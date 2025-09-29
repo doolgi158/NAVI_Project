@@ -6,7 +6,6 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-@Builder
 public class ApiResponse<T> {   //
     private int status;                 // HTTP 상태 코드
     private String message;             // 처리 결과 메시지

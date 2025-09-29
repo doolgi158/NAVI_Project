@@ -1,18 +1,27 @@
 package com.NAVI_Project.travel.domain;
 
+import com.NAVI_Project.common.entity.BaseEntity;
+
 import jakarta.persistence.*;
+import lombok.*;
 
-import java.sql.Clob;
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
+
+@Getter
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name="NAVI_TRAVEL")
-public class Travel {
-    
+@SequenceGenerator(name = "travel_seq", sequenceName = "TRAVEL_SEQ", allocationSize = 1)
+public class Travel extends BaseEntity { //등록일 수정일 자동생성 상속
+
+
     // 여행지 ID (내부 PK, SEQUENCE 활용)
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "travel_seq")
-    @SequenceGenerator(name = "travel_seq", sequenceName = "TRAVEL_SEQ", allocationSize = 1)
     @Column(name = "TRAVEL_ID")
     private Long travelId;
 
@@ -56,10 +65,10 @@ public class Travel {
 
     // GPS 좌표
     @Column(name = "MAPX", precision = 10, scale = 7)
-    private Double mapX; // 경도
+    private BigDecimal mapX; // 경도
 
     @Column(name = "MAPY", precision = 10, scale = 7)
-    private Double mapY; // 위도
+    private BigDecimal mapY; // 위도
 
     // 지역 코드 정보
     @Column(name = "REGION1_CD", length = 10)
@@ -91,11 +100,13 @@ public class Travel {
     private String thumbnailPath;   //서브사진경로
 
     // 관리 정보
-    @Column(name = "MODIFIED_DATE")
-    private LocalDateTime modifiedDate; //수정일
-
-    @Column(name = "CREATED_DATE")
-    private LocalDateTime createdDate;  //생성일
+//    @CreatedDate
+//    @Column(name = "created_at", updatable = false, nullable = false)
+//    private LocalDateTime createdAt; //생성일 자동 생성
+//
+//    @LastModifiedDate
+//    @Column(name = "updated_at")
+//    private LocalDateTime updatedAt; //수정일 자동 생성
 
     @Column(name = "STATE")
     private int state;  // 개시상태(공개, 비공개)
