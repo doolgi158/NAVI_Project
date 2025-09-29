@@ -3,8 +3,8 @@ package com.NAVI_Project.accommodation.domain;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
-@Entity
-@Table(name="NAVI_ROOM")
+//@Entity
+//@Table(name="NAVI_ROOM")
 public class Room {
     private String room_id;
     private String acc_id;
