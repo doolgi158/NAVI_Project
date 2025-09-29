@@ -1,7 +1,13 @@
 package com.NAVI_Project.accommodation.domain;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name="NAVI_ROOM")
 public class Room {
@@ -11,14 +17,15 @@ public class Room {
     * 2. 숙소 ID(accId)       7. 최대인원(maxCnt)
     * 3. 객실명(roomName)      8. 주중가격(weekdayFee)
     * 4. 객실크기(roomSize)    9. 주말가격(weekendFee)
-    * 5. 객실수(quantity)      10. 운영여부(isActive)
+    * 5. 객실수(roomCnt)      10. 운영여부(isActive)
     * */
 
     @Id
     @Column(name = "room_id", length = 20)
     private String roomId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    // FK 설정
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name="acc_id", nullable = false)
     private Acc acc;
 
@@ -29,7 +36,7 @@ public class Room {
     private Integer roomSize;
 
     @Column(nullable = false)
-    private Integer quantity;
+    private Integer roomCnt = 1;
 
     @Column(name = "base_cnt", nullable = false)
     private Integer baseCnt = 2;
@@ -45,4 +52,14 @@ public class Room {
 
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
+
+    @PrePersist
+    public void prePersist() {
+        if (roomCnt == null) roomCnt = 1;
+        if (baseCnt == null) baseCnt = 0;
+        if (maxCnt == null) maxCnt = 0;
+        if (weekdayFee == null) weekdayFee = 0;
+        if (weekendFee == null) weekendFee = 0;
+        if (isActive == null) isActive = true;
+    }
 }

@@ -2,13 +2,14 @@ package com.NAVI_Project.accommodation.domain;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
-@Data
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -99,15 +100,16 @@ public class Acc {
         }
     }
 
+    // 수정일 자동 관리
     @PreUpdate
     public void preUpdate() {
         updatedAt = LocalDateTime.now();
     }
 
-    //
+    // FK 양방향 관계 설정
     @OneToMany(mappedBy = "acc",
                cascade = CascadeType.ALL,
                fetch = FetchType.LAZY,
-               optional = false)
-    private List<Room> rooms;
+               orphanRemoval = true)
+    private List<Room> rooms = new ArrayList<>();
 }
