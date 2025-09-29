@@ -1,4 +1,4 @@
-package com.NAVI_Project.security;
+package com.NAVI_Project.user.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
