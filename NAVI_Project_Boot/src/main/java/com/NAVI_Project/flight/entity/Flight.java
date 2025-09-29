@@ -32,7 +32,7 @@ public class Flight extends BaseEntity { //등록일 수정일 자동생성 상�
     @Column(name = "economy_charge", nullable = false)
     private int economyCharge; //일반석 가격 항상 존재함
 
-    @Column(name = "prestigeCharge")
+    @Column(name = "prestige_charge")
     private Integer prestigeCharge; //일부 항공편 프레스티지석 없음.
 
 }
