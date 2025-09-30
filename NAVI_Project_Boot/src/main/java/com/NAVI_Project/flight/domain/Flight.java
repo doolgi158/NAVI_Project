@@ -1,4 +1,4 @@
-package com.NAVI_Project.flight.entity;
+package com.NAVI_Project.flight.domain;
 
 import com.NAVI_Project.common.entity.BaseEntity;
 import jakarta.persistence.*;

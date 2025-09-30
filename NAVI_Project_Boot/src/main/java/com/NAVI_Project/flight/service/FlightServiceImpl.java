@@ -1,7 +1,8 @@
 package com.NAVI_Project.flight.service;
 
-import com.NAVI_Project.flight.entity.Flight;
-import com.NAVI_Project.flight.entity.Seat;
+import com.NAVI_Project.flight.domain.Flight;
+import com.NAVI_Project.flight.domain.Seat;
+import com.NAVI_Project.flight.domain.SeatClass;
 import com.NAVI_Project.flight.repository.FlightRepository;
 import com.NAVI_Project.flight.repository.SeatRepository;
 import jakarta.transaction.Transactional;
@@ -20,13 +21,20 @@ public class FlightServiceImpl implements FlightService{
         //항공편 저장
         flightRepository.save(flight);
 
-        //좌석 자동 생성(30열 x 6좌석)
-        for (int i = 1; i <= 30; i++){
+        int totalRows = 30; // 총 30줄
+        int seatsPerRow = 6; // A~F 표출 위해 필요
+        int prestigeRows = (int) Math.ceil(totalRows * 0.1); // 전체의 10프로 프레스티지 석 설정
+
+        for (int i = 1; i <= totalRows; i++){
             for (char col = 'A'; col <= 'F'; col++){
+                SeatClass seatClass = (i <= prestigeRows && flight.getPrestigeCharge() != null && flight.getPrestigeCharge() > 0)
+                    ? SeatClass.PRESTIGE : SeatClass.ECONOMY;
+
                 Seat seat = Seat.builder()
                         .flight(flight)
                         .seatNo(i + String.valueOf(col))
                         .isReserved(false)
+                        .seatClass(seatClass)
                         .build();
                 seatRepository.save(seat);
             }

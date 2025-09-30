@@ -1,6 +1,6 @@
 package com.NAVI_Project.flight.repository;
 
-import com.NAVI_Project.flight.entity.Seat;
+import com.NAVI_Project.flight.domain.Seat;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;

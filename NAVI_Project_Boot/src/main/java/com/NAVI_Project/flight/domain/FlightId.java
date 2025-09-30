@@ -1,4 +1,4 @@
-package com.NAVI_Project.flight.entity;
+package com.NAVI_Project.flight.domain;
 
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
