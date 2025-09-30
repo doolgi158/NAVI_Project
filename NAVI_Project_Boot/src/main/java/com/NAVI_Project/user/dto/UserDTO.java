@@ -1,4 +1,4 @@
-package com.NAVI_Project.user.userdto;
+package com.NAVI_Project.user.dto;
 
 import com.NAVI_Project.user.enums.UserState;
 import com.fasterxml.jackson.annotation.JsonFormat;

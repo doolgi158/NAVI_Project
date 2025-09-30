@@ -1,4 +1,4 @@
-package com.NAVI_Project.user.trylogin.dto;
+package com.NAVI_Project.user.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;

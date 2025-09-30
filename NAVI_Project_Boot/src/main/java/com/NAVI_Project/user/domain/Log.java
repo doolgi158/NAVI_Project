@@ -1,4 +1,4 @@
-package com.NAVI_Project.user.log.domain;
+package com.NAVI_Project.user.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
