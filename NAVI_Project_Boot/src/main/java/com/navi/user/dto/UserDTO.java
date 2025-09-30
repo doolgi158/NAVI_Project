@@ -3,6 +3,9 @@ package com.navi.user.dto;
 import com.navi.user.enums.UserState;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -19,4 +22,7 @@ public class UserDTO {
     private char local;             // 내/외국인
     private UserState userState;    // 유저 상태
     private String signUp;          // 가입일
+
+    // 권한
+    private List<String> role = new ArrayList<>();
 }
