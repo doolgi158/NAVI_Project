@@ -43,7 +43,6 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
-<<<<<<< HEAD
     // Oracle PKI and Wallet support: 전자지갑(Wallet)을 통한 보안 접속에 필수
     // https://mvnrepository.com/artifact/com.oracle.database.security/oraclepki
     implementation 'com.oracle.database.security:oraclepki:23.7.0.25.01'
@@ -53,17 +52,6 @@ dependencies {
 
     // https://mvnrepository.com/artifact/com.oracle.database.security/osdt_core
     implementation 'com.oracle.database.security:osdt_core:21.17.0.0'
-
-=======
-
-    // Oracle PKI and Wallet support: 전자지갑(Wallet)을 통한 보안 접속에 필수
-    // https://mvnrepository.com/artifact/com.oracle.database.security/oraclepki
-    implementation 'com.oracle.database.security:oraclepki:23.7.0.25.01'
-    // https://mvnrepository.com/artifact/com.oracle.database.security/osdt_cert
-    implementation 'com.oracle.database.security:osdt_cert:21.17.0.0'
-    // https://mvnrepository.com/artifact/com.oracle.database.security/osdt_core
-    implementation 'com.oracle.database.security:osdt_core:21.17.0.0'
->>>>>>> 702c880055389ca4be9ed3d4c1660cca1b022696
 }
 
 tasks.named('test') {

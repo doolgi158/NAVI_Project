@@ -5,16 +5,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-<<<<<<< HEAD
-//@Entity
-//@Table(name="NAVI_ROOM")
-=======
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name="NAVI_ROOM")
->>>>>>> 702c880055389ca4be9ed3d4c1660cca1b022696
 public class Room {
     /*
     * [Column]
