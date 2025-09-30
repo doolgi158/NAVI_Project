@@ -1,6 +1,6 @@
 package com.navi.flight.service;
 
-import com.navi.flight.entity.Flight;
+import com.navi.flight.domain.Flight;
 
 public interface FlightService {
     public void saveFlight(Flight flight);
