@@ -37,4 +37,4 @@ out/
 .vscode/
 
 application.properties
-**/resources/wallet/
+src/main/resources/wallet/

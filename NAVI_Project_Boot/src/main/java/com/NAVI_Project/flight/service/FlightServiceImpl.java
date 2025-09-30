@@ -26,7 +26,7 @@ public class FlightServiceImpl implements FlightService{
                 Seat seat = Seat.builder()
                         .flight(flight)
                         .seatNo(i + String.valueOf(col))
-                        .reserved(false)
+                        .isReserved(false)
                         .build();
                 seatRepository.save(seat);
             }

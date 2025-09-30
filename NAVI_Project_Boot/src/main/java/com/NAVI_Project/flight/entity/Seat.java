@@ -27,5 +27,5 @@ public class Seat {
 
     @Setter
     @Column(name = "is_reserved", nullable = false)
-    private boolean reserved; // 예약여부 (true = 예약 / false = 빈좌석)
+    private boolean isReserved; // 예약여부 (true = 예약 / false = 빈좌석)
 }
