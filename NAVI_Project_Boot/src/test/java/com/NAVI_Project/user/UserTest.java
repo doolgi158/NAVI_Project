@@ -1,7 +1,11 @@
 package com.NAVI_Project.user;
 
+<<<<<<< HEAD
 import com.NAVI_Project.user.enums.UserState;
 import com.NAVI_Project.user.userdomain.User;
+=======
+import com.NAVI_Project.user.domain.User;
+>>>>>>> 702c880055389ca4be9ed3d4c1660cca1b022696
 import com.NAVI_Project.user.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -9,9 +13,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+<<<<<<< HEAD
 import java.security.SecureRandom;
 import java.util.Random;
 
+=======
+>>>>>>> 702c880055389ca4be9ed3d4c1660cca1b022696
 @Slf4j
 @SpringBootTest
 public class UserTest {
@@ -21,7 +28,10 @@ public class UserTest {
     @Autowired
     private UserRepository userRepository;
 
+<<<<<<< HEAD
     // 관리자 만들기
+=======
+>>>>>>> 702c880055389ca4be9ed3d4c1660cca1b022696
     @Test
     public void CreateAdmin(){
         User user = User.builder()
@@ -32,6 +42,7 @@ public class UserTest {
                 .perNum(passwordEncoder.encode("2508293123456"))
                 .ID("naviadmin")
                 .PW(passwordEncoder.encode("skqlAdmin1234!"))
+<<<<<<< HEAD
                 .userState(UserState.NORMAL)
                 .build();
         userRepository.save(user);
@@ -78,4 +89,10 @@ public class UserTest {
             pasword.setLength(0);
         }
     }
+=======
+                .state(User.ProviderType.NORMAL)
+                .build();
+        userRepository.save(user);
+    }
+>>>>>>> 702c880055389ca4be9ed3d4c1660cca1b022696
 }
