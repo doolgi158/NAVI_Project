@@ -57,11 +57,11 @@ public class Travel extends BaseEntity { //등록일 수정일 자동생성 상�
     @Column(name = "ZIPCODE", length = 10)
     private String zipcode;     //우편번호
 
-    @Column(name = "TEL", length = 20)
-    private String tel;     //전화번호
-
-    @Column(name = "TAGS")
-    private String tags;    // 태그정보
+//    @Column(name = "TEL", length = 20)
+//    private String tel;     //전화번호
+//
+//    @Column(name = "TAGS")
+//    private String tags;    // 태그정보
 
     // GPS 좌표
     @Column(name = "MAPX", precision = 10, scale = 7, columnDefinition = "NUMBER(10, 7)")
