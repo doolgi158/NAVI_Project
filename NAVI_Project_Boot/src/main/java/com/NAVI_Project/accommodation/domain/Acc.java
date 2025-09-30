@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,12 +47,11 @@ public class Acc {
     @Column(length = 200, nullable = false)
     private String address;
 
-    @Column(name = "latitude", precision = 9, scale = 6, nullable = false)
-    private Double mapy = 0.0;
+    @Column(name = "longitude", precision = 10, scale = 7, columnDefinition = "NUMBER(10, 7)")
+    private BigDecimal mapx; // 경도
 
-    @Column(name = "longitude", precision = 10, scale = 6, nullable = false)
-    private Double mapx = 0.0;
-
+    @Column(name = "latitude", precision = 10, scale = 7,columnDefinition = "NUMBER(10, 7)")
+    private BigDecimal mapy; // 위도
     @Lob
     @Column(name = "description")
     private String overview;
@@ -84,8 +84,8 @@ public class Acc {
     // 따라서, DB 저장 직전에 null을 기본값으로 보정
     @PrePersist
     public void prePersist() {
-        if (mapy == null) mapy = 0.0;
-        if (mapx == null) mapx = 0.0;
+        if (mapy == null) mapy = BigDecimal.ZERO;
+        if (mapx == null) mapx = BigDecimal.ZERO;
         if (checkIn == null) checkIn = "15:00";
         if (checkOut == null) checkOut = "11:00";
         if (hasCooking == null) hasCooking = false;

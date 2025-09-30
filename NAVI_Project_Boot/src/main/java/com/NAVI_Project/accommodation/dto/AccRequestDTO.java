@@ -20,8 +20,8 @@ public class AccRequestDTO {
     private String tel;
     private int townshipId;
     private String address;
-    private Double mapy = 0.0;
-    private Double mapx = 0.0;
+    //private Double mapy = 0.0;
+    //private Double mapx = 0.0;
     private String overview;
     private String checkIn = "15:00";
     private String checkOut = "11:00";
