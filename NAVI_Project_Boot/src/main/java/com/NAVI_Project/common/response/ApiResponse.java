@@ -1,6 +1,5 @@
-package com.NAVI_Project.common.Response;
+package com.NAVI_Project.common.response;
 
-import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
