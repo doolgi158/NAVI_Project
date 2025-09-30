@@ -1,4 +1,4 @@
-package com.NAVI_Project.user.log.dto;
+package com.NAVI_Project.user.dto;
 
 import lombok.*;
 

@@ -1,4 +1,4 @@
-package com.NAVI_Project.user.social.dto;
+package com.NAVI_Project.user.dto;
 
 import com.NAVI_Project.user.enums.SocialState;
 import com.fasterxml.jackson.annotation.JsonFormat;

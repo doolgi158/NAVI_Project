@@ -1,7 +1,7 @@
 package com.NAVI_Project.user;
 
 import com.NAVI_Project.user.enums.UserState;
-import com.NAVI_Project.user.userdomain.User;
+import com.NAVI_Project.user.domain.User;
 import com.NAVI_Project.user.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;

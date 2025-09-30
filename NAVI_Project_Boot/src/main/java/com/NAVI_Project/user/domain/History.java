@@ -1,6 +1,5 @@
-package com.NAVI_Project.user.history.domain;
+package com.NAVI_Project.user.domain;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
 
