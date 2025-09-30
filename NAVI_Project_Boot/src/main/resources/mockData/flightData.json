@@ -1,0 +1,30 @@
+{
+  "response": {
+    "body": {
+      "items": {
+        "item": [
+          {
+            "airlineNm": "아시아나항공",
+            "arrAirportNm": "제주",
+            "arrPlandTime": 202510031045,
+            "depAirportNm": "김포",
+            "depPlandTime": 202510030900,
+            "economyCharge": 59000,
+            "prestigeCharge": 120000,
+            "vihicleId": "OZ8901"
+          },
+          {
+            "airlineNm": "제주항공",
+            "arrAirportNm": "김포",
+            "arrPlandTime": 202510031400,
+            "depAirportNm": "제주",
+            "depPlandTime": 202510031200,
+            "economyCharge": 65000,
+            "prestigeCharge": 0,
+            "vihicleId": "7C112"
+          }
+        ]
+      }
+    }
+  }
+}
