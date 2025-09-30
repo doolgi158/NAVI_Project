@@ -1,16 +1,15 @@
-package com.NAVI_Project.user.domain;
+package com.NAVI_Project.user.userdomain;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.NAVI_Project.user.enums.UserState;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 
 @Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
+@Builder
 @Entity
 @Table(name = "navi_users")
 @SequenceGenerator(
@@ -20,12 +19,6 @@ import org.hibernate.annotations.CreationTimestamp;
         allocationSize = 1
 )
 public class User {
-    public enum ProviderType {
-        NORMAL,         // 0
-        SLEEP,          // 1
-        DELETE,         // 2
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "navi_users_generator")
     @Column(name = "user_no")
@@ -61,11 +54,10 @@ public class User {
     @Column(name = "user_signup", updatable = false)
     @ColumnDefault(value = "sysdate")
     @CreationTimestamp
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private String signUp;      // 가입일
 
     @Column(name = "user_state", nullable = false)
     @ColumnDefault(value = "0")
     @Enumerated(EnumType.STRING)
-    private ProviderType state; // 유저 상태
+    private UserState userState; // 유저 상태
 }

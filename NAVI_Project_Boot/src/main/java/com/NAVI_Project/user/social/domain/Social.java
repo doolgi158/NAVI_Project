@@ -1,14 +1,11 @@
-package com.NAVI_Project.social.domain;
+package com.NAVI_Project.user.social.domain;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.NAVI_Project.user.enums.SocialState;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
-@Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
@@ -20,13 +17,6 @@ import lombok.Setter;
         allocationSize = 1
 )
 public class Social {
-    public enum ProviderType {
-        GOOGLE,     // 0
-        KAKAO,      // 1
-        NAVER,      // 2
-        EMAIL       // 3
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "navi_certify_generator")
     @Column(name = "cer_no")
@@ -40,14 +30,12 @@ public class Social {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "cer_type", nullable = false)
-    private ProviderType type;  // 인증수단
+    private SocialState type;  // 인증수단
 
     @Column(name = "cer_request", nullable = false)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private String request;     // 요청시간
 
     @Column(name = "cer_limit", nullable = false)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private String limit;       // 유효기간
 
     @Column(name = "cer_confirm", nullable = false)
