@@ -1,7 +1,7 @@
 package com.navi.user;
 
 import com.navi.user.enums.UserState;
-import com.navi.user.userdomain.User;
+import com.navi.user.domain.User;
 import com.navi.user.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -44,9 +44,8 @@ public class UserTest {
         SecureRandom secureRandom = new SecureRandom();
         StringBuilder phone = new StringBuilder();
         StringBuilder personal = new StringBuilder();
-        StringBuilder pasword = new StringBuilder();
+        StringBuilder password = new StringBuilder();
         UserState[] values = UserState.values();
-        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
 
         for(int i = 0; i <= 100; i++) {
             for (int j = 0; j < 8; j++) {
@@ -55,10 +54,8 @@ public class UserTest {
             for (int j = 0; j < 13; j++) {
                 personal.append(random.nextInt(10));
             }
-            for (int j = 0; j < 8; j++) {
-                int index = secureRandom.nextInt(chars.length());
-                pasword.append(chars.charAt(index));
-            }
+            password.append("user").append(i).append("!");
+
             UserState state = values[random.nextInt(values.length)];
             int phonenum = 10000000 + random.nextInt(90000000);
 
@@ -69,13 +66,13 @@ public class UserTest {
                     .email("user" + i + "@naver.com")
                     .perNum(passwordEncoder.encode(personal.toString()))
                     .ID("navi" + i)
-                    .PW(passwordEncoder.encode(pasword.toString()))
+                    .PW(passwordEncoder.encode(password.toString()))
                     .userState(state)
                     .build();
             userRepository.save(user);
             phone.setLength(0);
             personal.setLength(0);
-            pasword.setLength(0);
+            password.setLength(0);
         }
     }
 }

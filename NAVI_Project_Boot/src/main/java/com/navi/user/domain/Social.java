@@ -1,4 +1,4 @@
-package com.navi.user.social.domain;
+package com.navi.user.domain;
 
 import com.navi.user.enums.SocialState;
 import jakarta.persistence.*;

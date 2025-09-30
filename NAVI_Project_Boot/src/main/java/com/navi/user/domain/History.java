@@ -1,4 +1,4 @@
-package com.navi.user.history.domain;
+package com.navi.user.domain;
 
 import jakarta.persistence.*;
 import lombok.*;

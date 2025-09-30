@@ -64,10 +64,10 @@ public class Travel extends BaseEntity { //등록일 수정일 자동생성 상�
     private String tags;    // 태그정보
 
     // GPS 좌표
-    @Column(name = "MAPX", precision = 10, scale = 7)
+    @Column(name = "MAPX", precision = 10, scale = 7, columnDefinition = "NUMBER(10, 7)")
     private BigDecimal mapX; // 경도
 
-    @Column(name = "MAPY", precision = 10, scale = 7)
+    @Column(name = "MAPY", precision = 10, scale = 7, columnDefinition = "NUMBER(10, 7)")
     private BigDecimal mapY; // 위도
 
     // 지역 코드 정보

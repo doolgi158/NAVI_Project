@@ -1,7 +1,6 @@
-package com.navi.user.userdto;
+package com.navi.user.dto;
 
 import com.navi.user.enums.UserState;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
 @Data
@@ -19,7 +18,5 @@ public class UserDTO {
     private String PW;              // 비밀번호
     private char local;             // 내/외국인
     private UserState userState;    // 유저 상태
-
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private String signUp;          // 가입일
 }

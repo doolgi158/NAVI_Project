@@ -1,4 +1,4 @@
-package com.navi.user.userdomain;
+package com.navi.user.domain;
 
 import com.navi.user.enums.UserState;
 import jakarta.persistence.*;
