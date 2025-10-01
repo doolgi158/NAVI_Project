@@ -7,7 +7,6 @@
 <body>
     <a href="/board/write">글쓰기</a>
 
-    <table border="1">
         <thead>
             <tr>
                 <th>번호</th>
@@ -18,15 +17,14 @@
         </thead>
         <tbody>
             <tr th:each="board : ${boards}">
-                <td th:text="${board.id}"></td>
+                <td th:text="${board.board.no}"></td>
                 <td>
-                    <a th:href="@{/board/{id}(id=${board.id})}"
-                       th:text="${board.id}"></a>
+                    <a th:href="@{/board/{id}(id=${board.board_no})}"
+                       th:text="${board.board_Title}"></a>
                 </td>
-                <td th:text="${board.author}"></td>
-                <td th:text="${#temporals.format(board.createdAt, 'yyyy-MM-dd')}"></td>
+                <td th:text="${board.board_good}"></td>
+                <td th:text="${board.report_count}"></td>
             </tr>
         </tbody>
-    </table>
 </body>
 </html>

@@ -38,4 +38,8 @@ public class Board {
     @Column(nullable = false, length = 500)
     private String board_content;   //게시글내용
 
+    @Column(nullable = false)
+    private int user_no;    //사용자번호
+
+
 }

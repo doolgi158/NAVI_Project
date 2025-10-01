@@ -5,18 +5,24 @@
     <title>글쓰기</title>
 </head>
 <body>
+    <h1>게시글 작성</h1>
+
     <form action="/board" method="post">
         <div>
             <label>제목:</label>
-            <input type="text" name="title" required>
-        </div>
-        <div>
-            <label>작성자:</label>
-            <input type="text" name="author" required>
+            <input type="text" name="board_title" required>
         </div>
         <div>
             <label>내용:</label>
-            <textarea name="content" rows="10" required></textarea>
+            <input type="text" name="author" required>
+        </div>
+        <div>
+            <label>사용자번호:</label>
+            <textarea name="board_content" rows="10" required></textarea>
+        </div>
+        <div>
+            <label>사용자번호:</label>
+            <input type="number" name="user_no" required>
         </div>
         <button type="submit">등록</button>
         <a href="/board">취소</a>
