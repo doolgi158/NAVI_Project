@@ -19,7 +19,7 @@ public class ApiFailHandler implements AuthenticationFailureHandler {
         String username = request.getParameter("username");
 
         ApiResponse<Object> apiResponse = ApiResponse.error(
-                "로그인 실패",
+            "로그인 실패",
                 401,
                 "id: " + username
         );

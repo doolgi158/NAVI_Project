@@ -1,7 +1,10 @@
 package com.navi.user.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.navi.common.response.ApiResponse;
 import com.navi.user.security.handler.ApiFailHandler;
 import com.navi.user.security.handler.ApiSuccessHandler;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

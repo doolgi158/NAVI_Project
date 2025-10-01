@@ -3,23 +3,21 @@ package com.navi.user.security.util;
 import com.navi.common.util.CustomException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import lombok.extern.slf4j.Slf4j;
 
 import javax.crypto.SecretKey;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.Map;
 
-@Slf4j
 public class JWTUtil {
-    private static final String key = "1234567890123456789012345678901234567890";
+    private static final String stringKey = "1234567890123456789012345678901234567890";
 
     // JWT 문자열 토큰 생성
     public static String generateToken(Map<String, Object> valueMap, int min) {
-        SecretKey key;
+        SecretKey secretKey;
 
         try {
-            key = Keys.hmacShaKeyFor(JWTUtil.key.getBytes("UTF-8"));
+            secretKey = Keys.hmacShaKeyFor(stringKey.getBytes("UTF-8"));
         } catch(Exception e) {
             throw new CustomException(e.getMessage(), 500, valueMap);
         }
@@ -29,18 +27,18 @@ public class JWTUtil {
                 .setClaims(valueMap)
                 .setIssuedAt(Date.from(ZonedDateTime.now().toInstant()))
                 .setExpiration(Date.from(ZonedDateTime.now().plusMinutes(min).toInstant()))
-                .signWith(key)
+                .signWith(secretKey)
                 .compact();
     }
 
-    // JWT 토큰 검정
+    // JWT 토큰 체크해서 유저 정보 반환
     public static Map<String, Object> validateToken(String token) {
         Map<String, Object> claim;
 
         try{
-            SecretKey key = Keys.hmacShaKeyFor(JWTUtil.key.getBytes("UTF-8"));
+            SecretKey secretKey = Keys.hmacShaKeyFor(stringKey.getBytes("UTF-8"));
             claim = Jwts.parserBuilder()
-                    .setSigningKey(key).build()
+                    .setSigningKey(secretKey).build()
                     .parseClaimsJws(token).getBody();
         } catch(MalformedJwtException malformedJwtException) {
             throw new MalformedJwtException(malformedJwtException.getMessage());
