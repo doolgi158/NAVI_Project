@@ -1,4 +1,5 @@
 import MainLyout from "../layout/MainLayout";
+import React from "react";
 
 const MainPage = () => {
     return (
