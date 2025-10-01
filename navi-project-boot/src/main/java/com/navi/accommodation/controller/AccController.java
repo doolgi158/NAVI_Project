@@ -13,6 +13,6 @@ public class AccController {
     @GetMapping("/api/accommodation/load")
     public String loadData() throws Exception {
         accService.loadFromJsonFile();
-        return "숙소 데이터 로드 완료!";
+        return "숙소 1차 데이터 로드 완료!";
     }
 }

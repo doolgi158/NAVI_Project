@@ -39,10 +39,10 @@ public class Acc {
     @Column(length = 50, nullable = false)
     private String title;
 
-    @Column(columnDefinition = "NVARCHAR2(10)", nullable = false)
+    @Column(columnDefinition = "NVARCHAR2(10)")
     private String category;
 
-    @Column(length = 20)
+    @Column(length = 40)
     private String tel;
 
     @Column(name = "township_id", nullable = false)

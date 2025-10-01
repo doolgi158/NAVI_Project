@@ -56,29 +56,17 @@ public class Travel extends BaseEntity { //등록일 수정일 자동생성 상�
     @Column(name = "ZIPCODE", length = 10)
     private String zipcode;     //우편번호
 
-<<<<<<<< HEAD:naviProjectBoot/src/main/java/com/navi/travel/domain/Travel.java
-//    @Column(name = "TEL", length = 20)
-//    private String tel;     //전화번호
-//
-//    @Column(name = "TAGS")
-//    private String tags;    // 태그정보
-========
     @Column(name = "TEL", length = 50)
     private String tel;     //전화번호
 
     @Column(name = "TAGS", length = 500)
     private String tags;    // 태그정보
->>>>>>>> ced1df1312dfc51a7344e267650a76e6c46e525a:NAVI_Project_Boot/src/main/java/com/navi/travel/domain/Travel.java
 
     // GPS 좌표
     @Column(name = "MAPX", precision = 10, scale = 7, columnDefinition = "NUMBER(10, 7)")
     private BigDecimal mapX; // 경도
 
-<<<<<<<< HEAD:naviProjectBoot/src/main/java/com/navi/travel/domain/Travel.java
     @Column(name = "MAPY", precision = 10, scale = 7, columnDefinition = "NUMBER(10, 7)")
-========
-    @Column(name = "MAPY", precision = 10, scale = 7,columnDefinition = "NUMBER(10, 7)")
->>>>>>>> ced1df1312dfc51a7344e267650a76e6c46e525a:NAVI_Project_Boot/src/main/java/com/navi/travel/domain/Travel.java
     private BigDecimal mapY; // 위도
 
     // 지역 코드 정보
