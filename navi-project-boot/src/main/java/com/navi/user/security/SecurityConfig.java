@@ -1,5 +1,7 @@
 package com.navi.user.security;
 
+import com.navi.user.security.handler.ApiFailHandler;
+import com.navi.user.security.handler.ApiSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,7 +27,11 @@ public class SecurityConfig {
         security.sessionManagement(sessionConfig -> sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         security.csrf(config -> config.disable());
 
-        security.formLogin(config -> config.loginPage("/api/users/login"));
+        security.formLogin(config -> {
+            config.loginPage("/api/users/login");
+            config.successHandler(new ApiSuccessHandler());
+            config.failureHandler(new ApiFailHandler());
+        });
 
         return security.build();
     }

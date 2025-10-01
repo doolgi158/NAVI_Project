@@ -1,5 +1,6 @@
 package com.navi.user;
 
+import com.navi.user.enums.UserRole;
 import com.navi.user.enums.UserState;
 import com.navi.user.domain.User;
 import com.navi.user.repository.UserRepository;
@@ -30,10 +31,11 @@ public class UserTest {
                 .birth("2025-08-29")
                 .email("enfrlwlapdlf@gmail.com")
                 .perNum(passwordEncoder.encode("2508293123456"))
-                .ID("naviadmin")
-                .PW(passwordEncoder.encode("skqlAdmin1234!"))
+                .id("naviadmin")
+                .pw(passwordEncoder.encode("skqlAdmin1234!"))
                 .userState(UserState.NORMAL)
                 .build();
+        user.addRole(UserRole.ADMIN);
         userRepository.save(user);
     }
 
@@ -65,10 +67,11 @@ public class UserTest {
                     .birth(phone.toString())
                     .email("user" + i + "@naver.com")
                     .perNum(passwordEncoder.encode(personal.toString()))
-                    .ID("navi" + i)
-                    .PW(passwordEncoder.encode(password.toString()))
+                    .id("navi" + i)
+                    .pw(passwordEncoder.encode(password.toString()))
                     .userState(state)
                     .build();
+            user.addRole(UserRole.USER);
             userRepository.save(user);
             phone.setLength(0);
             personal.setLength(0);

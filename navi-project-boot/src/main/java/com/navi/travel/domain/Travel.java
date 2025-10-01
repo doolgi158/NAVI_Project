@@ -7,7 +7,6 @@ import lombok.*;
 
 import java.math.BigDecimal;
 
-
 @Getter
 @ToString
 @NoArgsConstructor
@@ -40,34 +39,46 @@ public class Travel extends BaseEntity { //등록일 수정일 자동생성 상�
     private String categoryRefId;   //카테고리 참조id
 
     // 기본 정보
-    @Column(name = "TITLE", nullable = false, length = 255)
+    @Column(name = "TITLE", nullable = false, length = 500)
     private String title;   //여행지 제목
 
-    @Column(name = "INTRODUCTION")
+    @Column(name = "INTRODUCTION",columnDefinition = "CLOB")
     @Lob // Oracle의 CLOB 타입과 매핑
     private String introduction;    //여행지 소개
 
     // 주소 및 연락처
-    @Column(name = "ADDRESS", length = 255)
+    @Column(name = "ADDRESS", length = 500)
     private String address;     //지번주소
 
-    @Column(name = "ROAD_ADDRESS", length = 255)
+    @Column(name = "ROAD_ADDRESS", length = 500)
     private String roadAddress;     //도로명 주소
 
     @Column(name = "ZIPCODE", length = 10)
     private String zipcode;     //우편번호
 
-    @Column(name = "TEL", length = 20)
+<<<<<<<< HEAD:naviProjectBoot/src/main/java/com/navi/travel/domain/Travel.java
+//    @Column(name = "TEL", length = 20)
+//    private String tel;     //전화번호
+//
+//    @Column(name = "TAGS")
+//    private String tags;    // 태그정보
+========
+    @Column(name = "TEL", length = 50)
     private String tel;     //전화번호
 
-    @Column(name = "TAGS")
+    @Column(name = "TAGS", length = 500)
     private String tags;    // 태그정보
+>>>>>>>> ced1df1312dfc51a7344e267650a76e6c46e525a:NAVI_Project_Boot/src/main/java/com/navi/travel/domain/Travel.java
 
     // GPS 좌표
     @Column(name = "MAPX", precision = 10, scale = 7, columnDefinition = "NUMBER(10, 7)")
     private BigDecimal mapX; // 경도
 
+<<<<<<<< HEAD:naviProjectBoot/src/main/java/com/navi/travel/domain/Travel.java
     @Column(name = "MAPY", precision = 10, scale = 7, columnDefinition = "NUMBER(10, 7)")
+========
+    @Column(name = "MAPY", precision = 10, scale = 7,columnDefinition = "NUMBER(10, 7)")
+>>>>>>>> ced1df1312dfc51a7344e267650a76e6c46e525a:NAVI_Project_Boot/src/main/java/com/navi/travel/domain/Travel.java
     private BigDecimal mapY; // 위도
 
     // 지역 코드 정보
@@ -100,14 +111,42 @@ public class Travel extends BaseEntity { //등록일 수정일 자동생성 상�
     private String thumbnailPath;   //서브사진경로
 
     // 관리 정보
-//    @CreatedDate
-//    @Column(name = "created_at", updatable = false, nullable = false)
+//    @Column(name = "CREATED_AT", updatable = false, nullable = false)
 //    private LocalDateTime createdAt; //생성일 자동 생성
 //
-//    @LastModifiedDate
-//    @Column(name = "updated_at")
-//    private LocalDateTime updatedAt; //수정일 자동 생성
+//    @Column(name = "UPDATED_AT")
+//    private LocalDateTime updatedAt;
 
-    @Column(name = "STATE")
+    @Column(name = "STATE", nullable = false)
     private int state;  // 개시상태(공개, 비공개)
+
+    /**
+     * 외부 API 데이터를 기반으로 기존 엔티티의 필드 값을 업데이트하는 메소드
+     * (콘텐츠 ID(contentId)가 이미 존재할 때 사용)
+     */
+    public void updateFromApi(Travel newTravel) {
+        this.title = newTravel.title;
+        this.introduction = newTravel.introduction;
+        this.address = newTravel.address;
+        this.roadAddress = newTravel.roadAddress;
+        this.zipcode = newTravel.zipcode;
+        this.tel = newTravel.tel;
+        this.tags = newTravel.tags;
+        this.mapX = newTravel.mapX;
+        this.mapY = newTravel.mapY;
+        this.contentsCd = newTravel.contentsCd;
+        this.categoryName = newTravel.categoryName;
+        this.categoryRefId = newTravel.categoryRefId;
+        this.region1Cd = newTravel.region1Cd;
+        this.region1Name = newTravel.region1Name;
+        this.region1RefId = newTravel.region1RefId;
+        this.region2Cd = newTravel.region2Cd;
+        this.region2Name = newTravel.region2Name;
+        this.region2RefId = newTravel.region2RefId;
+        this.photoId = newTravel.photoId;
+        this.imagePath = newTravel.imagePath;
+        this.thumbnailPath = newTravel.thumbnailPath;
+        this.state = newTravel.state;
+        // BaseEntity를 상속했으므로, UPDATED_AT은 자동으로 갱신됩니다.
+    }
 }

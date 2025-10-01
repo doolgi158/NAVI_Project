@@ -1,6 +1,7 @@
 package com.navi.user.dto;
 
 import com.navi.user.enums.SocialState;
+
 import lombok.*;
 
 @Data

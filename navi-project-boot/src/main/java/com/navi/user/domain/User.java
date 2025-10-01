@@ -1,10 +1,14 @@
 package com.navi.user.domain;
 
+import com.navi.user.enums.UserRole;
 import com.navi.user.enums.UserState;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @AllArgsConstructor
@@ -43,10 +47,10 @@ public class User {
     private String perNum;      // 주민/여권번호
 
     @Column(name = "user_ID", nullable = false)
-    private String ID;          // 아이디
+    private String id;          // 아이디
 
     @Column(name = "user_PW", nullable = false)
-    private String PW;          // 비밀번호
+    private String pw;          // 비밀번호
 
     @Column(name = "user_local")
     private char local;         // 내/외국인
@@ -60,4 +64,16 @@ public class User {
     @ColumnDefault(value = "0")
     @Enumerated(EnumType.STRING)
     private UserState userState; // 유저 상태
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<UserRole> userRoleList = new ArrayList<>();
+
+    public void addRole(UserRole userRole) {
+        userRoleList.add(userRole);
+    }
+
+    public void clearRole(UserRole userRole) {
+        userRoleList.clear();
+    }
 }
