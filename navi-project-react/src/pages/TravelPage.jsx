@@ -1,10 +1,10 @@
-import MainLyout from "../layout/MainLayout";
+import MainLayout from "../layout/MainLayout";
 
 const TravelPage = () => {
     const travelItems = [1, 2, 3, 4, 5];
 
     return (
-        <MainLyout>
+        <MainLayout>
             <div className="p-4 sm:p-6 bg-white min-h-full">
                 {/* 1. 검색 섹션 */}
                 <div className="mb-6 flex justify-center items-center">
@@ -66,7 +66,7 @@ const TravelPage = () => {
                     </div>
                 </div>
             </div>
-        </MainLyout>
+        </MainLayout>
     );
 }
 
