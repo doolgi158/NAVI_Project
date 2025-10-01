@@ -4,12 +4,14 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @Table(name = "board")
 @Getter
 @Setter
+@ToString
 @NoArgsConstructor
 @SequenceGenerator(
         name = "boot_board_generator",

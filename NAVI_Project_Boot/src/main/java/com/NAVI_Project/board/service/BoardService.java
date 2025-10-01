@@ -18,11 +18,12 @@ public class BoardService { //비즈니스 로직
         return boardRepository.findAll();
     }
     // 게시글 작성
-    public Board createBoard(Board board) {
-        return boardRepository.save(board);
+    public void createBoard(Board board) {
+        boardRepository.save(board);
     }
     // 게시글 삭제
-    public void deleteBoard(Long id) {
-        boardRepository.deleteById(id);
+    public void deleteBoard(Board board) {
+        boardRepository.delete(board);
     }
+
 }

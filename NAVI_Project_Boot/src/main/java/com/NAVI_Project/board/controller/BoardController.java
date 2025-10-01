@@ -1,13 +1,12 @@
 package com.NAVI_Project.board.controller;
 
+import com.NAVI_Project.board.domain.Board;
 import com.NAVI_Project.board.service.BoardService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/board")
@@ -20,13 +19,26 @@ public class BoardController {
     @GetMapping
     public String list(Model model) {
         model.addAttribute("boards", boardService.getAllBoards());
-        return "board/detail";
+        return "board/list";  //NAVI_Project/board/list.html
     }
 
     //게시글 상세 페이지
-    @GetMapping("/{id}")
+    @GetMapping("/{board_content}")
     public String detail(@PathVariable Long id, Model model) {
-        model.addAttribute("board", boardService.getBoard(id));
+        model.addAttribute("board", boardService.getAllBoards());
         return "board/detail";
+    }
+
+    //작성 페이지
+    @GetMapping("/write")
+    public String writeForm() {
+        return "board/write";
+    }
+
+    //게시글 등록
+    @PostMapping
+    public String write(@ModelAttribute Board board) {
+        boardService.createBoard(board);
+        return "redirect:/board";
     }
 }
