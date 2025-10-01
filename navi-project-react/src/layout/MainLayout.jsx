@@ -7,8 +7,9 @@ const MainLayout = ({children}) => {
         <div className="min-h-screen flex flex-col">
             <HeaderLayout />
 
-            {/* main 태그에 flex-grow를 적용하여 남은 공간을 모두 채움 */}
-            <main className="flex-grow">{children}</main>
+            {/* main 태그에 flex-grow와 좌우 패딩(px-24) dir 96px 여백 적용 */}
+            {/*Header의 높이(mt-1 = 4px)만큼 공간 확보*/}
+            <main className="flex-grow px-24 mt-1">{children}</main>
             <FooterLayout />
         </div>
     );
