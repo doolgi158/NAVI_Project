@@ -13,7 +13,6 @@ import java.io.IOException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    // 일반 예외처리
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleException(Exception ex) {
         ApiResponse<Object> response = ApiResponse.error(
@@ -62,13 +61,5 @@ public class GlobalExceptionHandler {
                 null
         );
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-    }
-
-    @GetMapping("/test")
-    public String test() {
-        if(true){
-            throw new IllegalArgumentException("에러 메세지");
-        }
-        return "ok";
     }
 }
