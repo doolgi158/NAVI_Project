@@ -2,6 +2,10 @@ package com.navi.common.controller;
 
 import com.navi.common.response.ApiResponse;
 import com.navi.common.util.CustomException;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.InvalidClaimException;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.ServletException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -72,5 +76,55 @@ public class GlobalExceptionHandler {
                 ex.getData()
         );
         return ResponseEntity.status(HttpStatus.valueOf(ex.getStatus())).body(response);
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ApiResponse<Object>> handleRuntimeException(RuntimeException ex) {
+        ApiResponse<Object> response = ApiResponse.error(
+                ex.getMessage(),
+                500,
+                null
+        );
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+    @ExceptionHandler(MalformedJwtException.class)
+    public ResponseEntity<ApiResponse<Object>> handleMalformedJwtException(MalformedJwtException ex) {
+        ApiResponse<Object> response = ApiResponse.error(
+                ex.getMessage(),
+                400,
+                null
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<ApiResponse<Object>> handleExpiredJwtException(ExpiredJwtException ex) {
+        ApiResponse<Object> response = ApiResponse.error(
+                ex.getMessage(),
+                401,
+                null
+        );
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
+
+    @ExceptionHandler(InvalidClaimException.class)
+    public ResponseEntity<ApiResponse<Object>> handleInvalidClaimException(InvalidClaimException ex) {
+        ApiResponse<Object> response = ApiResponse.error(
+                ex.getMessage(),
+                401,
+                null
+        );
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
+
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<ApiResponse<Object>> handleJwtException(JwtException ex) {
+        ApiResponse<Object> response = ApiResponse.error(
+                ex.getMessage(),
+                401,
+                null
+        );
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 }
