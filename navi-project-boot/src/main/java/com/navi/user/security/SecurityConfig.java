@@ -21,12 +21,15 @@ import java.util.Arrays;
 public class SecurityConfig {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity security) throws Exception {
+        // CORS 설정
         security.cors(httpSecurityCorsConfigurer -> {
             httpSecurityCorsConfigurer.configurationSource(corsConfigurationSource());
         });
+        // CSRF 설정
         security.sessionManagement(sessionConfig -> sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         security.csrf(config -> config.disable());
 
+        // 로그인 설정
         security.formLogin(config -> {
             config.loginPage("/api/users/login");
             config.successHandler(new ApiSuccessHandler());
@@ -36,11 +39,13 @@ public class SecurityConfig {
         return security.build();
     }
 
+    // Password 암호화
     @Bean
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
     }
 
+    // CORS 세부 설정
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();

@@ -15,6 +15,7 @@ import java.util.Map;
 @Slf4j
 public class ApiFailHandler implements AuthenticationFailureHandler {
 
+    // 로그인 실패하면 Json 방식으로 알려주기
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
         Gson gson = new Gson();

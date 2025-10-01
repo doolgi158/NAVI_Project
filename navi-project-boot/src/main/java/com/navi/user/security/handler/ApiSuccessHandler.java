@@ -15,6 +15,8 @@ import java.util.Map;
 
 @Slf4j
 public class ApiSuccessHandler implements AuthenticationSuccessHandler {
+
+    // 로그인 성공하면 토큰값 추가하여 json방식으로 알려주기
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         UserDTO userDTO = (UserDTO) authentication.getPrincipal();
