@@ -1,6 +1,6 @@
-package com.NAVI_Project.board.controller;
+package com.navi.board.controller;
 
-import com.NAVI_Project.board.service.BoardService;
+import com.navi.board.service.BoardService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -26,7 +26,7 @@ public class BoardController {
     //게시글 상세 페이지
     @GetMapping("/{id}")
     public String detail(@PathVariable Long id, Model model) {
-        model.addAttribute("board", boardService.getBoard(id));
+        model.addAttribute("board", boardService.getAllBoards());
         return "board/detail";
     }
 }

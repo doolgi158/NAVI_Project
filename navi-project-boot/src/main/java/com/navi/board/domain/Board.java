@@ -1,4 +1,4 @@
-package com.NAVI_Project.board.domain;
+package com.navi.board.domain;
 
 import jakarta.persistence.*;
 import lombok.Getter;

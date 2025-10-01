@@ -1,7 +1,7 @@
-package com.NAVI_Project.board.service;
+package com.navi.board.service;
 
-import com.NAVI_Project.board.domain.Board;
-import com.NAVI_Project.board.repository.BoardRepository;
+import com.navi.board.domain.Board;
+import com.navi.board.repository.BoardRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
