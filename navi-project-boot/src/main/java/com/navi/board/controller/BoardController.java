@@ -24,9 +24,9 @@ public class BoardController {
     }
 
     //게시글 상세 페이지
-    @GetMapping("/{board_content}")
-    public String detail(@PathVariable Long id, Model model) {
-        model.addAttribute("board", boardService.getAllBoards());
+    @GetMapping("/{id}")
+    public String detail(@PathVariable Integer id, Model model) {
+        model.addAttribute("board", boardService.getBoard(id));
         return "board/detail";
     }
 
