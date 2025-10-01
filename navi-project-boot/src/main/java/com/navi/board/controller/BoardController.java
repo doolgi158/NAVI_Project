@@ -1,7 +1,8 @@
-package com.NAVI_Project.board.controller;
+package com.navi.board.controller;
 
-import com.NAVI_Project.board.domain.Board;
-import com.NAVI_Project.board.service.BoardService;
+import com.navi.board.domain.Board;
+import com.navi.board.service.BoardService;
+import com.navi.board.service.BoardService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
