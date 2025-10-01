@@ -14,13 +14,14 @@ import java.util.Map;
 public class JWTUtil {
     private static final String key = "1234567890123456789012345678901234567890";
 
+    // JWT 문자열 토큰 생성
     public static String generateToken(Map<String, Object> valueMap, int min) {
-        SecretKey key = null;
+        SecretKey key;
 
         try {
             key = Keys.hmacShaKeyFor(JWTUtil.key.getBytes("UTF-8"));
         } catch(Exception e) {
-            throw new CustomException(e.getMessage(), 500, null);
+            throw new CustomException(e.getMessage(), 500, valueMap);
         }
 
         return Jwts.builder()
@@ -32,8 +33,9 @@ public class JWTUtil {
                 .compact();
     }
 
+    // JWT 토큰 검정
     public static Map<String, Object> validateToken(String token) {
-        Map<String, Object> claim = null;
+        Map<String, Object> claim;
 
         try{
             SecretKey key = Keys.hmacShaKeyFor(JWTUtil.key.getBytes("UTF-8"));
