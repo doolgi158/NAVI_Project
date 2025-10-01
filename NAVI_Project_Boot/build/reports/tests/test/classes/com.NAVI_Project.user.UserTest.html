@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="x-ua-compatible" content="IE=edge"/>
+<title>Test results - UserTest</title>
+<link href="../css/base-style.css" rel="stylesheet" type="text/css"/>
+<link href="../css/style.css" rel="stylesheet" type="text/css"/>
+<script src="../js/report.js" type="text/javascript"></script>
+</head>
+<body>
+<div id="content">
+<h1>UserTest</h1>
+<div class="breadcrumbs">
+<a href="../index.html">all</a> &gt; 
+<a href="../packages/com.NAVI_Project.user.html">com.NAVI_Project.user</a> &gt; UserTest</div>
+<div id="summary">
+<table>
+<tr>
+<td>
+<div class="summaryGroup">
+<table>
+<tr>
+<td>
+<div class="infoBox" id="tests">
+<div class="counter">1</div>
+<p>tests</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="failures">
+<div class="counter">0</div>
+<p>failures</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="ignored">
+<div class="counter">0</div>
+<p>ignored</p>
+</div>
+</td>
+<td>
+<div class="infoBox" id="duration">
+<div class="counter">13.169s</div>
+<p>duration</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</td>
+<td>
+<div class="infoBox success" id="successRate">
+<div class="percent">100%</div>
+<p>successful</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="tab-container">
+<ul class="tabLinks">
+<li>
+<a href="#">Tests</a>
+</li>
+<li>
+<a href="#">Standard output</a>
+</li>
+<li>
+<a href="#">Standard error</a>
+</li>
+</ul>
+<div class="tab">
+<h2>Tests</h2>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Duration</th>
+<th>Result</th>
+</tr>
+</thead>
+<tr>
+<td class="success">Insertuser()</td>
+<td class="success">13.169s</td>
+<td class="success">passed</td>
+</tr>
+</table>
+</div>
+<div class="tab">
+<h2>Standard output</h2>
+<span class="code">
+<pre>01:31:39.601 [Test worker] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.NAVI_Project.user.UserTest]: UserTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+01:31:39.710 [Test worker] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.NAVI_Project.NaviProjectApplication for test class com.NAVI_Project.user.UserTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.5.6)
+
+2025-09-30T01:31:40.049+09:00  INFO 13216 --- [NAVI_Project] [    Test worker] com.NAVI_Project.user.UserTest           : Starting UserTest using Java 21.0.7 with PID 13216 (started by kolon in C:\NAVI_Project\NAVI_Project_Boot)
+2025-09-30T01:31:40.050+09:00  INFO 13216 --- [NAVI_Project] [    Test worker] com.NAVI_Project.user.UserTest           : No active profile set, falling back to 1 default profile: &quot;default&quot;
+2025-09-30T01:31:40.684+09:00  INFO 13216 --- [NAVI_Project] [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-09-30T01:31:40.735+09:00  INFO 13216 --- [NAVI_Project] [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 44 ms. Found 1 JPA repository interface.
+2025-09-30T01:31:41.222+09:00  INFO 13216 --- [NAVI_Project] [    Test worker] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-09-30T01:31:41.279+09:00  INFO 13216 --- [NAVI_Project] [    Test worker] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.29.Final
+2025-09-30T01:31:41.309+09:00  INFO 13216 --- [NAVI_Project] [    Test worker] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-09-30T01:31:41.567+09:00  INFO 13216 --- [NAVI_Project] [    Test worker] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-09-30T01:31:41.593+09:00  INFO 13216 --- [NAVI_Project] [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-09-30T01:31:42.170+09:00  INFO 13216 --- [NAVI_Project] [    Test worker] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection oracle.jdbc.driver.T4CConnection@64540344
+2025-09-30T01:31:42.172+09:00  INFO 13216 --- [NAVI_Project] [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-09-30T01:31:42.395+09:00  INFO 13216 --- [NAVI_Project] [    Test worker] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 23.10
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-09-30T01:31:43.151+09:00  INFO 13216 --- [NAVI_Project] [    Test worker] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-09-30T01:31:43.823+09:00  INFO 13216 --- [NAVI_Project] [    Test worker] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-09-30T01:31:43.880+09:00  WARN 13216 --- [NAVI_Project] [    Test worker] .s.s.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: 85986d98-b13a-402d-a403-6d6d932923a2
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2025-09-30T01:31:43.889+09:00  INFO 13216 --- [NAVI_Project] [    Test worker] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2025-09-30T01:31:43.970+09:00 DEBUG 13216 --- [NAVI_Project] [    Test worker] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with filters: DisableEncodeUrlFilter, WebAsyncManagerIntegrationFilter, SecurityContextHolderFilter, HeaderWriterFilter, CsrfFilter, LogoutFilter, RequestCacheAwareFilter, SecurityContextHolderAwareRequestFilter, AnonymousAuthenticationFilter, ExceptionTranslationFilter
+2025-09-30T01:31:44.584+09:00  INFO 13216 --- [NAVI_Project] [    Test worker] com.NAVI_Project.user.UserTest           : Started UserTest in 4.749 seconds (process running for 5.642)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+?[35m[Hibernate]?[0m 
+    ?[34mselect?[0m
+        navi_users_seq.nextval
+?[35m[Hibernate]?[0m 
+    ?[34minsert?[0m 
+    ?[34minto?[0m
+        navi_users
+        (user_id, user_pw, user_birth, user_email, user_gender, user_local, user_name, user_pernum, user_phone, user_signup, user_state, user_no) 
+    ?[34mvalues?[0m
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?[34mcurrent_timestamp?[0m, ?, ?)
+</pre>
+</span>
+</div>
+<div class="tab">
+<h2>Standard error</h2>
+<span class="code">
+<pre>Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+WARNING: A Java agent has been loaded dynamically (C:\Users\kolon\.gradle\caches\modules-2\files-2.1\net.bytebuddy\byte-buddy-agent\1.17.7\fbf3d6d649ed37fc9e9c59480a05be0a26e3c2da\byte-buddy-agent-1.17.7.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+</pre>
+</span>
+</div>
+</div>
+<div id="footer">
+<p>
+<div>
+<label class="hidden" id="label-for-line-wrapping-toggle" for="line-wrapping-toggle">Wrap lines
+<input id="line-wrapping-toggle" type="checkbox" autocomplete="off"/>
+</label>
+</div>Generated by 
+<a href="https://www.gradle.org">Gradle 8.14.3</a> at 2025. 9. 30. 오전 1:31:57</p>
+</div>
+</div>
+</body>
+</html>
