@@ -17,10 +17,6 @@ import java.util.Map;
 public class ApiSuccessHandler implements AuthenticationSuccessHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        log.info("---------------------------------------------------------------");
-        log.info(authentication.toString());
-        log.info("---------------------------------------------------------------");
-
         UserDTO userDTO = (UserDTO) authentication.getPrincipal();
         Map<String, Object> claims = userDTO.getClaims();
 
