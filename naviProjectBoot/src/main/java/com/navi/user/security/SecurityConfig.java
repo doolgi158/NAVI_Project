@@ -1,5 +1,6 @@
 package com.navi.user.security;
 
+import com.navi.user.security.handler.ApiFailHandler;
 import com.navi.user.security.handler.ApiSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -29,6 +30,7 @@ public class SecurityConfig {
         security.formLogin(config -> {
             config.loginPage("/api/users/login");
             config.successHandler(new ApiSuccessHandler());
+            config.failureHandler(new ApiFailHandler());
         });
 
         return security.build();
