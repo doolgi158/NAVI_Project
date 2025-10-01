@@ -4,7 +4,6 @@ import com.navi.user.enums.UserRole;
 import com.navi.user.enums.UserState;
 import com.navi.user.domain.User;
 import com.navi.user.repository.UserRepository;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,7 +12,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.security.SecureRandom;
 import java.util.Random;
 
-@Slf4j
 @SpringBootTest
 public class UserTest {
     @Autowired

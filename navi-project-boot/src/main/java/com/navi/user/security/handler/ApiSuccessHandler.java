@@ -5,7 +5,6 @@ import com.navi.user.dto.UserDTO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
@@ -13,7 +12,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Map;
 
-@Slf4j
 public class ApiSuccessHandler implements AuthenticationSuccessHandler {
 
     // 로그인 성공하면 토큰값 추가하여 json방식으로 알려주기
