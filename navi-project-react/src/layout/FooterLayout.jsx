@@ -1,5 +1,7 @@
 import React from "react";
 import { Layout, Row, Col, Typography, Space, Image } from "antd";
+import ktoLogo from '../images/kto.png';
+import tourapiLogo from '../images/tourapi.png'
 
 const { Footer } = Layout;
 const { Text } = Typography;
@@ -30,16 +32,16 @@ const FooterLayout = () => {
                 <Col xs={24} md={8} style={{ textAlign: "right" }}>
                     <Space size="middle">
                         <Image
-                            src="/images/tourapi.png"
+                            src={tourapiLogo}
                             alt="TourAPI"
                             preview={false}
                             width={80}
                         />
                         <Image
-                            src="/images/kto.png"
+                            src={ktoLogo}
                             alt="한국관광공사"
                             preview={false}
-                            width={100}
+                            width={80}
                         />
                     </Space>
                 </Col>

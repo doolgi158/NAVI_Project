@@ -17,7 +17,6 @@ public class FlightServiceImpl implements FlightService{
     private final SeatRepository seatRepository;
 
     @Override
-    @Transactional
     public void saveFlight(Flight flight) {
         //항공편 저장
         flightRepository.save(flight);
@@ -43,7 +42,6 @@ public class FlightServiceImpl implements FlightService{
     }
 
     @Override
-    @Transactional
     public void reserveSeat(Long seatId, String userName) { //예약 완료시 저장로직 추가 예정
         Seat seat = seatRepository.findById(seatId)
                 .orElseThrow(() -> new RuntimeException("좌석 없음"));
