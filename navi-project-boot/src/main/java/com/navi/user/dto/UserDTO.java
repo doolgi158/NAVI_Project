@@ -3,7 +3,6 @@ package com.navi.user.dto;
 import com.navi.user.enums.UserState;
 
 import lombok.*;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
