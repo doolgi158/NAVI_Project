@@ -8,8 +8,8 @@ const MainLayout = ({children}) => {
             <HeaderLayout />
 
             {/* main 태그에 flex-grow와 좌우 패딩(px-24) dir 96px 여백 적용 */}
-            {/*Header의 높이(mt-1 = 4px)만큼 공간 확보*/}
-            <main className="flex-grow px-24 mt-1">{children}</main>
+            {/*Header의 높이(mt-12 = 48px)만큼 공간 확보*/}
+            <main className="flex-grow px-24 mt-12">{children}</main>
             <FooterLayout />
         </div>
     );

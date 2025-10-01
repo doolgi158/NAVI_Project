@@ -1,12 +1,12 @@
-import MainLyout from "../layout/MainLayout";
+import MainLayout from "../layout/MainLayout";
 
 const MainPage = () => {
     return (
-        <MainLyout>
+        <MainLayout>
             <div className="text-3xl">
                 <div>Contents</div>
             </div>
-        </MainLyout>
+        </MainLayout>
     );
 }
 
