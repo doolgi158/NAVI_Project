@@ -30,10 +30,10 @@ public class AccServiceImpl implements AccService{
         JsonNode root = objectMapper.readTree(jsonFile.getInputStream());
         JsonNode items = root.path("response").path("body").path("items");
 
-        int count = 0;
+        //int count = 0;
 
         for(JsonNode wrapper : items) {
-            if(count >= 10) break;
+            //if(count >= 10) break;
             JsonNode item = wrapper.path("item");
 
             // JSON -> DTO 변환
@@ -41,7 +41,7 @@ public class AccServiceImpl implements AccService{
             // DTO -> Entity 저장
             insertFromApi(dto);
 
-            count++;
+            //count++;
         }
     }
 
@@ -49,8 +49,11 @@ public class AccServiceImpl implements AccService{
     @Override
     public void insertFromApi(AccApiDTO dto) {
         // accId 생성
-        String maxAccId = accRepository.findMaxAccId();
-        String newAccId = idGenerator.generateNextId("ACC", maxAccId);
+//        String maxAccId = accRepository.findMaxAccId();
+//        String newAccId = idGenerator.generateNextId("ACC", maxAccId);
+
+        Long seqVal = accRepository.getNextAccSeq();   // 오라클 시퀀스 호출
+        String newAccId = idGenerator.generateNextId("ACC", seqVal);
 
         Acc acc = Acc.builder()
                 .accId(newAccId)
