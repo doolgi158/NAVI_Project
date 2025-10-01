@@ -24,7 +24,7 @@ public class FlightTests {
 
     @Test
     void flightJsonTest() throws Exception {
-        InputStream is = getClass().getResourceAsStream("/mockData/flightData.json)");
+        InputStream is = getClass().getResourceAsStream("/mockData/flightData.json");
         JsonNode root = objectMapper.readTree(is);
         JsonNode items = root.path("response").path("body").path("items").path("item");
 
