@@ -1,6 +1,7 @@
-import React, { useState } from "react";
-import { Layout, Menu, Button, Drawer } from "antd";
+import { useState } from "react";
+import { Layout, Menu, Button, Drawer, Image } from "antd";
 import { MenuOutlined } from "@ant-design/icons";
+import naviLogo from '../images/navi_logo.png';
 
 const { Header } = Layout;
 
@@ -28,15 +29,13 @@ const HeaderLayout = () => {
       }}
     >
       {/* 로고 */}
-      <div
-        style={{
-          fontSize: "20px",
-          fontWeight: "bold",
-          color: "#2F3E46",
-        }}
-      >
-        NAVI
-      </div>
+        <Image
+          src={naviLogo}
+          alt="naviLogo"
+          preview={false}
+          width={130}
+      />
+     
 
       {/* PC 메뉴 */}
       <Menu
