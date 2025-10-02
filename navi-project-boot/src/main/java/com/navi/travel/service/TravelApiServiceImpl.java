@@ -2,11 +2,16 @@ package com.navi.travel.service;
 
 import com.navi.travel.domain.Travel;
 import com.navi.travel.dto.TravelApiItemDTO;
+import com.navi.travel.dto.ListResponseDTO;
 import com.navi.travel.repository.TravelRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -218,6 +223,68 @@ public class TravelApiServiceImpl implements TravelApiService {
         Travel travel = modelMapper.map(travelApiItemDTO, Travel.class);   //Travel 항목 조회 기능 정의
         Travel savedTravel = travelRepository.save(travel); //INSERT 쿼리 실행
         return savedTravel.getTravelId();   //클라이언트에게 새로 생성된 항목의 id리턴
+    }
+
+    // 🌟🌟🌟 DB에서 페이징 처리된 목록을 조회하고 DTO로 변환하는 메서드 추가 🌟🌟🌟
+    @Override
+    @Transactional(readOnly = true) // 읽기 전용으로 설정
+    public ListResponseDTO<TravelApiItemDTO> getList(int page, int size) {
+
+        // 1. Pageable 객체 생성: 페이지 번호는 0부터 시작하므로 page - 1, 정렬 기준은 travelId 내림차순
+        Pageable pageable = PageRequest.of(
+                page - 1,
+                size,
+                Sort.by("travelId").descending() // 최신 등록순으로 정렬한다고 가정
+        );
+
+        // 2. Repository를 통해 DB에서 페이징된 데이터 조회
+        // Travel 엔티티의 조회수(views)와 좋아요 수(likes)는 이미 포함되어 있습니다.
+        Page<Travel> result = travelRepository.findAll(pageable);
+
+        // 3. 엔티티 리스트를 DTO 리스트로 변환
+        List<TravelApiItemDTO> dtoList = result.getContent().stream()
+                // ModelMapper를 사용하여 Travel 엔티티를 TravelApiItemDTO로 매핑
+                .map(travel -> modelMapper.map(travel, TravelApiItemDTO.class))
+                .toList();
+
+        // 4. 페이지네이션 정보 계산 및 ListResponseDTO 생성
+
+        // 현재 페이지 블록의 페이지네이션 버튼 수 (예: 10개)
+        int pageBlockSize = 10;
+
+        // 총 항목 수
+        int totalCount = (int) result.getTotalElements();
+        // 총 페이지 수
+        int totalPage = result.getTotalPages();
+
+        // 페이지네이션 블록 계산
+        int endPage = (int)(Math.ceil(page / (double)pageBlockSize)) * pageBlockSize;
+        int startPage = endPage - pageBlockSize + 1;
+
+        // 실제 총 페이지 수가 endPage보다 작으면 endPage를 조정
+        if(totalPage < endPage) {
+            endPage = totalPage;
+        }
+
+        // 페이지 번호 목록 생성
+        List<Integer> pageNumList = List.of();
+        if (startPage <= endPage) {
+            pageNumList = java.util.stream.IntStream.rangeClosed(startPage, endPage)
+                    .boxed().toList();
+        }
+
+        // ListResponseDTO 빌드 및 반환
+        return ListResponseDTO.<TravelApiItemDTO>builder()
+                .dtoList(dtoList)
+                .totalCount(totalCount)
+                .totalPage(totalPage)
+                .current(page)
+                .prev(result.hasPrevious()) // 이전 페이지 존재 여부
+                .next(result.hasNext())     // 다음 페이지 존재 여부
+                .startPage(startPage)
+                .endPage(endPage)
+                .pageNumList(pageNumList)
+                .build();
     }
 
  }

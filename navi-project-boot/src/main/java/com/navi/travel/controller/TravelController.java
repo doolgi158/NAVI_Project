@@ -1,5 +1,7 @@
 package com.navi.travel.controller;
 
+import com.navi.travel.dto.ListResponseDTO;
+import com.navi.travel.dto.TravelApiItemDTO;
 import com.navi.travel.service.TravelApiService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -11,9 +13,13 @@ public class TravelController {
     private final TravelApiService travelApiService;
 
     //제주도 여행정보 리스트 화면
-    @GetMapping("/jejuSpotView")
-    public String jejuSpotView(){
-        return "hello";
+    @GetMapping("/list")
+    public ListResponseDTO<TravelApiItemDTO> getList(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        // Service를 통해 DB에서 데이터를 가져와 반환
+        return travelApiService.getList(page, size);
     }
 
 

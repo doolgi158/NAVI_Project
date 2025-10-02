@@ -3,9 +3,14 @@ package com.navi.travel.dto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@ToString
 public class TravelApiItemDTO {
     private String alltag;
     private String contentsid; // 테이블의 CONTENTS_ID
@@ -22,6 +27,8 @@ public class TravelApiItemDTO {
     private String postcode; // 테이블의 ZIPCODE
     private String phoneno; // 테이블의 TEL
     private RepPhotoDTO repPhoto; // 2단계 중첩 객체
+    private Long likes;
+    private Long views;
 
     //중첩 객체 DTO 정의
     @Getter @Setter @NoArgsConstructor
