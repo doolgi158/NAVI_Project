@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class FlightDTO {
+public class ApiFlightDTO {
 
     private String vihicleId; //항공편 ID
     private String airlineNm; //항공사명

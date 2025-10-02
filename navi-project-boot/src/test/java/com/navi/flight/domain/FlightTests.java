@@ -3,7 +3,7 @@ package com.navi.flight.domain;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.navi.flight.dto.FlightDTO;
+import com.navi.flight.dto.ApiFlightDTO;
 import com.navi.flight.repository.FlightRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,13 +28,13 @@ public class FlightTests {
         JsonNode root = objectMapper.readTree(is);
         JsonNode items = root.path("response").path("body").path("items").path("item");
 
-        List<FlightDTO> dtoList = objectMapper.readValue(
+        List<ApiFlightDTO> dtoList = objectMapper.readValue(
                 items.toString(),
-                new TypeReference<List<FlightDTO>>() {
+                new TypeReference<List<ApiFlightDTO>>() {
                 }
         );
 
-        for(FlightDTO dto : dtoList) {
+        for(ApiFlightDTO dto : dtoList) {
             Flight flight = Flight.builder()
                     .id(new FlightId(dto.getVihicleId(),
                             LocalDateTime.parse(dto.getDepPlandTime().toString(), DateTimeFormatter.ofPattern("yyyyMMddHHmm"))
