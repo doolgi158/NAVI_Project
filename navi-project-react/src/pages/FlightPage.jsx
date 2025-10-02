@@ -98,26 +98,6 @@ const FlightPage = () => {
               )}
             </div>
 
-            {/* 시간 선택 (왕복, 편도 공통 → 옵션) */}
-            <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm text-gray-600 mb-2">출발 시간 (선택)</label>
-                <TimePicker
-                  className="w-full"
-                  format="HH:mm"
-                  onChange={(val) => setDates({ ...dates, depTime: val })}
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-600 mb-2">도착 시간 (선택)</label>
-                <TimePicker
-                  className="w-full"
-                  format="HH:mm"
-                  onChange={(val) => setDates({ ...dates, arrTime: val })}
-                />
-              </div>
-            </div>
-
             {/* 탑승객 */}
             <div>
               <label className="block text-sm text-gray-600 mb-2">탑승객</label>
@@ -127,8 +107,7 @@ const FlightPage = () => {
             {/* 좌석 등급 */}
             <div className="md:col-span-2">
               <label className="block text-sm text-gray-600 mb-2">좌석 등급</label>
-              <Select defaultValue="all" className="w-full">
-                <Option value="all">모두 보기</Option>
+              <Select defaultValue="economy" className="w-full">
                 <Option value="economy">일반석</Option>
                 <Option value="business">비즈니스석</Option>
               </Select>
