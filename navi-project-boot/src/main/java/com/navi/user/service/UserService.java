@@ -1,10 +1,9 @@
 package com.navi.user.service;
 
-import com.navi.user.domain.User;
-import com.navi.user.dto.UserDTO;
+import com.navi.user.dto.users.UserSecurityDTO;
 
 import java.util.List;
 
 public interface UserService {
-    public List<UserDTO> userList(User user);
+    public List<UserSecurityDTO> userList();
 }

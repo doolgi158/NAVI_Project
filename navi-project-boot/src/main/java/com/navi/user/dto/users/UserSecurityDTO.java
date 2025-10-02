@@ -1,4 +1,4 @@
-package com.navi.user.dto;
+package com.navi.user.dto.users;
 
 import com.navi.user.enums.UserState;
 
@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 @ToString
 @Getter
 @Setter
-public class UserDTO extends User {
+public class UserSecurityDTO extends User {
     private long no;                // 사용자 번호
     private String name;            // 이름
     private String phone;           // 전화번호
@@ -27,7 +27,7 @@ public class UserDTO extends User {
     // 권한
     private List<String> role = new ArrayList<>();
 
-    public UserDTO(String name, String phone, String birth, String email, String id, String pw, UserState userState, List<String> role) {
+    public UserSecurityDTO(String name, String phone, String birth, String email, String id, String pw, UserState userState, List<String> role) {
         super(id, pw, role.stream().map(str -> new SimpleGrantedAuthority("ROLE_" + str)).collect(Collectors.toList()));
         this.name = name;
         this.phone = phone;
