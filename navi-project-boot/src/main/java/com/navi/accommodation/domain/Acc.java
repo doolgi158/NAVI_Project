@@ -1,5 +1,6 @@
 package com.navi.accommodation.domain;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -43,6 +44,7 @@ public class Acc {
     @Column(name = "acc_id", length = 20, unique = true, updatable = false)
     private String accId;
 
+    // api 복구되면 unique = true 로 변경해야 함
     @Column(name = "content_id", unique = false)
     private Long contentId;
 
@@ -72,11 +74,11 @@ public class Acc {
     private String overview;
 
     @Builder.Default
-    @Column(name = "checkin", length = 5, nullable = false)
+    @Column(name = "checkin", length = 15, nullable = false)
     private String checkIn = "15:00";
 
     @Builder.Default
-    @Column(name = "checkout", length = 5, nullable = false)
+    @Column(name = "checkout", length = 15, nullable = false)
     private String checkOut = "11:00";
 
     @Builder.Default
@@ -114,7 +116,7 @@ public class Acc {
         if (isDeletable == null) isDeletable = false;
         if (isActive == null) isActive = true;
 
-        // acc_id 자동 세팅
+        // acc_id 자동 생성
         if(accId == null && accNo != null){
             this.accId = String.format("ACC%03d", accNo);
         }
@@ -126,16 +128,22 @@ public class Acc {
         modifiedTime = LocalDateTime.now();
     }
 
-    // FK 양방향 관계 설정
+    // FK 양방향 관계 설정 : 숙소 - 객실
     @Builder.Default
     @OneToMany(mappedBy = "acc",
                cascade = CascadeType.ALL,
                fetch = FetchType.LAZY,
                orphanRemoval = true)
+    @JsonManagedReference
     private List<Room> rooms = new ArrayList<>();
 
-    // change 메서드 - 임시
-    public void changeTitle(String title) {
-        this.title = title;
+    // 의도한 변경만 메서드로 모아 관리 가능
+    public void changeDetails(String overview, String checkIn, String checkOut,
+                              Boolean hasCooking, Boolean hasParking) {
+        if (overview != null) this.overview = overview;
+        if (checkIn != null) this.checkIn = checkIn;
+        if (checkOut != null) this.checkOut = checkOut;
+        if (hasCooking != null) this.hasCooking = hasCooking;
+        if (hasParking != null) this.hasParking = hasParking;
     }
 }
