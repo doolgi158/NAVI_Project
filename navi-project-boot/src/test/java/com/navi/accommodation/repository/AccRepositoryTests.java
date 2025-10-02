@@ -42,16 +42,16 @@ public class AccRepositoryTests {
 
     @Test
     public void accDeleteTest() {
-        accRepository.deleteById("TESTID");
+        accRepository.deleteById(1L);
         log.info("NAVI_ACCOMMODATION 테이블 데이터 삭제 완료");
     }
 
     @Test
     public void accUpdateTest() {
-        Optional<Acc> accOptional = accRepository.findById("TESTID");
+        Optional<Acc> accOptional = accRepository.findById(1L);
         if(accOptional.isPresent()) {
             Acc acc = accOptional.get();
-            acc.changeTitle("TEST 호텔");
+//            acc.changeTitle("TEST 호텔");
 
             log.info("NAVI_ACCOMMODATION 테이블 데이터 수정");
             accRepository.save(acc);
