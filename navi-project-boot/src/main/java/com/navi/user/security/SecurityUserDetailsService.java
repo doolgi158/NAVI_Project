@@ -36,7 +36,6 @@ public class SecurityUserDetailsService implements UserDetailsService {
                 user.getPhone(),
                 user.getBirth(),
                 user.getEmail(),
-                user.getPerNum(),
                 user.getId(),
                 user.getPw(),
                 user.getUserState(),
