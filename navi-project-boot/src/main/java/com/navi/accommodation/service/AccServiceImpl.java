@@ -5,61 +5,92 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.navi.accommodation.domain.Acc;
 import com.navi.accommodation.dto.api.AccApiDTO;
 import com.navi.accommodation.repository.AccRepository;
-import com.navi.common.util.IdGenerator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class AccServiceImpl implements AccService{
     public final AccRepository accRepository;
     public final ObjectMapper objectMapper;
-    public final IdGenerator idGenerator;
 
     //JSON 파일 경로 지정
-    @Value("classpath:accMockData/acc_list.json")
-    private Resource jsonFile;
+    @Value("classpath:accMockData/acc_list.json")   // 숙소 전체 리스트(최초 적재)
+    private Resource listFile;
+    @Value("classpath:accMockData/acc_basic.json")  // 특정 숙소 정보(보강 업데이트)
+    private Resource basicFile;
+    @Value("classpath:accMockData/acc_extra.json")  // 특정 숙소 추가 정보(보강 업데이트)
+    private Resource extraFile;
 
     @Override
+    /* insert 전용 */
     public void loadFromJsonFile() throws IOException {
-        JsonNode root = objectMapper.readTree(jsonFile.getInputStream());
+        processJson(listFile, true);
+    }
+
+    @Override
+    /* update 전용 */
+    public void updateFromJsonFile() throws IOException {
+        processJson(basicFile, false);
+        processJson(extraFile, false);
+    }
+
+    // insertOnly가 true면 insert 전용, false면 update 전용
+    public void processJson(Resource file, boolean insertOnly) throws IOException {
+        // JSON 파싱하여 트리 구조로 유연하게 탐색
+        JsonNode root = objectMapper.readTree(file.getInputStream());
         JsonNode items = root.path("response").path("body").path("items");
 
-        int count = 0;
-
-        for(JsonNode wrapper : items) {
-            if(count >= 10) break;
+        for(JsonNode wrapper : items){
             JsonNode item = wrapper.path("item");
-
-            // JSON -> DTO 변환
+            // JSON의 item 내용을 AccApiDTO에 매핑
             AccApiDTO dto = objectMapper.treeToValue(item, AccApiDTO.class);
-            // DTO -> Entity 저장
-            insertFromApi(dto);
 
-            count++;
+            if(dto.getContentId() == null) {
+                log.warn("contentId 없음 -> SKIP: {}", dto);
+                continue;
+            }
+
+            if(insertOnly) {
+                accRepository.findByContentId(dto.getContentId())
+                        .ifPresentOrElse(
+                                acc -> log.info("이미 존제 -> SKIP: {}", dto.getContentId()),
+                                () -> insertInitialFromApi(dto)
+                        );
+            } else {
+                accRepository.findByContentId(dto.getContentId())
+                        .ifPresent(acc -> {
+                            acc.changeDetails(
+                                    dto.getOverview(),
+                                    dto.getCheckIn(),
+                                    dto.getCheckOut(),
+                                    dto.getHasCooking(),
+                                    dto.getHasParking()
+                            );
+                            accRepository.save(acc);
+                            log.info("UPDATE 성공 (contentId = {})", acc.getContentId());
+                        });
+            }
         }
     }
 
-
     @Override
-    public void insertFromApi(AccApiDTO dto) {
-        // accId 생성
-        String maxAccId = accRepository.findMaxAccId();
-        String newAccId = idGenerator.generateNextId("ACC", maxAccId);
-
+    public void insertInitialFromApi(AccApiDTO dto) {
         Acc acc = Acc.builder()
-                .accId(newAccId)
                 .contentId(dto.getContentId())
                 .title(dto.getTitle())
-                .category(dto.getCat3())
+                .category(dto.getCategory())
                 .tel(dto.getTel())
                 .townshipId(1)  // 임시값
-                .address(dto.getAddr1() + dto.getAddr2())
+                .address(dto.getAddr1() + (dto.getAddr2() != null ? dto.getAddr2() : ""))
                 .mapy(dto.getMapy())
                 .mapx(dto.getMapx())
                 .createdTime(LocalDateTime.now())
@@ -67,8 +98,6 @@ public class AccServiceImpl implements AccService{
                 .build();
 
         accRepository.save(acc);
+        log.info("INSERT 성공 (contentId = {})", acc.getContentId());
     }
-
-
-
 }

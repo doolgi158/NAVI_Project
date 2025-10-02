@@ -8,5 +8,6 @@ import java.util.List;
 
 public interface AccService {
     public void loadFromJsonFile() throws IOException;
-    public void insertFromApi(AccApiDTO dto);
+    public void insertInitialFromApi(AccApiDTO dto);
+    public void updateFromJsonFile() throws IOException;
 }

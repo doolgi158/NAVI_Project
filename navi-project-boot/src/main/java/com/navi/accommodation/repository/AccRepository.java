@@ -5,8 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
-public interface AccRepository extends JpaRepository<Acc, String> {
-    @Query("SELECT COALESCE(MAX(a.accId), 'ACC00000') FROM Acc a")
-    String findMaxAccId();
+public interface AccRepository extends JpaRepository<Acc, Long> {
+    // 업데이트 할 때 기준이 되는 키
+    Optional<Acc> findByContentId(Long ContentId);
 }
