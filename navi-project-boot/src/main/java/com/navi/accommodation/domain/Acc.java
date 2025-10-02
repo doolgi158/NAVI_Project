@@ -44,8 +44,7 @@ public class Acc {
     @Column(name = "acc_id", length = 20, unique = true, updatable = false)
     private String accId;
 
-    // api 복구되면 unique = true 로 변경해야 함
-    @Column(name = "content_id", unique = false)
+    @Column(name = "content_id")
     private Long contentId;
 
     @Column(length = 50, nullable = false)
@@ -63,23 +62,23 @@ public class Acc {
     @Column(length = 200, nullable = false)
     private String address;
 
-    @Column(name = "latitude", precision = 10, scale = 7,columnDefinition = "NUMBER(10, 7)")
+    @Column(name = "mapy", precision = 10, scale = 7,columnDefinition = "NUMBER(10, 7)")
     private BigDecimal mapy;
 
-    @Column(name = "longitude", precision = 10, scale = 7, columnDefinition = "NUMBER(10, 7)")
+    @Column(name = "mapx", precision = 10, scale = 7, columnDefinition = "NUMBER(10, 7)")
     private BigDecimal mapx;
 
     @Lob
-    @Column(name = "description")
+    @Column(name = "overview")
     private String overview;
 
     @Builder.Default
-    @Column(name = "checkin", length = 15, nullable = false)
-    private String checkIn = "15:00";
+    @Column(name = "checkin_time", length = 15, nullable = false)
+    private String checkInTime = "15:00";
 
     @Builder.Default
-    @Column(name = "checkout", length = 15, nullable = false)
-    private String checkOut = "11:00";
+    @Column(name = "checkout_time", length = 15, nullable = false)
+    private String checkOutTime = "11:00";
 
     @Builder.Default
     @Column(name = "has_cooking", nullable = false)
@@ -91,16 +90,16 @@ public class Acc {
 
     @Builder.Default
     @Column(name = "is_deletable", nullable = false)
-    private Boolean isDeletable = false;
+    private boolean isDeletable = false;
 
     @Builder.Default
     @Column(name = "is_active", nullable = false)
-    private Boolean isActive = true;
+    private boolean isActive = true;
 
     @Column(name = "created_time", nullable = false, updatable = false)
     private LocalDateTime createdTime;
 
-    @Column(name = "updated_time", nullable = false)
+    @Column(name = "modified_time", nullable = false)
     private LocalDateTime modifiedTime;
 
     // API 에서 null이 들어오면 기본값이 무력화되고 Hibernate는 null을 그대로 INSERT
@@ -109,12 +108,10 @@ public class Acc {
     public void prePersist() {
         if (mapy == null) mapy = BigDecimal.ZERO;
         if (mapx == null) mapx = BigDecimal.ZERO;
-        if (checkIn == null) checkIn = "15:00";
-        if (checkOut == null) checkOut = "11:00";
+        if (checkInTime == null) checkInTime = "15:00";
+        if (checkOutTime == null) checkOutTime = "11:00";
         if (hasCooking == null) hasCooking = false;
         if (hasParking == null) hasParking = false;
-        if (isDeletable == null) isDeletable = false;
-        if (isActive == null) isActive = true;
 
         // acc_id 자동 생성
         if(accId == null && accNo != null){
@@ -137,13 +134,31 @@ public class Acc {
     @JsonManagedReference
     private List<Room> rooms = new ArrayList<>();
 
-    // 의도한 변경만 메서드로 모아 관리 가능
-    public void changeDetails(String overview, String checkIn, String checkOut,
+    // change 메서드 : 의도한 변경만 메서드로 모아 관리 가능
+    /* === AccApiDTO : API 적재 전용 === */
+    public void changeFromApi(String overview, String checkInTime, String checkOutTime,
                               Boolean hasCooking, Boolean hasParking) {
         if (overview != null) this.overview = overview;
-        if (checkIn != null) this.checkIn = checkIn;
-        if (checkOut != null) this.checkOut = checkOut;
+        if (checkInTime != null) this.checkInTime = checkInTime;
+        if (checkOutTime != null) this.checkOutTime = checkOutTime;
         if (hasCooking != null) this.hasCooking = hasCooking;
         if (hasParking != null) this.hasParking = hasParking;
     }
+    /* === AccRequestDTO : 관지자 전용 === */
+    public void changeFromRequest(String title, String category, String tel, String address,
+                                  String overview, String checkInTime, String checkOutTime,
+                                  Boolean hasCooking, Boolean hasParking, boolean isActive) {
+        if (title != null) this.title = title;
+        if (category != null) this.category = category;
+        if (tel != null) this.tel = tel;
+        if (address != null) this.address = address;
+        if (overview != null) this.overview = overview;
+        if (checkInTime != null) this.checkInTime = checkInTime;
+        if (checkOutTime != null) this.checkOutTime = checkOutTime;
+        if (hasCooking != null) this.hasCooking = hasCooking;
+        if (hasParking != null) this.hasParking = hasParking;
+
+        this.isActive = isActive;
+    }
+
 }
