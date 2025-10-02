@@ -98,6 +98,14 @@ public class Travel extends BaseEntity { //등록일 수정일 자동생성 상�
     @Column(name = "THUMBNAIL_PATH", length = 500)
     private String thumbnailPath;   //서브사진경로
 
+    @Builder.Default
+    @Column(name = "VIEWS_COUNT", nullable = false)
+    private Long views = 0L; // 조회수 (초기값 0 설정)
+
+    @Builder.Default
+    @Column(name = "LIKES_COUNT", nullable = false)
+    private Long likes = 0L; // 좋아요 수 (초기값 0 설정)
+
     // 관리 정보
 //    @Column(name = "CREATED_AT", updatable = false, nullable = false)
 //    private LocalDateTime createdAt; //생성일 자동 생성

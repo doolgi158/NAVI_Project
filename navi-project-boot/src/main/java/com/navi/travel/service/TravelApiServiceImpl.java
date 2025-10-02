@@ -147,9 +147,20 @@ public class TravelApiServiceImpl implements TravelApiService {
         Map<String, String> region1Cd = (Map<String, String>) item.get("region1cd");
         Map<String, String> region2Cd = (Map<String, String>) item.get("region2cd");
 
+        // 카테고리 이름 추출 (contentscd의 "label" 값)
+        String categoryName = contentsCd != null ? contentsCd.get("label") : null;
+
+
         // RepPhoto -> photoid 구조 추출 (2단계 중첩)
         Map<String, Object> repPhoto = (Map<String, Object>) item.get("repPhoto");
         Map<String, Object> photoIdMap = (repPhoto != null) ? (Map<String, Object>) repPhoto.get("photoid") : null;
+
+        // '숙박' 데이터 제외 조건 확인
+        if ("숙박".equals(categoryName)) {
+            // 카테고리 이름이 '숙박'인 경우, 데이터 저장을 제외하기 위해 빈 Optional 반환
+            System.out.println("데이터 제외: 카테고리 이름이 '숙박'이므로 건너뜁니다 (ContentsId: " + item.get("contentsid") + ")");
+            return Optional.empty(); // 여기서 제외
+        }
 
         // API 응답에서 좌표는 일반적으로 Double 형태로 오므로, BigDecimal로 변환합니다.
         Double mapXDouble = (Double) item.get("longitude"); // 엔티티 MAPX (경도)
@@ -157,6 +168,8 @@ public class TravelApiServiceImpl implements TravelApiService {
 
         // PhotoId는 Number 형태로 올 수 있으므로 Long으로 변환합니다.
         Number photoIdNumber = (Number) (photoIdMap != null ? photoIdMap.get("photoid") : null);
+
+
 
         // 3. Travel 엔티티 생성 (Builder 사용)
         Travel entity = Travel.builder()
@@ -175,7 +188,7 @@ public class TravelApiServiceImpl implements TravelApiService {
 
                 // 카테고리 정보 (Null 체크)
                 .contentsCd(contentsCd != null ? contentsCd.get("value") : null)
-                .categoryName(contentsCd != null ? contentsCd.get("label") : null)
+                .categoryName(categoryName)
                 .categoryRefId(contentsCd != null ? contentsCd.get("refId") : null)
 
                 // 지역 1차 정보 (Null 체크)
