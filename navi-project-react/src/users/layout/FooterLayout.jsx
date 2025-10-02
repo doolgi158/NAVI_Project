@@ -1,4 +1,3 @@
-import React from "react";
 import { Layout, Row, Col, Typography, Space, Image } from "antd";
 
 const { Footer } = Layout;
@@ -24,7 +23,7 @@ const FooterLayout = () => {
                         Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
                         eiusmod tempor incididunt ut labore et dolore magna aliqua.
                     </Text>
-                </Col>
+                </Col>  
 
                 {/* 우측: 로고 영역 */}
                 <Col xs={24} md={8} style={{ textAlign: "right" }}>
