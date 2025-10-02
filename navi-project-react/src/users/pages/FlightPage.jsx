@@ -1,7 +1,7 @@
 import { DatePicker, Input, Select, Button, TimePicker } from "antd";
 import { useState } from "react";
 import "bootstrap-icons/font/bootstrap-icons.css";
-import MainLayout from "./MainLayout";
+import MainLayout from "../layout/MainLayout";
 
 const { Option } = Select;
 const { RangePicker } = DatePicker;
