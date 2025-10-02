@@ -30,7 +30,7 @@ const TravelPage = () => {
     const [travelItems, setTravelItems] = useState(initialTravelItems);
     const totalCount = 5309; // 목업 총 건수
     const [currentPage, setCurrentPage] = useState(1);
-    const pageSize = 5; // 한 페이지에 5개 항목 표시
+    const pageSize = 10; // 한 페이지에 10개 항목 표시
     const startIndex = (currentPage - 1) * pageSize;
     const currentItems = travelItems.slice(startIndex, startIndex + pageSize);
     const [isSearching, setIsSearching] = useState(false); // 검색 로딩 상태 추가
@@ -76,7 +76,7 @@ const TravelPage = () => {
 
     return (
         <MainLayout>
-            {/* MainLayout의 중앙 컨테이너(div.bg-white) 내부로 들어가는 실제 콘텐츠 영역 */}
+            MainLayout의 중앙 컨테이너(div.bg-white) 내부로 들어가는 실제 콘텐츠 영역
             <div style={{ padding: '0 8px' }}>
                 
                 {/* 1. 검색 섹션: Row justify="center"로 중앙에 배치 */}
@@ -96,7 +96,7 @@ const TravelPage = () => {
 
                 {/* 2. 통계 및 정렬 버튼 섹션 */}
                 <Row justify="center" style={{ marginBottom: 12 }}>
-                    <Col xs={24} lg={16}>
+                    <Col xs={24} lg={19}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                             <Text style={{ color: '#595959', fontSize: 14 }}>총 {totalCount.toLocaleString()}건</Text>
                             <Space size="middle">
@@ -158,7 +158,7 @@ const TravelPage = () => {
                             <Col xs={24} md={14}>
                                 <Card
                                     title={activeItem.title || "여행지 상세 정보"}
-                                    style={{ minHeight: 500, backgroundColor: '#fafafa' }} 
+                                    style={{ minHeight: 1135, backgroundColor: '#fafafa' }} 
                                 >
                                     {/* 지도 목업 */}
                                     <div style={{ color: '#8c8c8c', padding: 96, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
@@ -188,6 +188,7 @@ const TravelPage = () => {
             </div>
         </MainLayout>
     );
+ 
 };
 
 export default TravelPage;
