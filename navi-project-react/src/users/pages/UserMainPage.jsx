@@ -1,7 +1,6 @@
 import MainLayout from "../layout/MainLayout";
-import React from "react";
 
-const MainPage = () => {
+const UserMainPage = () => {
     return (
         <MainLayout>
             <div className="text-3xl">
@@ -11,4 +10,4 @@ const MainPage = () => {
     );
 }
 
-export default MainPage;
+export default UserMainPage;

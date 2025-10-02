@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import { Layout, Menu, Button, Drawer,Image } from "antd";
+import { useState } from "react";
+import { Layout, Menu, Button, Drawer, Image } from "antd";
 import { MenuOutlined } from "@ant-design/icons";
-import naviLogo from '../images/navi_logo.png'
+import naviLogo from '../images/navi_logo.png';
 
 const { Header } = Layout;
 

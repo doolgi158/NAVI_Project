@@ -1,35 +1,24 @@
-import React from "react";
 import { lazy, Suspense } from "react";
 import { createBrowserRouter } from "react-router-dom";
 
 const Loading = <div>Loading...</div>
-const Main = lazy(() => import("../pages/MainPage.jsx"))
-const Travel = lazy(() => import("../pages/TravelPage.jsx"))
-const Flight = lazy(() => import("../pages/FlightPage.jsx"))
-const FlightDetail = lazy(() => import("../pages/FlightDetailPage.jsx"))
-const FlightRsv = lazy(() => import("../pages/FlightRsvInputPage.jsx"))
+const UserMain = lazy(() => import("../users/pages/UserMainPage.jsx"))
+const Users = lazy(() => import("../users/pages/UsersPage.jsx"))
+const AdminDashboard = lazy(() => import("../admin/pages/AdminDashboardPage.jsx"))
 
 const root = createBrowserRouter([
     {
         path: "",
-        element: <Suspense fallback={Loading}><Main /></Suspense>
+        element: <Suspense fallback={Loading}><UserMain /></Suspense>
     },
     {
-        path: "travel",
-        element: <Suspense fallback={Loading}><Travel /></Suspense>
+        path: "/adm/dashboard",
+        element: <Suspense fallback={Loading}><AdminDashboard /></Suspense>
     },
     {
-        path: "flight",
-        element: <Suspense fallback={Loading}><Flight /></Suspense>
-    },
-    {
-        path: "flight/:id",
-        element: <Suspense fallback={Loading}><FlightDetail /></Suspense>
-    },
-    {
-        path: "flight/:id/rsv",
-        element: <Suspense fallback={Loading}><FlightRsv /></Suspense>
-    },
+        path: "/adm/users",
+        element: <Suspense fallback={Loading}><Users /></Suspense>
+    }
 ]);
 
 export default root;

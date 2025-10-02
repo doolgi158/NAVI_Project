@@ -1,9 +1,13 @@
 package com.navi.user.security;
 
+import com.navi.common.util.CustomException;
 import com.navi.user.domain.User;
 import com.navi.user.dto.UserDTO;
+import com.navi.user.enums.UserState;
 import com.navi.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -21,6 +25,10 @@ public class SecurityUserDetailsService implements UserDetailsService {
         User user = userRepository.getUser(username);
         if(user == null) {
             throw new UsernameNotFoundException(username + "번의 유저를 찾을 수 없습니다.");
+        } else if(user.getUserState() == UserState.DELETE) {
+            throw new CustomException("탈퇴한 계정입니다.", 403, null);
+        } else if(user.getUserState() == UserState.SLEEP) {
+            throw new LockedException("휴면 계정입니다.");
         }
 
         return new UserDTO(
