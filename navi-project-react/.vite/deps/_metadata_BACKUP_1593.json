@@ -1,0 +1,43 @@
+{
+<<<<<<< HEAD
+  "hash": "033f733a",
+  "configHash": "3d8a071c",
+  "lockfileHash": "1a78a328",
+  "browserHash": "10606774",
+  "optimized": {
+    "react": {
+      "src": "../../node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "b7d92fb7",
+      "needsInterop": true
+    },
+    "react-dom/client": {
+      "src": "../../node_modules/react-dom/client.js",
+      "file": "react-dom_client.js",
+      "fileHash": "6ec21c0a",
+      "needsInterop": true
+    },
+    "react-router-dom": {
+      "src": "../../node_modules/react-router-dom/dist/index.mjs",
+      "file": "react-router-dom.js",
+      "fileHash": "3f29af26",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-4J6BLW67": {
+      "file": "chunk-4J6BLW67.js"
+    },
+    "chunk-WYQRYOQT": {
+      "file": "chunk-WYQRYOQT.js"
+    }
+  }
+=======
+  "hash": "2fe65f9f",
+  "configHash": "112d82ab",
+  "lockfileHash": "1206d165",
+  "browserHash": "08bd5fad",
+  "optimized": {},
+  "chunks": {}
+>>>>>>> c71dfe39f7535704140b80f769b7452f25a7e17f
+}

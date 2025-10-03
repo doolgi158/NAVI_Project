@@ -38,9 +38,9 @@ public class AccApiDTO {
 
     /* acc_extra.json */
     @JsonProperty("checkintime")
-    private String checkIn;
+    private String checkInTime;
     @JsonProperty("checkouttime")
-    private String checkOut;
+    private String checkOutTime;
     @JsonProperty("chkcooking")
     private Integer hasCooking;
     @JsonProperty("parkinglodging")
@@ -56,4 +56,6 @@ public class AccApiDTO {
     public Boolean getHasParking() {
         return hasParking != null && hasParking == 1;
     }
+
+    /* category 로직 추가 필요 */
 }

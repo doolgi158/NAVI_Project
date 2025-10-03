@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.navi.accommodation.domain.Acc;
 import com.navi.accommodation.dto.api.AccApiDTO;
+import com.navi.accommodation.dto.request.AccRequestDTO;
 import com.navi.accommodation.repository.AccRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -22,6 +24,7 @@ public class AccServiceImpl implements AccService{
     public final AccRepository accRepository;
     public final ObjectMapper objectMapper;
 
+    /* === 관리자 전용 API 적재 === */
     //JSON 파일 경로 지정
     @Value("classpath:accMockData/acc_list.json")   // 숙소 전체 리스트(최초 적재)
     private Resource listFile;
@@ -68,10 +71,10 @@ public class AccServiceImpl implements AccService{
             } else {
                 accRepository.findByContentId(dto.getContentId())
                         .ifPresent(acc -> {
-                            acc.changeDetails(
+                            acc.changeFromApi(
                                     dto.getOverview(),
-                                    dto.getCheckIn(),
-                                    dto.getCheckOut(),
+                                    dto.getCheckInTime(),
+                                    dto.getCheckOutTime(),
                                     dto.getHasCooking(),
                                     dto.getHasParking()
                             );
@@ -99,5 +102,77 @@ public class AccServiceImpl implements AccService{
 
         accRepository.save(acc);
         log.info("INSERT 성공 (contentId = {})", acc.getContentId());
+    }
+
+    /* === 관리자 전용 CRUD === */
+    @Override
+    public Acc createAcc(AccRequestDTO dto) {
+        Acc acc = Acc.builder()
+                .contentId(null)
+                .title(dto.getTitle())
+                .category(dto.getCategory())
+                .tel(dto.getTel())
+                .address(dto.getAddress())
+                .overview(dto.getOverview())
+                .checkInTime(dto.getCheckInTime())
+                .checkOutTime(dto.getCheckOutTime())
+                .hasCooking(dto.getHasCooking() != null ? dto.getHasCooking() : false)
+                .hasParking(dto.getHasParking() != null ? dto.getHasParking() : false)
+                .isActive(dto.isActive())
+                .isDeletable(false)
+                .createdTime(LocalDateTime.now())
+                .modifiedTime(LocalDateTime.now())
+                .build();
+
+        return accRepository.save(acc);
+    }
+
+    @Override
+    public Acc updateAcc(Long accNo, AccRequestDTO dto) {
+        Acc acc = accRepository.findById(accNo)
+                .orElseThrow(() -> new IllegalArgumentException("숙소가 존재하지 않습니다."));
+
+        // API 숙소 수정 불가
+        if(acc.getContentId() != null) {
+            throw new IllegalStateException("API로 받아온 숙소는 수정할 수 없습니다.");
+        }
+
+        acc.changeFromRequest(
+                dto.getTitle(),
+                dto.getCategory(),
+                dto.getTel(),
+                dto.getAddress(),
+                dto.getOverview(),
+                dto.getCheckInTime(),
+                dto.getCheckOutTime(),
+                dto.getHasCooking(),
+                dto.getHasParking(),
+                dto.isActive()
+        );
+
+        return accRepository.save(acc);
+    }
+
+    @Override
+    public void deleteAcc(Long accNo) {
+        Acc acc = accRepository.findById(accNo)
+                .orElseThrow(() -> new IllegalArgumentException("숙소가 존재하지 않습니다."));
+
+        // API 숙소 삭제 불가
+        if(acc.getContentId() != null) {
+            throw new IllegalStateException("API로 받아온 숙소는 삭제할 수 없습니다.");
+        }
+        // 예약사항이 있으면 삭제 불가
+        if(!acc.isDeletable()) {
+            throw new IllegalStateException("삭제 불가 상태의 숙소입니다.");
+        }
+
+        accRepository.delete(acc);
+    }
+
+    /* === 조회 (공통) === */
+    @Override
+    public List<Acc> getAllAcc() {
+        return accRepository.findAll();
     }
 }

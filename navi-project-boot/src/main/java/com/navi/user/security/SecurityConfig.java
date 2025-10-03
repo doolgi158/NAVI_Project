@@ -1,7 +1,12 @@
 package com.navi.user.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.navi.common.response.ApiResponse;
+import com.navi.user.domain.User;
+import com.navi.user.security.Filter.JWTCheckFilter;
 import com.navi.user.security.handler.ApiFailHandler;
 import com.navi.user.security.handler.ApiSuccessHandler;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,6 +15,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -21,26 +27,36 @@ import java.util.Arrays;
 public class SecurityConfig {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity security) throws Exception {
+        // CORS 설정
         security.cors(httpSecurityCorsConfigurer -> {
             httpSecurityCorsConfigurer.configurationSource(corsConfigurationSource());
         });
+        // 세션 관리 정책 설정
         security.sessionManagement(sessionConfig -> sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+        // CSRF 설정
         security.csrf(config -> config.disable());
 
+        // 로그인 설정
         security.formLogin(config -> {
             config.loginPage("/api/users/login");
             config.successHandler(new ApiSuccessHandler());
             config.failureHandler(new ApiFailHandler());
         });
 
+        // JWT 체크 (토큰 정보가 있으면 로그인을 건너뛴다)
+        security.addFilterBefore(new JWTCheckFilter(), UsernamePasswordAuthenticationFilter.class);
+
         return security.build();
     }
 
+    // Password 암호화
     @Bean
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
     }
 
+    // CORS 세부 설정
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();

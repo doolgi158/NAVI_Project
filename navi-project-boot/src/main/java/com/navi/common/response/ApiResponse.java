@@ -11,7 +11,7 @@ public class ApiResponse<T> {   //
     private T data;                     // 데이터
     private LocalDateTime timestamp;    // 응답 시간
 
-    public ApiResponse(int status, String message, T data) {
+    public ApiResponse(String message, int status, T data) {
         this.status = status;
         this.message = message;
         this.data = data;
@@ -20,11 +20,11 @@ public class ApiResponse<T> {   //
 
     // 성공 응답
     public static <T> ApiResponse<T> success(T data) {
-        return new ApiResponse<>(200, "SUCCESS", data);
+        return new ApiResponse<>("SUCCESS", 200, data);
     }
 
     // 실패 응답
     public static <T> ApiResponse<T> error(String message, int status, T data) {
-        return new ApiResponse<>(status, message, data);
+        return new ApiResponse<>(message, status, data);
     }
 }

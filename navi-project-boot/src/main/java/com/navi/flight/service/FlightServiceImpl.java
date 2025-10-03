@@ -4,11 +4,23 @@ import com.navi.flight.domain.Flight;
 import com.navi.flight.domain.Seat;
 import com.navi.flight.domain.SeatClass;
 
+import com.navi.flight.dto.FlightDetailResponseDTO;
+import com.navi.flight.dto.FlightSearchRequestDTO;
 import com.navi.flight.repository.FlightRepository;
 import com.navi.flight.repository.SeatRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -53,5 +65,31 @@ public class FlightServiceImpl implements FlightService{
         }
 
         seat.setReserved(true);
+    }
+
+    @Override
+    public List<FlightDetailResponseDTO> searchFlights(FlightSearchRequestDTO requestDTO) {
+        LocalDate depDate = LocalDate.parse(requestDTO.getDepDate(), DateTimeFormatter.ISO_DATE);
+
+        return flightRepository.findAll().stream()
+                .filter(f -> f.getDepAirportNm().equals(requestDTO.getDepAirportNm()))
+                .filter(f -> f.getArrAirportNm().equals(requestDTO.getArrAirportNm()))
+                .filter(f -> f.getId().getDepTime().toLocalDate().equals(depDate))
+                .map(f -> {
+                    int price = requestDTO.getSeatClass().equalsIgnoreCase("ECONOMY")
+                            ? f.getEconomyCharge() : f.getPrestigeCharge() != null ? f.getPrestigeCharge() : 0;
+
+                    return FlightDetailResponseDTO.builder()
+                            .flightNo(f.getId().getFlightId())
+                            .airlineNm(f.getAirlineNm())
+                            .depAirportNm(f.getDepAirportNm())
+                            .arrAirportNm(f.getArrAirportNm())
+                            .depTime(f.getId().getDepTime())
+                            .arrTime(f.getArrTime())
+                            .price(price)
+                            .seatClass(requestDTO.getSeatClass().toUpperCase())
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 }

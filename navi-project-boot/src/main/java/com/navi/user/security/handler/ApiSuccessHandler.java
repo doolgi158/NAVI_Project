@@ -1,11 +1,12 @@
 package com.navi.user.security.handler;
 
 import com.google.gson.Gson;
+import com.navi.common.util.CustomException;
 import com.navi.user.dto.UserDTO;
+import com.navi.user.security.util.JWTUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
@@ -13,15 +14,17 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Map;
 
-@Slf4j
 public class ApiSuccessHandler implements AuthenticationSuccessHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         UserDTO userDTO = (UserDTO) authentication.getPrincipal();
         Map<String, Object> claims = userDTO.getClaims();
 
-        claims.put("accessToken", "");
-        claims.put("refreshToken", "");
+        String accessToken = JWTUtil.generateToken(claims, 10);
+        String refreshToken = JWTUtil.generateToken(claims, 60 * 24);
+
+        claims.put("accessToken", accessToken);
+        claims.put("refreshToken", refreshToken);
 
         Gson gson = new Gson();
         String jsonStr = gson.toJson(claims);
