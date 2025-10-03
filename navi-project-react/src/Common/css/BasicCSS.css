@@ -1,3 +1,32 @@
 body{
     background-color: #faf9f6;
 }
+
+/* 모달 배경 (어두운 배경) */
+.ant-modal-mask {
+  animation: fadeIn 0.3s ease forwards;
+}
+
+/* 모달 콘텐츠 */
+.ant-modal-content {
+  animation: zoomInCenter 0.3s ease forwards;
+  transform-origin: center center !important;
+}
+
+/* 페이드 인 효과 */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* 가운데에서 점점 커지고 선명해지는 효과 */
+@keyframes zoomInCenter {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
