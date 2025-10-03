@@ -1,4 +1,4 @@
-import MainLayout from "./MainLayout";
+import MainLayout from "../layout/MainLayout";
 
 const TravelPage = () => {
     const travelItems = [1, 2, 3, 4, 5];

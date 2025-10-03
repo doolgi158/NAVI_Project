@@ -1,9 +1,13 @@
 package com.navi.user;
 
+import com.navi.user.dto.users.UserRequestDTO;
+import com.navi.user.dto.users.UserResponseDTO;
 import com.navi.user.enums.UserRole;
 import com.navi.user.enums.UserState;
 import com.navi.user.domain.User;
 import com.navi.user.repository.UserRepository;
+import com.navi.user.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.security.SecureRandom;
 import java.util.Random;
 
+@Slf4j
 @SpringBootTest
 public class UserTest {
     @Autowired
@@ -19,6 +24,9 @@ public class UserTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private UserService userService;
 
     // 관리자 만들기
     @Test
@@ -47,7 +55,7 @@ public class UserTest {
         StringBuilder password = new StringBuilder();
         UserState[] values = UserState.values();
 
-        for(int i = 0; i <= 100; i++) {
+        for(int i = 101; i <= 1000; i++) {
             for (int j = 0; j < 8; j++) {
                 phone.append(random.nextInt(10));
             }
@@ -76,4 +84,12 @@ public class UserTest {
             password.setLength(0);
         }
     }
+
+    @Test
+    public void testGet() {
+        Long no = 65L;
+        UserResponseDTO userResponseDTO = userService.get(no);
+        log.info("데이터: {}", userResponseDTO);
+    }
+
 }

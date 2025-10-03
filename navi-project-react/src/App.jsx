@@ -1,9 +1,10 @@
 import { RouterProvider } from 'react-router-dom';
 import root from "./router/root.jsx";
 
-export default function App() {
+function App() {
   return (
     <RouterProvider router={root}/>
   );
-};
+}
 
+export default App

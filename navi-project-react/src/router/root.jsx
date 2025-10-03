@@ -3,7 +3,7 @@ import { createBrowserRouter } from "react-router-dom";
 
 const Loading = <div>Loading...</div>
 const UserMain = lazy(() => import("../users/pages/UserMainPage.jsx"))
-const Users = lazy(() => import("../users/pages/UsersPage.jsx"))
+const AdminUsers = lazy(() => import("../admin/pages/AdminUsersPage.jsx"))
 const AdminDashboard = lazy(() => import("../admin/pages/AdminDashboardPage.jsx"))
 
 const root = createBrowserRouter([
@@ -17,8 +17,8 @@ const root = createBrowserRouter([
     },
     {
         path: "/adm/users",
-        element: <Suspense fallback={Loading}><Users /></Suspense>
-    }
+        element: <Suspense fallback={Loading}><AdminUsers /></Suspense>
+    },
 ]);
 
 export default root;
