@@ -1,0 +1,510 @@
+{
+  "response": {
+    "body": {
+      "items": {
+        "item": [
+          {
+            "airlineNm": "진에어",
+            "arrAirportNm": "제주",
+            "arrPlandTime": 202510020710,
+            "depAirportNm": "여수",
+            "depPlandTime": 202510020600,
+            "economyCharge": 100637,
+            "prestigeCharge": 202696,
+            "vihicleId": "LJ2242"
+          },
+          {
+            "airlineNm": "티웨이항공",
+            "arrAirportNm": "부산",
+            "arrPlandTime": 202510020827,
+            "depAirportNm": "제주",
+            "depPlandTime": 202510020700,
+            "economyCharge": 51863,
+            "prestigeCharge": 263472,
+            "vihicleId": "TW7522"
+          },
+          {
+            "airlineNm": "아시아나항공",
+            "arrAirportNm": "여수",
+            "arrPlandTime": 202510020930,
+            "depAirportNm": "청주",
+            "depPlandTime": 202510020800,
+            "economyCharge": 75331,
+            "prestigeCharge": 255150,
+            "vihicleId": "OZ3242"
+          },
+          {
+            "airlineNm": "대한항공",
+            "arrAirportNm": "김포",
+            "arrPlandTime": 202510021031,
+            "depAirportNm": "제주",
+            "depPlandTime": 202510020900,
+            "economyCharge": 110366,
+            "prestigeCharge": 270531,
+            "vihicleId": "KE3106"
+          },
+          {
+            "airlineNm": "티웨이항공",
+            "arrAirportNm": "청주",
+            "arrPlandTime": 202510021159,
+            "depAirportNm": "부산",
+            "depPlandTime": 202510021000,
+            "economyCharge": 61751,
+            "prestigeCharge": 270634,
+            "vihicleId": "TW6589"
+          },
+          {
+            "airlineNm": "티웨이항공",
+            "arrAirportNm": "여수",
+            "arrPlandTime": 202510021207,
+            "depAirportNm": "대구",
+            "depPlandTime": 202510021100,
+            "economyCharge": 91943,
+            "prestigeCharge": 0,
+            "vihicleId": "TW4067"
+          },
+          {
+            "airlineNm": "티웨이항공",
+            "arrAirportNm": "무안",
+            "arrPlandTime": 202510021355,
+            "depAirportNm": "광주",
+            "depPlandTime": 202510021200,
+            "economyCharge": 67943,
+            "prestigeCharge": 233034,
+            "vihicleId": "TW1737"
+          },
+          {
+            "airlineNm": "아시아나항공",
+            "arrAirportNm": "여수",
+            "arrPlandTime": 202510021456,
+            "depAirportNm": "무안",
+            "depPlandTime": 202510021300,
+            "economyCharge": 119794,
+            "prestigeCharge": 0,
+            "vihicleId": "OZ1110"
+          },
+          {
+            "airlineNm": "아시아나항공",
+            "arrAirportNm": "제주",
+            "arrPlandTime": 202510021555,
+            "depAirportNm": "부산",
+            "depPlandTime": 202510021400,
+            "economyCharge": 86735,
+            "prestigeCharge": 298276,
+            "vihicleId": "OZ1155"
+          },
+          {
+            "airlineNm": "제주항공",
+            "arrAirportNm": "광주",
+            "arrPlandTime": 202510021605,
+            "depAirportNm": "김포",
+            "depPlandTime": 202510021500,
+            "economyCharge": 106625,
+            "prestigeCharge": 0,
+            "vihicleId": "7C7477"
+          },
+          {
+            "airlineNm": "제주항공",
+            "arrAirportNm": "광주",
+            "arrPlandTime": 202510021701,
+            "depAirportNm": "여수",
+            "depPlandTime": 202510021600,
+            "economyCharge": 94707,
+            "prestigeCharge": 248398,
+            "vihicleId": "7C1509"
+          },
+          {
+            "airlineNm": "진에어",
+            "arrAirportNm": "제주",
+            "arrPlandTime": 202510021844,
+            "depAirportNm": "광주",
+            "depPlandTime": 202510021700,
+            "economyCharge": 105203,
+            "prestigeCharge": 208775,
+            "vihicleId": "LJ9910"
+          },
+          {
+            "airlineNm": "대한항공",
+            "arrAirportNm": "여수",
+            "arrPlandTime": 202510021958,
+            "depAirportNm": "청주",
+            "depPlandTime": 202510021800,
+            "economyCharge": 73428,
+            "prestigeCharge": 158395,
+            "vihicleId": "KE2670"
+          },
+          {
+            "airlineNm": "대한항공",
+            "arrAirportNm": "청주",
+            "arrPlandTime": 202510022000,
+            "depAirportNm": "김포",
+            "depPlandTime": 202510021900,
+            "economyCharge": 111241,
+            "prestigeCharge": 0,
+            "vihicleId": "KE727"
+          },
+          {
+            "airlineNm": "제주항공",
+            "arrAirportNm": "부산",
+            "arrPlandTime": 202510022140,
+            "depAirportNm": "여수",
+            "depPlandTime": 202510022000,
+            "economyCharge": 88993,
+            "prestigeCharge": 199348,
+            "vihicleId": "7C3516"
+          },
+          {
+            "airlineNm": "진에어",
+            "arrAirportNm": "청주",
+            "arrPlandTime": 202510022254,
+            "depAirportNm": "대구",
+            "depPlandTime": 202510022100,
+            "economyCharge": 65994,
+            "prestigeCharge": 251730,
+            "vihicleId": "LJ8808"
+          },
+          {
+            "airlineNm": "대한항공",
+            "arrAirportNm": "제주",
+            "arrPlandTime": 202510022345,
+            "depAirportNm": "청주",
+            "depPlandTime": 202510022200,
+            "economyCharge": 94285,
+            "prestigeCharge": 292055,
+            "vihicleId": "KE8481"
+          },
+          {
+            "airlineNm": "아시아나항공",
+            "arrAirportNm": "김포",
+            "arrPlandTime": 202510030037,
+            "depAirportNm": "부산",
+            "depPlandTime": 202510022300,
+            "economyCharge": 76521,
+            "prestigeCharge": 0,
+            "vihicleId": "OZ8745"
+          },
+          {
+            "airlineNm": "대한항공",
+            "arrAirportNm": "여수",
+            "arrPlandTime": 202510030121,
+            "depAirportNm": "김포",
+            "depPlandTime": 202510030000,
+            "economyCharge": 90339,
+            "prestigeCharge": 0,
+            "vihicleId": "KE2349"
+          },
+          {
+            "airlineNm": "티웨이항공",
+            "arrAirportNm": "대구",
+            "arrPlandTime": 202510030230,
+            "depAirportNm": "제주",
+            "depPlandTime": 202510030100,
+            "economyCharge": 86715,
+            "prestigeCharge": 0,
+            "vihicleId": "TW3639"
+          },
+          {
+            "airlineNm": "진에어",
+            "arrAirportNm": "청주",
+            "arrPlandTime": 202510030323,
+            "depAirportNm": "김포",
+            "depPlandTime": 202510030200,
+            "economyCharge": 70206,
+            "prestigeCharge": 0,
+            "vihicleId": "LJ2612"
+          },
+          {
+            "airlineNm": "제주항공",
+            "arrAirportNm": "청주",
+            "arrPlandTime": 202510030408,
+            "depAirportNm": "여수",
+            "depPlandTime": 202510030300,
+            "economyCharge": 91367,
+            "prestigeCharge": 192928,
+            "vihicleId": "7C238"
+          },
+          {
+            "airlineNm": "대한항공",
+            "arrAirportNm": "제주",
+            "arrPlandTime": 202510030522,
+            "depAirportNm": "무안",
+            "depPlandTime": 202510030400,
+            "economyCharge": 71540,
+            "prestigeCharge": 264590,
+            "vihicleId": "KE9317"
+          },
+          {
+            "airlineNm": "대한항공",
+            "arrAirportNm": "부산",
+            "arrPlandTime": 202510030656,
+            "depAirportNm": "광주",
+            "depPlandTime": 202510030500,
+            "economyCharge": 98071,
+            "prestigeCharge": 299799,
+            "vihicleId": "KE1970"
+          },
+          {
+            "airlineNm": "티웨이항공",
+            "arrAirportNm": "무안",
+            "arrPlandTime": 202510030702,
+            "depAirportNm": "제주",
+            "depPlandTime": 202510030600,
+            "economyCharge": 100082,
+            "prestigeCharge": 0,
+            "vihicleId": "TW643"
+          },
+          {
+            "airlineNm": "진에어",
+            "arrAirportNm": "김포",
+            "arrPlandTime": 202510030827,
+            "depAirportNm": "광주",
+            "depPlandTime": 202510030700,
+            "economyCharge": 59199,
+            "prestigeCharge": 0,
+            "vihicleId": "LJ1217"
+          },
+          {
+            "airlineNm": "제주항공",
+            "arrAirportNm": "청주",
+            "arrPlandTime": 202510030906,
+            "depAirportNm": "광주",
+            "depPlandTime": 202510030800,
+            "economyCharge": 79686,
+            "prestigeCharge": 271965,
+            "vihicleId": "7C956"
+          },
+          {
+            "airlineNm": "대한항공",
+            "arrAirportNm": "무안",
+            "arrPlandTime": 202510031041,
+            "depAirportNm": "여수",
+            "depPlandTime": 202510030900,
+            "economyCharge": 60919,
+            "prestigeCharge": 0,
+            "vihicleId": "KE2947"
+          },
+          {
+            "airlineNm": "아시아나항공",
+            "arrAirportNm": "광주",
+            "arrPlandTime": 202510031146,
+            "depAirportNm": "무안",
+            "depPlandTime": 202510031000,
+            "economyCharge": 100538,
+            "prestigeCharge": 265381,
+            "vihicleId": "OZ3901"
+          },
+          {
+            "airlineNm": "아시아나항공",
+            "arrAirportNm": "광주",
+            "arrPlandTime": 202510031212,
+            "depAirportNm": "청주",
+            "depPlandTime": 202510031100,
+            "economyCharge": 81734,
+            "prestigeCharge": 185947,
+            "vihicleId": "OZ8164"
+          },
+          {
+            "airlineNm": "진에어",
+            "arrAirportNm": "부산",
+            "arrPlandTime": 202510031312,
+            "depAirportNm": "여수",
+            "depPlandTime": 202510031200,
+            "economyCharge": 100298,
+            "prestigeCharge": 174365,
+            "vihicleId": "LJ5987"
+          },
+          {
+            "airlineNm": "대한항공",
+            "arrAirportNm": "부산",
+            "arrPlandTime": 202510031417,
+            "depAirportNm": "광주",
+            "depPlandTime": 202510031300,
+            "economyCharge": 116708,
+            "prestigeCharge": 219255,
+            "vihicleId": "KE9041"
+          },
+          {
+            "airlineNm": "제주항공",
+            "arrAirportNm": "대구",
+            "arrPlandTime": 202510031558,
+            "depAirportNm": "무안",
+            "depPlandTime": 202510031400,
+            "economyCharge": 97092,
+            "prestigeCharge": 0,
+            "vihicleId": "7C5150"
+          },
+          {
+            "airlineNm": "아시아나항공",
+            "arrAirportNm": "청주",
+            "arrPlandTime": 202510031638,
+            "depAirportNm": "부산",
+            "depPlandTime": 202510031500,
+            "economyCharge": 85307,
+            "prestigeCharge": 179323,
+            "vihicleId": "OZ6900"
+          },
+          {
+            "airlineNm": "티웨이항공",
+            "arrAirportNm": "제주",
+            "arrPlandTime": 202510031709,
+            "depAirportNm": "무안",
+            "depPlandTime": 202510031600,
+            "economyCharge": 99009,
+            "prestigeCharge": 0,
+            "vihicleId": "TW5539"
+          },
+          {
+            "airlineNm": "대한항공",
+            "arrAirportNm": "여수",
+            "arrPlandTime": 202510031805,
+            "depAirportNm": "김포",
+            "depPlandTime": 202510031700,
+            "economyCharge": 95717,
+            "prestigeCharge": 153135,
+            "vihicleId": "KE8111"
+          },
+          {
+            "airlineNm": "아시아나항공",
+            "arrAirportNm": "여수",
+            "arrPlandTime": 202510031912,
+            "depAirportNm": "제주",
+            "depPlandTime": 202510031800,
+            "economyCharge": 118670,
+            "prestigeCharge": 158778,
+            "vihicleId": "OZ5473"
+          },
+          {
+            "airlineNm": "제주항공",
+            "arrAirportNm": "대구",
+            "arrPlandTime": 202510032024,
+            "depAirportNm": "부산",
+            "depPlandTime": 202510031900,
+            "economyCharge": 61925,
+            "prestigeCharge": 169663,
+            "vihicleId": "7C3346"
+          },
+          {
+            "airlineNm": "아시아나항공",
+            "arrAirportNm": "여수",
+            "arrPlandTime": 202510032124,
+            "depAirportNm": "대구",
+            "depPlandTime": 202510032000,
+            "economyCharge": 83184,
+            "prestigeCharge": 202811,
+            "vihicleId": "OZ3556"
+          },
+          {
+            "airlineNm": "아시아나항공",
+            "arrAirportNm": "광주",
+            "arrPlandTime": 202510032238,
+            "depAirportNm": "무안",
+            "depPlandTime": 202510032100,
+            "economyCharge": 68706,
+            "prestigeCharge": 200097,
+            "vihicleId": "OZ8644"
+          },
+          {
+            "airlineNm": "티웨이항공",
+            "arrAirportNm": "여수",
+            "arrPlandTime": 202510032329,
+            "depAirportNm": "무안",
+            "depPlandTime": 202510032200,
+            "economyCharge": 59091,
+            "prestigeCharge": 0,
+            "vihicleId": "TW6740"
+          },
+          {
+            "airlineNm": "아시아나항공",
+            "arrAirportNm": "무안",
+            "arrPlandTime": 202510040030,
+            "depAirportNm": "청주",
+            "depPlandTime": 202510032300,
+            "economyCharge": 62405,
+            "prestigeCharge": 270585,
+            "vihicleId": "OZ8149"
+          },
+          {
+            "airlineNm": "진에어",
+            "arrAirportNm": "제주",
+            "arrPlandTime": 202510040111,
+            "depAirportNm": "광주",
+            "depPlandTime": 202510040000,
+            "economyCharge": 85588,
+            "prestigeCharge": 160220,
+            "vihicleId": "LJ5896"
+          },
+          {
+            "airlineNm": "티웨이항공",
+            "arrAirportNm": "무안",
+            "arrPlandTime": 202510040236,
+            "depAirportNm": "대구",
+            "depPlandTime": 202510040100,
+            "economyCharge": 51111,
+            "prestigeCharge": 0,
+            "vihicleId": "TW3913"
+          },
+          {
+            "airlineNm": "티웨이항공",
+            "arrAirportNm": "무안",
+            "arrPlandTime": 202510040321,
+            "depAirportNm": "대구",
+            "depPlandTime": 202510040200,
+            "economyCharge": 99284,
+            "prestigeCharge": 0,
+            "vihicleId": "TW7199"
+          },
+          {
+            "airlineNm": "티웨이항공",
+            "arrAirportNm": "제주",
+            "arrPlandTime": 202510040452,
+            "depAirportNm": "여수",
+            "depPlandTime": 202510040300,
+            "economyCharge": 52272,
+            "prestigeCharge": 223025,
+            "vihicleId": "TW9007"
+          },
+          {
+            "airlineNm": "아시아나항공",
+            "arrAirportNm": "무안",
+            "arrPlandTime": 202510040524,
+            "depAirportNm": "부산",
+            "depPlandTime": 202510040400,
+            "economyCharge": 114015,
+            "prestigeCharge": 297911,
+            "vihicleId": "OZ8030"
+          },
+          {
+            "airlineNm": "진에어",
+            "arrAirportNm": "청주",
+            "arrPlandTime": 202510040632,
+            "depAirportNm": "여수",
+            "depPlandTime": 202510040500,
+            "economyCharge": 57660,
+            "prestigeCharge": 290647,
+            "vihicleId": "LJ2994"
+          },
+          {
+            "airlineNm": "진에어",
+            "arrAirportNm": "무안",
+            "arrPlandTime": 202510040729,
+            "depAirportNm": "김포",
+            "depPlandTime": 202510040600,
+            "economyCharge": 60763,
+            "prestigeCharge": 0,
+            "vihicleId": "LJ1555"
+          },
+          {
+            "airlineNm": "대한항공",
+            "arrAirportNm": "무안",
+            "arrPlandTime": 202510040829,
+            "depAirportNm": "부산",
+            "depPlandTime": 202510040700,
+            "economyCharge": 110757,
+            "prestigeCharge": 0,
+            "vihicleId": "KE8557"
+          }
+        ]
+      }
+    }
+  }
+}
