@@ -3,11 +3,10 @@ package com.navi.user.dto.users;
 import com.navi.user.enums.UserState;
 import lombok.*;
 
-@ToString
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class UserResponseDTO {
     private long no;                // 사용자 번호
     private String name;            // 이름

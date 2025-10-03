@@ -1,14 +1,14 @@
 package com.navi.user.dto.users;
 
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
-@ToString
-@Getter
-@Setter
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class UserRequestDTO {
+    private Long no;                // 사용자 번호
     private String name;            // 이름
     private String phone;           // 전화번호
     private String birth;           // 생년월일
