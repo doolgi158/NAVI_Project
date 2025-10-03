@@ -16,9 +16,9 @@ public class AccRequestDTO {    /* 숙소 등록, 수정 요청 */
     private String tel;
     private String address;
     private String overview;
-    private String checkIn;
-    private String checkOut;
+    private String checkInTime;
+    private String checkOutTime;
     private Boolean hasCooking;
     private Boolean hasParking;
-    private Boolean isActive;
+    private boolean isActive;
 }
