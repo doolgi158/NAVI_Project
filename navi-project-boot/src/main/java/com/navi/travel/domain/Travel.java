@@ -8,6 +8,7 @@ import lombok.*;
 import java.math.BigDecimal;
 
 @Getter
+@Setter
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
@@ -63,11 +64,11 @@ public class Travel extends BaseEntity { //등록일 수정일 자동생성 상�
     private String tags;    // 태그정보
 
     // GPS 좌표
-    @Column(name = "MAPX", precision = 10, scale = 7, columnDefinition = "NUMBER(10, 7)")
-    private BigDecimal mapX; // 경도
+    @Column(name = "longitude", precision = 10, scale = 7, columnDefinition = "NUMBER(10, 7)")
+    private BigDecimal longitude; // 경도
 
-    @Column(name = "MAPY", precision = 10, scale = 7, columnDefinition = "NUMBER(10, 7)")
-    private BigDecimal mapY; // 위도
+    @Column(name = "latitude", precision = 10, scale = 7, columnDefinition = "NUMBER(10, 7)")
+    private BigDecimal latitude; // 위도
 
     // 지역 코드 정보
     @Column(name = "REGION1_CD", length = 10)
@@ -128,8 +129,8 @@ public class Travel extends BaseEntity { //등록일 수정일 자동생성 상�
         this.zipcode = newTravel.zipcode;
         this.tel = newTravel.tel;
         this.tags = newTravel.tags;
-        this.mapX = newTravel.mapX;
-        this.mapY = newTravel.mapY;
+        this.longitude = newTravel.longitude;
+        this.latitude = newTravel.latitude;
         this.contentsCd = newTravel.contentsCd;
         this.categoryName = newTravel.categoryName;
         this.categoryRefId = newTravel.categoryRefId;

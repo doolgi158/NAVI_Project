@@ -1,5 +1,6 @@
 package com.navi.travel;
 
+import com.navi.travel.domain.Travel;
 import com.navi.travel.repository.TravelRepository;
 import com.navi.travel.service.TravelApiService;
 import lombok.extern.slf4j.Slf4j;
@@ -7,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -48,5 +51,13 @@ public class TravelTests {
 
         System.out.println("--- [테스트 완료: DB 자동 롤백] ---");
 
+    }
+
+    @Test
+    public void testRead() {
+        Long travelId = 302L;
+        Optional<Travel> result = travelRepository.findById(travelId);
+        Travel travel = result.orElseThrow();
+        log.info("데이터 조회 : {}",travel);
     }
 }

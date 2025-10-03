@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import javax.swing.text.html.Option;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
@@ -33,6 +34,60 @@ public class TravelApiServiceImpl implements TravelApiService {
     private final TravelRepository travelRepository;
     private final ModelMapper modelMapper;  //DTO와 엔티티간의 매핑 담당 객체 선언
     private final RestTemplate restTemplate;
+
+    // DTO → Entity
+    @Override
+    public Long register(TravelApiItemDTO travelApiItemDTO) {   //Travel 생성 기능 정의
+        Travel travel = modelMapper.map(travelApiItemDTO, Travel.class);   //Travel 항목 조회 기능 정의
+        Travel savedTravel = travelRepository.save(travel); //INSERT 쿼리 실행
+        return savedTravel.getTravelId();   //클라이언트에게 새로 생성된 항목의 id리턴
+    }
+
+    @Override
+    public TravelApiItemDTO get(Long travelId){
+        Optional<Travel> result = travelRepository.findById(travelId);
+        Travel travel = result.orElseThrow();
+        TravelApiItemDTO dto = modelMapper.map(travel, TravelApiItemDTO.class);
+
+        return dto;
+    }
+
+    //수정
+    @Override
+    public void modify(TravelApiItemDTO travelApiItemDTO) {
+
+        // ID로 기존 엔티티 조회 (존재하지 않으면 예외 발생)
+        Optional<Travel> result = travelRepository.findById(travelApiItemDTO.getTravelId());
+        Travel travel = result.orElseThrow(() ->
+                new RuntimeException("해당 ID(" + travelApiItemDTO.getTravelId() + ")의 여행지 정보를 찾을 수 없습니다.")
+        );
+
+        // DTO -> 임시 Travel 엔티티 변환 (ModelMapper 사용)
+        Travel newTravelData = modelMapper.map(travelApiItemDTO, Travel.class);
+
+
+        // 엔티티의 '일괄 수정' 메서드 호출
+        travel.updateFromApi(newTravelData);
+
+        //DB반영
+        travelRepository.save(travel);
+    }
+
+    //삭제
+    @Override
+    public void remove(Long travelId) {
+
+        // travelId로 해당 엔티티가 존재하는지 먼저 확인합니다.
+        Optional<Travel> result = travelRepository.findById(travelId);
+
+        // 만약 결과가 비어있다면(isEmtpy), 예외처리
+        result.orElseThrow(() ->
+                new IllegalArgumentException("삭제하려는 여행지 정보 (ID: " + travelId + ")를 찾을 수 없습니다.")
+        );
+
+        // 엔티티가 존재시 삭제를 진행합니다.
+        travelRepository.deleteById(travelId);
+    }
 
     // API 호출 및 데이터 저장 로직 (페이지 번호를 이용한 페이징 처리)
     @Override
@@ -218,14 +273,8 @@ public class TravelApiServiceImpl implements TravelApiService {
         return Optional.of(entity);
     }
 
-    @Override
-    public Long register(TravelApiItemDTO travelApiItemDTO) {   //Travel 생성 기능 정의
-        Travel travel = modelMapper.map(travelApiItemDTO, Travel.class);   //Travel 항목 조회 기능 정의
-        Travel savedTravel = travelRepository.save(travel); //INSERT 쿼리 실행
-        return savedTravel.getTravelId();   //클라이언트에게 새로 생성된 항목의 id리턴
-    }
 
-    // 🌟🌟🌟 DB에서 페이징 처리된 목록을 조회하고 DTO로 변환하는 메서드 추가 🌟🌟🌟
+    // DB에서 페이징 처리된 목록을 조회하고 DTO로 변환하는 메서드 추가
     @Override
     @Transactional(readOnly = true) // 읽기 전용으로 설정
     public ListResponseDTO<TravelApiItemDTO> getList(int page, int size) {
@@ -286,5 +335,4 @@ public class TravelApiServiceImpl implements TravelApiService {
                 .pageNumList(pageNumList)
                 .build();
     }
-
  }

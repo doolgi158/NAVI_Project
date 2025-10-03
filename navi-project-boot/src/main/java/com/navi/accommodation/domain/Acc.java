@@ -54,7 +54,7 @@ public class Acc {
     @Column(columnDefinition = "NVARCHAR2(10)", nullable = false)
     private String category;
 
-    @Column(length = 20)
+    @Column(length = 50)
     private String tel;
 
     @Column(name = "township_id", nullable = false)

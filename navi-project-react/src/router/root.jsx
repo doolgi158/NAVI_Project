@@ -6,9 +6,7 @@ import travelRouter from "./travelRouter"
 const Loading = <div>Loading...</div>
 const Main = lazy(() => import("../pages/MainPage.jsx"))
 const Travel = lazy(() => import("../pages/TravelPage.jsx"))
-const Flight = lazy(() => import("../pages/FlightPage.jsx"))
-const FlightDetail = lazy(() => import("../pages/FlightDetailPage.jsx"))
-const FlightRsv = lazy(() => import("../pages/FlightRsvInputPage.jsx"))
+
 
 const root = createBrowserRouter([
     {
@@ -20,18 +18,7 @@ const root = createBrowserRouter([
         element: <Suspense fallback={Loading}><Travel /></Suspense>,
         children: travelRouter()
     },
-    {
-        path: "flight",
-        element: <Suspense fallback={Loading}><Flight /></Suspense>
-    },
-    {
-        path: "flight/:id",
-        element: <Suspense fallback={Loading}><FlightDetail /></Suspense>
-    },
-    {
-        path: "flight/:id/rsv",
-        element: <Suspense fallback={Loading}><FlightRsv /></Suspense>
-    },
+    
 ]);
 
 export default root;
