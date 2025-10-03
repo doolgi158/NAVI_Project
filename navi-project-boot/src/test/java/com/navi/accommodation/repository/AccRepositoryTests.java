@@ -20,10 +20,11 @@ public class AccRepositoryTests {
     @Test
     public void accInsertTest() {
         Acc acc = Acc.builder()
+                .accId("TESTID")
                 .title("제주 선샤인 호텔")
                 .category("호텔")
                 .tel("064-123-4567")
-                .townshipId(1) // 임시 세팅
+                .townshipId(1) // 시스템/테스트에서 직접 값 세팅
                 .address("제주특별자치도 제주시 애월읍 123-45")
                 .mapx(new BigDecimal("126.5432100"))
                 .mapy(new BigDecimal("33.1234567"))
@@ -40,22 +41,30 @@ public class AccRepositoryTests {
     }
 
     @Test
+    public void accDeleteTest() {
+        accRepository.deleteById(1L);
+        log.info("NAVI_ACCOMMODATION 테이블 데이터 삭제 완료");
+    }
+
+    @Test
     public void accUpdateTest() {
         Optional<Acc> accOptional = accRepository.findById(1L);
         if(accOptional.isPresent()) {
             Acc acc = accOptional.get();
-            AccRequestDTO dto = AccRequestDTO.builder()
-                    .title("업데이트 후 호텔")
-                    .build();
-            acc.changeFromRequestDTO(dto);
+//            acc.changeTitle("TEST 호텔");
+
+            log.info("NAVI_ACCOMMODATION 테이블 데이터 수정");
             accRepository.save(acc);
-            log.info("NAVI_ACCOMMODATION 테이블 데이터 수정 완료");
         }
     }
 
+    // 데이터 들어가는지 임시 확인
+    @Autowired
+    private AccService accService;
+
     @Test
-    public void accDeleteTest() {
-        accRepository.deleteById(1L);
-        log.info("NAVI_ACCOMMODATION 테이블 데이터 삭제 완료");
+    public void loadFromJsonFileTest() throws Exception {
+        accService.loadFromJsonFile();
+        log.info("✅ JSON 데이터 DB 적재 완료");
     }
 }

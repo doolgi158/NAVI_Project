@@ -8,1146 +8,1146 @@
       "items": [
         {
           "item": {
-            "contentid": "1",
+            "contentid": 1,
             "title": "예래펜션",
             "addr1": "제주특별자치도 서귀포시 예래해안로 527(상예동)",
             "addr2": "",
             "zipcode": "63536",
             "tel": "010-9744-7768",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4002560434",
-            "mapy": "33.2539916775",
+            "mapx": 126.4002560434,
+            "mapy": 33.2539916775,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "2",
+            "contentid": 2,
             "title": "썬랜드 호텔",
             "addr1": "제주특별자치도 제주시 신광로 92",
             "addr2": "",
             "zipcode": "63132",
             "tel": "064-744-1601~2",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4895708953",
-            "mapy": "33.4839982207",
+            "mapx": 126.4895708953,
+            "mapy": 33.4839982207,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "3",
+            "contentid": 3,
             "title": "신세계호텔",
             "addr1": "제주특별자치도 서귀포시 중앙로 2-2",
             "addr2": "",
             "zipcode": "63595",
             "tel": "064-732-5800",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.5623172",
-            "mapy": "33.2447147065",
+            "mapx": 126.5623172,
+            "mapy": 33.2447147065,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "4",
+            "contentid": 4,
             "title": "토비스콘도 제주",
             "addr1": "제주특별자치도 제주시 애월읍 애월로1길 8",
             "addr2": "",
             "zipcode": "63043",
             "tel": "",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.3117312768",
-            "mapy": "33.4631615996",
+            "mapx": 126.3117312768,
+            "mapy": 33.4631615996,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "5",
+            "contentid": 5,
             "title": "서귀포 귤림성",
             "addr1": "제주특별자치도 서귀포시 일주동로 8941",
             "addr2": "",
             "zipcode": "63571",
             "tel": "064-739-3331",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.5360193536",
-            "mapy": "33.2503192271",
+            "mapx": 126.5360193536,
+            "mapy": 33.2503192271,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "6",
+            "contentid": 6,
             "title": "제주 금강산콘도",
             "addr1": "제주특별자치도 제주시 한림읍 협재로 210-18",
             "addr2": "",
             "zipcode": "63015",
             "tel": "064-795-7800",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.2502662709",
-            "mapy": "33.3795865508",
+            "mapx": 126.2502662709,
+            "mapy": 33.3795865508,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "7",
+            "contentid": 7,
             "title": "라운지하우스 제주다",
             "addr1": "제주특별자치도 서귀포시 안덕면 사계남로50번길 60",
             "addr2": "",
             "zipcode": "63528",
             "tel": "064-792-5670",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.2926827266",
-            "mapy": "33.2232794901",
+            "mapx": 126.2926827266,
+            "mapy": 33.2232794901,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "8",
+            "contentid": 8,
             "title": "티파니에서 아침을",
             "addr1": "제주특별자치도 서귀포시 남원읍 서의로154번길 12",
             "addr2": "",
             "zipcode": "63618",
             "tel": "",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.7121611922",
-            "mapy": "33.3050159945",
+            "mapx": 126.7121611922,
+            "mapy": 33.3050159945,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "9",
+            "contentid": 9,
             "title": "청재설헌",
             "addr1": "제주특별자치도 서귀포시 인정오름로 135-18",
             "addr2": "",
             "zipcode": "63580",
             "tel": "064-732-2020",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.5717570498",
-            "mapy": "33.2891599519",
+            "mapx": 126.5717570498,
+            "mapy": 33.2891599519,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "10",
+            "contentid": 10,
             "title": "귤익는마을",
             "addr1": "제주특별자치도 서귀포시 성산읍 신천서로 11",
             "addr2": "",
             "zipcode": "63637",
             "tel": "064-787-0543",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.8501205782",
-            "mapy": "33.3441111157",
+            "mapx": 126.8501205782,
+            "mapy": 33.3441111157,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "11",
+            "contentid": 11,
             "title": "그림리조트",
             "addr1": "제주특별자치도 제주시 서해안로 620-1(용담삼동)",
             "addr2": "",
             "zipcode": "63150",
             "tel": "064-713-0002",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.5034939547",
-            "mapy": "33.5162143194",
+            "mapx": 126.5034939547,
+            "mapy": 33.5162143194,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "12",
+            "contentid": 12,
             "title": "제주목화휴양펜션",
             "addr1": "제주특별자치도 서귀포시 남원읍 태위로 485",
             "addr2": "",
             "zipcode": "63620",
             "tel": "064-702-4334",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.6994240677",
-            "mapy": "33.275813457",
+            "mapx": 126.6994240677,
+            "mapy": 33.275813457,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "13",
+            "contentid": 13,
             "title": "제주캐슬펜션",
             "addr1": "제주특별자치도 서귀포시 태평로92번길 36",
             "addr2": "",
             "zipcode": "63571",
             "tel": "010-9990-6780",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.5312505263",
-            "mapy": "33.24122571",
+            "mapx": 126.5312505263,
+            "mapy": 33.24122571,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "14",
+            "contentid": 14,
             "title": "이어도성 펜션",
             "addr1": "제주특별자치도 서귀포시 천제연로 113",
             "addr2": "",
             "zipcode": "63534",
             "tel": "064-738-0452",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4179350411",
-            "mapy": "33.2550779472",
+            "mapx": 126.4179350411,
+            "mapy": 33.2550779472,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "15",
+            "contentid": 15,
             "title": "비치스토리호텔",
             "addr1": "제주특별자치도 제주시 조함해안로 492-5",
             "addr2": "",
             "zipcode": "63333",
             "tel": "064-784-7400",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.6654098459",
-            "mapy": "33.5421529255",
+            "mapx": 126.6654098459,
+            "mapy": 33.5421529255,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "16",
+            "contentid": 16,
             "title": "제주 라임오렌지빌",
             "addr1": "제주특별자치도 서귀포시 칠십리로 332",
             "addr2": "",
             "zipcode": "63599",
             "tel": "064-767-3888",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.5872538945",
-            "mapy": "33.2462316012",
+            "mapx": 126.5872538945,
+            "mapy": 33.2462316012,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "17",
+            "contentid": 17,
             "title": "제주 그랑빌펜션",
             "addr1": "제주특별자치도 서귀포시 중문관광로 17",
             "addr2": "",
             "zipcode": "63534",
             "tel": "064-739-9994",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4152741309",
-            "mapy": "33.256419424",
+            "mapx": 126.4152741309,
+            "mapy": 33.256419424,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "18",
+            "contentid": 18,
             "title": "JJ하우스",
             "addr1": "제주특별자치도 서귀포시 중산간서로 241",
             "addr2": "",
             "zipcode": "63558",
             "tel": "064-739-7891",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4856512683",
-            "mapy": "33.2605478564",
+            "mapx": 126.4856512683,
+            "mapy": 33.2605478564,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "19",
+            "contentid": 19,
             "title": "마레보 비치호텔",
             "addr1": "제주특별자치도 제주시 곽지1길 23 마레보비치호텔",
             "addr2": "",
             "zipcode": "63034",
             "tel": "",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.304137829",
-            "mapy": "33.4481853609",
+            "mapx": 126.304137829,
+            "mapy": 33.4481853609,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "20",
+            "contentid": 20,
             "title": "제주 스위트호텔",
             "addr1": "제주특별자치도 서귀포시 중문관광로72번길 67",
             "addr2": "",
             "zipcode": "63535",
             "tel": "064-738-3800",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4083582278",
-            "mapy": "33.2490784581",
+            "mapx": 126.4083582278,
+            "mapy": 33.2490784581,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "21",
+            "contentid": 21,
             "title": "제주신라호텔",
             "addr1": "제주특별자치도 서귀포시 중문관광로72번길 75",
             "addr2": "",
             "zipcode": "63535",
             "tel": "064-735-5114",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4087304418",
-            "mapy": "33.2480035829",
+            "mapx": 126.4087304418,
+            "mapy": 33.2480035829,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "22",
+            "contentid": 22,
             "title": "씨에스 호텔&리조트",
             "addr1": "제주특별자치도 서귀포시 중문관광로 198",
             "addr2": "",
             "zipcode": "63547",
             "tel": "064-735-3000",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4198240376",
-            "mapy": "33.242918208",
+            "mapx": 126.4198240376,
+            "mapy": 33.242918208,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "23",
+            "contentid": 23,
             "title": "메종 글래드 제주",
             "addr1": "제주특별자치도 제주시 노연로 80",
             "addr2": "",
             "zipcode": "63132",
             "tel": "",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4889153601",
-            "mapy": "33.4856341402",
+            "mapx": 126.4889153601,
+            "mapy": 33.4856341402,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "24",
+            "contentid": 24,
             "title": "서귀포KAL호텔",
             "addr1": "제주특별자치도 서귀포시 칠십리로 242",
             "addr2": "",
             "zipcode": "63599",
             "tel": "064-733-2001",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.5808072727",
-            "mapy": "33.2443539282",
+            "mapx": 126.5808072727,
+            "mapy": 33.2443539282,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "25",
+            "contentid": 25,
             "title": "제주로얄호텔",
             "addr1": "제주특별자치도 제주시 신대로12길 45",
             "addr2": "",
             "zipcode": "63124",
             "tel": "064-743-2222",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4916706108",
-            "mapy": "33.4885171979",
+            "mapx": 126.4916706108,
+            "mapy": 33.4885171979,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "26",
+            "contentid": 26,
             "title": "하니크라운호텔",
             "addr1": "제주특별자치도 제주시 삼성로 10",
             "addr2": "",
             "zipcode": "63197",
             "tel": "010-2653-0324",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.5275532246",
-            "mapy": "33.5051714812",
+            "mapx": 126.5275532246,
+            "mapy": 33.5051714812,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "27",
+            "contentid": 27,
             "title": "제주 오리엔탈 호텔",
             "addr1": "제주특별자치도 제주시 탑동로 47",
             "addr2": "",
             "zipcode": "63166",
             "tel": "",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.5198091709",
-            "mapy": "33.5176172015",
+            "mapx": 126.5198091709,
+            "mapy": 33.5176172015,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "28",
+            "contentid": 28,
             "title": "제주 펄 관광호텔",
             "addr1": "제주특별자치도 제주시 신대로20길 49(연동)",
             "addr2": "",
             "zipcode": "63136",
             "tel": "064-742-8871",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4908985676",
-            "mapy": "33.4835927304",
+            "mapx": 126.4908985676,
+            "mapy": 33.4835927304,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "29",
+            "contentid": 29,
             "title": "롯데호텔 제주",
             "addr1": "제주특별자치도 서귀포시 중문관광로72번길 35",
             "addr2": "",
             "zipcode": "63535",
             "tel": "064-731-1000",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4105247144",
-            "mapy": "33.2487146442",
+            "mapx": 126.4105247144,
+            "mapy": 33.2487146442,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "30",
+            "contentid": 30,
             "title": "스타즈 호텔 제주 로베로(구 로베로호텔)",
             "addr1": "제주특별자치도 제주시 관덕로 26",
             "addr2": "",
             "zipcode": "63168",
             "tel": "010-7549-9737",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.5220229746",
-            "mapy": "33.5128872053",
+            "mapx": 126.5220229746,
+            "mapy": 33.5128872053,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "31",
+            "contentid": 31,
             "title": "신신호텔 제주오션",
             "addr1": "제주특별자치도 서귀포시 중앙로 14 (서귀동)",
             "addr2": "",
             "zipcode": "63595",
             "tel": "",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.5623477245",
-            "mapy": "33.2459867883",
+            "mapx": 126.5623477245,
+            "mapy": 33.2459867883,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "32",
+            "contentid": 32,
             "title": "바다하우스",
             "addr1": "제주특별자치도 제주시 애월읍 애월해안로 218",
             "addr2": "",
             "zipcode": "63045",
             "tel": "064-799-6192",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.3358485474",
-            "mapy": "33.4665199416",
+            "mapx": 126.3358485474,
+            "mapy": 33.4665199416,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "33",
+            "contentid": 33,
             "title": "나.미.송",
             "addr1": "제주특별자치도 제주시 애월읍 평화로 2476-10",
             "addr2": "",
             "zipcode": "63065",
             "tel": "010-8307-0531",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4177005773",
-            "mapy": "33.430314132",
+            "mapx": 126.4177005773,
+            "mapy": 33.430314132,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "34",
+            "contentid": 34,
             "title": "끄라비 펜션",
             "addr1": "제주특별자치도 서귀포시 토평로148번길 28(토평동)",
             "addr2": "",
             "zipcode": "63603",
             "tel": "010-4552-7062",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.5914111187",
-            "mapy": "33.2795057737",
+            "mapx": 126.5914111187,
+            "mapy": 33.2795057737,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "35",
+            "contentid": 35,
             "title": "하얀언덕",
             "addr1": "제주특별자치도 서귀포시 표선면 민속해안로 351",
             "addr2": "",
             "zipcode": "63629",
             "tel": "",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.8339838297",
-            "mapy": "33.3115227846",
+            "mapx": 126.8339838297,
+            "mapy": 33.3115227846,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "36",
+            "contentid": 36,
             "title": "가름게스트하우스",
             "addr1": "제주특별자치도 서귀포시 법환하로9번길 10",
             "addr2": "",
             "zipcode": "63573",
             "tel": "064-739-4499",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.5123383804",
-            "mapy": "33.2365870334",
+            "mapx": 126.5123383804,
+            "mapy": 33.2365870334,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "37",
+            "contentid": 37,
             "title": "제주 메이플호텔",
             "addr1": "제주특별자치도 제주시 원노형3길 41 메이플호텔",
             "addr2": "",
             "zipcode": "63081",
             "tel": "",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4817104098",
-            "mapy": "33.4865589227",
+            "mapx": 126.4817104098,
+            "mapy": 33.4865589227,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "38",
+            "contentid": 38,
             "title": "제주알(R)호텔",
             "addr1": "제주특별자치도 제주시 서광로14길 5",
             "addr2": "",
             "zipcode": "63185",
             "tel": "064-757-7734",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.5179180807",
-            "mapy": "33.4994636267",
+            "mapx": 126.5179180807,
+            "mapy": 33.4994636267,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "39",
+            "contentid": 39,
             "title": "산들애풀하우스",
             "addr1": "제주특별자치도 서귀포시 성산읍 서성일로 689-8",
             "addr2": "",
             "zipcode": "63631",
             "tel": "064-784-1988",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.8572041127",
-            "mapy": "33.429821212",
+            "mapx": 126.8572041127,
+            "mapy": 33.429821212,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "40",
+            "contentid": 40,
             "title": "베니키아 중문호텔",
             "addr1": "제주특별자치도 서귀포시 천제연로 166(중문동)",
             "addr2": "",
             "zipcode": "63546",
             "tel": "064-802-8889",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4223958362",
-            "mapy": "33.2519089231",
+            "mapx": 126.4223958362,
+            "mapy": 33.2519089231,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "41",
+            "contentid": 41,
             "title": "롯데시티호텔 제주",
             "addr1": "제주특별자치도 제주시 도령로 83",
             "addr2": "",
             "zipcode": "63127",
             "tel": "064-730-1000",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4865515629",
-            "mapy": "33.4906557686",
+            "mapx": 126.4865515629,
+            "mapy": 33.4906557686,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "42",
+            "contentid": 42,
             "title": "소노벨 제주",
             "addr1": "제주특별자치도 제주시 신북로 577 대명리조트",
             "addr2": "",
             "zipcode": "63333",
             "tel": "1588-4888",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.6713315983",
-            "mapy": "33.5402087913",
+            "mapx": 126.6713315983,
+            "mapy": 33.5402087913,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "43",
+            "contentid": 43,
             "title": "동박생이",
             "addr1": "제주특별자치도 제주시 구좌읍 월정1길 89",
             "addr2": "",
             "zipcode": "63358",
             "tel": "010-3697-4191",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.7927872971",
-            "mapy": "33.5584753917",
+            "mapx": 126.7927872971,
+            "mapy": 33.5584753917,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "44",
+            "contentid": 44,
             "title": "샘모루펜션",
             "addr1": "제주특별자치도 서귀포시 염돈로28번길 11(강정동)",
             "addr2": "",
             "zipcode": "63558",
             "tel": "064-739-9756",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4948867436",
-            "mapy": "33.2531627063",
+            "mapx": 126.4948867436,
+            "mapy": 33.2531627063,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "45",
+            "contentid": 45,
             "title": "제이뷰호텔",
             "addr1": "제주특별자치도 서귀포시 중산간서로 935",
             "addr2": "",
             "zipcode": "63534",
             "tel": "064-739-6800",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4165182808",
-            "mapy": "33.2647796319",
+            "mapx": 126.4165182808,
+            "mapy": 33.2647796319,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "46",
+            "contentid": 46,
             "title": "카이로스",
             "addr1": "제주특별자치도 제주시 애월읍 장유길 49-43",
             "addr2": "",
             "zipcode": "63055",
             "tel": "010-7478-5707",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4003238855",
-            "mapy": "33.4491617714",
+            "mapx": 126.4003238855,
+            "mapy": 33.4491617714,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "47",
+            "contentid": 47,
             "title": "호텔 리젠트마린",
             "addr1": "제주특별자치도 제주시 서부두2길 20(건입동)",
             "addr2": "",
             "zipcode": "63276",
             "tel": "064-717-5000",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.5266863526",
-            "mapy": "33.5175395423",
+            "mapx": 126.5266863526,
+            "mapy": 33.5175395423,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "48",
+            "contentid": 48,
             "title": "관음사가는길펜션",
             "addr1": "제주특별자치도 제주시 산록북로 819(아라일동)",
             "addr2": "",
             "zipcode": "63244",
             "tel": "064-724-9931",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.5544690871",
-            "mapy": "33.4375488373",
+            "mapx": 126.5544690871,
+            "mapy": 33.4375488373,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "49",
+            "contentid": 49,
             "title": "용산 제주유스호스텔",
             "addr1": "제주특별자치도 서귀포시 이어도로 297(하원동)",
             "addr2": "",
             "zipcode": "63542",
             "tel": "064-738-9502~4",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4509463268",
-            "mapy": "33.2434491956",
+            "mapx": 126.4509463268,
+            "mapy": 33.2434491956,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "50",
+            "contentid": 50,
             "title": "나인스파빌",
             "addr1": "제주특별자치도 제주시 애월읍 하광로 518",
             "addr2": "",
             "zipcode": "63062",
             "tel": "064-727-1000",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4301213796",
-            "mapy": "33.445393216",
+            "mapx": 126.4301213796,
+            "mapy": 33.445393216,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "51",
+            "contentid": 51,
             "title": "WE호텔",
             "addr1": "제주특별자치도 서귀포시 1100로 453-95",
             "addr2": "",
             "zipcode": "63551",
             "tel": "",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4439404253",
-            "mapy": "33.2860916001",
+            "mapx": 126.4439404253,
+            "mapy": 33.2860916001,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "52",
+            "contentid": 52,
             "title": "꿈꾸는 노마드",
             "addr1": "제주특별자치도 서귀포시 선반로 54 (강정동)",
             "addr2": "",
             "zipcode": "63560",
             "tel": "064-739-3114, 010-4574-4459",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.49956715",
-            "mapy": "33.2417251539",
+            "mapx": 126.49956715,
+            "mapy": 33.2417251539,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "53",
+            "contentid": 53,
             "title": "더 세리 리조트",
             "addr1": "제주특별자치도 서귀포시 법환상로2번길 97-17 (법환동)",
             "addr2": "",
             "zipcode": "63572",
             "tel": "064-739-9966",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.5120270623",
-            "mapy": "33.2470442084",
+            "mapx": 126.5120270623,
+            "mapy": 33.2470442084,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "54",
+            "contentid": 54,
             "title": "제주 스카브로호텔",
             "addr1": "제주특별자치도 서귀포시 예래해안로 15",
             "addr2": "",
             "zipcode": "63538",
             "tel": "064-738-1551",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.369942449",
-            "mapy": "33.2341295039",
+            "mapx": 126.369942449,
+            "mapy": 33.2341295039,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "55",
+            "contentid": 55,
             "title": "제주마중",
             "addr1": "제주특별자치도 제주시 한림읍 금능9길 10-1",
             "addr2": "",
             "zipcode": "63010",
             "tel": "0507-1419-9118",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.2303650085",
-            "mapy": "33.3892546129",
+            "mapx": 126.2303650085,
+            "mapy": 33.3892546129,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "56",
+            "contentid": 56,
             "title": "랜딩관 제주신화월드 호텔 앤 리조트",
             "addr1": "제주특별자치도 서귀포시 안덕면 신화역사로304번길 38",
             "addr2": "",
             "zipcode": "63522",
             "tel": "1670-8800",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.3163621886",
-            "mapy": "33.3050013908",
+            "mapx": 126.3163621886,
+            "mapy": 33.3050013908,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "57",
+            "contentid": 57,
             "title": "메리어트관 제주신화월드 호텔 앤 리조트",
             "addr1": "제주특별자치도 서귀포시 안덕면 신화역사로304번길 38",
             "addr2": "",
             "zipcode": "63522",
             "tel": "1670-8800",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.3163621886",
-            "mapy": "33.3050013908",
+            "mapx": 126.3163621886,
+            "mapy": 33.3050013908,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "58",
+            "contentid": 58,
             "title": "서머셋 제주신화월드",
             "addr1": "제주특별자치도 서귀포시 안덕면 신화역사로304번길 89(안덕면)",
             "addr2": "",
             "zipcode": "63522",
             "tel": "1670-8800",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.3175482431",
-            "mapy": "33.3029183065",
+            "mapx": 126.3175482431,
+            "mapy": 33.3029183065,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "59",
+            "contentid": 59,
             "title": "엘린호텔",
             "addr1": "제주특별자치도 제주시 은남1길 4 (연동)",
             "addr2": "",
             "zipcode": "63124",
             "tel": "064-743-5600",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4954452638",
-            "mapy": "33.4893532766",
+            "mapx": 126.4954452638,
+            "mapy": 33.4893532766,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "60",
+            "contentid": 60,
             "title": "틸다하우스",
             "addr1": "제주특별자치도 제주시 한경면 중산간서로 3367-1",
             "addr2": "",
             "zipcode": "63007",
             "tel": "010-7628-0037",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.2377161084",
-            "mapy": "33.3110911514",
+            "mapx": 126.2377161084,
+            "mapy": 33.3110911514,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "61",
+            "contentid": 61,
             "title": "취다선리조트(취다선 리조트 Tea&Meditation)",
             "addr1": "제주특별자치도 서귀포시 성산읍 해맞이해안로 2688",
             "addr2": "",
             "zipcode": "63639",
             "tel": "010-5117-7552",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.9127177787",
-            "mapy": "33.4718785742",
+            "mapx": 126.9127177787,
+            "mapy": 33.4718785742,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "62",
+            "contentid": 62,
             "title": "제주에코스위츠[한국관광 품질인증/Korea Quality]",
             "addr1": "제주특별자치도 서귀포시 중문상로 207-13(중문동)",
             "addr2": "",
             "zipcode": "63550",
             "tel": "064-738-9975",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4277589586",
-            "mapy": "33.2654158502",
+            "mapx": 126.4277589586,
+            "mapy": 33.2654158502,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "63",
+            "contentid": 63,
             "title": "서툰가족",
             "addr1": "제주특별자치도 서귀포시 안덕면 사계중앙로 41-15",
             "addr2": "",
             "zipcode": "63528",
             "tel": "",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.2980682613",
-            "mapy": "33.2282179181",
+            "mapx": 126.2980682613,
+            "mapy": 33.2282179181,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "64",
+            "contentid": 64,
             "title": "신라스테이 제주",
             "addr1": "제주특별자치도 제주시 노연로 100",
             "addr2": "",
             "zipcode": "63133",
             "tel": "064-717-9000",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4910512883",
-            "mapy": "33.4855175198",
+            "mapx": 126.4910512883,
+            "mapy": 33.4855175198,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "65",
+            "contentid": 65,
             "title": "벤티모 호텔 앤 레지던스 제주",
             "addr1": "제주특별자치도 제주시 연삼로 14 (연동)",
             "addr2": "",
             "zipcode": "63118",
             "tel": "",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4937564282",
-            "mapy": "33.493458351",
+            "mapx": 126.4937564282,
+            "mapy": 33.493458351,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "66",
+            "contentid": 66,
             "title": "더쉼팡스파앤풀빌라",
             "addr1": "제주특별자치도 서귀포시 표선면 세성로 67-2",
             "addr2": "",
             "zipcode": "63625",
             "tel": "",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.8037086578",
-            "mapy": "33.3121805593",
+            "mapx": 126.8037086578,
+            "mapy": 33.3121805593,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "67",
+            "contentid": 67,
             "title": "베이힐풀앤빌라",
             "addr1": "제주특별자치도 서귀포시 예래로 424(하예동)",
             "addr2": "",
             "zipcode": "63538",
             "tel": "",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.3727671417",
-            "mapy": "33.2369264622",
+            "mapx": 126.3727671417,
+            "mapy": 33.2369264622,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "68",
+            "contentid": 68,
             "title": "스테리나잇 제주",
             "addr1": "제주특별자치도 제주시 애월로 37",
             "addr2": "",
@@ -1156,15 +1156,15 @@
             "cat3": "",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.3122812503",
-            "mapy": "33.4622061589",
+            "mapx": 126.3122812503,
+            "mapy": 33.4622061589,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "69",
+            "contentid": 69,
             "title": "쿠지홀리데이",
             "addr1": "제주특별자치도 서귀포시 난산로 100",
             "addr2": "",
@@ -1173,15 +1173,15 @@
             "cat3": "",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.8651429381",
-            "mapy": "33.4026187891",
+            "mapx": 126.8651429381,
+            "mapy": 33.4026187891,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "70",
+            "contentid": 70,
             "title": "그랜드 조선 제주",
             "addr1": "제주특별자치도 서귀포시 중문관광로72번길 60",
             "addr2": "",
@@ -1190,15 +1190,15 @@
             "cat3": "",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4063028265",
-            "mapy": "33.2501588629",
+            "mapx": 126.4063028265,
+            "mapy": 33.2501588629,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "71",
+            "contentid": 71,
             "title": "히든 클리프 호텔 & 네이쳐",
             "addr1": "제주특별자치도 서귀포시 예래해안로 542",
             "addr2": "",
@@ -1207,32 +1207,32 @@
             "cat3": "",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4026058226",
-            "mapy": "33.2547582966",
+            "mapx": 126.4026058226,
+            "mapy": 33.2547582966,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "72",
+            "contentid": 72,
             "title": "호텔 더본 제주",
             "addr1": "제주특별자치도 서귀포시 색달로 18",
             "addr2": "",
             "zipcode": "63534",
             "tel": "",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4057165519",
-            "mapy": "33.2597605709",
+            "mapx": 126.4057165519,
+            "mapy": 33.2597605709,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "73",
+            "contentid": 73,
             "title": "삼일삼오",
             "addr1": "제주특별자치도 제주시 구좌읍 해맞이해안로 1542-4",
             "addr2": "",
@@ -1241,15 +1241,15 @@
             "cat3": "",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.8687730858",
-            "mapy": "33.5274244998",
+            "mapx": 126.8687730858,
+            "mapy": 33.5274244998,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "74",
+            "contentid": 74,
             "title": "그랜드 하얏트 제주",
             "addr1": "제주특별자치도 제주시 노연로 12 (노형동)",
             "addr2": "",
@@ -1258,66 +1258,66 @@
             "cat3": "",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4814715703",
-            "mapy": "33.4852923931",
+            "mapx": 126.4814715703,
+            "mapy": 33.4852923931,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "75",
+            "contentid": 75,
             "title": "다인오세아노 호텔",
             "addr1": "제주특별자치도 제주시 애월해안로 394",
             "addr2": "",
             "zipcode": "63046",
             "tel": "",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.3504804724",
-            "mapy": "33.4725306183",
+            "mapx": 126.3504804724,
+            "mapy": 33.4725306183,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "76",
+            "contentid": 76,
             "title": "헤이, 서귀포",
             "addr1": "제주특별자치도 서귀포시 태평로 363",
             "addr2": "",
             "zipcode": "63595",
             "tel": "",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.560089583",
-            "mapy": "33.2461450683",
+            "mapx": 126.560089583,
+            "mapy": 33.2461450683,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "77",
+            "contentid": 77,
             "title": "제주엠리조트",
             "addr1": "제주특별자치도 서귀포시 중산간서로157번길 28-6 제주M리조트",
             "addr2": "",
             "zipcode": "63558",
             "tel": "",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4943561301",
-            "mapy": "33.2578066302",
+            "mapx": 126.4943561301,
+            "mapy": 33.2578066302,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "78",
+            "contentid": 78,
             "title": "제주901",
             "addr1": "제주특별자치도 제주시 1100로 2977-10 (노형동)",
             "addr2": "",
@@ -1326,15 +1326,15 @@
             "cat3": "",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4862885506",
-            "mapy": "33.4529238296",
+            "mapx": 126.4862885506,
+            "mapy": 33.4529238296,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "79",
+            "contentid": 79,
             "title": "에코랜드 호텔",
             "addr1": "제주특별자치도 제주시 번영로 1278-169",
             "addr2": "",
@@ -1343,15 +1343,15 @@
             "cat3": "",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.6681893538",
-            "mapy": "33.4558430751",
+            "mapx": 126.6681893538,
+            "mapy": 33.4558430751,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "80",
+            "contentid": 80,
             "title": "블라제 리조트[한국관광 품질인증/Korea Quality]",
             "addr1": "제주특별자치도 서귀포시 녹산로 274",
             "addr2": "",
@@ -1360,15 +1360,15 @@
             "cat3": "",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.7467953865",
-            "mapy": "33.3795499885",
+            "mapx": 126.7467953865,
+            "mapy": 33.3795499885,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "81",
+            "contentid": 81,
             "title": "물결그림",
             "addr1": "제주특별자치도 제주시 함덕5길 8-7",
             "addr2": "",
@@ -1377,15 +1377,15 @@
             "cat3": "",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.6595658566",
-            "mapy": "33.5444525773",
+            "mapx": 126.6595658566,
+            "mapy": 33.5444525773,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "82",
+            "contentid": 82,
             "title": "디아넥스호텔",
             "addr1": "제주특별자치도 서귀포시 안덕면 산록남로762번길 71",
             "addr2": "",
@@ -1394,15 +1394,15 @@
             "cat3": "",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.3926444971",
-            "mapy": "33.3030666935",
+            "mapx": 126.3926444971,
+            "mapy": 33.3030666935,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "83",
+            "contentid": 83,
             "title": "카세로지",
             "addr1": "제주특별자치도 서귀포시 표선면 가시로 383",
             "addr2": "",
@@ -1411,15 +1411,15 @@
             "cat3": "",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.7869121327",
-            "mapy": "33.3454127339",
+            "mapx": 126.7869121327,
+            "mapy": 33.3454127339,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "84",
+            "contentid": 84,
             "title": "금단영[한국관광 품질인증/Korea Quality]",
             "addr1": "제주특별자치도 제주시 한경면 일주서로 4466",
             "addr2": "",
@@ -1428,15 +1428,15 @@
             "cat3": "",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.1936576942",
-            "mapy": "33.3621237068",
+            "mapx": 126.1936576942,
+            "mapy": 33.3621237068,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "85",
+            "contentid": 85,
             "title": "비케이호텔 제주(BK호텔 제주)",
             "addr1": "제주특별자치도 서귀포시 칠십리로91번길 12 (서귀동)",
             "addr2": "",
@@ -1445,15 +1445,15 @@
             "cat3": "",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.5642865558",
-            "mapy": "33.24106514",
+            "mapx": 126.5642865558,
+            "mapy": 33.24106514,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "86",
+            "contentid": 86,
             "title": "담모라 호텔앤리조트",
             "addr1": "제주특별자치도 서귀포시 안덕면 일주서로 1975-11",
             "addr2": "",
@@ -1462,15 +1462,15 @@
             "cat3": "",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.3060420916",
-            "mapy": "33.2497489991",
+            "mapx": 126.3060420916,
+            "mapy": 33.2497489991,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "87",
+            "contentid": 87,
             "title": "발트하우스",
             "addr1": "제주특별자치도 서귀포시 표선면 번영로 3361-26",
             "addr2": "",
@@ -1479,117 +1479,117 @@
             "cat3": "",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.8279307185",
-            "mapy": "33.3491324273",
+            "mapx": 126.8279307185,
+            "mapy": 33.3491324273,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "88",
+            "contentid": 88,
             "title": "리치호텔",
             "addr1": "제주특별자치도 제주시 애월읍 고내로13길 100",
             "addr2": "",
             "zipcode": "63046",
             "tel": "",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.3489500598",
-            "mapy": "33.472097309",
+            "mapx": 126.3489500598,
+            "mapy": 33.472097309,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "89",
+            "contentid": 89,
             "title": "아덴힐리조트&골프",
             "addr1": "제주특별자치도 제주시 한림읍 화전길 82아덴힐리조트 앤 골프클럽",
             "addr2": "",
             "zipcode": "63021",
             "tel": "",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.3672651377",
-            "mapy": "33.348127981",
+            "mapx": 126.3672651377,
+            "mapy": 33.348127981,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "90",
+            "contentid": 90,
             "title": "호텔컬리넌 제주",
             "addr1": "제주특별자치도 제주시 사장1길 26 (연동)",
             "addr2": "",
             "zipcode": "63133",
             "tel": "",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4928539116",
-            "mapy": "33.4853925632",
+            "mapx": 126.4928539116,
+            "mapy": 33.4853925632,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "91",
+            "contentid": 91,
             "title": "호텔스위트캐슬",
             "addr1": "제주특별자치도 제주시 조천읍 신북로 443",
             "addr2": "",
             "zipcode": "63333",
             "tel": "",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.6569160914",
-            "mapy": "33.5442386694",
+            "mapx": 126.6569160914,
+            "mapy": 33.5442386694,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "92",
+            "contentid": 92,
             "title": "제주해군호텔",
             "addr1": "제주특별자치도 제주시 해안마을서2길 19 (해안동)",
             "addr2": "",
             "zipcode": "63077",
             "tel": "",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4486833482",
-            "mapy": "33.4590086702",
+            "mapx": 126.4486833482,
+            "mapy": 33.4590086702,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "93",
+            "contentid": 93,
             "title": "글로스터호텔 제주",
             "addr1": "제주특별자치도 제주시 삼무로 57 (연동)",
             "addr2": "",
             "zipcode": "63125",
             "tel": "",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4926621543",
-            "mapy": "33.4901448115",
+            "mapx": 126.4926621543,
+            "mapy": 33.4901448115,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "94",
+            "contentid": 94,
             "title": "어반아일랜드호텔",
             "addr1": "제주특별자치도 제주시 삼무로 76 (연동)",
             "addr2": "",
@@ -1598,32 +1598,32 @@
             "cat3": "",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4947508744",
-            "mapy": "33.4895893506",
+            "mapx": 126.4947508744,
+            "mapy": 33.4895893506,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "95",
+            "contentid": 95,
             "title": "더스테이센추리호텔",
             "addr1": "제주특별자치도 제주시 애월읍 일주서로 7113",
             "addr2": "",
             "zipcode": "63053",
             "tel": "",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4089334423",
-            "mapy": "33.4848968405",
+            "mapx": 126.4089334423,
+            "mapy": 33.4848968405,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "96",
+            "contentid": 96,
             "title": "JW 메리어트 제주 리조트 & 스파",
             "addr1": "제주특별자치도 서귀포시 태평로 152 (호근동)",
             "addr2": "",
@@ -1632,15 +1632,15 @@
             "cat3": "",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.538266538",
-            "mapy": "33.2433228122",
+            "mapx": 126.538266538,
+            "mapy": 33.2433228122,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "97",
+            "contentid": 97,
             "title": "켄싱턴리조트 제주중문",
             "addr1": "제주특별자치도 서귀포시 중문관광로72번길 29-29 (색달동)",
             "addr2": "",
@@ -1649,15 +1649,15 @@
             "cat3": "",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4125440078",
-            "mapy": "33.2476425719",
+            "mapx": 126.4125440078,
+            "mapy": 33.2476425719,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "98",
+            "contentid": 98,
             "title": "선셋티아",
             "addr1": "제주특별자치도 제주시 조천읍 선흘남4길 31",
             "addr2": "",
@@ -1666,15 +1666,15 @@
             "cat3": "",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.7048710974",
-            "mapy": "33.5076545994",
+            "mapx": 126.7048710974,
+            "mapy": 33.5076545994,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "99",
+            "contentid": 99,
             "title": "호텔 골든데이지 서귀포오션",
             "addr1": "제주특별자치도 서귀포시 동홍로 7 (서귀동)",
             "addr2": "",
@@ -1683,15 +1683,15 @@
             "cat3": "",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.5674360957",
-            "mapy": "33.2494142687",
+            "mapx": 126.5674360957,
+            "mapy": 33.2494142687,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "100",
+            "contentid": 100,
             "title": "취다선 리조트",
             "addr1": "제주특별자치도 서귀포시 성산읍 해맞이해안로 2688",
             "addr2": "",
@@ -1700,569 +1700,569 @@
             "cat3": "",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.9127177787",
-            "mapy": "33.4718785742",
+            "mapx": 126.9127177787,
+            "mapy": 33.4718785742,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "101",
+            "contentid": 101,
             "title": "C&P리조트",
             "addr1": "제주특별자치도 서귀포시 성산읍 중산간동로 4328-63",
             "addr2": "",
             "zipcode": "63635",
             "tel": "010-6713-5810",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.8308461996",
-            "mapy": "33.3899501906",
+            "mapx": 126.8308461996,
+            "mapy": 33.3899501906,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "102",
+            "contentid": 102,
             "title": "제주향",
             "addr1": "제주특별자치도 서귀포시 색달로61번길 57",
             "addr2": "",
             "zipcode": "63534",
             "tel": "064-739-5665",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4139241043",
-            "mapy": "33.2628631355",
+            "mapx": 126.4139241043,
+            "mapy": 33.2628631355,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "103",
+            "contentid": 103,
             "title": "휘닉스 제주 섭지코지",
             "addr1": "제주특별자치도 서귀포시 성산읍 섭지코지로 107",
             "addr2": "",
             "zipcode": "63642",
             "tel": "064-731-7000~5",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.9280674087",
-            "mapy": "33.430250088",
+            "mapx": 126.9280674087,
+            "mapy": 33.430250088,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "104",
+            "contentid": 104,
             "title": "다인리조트",
             "addr1": "제주특별자치도 제주시 애월읍 애월해안로 400-9",
             "addr2": "",
             "zipcode": "63046",
             "tel": "064-799-2600",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.3512637615",
-            "mapy": "33.4714751921",
+            "mapx": 126.3512637615,
+            "mapy": 33.4714751921,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "105",
+            "contentid": 105,
             "title": "담앤루리조트",
             "addr1": "제주특별자치도 서귀포시 이어도로343번길 63",
             "addr2": "",
             "zipcode": "63543",
             "tel": "064-739-6612",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4515573305",
-            "mapy": "33.2458850471",
+            "mapx": 126.4515573305,
+            "mapy": 33.2458850471,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "106",
+            "contentid": 106,
             "title": "롱비치펜션",
             "addr1": "제주특별자치도 서귀포시 남태해안로 11-16 롱비치펜션",
             "addr2": "",
             "zipcode": "63621",
             "tel": "064-764-9944",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.7107786499",
-            "mapy": "33.2753831304",
+            "mapx": 126.7107786499,
+            "mapy": 33.2753831304,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "107",
+            "contentid": 107,
             "title": "바다에누워 펜션",
             "addr1": "제주특별자치도 서귀포시 남원읍 위미해안로 60",
             "addr2": "",
             "zipcode": "63611",
             "tel": "",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.6578361411",
-            "mapy": "33.2696884696",
+            "mapx": 126.6578361411,
+            "mapy": 33.2696884696,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "108",
+            "contentid": 108,
             "title": "보물섬펜션",
             "addr1": "제주특별자치도 서귀포시 성산읍 한도로242번길 10-11",
             "addr2": "",
             "zipcode": "63643",
             "tel": "",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.931705148",
-            "mapy": "33.4664517038",
+            "mapx": 126.931705148,
+            "mapy": 33.4664517038,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "109",
+            "contentid": 109,
             "title": "뷰티풀하우스",
             "addr1": "제주특별자치도 서귀포시 이어도로253번길 2(대포동)",
             "addr2": "",
             "zipcode": "63543",
             "tel": "",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4466828006",
-            "mapy": "33.2437463177",
+            "mapx": 126.4466828006,
+            "mapy": 33.2437463177,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "110",
+            "contentid": 110,
             "title": "제주 써니데이",
             "addr1": "제주특별자치도 서귀포시 대포로 131",
             "addr2": "",
             "zipcode": "63544",
             "tel": "010-3808-5204",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4358310559",
-            "mapy": "33.2396299343",
+            "mapx": 126.4358310559,
+            "mapy": 33.2396299343,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "111",
+            "contentid": 111,
             "title": "아망뜨펜션(제주)",
             "addr1": "제주특별자치도 서귀포시 표선면 민속해안로 11",
             "addr2": "",
             "zipcode": "63625",
             "tel": "064-787-0300",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.806436338",
-            "mapy": "33.3060923857",
+            "mapx": 126.806436338,
+            "mapy": 33.3060923857,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "112",
+            "contentid": 112,
             "title": "앙끄리에펜션",
             "addr1": "제주특별자치도 서귀포시 색달로61번길 59-8",
             "addr2": "",
             "zipcode": "63534",
             "tel": "",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4138213265",
-            "mapy": "33.2632769775",
+            "mapx": 126.4138213265,
+            "mapy": 33.2632769775,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "113",
+            "contentid": 113,
             "title": "그린사이드",
             "addr1": "제주특별자치도 서귀포시 천제연로 51(색달동)",
             "addr2": "",
             "zipcode": "63534",
             "tel": "064-738-0074",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4112189253",
-            "mapy": "33.2564832418",
+            "mapx": 126.4112189253,
+            "mapy": 33.2564832418,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "114",
+            "contentid": 114,
             "title": "제주바다산책",
             "addr1": "제주특별자치도 서귀포시 남원읍 남태해안로 11-14",
             "addr2": "",
             "zipcode": "63621",
             "tel": "064-764-9955",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.7104397927",
-            "mapy": "33.2752664712",
+            "mapx": 126.7104397927,
+            "mapy": 33.2752664712,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "115",
+            "contentid": 115,
             "title": "제주 하이랜드 펜션",
             "addr1": "제주특별자치도 서귀포시 이어도로 244(대포동)",
             "addr2": "",
             "zipcode": "63543",
             "tel": "064-738-1944",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4452190707",
-            "mapy": "33.2423075649",
+            "mapx": 126.4452190707,
+            "mapy": 33.2423075649,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "116",
+            "contentid": 116,
             "title": "제주 지삿개풍경",
             "addr1": "제주특별자치도 서귀포시 이어도로 150",
             "addr2": "",
             "zipcode": "63544",
             "tel": "064-738-5353",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4382447306",
-            "mapy": "33.2398521701",
+            "mapx": 126.4382447306,
+            "mapy": 33.2398521701,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "117",
+            "contentid": 117,
             "title": "해뜨는집 펜션",
             "addr1": "제주특별자치도 서귀포시 성산읍 한도로 137",
             "addr2": "",
             "zipcode": "63639",
             "tel": "064-784-8812",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.9225419911",
-            "mapy": "33.4691290372",
+            "mapx": 126.9225419911,
+            "mapy": 33.4691290372,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "118",
+            "contentid": 118,
             "title": "까델아스 리조트",
             "addr1": "제주특별자치도 제주시 애월읍 신엄9길 50",
             "addr2": "",
             "zipcode": "63047",
             "tel": "064-799-7996",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.3671844993",
-            "mapy": "33.4758888442",
+            "mapx": 126.3671844993,
+            "mapy": 33.4758888442,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "119",
+            "contentid": 119,
             "title": "꼬뜨도르 호텔",
             "addr1": "제주특별자치도 제주시 구좌읍 일주동로 1724",
             "addr2": "",
             "zipcode": "63347",
             "tel": "064-782-0800",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.716877367",
-            "mapy": "33.5521887531",
+            "mapx": 126.716877367,
+            "mapy": 33.5521887531,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "120",
+            "contentid": 120,
             "title": "늘송파크텔",
             "addr1": "제주특별자치도 제주시 원노형5길 22 (노형동)",
             "addr2": "",
             "zipcode": "63081",
             "tel": "010-9264-4831",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4831824807",
-            "mapy": "33.4875921654",
+            "mapx": 126.4831824807,
+            "mapy": 33.4875921654,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "121",
+            "contentid": 121,
             "title": "제주 추억여행",
             "addr1": "제주특별자치도 서귀포시 태평로92번길 21",
             "addr2": "",
             "zipcode": "63571",
             "tel": "064-739-7999",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.5322643008",
-            "mapy": "33.2424061513",
+            "mapx": 126.5322643008,
+            "mapy": 33.2424061513,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "122",
+            "contentid": 122,
             "title": "스프링힐 리조트",
             "addr1": "제주특별자치도 서귀포시 천제연로 292",
             "addr2": "",
             "zipcode": "63544",
             "tel": "064-738-3077",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4368501597",
-            "mapy": "33.2509287039",
+            "mapx": 126.4368501597,
+            "mapy": 33.2509287039,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "123",
+            "contentid": 123,
             "title": "오션하우스",
             "addr1": "제주특별자치도 서귀포시 안덕면 사계남로216번길 42",
             "addr2": "",
             "zipcode": "63528",
             "tel": "010-3693-4541",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.310189285",
-            "mapy": "33.2348340441",
+            "mapx": 126.310189285,
+            "mapy": 33.2348340441,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "124",
+            "contentid": 124,
             "title": "밀레니엄빌",
             "addr1": "제주특별자치도 서귀포시 보목로64번길 196",
             "addr2": "",
             "zipcode": "63599",
             "tel": "064-763-1796",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.5899536843",
-            "mapy": "33.2451928698",
+            "mapx": 126.5899536843,
+            "mapy": 33.2451928698,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "125",
+            "contentid": 125,
             "title": "씨에나펜션",
             "addr1": "제주특별자치도 서귀포시 예래로 267",
             "addr2": "",
             "zipcode": "63538",
             "tel": "064-739-6623",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.3857325676",
-            "mapy": "33.2421399797",
+            "mapx": 126.3857325676,
+            "mapy": 33.2421399797,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "126",
+            "contentid": 126,
             "title": "애월해안누리(구 하얀둥지)",
             "addr1": "제주특별자치도 제주시 애월읍 애월해안로 298",
             "addr2": "",
             "zipcode": "63046",
             "tel": "",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.3416562839",
-            "mapy": "33.4705668076",
+            "mapx": 126.3416562839,
+            "mapy": 33.4705668076,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "127",
+            "contentid": 127,
             "title": "포시즌펜션",
             "addr1": "제주특별자치도 서귀포시 칠십리로285번길 3",
             "addr2": "",
             "zipcode": "63598",
             "tel": "",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.583509721",
-            "mapy": "33.2486146127",
+            "mapx": 126.583509721,
+            "mapy": 33.2486146127,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "128",
+            "contentid": 128,
             "title": "제주썬레이크빌",
             "addr1": "제주특별자치도 서귀포시 성산읍 한도로 49",
             "addr2": "",
             "zipcode": "63639",
             "tel": "064-782-2277",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.9133678229",
-            "mapy": "33.4675235107",
+            "mapx": 126.9133678229,
+            "mapy": 33.4675235107,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "129",
+            "contentid": 129,
             "title": "샤뜰레 펜션",
             "addr1": "제주특별자치도 서귀포시 서호호근로46번길 68",
             "addr2": "",
             "zipcode": "63569",
             "tel": "064-738-9852",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.5288644613",
-            "mapy": "33.2483915481",
+            "mapx": 126.5288644613,
+            "mapy": 33.2483915481,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "130",
+            "contentid": 130,
             "title": "제주펜션 향림원",
             "addr1": "제주특별자치도 서귀포시 칠십리로394번길 8-3",
             "addr2": "",
             "zipcode": "63599",
             "tel": "064-733-5799",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.593211767",
-            "mapy": "33.2437569688",
+            "mapx": 126.593211767,
+            "mapy": 33.2437569688,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "131",
+            "contentid": 131,
             "title": "제주 블랙스톤",
             "addr1": "제주특별자치도 제주시 한림읍 한창로 925-122",
             "addr2": "",
             "zipcode": "63020",
             "tel": "",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.3124118005",
-            "mapy": "33.3377949264",
+            "mapx": 126.3124118005,
+            "mapy": 33.3377949264,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "132",
+            "contentid": 132,
             "title": "타미우스골프&빌리지",
             "addr1": "제주특별자치도 제주시 애월읍 화전길 201",
             "addr2": "",
             "zipcode": "63040",
             "tel": "064-793-0707",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.3856635358",
-            "mapy": "33.3482949189",
+            "mapx": 126.3856635358,
+            "mapy": 33.3482949189,
             "modifiedtime": "",
             "createdtime": ""
           }
         },
         {
           "item": {
-            "contentid": "133",
+            "contentid": 133,
             "title": "아침의향기",
             "addr1": "제주특별자치도 서귀포시 색달중앙로 122",
             "addr2": "",
             "zipcode": "63534",
             "tel": "064-738-4679",
-            "cat3": "",
+            "cat3": "0.0",
             "firstimage": "",
             "firstimage2": "",
-            "mapx": "126.4144767725",
-            "mapy": "33.2655961758",
+            "mapx": 126.4144767725,
+            "mapy": 33.2655961758,
             "modifiedtime": "",
             "createdtime": ""
           }
