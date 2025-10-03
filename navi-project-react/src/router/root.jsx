@@ -20,7 +20,7 @@ const root = createBrowserRouter([
     },
     {
         path: "/adm/users",
-        element: <Suspense fallback={Loading}><Users /></Suspense>
+        element: <Suspense fallback={Loading}><AdminUsers /></Suspense>
     },
     {
         path: "/flight",
