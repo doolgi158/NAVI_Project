@@ -30,13 +30,13 @@ public class Travel extends BaseEntity { //등록일 수정일 자동생성 상�
     private String contentId;
 
     // 카테고리 정보
-    @Column(name = "CONTENTS_CD", nullable = false, length = 5)
+    @Column(name = "CONTENTS_CD", nullable = false, length = 15)
     private String contentsCd;  //카테고리 id
 
-    @Column(name = "CATEGORY_NAME", length = 50)
+    @Column(name = "CATEGORY_NAME", length = 150)
     private String categoryName;    //카테고리 이름 (숙박,축제/행사 등)
 
-    @Column(name = "CATEGORY_REF_ID", length = 50)
+    @Column(name = "CATEGORY_REF_ID", length = 150)
     private String categoryRefId;   //카테고리 참조id
 
     // 기본 정보
@@ -54,39 +54,37 @@ public class Travel extends BaseEntity { //등록일 수정일 자동생성 상�
     @Column(name = "ROAD_ADDRESS", length = 500)
     private String roadAddress;     //도로명 주소
 
-    @Column(name = "ZIPCODE", length = 10)
-    private String zipcode;     //우편번호
 
-    @Column(name = "TEL", length = 50)
-    private String tel;     //전화번호
+    @Column(name = "PHONE_NO", length = 50)
+    private String phoneNo;     //전화번호
 
-    @Column(name = "TAGS", length = 500)
-    private String tags;    // 태그정보
+    @Column(name = "TAG", length = 500)
+    private String tag;    // 태그정보
 
     // GPS 좌표
-    @Column(name = "longitude", precision = 10, scale = 7, columnDefinition = "NUMBER(10, 7)")
-    private BigDecimal longitude; // 경도
+    @Column(name = "longitude")
+    private Double longitude; // 경도
 
-    @Column(name = "latitude", precision = 10, scale = 7, columnDefinition = "NUMBER(10, 7)")
-    private BigDecimal latitude; // 위도
+    @Column(name = "latitude")
+    private Double latitude; // 위도
 
     // 지역 코드 정보
     @Column(name = "REGION1_CD", length = 10)
     private String region1Cd;   //시코드
 
-    @Column(name = "REGION1_NAME", length = 50)
+    @Column(name = "REGION1_NAME", length = 150)
     private String region1Name;     //시명(제주시,서귀포시)
 
-    @Column(name = "REGION1_REF_ID", length = 50)
+    @Column(name = "REGION1_REF_ID", length = 150)
     private String region1RefId;    //시참조id
 
     @Column(name = "REGION2_CD", length = 10)
     private String region2Cd;    //읍코드
 
-    @Column(name = "REGION2_NAME", length = 50)
+    @Column(name = "REGION2_NAME", length = 150)
     private String region2Name; //읍명
 
-    @Column(name = "REGION2_REF_ID", length = 50)
+    @Column(name = "REGION2_REF_ID", length = 150)
     private String region2RefId;    //읍참조id
 
     // 사진 정보
@@ -107,13 +105,6 @@ public class Travel extends BaseEntity { //등록일 수정일 자동생성 상�
     @Column(name = "LIKES_COUNT", nullable = false)
     private Long likes = 0L; // 좋아요 수 (초기값 0 설정)
 
-    // 관리 정보
-//    @Column(name = "CREATED_AT", updatable = false, nullable = false)
-//    private LocalDateTime createdAt; //생성일 자동 생성
-//
-//    @Column(name = "UPDATED_AT")
-//    private LocalDateTime updatedAt;
-
     @Column(name = "STATE", nullable = false)
     private int state;  // 개시상태(공개, 비공개)
 
@@ -126,9 +117,8 @@ public class Travel extends BaseEntity { //등록일 수정일 자동생성 상�
         this.introduction = newTravel.introduction;
         this.address = newTravel.address;
         this.roadAddress = newTravel.roadAddress;
-        this.zipcode = newTravel.zipcode;
-        this.tel = newTravel.tel;
-        this.tags = newTravel.tags;
+        this.phoneNo = newTravel.phoneNo;
+        this.tag = newTravel.tag;
         this.longitude = newTravel.longitude;
         this.latitude = newTravel.latitude;
         this.contentsCd = newTravel.contentsCd;
@@ -144,6 +134,13 @@ public class Travel extends BaseEntity { //등록일 수정일 자동생성 상�
         this.imagePath = newTravel.imagePath;
         this.thumbnailPath = newTravel.thumbnailPath;
         this.state = newTravel.state;
-        // BaseEntity를 상속했으므로, UPDATED_AT은 자동으로 갱신됩니다.
     }
+
+    /**
+     * 조회수를 1 증가시키는 메서드 (Service에서 호출)
+     */
+    public void incrementViews() {
+        this.views = this.views + 1;
+    }
+
 }
