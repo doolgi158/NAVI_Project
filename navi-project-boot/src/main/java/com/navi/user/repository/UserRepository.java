@@ -8,9 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface UserRepository extends JpaRepository<User, Long> {
-
     // id를 기준으로 User의 데이터를 가져온다.
-    @EntityGraph(attributePaths = "roleList")
+    @EntityGraph(attributePaths = "userRoleList")
     @Query("select u from User u where u.id = :id")
     User getUser(@Param("id") String id);
 }

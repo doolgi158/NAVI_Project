@@ -1,7 +1,8 @@
 import { lazy, Suspense } from "react";
 import { createBrowserRouter } from "react-router-dom";
+import travelRouter from "./travelRouter"
 
-const Loading = <div></div>
+const Travel = lazy(() => import("../pages/TravelPage.jsx"))
 const UserMain = lazy(() => import("../users/pages/UserMainPage.jsx"))
 const AdminUsers = lazy(() => import("../admin/pages/AdminUsersPage.jsx"))
 const AdminDashboard = lazy(() => import("../admin/pages/AdminDashboardPage.jsx"))
@@ -14,6 +15,11 @@ const root = createBrowserRouter([
     {
         path: "",
         element: <Suspense fallback={Loading}><UserMain /></Suspense>
+    },
+    {
+        path: "travel",
+        element: <Suspense fallback={Loading}><Travel /></Suspense>,
+        children: travelRouter()
     },
     {
         path: "/adm/dashboard",

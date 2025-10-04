@@ -51,10 +51,10 @@ public class Acc {
     @Column(length = 50, nullable = false)
     private String title;
 
-    @Column(columnDefinition = "NVARCHAR2(10)")
+    @Column(columnDefinition = "NVARCHAR2(10)", nullable = false)
     private String category;
 
-    @Column(length = 40)
+    @Column(length = 50)
     private String tel;
 
     @Column(name = "township_id", nullable = false)

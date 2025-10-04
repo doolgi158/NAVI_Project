@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "hash": "033f733a",
   "configHash": "3d8a071c",
   "lockfileHash": "1a78a328",
@@ -31,4 +32,12 @@
       "file": "chunk-WYQRYOQT.js"
     }
   }
+=======
+  "hash": "2fe65f9f",
+  "configHash": "112d82ab",
+  "lockfileHash": "1206d165",
+  "browserHash": "08bd5fad",
+  "optimized": {},
+  "chunks": {}
+>>>>>>> c71dfe39f7535704140b80f769b7452f25a7e17f
 }

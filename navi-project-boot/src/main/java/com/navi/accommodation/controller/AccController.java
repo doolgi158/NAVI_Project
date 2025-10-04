@@ -16,7 +16,7 @@ public class AccController {
     @GetMapping("/initData")
     public String loadAccData() throws Exception {
         accService.loadFromJsonFile();
-        return "숙소 1차 데이터 로드 완료!";
+        return "숙소 데이터 로드 완료!";
     }
     @PostMapping("/initData")
     public String updateAccData() throws Exception {
