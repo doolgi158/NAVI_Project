@@ -4,16 +4,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.navi.flight.dto.ApiFlightDTO;
-import com.navi.flight.repository.FlightRepository;
-import com.navi.flight.repository.SeatRepository;
+import com.navi.flight.service.AirportService;
 import com.navi.flight.service.FlightService;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.InputStream;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @SpringBootTest
@@ -23,17 +21,22 @@ public class FlightTests {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private FlightService flightService; // ✅ 서비스 호출해야 좌석 자동 생성됨
+    private FlightService flightService; // 항공편 저장 + 좌석 자동 생성
 
     @Autowired
-    private FlightRepository flightRepository;
+    private AirportService airportService; // 공항 데이터 저장
 
-    @Autowired
-    private SeatRepository seatRepository;
-
+    /**
+     * 1. mockData/airports.json → navi_airport 저장
+     * 2. mockData/flightData.json → Flight + Seat 저장
+     */
     @Test
     void flightJsonTest() throws Exception {
-        InputStream is = getClass().getResourceAsStream("/mockData/flightData.json)");
+        // 1. 공항 데이터 로드
+        airportService.loadAirportData();
+
+        // 2. 항공편 데이터 로드
+        InputStream is = getClass().getResourceAsStream("/mockData/flightData.json");
         JsonNode root = objectMapper.readTree(is);
         JsonNode items = root.path("response").path("body").path("items").path("item");
 
@@ -42,28 +45,23 @@ public class FlightTests {
                 new TypeReference<List<ApiFlightDTO>>() {}
         );
 
+        // 3. 항공편 저장 (좌석 자동 생성 포함)
         for (ApiFlightDTO dto : dtoList) {
-            Flight flight = Flight.builder()
-                    .id(new FlightId(
-                            dto.getVihicleId(),
-                            LocalDateTime.parse(dto.getDepPlandTime().toString(),
-                                    DateTimeFormatter.ofPattern("yyyyMMddHHmm"))
-                    ))
-                    .airlineNm(dto.getAirlineNm())
-                    .depAirportNm(dto.getDepAirportNm())
-                    .arrAirportNm(dto.getArrAirportNm())
-                    .arrTime(LocalDateTime.parse(dto.getArrPlandTime().toString(),
-                            DateTimeFormatter.ofPattern("yyyyMMddHHmm")))
-                    .economyCharge(dto.getEconomyCharge())
-                    .prestigeCharge(dto.getPrestigeCharge())
-                    .build();
-
-            // ✅ 여기서 서비스로 저장해야 좌석까지 생성됨
-            flightService.saveFlight(flight);
+            flightService.saveFlight(dto);
         }
 
-        // ✅ 확인용 로그
-        System.out.println("총 항공편 수: " + flightRepository.count());
-        System.out.println("총 좌석 수: " + seatRepository.count());
+        // 4. 서비스 계층 통해 카운트
+        long airportCount = airportService.countAirports();
+        long flightCount = flightService.countFlights();
+        long seatCount = flightService.countSeats();
+
+        System.out.println("총 공항 수: " + airportCount);
+        System.out.println("총 항공편 수: " + flightCount);
+        System.out.println("총 좌석 수: " + seatCount);
+
+        // 5. 간단한 검증 추가
+        Assertions.assertTrue(airportCount > 0, "공항이 저장되어야 함");
+        Assertions.assertTrue(flightCount > 0, "항공편이 저장되어야 함");
+        Assertions.assertTrue(seatCount > 0, "좌석이 자동 생성되어야 함");
     }
 }

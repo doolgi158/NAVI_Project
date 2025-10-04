@@ -1,8 +1,7 @@
 package com.navi.user.security.handler;
 
 import com.google.gson.Gson;
-import com.navi.common.util.CustomException;
-import com.navi.user.dto.UserDTO;
+import com.navi.user.dto.users.UserSecurityDTO;
 import com.navi.user.security.util.JWTUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,8 +16,8 @@ import java.util.Map;
 public class ApiSuccessHandler implements AuthenticationSuccessHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        UserDTO userDTO = (UserDTO) authentication.getPrincipal();
-        Map<String, Object> claims = userDTO.getClaims();
+        UserSecurityDTO userSecurityDTO = (UserSecurityDTO) authentication.getPrincipal();
+        Map<String, Object> claims = userSecurityDTO.getClaims();
 
         String accessToken = JWTUtil.generateToken(claims, 10);
         String refreshToken = JWTUtil.generateToken(claims, 60 * 24);

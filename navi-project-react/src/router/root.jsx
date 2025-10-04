@@ -7,8 +7,11 @@ const Main = lazy(() => import("../pages/MainPage.jsx"))
 const Travel = lazy(() => import("../pages/TravelPage.jsx"))
 
 const UserMain = lazy(() => import("../users/pages/UserMainPage.jsx"))
-const Users = lazy(() => import("../users/pages/UsersPage.jsx"))
+const AdminUsers = lazy(() => import("../admin/pages/AdminUsersPage.jsx"))
 const AdminDashboard = lazy(() => import("../admin/pages/AdminDashboardPage.jsx"))
+const Flight = lazy(() => import("../users/pages/FlightPage.jsx"))
+const FlightDetail = lazy(() => import("../users/pages/FlightDetailPage.jsx"))
+const FlightRsv = lazy(() => import("../users/pages/FlightRsvInputPage.jsx"))
 
 const root = createBrowserRouter([
     {
@@ -26,8 +29,20 @@ const root = createBrowserRouter([
     },
     {
         path: "/adm/users",
-        element: <Suspense fallback={Loading}><Users /></Suspense>
-    }
+        element: <Suspense fallback={Loading}><AdminUsers /></Suspense>
+    },
+    {
+        path: "/flight",
+        element: <Suspense fallback={Loading}><Flight /></Suspense>
+    },
+    {
+        path: "/flight/detail/:flightNo",
+        element: <Suspense fallback={Loading}><FlightDetail /></Suspense>
+    },
+    {
+        path: "/flight/reserve/:flightNo",
+        element: <Suspense fallback={Loading}><FlightRsv /></Suspense>
+    },
 ]);
 
 export default root;

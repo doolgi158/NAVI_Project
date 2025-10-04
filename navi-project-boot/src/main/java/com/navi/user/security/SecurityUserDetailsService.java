@@ -2,11 +2,10 @@ package com.navi.user.security;
 
 import com.navi.common.util.CustomException;
 import com.navi.user.domain.User;
-import com.navi.user.dto.UserDTO;
+import com.navi.user.dto.users.UserSecurityDTO;
 import com.navi.user.enums.UserState;
 import com.navi.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -31,12 +30,11 @@ public class SecurityUserDetailsService implements UserDetailsService {
             throw new LockedException("휴면 계정입니다.");
         }
 
-        return new UserDTO(
+        return new UserSecurityDTO(
                 user.getName(),
                 user.getPhone(),
                 user.getBirth(),
                 user.getEmail(),
-                user.getPerNum(),
                 user.getId(),
                 user.getPw(),
                 user.getUserState(),

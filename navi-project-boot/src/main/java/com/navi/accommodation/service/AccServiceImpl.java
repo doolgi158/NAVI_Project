@@ -57,29 +57,25 @@ public class AccServiceImpl implements AccService{
             // JSON의 item 내용을 AccApiDTO에 매핑
             AccApiDTO dto = objectMapper.treeToValue(item, AccApiDTO.class);
 
-            if(dto.getContentId() == null) {
+            if(dto.getContentId().isBlank()) {
                 log.warn("contentId 없음 -> SKIP: {}", dto);
                 continue;
             }
 
+            Long contentId = Long.parseLong(dto.getContentId());
+
             if(insertOnly) {
-                accRepository.findByContentId(dto.getContentId())
+                accRepository.findByContentId(contentId)
                         .ifPresentOrElse(
-                                acc -> log.info("이미 존제 -> SKIP: {}", dto.getContentId()),
+                                acc -> log.info("이미 존제 -> SKIP: {}", contentId),
                                 () -> insertInitialFromApi(dto)
                         );
             } else {
-                accRepository.findByContentId(dto.getContentId())
+                accRepository.findByContentId(contentId)
                         .ifPresent(acc -> {
-                            acc.changeFromApi(
-                                    dto.getOverview(),
-                                    dto.getCheckInTime(),
-                                    dto.getCheckOutTime(),
-                                    dto.getHasCooking(),
-                                    dto.getHasParking()
-                            );
+                            acc.changeFromApiDTO(dto, 1); // townshipId 임시값
                             accRepository.save(acc);
-                            log.info("UPDATE 성공 (contentId = {})", acc.getContentId());
+                            log.info("UPDATE 성공 (contentId = {})", contentId);
                         });
             }
         }
@@ -87,18 +83,8 @@ public class AccServiceImpl implements AccService{
 
     @Override
     public void insertInitialFromApi(AccApiDTO dto) {
-        Acc acc = Acc.builder()
-                .contentId(dto.getContentId())
-                .title(dto.getTitle())
-                .category(dto.getCategory())
-                .tel(dto.getTel())
-                .townshipId(1)  // 임시값
-                .address(dto.getAddr1() + (dto.getAddr2() != null ? dto.getAddr2() : ""))
-                .mapy(dto.getMapy())
-                .mapx(dto.getMapx())
-                .createdTime(LocalDateTime.now())
-                .modifiedTime(LocalDateTime.now())
-                .build();
+        Acc acc = Acc.builder().build();
+        acc.changeFromApiDTO(dto, 1); // townshipId 임시값
 
         accRepository.save(acc);
         log.info("INSERT 성공 (contentId = {})", acc.getContentId());
@@ -107,23 +93,8 @@ public class AccServiceImpl implements AccService{
     /* === 관리자 전용 CRUD === */
     @Override
     public Acc createAcc(AccRequestDTO dto) {
-        Acc acc = Acc.builder()
-                .contentId(null)
-                .title(dto.getTitle())
-                .category(dto.getCategory())
-                .tel(dto.getTel())
-                .address(dto.getAddress())
-                .overview(dto.getOverview())
-                .checkInTime(dto.getCheckInTime())
-                .checkOutTime(dto.getCheckOutTime())
-                .hasCooking(dto.getHasCooking() != null ? dto.getHasCooking() : false)
-                .hasParking(dto.getHasParking() != null ? dto.getHasParking() : false)
-                .isActive(dto.isActive())
-                .isDeletable(false)
-                .createdTime(LocalDateTime.now())
-                .modifiedTime(LocalDateTime.now())
-                .build();
-
+        Acc acc = Acc.builder().build();
+        acc.changeFromRequestDTO(dto);
         return accRepository.save(acc);
     }
 
@@ -136,20 +107,7 @@ public class AccServiceImpl implements AccService{
         if(acc.getContentId() != null) {
             throw new IllegalStateException("API로 받아온 숙소는 수정할 수 없습니다.");
         }
-
-        acc.changeFromRequest(
-                dto.getTitle(),
-                dto.getCategory(),
-                dto.getTel(),
-                dto.getAddress(),
-                dto.getOverview(),
-                dto.getCheckInTime(),
-                dto.getCheckOutTime(),
-                dto.getHasCooking(),
-                dto.getHasParking(),
-                dto.isActive()
-        );
-
+        acc.changeFromRequestDTO(dto);
         return accRepository.save(acc);
     }
 

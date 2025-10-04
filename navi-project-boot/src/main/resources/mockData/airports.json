@@ -1,0 +1,24 @@
+{
+  "response": {
+    "body": {
+      "items": {
+        "item": [
+          { "airportCode": "GMP", "airportName": "김포" },
+          { "airportCode": "CJU", "airportName": "제주" },
+          { "airportCode": "PUS", "airportName": "김해(부산)" },
+          { "airportCode": "TAE", "airportName": "대구" },
+          { "airportCode": "CJJ", "airportName": "청주" },
+          { "airportCode": "KWJ", "airportName": "광주" },
+          { "airportCode": "MWX", "airportName": "무안" },
+          { "airportCode": "RSU", "airportName": "여수" },
+          { "airportCode": "USN", "airportName": "울산" },
+          { "airportCode": "KUV", "airportName": "군산" },
+          { "airportCode": "YNY", "airportName": "양양" },
+          { "airportCode": "HIN", "airportName": "사천" },
+          { "airportCode": "WJU", "airportName": "원주" },
+          { "airportCode": "JDG", "airportName": "정석(훈련)" }
+        ]
+      }
+    }
+  }
+}

@@ -1,9 +1,13 @@
-import { RouterProvider } from 'react-router-dom';
+import { RouterProvider } from "react-router-dom";
 import root from "./router/root.jsx";
+import { ModalProvider } from "./common/ModalProvider.jsx";
 
-export default function App() {
+function App() {
   return (
-    <RouterProvider router={root}/>
+    <ModalProvider>
+      <RouterProvider router={root} />
+    </ModalProvider>
   );
-};
+}
 
+export default App;
