@@ -6,10 +6,22 @@ import com.navi.flight.dto.FlightSearchRequestDTO;
 
 import java.util.List;
 
+/**
+ * ✈️ FlightService
+ *
+ * [책임]
+ * - 항공편 등록
+ * - 항공편 조회
+ * - 항공편 개수 조회
+ */
 public interface FlightService {
-    void saveFlight(ApiFlightDTO dto);          // 항공편 저장 + 좌석 생성
-    void reserveSeat(Long seatId, String userName); // 좌석 예약
-    List<FlightDetailResponseDTO> searchFlights(FlightSearchRequestDTO requestDTO); // 항공편 검색
-    long countFlights();                        // ✅ 항공편 개수
-    long countSeats();                          // ✅ 좌석 개수
+
+    /** 항공편 등록 (좌석은 생성하지 않음) */
+    void saveFlight(ApiFlightDTO dto);
+
+    /** 항공편 검색 (출발/도착/날짜/좌석등급 기준) */
+    List<FlightDetailResponseDTO> searchFlights(FlightSearchRequestDTO requestDTO);
+
+    /** 등록된 항공편 개수 조회 */
+    long countFlights();
 }
