@@ -1,10 +1,7 @@
 import axios from "axios";
 
-// 서버 주소
-export const API_SERVER_HOST = "http://localhost:8080";
-
-// 기본 API 경로. 도메인(travel, flight)이 이 뒤에 붙게 됩니다.
-const BASE_PREFIX = `${API_SERVER_HOST}/api`;
+// 기본 API 경로. Vite 프록시를 통해 8080으로 전달됩니다.
+const BASE_PREFIX = '/api';
 
 
 /**
@@ -13,9 +10,7 @@ const BASE_PREFIX = `${API_SERVER_HOST}/api`;
  * @param {string|number} id - 조회할 항목의 고유 ID (예: tno, fno 등)
  * @returns {Promise<any>} 항목 데이터
  */
-
 export const getOne = async (domain, id) => {
-    // API 경로 생성: /api/travel/1 또는 /api/flight/2
     const prefix = `${BASE_PREFIX}/${domain}`;
 
     // HTTP GET 요청
@@ -24,7 +19,6 @@ export const getOne = async (domain, id) => {
     // 성공적으로 응답을 받으면 데이터를 반환
     return response.data;
 };
-
 
 
 /**
@@ -36,11 +30,10 @@ export const getOne = async (domain, id) => {
 export const getList = async (domain, pageParam) => {
     const { page, size } = pageParam;
     
-    // API 경로 생성: /api/travel/list 또는 /api/flight/list
-    const prefix = `${BASE_PREFIX}/${domain}`;
+    const prefix = `${BASE_PREFIX}/${domain}`; 
 
     const response = await axios.get(
-        `${prefix}/list`, 
+        `${prefix}`, 
         {params: {page: page, size: size}}
     );
     return response.data;
