@@ -2,7 +2,7 @@ import { Form, Input, Button, Card } from "antd";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { login } from "../../slice/loginslice";
+import { loginAsync } from "../../slice/loginslice";
 
 const initstate = {
   userid: "",
@@ -14,15 +14,10 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
   const [loginData, setLoginData] = useState({ ...initstate });
   const dispatch = useDispatch();
 
-  // 디버깅용: loginData 바뀔 때 확인
-  useEffect(() => {
-    console.log("로그인 데이터 변경:", loginData);
-  }, [loginData]);
-
   // 폼 제출 핸들러
   const handleSubmit = (values) => {
     setLoginData(values);
-    dispatch(login(values));
+    dispatch(loginAsync(values));
     onClose();
   };
 
