@@ -4,9 +4,7 @@ import { ModalProvider } from "./common/component/ModalProvider.jsx";
 
 function App() {
   return (
-    <ModalProvider>
-      <RouterProvider router={root} />
-    </ModalProvider>
+    <RouterProvider router={root} />
   );
 }
 

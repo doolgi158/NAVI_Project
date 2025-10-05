@@ -27,9 +27,21 @@ public class ApiFailHandler implements AuthenticationFailureHandler {
         Gson gson = new Gson();
         String str = gson.toJson(apiResponse);
 
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json; charset=UTF-8");
         PrintWriter printWriter = response.getWriter();
         printWriter.println(str);
         printWriter.close();
+    }
+
+    private String getIp(HttpServletRequest request) {
+        String ip = request.getHeader("X-Forwarded-For");
+
+        if (ip != null && !ip.isEmpty() && !"unknown".equalsIgnoreCase(ip)) {
+            // X-Forwarded-For 헤더에는 "client, proxy1, proxy2" 형태로 여러 IP가 들어올 수 있음
+            return ip.split(",")[0].trim(); // 첫 번째 IP가 실제 클라이언트 IP
+        }
+
+        return request.getRemoteAddr();
     }
 }

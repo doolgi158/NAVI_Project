@@ -1,6 +1,5 @@
 package com.navi.user.service;
 
-import com.navi.user.domain.User;
 import com.navi.user.dto.users.UserRequestDTO;
 import com.navi.user.dto.users.UserResponseDTO;
 

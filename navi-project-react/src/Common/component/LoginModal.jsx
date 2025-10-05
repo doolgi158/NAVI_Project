@@ -3,22 +3,46 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { loginAsync } from "../../slice/loginslice";
+import { useModal } from "./ModalProvider";
+import { useNavigate } from "react-router-dom";
 
 const initstate = {
-  userid: "",
-  userpw: "",
+  username: "",
+  password: "",
 };
 
 const LoginModal = ({ open = false, onClose = () => {} }) => {
   const [form] = Form.useForm();
   const [loginData, setLoginData] = useState({ ...initstate });
   const dispatch = useDispatch();
-
+  const { showModal, closeModal } = useModal();
+  const navigate = useNavigate();
+  
   // 폼 제출 핸들러
   const handleSubmit = (values) => {
     setLoginData(values);
-    dispatch(loginAsync(values));
-    onClose();
+    
+    dispatch(loginAsync(values))
+      .unwrap()
+      .then((data) => {
+        // 모달 닫기
+        closeModal();
+        if(data.id === 'naviadmin') {
+          navigate("/adm/dashboard", { replace: true });
+        } else {
+          navigate("/", { replace: true });
+        }
+      })
+      .catch((err) => {
+        // 실패 메시지 알림
+        alert("아이디 또는 비밀번호가 올바르지 않습니다.");
+
+        // 모달 다시 열기 (필요 시)
+        showModal("login");
+
+        // 폼 비우기
+        form.resetFields();
+      });
   };
 
   return (
@@ -57,7 +81,7 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
                 {/* 아이디 */}
                 <Form.Item
                   label="아이디"
-                  name="userid"
+                  name="username"
                   rules={[{ required: true, message: "아이디를 입력하세요" }]}
                 >
                   <Input placeholder="아이디 입력" size="large" />
@@ -66,7 +90,7 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
                 {/* 비밀번호 */}
                 <Form.Item
                   label="비밀번호"
-                  name="userpw"
+                  name="password"
                   rules={[{ required: true, message: "비밀번호를 입력하세요" }]}
                 >
                   <Input.Password placeholder="비밀번호 입력" size="large" />

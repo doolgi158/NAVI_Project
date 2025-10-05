@@ -30,6 +30,7 @@ public class ApiSuccessHandler implements AuthenticationSuccessHandler {
         Gson gson = new Gson();
         String jsonStr = gson.toJson(claims);
 
+        response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType("application/json; charset=UTF-8");
         PrintWriter printWriter = response.getWriter();
         printWriter.println(jsonStr);
