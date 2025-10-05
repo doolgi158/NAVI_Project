@@ -28,11 +28,11 @@ const root = createBrowserRouter([
         element: <Suspense fallback={Loading}><Flight /></Suspense>
     },
     {
-        path: "/flight/detail/:flightNo",
+        path: "/flight/detail",
         element: <Suspense fallback={Loading}><FlightDetail /></Suspense>
     },
     {
-        path: "/flight/reserve/:flightNo",
+        path: "/flight/rsv/:flightNo",
         element: <Suspense fallback={Loading}><FlightRsv /></Suspense>
     },
     {

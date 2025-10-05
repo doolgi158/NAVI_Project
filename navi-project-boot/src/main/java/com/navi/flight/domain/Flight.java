@@ -14,11 +14,12 @@ import java.time.LocalDateTime;
 @Builder
 public class Flight extends BaseEntity {
 
+    /** 복합키 (편명 + 출발일시) */
     @EmbeddedId
-    private FlightId id; // 복합키 (편명 + 출발일시)
+    private FlightId id;
 
     @Column(name = "airline_nm", nullable = false, length = 50)
-    private String airlineNm; // 항공사명
+    private String airlineNm;
 
     /** 출발 공항 (FK → Airport.airport_code) */
     @ManyToOne(fetch = FetchType.LAZY)
@@ -34,8 +35,14 @@ public class Flight extends BaseEntity {
     private LocalDateTime arrTime;
 
     @Column(name = "economy_charge", nullable = false)
-    private int economyCharge; // 일반석 요금
+    private int economyCharge;
 
     @Column(name = "prestige_charge")
-    private Integer prestigeCharge; // null 허용 (프레스티지 없는 항공편)
+    private Integer prestigeCharge;
+
+    /* 좌석 지연 생성 여부 (초기 false → 최초 생성 후 true) */
+    @Column(name = "seat_initialized", nullable = false)
+    @Builder.Default
+    @Setter
+    private boolean seatInitialized = false;
 }
