@@ -6,6 +6,7 @@ import com.navi.user.dto.users.UserResponseDTO;
 import com.navi.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public Long register(UserRequestDTO userRequestDTO) {
@@ -70,5 +72,16 @@ public class UserServiceImpl implements UserService{
                 .signUp(user.getSignUp())
                 .build())
             .toList();
+    }
+
+    @Override
+    public UserRequestDTO login(String userId, String userPw) {
+        Optional<User> userOpt = userRepository.findByUserId(userId);
+
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            if (passwordEncoder.matches(userPw, user.getPw())) return new UserRequestDTO(user);
+        }
+        return null;
     }
 }
