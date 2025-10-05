@@ -1,5 +1,6 @@
 import { lazy, Suspense } from "react";
 import { createBrowserRouter } from "react-router-dom";
+import TravelPage from "../users/pages/TravelPage.jsx";
 
 const Loading = <div>Loading...</div>
 const UserMain = lazy(() => import("../users/pages/UserMainPage.jsx"))
@@ -33,6 +34,10 @@ const root = createBrowserRouter([
     {
         path: "/flight/rsv/:flightNo",
         element: <Suspense fallback={Loading}><FlightRsv /></Suspense>
+    },
+    {
+        path: "/travel",
+        element: <Suspense fallback={Loading}><TravelPage /></Suspense>
     },
 ]);
 
