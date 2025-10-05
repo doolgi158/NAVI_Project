@@ -2,7 +2,8 @@ import { lazy, Suspense } from "react";
 import { createBrowserRouter } from "react-router-dom";
 import travelRouter from "./travelRouter"
 
-const Travel = lazy(() => import("../pages/TravelPage.jsx"))
+const Loading = <div></div>
+const Travel = lazy(() => import("../users/pages/TravelPage.jsx"))
 const UserMain = lazy(() => import("../users/pages/UserMainPage.jsx"))
 const AdminUsers = lazy(() => import("../admin/pages/AdminUsersPage.jsx"))
 const AdminDashboard = lazy(() => import("../admin/pages/AdminDashboardPage.jsx"))
