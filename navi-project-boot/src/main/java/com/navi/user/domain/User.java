@@ -43,9 +43,6 @@ public class User {
     @Column(name = "user_gender")
     private char gender;        // 성별
 
-    @Column(name = "user_pernum", nullable = false)
-    private String perNum;      // 주민/여권번호
-
     @Column(name = "user_ID", nullable = false)
     private String id;          // 아이디
 

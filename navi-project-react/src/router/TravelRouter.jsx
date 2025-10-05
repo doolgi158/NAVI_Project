@@ -2,8 +2,8 @@ import { Suspense, lazy } from "react";
 import { Navigate } from "react-router-dom";
 
 const Loading = <div>Loading....</div>
-const TravelList = lazy(() => import("../pages/TravelList.jsx"))
-const TravelDetailPage = lazy(() => import("../pages/TravelDetailPage.jsx"))
+const TravelList = lazy(() => import("../users/pages/TravelList.jsx"))
+const TravelDetailPage = lazy(() => import("../users/pages/TravelDetailPage.jsx"))
 
 const TravelRouter = () => {
     return [

@@ -1,7 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initState = {
-    email:''
+    userid:'',
+    userpw:'',
+    usertokken:'',
 };
 
 const loginSlice = createSlice({
@@ -9,10 +11,12 @@ const loginSlice = createSlice({
   initialState: initState,
   reducers: {
     login: (state, action) => {
-        console.log("로그인");
+        const data = action.payload;
+        
+        return {userid: data.userid};
     },
     logout: (state, action) => {
-        console.log("로그아웃");
+        return {userid:''};
     }
     }
 });

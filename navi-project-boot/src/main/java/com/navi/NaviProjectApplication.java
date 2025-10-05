@@ -6,8 +6,8 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-@EnableScheduling // 스케줄링 활성화(자동업데이트)
-@EnableJpaAuditing // Auditing 기능 켜기 (등록일 수정일 날짜 자동 생성 반영해주는거 삭제X)
+//@EnableScheduling //스케줄러 기능 켜기
+@EnableJpaAuditing // 등록일/수정일 자동 생성
 @SpringBootApplication
 public class NaviProjectApplication {
 

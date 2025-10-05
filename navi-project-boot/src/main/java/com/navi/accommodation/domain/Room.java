@@ -37,6 +37,10 @@ public class Room {
     @Column(name = "room_id", length = 20, unique = true, updatable = false)
     private String roomId;
 
+    // 임시 설정 - json 파일 O, API X
+    @Column(name = "content_id")
+    private Long contentId;
+
     // FK 설정
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name="accNo", nullable = false)
@@ -95,17 +99,23 @@ public class Room {
     // change 메서드
     /* === AccApiDTO : API 적재 전용 === */
     public void changeFromApiDTO(RoomApiDTO dto) {
-//        roomName   = dto.getRoomName();
-//        roomSize   = parseIntOrDefault(dto.getRoomSize(), 0);   // "" 오면 0
-//        roomCnt    = parseIntOrDefault(dto.getRoomCnt(), 1);    // "" 오면 1
-//        baseCnt    = parseIntOrDefault(dto.getBaseCnt(), 2);    // "" 오면 2
-//        maxCnt     = parseIntOrDefault(dto.getMaxCnt(), 2);     // "" 오면 2
-//        weekdayFee = parseIntOrDefault(dto.getWeekdayFee(), 0); // "" 오면 0
-//        weekendFee = parseIntOrDefault(dto.getWeekendFee(), 0); // "" 오면 0
-//        hasWifi    = convertWifi(dto.getHasWifi());             // "" 오면 true
+        if (nonEmptyOrNull(dto.getContentId()) != null) contentId = Long.parseLong(dto.getContentId());
+        if (nonEmptyOrNull(dto.getRoomName()) != null) roomName = dto.getRoomName();
+        if (nonEmptyOrNull(dto.getRoomSize()) != null) roomSize = Integer.parseInt(dto.getRoomSize());
+        if (nonEmptyOrNull(dto.getRoomCnt()) != null) roomCnt = Integer.parseInt(dto.getRoomCnt());
+        if (nonEmptyOrNull(dto.getBaseCnt()) != null) baseCnt = Integer.parseInt(dto.getBaseCnt());
+        if (nonEmptyOrNull(dto.getMaxCnt()) != null) maxCnt = Integer.parseInt(dto.getMaxCnt());
+        if (nonEmptyOrNull(dto.getWeekdayFee()) != null) weekdayFee = Integer.parseInt(dto.getWeekdayFee());
+        if (nonEmptyOrNull(dto.getWeekendFee()) != null) weekendFee = Integer.parseInt(dto.getWeekendFee());
+        if (nonEmptyOrNull(dto.getHasWifi()) != null) hasWifi = "1".equals(dto.getHasWifi());
     }
     /* === AccRequestDTO : 관지자 전용 === */
     public void changeFromRequestDTO(RoomRequestDTO dto) {
 
+    }
+
+    /* 문자열 유효성 검증용 유틸 메서드 */
+    private String nonEmptyOrNull(String value) {
+        return (value != null && !value.isBlank()) ? value : null;
     }
 }
