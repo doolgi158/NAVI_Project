@@ -73,15 +73,4 @@ public class UserServiceImpl implements UserService{
                 .build())
             .toList();
     }
-
-    @Override
-    public UserRequestDTO login(String userId, String userPw) {
-        Optional<User> userOpt = userRepository.findByUserId(userId);
-
-        if (userOpt.isPresent()) {
-            User user = userOpt.get();
-            if (passwordEncoder.matches(userPw, user.getPw())) return new UserRequestDTO(user);
-        }
-        return null;
-    }
 }
