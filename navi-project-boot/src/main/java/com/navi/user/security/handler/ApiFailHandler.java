@@ -27,6 +27,8 @@ public class ApiFailHandler implements AuthenticationFailureHandler {
         Gson gson = new Gson();
         String str = gson.toJson(apiResponse);
 
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+
         response.setContentType("application/json; charset=UTF-8");
         PrintWriter printWriter = response.getWriter();
         printWriter.println(str);

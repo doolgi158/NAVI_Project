@@ -1,5 +1,6 @@
 package com.navi.user.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.navi.user.enums.UserRole;
 import com.navi.user.enums.UserState;
 import jakarta.persistence.*;
@@ -55,6 +56,7 @@ public class User {
     @Column(name = "user_signup", updatable = false)
     @ColumnDefault(value = "sysdate")
     @CreationTimestamp
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private String signUp;      // 가입일
 
     @Column(name = "user_state", nullable = false)
