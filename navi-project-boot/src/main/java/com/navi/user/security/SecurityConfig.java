@@ -1,5 +1,6 @@
 package com.navi.user.security;
 
+import com.navi.user.security.Filter.JWTCheckFilter;
 import com.navi.user.security.handler.ApiFailHandler;
 import com.navi.user.security.handler.ApiSuccessHandler;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -25,8 +27,10 @@ public class SecurityConfig {
         security.cors(httpSecurityCorsConfigurer -> {
             httpSecurityCorsConfigurer.configurationSource(corsConfigurationSource());
         });
-        // CSRF 설정
+        // 세션 관리 정책 설정
         security.sessionManagement(sessionConfig -> sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+        // CSRF 설정
         security.csrf(config -> config.disable());
 
         // 로그인 설정
@@ -35,6 +39,9 @@ public class SecurityConfig {
             config.successHandler(new ApiSuccessHandler());
             config.failureHandler(new ApiFailHandler());
         });
+
+        // JWT 체크 (토큰 정보가 있으면 로그인을 건너뛴다)
+        security.addFilterBefore(new JWTCheckFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return security.build();
     }

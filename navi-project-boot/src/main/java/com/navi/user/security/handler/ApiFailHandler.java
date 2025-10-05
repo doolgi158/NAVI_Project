@@ -2,19 +2,15 @@ package com.navi.user.security.handler;
 
 import com.google.gson.Gson;
 import com.navi.common.response.ApiResponse;
-import com.navi.user.dto.UserDTO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Map;
 
-@Slf4j
 public class ApiFailHandler implements AuthenticationFailureHandler {
 
     // 로그인 실패하면 Json 방식으로 알려주기
@@ -23,7 +19,7 @@ public class ApiFailHandler implements AuthenticationFailureHandler {
         String username = request.getParameter("username");
 
         ApiResponse<Object> apiResponse = ApiResponse.error(
-                "로그인 실패",
+            "로그인 실패",
                 401,
                 "id: " + username
         );

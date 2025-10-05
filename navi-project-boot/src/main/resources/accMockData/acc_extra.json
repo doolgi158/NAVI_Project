@@ -8,1464 +8,1331 @@
       "items": [
         {
           "item": {
-            "contentid": 1,
+            "contentid": "1",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능",
-            "foodplace": "바비큐장",
-            "parkinglodging": "주차 가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 2,
+            "contentid": "2",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "불가",
-            "foodplace": "레스토랑",
-            "parkinglodging": "주차가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 3,
+            "contentid": "3",
             "checkintime": "16:00",
             "checkouttime": "익일 11:00",
-            "chkcooking": "불가",
-            "foodplace": "한식당",
-            "parkinglodging": "가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 4,
+            "contentid": "4",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 5,
+            "contentid": "5",
             "checkintime": "14:00",
             "checkouttime": "익일 11:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 6,
+            "contentid": "6",
             "checkintime": "15:00",
             "checkouttime": "익일 11:00",
-            "chkcooking": "가능",
-            "foodplace": "한식당",
-            "parkinglodging": "주차 가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 7,
+            "contentid": "7",
             "checkintime": "17:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "주차 가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 8,
+            "contentid": "8",
             "checkintime": "16:00",
             "checkouttime": "11:00",
-            "chkcooking": "",
-            "foodplace": "",
-            "parkinglodging": "가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 9,
+            "contentid": "9",
             "checkintime": "16:00",
             "checkouttime": "익일 11:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "주차 가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 10,
+            "contentid": "10",
             "checkintime": "15:00",
             "checkouttime": "12:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "주차가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 11,
+            "contentid": "11",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능(일부 객실)",
-            "foodplace": "BAR, 셀프조식바",
-            "parkinglodging": "주차 가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 12,
+            "contentid": "12",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능",
-            "foodplace": "카페",
-            "parkinglodging": "주차가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 13,
+            "contentid": "13",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능",
-            "foodplace": "무인카페, 바베큐장",
-            "parkinglodging": "주차가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 14,
+            "contentid": "14",
             "checkintime": "13:00",
             "checkouttime": "익일 12:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "",
+            "chkcooking": "1",
+            "parkinglodging": "0",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 15,
+            "contentid": "15",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "불가",
-            "foodplace": "없음",
-            "parkinglodging": "가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 16,
+            "contentid": "16",
             "checkintime": "15:00",
             "checkouttime": "익일11:00",
-            "chkcooking": "가능",
-            "foodplace": "조식레스토랑, 바베큐장",
-            "parkinglodging": "가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 17,
+            "contentid": "17",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능",
-            "foodplace": "레스토랑, 바베큐장",
-            "parkinglodging": "주차가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 18,
+            "contentid": "18",
             "checkintime": "15:00",
             "checkouttime": "12:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 19,
+            "contentid": "19",
             "checkintime": "16:00",
             "checkouttime": "11:00",
-            "chkcooking": "",
-            "foodplace": "",
-            "parkinglodging": "가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 20,
+            "contentid": "20",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "불가",
-            "foodplace": "라 테라스(레스토랑) / 라비타(와인바) / 한우명가 / 앙트레(테라스)",
-            "parkinglodging": "가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 21,
+            "contentid": "21",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "불가",
-            "foodplace": "레스토랑 / 라운지&바 / 베이커리",
-            "parkinglodging": "가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 22,
+            "contentid": "22",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "불가",
-            "foodplace": "씨에스 다이닝, 카노푸스 다이닝, 카노푸스 카페",
-            "parkinglodging": "주차가능(100여대)",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 23,
+            "contentid": "23",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "",
-            "foodplace": "",
-            "parkinglodging": "가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 24,
+            "contentid": "24",
             "checkintime": "15:00",
             "checkouttime": "12:00",
-            "chkcooking": "불가",
-            "foodplace": "살레(레스토랑), 로비라운지, 허니문하우스(카페), 델리(베이커리), 한라정(한식당)",
-            "parkinglodging": "주차가능(200대)",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 25,
+            "contentid": "25",
             "checkintime": "15:00",
             "checkouttime": "12:00",
-            "chkcooking": "불가",
-            "foodplace": "카페, 식당",
-            "parkinglodging": "주차가능(80대/옥외 1,452평방미터)",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 26,
+            "contentid": "26",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "불가",
-            "foodplace": "",
-            "parkinglodging": "가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 27,
+            "contentid": "27",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "불가",
-            "foodplace": "",
-            "parkinglodging": "가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 28,
+            "contentid": "28",
             "checkintime": "14:00",
             "checkouttime": "11:00",
-            "chkcooking": "불가",
-            "foodplace": "레스토랑(한/중/양 식  조식 뷔페)",
-            "parkinglodging": "주차 가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 29,
+            "contentid": "29",
             "checkintime": "14:00",
             "checkouttime": "11:00",
-            "chkcooking": "불가",
-            "foodplace": "라세느(레스토랑), 더 라운지앤바, 풀카페(바&라운지), 인룸다이닝(룸서비스), 델리카한스(베이커리)",
-            "parkinglodging": "주차 가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 30,
+            "contentid": "30",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "불가",
-            "foodplace": "카페성지, 그로서리(양식), Lit Bread(베이커리 및 조식), 카카오 패밀리",
-            "parkinglodging": "주차 가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 31,
+            "contentid": "31",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "",
-            "foodplace": "",
-            "parkinglodging": "가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 32,
+            "contentid": "32",
             "checkintime": "14:00",
             "checkouttime": "익일 12:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "가능(소형 10대)",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 33,
+            "contentid": "33",
             "checkintime": "14:00",
             "checkouttime": "12:00",
-            "chkcooking": "",
-            "foodplace": "",
-            "parkinglodging": "주차 가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 34,
+            "contentid": "34",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 35,
+            "contentid": "35",
             "checkintime": "16:00",
             "checkouttime": "11:00",
-            "chkcooking": "",
-            "foodplace": "",
-            "parkinglodging": "가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 36,
+            "contentid": "36",
             "checkintime": "16:00~23:00",
             "checkouttime": "10:30",
-            "chkcooking": "",
-            "foodplace": "",
-            "parkinglodging": "가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 37,
+            "contentid": "37",
             "checkintime": "14:00",
             "checkouttime": "11:00",
-            "chkcooking": "불가능",
-            "foodplace": "없음",
-            "parkinglodging": "가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 38,
+            "contentid": "38",
             "checkintime": "16:00",
             "checkouttime": "11:00",
-            "chkcooking": "불가",
-            "foodplace": "있음",
-            "parkinglodging": "가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 39,
+            "contentid": "39",
             "checkintime": "15:00",
             "checkouttime": "익일 11:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "",
+            "chkcooking": "1",
+            "parkinglodging": "0",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 40,
+            "contentid": "40",
             "checkintime": "13:00",
             "checkouttime": "11:00",
-            "chkcooking": "",
-            "foodplace": "B166 FAMILY RESTAURANT",
-            "parkinglodging": "주차가능(30대)",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 41,
+            "contentid": "41",
             "checkintime": "15:00",
             "checkouttime": "12:00",
-            "chkcooking": "불가",
-            "foodplace": "C'cafe(레스토랑), Pool Bar (바&라운지)",
-            "parkinglodging": "주차가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 42,
+            "contentid": "42",
             "checkintime": "15:00~22:00",
             "checkouttime": "11:00",
-            "chkcooking": "Tower A/B동만 가능",
-            "foodplace": "해난디(조식뷔페), 어멍(흑돼지구이 전문점), BBQ Square Garden",
-            "parkinglodging": "가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 43,
+            "contentid": "43",
             "checkintime": "16:00",
             "checkouttime": "익일 11:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 44,
+            "contentid": "44",
             "checkintime": "15:00",
             "checkouttime": "익일 11:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "",
+            "chkcooking": "1",
+            "parkinglodging": "0",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 45,
+            "contentid": "45",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "불가",
-            "foodplace": "조식당",
-            "parkinglodging": "주차 가능(26대)",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 46,
+            "contentid": "46",
             "checkintime": "16:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능",
-            "foodplace": "카페",
-            "parkinglodging": "가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 47,
+            "contentid": "47",
             "checkintime": "15:00",
             "checkouttime": "12:00",
-            "chkcooking": "불가",
-            "foodplace": "레스토랑, 카페, 베이커리",
-            "parkinglodging": "가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 48,
+            "contentid": "48",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능",
-            "foodplace": "바비큐장",
-            "parkinglodging": "가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 49,
+            "contentid": "49",
             "checkintime": "15:00",
             "checkouttime": "12:00",
-            "chkcooking": "가능",
-            "foodplace": "식당, 카페, 바베큐장",
-            "parkinglodging": "주차 가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 50,
+            "contentid": "50",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "주차 가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 51,
+            "contentid": "51",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "불가능",
-            "foodplace": "올데이 다이닝 다채 / 아잘리아 라운지 / 아잘리아 바 / 델리 등",
-            "parkinglodging": "가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 52,
+            "contentid": "52",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 53,
+            "contentid": "53",
             "checkintime": "16:00",
             "checkouttime": "11:00",
-            "chkcooking": "불가",
-            "foodplace": "있음",
-            "parkinglodging": "가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 54,
+            "contentid": "54",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "",
-            "foodplace": "SHORE LOUNGE(펍)",
-            "parkinglodging": "주차가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 55,
+            "contentid": "55",
             "checkintime": "16:00",
             "checkouttime": "11:00",
-            "chkcooking": "",
-            "foodplace": "바비큐장",
-            "parkinglodging": "",
+            "chkcooking": "0",
+            "parkinglodging": "0",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 56,
+            "contentid": "56",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "불가",
-            "foodplace": "[메리어트관] 스카이 온 파이브 다이닝(뷔페), 제주선(한식당), 제주선 더블랙(코스요리), 르 쉬느아(중식당), 디 아일렛 라운지, 엠 라운지<br>\n[서머셋] 성화정(중식당)<br>\n[신화관] 신화테라스(동남아요리)<br>\n[랜딩관] 랜딩 다이닝(뷔페), 랜딩 라운지, 랜딩 델리",
-            "parkinglodging": "가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 57,
+            "contentid": "57",
             "checkintime": "15:00",
             "checkouttime": "익일 11:00",
-            "chkcooking": "불가",
-            "foodplace": "시그니처 레스토랑 (르 쉬느아, 제주선, 스카이 온 파이브 다이닝 등)<br />\n캐주얼 레스토랑 (화산, 애월항포구횟집, 풍로 등)<br />\n카페&스낵 (디 아일렛 라운지, 엠 라운지, 라 벨라 등)<br />\n바&펍 (S BAR, 이자카야 안주, 바온탑 등)",
-            "parkinglodging": "주차가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 58,
+            "contentid": "58",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "주차가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 59,
+            "contentid": "59",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "불가능",
-            "foodplace": "",
-            "parkinglodging": "가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 60,
+            "contentid": "60",
             "checkintime": "16:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능",
-            "foodplace": "있음",
-            "parkinglodging": "가능<br>요금(무료)",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 61,
+            "contentid": "61",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "불가",
-            "foodplace": "있음",
-            "parkinglodging": "가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 62,
+            "contentid": "62",
             "checkintime": "16:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능",
-            "foodplace": "있음",
-            "parkinglodging": "가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 63,
+            "contentid": "63",
             "checkintime": "16:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 64,
+            "contentid": "64",
             "checkintime": "15:00",
             "checkouttime": "12:00",
-            "chkcooking": "불가",
-            "foodplace": "뷔페 레스토랑 / 라운지&바",
-            "parkinglodging": "가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 65,
+            "contentid": "65",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "",
-            "foodplace": "",
-            "parkinglodging": "",
+            "chkcooking": "0",
+            "parkinglodging": "0",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 66,
+            "contentid": "66",
             "checkintime": "15:00",
             "checkouttime": "10:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "주차가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 67,
+            "contentid": "67",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능 (단, 불사용 금지. 연기가 나는 식재료 사용 불가)",
-            "foodplace": "나니아 레스토랑, 와인 카브, 프라이빗 다이닝룸, 풀사이드 바",
-            "parkinglodging": "주차가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 68,
+            "contentid": "68",
             "checkintime": "16:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능",
-            "foodplace": "없음",
-            "parkinglodging": "가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 69,
+            "contentid": "69",
             "checkintime": "16:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능",
-            "foodplace": "있음",
-            "parkinglodging": "가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 70,
+            "contentid": "70",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "불가",
-            "foodplace": "뷔페 / 루프탑바 / 풀사이드카페 등",
-            "parkinglodging": "가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 71,
+            "contentid": "71",
             "checkintime": "14:00",
             "checkouttime": "11:00",
-            "chkcooking": "불가능",
-            "foodplace": "치치 라운지 카페 / 파노라마 뷔페 & 올데이 다이닝 / 비욘드 루프탑 바",
-            "parkinglodging": "가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 72,
+            "contentid": "72",
             "checkintime": "15:00",
             "checkouttime": "익일 11:00",
-            "chkcooking": "",
-            "foodplace": "본가프리미엄, 도두반점, 탐모라",
-            "parkinglodging": "",
+            "chkcooking": "0",
+            "parkinglodging": "0",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 73,
+            "contentid": "73",
             "checkintime": "16:00",
             "checkouttime": "11:00",
-            "chkcooking": "불가능",
-            "foodplace": "",
-            "parkinglodging": "",
+            "chkcooking": "0",
+            "parkinglodging": "0",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 74,
+            "contentid": "74",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "불가능",
-            "foodplace": "그랜드 키친 뷔페 / 유메야마 일식당 / 녹나무 한식당 등",
-            "parkinglodging": "가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 75,
+            "contentid": "75",
             "checkintime": "15:00",
             "checkouttime": "익일 11:00",
-            "chkcooking": "불가",
-            "foodplace": "",
-            "parkinglodging": "",
+            "chkcooking": "0",
+            "parkinglodging": "0",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 76,
+            "contentid": "76",
             "checkintime": "15:00",
             "checkouttime": "익일 11:00",
-            "chkcooking": "",
-            "foodplace": "",
-            "parkinglodging": "",
+            "chkcooking": "0",
+            "parkinglodging": "0",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 77,
+            "contentid": "77",
             "checkintime": "15:00",
             "checkouttime": "익일 11:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "",
+            "chkcooking": "1",
+            "parkinglodging": "0",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 78,
+            "contentid": "78",
             "checkintime": "16:00",
             "checkouttime": "11:00",
-            "chkcooking": "불가",
-            "foodplace": "[카페] 수요일~일요일 09:00~18:00",
-            "parkinglodging": "가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 79,
+            "contentid": "79",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "불가",
-            "foodplace": "레스토랑  /  베이커리 카페 / 풀 스낵 바 / 레스토랑 첨-벙 / 풀사이드  BBQ",
-            "parkinglodging": "가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 80,
+            "contentid": "80",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능",
-            "foodplace": "있음",
-            "parkinglodging": "가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 81,
+            "contentid": "81",
             "checkintime": "16:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 82,
+            "contentid": "82",
             "checkintime": "15:00",
             "checkouttime": "익일 11:00",
-            "chkcooking": "",
-            "foodplace": "",
-            "parkinglodging": "있음(주차공간 여유있음)",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 83,
+            "contentid": "83",
             "checkintime": "14:00",
             "checkouttime": "익일 12:00",
-            "chkcooking": "불가",
-            "foodplace": "다이닝룸 by 쇼고 시카와타리",
-            "parkinglodging": "실내 및 외부(호림식당전용주차장 함께 사용)주차장 있음",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 84,
+            "contentid": "84",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 85,
+            "contentid": "85",
             "checkintime": "16:00",
             "checkouttime": "11:30",
-            "chkcooking": "",
-            "foodplace": "",
-            "parkinglodging": "가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 86,
+            "contentid": "86",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "",
-            "foodplace": "",
-            "parkinglodging": "가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 87,
+            "contentid": "87",
             "checkintime": "16:00~22:00",
             "checkouttime": "11:30",
-            "chkcooking": "가능",
-            "foodplace": "카페 이오스",
-            "parkinglodging": "가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 88,
+            "contentid": "88",
             "checkintime": "15:00",
             "checkouttime": "익일 11:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 89,
+            "contentid": "89",
             "checkintime": "15:00",
             "checkouttime": "익일 11:00",
-            "chkcooking": "가능",
-            "foodplace": "클럽하우스 / 아덴뜰애",
-            "parkinglodging": "가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 90,
+            "contentid": "90",
             "checkintime": "15:00",
             "checkouttime": "익일 11:00",
-            "chkcooking": "불가",
-            "foodplace": "",
-            "parkinglodging": "있음",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 91,
+            "contentid": "91",
             "checkintime": "15:00",
             "checkouttime": "익일 11:00",
-            "chkcooking": "불가",
-            "foodplace": "있음",
-            "parkinglodging": "있음",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 92,
+            "contentid": "92",
             "checkintime": "14:00",
             "checkouttime": "익일 11:00",
-            "chkcooking": "불가",
-            "foodplace": "",
-            "parkinglodging": "있음",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 93,
+            "contentid": "93",
             "checkintime": "15:00",
             "checkouttime": "익일 11:00",
-            "chkcooking": "불가",
-            "foodplace": "",
-            "parkinglodging": "있음",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 94,
+            "contentid": "94",
             "checkintime": "15:00",
             "checkouttime": "익일 11:00",
-            "chkcooking": "불가",
-            "foodplace": "",
-            "parkinglodging": "있음",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 95,
+            "contentid": "95",
             "checkintime": "15:00",
             "checkouttime": "익일 11:00",
-            "chkcooking": "불가",
-            "foodplace": "",
-            "parkinglodging": "있음",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 96,
+            "contentid": "96",
             "checkintime": "15:00",
             "checkouttime": "익일 11:00",
-            "chkcooking": "불가",
-            "foodplace": "",
-            "parkinglodging": "가능 (셀프 주차: 10 분당 1,500 원, 투숙객 무료 주차 이용 / 발렛 주차: 회당 25,000 원)",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 97,
+            "contentid": "97",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 98,
+            "contentid": "98",
             "checkintime": "16:00",
             "checkouttime": "11:00",
-            "chkcooking": "",
-            "foodplace": "",
-            "parkinglodging": "가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 99,
+            "contentid": "99",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "",
-            "foodplace": "",
-            "parkinglodging": "가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 100,
+            "contentid": "100",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "",
-            "foodplace": "",
-            "parkinglodging": "가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 101,
+            "contentid": "101",
             "checkintime": "16:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능",
-            "foodplace": "카페, 바비큐장",
-            "parkinglodging": "주차가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 102,
+            "contentid": "102",
             "checkintime": "14:30",
             "checkouttime": "11:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "주차 가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 103,
+            "contentid": "103",
             "checkintime": "14:00",
             "checkouttime": "익일 11:00",
-            "chkcooking": "가능",
-            "foodplace": "해랑 한식당, 민트(전망 레스토랑/카페), 섭지(로비 라운지), 테디클럽 등",
-            "parkinglodging": "주차 가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 104,
+            "contentid": "104",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능",
-            "foodplace": "조식뷔페",
-            "parkinglodging": "주차 가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 105,
+            "contentid": "105",
             "checkintime": "15:00",
             "checkouttime": "익일 11:00",
-            "chkcooking": "가능",
-            "foodplace": "레스토랑, 바베큐장",
-            "parkinglodging": "가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 106,
+            "contentid": "106",
             "checkintime": "15:00",
             "checkouttime": "익일 11:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "주차 가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 107,
+            "contentid": "107",
             "checkintime": "14:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 108,
+            "contentid": "108",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "",
-            "foodplace": "",
-            "parkinglodging": "가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 109,
+            "contentid": "109",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능",
-            "foodplace": "바베큐장",
-            "parkinglodging": "가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 110,
+            "contentid": "110",
             "checkintime": "14:00",
             "checkouttime": "12:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "주차가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 111,
+            "contentid": "111",
             "checkintime": "15:00",
             "checkouttime": "익일 11:00",
-            "chkcooking": "가능",
-            "foodplace": "있음",
-            "parkinglodging": "있음",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 112,
+            "contentid": "112",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 113,
+            "contentid": "113",
             "checkintime": "16:00",
             "checkouttime": "익일 11:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "주차가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 114,
+            "contentid": "114",
             "checkintime": "15:00",
             "checkouttime": "익일11:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "주차 가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 115,
+            "contentid": "115",
             "checkintime": "15:00",
             "checkouttime": "익일 11:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 116,
+            "contentid": "116",
             "checkintime": "15:00",
             "checkouttime": "익일 11:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "주차가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 117,
+            "contentid": "117",
             "checkintime": "15:00",
             "checkouttime": "익일 11:00",
-            "chkcooking": "콘도형 객실만 가능",
-            "foodplace": "레스토랑",
-            "parkinglodging": "가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 118,
+            "contentid": "118",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능",
-            "foodplace": "레스토랑, 바베큐장",
-            "parkinglodging": "주차 가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 119,
+            "contentid": "119",
             "checkintime": "16:00",
             "checkouttime": "익일 11:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 120,
+            "contentid": "120",
             "checkintime": "14:00",
             "checkouttime": "12:00",
-            "chkcooking": "불가",
-            "foodplace": "",
-            "parkinglodging": "가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 121,
+            "contentid": "121",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "주차 가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 122,
+            "contentid": "122",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 123,
+            "contentid": "123",
             "checkintime": "16:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 124,
+            "contentid": "124",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "주차가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 125,
+            "contentid": "125",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "주차가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 126,
+            "contentid": "126",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능",
-            "foodplace": "바베큐장",
-            "parkinglodging": "가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 127,
+            "contentid": "127",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 128,
+            "contentid": "128",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능",
-            "foodplace": "카페&조식당, 야외 바베큐장",
-            "parkinglodging": "주차 가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 129,
+            "contentid": "129",
             "checkintime": "16:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "주차 가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 130,
+            "contentid": "130",
             "checkintime": "13:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "주차가능",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 131,
+            "contentid": "131",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "불가",
-            "foodplace": "레스토랑",
-            "parkinglodging": "가능",
+            "chkcooking": "0",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 132,
+            "contentid": "132",
             "checkintime": "14:00",
             "checkouttime": "익일 12:00",
-            "chkcooking": "가능",
-            "foodplace": "BAR, 포장마차",
-            "parkinglodging": "가능(소형 200대)",
+            "chkcooking": "1",
+            "parkinglodging": "1",
             "cat3": ""
           }
         },
         {
           "item": {
-            "contentid": 133,
+            "contentid": "133",
             "checkintime": "15:00",
             "checkouttime": "11:00",
-            "chkcooking": "가능",
-            "foodplace": "",
-            "parkinglodging": "",
+            "chkcooking": "1",
+            "parkinglodging": "0",
             "cat3": ""
           }
         }
