@@ -11,7 +11,6 @@ import com.navi.flight.repository.FlightRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -30,20 +29,21 @@ public class FlightServiceImpl implements FlightService {
     private final AirportRepository airportRepository;
 
     /**
-     * ✅ API 공항명 → DB 공항 엔티티 매핑
+     * API 공항명 → DB 공항엔티티 매핑
      */
     private Airport resolveAirportByApiName(String apiName) {
         if ("부산".equals(apiName) || "김해".equals(apiName)) {
             return airportRepository.findByAirportName("김해(부산)")
                     .orElseThrow(() -> new RuntimeException("공항 정보 없음: " + apiName));
         }
+
         return airportRepository.findByAirportName(apiName)
                 .or(() -> airportRepository.findByAirportNameContaining(apiName))
                 .orElseThrow(() -> new RuntimeException("공항 정보 없음: " + apiName));
     }
 
     /**
-     * ✅ 항공편 저장 (좌석은 생성하지 않음)
+     * 항공편 저장 (좌석은 생성하지 않음)
      */
     @Override
     public void saveFlight(ApiFlightDTO dto) {
@@ -70,33 +70,19 @@ public class FlightServiceImpl implements FlightService {
     }
 
     /**
-     * ✅ 항공편 조회
-     * - 클라이언트에서 보낸 검색 조건에 맞는 항공편을 필터링
-     * - 공항코드 + 출발일 기준으로 검색
+     * 항공편 조회
      */
     @Override
     public List<FlightDetailResponseDTO> searchFlights(FlightSearchRequestDTO requestDTO) {
-
-        // 1️⃣ 출발·도착 공항 코드
-        String depCode = requestDTO.getDepAirportCode();
-        String arrCode = requestDTO.getArrAirportCode();
-
-        // 2️⃣ 출발일 하루 범위 (00:00~23:59)
-        LocalDate depDate = LocalDate.parse(requestDTO.getDepDate());
-        LocalDateTime start = depDate.atStartOfDay();
-        LocalDateTime end = depDate.atTime(23, 59, 59);
-
-        // 3️⃣ Repository 호출
-        List<Flight> flights = flightRepository.findFlightsByCondition(depCode, arrCode, start, end);
-
-        // 4️⃣ DTO 변환
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-
-        return flights.stream()
+        return flightRepository.findAll().stream()
+                .filter(f -> f.getDepAirport().getAirportCode().equals(requestDTO.getDepAirportCode()))
+                .filter(f -> f.getArrAirport().getAirportCode().equals(requestDTO.getArrAirportCode()))
+                .filter(f -> f.getId().getDepTime().toLocalDate().equals(
+                        LocalDateTime.parse(requestDTO.getDepDate()).toLocalDate()))
                 .map(f -> {
                     int price = requestDTO.getSeatClass().equalsIgnoreCase("ECONOMY")
                             ? f.getEconomyCharge()
-                            : (f.getPrestigeCharge() != null ? f.getPrestigeCharge() : f.getEconomyCharge());
+                            : (f.getPrestigeCharge() != null ? f.getPrestigeCharge() : 0);
 
                     return FlightDetailResponseDTO.builder()
                             .flightNo(f.getId().getFlightId())
@@ -105,7 +91,7 @@ public class FlightServiceImpl implements FlightService {
                             .depAirportName(f.getDepAirport().getAirportName())
                             .arrAirportCode(f.getArrAirport().getAirportCode())
                             .arrAirportName(f.getArrAirport().getAirportName())
-                            .depTime(LocalDateTime.from(f.getId().getDepTime()))
+                            .depTime(f.getId().getDepTime())
                             .arrTime(f.getArrTime())
                             .price(price)
                             .seatClass(requestDTO.getSeatClass().toUpperCase())
@@ -114,9 +100,6 @@ public class FlightServiceImpl implements FlightService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * ✅ 전체 항공편 개수 조회
-     */
     @Override
     public long countFlights() {
         return flightRepository.count();

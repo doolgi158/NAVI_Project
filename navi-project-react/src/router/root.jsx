@@ -6,9 +6,9 @@ const TravelPage = lazy(() => import("../users/pages/TravelPage.jsx"))
 const UserMain = lazy(() => import("../users/pages/UserMainPage.jsx"))
 const AdminUsers = lazy(() => import("../admin/pages/AdminUsersPage.jsx"))
 const AdminDashboard = lazy(() => import("../admin/pages/AdminDashboardPage.jsx"))
-const Flight = lazy(() => import("../users/pages/flight/FlightPage.jsx"))
-const FlightDetail = lazy(() => import("../users/pages/flight/FlightDetailPage.jsx"))
-const FlightRsv = lazy(() => import("../users/pages/flight/FlightRsvInputPage.jsx"))
+const Flight = lazy(() => import("../users/pages/FlightPage.jsx"))
+const FlightDetail = lazy(() => import("../users/pages/FlightDetailPage.jsx"))
+const FlightRsv = lazy(() => import("../users/pages/FlightRsvInputPage.jsx"))
 const Signup = lazy(() => import("../users/pages/UserSignupPage.jsx"))
 
 const root = createBrowserRouter([
