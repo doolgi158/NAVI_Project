@@ -13,10 +13,10 @@ public class BoardService { //비즈니스 로직
 
     private final BoardRepository boardRepository;
 
-    // 게시글 목록 조회
-//    public List<Board> getAllBoards() {
-//        return boardRepository.findAll();
-//    }
+    //게시글 목록 조회
+    public List<Board> getAllBoards() {
+        return boardRepository.findAll();
+    }
     // 게시글 작성
 //    public void createBoard(Board board) {
 //        boardRepository.save(board);
@@ -27,6 +27,10 @@ public class BoardService { //비즈니스 로직
                 .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
     }
 
+    // 게시글 작성
+    public void createBoard(Board board) {
+        boardRepository.save(board);
+    }
     // 게시글 삭제
     public void deleteBoard(Integer id) {
         boardRepository.deleteById(Long.valueOf(id));
