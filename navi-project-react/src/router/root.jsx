@@ -43,9 +43,15 @@ const root = createBrowserRouter([
         element: <Suspense fallback={Loading}><FlightRsv /></Suspense>
     },
     {
+<<<<<<< HEAD
         path: "/signup",
         element: <Suspense fallback={Loading}><Signup /></Suspense>
     }
+=======
+        path: "/travel",
+        element: <Suspense fallback={Loading}><TravelPage /></Suspense>
+    },
+>>>>>>> add44fae7f6d318eb92754c3ffc1c2985fa8bcf0
 ]);
 
 export default root;
