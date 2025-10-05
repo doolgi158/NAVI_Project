@@ -1,0 +1,27 @@
+import { Suspense, lazy } from "react";
+import { Navigate } from "react-router-dom";
+
+const Loading = <div>Loading....</div>
+const TravelList = lazy(() => import("../users/pages/TravelList.jsx"))
+const TravelDetailPage = lazy(() => import("../users/pages/TravelDetailPage.jsx"))
+
+const TravelRouter = () => {
+    return [
+        //여행지 리스트
+        {
+            path:"list",
+            element:<Suspense fallback={Loading} ><TravelList /></Suspense>
+        },
+        {
+            path: "",
+            element: <Navigate replace to="list" />
+        },
+        //여행지 상세페이지
+        {
+            path: "detail/:id",
+            element: <Suspense fallback={Loading}><TravelDetailPage /></Suspense>,
+        },
+    ]
+}
+
+export default TravelRouter;

@@ -1,3 +1,4 @@
+import { Outlet } from 'react-router-dom';
 import MainLayout from "../layout/MainLayout";
 
 const TravelPage = () => {
@@ -136,6 +137,6 @@ const TravelPage = () => {
             </div>
         </MainLayout>
     );
-}
+};
 
 export default TravelPage;

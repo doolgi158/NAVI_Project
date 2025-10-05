@@ -9,11 +9,13 @@ public class ApiResponse<T> {   //
     private int status;                 // HTTP 상태 코드
     private String message;             // 처리 결과 메시지
     private T data;                     // 데이터
+    private LocalDateTime timestamp;    // 응답 시간
 
     public ApiResponse(String message, int status, T data) {
         this.status = status;
         this.message = message;
         this.data = data;
+        this.timestamp = LocalDateTime.now();
     }
 
     // 성공 응답

@@ -46,6 +46,11 @@ dependencies {
     // Oracle PKI and Wallet support: 전자지갑(Wallet)을 통한 보안 접속에 필수
     // https://mvnrepository.com/artifact/com.oracle.database.security/oraclepki
     implementation 'com.oracle.database.security:oraclepki:23.7.0.25.01'
+    //수동으로 Jackson을 추가합니다.
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+
+    // Spring WebFlux 스타터 (WebClient를 사용하기 위해 필요)
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
     // https://mvnrepository.com/artifact/com.oracle.database.security/osdt_cert
     implementation 'com.oracle.database.security:osdt_cert:21.17.0.0'
