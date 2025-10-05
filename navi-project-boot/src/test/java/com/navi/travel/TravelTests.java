@@ -32,7 +32,7 @@ public class TravelTests {
      * 트랜잭션 종료 시 DB 변경 사항은 자동 롤백됩니다.
      */
     @Test
-    @Transactional // 테스트 후 DB 롤백 처리
+    //@Transactional // 테스트 후 DB 롤백 처리
     public void insertTravelData() {
         log.info("--- [테스트 시작: API 데이터 저장] ---");
 

@@ -1,10 +1,8 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import MainLayout from '../layout/MainLayout';
 import axios from 'axios'; 
 
-const KAKAO_MAP_APP_KEY = "YOUR_KAKAO_MAP_APP_KEY_HERE"; 
-const KAKAO_MAP_SCRIPT_ID = "kakao-map-script-travel";
 
 // =========================================================================
 // 💡 API 연동 환경 설정 및 Mock 데이터 함수 (주석 처리됨)
@@ -14,7 +12,8 @@ const KAKAO_MAP_SCRIPT_ID = "kakao-map-script-travel";
  * 🚀 실제 서버 연동을 위한 메인 데이터 호출 함수
  */
 const getTravelData = async (domain, pageParam) => {
-
+    // ----------------------------------------------------------------------
+    // ✅ 실제 API 사용 시: fetch 대신 axios와 프록시 경로를 사용하도록 수정
     const apiUrl = `/api/${domain}`; // URL: /api/travel (Vite가 /travel로 변환하여 8080에 전달)
     
     try {
@@ -37,119 +36,6 @@ const getTravelData = async (domain, pageParam) => {
 
 
 };
-
-// =========================================================================
-// 💡 Kakao Map Hooks (통합)
-// =========================================================================
-
-/**
- * Kakao 지도 API 스크립트를 동적으로 로드하고 로딩 상태를 관리합니다.
- */
-const useKakaoMapLoader = (appKey) => {
-    const [isMapLoaded, setIsMapLoaded] = useState(false);
-    const scriptLoadAttempted = useRef(false);
-
-    useEffect(() => {
-        if (window.kakao && window.kakao.maps && !isMapLoaded) {
-            setIsMapLoaded(true);
-            return;
-        }
-        if (document.getElementById(KAKAO_MAP_SCRIPT_ID) || scriptLoadAttempted.current) {
-            return;
-        }
-        
-        scriptLoadAttempted.current = true;
-        
-        const script = document.createElement('script');
-        script.id = KAKAO_MAP_SCRIPT_ID;
-        // 'services' 라이브러리를 추가하여 주소-좌표 변환을 대비합니다.
-        script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${appKey}&libraries=services&autoload=false`; 
-        script.async = true;
-
-        const onLoad = () => {
-            window.kakao.maps.load(() => {
-                setIsMapLoaded(true);
-                console.log("Kakao Map API 로드 및 준비 완료.");
-            });
-        };
-
-        script.addEventListener('load', onLoad);
-        document.head.appendChild(script);
-
-        return () => {
-            script.removeEventListener('load', onLoad);
-        };
-    }, [appKey, isMapLoaded]);
-
-    return isMapLoaded;
-};
-
-/**
- * Kakao Map을 초기화하고 선택된 항목에 따라 마커를 업데이트합니다.
- */
-const useMapMarkerUpdater = (mapContainerRef, isMapLoaded, selectedItem) => {
-    const mapRef = useRef(null);
-    const markerRef = useRef(null);
-
-    // 1. 지도 초기화 (최초 1회 실행)
-    useEffect(() => {
-        if (!mapContainerRef.current || !isMapLoaded || !window.kakao || mapRef.current) {
-            return;
-        }
-        
-        // 제주도 중심 좌표 (기본값)
-        const initialCenter = new window.kakao.maps.LatLng(33.4075, 126.5401); 
-        
-        const options = {
-            center: initialCenter, 
-            level: 10 // 제주 전체를 볼 수 있도록 줌 레벨 조정
-        };
-
-        const map = new window.kakao.maps.Map(mapContainerRef.current, options);
-        mapRef.current = map;
-        console.log("Kakao Map 초기화 완료.");
-        
-        // 지도 컨트롤 추가
-        map.addControl(new window.kakao.maps.ZoomControl(), window.kakao.maps.ControlPosition.RIGHT);
-
-    }, [isMapLoaded]);
-    
-    // 2. 선택된 항목 변경 시 마커 업데이트 및 지도 이동
-    useEffect(() => {
-        const map = mapRef.current;
-        if (!map || !selectedItem || !window.kakao) return;
-
-        const { lat, lng, title } = selectedItem;
-        const moveLatlng = new window.kakao.maps.LatLng(lat, lng);
-        
-        // 지도 중심을 선택된 위치로 이동
-        map.panTo(moveLatlng);
-        map.setLevel(4); // 항목 선택 시 줌 인
-        
-        // 기존 마커 제거
-        if (markerRef.current) {
-            markerRef.current.setMap(null);
-        }
-        
-        // 새 마커 생성 및 표시
-        const newMarker = new window.kakao.maps.Marker({
-            position: moveLatlng,
-            title: title,
-            image: new window.kakao.maps.MarkerImage(
-                'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png',
-                new window.kakao.maps.Size(32, 40),
-                { offset: new window.kakao.maps.Point(16, 40) }
-            )
-        });
-        
-        newMarker.setMap(map);
-        markerRef.current = newMarker;
-        
-        console.log(`지도 이동 및 마커 표시: ${title}`);
-
-    }, [selectedItem]); // selectedItem이 변경될 때마다 실행
-};
-
 
 
 // =========================================================================
@@ -261,9 +147,6 @@ const AntDPagination = ({ pageResult, handlePageClick, loading }) => (
 // TravelPage 컴포넌트
 // =========================================================================
 const TravelPage = () => {
-    const mapContainerRef = useRef(null);
-    const isMapLoaded = useKakaoMapLoader(KAKAO_MAP_APP_KEY);
-
     const [pageResult, setPageResult] = useState({
         dtoList: [],
         totalElements: 0,
@@ -279,9 +162,6 @@ const TravelPage = () => {
     const [loading, setLoading] = useState(false); 
     const [hasError, setHasError] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null); // 선택된 항목 상태
-
-     // Kakao Map 연동 훅 실행
-    useMapMarkerUpdater(mapContainerRef, isMapLoaded, selectedItem);
 
     // ✅ API 호출 함수 (무한 루프 방지를 위해 pageParam만 종속성으로 설정)
     const fetchTravelList = useCallback(() => {
@@ -336,7 +216,7 @@ const TravelPage = () => {
             setLoading(false);
             setSelectedItem(null);
         });
-    }, [pageParam]); 
+    }, [pageParam]); // 💡 무한 루프 방지: pageParam만 종속성으로 지정
 
     useEffect(() => {
         fetchTravelList();
@@ -435,26 +315,34 @@ const TravelPage = () => {
                         
                     </div>
 
-                    {/* B. 우측 지도 영역 (실제 Kakao Map) */}
+                    {/* B. 우측 지도 영역 (요청에 따라 지도 스타일 적용) */}
                     <div className="lg:w-8/12">
-                        <div className="relative border-2 border-gray-300 rounded-lg shadow-2xl h-[500px] lg:h-full lg:min-h-[1000px] lg:sticky lg:top-8 overflow-hidden"> 
-                            
-                            {/* Kakao Map 렌더링 컨테이너 */}
-                            <div 
-                                ref={mapContainerRef} 
-                                className={`w-full h-full transition duration-500 ${isMapLoaded ? 'opacity-100' : 'opacity-0'}`}
-                            >
-                                {!isMapLoaded && (
-                                    <div className="absolute inset-0 bg-gray-200 flex items-center justify-center text-xl text-gray-600 font-bold">
-                                        <svg className="animate-spin h-8 w-8 text-blue-500 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                        지도 로드 중...
+                        <div className="relative border-2 border-gray-300 rounded-lg shadow-2xl h-[400px] lg:h-full lg:min-h-[1000px] sticky top-6 overflow-hidden"> 
+                            {/* 지도 배경 시뮬레이션 */}
+                            <div className="absolute inset-0 bg-gray-300 flex items-center justify-center text-xl text-gray-600 font-bold">
+                                <span className="absolute inset-0 bg-map-pattern opacity-10"></span>
+                                <span className="z-10">실시간 지도 영역</span>
+                                
+                                {selectedItem && (
+                                    <div className="absolute z-20 p-3 rounded-lg bg-blue-600 text-white shadow-xl max-w-xs transition-all duration-500"
+                                        style={{ 
+                                            // 더미 위경도를 이용해 지도 위의 위치를 시뮬레이션
+                                            // Mock 데이터가 없으므로 이 좌표 계산은 의미가 없을 수 있습니다.
+                                            top: `${50 + (selectedItem.lat - 33.5) * 100}%`,
+                                            left: `${50 + (selectedItem.lng - 126.75) * 100}%`,
+                                            transform: 'translate(-50%, -100%)' 
+                                        }}>
+                                        <div className="font-bold text-lg leading-tight">{selectedItem.title}</div>
+                                        <div className="text-xs mt-1">{selectedItem.address}</div>
+                                        <div className="absolute left-1/2 bottom-0 transform -translate-x-1/2 translate-y-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-blue-600"></div>
                                     </div>
                                 )}
+
                             </div>
                             
-                            {!selectedItem && isMapLoaded && (
-                                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 z-10">
-                                    <span className="text-white text-lg sm:text-2xl font-semibold p-4 text-center">
+                            {!selectedItem && (
+                                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
+                                    <span className="text-white text-2xl font-semibold">
                                         목록에서 여행지를 선택하여 지도에서 위치를 확인하세요.
                                     </span>
                                 </div>
