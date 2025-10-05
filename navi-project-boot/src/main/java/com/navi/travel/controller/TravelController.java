@@ -15,7 +15,6 @@ public class TravelController {
     private final TravelService travelApiService;
 
     // 제주도 여행정보 리스트 화면 (페이지네이션 적용)
-    // TravelListResponseDTO<TravelApiItemDTO> 제네릭 사용 대신 Page<TravelListResponseDTO> 사용
     @GetMapping
     public Page<TravelListResponseDTO> getList(
             @RequestParam(defaultValue = "1") int page,
