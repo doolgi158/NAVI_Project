@@ -2,7 +2,7 @@ import React from 'react';
 import { Row, Col, Card, Typography, Divider, Button, Space, Tabs, Descriptions } from 'antd';
 import { HeartOutlined, ShareAltOutlined, StarOutlined, ClockCircleOutlined, CarOutlined } from '@ant-design/icons';
 import MainLayout
- from '../layout/MainLayout';
+ from '../../layout/MainLayout';
 const { Title, Text, Paragraph } = Typography;
 
 const TravelDetailPage = () => {

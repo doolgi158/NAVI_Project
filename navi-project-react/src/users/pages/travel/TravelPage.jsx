@@ -1,5 +1,5 @@
 import { Outlet } from 'react-router-dom';
-import MainLayout from "../layout/MainLayout";
+import MainLayout from "../../layout/MainLayout";
 
 const TravelPage = () => {
     const travelItems = [1, 2, 3, 4, 5, 6, 7]; // 아이템 개수 증가

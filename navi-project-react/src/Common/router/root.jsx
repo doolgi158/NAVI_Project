@@ -1,16 +1,14 @@
 import { lazy, Suspense } from "react";
 import { createBrowserRouter } from "react-router-dom";
-import { ModalProvider } from "../common/component/ModalProvider.jsx";
+import { ModalProvider } from "../components/Login/ModalProvider.jsx";
 
 const Loading = <div></div>
-const TravelPage = lazy(() => import("../users/pages/TravelPage.jsx"))
-const UserMain = lazy(() => import("../users/pages/UserMainPage.jsx"))
-const AdminUsers = lazy(() => import("../admin/pages/AdminUsersPage.jsx"))
-const AdminDashboard = lazy(() => import("../admin/pages/AdminDashboardPage.jsx"))
-const Flight = lazy(() => import("../users/pages/FlightPage.jsx"))
-const FlightDetail = lazy(() => import("../users/pages/FlightDetailPage.jsx"))
-const FlightRsv = lazy(() => import("../users/pages/FlightRsvInputPage.jsx"))
-const Signup = lazy(() => import("../users/pages/UserSignupPage.jsx"))
+const TravelPage = lazy(() => import("../../users/pages/travel/TravelPage.jsx"))
+const UserMain = lazy(() => import("../../users/pages/UserMainPage.jsx"))
+const AdminUsers = lazy(() => import("../../admin/pages/AdminUsersPage.jsx"))
+const AdminDashboard = lazy(() => import("../../admin/pages/AdminDashboardPage.jsx"))
+const Flight = lazy(() => import("../../users/pages/flight/FlightPage.jsx"))
+const Signup = lazy(() => import("../../users/pages/UserSignupPage.jsx"))
 
 const root = createBrowserRouter([
     {
@@ -49,26 +47,6 @@ const root = createBrowserRouter([
             <Suspense fallback={Loading}>
                 <ModalProvider>
                     <Flight />
-                </ModalProvider>
-            </Suspense>
-        )
-    },
-    {
-        path: "/flight/detail",
-        element: (
-            <Suspense fallback={Loading}>
-                <ModalProvider>
-                    <FlightDetail />
-                </ModalProvider>
-            </Suspense>
-        )
-    },
-    {
-        path: "/flight/rsv/:flightNo",
-        element: (
-            <Suspense fallback={Loading}>
-                <ModalProvider>
-                    <FlightRsv />
                 </ModalProvider>
             </Suspense>
         )

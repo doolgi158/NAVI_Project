@@ -1,6 +1,5 @@
 import { RouterProvider } from "react-router-dom";
-import root from "./router/root.jsx";
-import { ModalProvider } from "./common/component/ModalProvider.jsx";
+import root from "./common/router/root.jsx";
 
 function App() {
   return (

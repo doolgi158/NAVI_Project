@@ -3,7 +3,7 @@ import { DatePicker, Input, Select, Button } from "antd";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "bootstrap-icons/font/bootstrap-icons.css";
-import MainLayout from "../layout/MainLayout";
+import MainLayout from "../../layout/MainLayout";
 
 const { Option } = Select;
 const { RangePicker } = DatePicker;

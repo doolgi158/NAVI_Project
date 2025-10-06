@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { Userlogin } from "../api/UserApi";
+import { Userlogin } from "../api/naviApi";
 
 const initState = {
     username:'',

@@ -2,10 +2,10 @@ import { useState } from "react";
 import { Layout, Menu, Button, Drawer, Image, Space } from "antd";
 import { MenuOutlined } from "@ant-design/icons";
 import naviLogo from "../images/navi_logo.png";
-import { useModal } from "../../common/component/ModalProvider";
+import { useModal } from "../../common/components/Login/ModalProvider";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "../../slice/loginslice";
+import { logout } from "../../common/slice/loginSlice";
 
 const { Header } = Layout;
 

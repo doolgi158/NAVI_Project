@@ -1,4 +1,4 @@
-import MainLayout from "../layout/MainLayout";
+import MainLayout from "../../layout/MainLayout";
 import {Input, List, Button, Card, Pagination, Space,Typography,Row,Col,Image} from 'antd';
 import { HeartFilled } from '@ant-design/icons';
 import React, { useState } from 'react';
