@@ -3,6 +3,9 @@ package com.navi.user.domain;
 import com.navi.user.enums.SocialState;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Builder
@@ -34,12 +37,13 @@ public class Social {
     @Column(name = "cer_type", nullable = false, length = 20)
     private SocialState type;  // 인증수단
 
-    @Column(name = "cer_request", nullable = false)
-    private String request;     // 요청시간
+    @CreationTimestamp
+    @Column(name = "cer_request", nullable = false, updatable = false)
+    private LocalDateTime request;     // 요청시간
 
     @Column(name = "cer_limit", nullable = false)
-    private String limit;       // 유효기간
+    private LocalDateTime limit;       // 유효기간
 
     @Column(name = "cer_confirm", nullable = false)
-    private char confirm;       // 성공여부
+    private boolean confirm;       // 성공여부
 }

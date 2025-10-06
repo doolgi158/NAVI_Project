@@ -5,6 +5,7 @@ import com.navi.user.security.Filter.JWTCheckFilter;
 import com.navi.user.security.Filter.TryLoginFilter;
 import com.navi.user.security.handler.ApiFailHandler;
 import com.navi.user.security.handler.ApiSuccessHandler;
+import com.navi.user.security.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,6 +25,7 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final TryLoginRepository tryLoginRepository;
+    private final JWTUtil jwtUtil;
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity security) throws Exception {
@@ -43,12 +45,12 @@ public class SecurityConfig {
             config.loginProcessingUrl("/api/users/login")
                     .usernameParameter("username")
                     .passwordParameter("password");
-            config.successHandler(new ApiSuccessHandler(tryLoginRepository));
+            config.successHandler(new ApiSuccessHandler(tryLoginRepository, jwtUtil));
             config.failureHandler(new ApiFailHandler(tryLoginRepository));
         });
 
         // JWT 체크 (토큰 정보가 있으면 로그인을 건너뛴다)
-        security.addFilterBefore(new JWTCheckFilter(), UsernamePasswordAuthenticationFilter.class);
+        security.addFilterBefore(new JWTCheckFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
         security.addFilterBefore(new TryLoginFilter(tryLoginRepository), UsernamePasswordAuthenticationFilter.class);
         return security.build();
     }

@@ -18,6 +18,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ApiSuccessHandler implements AuthenticationSuccessHandler {
     private final TryLoginRepository tryLoginRepository;
+    private final JWTUtil jwtUtil;
 
     // 로그인 성공하면 토큰값 추가하여 json방식으로 알려주기
     @Override
@@ -25,8 +26,8 @@ public class ApiSuccessHandler implements AuthenticationSuccessHandler {
         UserSecurityDTO userSecurityDTO = (UserSecurityDTO) authentication.getPrincipal();
         Map<String, Object> claims = userSecurityDTO.getClaims();
 
-        String accessToken = JWTUtil.generateToken(claims, 10);
-        String refreshToken = JWTUtil.generateToken(claims, 60 * 24);
+        String accessToken = jwtUtil.generateToken(claims, 10);
+        String refreshToken = jwtUtil.generateToken(claims, 60 * 24);
 
         claims.put("accessToken", accessToken);
         claims.put("refreshToken", refreshToken);
