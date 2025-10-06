@@ -1,6 +1,6 @@
 package com.navi.user.controller;
 
-import com.navi.user.service.UserService;
+import com.navi.user.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

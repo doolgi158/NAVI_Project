@@ -8,6 +8,7 @@ import lombok.*;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class SocialDTO {
     private Long no;            // 인증 번호
     private String token;       // 리소스 토큰
