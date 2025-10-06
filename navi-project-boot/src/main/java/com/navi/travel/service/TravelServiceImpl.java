@@ -57,8 +57,18 @@ public class TravelServiceImpl implements TravelService {
         Travel travel = travelRepository.findById(travelId)
                 .orElseThrow(() -> new NoSuchElementException("Travel not found with ID: " + travelId));
 
-        travel.incrementViews();
         return TravelDetailResponseDTO.of(travel);
+    }
+
+    @Override
+    @Transactional // 쓰기 작업이므로 @Transactional을 유지하거나 명시적으로 적용
+    public void incrementViews(Long travelId) {
+        travelRepository.findById(travelId)
+                .ifPresent(travel -> {
+                    // Travel 엔티티의 incrementViews() 메서드가 Null 안전하도록 구현되어 있어야 합니다.
+                    travel.incrementViews();
+                    // JPA의 변경 감지(Dirty Checking)를 통해 트랜잭션 커밋 시 DB에 반영됩니다.
+                });
     }
 
     /**
@@ -99,13 +109,13 @@ public class TravelServiceImpl implements TravelService {
                     break; // 루프 즉시 종료
                 }
 
-
-
                 //데이터 1건당 SELECT 쿼리 1회와 INSERT 또는 UPDATE 쿼리 1회를 발생
                 Optional<Travel> existing = travelRepository.findByContentId(newTravel.getContentId());
                 if (existing.isPresent()) {
+                    // 엔티티가 이미 존재하는 경우 업데이트
                     existing.get().updateFromApi(newTravel);
                 } else {
+                    // 새로운 엔티티인 경우 저장
                     travelRepository.save(newTravel);
                 }
 

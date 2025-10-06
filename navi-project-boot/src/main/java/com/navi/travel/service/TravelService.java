@@ -9,6 +9,7 @@ public interface TravelService {
     Page<TravelListResponseDTO> getTravelList(Pageable pageable);    //여행지리스트
     TravelDetailResponseDTO getTravelDetail(Long travelId);  //여행지 상세
     int saveApiData();   //api데이터저장
-
+    void syncTravelData();
+    void incrementViews(Long travelId);
 
 }
