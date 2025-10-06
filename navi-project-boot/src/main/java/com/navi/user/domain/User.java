@@ -75,7 +75,4 @@ public class User {
     public void clearRole(UserRole userRole) {
         userRoleList.clear();
     }
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<TryLogin> tryLogins = new ArrayList<>();   // 로그인 시도
 }
