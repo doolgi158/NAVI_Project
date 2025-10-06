@@ -59,7 +59,6 @@ export const useLogin = () => {
 
       return { success: false, message: "서버 응답을 처리할 수 없습니다." };
     } catch (error) {
-      console.error("❌ 로그인 요청 오류:", error);
       alert("❗ 서버에 연결할 수 없습니다. 잠시 후 다시 시도하세요.");
       return { success: false, message: "서버에 연결할 수 없습니다." };
     }

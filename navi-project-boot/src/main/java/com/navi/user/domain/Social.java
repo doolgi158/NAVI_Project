@@ -22,14 +22,16 @@ public class Social {
     @Column(name = "cer_no")
     private Long no;            // 인증 번호
 
+    @Lob
     @Column(name = "cer_token", nullable = false)
     private String token;       // 리소스 토큰
 
+    @Lob
     @Column(name = "cer_refresh", nullable = false)
     private String refresh;     // 리프레시 토큰
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "cer_type", nullable = false)
+    @Column(name = "cer_type", nullable = false, length = 20)
     private SocialState type;  // 인증수단
 
     @Column(name = "cer_request", nullable = false)

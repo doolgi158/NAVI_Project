@@ -53,7 +53,7 @@ public interface TryLoginRepository extends JpaRepository<TryLogin, Long> {
             save(tryLogin);
             return false;
         }
-        
+
         return tryLogin.getCount() >= 5 && tryLogin.getState() == 'F';
     }
 }
