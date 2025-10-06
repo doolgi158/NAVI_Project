@@ -1,24 +1,17 @@
 import { Form, Input, Button, Card } from "antd";
 import { AnimatePresence, motion } from "framer-motion";
-import { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { loginAsync } from "../../slice/loginslice";
-
-const initstate = {
-  userid: "",
-  userpw: "",
-};
+import { useLogin } from "../../hooks/useLogin";
 
 const LoginModal = ({ open = false, onClose = () => {} }) => {
   const [form] = Form.useForm();
-  const [loginData, setLoginData] = useState({ ...initstate });
-  const dispatch = useDispatch();
+  const { login } = useLogin();
 
-  // 폼 제출 핸들러
-  const handleSubmit = (values) => {
-    setLoginData(values);
-    dispatch(loginAsync(values));
-    onClose();
+  const handleSubmit = async (values) => {
+    const success = await login(values);
+    if (!success) {
+      alert("아이디 또는 비밀번호가 올바르지 않습니다.");
+      form.resetFields();
+    }
   };
 
   return (
@@ -29,18 +22,17 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onClick={onClose} // 배경 클릭 시 닫힘
+          onClick={onClose}
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
-            onClick={(e) => e.stopPropagation()} // 카드 내부 클릭 방지
-            className="relative"
+            onClick={(e) => e.stopPropagation()}
           >
             <Card
-              className="w-full max-w-md p-6 rounded-2xl shadow-lg bg-white"
+              className="w-full max-w-md p-6 rounded-2xl shadow-lg bg-white relative"
               bordered={false}
             >
               {/* 닫기 버튼 */}
@@ -51,62 +43,64 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
                 ✕
               </button>
 
+              {/* 제목 */}
               <h2 className="text-center text-2xl font-bold mb-6">로그인</h2>
 
+              {/* 입력 폼 */}
               <Form form={form} layout="vertical" onFinish={handleSubmit}>
-                {/* 아이디 */}
                 <Form.Item
                   label="아이디"
-                  name="userid"
+                  name="username"
                   rules={[{ required: true, message: "아이디를 입력하세요" }]}
                 >
                   <Input placeholder="아이디 입력" size="large" />
                 </Form.Item>
 
-                {/* 비밀번호 */}
                 <Form.Item
                   label="비밀번호"
-                  name="userpw"
+                  name="password"
                   rules={[{ required: true, message: "비밀번호를 입력하세요" }]}
                 >
                   <Input.Password placeholder="비밀번호 입력" size="large" />
                 </Form.Item>
 
-                {/* 소셜 로그인 */}
-                <div className="flex flex-col gap-2 mt-6 mb-6 text-center">
-                  <Button block className="bg-red-500 text-white hover:bg-red-600">
+                {/* 중앙 정렬된 소셜 로그인 버튼들 */}
+                <div className="flex flex-col items-center gap-2 my-6 text-center">
+                  <Button type="link" className="text-blue-500">
                     구글 로그인
                   </Button>
-                  <Button block className="bg-yellow-400 text-black hover:bg-yellow-500">
+                  <Button type="link" className="text-yellow-500">
                     카카오 로그인
                   </Button>
-                  <Button block className="bg-green-500 text-white hover:bg-green-600">
+                  <Button type="link" className="text-green-500">
                     네이버 로그인
                   </Button>
                 </div>
 
-                {/* 로그인/회원가입 버튼 */}
-                <div className="flex justify-between gap-3 mt-4">
+                {/* 하단 링크 + 버튼 */}
+                <div className="flex justify-between items-center mt-8">
+                  {/* 왼쪽: 아이디 찾기 + 로그인 버튼 */}
                   <div className="flex flex-col items-center w-[48%]">
                     <a
                       href="/find-id"
-                      className="text-sm text-gray-600 mb-1 hover:text-sb-teal"
+                      className="text-sm text-gray-600 mb-2 hover:text-sb-teal"
                     >
                       아이디 찾기
                     </a>
                     <Button
                       type="primary"
                       htmlType="submit"
-                      className="bg-sb-teal hover:bg-sb-gold w-full h-11 font-semibold"
+                      className="w-full h-11 bg-sb-teal hover:bg-sb-gold font-semibold"
                     >
                       로그인
                     </Button>
                   </div>
 
+                  {/* 오른쪽: 비밀번호 찾기 + 회원가입 버튼 */}
                   <div className="flex flex-col items-center w-[48%]">
                     <a
                       href="/forgot"
-                      className="text-sm text-gray-600 mb-1 hover:text-sb-teal"
+                      className="text-sm text-gray-600 mb-2 hover:text-sb-teal"
                     >
                       비밀번호 찾기
                     </a>
@@ -115,7 +109,7 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
                       href="/signup"
                       className="w-full h-11 border border-gray-300 font-semibold"
                     >
-                      회원가입
+                      회원 가입
                     </Button>
                   </div>
                 </div>

@@ -11,6 +11,7 @@ import com.navi.flight.repository.FlightRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -36,7 +37,6 @@ public class FlightServiceImpl implements FlightService {
             return airportRepository.findByAirportName("김해(부산)")
                     .orElseThrow(() -> new RuntimeException("공항 정보 없음: " + apiName));
         }
-
         return airportRepository.findByAirportName(apiName)
                 .or(() -> airportRepository.findByAirportNameContaining(apiName))
                 .orElseThrow(() -> new RuntimeException("공항 정보 없음: " + apiName));
@@ -74,15 +74,25 @@ public class FlightServiceImpl implements FlightService {
      */
     @Override
     public List<FlightDetailResponseDTO> searchFlights(FlightSearchRequestDTO requestDTO) {
+
+        System.out.println("검색 요청 DTO = " + requestDTO);
+
         return flightRepository.findAll().stream()
-                .filter(f -> f.getDepAirport().getAirportCode().equals(requestDTO.getDepAirportCode()))
-                .filter(f -> f.getArrAirport().getAirportCode().equals(requestDTO.getArrAirportCode()))
-                .filter(f -> f.getId().getDepTime().toLocalDate().equals(
-                        LocalDateTime.parse(requestDTO.getDepDate()).toLocalDate()))
+                // ✅ 출발 공항 코드 일치
+                .filter(f -> f.getDepAirport().getAirportCode()
+                        .equals(requestDTO.getDepAirportCode()))
+                // ✅ 도착 공항 코드 일치
+                .filter(f -> f.getArrAirport().getAirportCode()
+                        .equals(requestDTO.getArrAirportCode()))
+                // ✅ 출발 날짜 일치 (LocalDate로 비교)
+                .filter(f -> f.getId().getDepTime().toLocalDate()
+                        .equals(LocalDate.parse(requestDTO.getDepDate())))
+                // ✅ DTO 변환
                 .map(f -> {
                     int price = requestDTO.getSeatClass().equalsIgnoreCase("ECONOMY")
                             ? f.getEconomyCharge()
                             : (f.getPrestigeCharge() != null ? f.getPrestigeCharge() : 0);
+                    System.out.println("검색 요청 DTO => " + requestDTO);
 
                     return FlightDetailResponseDTO.builder()
                             .flightNo(f.getId().getFlightId())

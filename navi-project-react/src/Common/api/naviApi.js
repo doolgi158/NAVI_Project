@@ -1,8 +1,10 @@
 import axios from "axios";
 
-// 기본 API 경로. Vite 프록시를 통해 8080으로 전달됩니다.
-const BASE_PREFIX = '/api';
+// 서버 주소
+export const API_SERVER_HOST = "http://localhost:8080";
 
+// 기본 API 경로. 도메인(travel, flight)이 이 뒤에 붙게 됩니다.
+const BASE_PREFIX = `${API_SERVER_HOST}/api`;
 
 /**
  * 특정 도메인의 단일 항목을 조회하는 일반화된 함수
@@ -19,7 +21,6 @@ export const getOne = async (domain, id) => {
     // 성공적으로 응답을 받으면 데이터를 반환
     return response.data;
 };
-
 
 /**
  * 특정 도메인의 목록을 페이징하여 조회하는 일반화된 함수
@@ -38,3 +39,28 @@ export const getList = async (domain, pageParam) => {
     );
     return response.data;
 };
+
+// 로그인 처리
+export const Userlogin = async(loginParam) => {
+    const loginPrefix = `${BASE_PREFIX}/users`;
+
+    const params = new URLSearchParams();
+    params.append("username", loginParam.username);
+    params.append("password", loginParam.password);
+    
+    const response = await axios.post(`${loginPrefix}/login`, params, {
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    });
+
+    return response.data;
+};
+
+// 항공편 검색
+export const searchFlights = async (flightParam) => {
+  const url = `${API_SERVER_HOST}/flight/detail`;
+  const response = await axios.post(url, flightParam, {
+    headers: { "Content-Type": "application/json" },
+  });
+  return response.data;
+};
+

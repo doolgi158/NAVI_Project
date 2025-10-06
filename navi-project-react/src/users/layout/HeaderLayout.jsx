@@ -2,10 +2,10 @@ import { useState } from "react";
 import { Layout, Menu, Button, Drawer, Image, Space } from "antd";
 import { MenuOutlined } from "@ant-design/icons";
 import naviLogo from "../images/navi_logo.png";
-import { useModal } from "../../common/component/ModalProvider";
+import { useModal } from "../../common/components/Login/ModalProvider";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "../../slice/loginslice";
+import { logout } from "../../common/slice/loginSlice.js";
 
 const { Header } = Layout;
 
@@ -52,7 +52,7 @@ const HeaderLayout = () => {
         className="hidden md:flex"
       />
       {
-        loginstate.userid ?
+        loginstate.username ?
           <Space>
             <Button
               type="default"
@@ -93,7 +93,7 @@ const HeaderLayout = () => {
       >
         <Menu mode="vertical" items={items} style={{ color: "#2F3E46" }} />
         {
-          loginstate.userid ?
+          loginstate.username ?
             <div className="mt-4 flex flex-col gap-2">
               <Button
                 danger
