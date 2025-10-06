@@ -1,9 +1,8 @@
 import { lazy, Suspense } from "react";
 import { createBrowserRouter } from "react-router-dom";
-import AccRouter from "./AccRouter.jsx";
+import { TravelRouter } from "./TravelRouter.jsx";
 
 const Loading = <div></div>
-const TravelPage = lazy(() => import("../users/pages/TravelPage.jsx"))
 const UserMain = lazy(() => import("../users/pages/UserMainPage.jsx"))
 const AdminUsers = lazy(() => import("../admin/pages/AdminUsersPage.jsx"))
 const AdminDashboard = lazy(() => import("../admin/pages/AdminDashboardPage.jsx"))
@@ -48,7 +47,7 @@ const root = createBrowserRouter([
     },
     {
         path: "/travel",
-        element: <Suspense fallback={Loading}><TravelPage /></Suspense>
+        children: [...TravelRouter]
     },
     {
         path: "/accommodations",
@@ -58,6 +57,7 @@ const root = createBrowserRouter([
         path: "/accommodations/:accNo", 
         element: <Suspense fallback={Loading}><AccDetail /></Suspense>,
     },
+    
 ]);
 
 export default root;

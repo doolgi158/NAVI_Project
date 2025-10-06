@@ -1,6 +1,5 @@
 package com.navi.user.service;
 
-import com.navi.user.domain.User;
 import com.navi.user.dto.users.UserRequestDTO;
 import com.navi.user.dto.users.UserResponseDTO;
 
@@ -12,6 +11,4 @@ public interface UserService {
     public void modify(UserRequestDTO userRequestDTO);
     public void remove(Long no);
     public List<UserResponseDTO> userResponseList();
-
-    public UserRequestDTO login(String id, String pw);
 }

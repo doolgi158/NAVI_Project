@@ -1,7 +1,11 @@
 package com.navi.user.dto.users;
 
+import com.navi.user.domain.User;
 import com.navi.user.enums.UserState;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -18,4 +22,5 @@ public class UserResponseDTO {
     private char local;             // 내/외국인
     private UserState userState;    // 유저 상태
     private String signUp;          // 가입일
+    private String token;           // 토큰
 }

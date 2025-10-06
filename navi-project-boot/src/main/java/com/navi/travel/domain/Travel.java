@@ -5,7 +5,6 @@ import com.navi.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.math.BigDecimal;
 
 @Getter
 @Setter
