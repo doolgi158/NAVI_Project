@@ -1,14 +1,15 @@
 import FooterLayout from "./FooterLayout";
 import HeaderLayout from "./HeaderLayout";
 
-const MainLayout = ({ children }) => {
-  return (
-    <div className="min-h-screen flex flex-col">
-      <HeaderLayout />
-      <main className="flex-grow px-24 mt-1 bg-yellow-50">{children}</main>
-      <FooterLayout />
-    </div>
-  );
-};
+const MainLayout = ({children}) => {
+    return (
+       // 최상위 div에 화면 최소 높이, flex, 세로 정렬 클래스 적용
+        <div className="min-h-screen flex flex-col">
+            <HeaderLayout />
+            <main className="flex-grow  px-24 bg-yellow-50 ">{children}</main>
+            <FooterLayout />
+        </div>
+    );
+}
 
 export default MainLayout;

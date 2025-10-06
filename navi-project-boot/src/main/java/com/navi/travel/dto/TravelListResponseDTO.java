@@ -13,6 +13,7 @@ public class TravelListResponseDTO {
     private String title;       // 제목
     private String region1Name; //시명
     private String region2Name ;    //읍명
+    private String tag;     //태그
     private String thumbnailPath;   // 썸네일 경로
     private Long views;         // 조회수
     private Long likes;         // 좋아요 수
@@ -24,6 +25,7 @@ public class TravelListResponseDTO {
                 .title(Travel.getTitle())
                 .region1Name(Travel.getRegion1Name())
                 .region2Name(Travel.getRegion2Name())
+                .tag(Travel.getTag())
                 .thumbnailPath(Travel.getThumbnailPath())
                 .views(Travel.getViews())
                 .likes(Travel.getLikes())

@@ -12,9 +12,7 @@ const BASE_PREFIX = `${API_SERVER_HOST}`;
  * @param {string|number} id - 조회할 항목의 고유 ID (예: tno, fno 등)
  * @returns {Promise<any>} 항목 데이터
  */
-
 export const getOne = async (domain, id) => {
-    // API 경로 생성: /api/travel/1 또는 /api/flight/2
     const prefix = `${BASE_PREFIX}/${domain}`;
 
     // HTTP GET 요청
@@ -33,11 +31,10 @@ export const getOne = async (domain, id) => {
 export const getList = async (domain, pageParam) => {
     const { page, size } = pageParam;
     
-    // API 경로 생성: /api/travel/list 또는 /api/flight/list
-    const prefix = `${BASE_PREFIX}/${domain}`;
+    const prefix = `${BASE_PREFIX}/${domain}`; 
 
     const response = await axios.get(
-        `${prefix}/list`, 
+        `${prefix}`, 
         {params: {page: page, size: size}}
     );
     return response.data;
