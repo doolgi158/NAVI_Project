@@ -17,12 +17,10 @@ public class TryLoginDTO extends TryLogin {
     private char state;         // 성공 여부
     private LocalDateTime time; // 로그인시도 시간
     private String ip;          // 요청한 PC의 IP
-    private Long userNo;          // 사용자 번호
 
     public static TryLoginDTO fromEntity(TryLogin entity) {
         TryLoginDTO dto = new TryLoginDTO();
         dto.setTryid(entity.getTryid());
-        dto.setUserNo(entity.getUser().getNo());
         dto.setCount(entity.getCount());
         dto.setState(entity.getState());
         dto.setTime(entity.getTime());

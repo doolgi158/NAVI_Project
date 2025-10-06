@@ -1,11 +1,14 @@
 package com.navi.user.controller;
 
-import com.navi.user.domain.User;
 import com.navi.user.dto.TryLoginDTO;
 import com.navi.user.service.TryLoginService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/login-try")
@@ -14,18 +17,21 @@ public class TryLoginController {
     private final TryLoginService tryLoginService;
 
     // 로그인 실패
-    @PostMapping("/fail/{userNo}")
-    public ResponseEntity<TryLoginDTO> loginFail(@PathVariable Long userNo, @RequestParam String ip) {
-        User user = User.builder().no(userNo).build();
-        TryLoginDTO response = tryLoginService.handleLoginFail(user, ip);
-        return ResponseEntity.ok(response);
+    @PostMapping("/fail")
+    public ResponseEntity<?> recordFail(@RequestParam String ip) {
+        try {
+            tryLoginService.handleLoginFail(ip);
+            return ResponseEntity.ok().body(Map.of("status", "FAIL_RECORDED"));
+        } catch (LockedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("status", "LOCKED", "message", e.getMessage()));
+        }
     }
 
     // 로그인 성공
-    @PostMapping("/success/{userNo}")
-    public ResponseEntity<TryLoginDTO> loginSuccess(@PathVariable Long userNo, @RequestParam String ip) {
-        User user = User.builder().no(userNo).build();
-        TryLoginDTO response = tryLoginService.handleLoginSuccess(user, ip);
-        return ResponseEntity.ok(response);
+    @PostMapping("/success")
+    public ResponseEntity<?> recordSuccess(@RequestParam String ip) {
+        tryLoginService.handleLoginSuccess(ip);
+        return ResponseEntity.ok(Map.of("status", "SUCCESS_RECORDED"));
     }
 }

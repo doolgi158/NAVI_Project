@@ -1,15 +1,15 @@
 package com.navi.user.repository;
 
 import com.navi.user.domain.TryLogin;
-import com.navi.user.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 public interface TryLoginRepository extends JpaRepository<TryLogin, Long> {
-    // 유저별 최근 로그인 시도 조회
-    @Query("SELECT t FROM TryLogin t WHERE t.user = :user")
-    Optional<TryLogin> findTryLoginUser(@Param("user") User user);
+    // 특정 IP로 마지막 시도 찾기
+    Optional<TryLogin> findByIp(String ip);
+
+    // 특정 IP 존재 여부 확인
+    boolean existsByIp(String ip);
 }
