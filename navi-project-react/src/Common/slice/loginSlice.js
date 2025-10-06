@@ -30,7 +30,7 @@ const loginSlice = createSlice({
       .addCase(loginAsync.fulfilled, (state, action) => {
         // 로그인 요청이 성공했을 때 상태 업데이트
         const data = action.payload;
-
+        console.log(data);
         return {username: data.id, token: data.accessToken};
       })
       .addCase(loginAsync.rejected, (state, action) => {
