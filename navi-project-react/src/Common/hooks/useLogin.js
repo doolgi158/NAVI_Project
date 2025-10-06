@@ -2,7 +2,7 @@
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { loginAsync } from "./../slice/loginSlice";
+import { loginAsync } from "../slice/loginSlice.js";
 import { useModal } from "../components/Login/ModalProvider";
 
 const host = "http://localhost:8080";

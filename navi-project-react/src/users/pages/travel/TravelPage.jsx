@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import MainLayout from '../layout/MainLayout';
+import MainLayout from '../../layout/MainLayout.jsx';
 import axios from 'axios'; 
 
 

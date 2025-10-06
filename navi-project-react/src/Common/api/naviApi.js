@@ -4,7 +4,7 @@ import axios from "axios";
 export const API_SERVER_HOST = "http://localhost:8080";
 
 // 기본 API 경로. 도메인(travel, flight)이 이 뒤에 붙게 됩니다.
-const BASE_PREFIX = `${API_SERVER_HOST}`;
+const BASE_PREFIX = `${API_SERVER_HOST}/api`;
 
 /**
  * 특정 도메인의 단일 항목을 조회하는 일반화된 함수
