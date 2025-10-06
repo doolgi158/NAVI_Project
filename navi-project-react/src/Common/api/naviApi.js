@@ -62,3 +62,11 @@ export const searchFlights = async (flightParam) => {
   return response.data;
 };
 
+// 카카오맵 설정 정보를 서버에서 조회하는 함수
+
+export const getKakaoMapConfig = async () => {
+    // 💡 [수정] 프록시 설정에 따라 BASE_PREFIX를 사용하거나,
+    // 클라이언트 코드가 BASE_PREFIX 없이 /api/config/kakao를 호출하도록 수정합니다.
+    const response = await axios.get(`${BASE_PREFIX}/config/kakao`);
+    return response.data;
+};

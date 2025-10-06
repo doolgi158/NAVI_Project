@@ -1,13 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import MainLayout from '../../layout/MainLayout.jsx';
 import axios from 'axios'; 
 import { useNavigate } from 'react-router-dom'; 
 
-// =========================================================================
-// 💡 API 연동 환경 설정 및 Mock 데이터 함수 (주석 처리됨)
-// =========================================================================
-// ... (getTravelData 함수는 동일합니다)
 
 const getTravelData = async (domain, pageParam) => {
     // ----------------------------------------------------------------------
@@ -56,6 +52,7 @@ const AntDCard = ({ item, onClick, isSelected }) => (
                 className="w-full h-full object-cover rounded-lg shadow-md"
                 onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/112x112/cccccc/333333?text=No+Image"; }}
             />
+            {/* {item.thumbnailPath} */}
         </div>
 
         {/* ✅ 우측 콘텐츠 영역 */}
@@ -138,6 +135,7 @@ const AntDPagination = ({ pageResult, handlePageClick, loading }) => (
                 &gt;&gt;
             </button>
         </div>
+        
     </div>
 );
 
@@ -145,9 +143,9 @@ const AntDPagination = ({ pageResult, handlePageClick, loading }) => (
 // TravelPage 컴포넌트
 // =========================================================================
 const TravelPage = () => {
-    // useNavigate 훅을 사용하여 navigate 함수 초기화
-    const navigate = useNavigate(); 
-    
+    // useNavigate 훅을 사용하여 navigate 함수 초기화
+    const navigate = useNavigate(); 
+    
     const [pageResult, setPageResult] = useState({
         dtoList: [],
         totalElements: 0,
@@ -163,6 +161,14 @@ const TravelPage = () => {
     const [loading, setLoading] = useState(false); 
     const [hasError, setHasError] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null); // 선택된 항목 상태
+
+    // ⭐️ 지도 SDK 로드 완료 상태를 추적하는 새 상태 ⭐️
+    const [isMapSDKLoaded, setIsMapSDKLoaded] = useState(false); 
+
+    // 지도 객체를 저장할 Ref
+    const mapRef = useRef(null);
+    const markerRef = useRef(null); 
+    const infoWindowRef = useRef(null);
 
     // ✅ API 호출 함수 (무한 루프 방지를 위해 pageParam만 종속성으로 설정)
     const fetchTravelList = useCallback(() => {
@@ -200,8 +206,6 @@ const TravelPage = () => {
             if (data.content.length > 0) {
                 // 이전 선택 항목이 현재 페이지에 있으면 유지, 없으면 첫 항목 선택
                 setSelectedItem(prevSelectedItem => {
-                    // API 응답 객체가 travelId를 사용하더라도, selectedItem의 비교 기준은 id로 유지할 수 있습니다. 
-                    // 하지만 정확한 비교를 위해 selectedItem.id를 item.travelId로 변경하는 것이 좋습니다.
                     const currentSelectedItem = prevSelectedItem && data.content.find(item => item.travelId === prevSelectedItem.travelId);
                     return currentSelectedItem || data.content[0];
                 });
@@ -234,9 +238,81 @@ const TravelPage = () => {
     // ✅ 카드 클릭 시 상세 정보 설정 및 페이지 이동
     const handleCardClick = (item) => {
         setSelectedItem(item);
-        // travelId를 이용해 상세 페이지로 이동
-        navigate(`/travel/detail/${item.travelId}`); 
+        // travelId를 이용해 상세 페이지로 이동
+        navigate(`/travel/detail/${item.travelId}`); 
     };
+
+     // =========================================================================
+    // ⭐️ 지도 로직 수정 영역 ⭐️
+    // =========================================================================
+    
+    // 1. [수정 1] 지도 SDK를 활성화하고 isMapSDKLoaded 상태를 업데이트합니다.
+    useEffect(() => {
+        const loadKakaoMap = () => {
+    if (window.kakao && window.kakao.maps) {
+      window.kakao.maps.load(() => {
+        console.log("✅ Kakao Maps SDK 로드 완료");
+        setIsMapSDKLoaded(true);
+      });
+    } else {
+      console.warn("⚠️ Kakao SDK가 아직 로드되지 않음");
+    }
+  };
+
+  // script가 이미 존재하는 경우
+  if (window.kakao && window.kakao.maps) {
+    loadKakaoMap();
+  } else {
+    const script = document.createElement("script");
+    script.src = "//dapi.kakao.com/v2/maps/sdk.js?appkey=64f77515cbf4b9bf257e664e44b1ab9b&libraries=services&autoload=false";
+    script.async = true;
+    script.onload = loadKakaoMap;
+    document.head.appendChild(script);
+  }
+}, []);
+
+    
+    // 2. [수정 2] selectedItem과 isMapSDKLoaded 상태가 변경될 때마다 지도를 업데이트합니다.
+    useEffect(() => {
+  if (!isMapSDKLoaded || !selectedItem) return;
+
+  // DOM 렌더 이후 실행 (렌더 타이밍 보장)
+  setTimeout(() => {
+    const mapContainer = document.getElementById("kakao-map-container");
+    if (!mapContainer) {
+      console.error("지도 컨테이너를 찾을 수 없습니다.");
+      return;
+    }
+
+    const maps = window.kakao.maps;
+    const mapOption = {
+      center: new maps.LatLng(33.450701, 126.570667),
+      level: 8,
+    };
+    const map = new maps.Map(mapContainer, mapOption);
+    mapRef.current = map;
+
+    // 주소 좌표 검색 로직
+    const geocoder = new maps.services.Geocoder();
+    geocoder.addressSearch(selectedItem.address, (result, status) => {
+      let coords;
+      if (status === maps.services.Status.OK && result[0]) {
+        coords = new maps.LatLng(result[0].y, result[0].x);
+      } else {
+        coords = new maps.LatLng(33.450701, 126.570667);
+      }
+
+      const marker = new maps.Marker({ map, position: coords });
+      const infowindow = new maps.InfoWindow({ content: `<div>${selectedItem.title}</div>` });
+      infowindow.open(map, marker);
+
+      setTimeout(() => {
+        map.relayout();
+        map.setCenter(coords);
+      }, 300);
+    });
+  }, 100); // 100ms 지연
+}, [isMapSDKLoaded, selectedItem]); // isMapSDKLoaded를 종속성 배열에 추가
 
     const regionTags = ["제주시", "서귀포시", "동부", "서부", "남부", "북부"];
     const totalCountText = loading ? "로딩 중..." : `총 ${pageResult.totalElements.toLocaleString()}개`;
@@ -318,39 +394,33 @@ const TravelPage = () => {
                         
                     </div>
 
-                    {/* B. 우측 지도 영역 (요청에 따라 지도 스타일 적용) */}
+                    {/* B. 우측 지도 영역 (카카오맵으로 교체) */}
                     <div className="lg:w-8/12">
-                        <div className="relative border-2 border-gray-300 rounded-lg shadow-2xl h-[400px] lg:h-full lg:min-h-[1000px] sticky top-6 overflow-hidden"> 
-                            {/* 지도 배경 시뮬레이션 */}
-                            <div className="absolute inset-0 bg-gray-300 flex items-center justify-center text-xl text-gray-600 font-bold">
-                                <span className="absolute inset-0 bg-map-pattern opacity-10"></span>
-                                <span className="z-10">실시간 지도 영역</span>
-                                
-                                {selectedItem && (
-                                    <div className="absolute z-20 p-3 rounded-lg bg-blue-600 text-white shadow-xl max-w-xs transition-all duration-500"
-                                        style={{ 
-                                            // 더미 위경도를 이용해 지도 위의 위치를 시뮬레이션
-                                            // Mock 데이터가 없으므로 이 좌표 계산은 의미가 없을 수 있습니다.
-                                            top: `${50 + (selectedItem.lat - 33.5) * 100}%`,
-                                            left: `${50 + (selectedItem.lng - 126.75) * 100}%`,
-                                            transform: 'translate(-50%, -100%)' 
-                                        }}>
-                                        <div className="font-bold text-lg leading-tight">{selectedItem.title}</div>
-                                        <div className="text-xs mt-1">{selectedItem.address}</div>
-                                        <div className="absolute left-1/2 bottom-0 transform -translate-x-1/2 translate-y-full w-0 h-0 border-x-8 border-x-transparent border-t-8 border-t-blue-600"></div>
+                        <div className="relative border-2 border-gray-300 rounded-lg shadow-2xl h-[500px] sticky top-6 overflow-hidden"> 
+                            
+                            {/* ⭐️ 카카오맵이 렌더링될 실제 컨테이너 ⭐️ */}
+                            <div 
+                                id="kakao-map-container" 
+                                style={{ width: '100%', height: '100%',display: "block" }}
+                            >
+                                {/* 선택된 항목이 없을 때 가이드 메시지 */}
+                                {!selectedItem && (
+                                     <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-70 z-10">
+                                         <span className="text-white text-2xl font-semibold p-4 text-center">
+                                             목록에서 여행지를 선택하여<br/> 지도에서 위치를 확인하세요.
+                                         </span>
+                                     </div>
+                                )}
+                                
+                                {/* ⚠️ 지도 로드 실패/지연 시 메시지 ⚠️ */}
+                                {!isMapSDKLoaded && (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-gray-100 z-10">
+                                        <div className="text-gray-600 text-lg font-medium">
+                                            카카오맵 SDK 로딩 중...
+                                        </div>
                                     </div>
                                 )}
-
                             </div>
-                            
-                            {!selectedItem && (
-                                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
-                                    <span className="text-white text-2xl font-semibold">
-                                        목록에서 여행지를 선택하여 지도에서 위치를 확인하세요.
-                                    </span>
-                                </div>
-                            )}
-
                         </div>
                     </div>
                 </div>
@@ -365,13 +435,7 @@ const TravelPage = () => {
                 )}
             </div>
             
-            {/* Tailwind Map Pattern을 위한 Style 정의 (옵션) */}
-            <style jsx="true">{`
-                .bg-map-pattern {
-                    background-image: linear-gradient(0deg, transparent 24%, rgba(255,255,255,.05) 25%, rgba(255,255,255,.05) 26%, transparent 27%, transparent 74%, rgba(255,255,255,.05) 75%, rgba(255,255,255,.05) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(255,255,255,.05) 25%, rgba(255,255,255,.05) 26%, transparent 27%, transparent 74%, rgba(255,255,255,.05) 75%, rgba(255,255,255,.05) 76%, transparent 77%, transparent);
-                    background-size: 50px 50px;
-                }
-            `}</style>
+           
 
         </MainLayout>
     );
