@@ -145,7 +145,7 @@ const AntDPagination = ({ pageResult, handlePageClick, loading }) => (
 // TravelPage 컴포넌트
 // =========================================================================
 const TravelPage = () => {
-    // 💡 [수정됨 2] useNavigate 훅을 사용하여 navigate 함수 초기화
+    // useNavigate 훅을 사용하여 navigate 함수 초기화
     const navigate = useNavigate(); 
     
     const [pageResult, setPageResult] = useState({

@@ -9,7 +9,7 @@ import {
     HeartOutlined, ShareAltOutlined, StarOutlined, 
     PhoneOutlined, GlobalOutlined, EnvironmentOutlined 
 } from '@ant-design/icons';
-import MainLayout from '../layout/MainLayout';
+import MainLayout from '../../layout/MainLayout';
 
 const { Title, Text, Paragraph } = Typography;
 
