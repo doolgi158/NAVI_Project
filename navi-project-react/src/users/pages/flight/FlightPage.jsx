@@ -72,10 +72,10 @@ const FlightPage = () => {
     // 3️⃣ 검색 조건을 객체로 묶기
     const searchData = {
       tripType,
-      from,
-      to,
-      dates: formattedDates, // ✅ dayjs → 문자열 변환 완료
-      passengers,
+      depAirport: from,     // ✅ key 이름 변경
+      arrAirport: to,       // ✅ key 이름 변경
+      depDate: formattedDates.depDate, // ✅ 평탄화 (dates 제거)
+      passengerCount: passengers,
       seatClass,
     };
 

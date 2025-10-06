@@ -5,7 +5,7 @@ import naviLogo from "../images/navi_logo.png";
 import { useModal } from "../../common/components/Login/ModalProvider";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "../../common/slice/loginSlice";
+import { logout } from "../../common/slice/loginSlice.js";
 
 const { Header } = Layout;
 

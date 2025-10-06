@@ -4,8 +4,7 @@ import axios from "axios";
 export const API_SERVER_HOST = "http://localhost:8080";
 
 // 기본 API 경로. 도메인(travel, flight)이 이 뒤에 붙게 됩니다.
-const BASE_PREFIX = `${API_SERVER_HOST}/api`;
-
+const BASE_PREFIX = `${API_SERVER_HOST}`;
 
 /**
  * 특정 도메인의 단일 항목을 조회하는 일반화된 함수
@@ -24,8 +23,6 @@ export const getOne = async (domain, id) => {
     // 성공적으로 응답을 받으면 데이터를 반환
     return response.data;
 };
-
-
 
 /**
  * 특정 도메인의 목록을 페이징하여 조회하는 일반화된 함수
@@ -60,3 +57,13 @@ export const Userlogin = async(loginParam) => {
 
     return response.data;
 };
+
+// 항공편 검색
+export const searchFlights = async (flightParam) => {
+  const url = `${API_SERVER_HOST}/flight/detail`;
+  const response = await axios.post(url, flightParam, {
+    headers: { "Content-Type": "application/json" },
+  });
+  return response.data;
+};
+

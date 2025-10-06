@@ -1,7 +1,11 @@
 package com.navi.user.dto.users;
 
+import com.navi.user.domain.User;
 import com.navi.user.enums.UserState;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @AllArgsConstructor

@@ -45,8 +45,12 @@ public class JWTCheckFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
 
         // 로그인 없이 접근 가능한 페이지 건너뜀
-        return path.startsWith("/api/users/signup") || path.startsWith("/api/users/login") || path.startsWith("/api/travels/") ||
+        if(path.startsWith("/api/users/signup") || path.startsWith("/api/users/login") || path.startsWith("/api/travels/") ||
                 path.startsWith("/api/transports") || path.startsWith("/api/accommodations") || path.startsWith("/api/posts") ||
-                path.startsWith("/api/notices") || path.startsWith("/api/login-try/**");
+                path.startsWith("/api/notices") || path.startsWith("/flight") || path.startsWith("/api/login-try/**")){
+            return true;
+        }
+
+        return false;
     }
 }
