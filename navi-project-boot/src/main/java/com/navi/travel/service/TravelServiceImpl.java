@@ -48,6 +48,7 @@ public class TravelServiceImpl implements TravelService {
     @Transactional(readOnly = true)
     public Page<TravelListResponseDTO> getTravelList(Pageable pageable) {
         Page<Travel> travelPage = travelRepository.findAll(pageable);
+        // Travel 엔티티 Page를 DTO Page로 변환
         return travelPage.map(TravelListResponseDTO::of);
     }
 

@@ -12,7 +12,7 @@ export const useKakaoMap = (containerId) => {
   const customOverlayRef = useRef(null); 
   const infoWindowRef = useRef(null); 
 
-  // ⭐️ 커스텀 오버레이를 숨길 페이지의 컨테이너 ID를 정의합니다.
+  //커스텀 오버레이를 숨길 페이지의 컨테이너 ID를 정의합니다.
   const HIDE_OVERLAY_ID = 'kakao-detail-map-container';
 
   // 1️⃣ SDK 로드 및 초기화 (유지)

@@ -2,7 +2,6 @@ import axios from "axios";
 import { useDispatch } from "react-redux";
 import { setlogin } from "../slice/loginSlice";
 import { useNavigate } from "react-router-dom";
-import { BASE_PREFIX } from "../api/naviApi";
 
 export const useLogin = () => {
   const dispatch = useDispatch();

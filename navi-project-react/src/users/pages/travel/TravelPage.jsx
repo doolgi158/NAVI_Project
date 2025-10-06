@@ -3,7 +3,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import MainLayout from '../../layout/MainLayout.jsx';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { useKakaoMap } from '../../../hooks/useKakaoMap'; 
+import { useKakaoMap } from '../../../Common/hooks/useKakaoMap.jsx'; 
 
 // ✅ 여행지 목록 API 호출 함수 (정렬 매개변수 추가)
 const getTravelData = async (domain, pageParam) => {

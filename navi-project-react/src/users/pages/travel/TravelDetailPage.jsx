@@ -10,8 +10,7 @@ import {
     PhoneOutlined, GlobalOutlined, EnvironmentOutlined 
 } from '@ant-design/icons';
 import MainLayout from '../../layout/MainLayout';
-// ⭐️ [추가] 이전에 작성했던 카카오맵 훅을 가져옵니다.
-import { useKakaoMap } from '../../../hooks/useKakaoMap'; 
+import { useKakaoMap } from '../../../Common/hooks/useKakaoMap.jsx'; 
 
 const { Title, Text, Paragraph } = Typography;
 
