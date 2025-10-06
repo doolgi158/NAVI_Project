@@ -1,5 +1,6 @@
 import { Suspense, lazy } from "react";
 import { Navigate } from "react-router-dom";
+import { ModalProvider } from "../components/Login/ModalProvider.jsx";
 
 const Loading = <div>Loading....</div>
 const TravelList = lazy(() => import("../../users/pages/travel/TravelList.jsx"))

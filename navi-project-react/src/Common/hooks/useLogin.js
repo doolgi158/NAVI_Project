@@ -1,51 +1,75 @@
 import axios from "axios";
 import { useDispatch } from "react-redux";
-import { login, logout } from "../slices/loginSlice.js";
-
-const BASE_PREFIX = "http://localhost:8080/api";
+import { setlogin } from "../slice/loginSlice";
+import { useNavigate } from "react-router-dom";
+import { BASE_PREFIX } from "../api/naviApi";
 
 export const useLogin = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  const loginAction = async (values) => {
-    const params = new URLSearchParams();
-    params.append("username", values.username);
-    params.append("password", values.password);
-
+  const login = async (values) => {
     try {
-      const response = await axios.post(`${BASE_PREFIX}/users/login`, params, {
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      });
-
-      // 성공 시 IP 기록
+      // ✅ 클라이언트 IP 조회      
       const ipRes = await axios.get("https://api.ipify.org?format=json");
       const ip = ipRes.data.ip;
-      await axios.post(`${BASE_PREFIX}/login-try/success?ip=${ip}`);
 
-      // Redux 상태 업데이트
-      dispatch(login({ username: response.data.id }));
+      // ✅ 로그인 요청
+      const params = new URLSearchParams();
+      params.append("username", values.username);
+      params.append("password", values.password);
+      params.append("ip", ip);
 
-      return true;
-    } catch (err) {
-      // 실패 시 IP 기록
-      try {
-        const ipRes = await axios.get("https://api.ipify.org?format=json");
-        const ip = ipRes.data.ip;
-        const res = await axios.post(`${BASE_PREFIX}/login-try/fail?ip=${ip}`);
-        if (res.data.status === "LOCKED") {
-          alert(res.data.message);
-          return false;
+      const response = await axios.post(`${BASE_PREFIX}/users/login`, params, {
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        validateStatus: () => true,  // 에러 상태도 직접 처리
+      });
+      
+      // ✅ 상태 코드별 처리
+      if (response.status === 200) {
+        const data = response.data;
+
+        // JWT 토큰 저장
+        localStorage.setItem("accessToken", data.accessToken);
+        localStorage.setItem("refreshToken", data.refreshToken);
+
+        // Redux 상태 갱신
+        dispatch(setlogin({ username: values.username, token: data.accessToken }));
+
+        // 관리자 전용 페이지 분기
+        if (data.id === "naviadmin") {
+          navigate("/adm/dashboard");
+        } else {
+          navigate("/"); // 일반 사용자 메인으로 이동
         }
-      } catch (ipErr) {
-        console.error("IP 전송 실패:", ipErr);
+
+        return { success: true, message: "로그인 성공" };
       }
 
-      alert("아이디 또는 비밀번호가 올바르지 않습니다.");
-      return false;
+      if (response.status === 403) {
+        alert("❗ 5회 이상 로그인 실패로 10분간 로그인 차단되었습니다.");
+        return { success: false, message: "5회 이상 실패로 10분간 로그인 차단되었습니다." };
+      }
+
+      if (response.status === 401) {
+        alert("❗ 아이디 또는 비밀번호가 올바르지 않습니다.");
+        return { success: false, message: "아이디 또는 비밀번호가 올바르지 않습니다." };
+      }
+      alert("❗ 알 수 없는 오류가 발생했습니다. 관리자에게 문의하세요.");
+
+      return { success: false, message: "서버 응답을 처리할 수 없습니다." };
+    } catch (error) {
+      console.error("❌ 로그인 요청 오류:", error);
+      alert("❗ 서버에 연결할 수 없습니다. 잠시 후 다시 시도하세요.");
+      return { success: false, message: "서버에 연결할 수 없습니다." };
     }
   };
 
-  const logoutAction = () => dispatch(logout());
+  const logoutUser = () => {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    dispatch(logout());
+  };
 
-  return { loginAction, logoutAction };
+  return { login, logoutUser };
 };
