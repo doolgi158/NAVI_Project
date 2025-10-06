@@ -1,17 +1,21 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 
 /**
- * ✅ Kakao Map Hook (Geocoding 로직 제거, DB 좌표만 사용)
+ * ✅ Kakao Map Hook (DB 좌표, 부드러운 이동, 마커 + 커스텀 오버레이 동시 적용)
  * @param {string} containerId - 지도 컨테이너 DOM id
  * @returns {object} { isMapLoaded, updateMap, resetMap }
  */
 export const useKakaoMap = (containerId) => {
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   const mapRef = useRef(null);
-  const markerRef = useRef(null);
-  const infoWindowRef = useRef(null);
+  const markerRef = useRef(null); 
+  const customOverlayRef = useRef(null); 
+  const infoWindowRef = useRef(null); 
 
-  // 1️⃣ SDK 로드 및 초기화
+  // ⭐️ 커스텀 오버레이를 숨길 페이지의 컨테이너 ID를 정의합니다.
+  const HIDE_OVERLAY_ID = 'kakao-detail-map-container';
+
+  // 1️⃣ SDK 로드 및 초기화 (유지)
   useEffect(() => {
     const loadKakaoSDK = () => {
       if (window.kakao && window.kakao.maps) {
@@ -35,12 +39,9 @@ export const useKakaoMap = (containerId) => {
 
   // 2️⃣ 지도 생성 또는 업데이트
   const updateMap = useCallback(
-    // item 객체 전체를 인수로 받음
     (item) => { 
-      // DB에서 가져온 위도(latitude), 경도(longitude) 값을 직접 사용
-      const { title, latitude, longitude } = item; 
+      const { title, latitude, longitude, thumbnailPath } = item; 
 
-   
       if (!isMapLoaded) { 
           console.log("[KakaoMap Debug] Map SDK not ready. Skipping map update.");
           return;
@@ -61,8 +62,8 @@ export const useKakaoMap = (containerId) => {
           const lat = parseFloat(latitude);
           const lng = parseFloat(longitude);
           coords = new kakao.maps.LatLng(lat, lng);
+          console.log(`[KakaoMap Success] Using DB coordinates: Lat ${lat}, Lng ${lng}`);
       } else {
-          // 2. 좌표가 없거나 유효하지 않으면 기본 좌표 사용
           coords = new kakao.maps.LatLng(33.3926876, 126.4948419); 
           console.error(`[KakaoMap Error] DB coordinates invalid or missing. Setting map to default center.`);
       }
@@ -78,29 +79,71 @@ export const useKakaoMap = (containerId) => {
           map.relayout();
       }
       
-      // 마커/인포윈도우 설정
+      // 2. 기존 마커 및 오버레이 제거
       if (markerRef.current) markerRef.current.setMap(null);
-      if (infoWindowRef.current) infoWindowRef.current.close();
-      const marker = new kakao.maps.Marker({ map, position: coords });
-      const infoWindow = new kakao.maps.InfoWindow({ content: `<div style="padding:5px 10px;">${title}</div>` });
-      infoWindow.open(map, marker);
-      markerRef.current = marker;
-      infoWindowRef.current = infoWindow;
+      if (customOverlayRef.current) customOverlayRef.current.setMap(null);
 
-      // 지도의 중심 이동
-      map.setCenter(coords);
+      // 3. 마커 생성 및 지도에 표시 (모든 페이지에서 마커는 표시)
+      const marker = new kakao.maps.Marker({ map, position: coords });
+      markerRef.current = marker;
+
+      // ⭐️ [수정] 현재 페이지가 상세 페이지(HIDE_OVERLAY_ID)인지 확인
+      const shouldShowCustomOverlay = containerId !== HIDE_OVERLAY_ID;
+
+      // 4. 커스텀 오버레이 처리 (조건부 생성 및 표시)
+      if (shouldShowCustomOverlay) {
+          // 오버레이를 표시해야 하는 경우에만 HTML 생성 및 오버레이 생성
+          const imageSrc = thumbnailPath || 'https://placehold.co/100x100/cccccc/333333?text=No';
+
+          const content = `
+            <div style="
+              width: 220px;
+              background: white;
+              border-radius: 12px;
+              overflow: hidden;
+              box-shadow: 0px 5px 10px 0px rgba(0,0,0,0.1);
+              font-family: sans-serif;
+            ">
+              <div style="width:100%; height:140px; overflow:hidden;  ">
+                <img src="${imageSrc}" style="width:100%; height:100%; object-fit:cover;  border-radius: 12px;" 
+                  onerror="this.onerror=null;this.src='https://placehold.co/220x140/cccccc/333333?text=No'"/>
+              </div>
+                <div style="padding:8px 12px; font-size:16px; font-weight:bold; color:#111; background: white;border-radius:0px 0px 12px 12px;">
+                ${title}
+              </div>
+            </div>
+          `;
+
+          // 5. 커스텀 오버레이 생성 및 지도에 표시
+          const customOverlay = new kakao.maps.CustomOverlay({
+              map: map,
+              position: coords,
+              content: content,
+              // 오버레이 위치 조정: 마커 위에 표시되도록 yAnchor 설정
+              yAnchor: 1, 
+              zIndex: 3,
+          });
+          
+          customOverlayRef.current = customOverlay;
+      }
+
+      // 지도의 중심 이동 (부드럽게 panTo 유지)
+      map.panTo(coords);
       map.relayout();
     },
-    [isMapLoaded, containerId] 
+    [isMapLoaded, containerId]
   );
 
-  // 3️⃣ 지도 초기화 해제
+  // 3️⃣ 지도 초기화 해제 
   const resetMap = useCallback(() => {
     mapRef.current = null;
+    // 마커 및 오버레이 모두 제거
+    if (markerRef.current) markerRef.current.setMap(null);
+    if (customOverlayRef.current) customOverlayRef.current.setMap(null);
     markerRef.current = null;
+    customOverlayRef.current = null;
     infoWindowRef.current = null;
   }, []);
 
-  // isGeocoderReady 반환 제거
   return { isMapLoaded, updateMap, resetMap };
 };

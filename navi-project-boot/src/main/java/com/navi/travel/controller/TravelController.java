@@ -7,6 +7,9 @@ import com.navi.travel.service.TravelService; // TravelApiService 대신 TravelS
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,15 +22,16 @@ public class TravelController {
     private final TravelService travelService;
 
 
+
     // 제주도 여행정보 리스트 화면 (페이지네이션 적용)
     @GetMapping
     public Page<TravelListResponseDTO> getList(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size
+            @PageableDefault(
+                    size = 10,
+                    sort = "updatedAt", // 정렬 기준 필드: 수정일
+                    direction = Sort.Direction.DESC // 정렬 방향: 내림차순 (최신순)
+            ) Pageable pageable
     ) {
-        // 클라이언트의 요청 페이지는 1부터 시작하지만, Spring Data JPA의 Pageable은 0부터 시작하므로 page - 1
-        PageRequest pageable = PageRequest.of(page - 1, size);
-
         // Service를 통해 DB에서 데이터를 가져와 반환
         return travelService.getTravelList(pageable);
     }
