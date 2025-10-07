@@ -9,7 +9,7 @@ const AdminUsers = lazy(() => import("../../admin/pages/AdminUsersPage.jsx"))
 const AdminDashboard = lazy(() => import("../../admin/pages/AdminDashboardPage.jsx"))
 const Flight = lazy(() => import("../../users/pages/flight/FlightPage.jsx"))
 const Signup = lazy(() => import("../../users/pages/UserSignupPage.jsx"))
-const AccList = lazy(() => import("../../users/pages/accommodation/AccDetailPage.jsx"))
+const AccList = lazy(() => import("../../users/pages/accommodation/AccListPage.jsx"))
 const AccDetail = lazy(() => import("../../users/pages/accommodation/AccDetailPage.jsx"))
 
 const root = createBrowserRouter([
