@@ -41,10 +41,12 @@ public class SecurityConfig {
         });
 
         // JWT 체크 (토큰 정보가 있으면 로그인을 건너뛴다)
-        security.addFilterBefore(new JWTCheckFilter(), UsernamePasswordAuthenticationFilter.class);
+       // security.addFilterBefore(new JWTCheckFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return security.build();
     }
+
+
 
     // Password 암호화
     @Bean
@@ -59,6 +61,7 @@ public class SecurityConfig {
         configuration.setAllowedOriginPatterns(Arrays.asList("*"));
         configuration.setAllowedMethods(Arrays.asList("POST", "GET", "DELETE", "PUT", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
+        configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

@@ -12,6 +12,7 @@ public interface AccService {
     public void loadFromJsonFile() throws IOException;
     public void insertInitialFromApi(AccApiDTO dto);
     public void updateFromJsonFile() throws IOException;
+    public void updateInitialFromApi(Acc acc, AccApiDTO dto);
 
     /* === 관리자 전용 CRUD === */
     Acc createAcc(AccRequestDTO dto);

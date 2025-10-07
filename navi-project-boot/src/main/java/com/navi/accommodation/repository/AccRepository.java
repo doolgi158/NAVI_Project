@@ -8,5 +8,5 @@ import java.util.List;
 import java.util.Optional;
 
 public interface AccRepository extends JpaRepository<Acc, Long> {
-    Optional<Acc> findByContentId(Long ContentId);
+    Optional<Acc> findByContentId(Long contentId);
 }

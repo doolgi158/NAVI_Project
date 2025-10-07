@@ -1,14 +1,15 @@
 import { lazy, Suspense } from "react";
 import { createBrowserRouter } from "react-router-dom";
-import TravelPage from "../users/pages/TravelPage.jsx";
+import { TravelRouter } from "./TravelRouter.jsx";
 
-const Loading = <div>Loading...</div>
+const Loading = <div></div>
 const UserMain = lazy(() => import("../users/pages/UserMainPage.jsx"))
 const AdminUsers = lazy(() => import("../admin/pages/AdminUsersPage.jsx"))
 const AdminDashboard = lazy(() => import("../admin/pages/AdminDashboardPage.jsx"))
 const Flight = lazy(() => import("../users/pages/FlightPage.jsx"))
 const FlightDetail = lazy(() => import("../users/pages/FlightDetailPage.jsx"))
 const FlightRsv = lazy(() => import("../users/pages/FlightRsvInputPage.jsx"))
+const Signup = lazy(() => import("../users/pages/UserSignupPage.jsx"))
 
 const root = createBrowserRouter([
     {
@@ -36,9 +37,14 @@ const root = createBrowserRouter([
         element: <Suspense fallback={Loading}><FlightRsv /></Suspense>
     },
     {
-        path: "/travel",
-        element: <Suspense fallback={Loading}><TravelPage /></Suspense>
+        path: "/signup",
+        element: <Suspense fallback={Loading}><Signup /></Suspense>
     },
+    {
+        path: "/travel",
+        children: [...TravelRouter]
+    },
+    
 ]);
 
 export default root;

@@ -1,5 +1,6 @@
 package com.navi.user.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.navi.user.enums.UserRole;
 import com.navi.user.enums.UserState;
 import jakarta.persistence.*;
@@ -43,9 +44,6 @@ public class User {
     @Column(name = "user_gender")
     private char gender;        // 성별
 
-    @Column(name = "user_pernum", nullable = false)
-    private String perNum;      // 주민/여권번호
-
     @Column(name = "user_ID", nullable = false)
     private String id;          // 아이디
 
@@ -58,6 +56,7 @@ public class User {
     @Column(name = "user_signup", updatable = false)
     @ColumnDefault(value = "sysdate")
     @CreationTimestamp
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private String signUp;      // 가입일
 
     @Column(name = "user_state", nullable = false)
@@ -76,4 +75,7 @@ public class User {
     public void clearRole(UserRole userRole) {
         userRoleList.clear();
     }
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<TryLogin> tryLogins = new ArrayList<>();   // 로그인 시도
 }
