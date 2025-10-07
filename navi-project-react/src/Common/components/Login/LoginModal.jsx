@@ -1,4 +1,4 @@
-import { Form, Input, Button, Card } from "antd";
+import { Form, Input, Button, Card, message } from "antd";
 import { AnimatePresence, motion } from "framer-motion";
 import { useLogin } from "../../hooks/useLogin";
 
@@ -7,10 +7,32 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
   const { login } = useLogin();
 
   const handleSubmit = async (values) => {
-    const success = await login(values);
-    if (!success) {
-      alert("아이디 또는 비밀번호가 올바르지 않습니다.");
+    const result = await login(values);
+
+    if (result.success) {
+      message.success(result.message);
       form.resetFields();
+      onClose();
+    } else {
+      message.error(result.message);
+      form.resetFields(["password"]);
+    }
+  };
+
+  // 🔗 소셜 로그인 클릭 핸들러
+  const handleSocialLogin = (provider) => {
+    switch (provider) {
+      case "google":
+        window.location.href = "http://localhost:8080/oauth2/authorization/google";
+        break;
+      case "kakao":
+        window.location.href = "http://localhost:8080/oauth2/authorization/kakao";
+        break;
+      case "naver":
+        window.location.href = "http://localhost:8080/oauth2/authorization/naver";
+        break;
+      default:
+        break;
     }
   };
 
@@ -25,17 +47,16 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
           onClick={onClose}
         >
           <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
+            initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
+            transition={{ duration: 0.3 }}
             onClick={(e) => e.stopPropagation()}
           >
             <Card
               className="w-full max-w-md p-6 rounded-2xl shadow-lg bg-white relative"
               bordered={false}
             >
-              {/* 닫기 버튼 */}
               <button
                 onClick={onClose}
                 className="absolute top-3 right-3 text-gray-500 hover:text-gray-800 text-xl"
@@ -43,10 +64,8 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
                 ✕
               </button>
 
-              {/* 제목 */}
               <h2 className="text-center text-2xl font-bold mb-6">로그인</h2>
 
-              {/* 입력 폼 */}
               <Form form={form} layout="vertical" onFinish={handleSubmit}>
                 <Form.Item
                   label="아이디"
@@ -64,27 +83,41 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
                   <Input.Password placeholder="비밀번호 입력" size="large" />
                 </Form.Item>
 
-                {/* 중앙 정렬된 소셜 로그인 버튼들 */}
-                <div className="flex flex-col items-center gap-2 my-6 text-center">
-                  <Button type="link" className="text-blue-500">
-                    구글 로그인
+                {/* ✅ 소셜 로그인 영역 */}
+                <div className="flex flex-col gap-3 my-6">
+                  <Button
+                    size="large"
+                    className="w-full bg-white border border-gray-300 hover:shadow-md flex items-center justify-center gap-2"
+                    onClick={() => handleSocialLogin("google")}
+                  >
+                    <span className="font-medium text-gray-700">
+                      Google 계정으로 로그인
+                    </span>
                   </Button>
-                  <Button type="link" className="text-yellow-500">
-                    카카오 로그인
+
+                  <Button
+                    size="large"
+                    className="w-full bg-[#FEE500] hover:bg-[#fadb05] flex items-center justify-center gap-2"
+                    onClick={() => handleSocialLogin("kakao")}
+                  >
+                    <span className="font-medium text-gray-800">
+                      카카오 계정으로 로그인
+                    </span>
                   </Button>
-                  <Button type="link" className="text-green-500">
-                    네이버 로그인
+
+                  <Button
+                    size="large"
+                    className="w-full bg-[#03C75A] hover:bg-[#02b153] flex items-center justify-center gap-2 text-white"
+                    onClick={() => handleSocialLogin("naver")}
+                  >
+                    <span className="font-medium">네이버 계정으로 로그인</span>
                   </Button>
                 </div>
 
-                {/* 하단 링크 + 버튼 */}
+                {/* 아이디/비번 찾기 + 회원가입 */}
                 <div className="flex justify-between items-center mt-8">
-                  {/* 왼쪽: 아이디 찾기 + 로그인 버튼 */}
                   <div className="flex flex-col items-center w-[48%]">
-                    <a
-                      href="/find-id"
-                      className="text-sm text-gray-600 mb-2 hover:text-sb-teal"
-                    >
+                    <a href="/find-id" className="text-sm text-gray-600 mb-2">
                       아이디 찾기
                     </a>
                     <Button
@@ -96,12 +129,8 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
                     </Button>
                   </div>
 
-                  {/* 오른쪽: 비밀번호 찾기 + 회원가입 버튼 */}
                   <div className="flex flex-col items-center w-[48%]">
-                    <a
-                      href="/forgot"
-                      className="text-sm text-gray-600 mb-2 hover:text-sb-teal"
-                    >
+                    <a href="/forgot" className="text-sm text-gray-600 mb-2">
                       비밀번호 찾기
                     </a>
                     <Button

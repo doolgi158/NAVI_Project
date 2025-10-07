@@ -40,21 +40,6 @@ export const getList = async (domain, pageParam) => {
     return response.data;
 };
 
-// 로그인 처리
-export const Userlogin = async(loginParam) => {
-    const loginPrefix = `${BASE_PREFIX}/users`;
-
-    const params = new URLSearchParams();
-    params.append("username", loginParam.username);
-    params.append("password", loginParam.password);
-    
-    const response = await axios.post(`${loginPrefix}/login`, params, {
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    });
-
-    return response.data;
-};
-
 // 항공편 검색
 export const searchFlights = async (flightParam) => {
   const url = `${API_SERVER_HOST}/flight/detail`;

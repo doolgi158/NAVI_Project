@@ -1,51 +1,74 @@
-// src/hooks/useLogin.js
 import axios from "axios";
 import { useDispatch } from "react-redux";
+import { setlogin } from "../slice/loginSlice";
 import { useNavigate } from "react-router-dom";
-import { loginAsync } from "../slice/loginSlice.js";
-import { useModal } from "../components/Login/ModalProvider";
-
-const host = "http://localhost:8080";
+import { API_SERVER_HOST } from "../api/naviApi.js";
 
 export const useLogin = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { showModal, closeModal } = useModal();
-  
-  // 로그인 시도 함수
+
   const login = async (values) => {
     try {
-      // 1️⃣ 로그인 시도
-      const data = await dispatch(loginAsync(values)).unwrap();
+      // ✅ 클라이언트 IP 조회      
+      const ipRes = await axios.get("https://api.ipify.org?format=json");
+      const ip = ipRes.data.ip;
 
-      // 2️⃣ 성공 시
-      const ip = await getUserIP();
-      await axios.post(`${host}/api/login-try/success/${data.no}?ip=${ip}`);
-      closeModal();
+      // ✅ 로그인 요청
+      const params = new URLSearchParams();
+      params.append("username", values.username);
+      params.append("password", values.password);
+      params.append("ip", ip);
 
-      if (data.id === "naviadmin") navigate("/adm/dashboard", { replace: true });
-      else navigate("/", { replace: true });
+      const response = await axios.post(`${API_SERVER_HOST}/users/login`, params, {
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        validateStatus: () => true,  // 에러 상태도 직접 처리
+      });
+      
+      // ✅ 상태 코드별 처리
+      if (response.status === 200) {
+        const data = response.data;
 
-      return true;
-    } catch (err) {
-      // 3️⃣ 실패 시
-      const ip = await getUserIP();
-      await axios.post(`${host}/api/login-try/fail/0?ip=${ip}`);
-      showModal("login");
-      return false;
+        // JWT 토큰 저장
+        localStorage.setItem("accessToken", data.accessToken);
+        localStorage.setItem("refreshToken", data.refreshToken);
+
+        // Redux 상태 갱신
+        dispatch(setlogin({ username: values.username, token: data.accessToken }));
+
+        // 관리자 전용 페이지 분기
+        if (data.id === "naviadmin") {
+          navigate("/adm/dashboard");
+        } else {
+          navigate("/"); // 일반 사용자 메인으로 이동
+        }
+
+        return { success: true, message: "로그인 성공" };
+      }
+
+      if (response.status === 403) {
+        alert("❗ 5회 이상 로그인 실패로 10분간 로그인 차단되었습니다.");
+        return { success: false, message: "5회 이상 실패로 10분간 로그인 차단되었습니다." };
+      }
+
+      if (response.status === 401) {
+        alert("❗ 아이디 또는 비밀번호가 올바르지 않습니다.");
+        return { success: false, message: "아이디 또는 비밀번호가 올바르지 않습니다." };
+      }
+      alert("❗ 알 수 없는 오류가 발생했습니다. 관리자에게 문의하세요.");
+
+      return { success: false, message: "서버 응답을 처리할 수 없습니다." };
+    } catch (error) {
+      alert("❗ 서버에 연결할 수 없습니다. 잠시 후 다시 시도하세요.");
+      return { success: false, message: "서버에 연결할 수 없습니다." };
     }
   };
 
-  // IP 조회 함수
-  const getUserIP = async () => {
-    try {
-      const res = await fetch("https://api.ipify.org?format=json");
-      const data = await res.json();
-      return data.ip;
-    } catch {
-      return "127.0.0.1";
-    }
+  const logoutUser = () => {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    dispatch(logout());
   };
 
-  return { login };
+  return { login, logoutUser };
 };

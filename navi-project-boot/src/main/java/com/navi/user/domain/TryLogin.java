@@ -3,15 +3,13 @@ package com.navi.user.domain;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.navi.common.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDateTime;
 
 @Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -42,12 +40,12 @@ public class TryLogin extends BaseEntity {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime time;    // 로그인시도 시간
 
-    @Column(name = "try_ip", nullable = false)
+    @Column(name = "try_ip", nullable = false, unique = true)
     private String ip;      // 요청한 PC의 IP
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_no", nullable = false)
-    private User user;        // 사용자 번호
+    @Column(name = "try_lockuntil")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime lockuntil; // 로그인 해제 시간
 
     // 실패 시 카운트 증가
     public void increaseCount() {

@@ -2,21 +2,29 @@ package com.navi.user.security.handler;
 
 import com.google.gson.Gson;
 import com.navi.common.response.ApiResponse;
+import com.navi.user.repository.TryLoginRepository;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 
+@RequiredArgsConstructor
 public class ApiFailHandler implements AuthenticationFailureHandler {
+    private final TryLoginRepository tryLoginRepository;
 
     // 로그인 실패하면 Json 방식으로 알려주기
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
         String username = request.getParameter("username");
+        String ip = getIp(request);
+
+        // 실패 기록 저장
+        tryLoginRepository.recordLoginAttempt(ip, false);
 
         ApiResponse<Object> apiResponse = ApiResponse.error(
             "로그인 실패",
