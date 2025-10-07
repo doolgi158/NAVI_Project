@@ -1,9 +1,10 @@
 package com.navi.reservation.dto.request;
 
 /*
- * ========================================================
- * RsvRequestDTO : 예약 생성 시 클라이언트에서 전달되는 데이터 DTO
- * ========================================================
+ * ============================================
+ * [RsvRequestDTO]
+ * : 예약 생성 시 클라이언트에서 전달되는 데이터 DTO
+ * =============================================
  */
 
 import com.navi.reservation.domain.Rsv;
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+//@Builder
 public class RsvRequestDTO {
     private Long userNo;
     private Rsv.TargetType targetType;
