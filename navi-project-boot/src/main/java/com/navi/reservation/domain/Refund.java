@@ -63,6 +63,7 @@ public class Refund {
     private String reason;
 
     // 환불상태 (예: 환불요청, 환불진행, 환불완료, 환불거절)
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(name = "status", columnDefinition = "NVARCHAR2(4)", nullable = false)
     private RefundStatus status = RefundStatus.환불요청;

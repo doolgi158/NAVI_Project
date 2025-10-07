@@ -13,6 +13,7 @@ import com.navi.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Nationalized;
 
 import java.time.LocalDateTime;
 
@@ -49,7 +50,7 @@ public class Rsv {
     // 결제 상태 (예: 결제대기, 결제완료, 결제실패, 결제취소)
     @Builder.Default
     @Enumerated(EnumType.STRING)
-    @Column(name = "payment_status", columnDefinition = "NVARCHAR2(4)", nullable = false)
+    @Nationalized @Column(name = "payment_status", length = 4, nullable = false)
     private PaymentStatus paymentStatus = PaymentStatus.결제대기;
 
     // 결제 승인번호 (예: IMP_67283051)
