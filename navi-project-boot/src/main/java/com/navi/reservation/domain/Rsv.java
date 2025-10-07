@@ -50,7 +50,7 @@ public class Rsv {
     // 결제 상태 (예: 결제대기, 결제완료, 결제실패, 결제취소)
     @Builder.Default
     @Enumerated(EnumType.STRING)
-    @Nationalized @Column(name = "payment_status", length = 4, nullable = false)
+    @Nationalized @Column(name = "payment_status", length = 10, nullable = false)
     private PaymentStatus paymentStatus = PaymentStatus.결제대기;
 
     // 결제 승인번호 (예: IMP_67283051)
@@ -63,7 +63,7 @@ public class Rsv {
 
     // 결제 수단 (예: CARD, KAKAO_PAY, NAVER_PAY)
     @Enumerated(EnumType.STRING)
-    @Column(name = "payment_method", length = 50)
+    @Column(name = "payment_method", length = 10)
     private PaymentMethod paymentMethod;
 
     // 총 결제 금액 (예: 128000)
