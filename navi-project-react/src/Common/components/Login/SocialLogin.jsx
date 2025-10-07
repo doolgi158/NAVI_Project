@@ -42,6 +42,7 @@ const SocialLoginButton = ({ provider }) => {
     // 버튼 렌더링
     return (
         <button
+        type = "button"
         onClick={handleClick}
         className={`w-full py-3 rounded-xl font-semibold shadow-md transition ${buttonStyle[provider]}`}
         >
