@@ -33,8 +33,17 @@ public class RsvCounter {
     @Column(name = "next_seq", nullable = false)
     private Integer nextSeq;
 
+    // 초기 생성자
+    public RsvCounter(String counterDate, String targetType) {
+        this.counterDate = counterDate;
+        this.targetType = targetType;
+        this.nextSeq = 1;
+    }
+
     // 시퀀스 증가 (다음 예약번호 생성용)
-    public void increment() { this.nextSeq++; }
+    public void increment() {
+        nextSeq = (nextSeq == null ? 1 : nextSeq + 1);
+    }
 
     /*
      * ===================================

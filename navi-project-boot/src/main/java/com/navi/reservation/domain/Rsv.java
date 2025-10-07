@@ -6,7 +6,7 @@ package com.navi.reservation.domain;
  * : 공통 예약 정보 관리 테이블
  * ============================
  * ㄴ 숙소, 항공, 짐배송 예약 유형을 통합 관리하며, 결제 정보 및 상태를 포함
- * ㄴ 예약 번호는 별도의 카운터 테이블에서 생성 (RsvCounter.java)
+ * ㄴ 결제 검증된 후 최종 확정값을 저장하는 마스터 테이블
  */
 
 import com.navi.user.domain.User;
@@ -17,15 +17,14 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Getter
-//@Builder
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "NAVI_RESERVATION")
+@Table(name = "NAVI_RESERVATION")   // indexes 추후 추가 예정
 public class Rsv {
-    /* === COLUMN 정의 === */
     // 예약 고유번호 (예: 20251007ACC001)
-    @Id @Column(name = "reserve_id", length = 30, nullable = false)
+    @Id @Column(name = "reserve_id", length = 20, nullable = false)
     private String reserveId;
 
     // 예약자 회원번호 (예: 10001)
@@ -48,6 +47,7 @@ public class Rsv {
     private LocalDateTime createdTime;
 
     // 결제 상태 (예: 결제대기, 결제완료, 결제실패, 결제취소)
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_status", columnDefinition = "NVARCHAR2(4)", nullable = false)
     private PaymentStatus paymentStatus = PaymentStatus.결제대기;
@@ -62,10 +62,11 @@ public class Rsv {
 
     // 결제 수단 (예: CARD, KAKAO_PAY, NAVER_PAY)
     @Enumerated(EnumType.STRING)
-    @Column(name = "payment_method", length = 50, nullable = false)
+    @Column(name = "payment_method", length = 50)
     private PaymentMethod paymentMethod;
 
     // 총 결제 금액 (예: 128000)
+    @Builder.Default
     @Column(name = "total_amount")
     private Integer totalAmount = 0;
 
@@ -83,11 +84,6 @@ public class Rsv {
     public void prePersist() {
         if (paymentStatus == null) paymentStatus = PaymentStatus.결제대기;
         if (totalAmount == null) totalAmount = 0;
-    }
-
-    // 추후 구현
-    public void changeFromRequestDTO() {
-
     }
 
     /* === 상태 변경 메서드 === */
