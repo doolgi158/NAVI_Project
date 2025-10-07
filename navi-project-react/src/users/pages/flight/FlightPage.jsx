@@ -19,7 +19,7 @@ const FlightPage = () => {
 
   const navigate = useNavigate();
 
-  // ✅ 공항 목록 (정규화된 코드 + 한글명)
+  // ✅ 공항 목록
   const airportList = [
     { airportCode: "GMP", airportName: "김포" },
     { airportCode: "CJU", airportName: "제주" },
@@ -44,8 +44,8 @@ const FlightPage = () => {
       alert("왕복은 가는 날과 오는 날을 선택해야 합니다.");
       return;
     }
-    if (tripType === "one" && !dates.dep && !dates.arr) {
-      alert("편도는 출발일이나 도착일 중 하나는 선택해야 합니다.");
+    if (tripType === "one" && !dates.dep) {
+      alert("편도는 출발일을 선택해야 합니다.");
       return;
     }
     if (!from || !to) {
@@ -62,24 +62,24 @@ const FlightPage = () => {
     if (tripType === "round" && dates.range) {
       formattedDates = {
         depDate: dates.range[0]?.format("YYYY-MM-DD"),
-        retDate: dates.range[1]?.format("YYYY-MM-DD"),
+        arrDate: dates.range[1]?.format("YYYY-MM-DD"), // ✅ 귀국일 이름 통일
       };
     } else {
       if (dates.dep) formattedDates.depDate = dates.dep.format("YYYY-MM-DD");
-      if (dates.arr) formattedDates.arrDate = dates.arr.format("YYYY-MM-DD");
     }
 
     // 3️⃣ 검색 조건을 객체로 묶기
     const searchData = {
       tripType,
-      depAirport: from,     // ✅ key 이름 변경
-      arrAirport: to,       // ✅ key 이름 변경
-      depDate: formattedDates.depDate, // ✅ 평탄화 (dates 제거)
+      depAirport: from,
+      arrAirport: to,
+      depDate: formattedDates.depDate,
+      arrDate: formattedDates.arrDate || null, // ✅ 추가 (왕복일만 존재)
       passengerCount: passengers,
       seatClass,
     };
 
-    console.log("검색 조건:", searchData);
+    console.log("📤 검색 조건:", searchData);
 
     // 4️⃣ 다음 페이지로 이동 (state로 검색조건 전달)
     navigate("/flight/detail", { state: searchData });
@@ -149,20 +149,18 @@ const FlightPage = () => {
               </Select>
             </div>
 
-           {/* 날짜 선택 */}
+            {/* 날짜 선택 */}
             <div className="md:col-span-2">
               <label className="block text-sm text-gray-600 mb-2">
                 {tripType === "round" ? "여행 기간" : "출발일"}
               </label>
 
               {tripType === "round" ? (
-                // 🔹 왕복일 경우 RangePicker (가는 날 / 오는 날)
                 <RangePicker
                   className="w-full"
-                  onChange={(val) => setDates({ ...dates, range: val })}
+                  onChange={(val) => setDates({ range: val })}
                 />
               ) : (
-                // 🔹 편도일 경우 출발일만 선택
                 <DatePicker
                   placeholder="출발일 선택"
                   className="w-full"
@@ -170,7 +168,6 @@ const FlightPage = () => {
                 />
               )}
             </div>
-
 
             {/* 탑승객 */}
             <div>
