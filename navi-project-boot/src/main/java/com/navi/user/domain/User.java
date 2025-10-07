@@ -68,6 +68,9 @@ public class User {
     @Builder.Default
     private List<UserRole> userRoleList = new ArrayList<>();
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Social social;
+
     public void addRole(UserRole userRole) {
         userRoleList.add(userRole);
     }

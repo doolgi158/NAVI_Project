@@ -20,7 +20,16 @@ public class JWTCheckFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        String path = ((HttpServletRequest) request).getRequestURI();
+
+        // ✅ 로그인 및 OAuth 요청은 JWT 검사 건너뛰기
+        if (path.startsWith("/api/auth/oauth/") || path.equals("/api/users/login")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String authHeaderString = request.getHeader("Authorization");
+
         try{
             String accessToken = authHeaderString.substring(7);
             Map<String, Object> claims = jwtUtil.validateToken(accessToken);

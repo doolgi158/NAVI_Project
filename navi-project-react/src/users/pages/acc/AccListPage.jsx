@@ -1,4 +1,4 @@
-import MainLayout from "../layout/MainLayout";
+import MainLayout from "../../layout/MainLayout";
 import { useState } from "react";
 import { Radio, Input, DatePicker, Select, Button, Card } from "antd"; 
 import { useNavigate } from 'react-router-dom';

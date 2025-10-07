@@ -52,7 +52,7 @@ const HeaderLayout = () => {
         className="hidden md:flex"
       />
       {
-        loginstate.username ?
+        loginstate.token ?
           <Space>
             <Button
               type="default"
@@ -93,7 +93,7 @@ const HeaderLayout = () => {
       >
         <Menu mode="vertical" items={items} style={{ color: "#2F3E46" }} />
         {
-          loginstate.username ?
+          loginstate.token ?
             <div className="mt-4 flex flex-col gap-2">
               <Button
                 danger
