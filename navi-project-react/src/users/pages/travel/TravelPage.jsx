@@ -255,9 +255,6 @@ const TravelPage = () => {
     navigate(`/travel/detail/${item.travelId}`);
   };
 
-  const regionTags = ['제주시', '서귀포시', '동부', '서부', '남부', '북부'];
-  const totalCountText = showLoading ? '로딩 중...' : `총 ${pageResult.totalElements.toLocaleString()}개`;
-
   return (
     <MainLayout>
       <div className="py-8 min-h-[calc(100vh-140px)] space-y-8">
@@ -278,7 +275,6 @@ const TravelPage = () => {
         {/* 통계 및 필터 (정렬 버튼 수정) */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center p-4 bg-white rounded-lg shadow-sm border border-gray-200 space-y-4 md:space-y-0">
           <div className="flex items-center space-x-6">
-            <p className="text-base font-semibold text-gray-800">{totalCountText}</p>
             <div className="flex space-x-4 text-sm font-medium">
               {/* ⭐️ [수정] 정렬 버튼에 handleSortChange 연결 및 현재 정렬 상태 반영 */}
               <button 
@@ -296,14 +292,6 @@ const TravelPage = () => {
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
-            {regionTags.map((tag) => (
-              <button
-                key={tag}
-                className="text-sm px-3 py-1 border border-blue-400 text-blue-700 bg-blue-50 rounded-full hover:bg-blue-100 transition"
-              >
-                #{tag}
-              </button>
-            ))}
           </div>
         </div>
 
