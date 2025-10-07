@@ -11,6 +11,11 @@ const FlightDetail = lazy(() => import("../users/pages/FlightDetailPage.jsx"))
 const FlightRsv = lazy(() => import("../users/pages/FlightRsvInputPage.jsx"))
 const Signup = lazy(() => import("../users/pages/UserSignupPage.jsx"))
 
+/* 숙소 */
+const AccList = lazy(() => import("../users/pages/AccListPage.jsx"))
+const AccDetail = lazy(() => import("../users/pages/AccDetailPage.jsx"))
+
+
 const root = createBrowserRouter([
     {
         path: "",
@@ -43,6 +48,14 @@ const root = createBrowserRouter([
     {
         path: "/travel",
         children: [...TravelRouter]
+    },
+    {
+        path: "/accommodations",
+        element: <Suspense fallback={Loading}><AccList /></Suspense>,
+    },
+    {
+        path: "/accommodations/:accNo", 
+        element: <Suspense fallback={Loading}><AccDetail /></Suspense>,
     },
     
 ]);
