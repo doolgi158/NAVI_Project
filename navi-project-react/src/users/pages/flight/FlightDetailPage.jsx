@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import MainLayout from "../layout/MainLayout";
+import MainLayout from "../../layout/MainLayout";
 
 const API_SERVER_HOST = "http://localhost:8080";
 
@@ -21,7 +21,7 @@ const FlightDetailPage = () => {
   // 전달받은 검색 조건
   const { depAirport, arrAirport, depDate, arrDate, seatClass } = state || {};
 
-  // ✈️ 항공편 조회
+  // 항공편 조회
   useEffect(() => {
     if (!depAirport || !arrAirport || !depDate) return;
 
@@ -40,9 +40,6 @@ const FlightDetailPage = () => {
             seatClass: (seatClass || "ECONOMY").toUpperCase(),
           };
 
-    console.log("------------------------------------------------------");
-    console.log(`📤 [${step.toUpperCase()} 요청 body]:`, body);
-
     setLoading(true);
     setInboundLoaded(false);
 
@@ -50,8 +47,6 @@ const FlightDetailPage = () => {
       .post(`${API_SERVER_HOST}/flight/detail`, body)
       .then((res) => {
         const data = Array.isArray(res.data) ? res.data : [];
-        console.log(`✅ [${step.toUpperCase()} 응답]:`, data);
-        console.log(`📊 [${step.toUpperCase()} 항공편 개수]:`, data.length);
 
         setFlights(data);
         setLoading(false);
@@ -60,7 +55,6 @@ const FlightDetailPage = () => {
           setInboundLoaded(true);
 
           if (data.length === 0) {
-            console.warn("⚠️ 귀국편 데이터가 없습니다!");
             setNoInbound(true);
 
             setTimeout(() => {
@@ -72,20 +66,16 @@ const FlightDetailPage = () => {
           }
         }
       })
-      .catch((err) => {
-        console.error(`❌ [${step.toUpperCase()} 요청 실패]:`, err);
-        setLoading(false);
-      });
+      .catch(() => setLoading(false));
   }, [step, depAirport, arrAirport, depDate, arrDate, seatClass]);
 
-  // ✈️ 항공편 선택
+  // 항공편 선택
   const handleSelectFlight = (flight) => {
     if (step === "outbound") setSelectedOutbound(flight);
     else setSelectedInbound(flight);
-    console.log(`🟢 [${step.toUpperCase()} 선택됨]:`, flight);
   };
 
-  // ⏭️ 다음 단계 이동
+  // 다음 단계 이동
   const handleNextStep = () => {
     if (step === "outbound") {
       if (!selectedOutbound) {
@@ -94,20 +84,15 @@ const FlightDetailPage = () => {
       }
 
       if (arrDate) {
-        console.log("🔄 귀국편 단계로 이동");
+        // 왕복인 경우
         setStep("inbound");
       } else {
-        console.log("➡️ 편도 예약 페이지 이동");
+        // 편도인 경우 바로 예약 페이지로 이동
         navigate(`/flight/rsv/${selectedOutbound.flightNo}`, {
           state: { selectedOutbound },
         });
       }
     } else if (step === "inbound") {
-      console.log("🧩 현재 flights:", flights);
-      console.log("🧩 inboundLoaded:", inboundLoaded);
-      console.log("🧩 noInbound:", noInbound);
-      console.log("🧩 selectedInbound:", selectedInbound);
-
       if (loading) {
         alert("귀국편 정보를 불러오는 중입니다. 잠시만 기다려주세요.");
         return;
@@ -128,20 +113,19 @@ const FlightDetailPage = () => {
         return;
       }
 
-      console.log("✅ 예약 페이지로 이동");
       navigate(`/flight/rsv/${selectedOutbound.flightNo}`, {
         state: { selectedOutbound, selectedInbound },
       });
     }
   };
 
-  // ✅ 버튼 활성화 조건
+  // 버튼 활성화 조건
   const isButtonDisabled =
     (step === "outbound" && !selectedOutbound) ||
     (step === "inbound" &&
       (loading || !inboundLoaded || noInbound || flights.length === 0));
 
-  // 🎨 렌더링
+  // 렌더링
   return (
     <MainLayout>
       <div className="max-w-4xl mx-auto mt-10 bg-white p-8 shadow-lg rounded-xl">
@@ -191,7 +175,7 @@ const FlightDetailPage = () => {
           </div>
         )}
 
-        {/* ✅ 다음 단계 버튼 */}
+        {/* ✅ 다음 단계 버튼 수정 완료 */}
         <div className="flex justify-end mt-4">
           <button
             onClick={handleNextStep}
@@ -202,7 +186,11 @@ const FlightDetailPage = () => {
                 : "bg-blue-600 text-white hover:bg-blue-700"
             }`}
           >
-            {step === "outbound" ? "귀국편 선택하기" : "예약 진행하기"}
+            {step === "outbound"
+              ? arrDate
+                ? "귀국편 선택하기"
+                : "예약 진행하기"
+              : "예약 진행하기"}
           </button>
         </div>
       </div>

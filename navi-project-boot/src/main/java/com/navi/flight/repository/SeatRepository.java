@@ -12,23 +12,23 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * ✈️ SeatRepository
+/*
+ *  SeatRepository
  * - 좌석 동시성 제어
  * - 항공편별 좌석 현황 통계
  */
 public interface SeatRepository extends JpaRepository<Seat, Long> {
 
-    /** 예약 시 동시성 제어용 (좌석 하나를 쓰기 락) */
+    /* 예약 시 동시성 제어용 (좌석 하나를 쓰기 락) */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select s from Seat s where s.seatId = :seatId")
     Optional<Seat> findByIdForUpdate(@Param("seatId") Long seatId);
 
-    /** ✅ 항공편(복합키) 기준으로 좌석이 이미 존재하는지 */
+    /* 항공편(복합키) 기준으로 좌석이 이미 존재하는지 */
     @Query("select (count(s) > 0) from Seat s where s.flight.id = :flightId")
     boolean existsByFlightId(@Param("flightId") FlightId flightId);
 
-    /** ✅ 전체 항공편별 좌석 현황 통계 (총석, 잔여석, 등급별) */
+    /* 전체 항공편별 좌석 현황 통계 (총석, 잔여석, 등급별) */
     @Query("""
         SELECT new com.navi.flight.dto.SeatStatusDTO(
             s.flight.id.flightId,
@@ -46,7 +46,7 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
     """)
     List<SeatStatusDTO> findSeatStatusByFlight();
 
-    /** ✅ 특정 항공편 하나의 좌석 현황 통계 (flightId 기준) */
+    /* 특정 항공편 하나의 좌석 현황 통계 (flightId 기준) */
     @Query("""
         SELECT new com.navi.flight.dto.SeatStatusDTO(
             s.flight.id.flightId,

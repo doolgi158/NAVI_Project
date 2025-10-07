@@ -5,8 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * ✈️ 항공편별 좌석 현황 DTO
+/*
+ * 항공편별 좌석 현황 DTO
  */
 @Data
 @Builder

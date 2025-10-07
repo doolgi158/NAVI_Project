@@ -12,8 +12,8 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * ✈️ FlightScheduler
+/*
+ *  FlightScheduler
  *
  * [역할]
  * - 매일 새벽 항공편 데이터 자동 갱신
@@ -27,7 +27,7 @@ public class FlightScheduler {
 
     private final FlightService flightService;
     private final FlightRepository flightRepository;
-    private final ApiFlightService apiFlightService; // ✅ 공공데이터 API 호출 전용 서비스
+    private final ApiFlightService apiFlightService; // 공공데이터 API 호출 전용 서비스
 
     /**
      * 매일 새벽 3시마다 실행
@@ -35,17 +35,17 @@ public class FlightScheduler {
      */
     @Scheduled(cron = "0 0 3 * * *", zone = "Asia/Seoul")
     public void updateFlightsNightly() {
-        log.info("🛫 [Scheduler] 항공편 데이터 갱신 시작");
+        log.info(" [Scheduler] 항공편 데이터 갱신 시작");
 
         try {
-            // 1️⃣ 어제 이전 항공편 삭제
+            // 어제 이전 항공편 삭제
             int deleted = deleteOldFlights();
 
-            // 2️⃣ API 호출 후 최신 항공편 리스트 가져오기
+            // API 호출 후 최신 항공편 리스트 가져오기
             List<ApiFlightDTO> flightList = apiFlightService.fetchTodayFlights();
             log.info("📡 [Scheduler] 공공데이터 API 수신 완료 — {}건", flightList.size());
 
-            // 3️⃣ 새 항공편 등록
+            // 새 항공편 등록
             for (ApiFlightDTO dto : flightList) {
                 try {
                     flightService.saveFlight(dto);
@@ -55,10 +55,10 @@ public class FlightScheduler {
                 }
             }
 
-            log.info("✅ [Scheduler] 항공편 갱신 완료 (삭제 {}건, 등록 {}건)", deleted, flightList.size());
+            log.info("[Scheduler] 항공편 갱신 완료 (삭제 {}건, 등록 {}건)", deleted, flightList.size());
 
         } catch (Exception e) {
-            log.error("❌ [Scheduler] 항공편 갱신 중 오류 발생: {}", e.getMessage(), e);
+            log.error("[Scheduler] 항공편 갱신 중 오류 발생: {}", e.getMessage(), e);
         }
     }
 
@@ -75,7 +75,7 @@ public class FlightScheduler {
         int count = oldFlights.size();
         flightRepository.deleteAll(oldFlights);
 
-        log.info("🧹 [Scheduler] 과거 항공편 {}건 삭제 완료", count);
+        log.info("[Scheduler] 과거 항공편 {}건 삭제 완료", count);
         return count;
     }
 }
