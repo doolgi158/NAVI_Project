@@ -1,7 +1,6 @@
 package com.navi.user.security;
 
 import com.navi.user.repository.TryLoginRepository;
-//import com.navi.user.security.Filter.JWTCheckFilter;
 import com.navi.user.security.Filter.TryLoginFilter;
 import com.navi.user.security.handler.ApiFailHandler;
 import com.navi.user.security.handler.ApiSuccessHandler;
@@ -27,6 +26,12 @@ public class SecurityConfig {
 
 //    @Bean
 //    SecurityFilterChain filterChain(HttpSecurity security) throws Exception {
+//        security
+//                .authorizeHttpRequests(authorize -> authorize
+//                        // ⭐️ [필수 확인] /travel 경로는 인증 없이 접근 가능해야 합니다.
+//                        .requestMatchers("/travel/**").permitAll()
+//                        .anyRequest().authenticated()
+//                );
 //        // CORS 설정
 //        security.cors(httpSecurityCorsConfigurer -> {
 //            httpSecurityCorsConfigurer.configurationSource(corsConfigurationSource());

@@ -11,6 +11,7 @@ public class TravelListResponseDTO {
     private Long travelId;
     private String contentId;   //api 컨텐츠id
     private String title;       // 제목
+    private String categoryName; //카테고리명
     private String region1Name; //시명
     private String region2Name ;    //읍명
     private Double longitude;   //경도
@@ -27,6 +28,7 @@ public class TravelListResponseDTO {
                 .travelId(travel.getTravelId())
                 .contentId(travel.getContentId())
                 .title(travel.getTitle())
+                .categoryName(travel.getCategoryName())
                 .region1Name(travel.getRegion1Name())
                 .region2Name(travel.getRegion2Name())
                 .longitude(travel.getLongitude())
