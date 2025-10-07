@@ -9,6 +9,8 @@ const AdminUsers = lazy(() => import("../../admin/pages/AdminUsersPage.jsx"))
 const AdminDashboard = lazy(() => import("../../admin/pages/AdminDashboardPage.jsx"))
 const Flight = lazy(() => import("../../users/pages/flight/FlightPage.jsx"))
 const Signup = lazy(() => import("../../users/pages/UserSignupPage.jsx"))
+const AccList = lazy(() => import("../../users/pages/accommodation/AccDetailPage.jsx"))
+const AccDetail = lazy(() => import("../../users/pages/accommodation/AccDetailPage.jsx"))
 
 const root = createBrowserRouter([
     {
@@ -67,6 +69,26 @@ const root = createBrowserRouter([
             <Suspense fallback={Loading}>
                 <ModalProvider>
                     <TravelPage />
+                </ModalProvider>
+            </Suspense>
+        )
+    },
+    {
+        path: "/accommodations",
+        element: (
+            <Suspense fallback={Loading}>
+                <ModalProvider>
+                    <AccList />
+                </ModalProvider>
+            </Suspense>
+        )
+    },
+    {
+        path: "/accommodations/:accNo", 
+        element: (
+            <Suspense fallback={Loading}>
+                <ModalProvider>
+                    <AccDetail />
                 </ModalProvider>
             </Suspense>
         )

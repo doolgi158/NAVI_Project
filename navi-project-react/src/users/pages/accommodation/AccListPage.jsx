@@ -1,4 +1,4 @@
-import MainLayout from "../layout/MainLayout";
+import MainLayout from "../../layout/MainLayout";
 import { useState } from "react";
 import { Radio, Input, DatePicker, Select, Button, Card } from "antd"; 
 import { useNavigate } from 'react-router-dom';
@@ -24,7 +24,7 @@ const mockAccommodations = [
     },
 ];
 
-const AccSearchPage = () => {
+const AccListPage = () => {
     const navigate = useNavigate();
     const [searchType, setSearchType] = useState("region");
     const [isSearched, setIsSearched] = useState(false); 
@@ -141,4 +141,4 @@ const AccSearchPage = () => {
     );
 }
 
-export default AccSearchPage;
+export default AccListPage;
