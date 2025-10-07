@@ -23,7 +23,7 @@ public class BoardService { //비즈니스 로직
 //    }
     // 게시글 상세 조회
     public Board getBoard(Integer id) {
-        return boardRepository.findById(Long.valueOf(id))
+        return boardRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
     }
 
@@ -33,7 +33,7 @@ public class BoardService { //비즈니스 로직
     }
     // 게시글 삭제
     public void deleteBoard(Integer id) {
-        boardRepository.deleteById(Long.valueOf(id));
+        boardRepository.deleteById(id);
     }
 
 }
