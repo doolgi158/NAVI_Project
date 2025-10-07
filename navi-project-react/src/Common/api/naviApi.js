@@ -1,7 +1,6 @@
 import axios from "axios";
 
-// 서버 주소
-export const API_SERVER_HOST = "http://localhost:8080";
+export const API_SERVER_HOST = "http://localhost:8080"; // API 서버 호스트 주소
 
 // 기본 API 경로. 도메인(travel, flight)이 이 뒤에 붙게 됩니다.
 const BASE_PREFIX = `${API_SERVER_HOST}/api`;
@@ -60,4 +59,12 @@ export const socialLogin = async (provider, code) => {
     console.error("❌ 소셜 로그인 오류:", error);
     throw error;
   }
+};
+// 카카오맵 설정 정보를 서버에서 조회하는 함수
+
+export const getKakaoMapConfig = async () => {
+    // 💡 [수정] 프록시 설정에 따라 BASE_PREFIX를 사용하거나,
+    // 클라이언트 코드가 BASE_PREFIX 없이 /api/config/kakao를 호출하도록 수정합니다.
+    const response = await axios.get(`${BASE_PREFIX}/config/kakao`);
+    return response.data;
 };
