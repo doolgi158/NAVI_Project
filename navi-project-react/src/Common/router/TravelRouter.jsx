@@ -3,14 +3,14 @@ import { Navigate } from "react-router-dom";
 import { ModalProvider } from "../components/Login/ModalProvider.jsx";
 
 const Loading = <div>Loading....</div>
-const TravelList = lazy(() => import("../../users/pages/travel/TravelList.jsx"))
+const TravelList = lazy(() => import("../../users/pages/travel/TravelPage.jsx"))
 const TravelDetailPage = lazy(() => import("../../users/pages/travel/TravelDetailPage.jsx"))
 
 const TravelRouter = () => {
     return [
         //여행지 리스트
         {
-            path:"list",
+            path:"",
             element:(
                 <Suspense fallback={Loading} >
                     <ModalProvider>
@@ -19,13 +19,10 @@ const TravelRouter = () => {
                 </Suspense>
             )
         },
-        {
-            path: "",
-            element: <Navigate replace to="list" />
-        },
+
         //여행지 상세페이지
         {
-            path: "detail/:id",
+            path: "detail/:travelId",
             element: (
                 <Suspense fallback={Loading}>
                     <ModalProvider>
