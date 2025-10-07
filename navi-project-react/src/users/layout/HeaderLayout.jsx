@@ -33,11 +33,30 @@ const HeaderLayout = () => {
         background: "#fff",
         padding: "0 24px",
         boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+         height: '64px',
       }}
     >
-      <Link to="/">
-        <Image src={naviLogo} alt="naviLogo" preview={false} width={130} />
-      </Link>
+      {/* 로고 섹션: 강제 중앙 정렬 및 line-height 0 적용  */}
+      <div 
+        style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          height: '100%', 
+          lineHeight: 0 // 글꼴 기반의 baseline 정렬 방지
+        }}
+      >
+        <Link to="/">
+          <Image 
+            src={naviLogo} 
+            alt="naviLogo" 
+            preview={false} 
+            width={130} 
+            style={{ 
+                display: 'block' // Image 컴포넌트를 block 레벨로 처리하여 정렬 명확히
+            }} 
+          />
+        </Link>
+      </div>
 
       <Menu
         mode="horizontal"

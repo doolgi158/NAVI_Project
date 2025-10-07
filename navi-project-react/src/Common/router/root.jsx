@@ -1,9 +1,9 @@
 import { lazy, Suspense } from "react";
 import { createBrowserRouter } from "react-router-dom";
 import { ModalProvider } from "../components/Login/ModalProvider.jsx";
+import TravelRouter from "./TravelRouter.jsx";
 
 const Loading = <div></div>
-const TravelPage = lazy(() => import("../../users/pages/travel/TravelPage.jsx"))
 const UserMain = lazy(() => import("../../users/pages/UserMainPage.jsx"))
 const AdminUsers = lazy(() => import("../../admin/pages/AdminUsersPage.jsx"))
 const AdminDashboard = lazy(() => import("../../admin/pages/AdminDashboardPage.jsx"))
@@ -65,13 +65,7 @@ const root = createBrowserRouter([
     },
     {
         path: "/travel",
-        element: (
-            <Suspense fallback={Loading}>
-                <ModalProvider>
-                    <TravelPage />
-                </ModalProvider>
-            </Suspense>
-        )
+        children: [...TravelRouter()]
     },
     {
         path: "/accommodations",

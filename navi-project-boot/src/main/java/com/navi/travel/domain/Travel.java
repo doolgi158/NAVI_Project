@@ -139,7 +139,7 @@ public class Travel extends BaseEntity { //등록일 수정일 자동생성 상�
      * 조회수를 1 증가시키는 메서드 (Service에서 호출)
      */
     public void incrementViews() {
-        this.views = this.views + 1;
+        this.views = (this.views == null) ? 1L : this.views + 1;
     }
 
 }
