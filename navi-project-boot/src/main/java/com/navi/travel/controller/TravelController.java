@@ -33,12 +33,12 @@ public class TravelController {
                     sort = "contentsCd,asc,updatedAt",
                     direction = Sort.Direction.DESC
             ) Pageable pageable,
-            // ⭐️ [수정] String으로 받습니다.
             @RequestParam(value = "region2Name", required = false) String region2NameCsv,
-            @RequestParam(value = "categoryName", required = false) String categoryName
+            @RequestParam(value = "categoryName", required = false) String categoryName,
+            @RequestParam(value = "search", required = false) String search
     ) {
 
-        // ⭐️ [핵심 로직 변경] List<String> 대신 null 또는 파싱된 List를 할당합니다.
+        //  List<String> 대신 null 또는 파싱된 List를 할당합니다.
         List<String> region2Names = null;
 
         if (region2NameCsv != null && !region2NameCsv.isEmpty()) {
@@ -54,7 +54,7 @@ public class TravelController {
         }
         // -------------------------------------------------------------
 
-        return travelService.getTravelList(pageable, region2Names, categoryName);
+        return travelService.getTravelList(pageable, region2Names, categoryName,search);
     }
 
     //상세내용 화면

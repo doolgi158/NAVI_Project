@@ -12,8 +12,30 @@ const TravelControls = ({
     // FilterPanel props
     regionTags, selectedCategory, handleCategoryChange, 
     handleRegionSelect, handleSelectAllRegions, handleDeselectAllRegions, 
-    isRegionPanelOpen, categories
+    isRegionPanelOpen, categories,
+    
+    // TravelPage로부터 전달받은 prop
+    handleClearFilter // 필터 초기화 함수
 }) => {
+
+    // 필터 적용 여부를 확인하는 로직 (뱃지 표시에 사용)
+    const isFilterActive = selectedRegions.length > 0 || pageParam.category !== '전체';
+
+    // 필터 버튼 클릭 시 실행할 핸들러 (로직 전체 변경)
+    const handleFilterButtonClick = () => {
+        if (isRegionPanelOpen) {
+            // 패널이 열려 있을 때: 필터 초기화 후 패널 닫기
+            handleClearFilter();
+            toggleRegionPanel(); // 패널을 닫습니다.
+        } else {
+            // 패널이 닫혀 있을 때: 패널 열기
+            toggleRegionPanel();
+        }
+    };
+
+    // 패널이 닫혀 있으면 "필터 선택" 표시
+    const buttonText = isRegionPanelOpen ? '필터 초기화' : '필터 선택';
+
 
     const TotalCountDisplay = showLoading ? (
         <p className="text-base font-semibold text-gray-800">로딩 중...</p>
@@ -26,6 +48,13 @@ const TravelControls = ({
             개
         </p>
     );
+    // 버튼 색상을 결정하는 클래스 로직
+    const buttonColorClasses = isRegionPanelOpen
+        ? 'bg-teal-500 text-white hover:bg-teal-800' // 패널 열림 = 필터 초기화 상태 
+        : isFilterActive
+            ? 'bg-blue-500 text-white border-blue-500 hover:bg-blue-600' // 필터 적용됨 
+            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'; // 기본 상태
+            
 
     return (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
@@ -59,24 +88,21 @@ const TravelControls = ({
                     </div>
                 </div>
                 
-                {/* 필터 토글 버튼 */}
+                {/* 필터 토글 버튼 (수정됨) */}
                 <button
-                    className={`px-4 py-2 text-sm border rounded-md shadow-sm transition flex items-center space-x-1 ${
-                        isRegionPanelOpen 
-                            ? 'bg-blue-500 text-white border-blue-500' 
-                            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                    }`}
-                    onClick={toggleRegionPanel} 
+                    // 버튼 색상 클래스 적용
+                    className={`px-4 py-2 text-sm border rounded-md shadow-sm transition flex items-center space-x-1 ${buttonColorClasses}`}
+                    onClick={handleFilterButtonClick}
                 >
-                    <i className="bi bi-funnel text-base"></i>
                     <span>
-                        필터 조회 
+                        {buttonText}
+                        
                         {/* 뱃지 표시 로직 */}
-                        {selectedRegions.length > 0 || pageParam.category !== '전체' ? (
+                        {isFilterActive ? (
                             <span className="ml-1 px-1 bg-red-500 text-white rounded-full text-xs font-bold">
                                 {(
                                     selectedRegions.length + 
-                                    (pageParam.category !== '전체' ? '' : 0)
+                                    (pageParam.category !== '전체' ? '' : 0) // 카테고리 필터가 '전체'가 아니면 1을 더합니다.
                                 ).toLocaleString()}
                             </span>
                         ) : null}

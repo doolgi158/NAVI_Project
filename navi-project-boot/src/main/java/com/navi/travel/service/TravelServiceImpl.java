@@ -52,20 +52,23 @@ public class TravelServiceImpl implements TravelService {
     // -------------------------------------------------------------
     @Override
     @Transactional(readOnly = true)
-    public Page<TravelListResponseDTO> getTravelList(Pageable pageable, List<String> region2Names, String category) {
-        log.info(">>> [TravelService] 필터 요청: Region={}, Category='{}'", region2Names, category);
+    public Page<TravelListResponseDTO> getTravelList(Pageable pageable, List<String> region2Names, String category, String search) {
+
+
         // 1. 필터 조건 확인 및 전체 조회
         boolean noRegionFilter = (region2Names == null || region2Names.isEmpty());
         //category 필터가 없거나 "전체"인 경우
         boolean noCategoryFilter = !StringUtils.hasText(category) || "전체".equalsIgnoreCase(category);
+        //search 필터가 없는 경우
+        boolean noSearchFilter = !StringUtils.hasText(search);
 
-        if (noRegionFilter && noCategoryFilter) {
+        if (noRegionFilter && noCategoryFilter && noSearchFilter) {
             // 필터 조건이 아예 없으면 전체 목록 반환
             return travelRepository.findAll(pageable).map(TravelListResponseDTO::of);
         }
 
         // 2. Specification 초기화 (시작점)
-        // ⭐️ [Deprecation 수정] Specification.where(null) 대신 중립적인 '항상 참' 조건(criteriaBuilder.conjunction())을 사용합니다.
+        //  Specification.where(null) 대신 중립적인 '항상 참' 조건(criteriaBuilder.conjunction())을 사용합니다.
         Specification<Travel> spec = (root, query, criteriaBuilder) -> criteriaBuilder.conjunction();
 
         // 3. 지역 필터링 (region2Name) 적용
@@ -88,7 +91,6 @@ public class TravelServiceImpl implements TravelService {
 
                 Specification<Travel> regionSpec = regionConditions.stream()
                         .reduce(Specification::or) // List의 모든 조건을 OR로 연결
-                        // ⭐️ [Deprecation 수정] Specification.where(null) 대신 중립적인 '항상 참' 조건으로 대체
                         .orElse((root, query, criteriaBuilder) -> criteriaBuilder.conjunction());
 
                 // 3-3. 전체 spec에 지역 필터를 AND로 추가
@@ -101,7 +103,6 @@ public class TravelServiceImpl implements TravelService {
 
             final String trimmedCategory = category.trim(); // 요청 받은 카테고리 값도 TRIM 처리
 
-            // ⭐️ [로그 추가] 실제 비교에 사용될 값 확인
             log.info(">>> [TravelService] 카테고리 필터 적용: 최종 비교 값='{}'", trimmedCategory);
 
             // 🚨 최종 수정: 엄격한 'equal' 대신 'like'를 사용하여 미묘한 DB 값 불일치 문제를 해결합니다.
@@ -119,7 +120,24 @@ public class TravelServiceImpl implements TravelService {
             spec = spec.and(categorySpec);
         }
 
-        // 5. Specification이 적용된 findAll 호출 (지역 AND 카테고리)
+        // ⭐️ 5. 제목(title) 부분 일치 검색 필터링 (Search) 적용
+        if (!noSearchFilter) {
+            final String trimmedSearch = search.trim();
+            final String lowerWildcardSearch = "%" + trimmedSearch.toLowerCase() + "%";
+
+            Specification<Travel> searchSpec = (root, query, criteriaBuilder) ->
+                    criteriaBuilder.like(
+                            criteriaBuilder.lower(root.get("title")), // title 필드를 소문자 변환
+                            lowerWildcardSearch // 소문자 변환된 검색어에 와일드카드(%) 추가
+                    );
+
+            // 기존 spec에 제목 검색 필터를 AND로 추가 (다른 필터와 함께 적용)
+            spec = spec.and(searchSpec);
+
+            log.info(">>> [TravelService] 제목 검색 필터 적용: 검색어='{}'", trimmedSearch);
+        }
+
+        // 6. Specification이 적용된 findAll 호출 (지역 AND 카테고리 AND 검색어)
         Page<Travel> travelPage = travelRepository.findAll(spec, pageable);
 
         // Travel 엔티티 Page를 DTO Page로 변환
@@ -261,4 +279,6 @@ public class TravelServiceImpl implements TravelService {
             return null;
         }
     }
+
+
 }

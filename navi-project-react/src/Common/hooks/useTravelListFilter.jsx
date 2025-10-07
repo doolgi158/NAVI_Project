@@ -65,15 +65,15 @@ export const useTravelListFilter = (onFilterChange) => {
         setIsRegionPanelOpen(prev => !prev);
     }, []);
 
-    // ⭐️ [추가] 모든 지역 선택 핸들러
+    //모든 지역 선택 핸들러
     const handleSelectAllRegions = useCallback(() => {
         if (onFilterChange) {
-            onFilterChange(REGION_TAGS); // REGION_TAGS는 '전체'가 제외된 모든 소분류 태그 목록
+            onFilterChange(REGION_TAGS); 
         }
         setSelectedRegions(REGION_TAGS);
     }, [onFilterChange]);
 
-    // ⭐️ [추가] 모든 지역 선택 해제 핸들러
+    //모든 지역 선택 해제 핸들러
     const handleDeselectAllRegions = useCallback(() => {
         if (onFilterChange) {
             onFilterChange([]); // 빈 배열 전달
@@ -81,7 +81,7 @@ export const useTravelListFilter = (onFilterChange) => {
         setSelectedRegions([]);
     }, [onFilterChange]);
 
-    // UI 렌더링을 위해 지역을 계층적으로 재구성 (유지)
+    // UI 렌더링을 위해 지역을 계층적으로 재구성 
     const categorizedTags = useMemo(() => {
         return Object.entries(ALL_REGIONS).map(([region1Cd, region2s]) => ({
             region1Cd,
@@ -92,11 +92,10 @@ export const useTravelListFilter = (onFilterChange) => {
         }));
     }, []);
 
-    // ⭐️ [추가] API 호출에 필요한 쿼리 파라미터 문자열 생성 
+    //API 호출에 필요한 쿼리 파라미터 문자열 생성 
      const filterQuery = useMemo(() => {
         if (selectedRegions.length === 0 || selectedRegions.length === REGION_TAGS.length) {
-            // 필터가 적용되지 않은 경우 (전체)
-            // ⭐️ 키 이름을 region2Name으로 변경
+            // 필터가 적용되지 않은 경우 
             return { region2Name: [] }; 
         }
 
@@ -104,7 +103,6 @@ export const useTravelListFilter = (onFilterChange) => {
         const region2List = Array.from(new Set(selectedRegions.map(r => r.region2Cd)));
         
         return {
-            // ⭐️ 키 이름을 region2Name으로 변경합니다.
             region2Name: region2List  // 예: ['애월', '한림', '성산']
         };
     }, [selectedRegions]);
