@@ -14,6 +14,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Nationalized;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
 
@@ -31,6 +33,7 @@ public class Rsv {
     // 예약자 회원번호 (예: 10001)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_no", nullable = false)
+    @OnDelete(action = OnDeleteAction.NO_ACTION)
     private User userNo;
 
     // 예약 대상 구분 (예: ACC, AIR, DLV)

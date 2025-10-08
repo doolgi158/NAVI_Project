@@ -3,6 +3,8 @@ package com.navi.reservation.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
 
@@ -36,6 +38,7 @@ public class Refund {
     // 예약 고유번호 (예: 20251007ACC001)
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reserve_id", nullable = false, unique = true)
+    @OnDelete(action = OnDeleteAction.NO_ACTION)
     private Rsv rsv;
 
     // 원결제금액 (예: 128000)
