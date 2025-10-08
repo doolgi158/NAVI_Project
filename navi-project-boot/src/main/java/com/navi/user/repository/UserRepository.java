@@ -1,6 +1,8 @@
 package com.navi.user.repository;
 
+import com.navi.user.domain.Social;
 import com.navi.user.domain.User;
+import com.navi.user.enums.SocialState;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -15,4 +17,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @EntityGraph(attributePaths = "userRoleList")
     @Query("select u from User u where u.id = :id")
     User getUser(@Param("id") String id);
+    boolean existsById(String id);
 }

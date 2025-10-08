@@ -1,8 +1,12 @@
 package com.navi.user.security.handler;
 
 import com.google.gson.Gson;
+import com.navi.user.domain.History;
+import com.navi.user.domain.User;
 import com.navi.user.dto.users.UserSecurityDTO;
+import com.navi.user.repository.HistoryRepository;
 import com.navi.user.repository.TryLoginRepository;
+import com.navi.user.repository.UserRepository;
 import com.navi.user.security.util.JWTUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,12 +17,21 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
+
+import static com.navi.user.security.util.LoginRequestUtil.getClientIp;
+import static com.navi.user.security.util.LoginRequestUtil.getUserName;
 
 @RequiredArgsConstructor
 public class ApiSuccessHandler implements AuthenticationSuccessHandler {
     private final TryLoginRepository tryLoginRepository;
     private final JWTUtil jwtUtil;
+    private final UserRepository userRepository;
+    private final HistoryRepository historyRepository;
+
+    private static final DateTimeFormatter DT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     // 로그인 성공하면 토큰값 추가하여 json방식으로 알려주기
     @Override
@@ -33,8 +46,23 @@ public class ApiSuccessHandler implements AuthenticationSuccessHandler {
         claims.put("refreshToken", refreshToken);
 
         // 로그인 성공 시 IP 시도 초기화
-        String ip = getIp(request);
-        tryLoginRepository.recordLoginAttempt(ip, true);
+        String ip = getClientIp(request);
+        String username = getUserName(request);
+
+        // DB에서 실제 User 엔티티 조회
+        User user = userRepository.getUser(userSecurityDTO.getUsername());
+        if (user != null) {
+            // ✅ 로그인 이력 저장
+            History history = History.builder()
+                    .ip(ip)
+                    .login(LocalDateTime.now().format(DT))
+                    .user(user)
+                    .build();
+
+            historyRepository.save(history);
+        }
+
+        tryLoginRepository.recordLoginAttempt(ip, username, true);
 
         Gson gson = new Gson();
         String jsonStr = gson.toJson(claims);
@@ -44,13 +72,5 @@ public class ApiSuccessHandler implements AuthenticationSuccessHandler {
         PrintWriter printWriter = response.getWriter();
         printWriter.println(jsonStr);
         printWriter.close();
-    }
-
-    private String getIp(HttpServletRequest request) {
-        String ip = request.getHeader("X-Forwarded-For");
-        if (ip != null && !ip.isEmpty() && !"unknown".equalsIgnoreCase(ip)) {
-            return ip.split(",")[0].trim();
-        }
-        return request.getRemoteAddr();
     }
 }
