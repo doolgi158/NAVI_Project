@@ -58,3 +58,7 @@ dependencies {
     // https://mvnrepository.com/artifact/com.oracle.database.security/osdt_core
     implementation 'com.oracle.database.security:osdt_core:21.17.0.0'
 }
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
