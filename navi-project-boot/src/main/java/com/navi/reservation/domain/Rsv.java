@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "NAVI_RESERVATION")   // indexes 추후 추가 예정
 public class Rsv {
+    /* === COLUMN 정의 === */
     // 예약 고유번호 (예: 20251007ACC001)
     @Id @Column(name = "reserve_id", length = 20, nullable = false)
     private String reserveId;
@@ -34,7 +35,7 @@ public class Rsv {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_no", nullable = false)
     @OnDelete(action = OnDeleteAction.NO_ACTION)
-    private User userNo;
+    private User user;
 
     // 예약 대상 구분 (예: ACC, AIR, DLV)
     @Enumerated(EnumType.STRING)    // --> Enum 순서(기본) 대신 문자열로 안전하게 저장

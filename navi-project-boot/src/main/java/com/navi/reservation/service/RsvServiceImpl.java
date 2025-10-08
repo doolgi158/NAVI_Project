@@ -49,7 +49,7 @@ public class RsvServiceImpl implements RsvService {
         // 예약 엔티티 생성
         Rsv rsv = Rsv.builder()
                 .reserveId(reserveId)
-                .userNo(user)
+                .user(user)
                 .targetType(dto.getTargetType())
                 .targetId(dto.getTargetId())
                 .paymentMethod(dto.getPaymentMethod())

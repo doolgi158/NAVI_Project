@@ -13,7 +13,7 @@ import java.util.Optional;
 public interface RsvRepository extends JpaRepository<Rsv, String> {
     /** === 관리자 기능 === */
     // 회원번호 기준으로 예약 전체 조회
-    @Query("SELECT r FROM Rsv r WHERE r.userNo.no = :userNo ORDER BY r.createdTime DESC")
+    @Query("SELECT r FROM Rsv r WHERE r.user.no = :userNo ORDER BY r.createdTime DESC")
     List<Rsv> findAllByUser(@Param("userNo") Long userNo);
 
     // 결제상태별 조회
