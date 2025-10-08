@@ -15,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -32,6 +33,7 @@ public class ApiLogoutSuccessHandler implements LogoutSuccessHandler {
     private static final DateTimeFormatter DT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Override
+    @Transactional
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
             throws IOException, ServletException {
 
@@ -67,14 +69,28 @@ public class ApiLogoutSuccessHandler implements LogoutSuccessHandler {
             return;
         }
 
-        // 최신 로그인 이력 찾기
+        // 관리자 예외 처리 (user_no == 0 인 경우)
+        if (user.getNo() == 0) {
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.getWriter().write("{\"message\":\"관리자 로그아웃 완료 (히스토리 기록 생략)\"}");
+            return;
+        }
+
+        // 최신 로그인 이력 조회
         List<History> list = historyRepository.findLatestHistory(user, PageRequest.of(0, 1));
 
         if (!list.isEmpty()) {
             History latest = list.get(0);
-            HistoryDTO dto = HistoryDTO.fromEntity(latest);
-            dto.setLogout(LocalDateTime.now().format(DT));
-            historyRepository.save(dto.toEntity());
+            // 🔹 기존 이력에 로그아웃 시간 세팅
+            latest = History.builder()
+                    .no(latest.getNo())
+                    .ip(latest.getIp())
+                    .login(latest.getLogin())
+                    .logout(LocalDateTime.now().format(DT))
+                    .user(user)
+                    .build();
+
+            historyRepository.save(latest);
         }
 
         response.setStatus(HttpServletResponse.SC_OK);

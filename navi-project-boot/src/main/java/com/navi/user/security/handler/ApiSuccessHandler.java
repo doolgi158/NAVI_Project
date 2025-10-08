@@ -49,28 +49,38 @@ public class ApiSuccessHandler implements AuthenticationSuccessHandler {
         String ip = getClientIp(request);
         String username = getUserName(request);
 
-        // DB에서 실제 User 엔티티 조회
-        User user = userRepository.getUser(userSecurityDTO.getUsername());
-        if (user != null) {
-            // ✅ 로그인 이력 저장
-            History history = History.builder()
-                    .ip(ip)
-                    .login(LocalDateTime.now().format(DT))
-                    .user(user)
-                    .build();
+        User user = userRepository.getUser(username);
 
-            historyRepository.save(history);
+        // 관리자(또는 DB에 없는 사용자)는 히스토리 생략
+        if (user == null || user.getNo() == 0) {
+            tryLoginRepository.recordLoginAttempt(ip, username, true);
+            writeResponse(response, claims, "관리자 로그인 성공 (히스토리 제외)");
+            return;
         }
 
-        tryLoginRepository.recordLoginAttempt(ip, username, true);
+        // 일반 사용자 로그인 기록 저장
+        History history = History.builder()
+                .user(user)
+                .ip(ip)
+                .login(LocalDateTime.now().format(DT))
+                .build();
+        historyRepository.save(history);
 
+        tryLoginRepository.recordLoginAttempt(ip, username, true);
+        writeResponse(response, claims, "로그인 성공");
+    }
+
+    // 응답 공통화
+    private void writeResponse(HttpServletResponse response, Map<String, Object> claims, String message)
+            throws IOException {
         Gson gson = new Gson();
+        claims.put("message", message);
         String jsonStr = gson.toJson(claims);
 
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType("application/json; charset=UTF-8");
-        PrintWriter printWriter = response.getWriter();
-        printWriter.println(jsonStr);
-        printWriter.close();
+        try (PrintWriter printWriter = response.getWriter()) {
+            printWriter.println(jsonStr);
+        }
     }
 }
