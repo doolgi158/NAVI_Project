@@ -1,15 +1,16 @@
 package com.navi.travel.dto;
 
 import com.navi.travel.domain.Travel;
-
 import lombok.Builder;
 import lombok.Getter;
 
-import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Builder
 public class TravelDetailResponseDTO {
+
     private Long travelId;
     private String contentId;
     private String contentsCd;
@@ -19,8 +20,8 @@ public class TravelDetailResponseDTO {
     private String introduction;
     private String address;
     private String roadAddress;
-    private String phoneNo; // Travel 엔티티의 tel 필드와 매핑됨
-    private String tag;     // Travel 엔티티의 tags 필드와 매핑됨
+    private String phoneNo;
+    private String tag;
     private Double longitude;
     private Double latitude;
     private String region1Name;
@@ -28,8 +29,26 @@ public class TravelDetailResponseDTO {
     private String imagePath;
     private Long views;
     private Long likes;
+    private Long bookmark;
 
-    public static TravelDetailResponseDTO of(Travel travel) {
+    // ✅ 중요: 사용자 상태 값
+    private boolean isLikedByUser;
+    private boolean isBookmarkedByUser;
+
+    private LocalDate updatedAt;
+    private LocalDate createdAt;
+
+    public static TravelDetailResponseDTO of(Travel travel, boolean isLikedByUser, boolean isBookmarkedByUser) {
+        LocalDateTime createdAtLDT = null;
+        LocalDateTime updatedAtLDT = null;
+
+        try {
+            createdAtLDT = travel.getCreatedAt();
+            updatedAtLDT = travel.getUpdatedAt();
+        } catch (Exception e) {
+            // 필요 시 변환 로직 추가
+        }
+
         return TravelDetailResponseDTO.builder()
                 .travelId(travel.getTravelId())
                 .contentId(travel.getContentId())
@@ -40,8 +59,8 @@ public class TravelDetailResponseDTO {
                 .introduction(travel.getIntroduction())
                 .address(travel.getAddress())
                 .roadAddress(travel.getRoadAddress())
-                .phoneNo(travel.getPhoneNo()) // Travel 엔티티에 getPhoneNo() 추가됨
-                .tag(travel.getTag())         // Travel 엔티티에 getTag() 추가됨
+                .phoneNo(travel.getPhoneNo())
+                .tag(travel.getTag())
                 .longitude(travel.getLongitude())
                 .latitude(travel.getLatitude())
                 .region1Name(travel.getRegion1Name())
@@ -49,6 +68,15 @@ public class TravelDetailResponseDTO {
                 .imagePath(travel.getImagePath())
                 .views(travel.getViews())
                 .likes(travel.getLikes())
+                .bookmark(travel.getBookmark())
+
+                // ✅ 여기 반드시 추가해야 함 (사용자 상태값 반영)
+                .isLikedByUser(isLikedByUser)
+                .isBookmarkedByUser(isBookmarkedByUser)
+
+                // ✅ LocalDate 변환
+                .createdAt(createdAtLDT != null ? createdAtLDT.toLocalDate() : null)
+                .updatedAt(updatedAtLDT != null ? updatedAtLDT.toLocalDate() : null)
                 .build();
     }
 }

@@ -1,101 +1,143 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 
 /**
- * ✅ Kakao Map Hook (DB 좌표, 부드러운 이동, 마커 + 커스텀 오버레이 동시 적용)
- * @param {string} containerId - 지도 컨테이너 DOM id
- * @returns {object} { isMapLoaded, updateMap, resetMap }
+ * Kakao Map Hook
  */
 export const useKakaoMap = (containerId) => {
-  const [isMapLoaded, setIsMapLoaded] = useState(false);
-  const mapRef = useRef(null);
-  const markerRef = useRef(null); 
-  const customOverlayRef = useRef(null); 
-  const infoWindowRef = useRef(null); 
+  const [isMapLoaded, setIsMapLoaded] = useState(false);
+  const mapRef = useRef(null);
+  const markerRef = useRef(null);
+  const customOverlayRef = useRef(null);
+  const infoWindowRef = useRef(null);
 
-  //커스텀 오버레이를 숨길 페이지의 컨테이너 ID를 정의합니다.
-  const HIDE_OVERLAY_ID = 'kakao-detail-map-container';
+  const HIDE_OVERLAY_ID = 'kakao-detail-map-container';
 
-  // 1️⃣ SDK 로드 및 초기화 (유지)
-  useEffect(() => {
-    const loadKakaoSDK = () => {
-      if (window.kakao && window.kakao.maps) {
-        window.kakao.maps.load(() => {
-          setIsMapLoaded(true);
-        });
-      }
-    };
+  useEffect(() => {
+    const loadKakaoSDK = () => {
+      if (window.kakao && window.kakao.maps) {
+        window.kakao.maps.load(() => {
+          setIsMapLoaded(true);
+          console.log("[KakaoMap] SDK loaded");
+        });
+      }
+    };
 
-    if (window.kakao && window.kakao.maps) {
-      loadKakaoSDK();
-    } else {
-      const script = document.createElement("script");
-      script.src =
-        "//dapi.kakao.com/v2/maps/sdk.js?appkey=64f77515cbf4b9bf257e664e44b1ab9b&autoload=false";
-      script.async = true;
-      script.onload = loadKakaoSDK;
-      document.head.appendChild(script);
-    }
-  }, []);
+    if (window.kakao && window.kakao.maps) {
+      loadKakaoSDK();
+    } else {
+      const script = document.createElement("script");
+      script.src = "//dapi.kakao.com/v2/maps/sdk.js?appkey=64f77515cbf4b9bf257e664e44b1ab9b&autoload=false";
+      script.async = true;
+      script.onload = loadKakaoSDK;
+      document.head.appendChild(script);
+    }
+  }, []);
 
-  // 2️⃣ 지도 생성 또는 업데이트
-  const updateMap = useCallback(
-    (item) => { 
-      const { title, latitude, longitude, thumbnailPath } = item; 
+  // wait until container has non-zero size (up to timeout)
+  const _waitForContainerVisible = async (timeout = 1200) => {
+    const start = performance.now();
+    return new Promise((resolve) => {
+      function check() {
+        const container = document.getElementById(containerId);
+        if (container) {
+          const w = container.clientWidth || 0;
+          const h = container.clientHeight || 0;
+          if (w > 10 && h > 10) return resolve(true);
+        }
+        if (performance.now() - start > timeout) return resolve(false);
+        requestAnimationFrame(check);
+      }
+      check();
+    });
+  };
 
-      if (!isMapLoaded) { 
-          console.log("[KakaoMap Debug] Map SDK not ready. Skipping map update.");
-          return;
-      }
+  // relayoutMap: 안정적으로 relayout + resize + setCenter 수행
+  const relayoutMap = useCallback(async () => {
+    if (!mapRef.current) {
+      console.warn("[KakaoMap] relayoutMap called but mapRef is null");
+      return;
+    }
 
-      const mapContainer = document.getElementById(containerId);
-      if (!mapContainer) {
-        console.error("지도 컨테이너를 찾을 수 없습니다:", containerId);
-        return;
-      }
+    const containerReady = await _waitForContainerVisible(1200);
+    if (!containerReady) {
+      console.warn("[KakaoMap] container not visible or zero size when relayout attempted");
+    }
 
-      const { kakao } = window;
-      let map = mapRef.current; 
+    try {
+      // relayout if available
+      if (typeof mapRef.current.relayout === "function") {
+        mapRef.current.relayout();
+      }
+      if (window.kakao && window.kakao.maps && window.kakao.maps.event) {
+        try {
+          window.kakao.maps.event.trigger(mapRef.current, "resize");
+        } catch (e) {
+          // 일부 환경에서 trigger(mapRef.current, 'resize') 실패할 수 있으므로 안전히 캐치
+          console.warn("[KakaoMap] kakao.maps.event.trigger resize failed:", e);
+        }
+      }
+      // restore center if possible
+      if (typeof mapRef.current.getCenter === "function" && typeof mapRef.current.setCenter === "function") {
+        const currentCenter = mapRef.current.getCenter();
+        if (currentCenter) {
+          mapRef.current.setCenter(currentCenter);
+        }
+      }
+      console.log("[KakaoMap] relayout/resize executed");
+    } catch (err) {
+      console.error("[KakaoMap] relayoutMap error:", err);
+    }
+  }, [containerId]);
 
-      // 1. 유효한 DB 좌표 확인
-      let coords;
-      if (latitude && longitude && !isNaN(parseFloat(latitude)) && !isNaN(parseFloat(longitude))) {
-          const lat = parseFloat(latitude);
-          const lng = parseFloat(longitude);
-          coords = new kakao.maps.LatLng(lat, lng);
-          console.log(`[KakaoMap Success] Using DB coordinates: Lat ${lat}, Lng ${lng}`);
-      } else {
-          coords = new kakao.maps.LatLng(33.3926876, 126.4948419); 
-          console.error(`[KakaoMap Error] DB coordinates invalid or missing. Setting map to default center.`);
-      }
+  // updateMap: create map if needed and set marker/overlay
+  const updateMap = useCallback(
+    (item) => {
+      const { title, latitude, longitude, thumbnailPath } = item || {};
+
+      if (!isMapLoaded) {
+        console.log("[KakaoMap] SDK not ready. Skipping updateMap.");
+        return;
+      }
+
+      const mapContainer = document.getElementById(containerId);
+      if (!mapContainer) {
+        console.error("[KakaoMap] map container not found:", containerId);
+        return;
+      }
+
+      const { kakao } = window;
+      let map = mapRef.current;
+
+      // coords
+      let coords;
+      if (latitude !== undefined && longitude !== undefined && !isNaN(parseFloat(latitude)) && !isNaN(parseFloat(longitude))) {
+        const lat = parseFloat(latitude);
+        const lng = parseFloat(longitude);
+        coords = new kakao.maps.LatLng(lat, lng);
+      } else {
+        coords = new kakao.maps.LatLng(33.3926876, 126.4948419);
+      }
 
       // 지도 인스턴스가 없으면 새로 생성 (최초 1회)
       if (!map) {
-          const mapOption = {
-              center: coords, // 최초 중심 좌표도 DB 값 사용
-              level: 9,
-          };
-          map = new kakao.maps.Map(mapContainer, mapOption);
-          mapRef.current = map;
-          map.relayout();
-      }
+        const mapOption = { center: coords, level: 9 };
+        map = new kakao.maps.Map(mapContainer, mapOption);
+        mapRef.current = map;
+      }
       
       // 2. 기존 마커 및 오버레이 제거
       if (markerRef.current) markerRef.current.setMap(null);
-      if (customOverlayRef.current) customOverlayRef.current.setMap(null);
+      if (customOverlayRef.current) customOverlayRef.current.setMap(null);
 
       // 3. 마커 생성 및 지도에 표시 (모든 페이지에서 마커는 표시)
       const marker = new kakao.maps.Marker({ map, position: coords });
-      markerRef.current = marker;
+      markerRef.current = marker;
 
-      // ⭐️ [수정] 현재 페이지가 상세 페이지(HIDE_OVERLAY_ID)인지 확인
-      const shouldShowCustomOverlay = containerId !== HIDE_OVERLAY_ID;
-
-      // 4. 커스텀 오버레이 처리 (조건부 생성 및 표시)
-      if (shouldShowCustomOverlay) {
-          // 오버레이를 표시해야 하는 경우에만 HTML 생성 및 오버레이 생성
-          const imageSrc = thumbnailPath || 'https://placehold.co/100x100/cccccc/333333?text=No';
-
-          const content = `
+      // 현재 페이지가 상세 페이지(HIDE_OVERLAY_ID)인지 확인
+      const shouldShowOverlay = containerId !== HIDE_OVERLAY_ID;
+      if (shouldShowOverlay) {
+        const imageSrc = thumbnailPath || 'https://placehold.co/100x100/cccccc/333333?text=No';
+        const content = `
             <div style="
               width: 220px;
               background: white;
@@ -109,41 +151,42 @@ export const useKakaoMap = (containerId) => {
                   onerror="this.onerror=null;this.src='https://placehold.co/220x140/cccccc/333333?text=No'"/>
               </div>
                 <div style="padding:8px 12px; font-size:16px; font-weight:bold; color:#111; background: white;border-radius:0px 0px 12px 12px;">
-                ${title}
+                ${title || ""}
               </div>
             </div>
           `;
 
           // 5. 커스텀 오버레이 생성 및 지도에 표시
           const customOverlay = new kakao.maps.CustomOverlay({
-              map: map,
-              position: coords,
-              content: content,
-              // 오버레이 위치 조정: 마커 위에 표시되도록 yAnchor 설정
-              yAnchor: 1, 
-              zIndex: 3,
-          });
-          
-          customOverlayRef.current = customOverlay;
-      }
+          map,
+          position: coords,
+          content,
+          yAnchor: 1,
+          zIndex: 3,
+        });
+        customOverlayRef.current = customOverlay;
+      }
 
-      // 지도의 중심 이동 (부드럽게 panTo 유지)
-      map.panTo(coords);
-      map.relayout();
-    },
-    [isMapLoaded, containerId]
-  );
+      // panTo
+      try {
+        map.panTo(coords);
+      } catch (e) {
+        // 안전 처리
+        console.warn("[KakaoMap] panTo failed:", e);
+      }
+    },
+    [isMapLoaded, containerId]
+  );
 
   // 3️⃣ 지도 초기화 해제 
   const resetMap = useCallback(() => {
-    mapRef.current = null;
-    // 마커 및 오버레이 모두 제거
-    if (markerRef.current) markerRef.current.setMap(null);
-    if (customOverlayRef.current) customOverlayRef.current.setMap(null);
-    markerRef.current = null;
-    customOverlayRef.current = null;
-    infoWindowRef.current = null;
-  }, []);
+    mapRef.current = null;
+    if (markerRef.current) markerRef.current.setMap(null);
+    if (customOverlayRef.current) customOverlayRef.current.setMap(null);
+    markerRef.current = null;
+    customOverlayRef.current = null;
+    infoWindowRef.current = null;
+  }, []);
 
-  return { isMapLoaded, updateMap, resetMap };
+   return { isMapLoaded, updateMap, relayoutMap, resetMap };
 };

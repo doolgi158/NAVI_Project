@@ -22,6 +22,7 @@ public class TravelListResponseDTO {
     private String thumbnailPath;   // 썸네일 경로
     private Long views;         // 조회수
     private Long likes;         // 좋아요 수
+    private Long bookmark;      //북마크 수
 
     public static TravelListResponseDTO of(Travel travel) {
         return TravelListResponseDTO.builder()
@@ -39,6 +40,7 @@ public class TravelListResponseDTO {
                 .thumbnailPath(travel.getThumbnailPath() != null ? travel.getThumbnailPath() : null)
                 .views(travel.getViews() != null ? travel.getViews() : 0L) // Long 타입 0L로 초기화
                 .likes(travel.getLikes() != null ? travel.getLikes() : 0L)   // Long 타입 0L로 초기화
+                .bookmark(travel.getBookmark() != null ? travel.getBookmark() : 0L)   // Long 타입 0L로 초기화
                 .build();
     }
 }

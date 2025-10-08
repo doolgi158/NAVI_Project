@@ -15,4 +15,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @EntityGraph(attributePaths = "userRoleList")
     @Query("select u from User u where u.id = :id")
     User getUser(@Param("id") String id);
+
+    // Id로 User 엔티티를 찾기 위한 메서드
+    Optional<User> findById(String id);
 }
