@@ -40,6 +40,11 @@ public class SecurityConfig {
         // CSRF 설정
         security.csrf(config -> config.disable());
 
+        security.authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/oauth/**").permitAll()
+                        .requestMatchers("/api/users/login").permitAll()
+                        .anyRequest().authenticated());
+
         // 로그인 설정
         security.formLogin(config -> {
             config.loginProcessingUrl("/api/users/login")
@@ -65,7 +70,7 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
+        configuration.setAllowedOriginPatterns(Arrays.asList("http://localhost:5173"));
         configuration.setAllowedMethods(Arrays.asList("POST", "GET", "DELETE", "PUT", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
         configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));

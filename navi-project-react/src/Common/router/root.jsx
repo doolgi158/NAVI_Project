@@ -9,6 +9,7 @@ const AdminUsers = lazy(() => import("../../admin/pages/AdminUsersPage.jsx"))
 const AdminDashboard = lazy(() => import("../../admin/pages/AdminDashboardPage.jsx"))
 const Flight = lazy(() => import("../../users/pages/flight/FlightPage.jsx"))
 const Signup = lazy(() => import("../../users/pages/UserSignupPage.jsx"))
+const Redirect = lazy(() => import("../../users/pages/RedirectPage.jsx"))
 
 const root = createBrowserRouter([
     {
@@ -64,6 +65,10 @@ const root = createBrowserRouter([
     {
         path: "/travel",
         children: [...TravelRouter()]
+    },
+    {
+        path: "/login/oauth2/redirect",
+        element: <Suspense fallback={Loading}><Redirect /> </Suspense>
     },
 ]);
 
