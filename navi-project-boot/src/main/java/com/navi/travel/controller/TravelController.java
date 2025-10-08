@@ -2,6 +2,7 @@ package com.navi.travel.controller;
 
 import com.navi.travel.dto.TravelDetailResponseDTO;
 import com.navi.travel.dto.TravelListResponseDTO;
+import com.navi.travel.dto.TravelRequestDTO;
 import com.navi.travel.service.TravelService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -137,6 +138,42 @@ public class TravelController {
         } catch (Exception e) {
             e.printStackTrace();
             return "API 데이터 저장 중 오류 발생: " + e.getMessage();
+        }
+    }
+    // ✅ 여행지 등록/수정
+    @PostMapping("/admin")
+    // @Secured("ROLE_ADMIN") // Spring Security 적용 시 권한 체크 추가
+    public ResponseEntity<TravelListResponseDTO> saveOrUpdateTravel(@RequestBody TravelRequestDTO dto) {
+        try {
+            TravelListResponseDTO response = travelService.saveTravel(dto);
+
+            // 등록(travelId가 null)이면 201 Created, 수정(travelId가 not null)이면 200 OK
+            HttpStatus status = (dto.getTravelId() == null) ? HttpStatus.CREATED : HttpStatus.OK;
+
+            return ResponseEntity.status(status).body(response);
+        } catch (NoSuchElementException e) {
+            // 수정 시 해당 ID의 여행지가 없는 경우
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (Exception e) {
+            System.err.println("여행지 저장/수정 중 서버 오류 발생: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    // ✅ 여행지 삭제 (Admin CRUD: Delete)
+    @DeleteMapping("/admin/{travelId}")
+    // @Secured("ROLE_ADMIN") // Spring Security 적용 시 권한 체크 추가
+    public ResponseEntity<Void> deleteTravel(@PathVariable Long travelId) {
+        try {
+            travelService.deleteTravel(travelId);
+            // 성공적인 삭제는 보통 204 No Content로 응답합니다.
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        } catch (NoSuchElementException e) {
+            // 삭제 대상이 없는 경우
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (Exception e) {
+            System.err.println("여행지 삭제 중 서버 오류 발생: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

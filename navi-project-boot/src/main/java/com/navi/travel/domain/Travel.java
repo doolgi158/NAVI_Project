@@ -2,11 +2,9 @@ package com.navi.travel.domain;
 
 import com.navi.common.entity.BaseEntity;
 
+import com.navi.travel.dto.TravelRequestDTO;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.util.HashSet;
-import java.util.Set;
 
 
 @Getter
@@ -29,7 +27,7 @@ public class Travel extends BaseEntity { //등록일 수정일 자동생성 상�
     private Long travelId;
 
     // 콘텐츠 ID (외부API의 여행지id, UNIQUE)
-    @Column(name = "CONTENTS_ID", unique = true, nullable = false, length = 50)
+    @Column(name = "CONTENTS_ID", unique = true, length = 50)
     private String contentId;
 
     // 카테고리 정보
@@ -115,10 +113,6 @@ public class Travel extends BaseEntity { //등록일 수정일 자동생성 상�
     @Column(name = "STATE", nullable = false)
     private int state;  // 개시상태(공개, 비공개)
 
-    // 🚨 기존의 양방향 매핑(likesRecords, bookmarkRecords)을 제거했습니다.
-    // 🚨 Like와 Bookmark 엔티티에 Travel 객체 필드('travel')가 없어 발생하는 오류를 해결합니다.
-    // 🚨 서비스 로직은 ID 기반 카운트를 사용하므로 이 필드들은 필요하지 않습니다.
-
     /**
      * 외부 API 데이터를 기반으로 기존 엔티티의 필드 값을 업데이트하는 메소드
      * (콘텐츠 ID(contentId)가 이미 존재할 때 사용)
@@ -163,5 +157,26 @@ public class Travel extends BaseEntity { //등록일 수정일 자동생성 상�
             this.likes = this.likes - 1;
         }
     }
+    
+    //여행지 정보 수동 업데이트
+    public void updateFromRequest(TravelRequestDTO dto) {
+        this.contentsCd = dto.getContentsCd();
+        this.title = dto.getTitle();
+        this.introduction = dto.getIntroduction();
+        this.address = dto.getAddress();
+        this.roadAddress = dto.getRoadAddress();
+        this.phoneNo = dto.getPhoneNo();
+        this.tag = dto.getTag();
+        this.longitude = dto.getLongitude();
+        this.latitude = dto.getLatitude();
+        this.categoryName = dto.getCategoryName();
+        this.region1Name = dto.getRegion1Name();
+        this.region2Name = dto.getRegion2Name();
+        this.imagePath = dto.getImagePath();
+        this.thumbnailPath = dto.getThumbnailPath();
+        this.state = dto.getState() != null ? dto.getState() : 1;
+        // contentId와 카운터 필드(views, likes, bookmark)는 여기서 업데이트하지 않습니다.
+    }
+    
 
 }

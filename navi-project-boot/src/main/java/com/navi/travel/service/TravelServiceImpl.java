@@ -6,6 +6,7 @@ import com.navi.travel.domain.Bookmark;
 import com.navi.travel.dto.TravelApiResponseBody;
 import com.navi.travel.dto.TravelDetailResponseDTO;
 import com.navi.travel.dto.TravelListResponseDTO;
+import com.navi.travel.dto.TravelRequestDTO;
 import com.navi.travel.repository.LikeRepository;
 import com.navi.travel.repository.TravelRepository;
 import com.navi.travel.repository.BookmarkRepository;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -144,90 +146,75 @@ public class TravelServiceImpl implements TravelService {
     @Transactional(readOnly = true)
     public Page<TravelListResponseDTO> getTravelList(Pageable pageable, List<String> region2Names, String category, String search) {
 
-
-        // 1. 필터 조건 확인 및 전체 조회
+        // 1. 필터 및 검색 조건 유무 확인
         boolean noRegionFilter = (region2Names == null || region2Names.isEmpty());
-        //category 필터가 없거나 "전체"인 경우
-        boolean noCategoryFilter = !StringUtils.hasText(category) || "전체".equalsIgnoreCase(category);
-        //search 필터가 없는 경우
+        // category 필터가 없거나 "전체"인 경우
+        boolean noCategoryFilter = !StringUtils.hasText(category) || "전체".equalsIgnoreCase(category.trim());
+        // search 필터가 없는 경우
         boolean noSearchFilter = !StringUtils.hasText(search);
 
+        // 2. 조건이 아예 없으면 전체 목록 반환 (500 오류 방지)
         if (noRegionFilter && noCategoryFilter && noSearchFilter) {
-            // 필터 조건이 아예 없으면 전체 목록 반환
             return travelRepository.findAll(pageable).map(TravelListResponseDTO::of);
         }
 
-        // 2. Specification 초기화 (시작점)
-        //  Specification.where(null) 대신 중립적인 '항상 참' 조건(criteriaBuilder.conjunction())을 사용합니다.
-        Specification<Travel> spec = (root, query, criteriaBuilder) -> criteriaBuilder.conjunction();
+        // 3. Specification 초기화 (시작점: 항상 참)
+        Specification<Travel> spec = Specification.where(null);  // Specification.where(null)는 모든 조건을 만족시키는 시작점입니다.
 
-        // 3. 지역 필터링 (region2Name) 적용
+        // 4. 지역 필터링 (region2Name) 적용
         if (!noRegionFilter) {
 
-            // 3-1. 입력된 지역 이름 리스트를 OR Specification 리스트로 변환
+            // 4-1. 입력된 지역 이름 리스트를 OR Specification 리스트로 변환
             List<Specification<Travel>> regionConditions = region2Names.stream()
-                    // 입력 값에 공백이 없는지 확인
                     .filter(StringUtils::hasText)
                     .map(regionName -> (Specification<Travel>) (root, query, criteriaBuilder) ->
                             criteriaBuilder.equal(
-                                    criteriaBuilder.trim(root.get("region2Name")), // DB 필드의 공백 제거
-                                    regionName.trim() // 입력된 필터 값의 공백 제거
+                                    criteriaBuilder.trim(root.get("region2Name")),
+                                    regionName.trim()
                             )
                     )
                     .collect(Collectors.toList());
 
-            // 3-2. 모든 지역 조건을 OR로 결합
+            // 4-2. 모든 지역 조건을 OR로 결합하여 spec에 AND로 추가
             if (!regionConditions.isEmpty()) {
-
                 Specification<Travel> regionSpec = regionConditions.stream()
-                        .reduce(Specification::or) // List의 모든 조건을 OR로 연결
-                        .orElse((root, query, criteriaBuilder) -> criteriaBuilder.conjunction());
+                        .reduce(Specification::or)
+                        .orElse(Specification.where(null));
 
-                // 3-3. 전체 spec에 지역 필터를 AND로 추가
                 spec = spec.and(regionSpec);
             }
         }
 
-        // 4. 카테고리 필터링 (categoryName) 적용
+        // 5. 카테고리 필터링 (categoryName) 적용
         if (!noCategoryFilter) {
 
-            final String trimmedCategory = category.trim(); // 요청 받은 카테고리 값도 TRIM 처리
-
-            log.info(">>> [TravelService] 카테고리 필터 적용: 최종 비교 값='{}'", trimmedCategory);
-
-            // 🚨 최종 수정: 엄격한 'equal' 대신 'like'를 사용하여 미묘한 DB 값 불일치 문제를 해결합니다.
-            // DB 카테고리 이름에 요청된 카테고리 이름이 포함되어 있는지 확인합니다.
+            final String trimmedCategory = category.trim();
             final String lowerWildcardCategory = "%" + trimmedCategory.toLowerCase() + "%";
 
             Specification<Travel> categorySpec = (root, query, criteriaBuilder) ->
                     criteriaBuilder.like(
-                            criteriaBuilder.lower(criteriaBuilder.trim(root.get("categoryName"))), // DB 필드를 TRIM 후, 소문자 변환
-                            lowerWildcardCategory // 소문자 변환된 요청 값에 와일드카드(%) 추가
+                            criteriaBuilder.lower(root.get("categoryName")),
+                            lowerWildcardCategory
                     );
 
-
-            // 기존 spec에 카테고리 필터를 AND로 추가
             spec = spec.and(categorySpec);
         }
 
-        //  5. 제목(title) 부분 일치 검색 필터링 (Search) 적용
+        // 6. 제목(title) 부분 일치 검색 필터링 (Search) 적용
         if (!noSearchFilter) {
             final String trimmedSearch = search.trim();
             final String lowerWildcardSearch = "%" + trimmedSearch.toLowerCase() + "%";
 
             Specification<Travel> searchSpec = (root, query, criteriaBuilder) ->
                     criteriaBuilder.like(
-                            criteriaBuilder.lower(root.get("title")), // title 필드를 소문자 변환
-                            lowerWildcardSearch // 소문자 변환된 검색어에 와일드카드(%) 추가
+                            criteriaBuilder.lower(root.get("title")),
+                            lowerWildcardSearch
                     );
 
-            // 기존 spec에 제목 검색 필터를 AND로 추가 (다른 필터와 함께 적용)
             spec = spec.and(searchSpec);
-
-            log.info(">>> [TravelService] 제목 검색 필터 적용: 검색어='{}'", trimmedSearch);
         }
 
-        // 6. Specification이 적용된 findAll 호출 (지역 AND 카테고리 AND 검색어)
+        // 7. Specification이 적용된 findAll 호출
         Page<Travel> travelPage = travelRepository.findAll(spec, pageable);
 
         // Travel 엔티티 Page를 DTO Page로 변환
@@ -324,7 +311,6 @@ public class TravelServiceImpl implements TravelService {
     }
 
     //지정된 페이지의 여행지 데이터를 API에서 가져옵니다.
-
     private TravelApiResponseBody fetchTravelDataFromApi(int page, int pageSize) {
         URI uri = UriComponentsBuilder.fromUriString(apiUrl)
                 .queryParam("apiKey", apiKey)
@@ -367,4 +353,45 @@ public class TravelServiceImpl implements TravelService {
             return null;
         }
     }
+
+    //여행지 수정, 등록
+    @Transactional
+    public TravelListResponseDTO saveTravel(TravelRequestDTO dto) {
+        Travel travel;
+
+        // travelId가 존재하면 수정, 없으면 등록
+        if (dto.getTravelId() != null) {
+            // 1. 수정 (Update)
+            travel = travelRepository.findById(dto.getTravelId())
+                    .orElseThrow(() -> new NoSuchElementException("Travel not found with ID: " + dto.getTravelId()));
+
+            // 2. 엔티티 업데이트
+            travel.updateFromRequest(dto);
+
+        } else {
+            // 3. 등록 (Create)
+            travel = dto.toEntity();
+        }
+
+        // 4. 저장 (JPA save는 C/U를 모두 처리)
+        Travel savedTravel = travelRepository.save(travel);
+
+        // 5. 응답 DTO로 변환하여 반환
+        return TravelListResponseDTO.of(savedTravel);
+    }
+
+    //여행지 삭제
+    @Transactional
+    public void deleteTravel(Long travelId) {
+        // 삭제 대상이 존재하는지 확인
+        if (!travelRepository.existsById(travelId)) {
+            throw new NoSuchElementException("Travel not found with ID: " + travelId);
+        }
+
+        // 좋아요 및 북마크 기록이 있다면 이를 먼저 삭제하거나,
+        // 엔티티에 Cascade 옵션이 설정되어 있다면 자동으로 삭제됩니다. (옵션 미설정 시 수동 삭제 필요)
+
+        travelRepository.deleteById(travelId);
+    }
+    
 }
