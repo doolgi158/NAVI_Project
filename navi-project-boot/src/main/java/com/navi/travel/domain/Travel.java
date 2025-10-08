@@ -5,6 +5,9 @@ import com.navi.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 
 @Getter
 @Setter
@@ -13,6 +16,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @Entity
+
 @Table(name="NAVI_TRAVEL")
 @SequenceGenerator(name = "travel_seq", sequenceName = "TRAVEL_SEQ", allocationSize = 1)
 public class Travel extends BaseEntity { //등록일 수정일 자동생성 상속
@@ -104,8 +108,16 @@ public class Travel extends BaseEntity { //등록일 수정일 자동생성 상�
     @Column(name = "LIKES_COUNT", nullable = false)
     private Long likes = 0L; // 좋아요 수 (초기값 0 설정)
 
+    @Builder.Default
+    @Column(name = "BOOKMARK_COUNT", nullable = false, columnDefinition = "NUMBER default 0")
+    private Long bookmark = 0L; // 북마크 수 (초기값 0 설정)
+
     @Column(name = "STATE", nullable = false)
     private int state;  // 개시상태(공개, 비공개)
+
+    // 🚨 기존의 양방향 매핑(likesRecords, bookmarkRecords)을 제거했습니다.
+    // 🚨 Like와 Bookmark 엔티티에 Travel 객체 필드('travel')가 없어 발생하는 오류를 해결합니다.
+    // 🚨 서비스 로직은 ID 기반 카운트를 사용하므로 이 필드들은 필요하지 않습니다.
 
     /**
      * 외부 API 데이터를 기반으로 기존 엔티티의 필드 값을 업데이트하는 메소드
@@ -135,11 +147,21 @@ public class Travel extends BaseEntity { //등록일 수정일 자동생성 상�
         this.state = newTravel.state;
     }
 
-    /**
-     * 조회수를 1 증가시키는 메서드 (Service에서 호출)
-     */
+    // 조회수를 1 증가
     public void incrementViews() {
         this.views = (this.views == null) ? 1L : this.views + 1;
+    }
+
+    // 좋아요 카운트 증가
+    public void incrementLikes() {
+        this.likes = this.likes + 1;
+    }
+
+    // 좋아요 카운트 감소 (좋아요 취소시)
+    public void decrementLikes() {
+        if (this.likes > 0) {
+            this.likes = this.likes - 1;
+        }
     }
 
 }
