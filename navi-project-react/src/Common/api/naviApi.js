@@ -48,6 +48,18 @@ export const searchFlights = async (flightParam) => {
   return response.data;
 };
 
+// 소셜 로그인
+export const socialLogin = async (provider, code) => {
+  const API_BASE = `${BASE_PREFIX}/api/auth`;
+
+  try {
+    const response = await axios.get(`${API_BASE}/oauth/${provider}?code=${code}`);
+    return response.data;
+  } catch (error) {
+    console.error("❌ 소셜 로그인 오류:", error);
+    throw error;
+  }
+};
 // 카카오맵 설정 정보를 서버에서 조회하는 함수
 
 export const getKakaoMapConfig = async () => {

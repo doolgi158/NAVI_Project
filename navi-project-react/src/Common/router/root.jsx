@@ -11,6 +11,7 @@ const Flight = lazy(() => import("../../users/pages/flight/FlightPage.jsx"))
 const Signup = lazy(() => import("../../users/pages/UserSignupPage.jsx"))
 const AccList = lazy(() => import("../../users/pages/accommodation/AccListPage.jsx"))
 const AccDetail = lazy(() => import("../../users/pages/accommodation/AccDetailPage.jsx"))
+const Redirect = lazy(() => import("../../users/pages/RedirectPage.jsx"))
 
 const root = createBrowserRouter([
     {
@@ -86,6 +87,10 @@ const root = createBrowserRouter([
                 </ModalProvider>
             </Suspense>
         )
+    },
+    {
+        path: "/login/oauth2/redirect",
+        element: <Suspense fallback={Loading}><Redirect /> </Suspense>
     },
 ]);
 

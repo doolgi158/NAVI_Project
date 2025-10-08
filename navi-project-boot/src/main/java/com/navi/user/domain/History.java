@@ -1,12 +1,17 @@
 package com.navi.user.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 @Getter
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Entity
 @Table(name = "navi_history")
 @SequenceGenerator(
@@ -18,18 +23,29 @@ import lombok.*;
 public class History {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "navi_history_generator")
-    @Column(name = "history_id")
-    private long ID;                // 이력 ID
+    @Column(name = "history_no")
+    private long no;        // 로그인 이력 id
 
-    @Column(name = "history_request", nullable = false)
-    private String request;         // 탈퇴 요청일
+    @Column(name = "history_ip", nullable = false)
+    private String ip;      // 로그인 ip
 
-    @Column(name = "history_withdrawdue")
-    private String withdrawDue;     // 탈퇴 예정일
+    @Column(name = "history_login", nullable = false)
+    @ColumnDefault(value = "Sysdate")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private String login;   // 로그인 시간
 
-    @Column(name = "history_withdrawend", updatable = false)
-    private String withdrawEnd;     //  탈퇴 처리일
+    @Column(name = "history_logout")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private String logout;  // 로그아웃 시간
 
-    @Column(name = "history_withdrawreason")
-    private String withdrawReason;  // 탈퇴 사유
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_no")
+    private User user;      // User 정보
+
+    public History(String ip, String login, String logout, User user) {
+        this.ip = ip;
+        this.login = login;
+        this.logout = logout;
+        this.user = user;
+    }
 }
