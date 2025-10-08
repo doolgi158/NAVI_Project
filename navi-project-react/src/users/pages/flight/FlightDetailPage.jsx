@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import MainLayout from "../layout/MainLayout";
+import MainLayout from "../../layout/MainLayout.jsx";
 
 const API_SERVER_HOST = "http://localhost:8080";
 
