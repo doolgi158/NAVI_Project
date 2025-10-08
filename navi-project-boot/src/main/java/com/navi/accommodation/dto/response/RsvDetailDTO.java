@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class RoomResponseDTO {
+public class RsvDetailDTO {
     private String roomId;
     private String roomName;
     private Integer roomSize;

@@ -1,4 +1,4 @@
-package com.navi.user.service;
+package com.navi.user.service.user;
 
 import com.navi.user.domain.User;
 import com.navi.user.dto.users.UserRequestDTO;

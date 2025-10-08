@@ -3,11 +3,13 @@ package com.navi.user.security;
 import com.navi.user.repository.TryLoginRepository;
 import com.navi.user.security.Filter.JWTCheckFilter;
 import com.navi.user.security.Filter.TryLoginFilter;
+import com.navi.user.security.handler.ApiFailHandler;
+import com.navi.user.security.handler.ApiSuccessHandler;
+import com.navi.user.security.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,44 +23,45 @@ import java.util.Arrays;
 
 @Configuration
 @RequiredArgsConstructor
-@EnableWebSecurity
 public class SecurityConfig {
-
     private final TryLoginRepository tryLoginRepository;
+    private final JWTUtil jwtUtil;
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity security) throws Exception {
-        security
-                // ✅ 모든 요청을 인증 없이 허용
-                .authorizeHttpRequests(authorize -> authorize
-                        .anyRequest().permitAll()
-                )
+        // CORS 설정
+        security.cors(httpSecurityCorsConfigurer -> {
+            httpSecurityCorsConfigurer.configurationSource(corsConfigurationSource());
+        });
 
-                // ✅ CORS 설정
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+        // 세션 관리 정책 설정
+        security.sessionManagement(sessionConfig -> sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-                // ✅ 세션 관리: STATELESS (JWT 기반)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        // CSRF 설정
+        security.csrf(config -> config.disable());
 
-                // ✅ 폼 로그인, 기본 로그인, CSRF 모두 비활성화
-                .formLogin(form -> form.disable())
-                .httpBasic(basic -> basic.disable())
-                .csrf(csrf -> csrf.disable());
+        // 로그인 설정
+        security.formLogin(config -> {
+            config.loginProcessingUrl("/api/users/login")
+                    .usernameParameter("username")
+                    .passwordParameter("password");
+            config.successHandler(new ApiSuccessHandler(tryLoginRepository, jwtUtil));
+            config.failureHandler(new ApiFailHandler(tryLoginRepository));
+        });
 
-        // ✅ JWT 필터 추가 (토큰이 있으면 로그인 건너뛰기)
-       // security.addFilterBefore(new JWTCheckFilter(), UsernamePasswordAuthenticationFilter.class);
-       // security.addFilterBefore(new TryLoginFilter(tryLoginRepository), UsernamePasswordAuthenticationFilter.class);
-
+        // JWT 체크 (토큰 정보가 있으면 로그인을 건너뛴다)
+        security.addFilterBefore(new JWTCheckFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
+        security.addFilterBefore(new TryLoginFilter(tryLoginRepository), UsernamePasswordAuthenticationFilter.class);
         return security.build();
     }
 
-    // ✅ PasswordEncoder 등록
+    // Password 암호화
     @Bean
-    public PasswordEncoder passwordEncoder() {
+    public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
     }
 
-    // ✅ CORS 세부 설정
+    // CORS 세부 설정
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
