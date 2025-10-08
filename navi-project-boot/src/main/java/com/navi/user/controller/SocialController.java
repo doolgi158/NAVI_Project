@@ -71,32 +71,32 @@ public class SocialController {
                                  @RequestHeader(value = "Authorization", required = false) String authorization,
                                  HttpServletRequest request) {
         try {
-            // 1) 요청 바디/토큰에서 username 추출
+            // 요청 바디/토큰에서 username 추출
             String username = extractUsername(body, authorization);
 
             if (username == null || username.isBlank()) {
                 return ApiResponse.error("요청 정보가 잘못되었습니다.", 400, null);
             }
 
-            // 2) 사용자 조회
+            // 사용자 조회
             User user = userRepository.getUser(username);
             if (user == null) {
                 return ApiResponse.error("사용자를 찾을 수 없습니다.", 404, null);
             }
 
-            // 3) 마지막 로그인 이력 1건 조회
+            // 마지막 로그인 이력 1건 조회
             List<History> list = historyRepository.findLatestHistory(user, PageRequest.of(0, 1));
             if (list.isEmpty()) {
                 return ApiResponse.error("로그인 이력이 없습니다.", 404, null);
             }
 
-            // 4) 로그아웃 시간 세팅(문자열 컬럼이므로 포맷 맞춰서)
+            // 로그아웃 시간 세팅(문자열 컬럼이므로 포맷 맞춰서)
             History latest = list.get(0);
             HistoryDTO dto = HistoryDTO.fromEntity(latest);
             String now = LocalDateTime.now().format(DT);
             dto.setLogout(now);
 
-            // 5) merge 업데이트 (id 포함된 엔티티 save)
+            // merge 업데이트 (id 포함된 엔티티 save)
             historyRepository.save(dto.toEntity());
 
             Map<String, Object> data = Map.of(
