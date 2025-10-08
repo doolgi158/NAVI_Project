@@ -3,6 +3,7 @@ package com.navi.reservation.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Nationalized;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -24,7 +25,7 @@ import java.time.LocalDateTime;
 @Table(name = "NAVI_REFUND")
 @SequenceGenerator(
         name = "navi_refund_generator",
-        sequenceName = "navi_refund_seq",
+        sequenceName = "refund_seq",
         initialValue = 1,
         allocationSize = 1)
 public class Refund {
@@ -68,7 +69,7 @@ public class Refund {
     // 환불상태 (예: 환불요청, 환불진행, 환불완료, 환불거절)
     @Builder.Default
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", columnDefinition = "NVARCHAR2(4)", nullable = false)
+    @Nationalized @Column(name = "status", nullable = false)
     private RefundStatus status = RefundStatus.환불요청;
 
     /* === ENUM 정의 === */

@@ -39,7 +39,7 @@ public class Rsv {
 
     // 예약 대상 구분 (예: ACC, AIR, DLV)
     @Enumerated(EnumType.STRING)    // --> Enum 순서(기본) 대신 문자열로 안전하게 저장
-    @Column(name = "target_type", length = 3, nullable = false)
+    @Nationalized @Column(name = "target_type", length = 10, nullable = false)
     private TargetType targetType;
 
     // 예약 대상 ID (예: ACC003)
@@ -54,7 +54,7 @@ public class Rsv {
     // 결제 상태 (예: 결제대기, 결제완료, 결제실패, 결제취소)
     @Builder.Default
     @Enumerated(EnumType.STRING)
-    @Nationalized @Column(name = "payment_status", length = 10, nullable = false)
+    @Nationalized @Column(name = "payment_status", length = 20, nullable = false)
     private PaymentStatus paymentStatus = PaymentStatus.결제대기;
 
     // 결제 승인번호 (예: IMP_67283051)

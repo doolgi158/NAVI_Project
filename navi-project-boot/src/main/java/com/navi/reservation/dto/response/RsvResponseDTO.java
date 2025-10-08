@@ -34,7 +34,7 @@ public class RsvResponseDTO {
     public static RsvResponseDTO fromEntity(Rsv entity) {
         return RsvResponseDTO.builder()
                 .reserveId(entity.getReserveId())
-                .userNo(entity.getUserNo().getNo())
+                .userNo(entity.getUser().getNo())
                 .targetType(entity.getTargetType())
                 .targetId(entity.getTargetId())
                 .paymentId(entity.getPaymentId())
