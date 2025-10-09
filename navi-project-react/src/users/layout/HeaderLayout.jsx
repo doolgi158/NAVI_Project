@@ -5,7 +5,7 @@ import naviLogo from "../images/navi_logo.png";
 import { useModal } from "../../common/components/Login/ModalProvider";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "../../common/slice/loginSlice.js";
+import { setlogout } from "../../common/slice/loginSlice.js";
 
 const { Header } = Layout;
 
@@ -71,11 +71,11 @@ const HeaderLayout = () => {
         className="hidden md:flex"
       />
       {
-        loginstate.username ?
+        loginstate.token ?
           <Space>
             <Button
               type="default"
-              onClick={() => dispatch(logout())}
+              onClick={() => dispatch(setlogout())}
               className="text-red-500 hover:text-red-700"
             >
               로그아웃
@@ -112,13 +112,13 @@ const HeaderLayout = () => {
       >
         <Menu mode="vertical" items={items} style={{ color: "#2F3E46" }} />
         {
-          loginstate.username ?
+          loginstate.token ?
             <div className="mt-4 flex flex-col gap-2">
               <Button
                 danger
                 block
                 onClick={() => {
-                dispatch(logout());   // Redux 상태 초기화
+                dispatch(setlogout());   // Redux 상태 초기화
                 setOpen(false);       // Drawer 닫기
                 }}
               >

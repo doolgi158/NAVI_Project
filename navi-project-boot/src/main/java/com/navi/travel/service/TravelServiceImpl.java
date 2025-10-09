@@ -1,10 +1,15 @@
 package com.navi.travel.service;
 
 import com.navi.travel.domain.Travel;
+import com.navi.travel.domain.Like;
+import com.navi.travel.domain.Bookmark;
 import com.navi.travel.dto.TravelApiResponseBody;
 import com.navi.travel.dto.TravelDetailResponseDTO;
 import com.navi.travel.dto.TravelListResponseDTO;
+import com.navi.travel.repository.LikeRepository;
 import com.navi.travel.repository.TravelRepository;
+import com.navi.travel.repository.BookmarkRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -31,10 +36,21 @@ import java.util.stream.Collectors;
 public class TravelServiceImpl implements TravelService {
     private final TravelRepository travelRepository;
     private final RestTemplate restTemplate;
+    private final LikeRepository likeRepository;
+    private final BookmarkRepository bookmarkRepository;
+    // private final UserRepository userRepository; // ✅ User 엔티티를 직접 참조하지 않으므로 제거
 
-    public TravelServiceImpl(TravelRepository travelRepository, RestTemplate restTemplate) {
+    public TravelServiceImpl(
+            TravelRepository travelRepository,
+            RestTemplate restTemplate,
+            LikeRepository likeRepository,
+            BookmarkRepository bookmarkRepository
+            /* ,UserRepository userRepository */) { // ✅ UserRepository 주입 제거
         this.travelRepository = travelRepository;
         this.restTemplate = restTemplate;
+        this.likeRepository = likeRepository;
+        this.bookmarkRepository = bookmarkRepository;
+        // this.userRepository = userRepository; // ✅ 주입 제거
     }
 
     @Value("${url}")
@@ -47,8 +63,82 @@ public class TravelServiceImpl implements TravelService {
         saveApiData();
     }
 
+    // 조회수 로직
+    @Transactional
+    public void incrementViews(Long travelId) {
+        Travel travel = travelRepository.findById(travelId)
+                .orElseThrow(() -> new NoSuchElementException("여행지 ID를 찾을 수 없습니다: " + travelId));
+
+        travel.setViews(travel.getViews() + 1);
+        travelRepository.save(travel);
+    }
+
+    @Override
+    @Transactional
+    public boolean toggleLike(Long travelId, String id) { // ✅ id로 변수명 통일
+        // 1. Travel 엔티티 조회 (카운트 업데이트 및 예외 처리를 위해 필요)
+        Travel travel = travelRepository.findById(travelId)
+                .orElseThrow(() -> new EntityNotFoundException("여행지를 찾을 수 없습니다. (Travel ID: " + travelId + ")"));
+
+        // 2. Like 기록 조회 (ID 기반)
+        Optional<Like> existingLike = likeRepository.findByTravelIdAndId(travelId, id);
+
+        boolean likedBefore = existingLike.isPresent();
+
+        if (likedBefore) {
+            // 3. 이미 눌러있으면 → 삭제 (ID 기반 리포지토리 메서드 사용)
+            likeRepository.deleteByTravelIdAndId(travelId, id);
+        } else {
+            // 4. 없으면 → 추가 (ID 기반 생성자 사용)
+            Like newLike = new Like(travelId, id);
+            likeRepository.save(newLike);
+        }
+
+        // 5. 좋아요 카운트 업데이트 (Travel ID 기반)
+        long likeCount = likeRepository.countByTravelId(travelId);
+        travel.setLikes(likeCount);
+        travelRepository.save(travel);
+
+        // ✅ 현재 상태 반환 (true = 새로 추가됨, false = 취소됨)
+        return !likedBefore;
+    }
+
+    /**
+     * ✅ 북마크 토글 (ID 기반 로직으로 수정)
+     */
+    @Override
+    @Transactional
+    public boolean toggleBookmark(Long travelId, String id) { // ✅ id로 변수명 통일
+        // 1. Travel 엔티티 조회 (카운트 업데이트 및 예외 처리를 위해 필요)
+        Travel travel = travelRepository.findById(travelId)
+                .orElseThrow(() -> new EntityNotFoundException("여행지를 찾을 수 없습니다. (Travel ID: " + travelId + ")"));
+
+        // 2. Bookmark 기록 조회 (ID 기반)
+        Optional<Bookmark> existingBookmark = bookmarkRepository.findByTravelIdAndId(travelId, id);
+
+        boolean bookmarkedBefore = existingBookmark.isPresent();
+
+        if (bookmarkedBefore) {
+            // 3. 이미 눌러있으면 → 삭제 (ID 기반 리포지토리 메서드 사용)
+            bookmarkRepository.deleteByTravelIdAndId(travelId, id);
+        } else {
+            // 4. 없으면 → 추가 (ID 기반 생성자 사용)
+            Bookmark newBookmark = new Bookmark(travelId, id);
+            bookmarkRepository.save(newBookmark);
+        }
+
+        // 5. 북마크 카운트 업데이트 (Travel ID 기반)
+        long bookmarkCount = bookmarkRepository.countByTravelId(travelId);
+        travel.setBookmark(bookmarkCount);
+        travelRepository.save(travel);
+
+        // ✅ 현재 상태 반환 (true = 새로 추가됨, false = 취소됨)
+        return !bookmarkedBefore;
+    }
+
+
     // -------------------------------------------------------------
-    // ⭐️ getTravelList 메서드 수정
+    // getTravelList 메서드는 변경 사항이 없으므로 기존 로직 유지
     // -------------------------------------------------------------
     @Override
     @Transactional(readOnly = true)
@@ -120,7 +210,7 @@ public class TravelServiceImpl implements TravelService {
             spec = spec.and(categorySpec);
         }
 
-        // ⭐️ 5. 제목(title) 부분 일치 검색 필터링 (Search) 적용
+        //  5. 제목(title) 부분 일치 검색 필터링 (Search) 적용
         if (!noSearchFilter) {
             final String trimmedSearch = search.trim();
             final String lowerWildcardSearch = "%" + trimmedSearch.toLowerCase() + "%";
@@ -144,34 +234,33 @@ public class TravelServiceImpl implements TravelService {
         return travelPage.map(TravelListResponseDTO::of);
     }
     // -------------------------------------------------------------
-    // ⭐️ getTravelList 메서드 수정 끝
+    //  getTravelList 메서드 수정 끝
     // -------------------------------------------------------------
 
     @Override
     @Transactional(readOnly = true)
-    public TravelDetailResponseDTO getTravelDetail(Long travelId) {
-        // ... (나머지 메서드 유지)
+    public TravelDetailResponseDTO getTravelDetail(Long travelId, String id) { // ✅ id 매개변수 추가
+        // 1. Travel 엔티티 조회
         Travel travel = travelRepository.findById(travelId)
                 .orElseThrow(() -> new NoSuchElementException("Travel not found with ID: " + travelId));
 
-        return TravelDetailResponseDTO.of(travel);
+        // TODO: 실제 인증 정보를 가져오는 로직으로 대체해야 합니다.
+        // 현재는 하드코딩된 값(80L)을 사용하거나, 인증 정보가 없으면 null을 사용한다고 가정합니다.
+//         String id = "navi38"; // ❌ 하드코딩 제거 (매개변수로 받음)
+
+        boolean isLikedByUser = false;
+        boolean isBookmarkedByUser = false;
+
+        if (id != null) {
+            // 2. 좋아요/북마크 여부 확인 (ID 기반 리포지토리 메서드 사용)
+            isLikedByUser = likeRepository.existsByTravelIdAndId(travelId, id);
+            isBookmarkedByUser = bookmarkRepository.existsByTravelIdAndId(travelId, id);
+        }
+
+        // 3. Travel 엔티티와 사용자 상태 정보를 함께 DTO로 변환하여 반환
+        return TravelDetailResponseDTO.of(travel, isLikedByUser, isBookmarkedByUser);
     }
 
-    @Override
-    @Transactional // 쓰기 작업이므로 @Transactional을 유지하거나 명시적으로 적용
-    public void incrementViews(Long travelId) {
-        travelRepository.findById(travelId)
-                .ifPresent(travel -> {
-                    // Travel 엔티티의 incrementViews() 메서드가 Null 안전하도록 구현되어 있어야 합니다.
-                    travel.incrementViews();
-                    // JPA의 변경 감지(Dirty Checking)를 통해 트랜잭션 커밋 시 DB에 반영됩니다.
-                });
-    }
-
-    /**
-     * 전체 API 데이터를 페이지 단위로 모두 가져와 DB에 저장합니다.
-     * 특정 카테고리(숙박, 축제/행사)는 제외합니다.
-     */
     @Override
     public int saveApiData() {
         int totalSavedCount = 0;
@@ -234,9 +323,8 @@ public class TravelServiceImpl implements TravelService {
         return totalSavedCount;
     }
 
-    /**
-     * 지정된 페이지의 여행지 데이터를 API에서 가져옵니다.
-     */
+    //지정된 페이지의 여행지 데이터를 API에서 가져옵니다.
+
     private TravelApiResponseBody fetchTravelDataFromApi(int page, int pageSize) {
         URI uri = UriComponentsBuilder.fromUriString(apiUrl)
                 .queryParam("apiKey", apiKey)
@@ -279,6 +367,4 @@ public class TravelServiceImpl implements TravelService {
             return null;
         }
     }
-
-
 }

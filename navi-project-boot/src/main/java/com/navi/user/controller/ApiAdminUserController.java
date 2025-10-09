@@ -1,12 +1,10 @@
 package com.navi.user.controller;
 
-import com.navi.user.domain.User;
 import com.navi.user.dto.users.UserResponseDTO;
-import com.navi.user.service.UserService;
+import com.navi.user.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 

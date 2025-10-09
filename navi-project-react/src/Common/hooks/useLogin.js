@@ -2,6 +2,7 @@ import axios from "axios";
 import { useDispatch } from "react-redux";
 import { setlogin } from "../slice/loginSlice";
 import { useNavigate } from "react-router-dom";
+import { API_SERVER_HOST } from "../api/naviApi.js";
 
 export const useLogin = () => {
   const dispatch = useDispatch();
@@ -19,7 +20,7 @@ export const useLogin = () => {
       params.append("password", values.password);
       params.append("ip", ip);
 
-      const response = await axios.post(`${BASE_PREFIX}/users/login`, params, {
+      const response = await axios.post(`${API_SERVER_HOST}/api/users/login`, params, {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         validateStatus: () => true,  // 에러 상태도 직접 처리
       });
