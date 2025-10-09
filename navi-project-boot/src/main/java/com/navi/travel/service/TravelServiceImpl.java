@@ -40,19 +40,16 @@ public class TravelServiceImpl implements TravelService {
     private final RestTemplate restTemplate;
     private final LikeRepository likeRepository;
     private final BookmarkRepository bookmarkRepository;
-    // private final UserRepository userRepository; // ✅ User 엔티티를 직접 참조하지 않으므로 제거
 
     public TravelServiceImpl(
             TravelRepository travelRepository,
             RestTemplate restTemplate,
             LikeRepository likeRepository,
-            BookmarkRepository bookmarkRepository
-            /* ,UserRepository userRepository */) { // ✅ UserRepository 주입 제거
+            BookmarkRepository bookmarkRepository){
         this.travelRepository = travelRepository;
         this.restTemplate = restTemplate;
         this.likeRepository = likeRepository;
         this.bookmarkRepository = bookmarkRepository;
-        // this.userRepository = userRepository; // ✅ 주입 제거
     }
 
     @Value("${url}")
@@ -144,22 +141,28 @@ public class TravelServiceImpl implements TravelService {
     // -------------------------------------------------------------
     @Override
     @Transactional(readOnly = true)
-    public Page<TravelListResponseDTO> getTravelList(Pageable pageable, List<String> region2Names, String category, String search) {
-
+    public Page<TravelListResponseDTO> getTravelList(Pageable pageable, List<String> region2Names, String category, String search, boolean publicOnly) {
         // 1. 필터 및 검색 조건 유무 확인
         boolean noRegionFilter = (region2Names == null || region2Names.isEmpty());
-        // category 필터가 없거나 "전체"인 경우
         boolean noCategoryFilter = !StringUtils.hasText(category) || "전체".equalsIgnoreCase(category.trim());
-        // search 필터가 없는 경우
         boolean noSearchFilter = !StringUtils.hasText(search);
 
         // 2. 조건이 아예 없으면 전체 목록 반환 (500 오류 방지)
-        if (noRegionFilter && noCategoryFilter && noSearchFilter) {
+        if (noRegionFilter && noCategoryFilter && noSearchFilter && !publicOnly) {
+            // publicOnly가 false(관리자)이고 검색 조건이 없으면 전체 반환
             return travelRepository.findAll(pageable).map(TravelListResponseDTO::of);
         }
 
         // 3. Specification 초기화 (시작점: 항상 참)
-        Specification<Travel> spec = Specification.where(null);  // Specification.where(null)는 모든 조건을 만족시키는 시작점입니다.
+        Specification<Travel> spec = Specification.where(null);
+
+        // ⭐️ 3.1. 공개(state=1) 필터링 적용 (publicOnly가 true일 때만)
+        if (publicOnly) {
+            Specification<Travel> publicSpec = (root, query, criteriaBuilder) ->
+                    criteriaBuilder.equal(root.get("state"), 1); // state=1 (공개)
+            spec = spec.and(publicSpec);
+        }
+
 
         // 4. 지역 필터링 (region2Name) 적용
         if (!noRegionFilter) {

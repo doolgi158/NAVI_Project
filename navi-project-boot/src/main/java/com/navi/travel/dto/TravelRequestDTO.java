@@ -34,7 +34,7 @@ public class TravelRequestDTO {
     private String region2Name;     // 지역2 이름 (시/군/구)
     private String imagePath;       // 대표 이미지 경로
     private String thumbnailPath;   // 썸네일 경로
-    private Integer state;          // 공개 상태 (1:공개, 0:비공개)
+    private int state;          // 공개 상태 (1:공개, 0:비공개)
 
     // DTO를 Entity로 변환하는 메서드 (등록 시 사용)
     public Travel toEntity() {
@@ -54,11 +54,11 @@ public class TravelRequestDTO {
                 .region2Name(this.region2Name)
                 .imagePath(this.imagePath)
                 .thumbnailPath(this.thumbnailPath)
+                .state(this.state)
                 // 신규 등록 시 조회수/좋아요/북마크는 0으로 초기화
                 .views(0L)
                 .likes(0L)
                 .bookmark(0L)
-                .state(this.state != null ? this.state : 1) // 기본 공개 상태 (1)
                 .build();
     }
 }

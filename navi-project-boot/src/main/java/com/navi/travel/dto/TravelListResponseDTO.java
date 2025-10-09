@@ -4,6 +4,9 @@ import com.navi.travel.domain.Travel;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
+
 
 @Getter
 @Builder
@@ -23,6 +26,11 @@ public class TravelListResponseDTO {
     private Long views;         // 조회수
     private Long likes;         // 좋아요 수
     private Long bookmark;      //북마크 수
+    private int state;          //상태
+    private LocalDateTime  updatedAt; //수정일
+    private LocalDateTime  createdAt; //등록일
+            
+    
 
     public static TravelListResponseDTO of(Travel travel) {
         return TravelListResponseDTO.builder()
@@ -41,6 +49,9 @@ public class TravelListResponseDTO {
                 .views(travel.getViews() != null ? travel.getViews() : 0L) // Long 타입 0L로 초기화
                 .likes(travel.getLikes() != null ? travel.getLikes() : 0L)   // Long 타입 0L로 초기화
                 .bookmark(travel.getBookmark() != null ? travel.getBookmark() : 0L)   // Long 타입 0L로 초기화
+                .state(travel.getState())
+                .updatedAt(travel.getUpdatedAt())
+                .createdAt(travel.getUpdatedAt())
                 .build();
     }
 }

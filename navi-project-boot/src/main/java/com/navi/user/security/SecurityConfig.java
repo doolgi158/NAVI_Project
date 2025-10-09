@@ -1,7 +1,7 @@
 package com.navi.user.security;
 
 import com.navi.user.repository.TryLoginRepository;
-import com.navi.user.security.Filter.JWTCheckFilter;
+//import com.navi.user.security.Filter.JWTCheckFilter;
 import com.navi.user.security.Filter.TryLoginFilter;
 import com.navi.user.security.handler.ApiFailHandler;
 import com.navi.user.security.handler.ApiSuccessHandler;
@@ -50,8 +50,8 @@ public class SecurityConfig {
         });
 
         // JWT 체크 (토큰 정보가 있으면 로그인을 건너뛴다)
-        security.addFilterBefore(new JWTCheckFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
-        security.addFilterBefore(new TryLoginFilter(tryLoginRepository), UsernamePasswordAuthenticationFilter.class);
+//        security.addFilterBefore(new JWTCheckFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
+//        security.addFilterBefore(new TryLoginFilter(tryLoginRepository), UsernamePasswordAuthenticationFilter.class);
         return security.build();
     }
 

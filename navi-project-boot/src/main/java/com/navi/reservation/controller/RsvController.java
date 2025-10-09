@@ -1,7 +1,5 @@
 package com.navi.reservation.controller;
 
-import com.navi.reservation.dto.request.RsvRequestDTO;
-import com.navi.reservation.dto.response.RsvResponseDTO;
 import com.navi.reservation.service.RsvService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

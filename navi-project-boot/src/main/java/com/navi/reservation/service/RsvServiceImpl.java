@@ -1,10 +1,6 @@
 package com.navi.reservation.service;
 
-import com.navi.reservation.domain.Rsv;
-import com.navi.reservation.dto.request.RsvRequestDTO;
-import com.navi.reservation.dto.response.RsvResponseDTO;
-import com.navi.reservation.repository.RsvCounterRepository;
-import com.navi.reservation.repository.RsvRepository;
+
 import com.navi.user.domain.User;
 import com.navi.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

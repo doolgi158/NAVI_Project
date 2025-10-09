@@ -13,7 +13,7 @@ public interface TravelService {
     int saveApiData();
 
     // 여행지 리스트 조회 (필터링, 검색, 페이징 포함)
-    Page<TravelListResponseDTO> getTravelList(Pageable pageable, List<String> region2Names, String category,String search);
+    Page<TravelListResponseDTO> getTravelList(Pageable pageable, List<String> region2Names, String category,String search, boolean publicOnly);
 
     // 여행지 상세 정보 조회 (✅ userId 타입: String으로 변경)
     TravelDetailResponseDTO getTravelDetail(Long travelId, String id);

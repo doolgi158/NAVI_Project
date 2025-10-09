@@ -110,7 +110,7 @@ public class Travel extends BaseEntity { //등록일 수정일 자동생성 상�
     @Column(name = "BOOKMARK_COUNT", nullable = false, columnDefinition = "NUMBER default 0")
     private Long bookmark = 0L; // 북마크 수 (초기값 0 설정)
 
-    @Column(name = "STATE", nullable = false)
+    @Column(name = "STATE", nullable = false,columnDefinition = "NUMBER(1) default 1" )
     private int state;  // 개시상태(공개, 비공개)
 
     /**
@@ -174,7 +174,7 @@ public class Travel extends BaseEntity { //등록일 수정일 자동생성 상�
         this.region2Name = dto.getRegion2Name();
         this.imagePath = dto.getImagePath();
         this.thumbnailPath = dto.getThumbnailPath();
-        this.state = dto.getState() != null ? dto.getState() : 1;
+        this.state = dto.getState();
         // contentId와 카운터 필드(views, likes, bookmark)는 여기서 업데이트하지 않습니다.
     }
     
