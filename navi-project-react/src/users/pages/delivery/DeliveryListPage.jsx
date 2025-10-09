@@ -9,14 +9,14 @@ const DeliveryListPage = () => {
   const data = [
     {
       key: 1,
-      name: "김진섭",
+      name: "홍길동",
       hotel: "라마다호텔",
       date: "2025-10-15",
       status: "배송중",
     },
     {
       key: 2,
-      name: "추유나",
+      name: "김이박",
       hotel: "롯데시티호텔",
       date: "2025-10-10",
       status: "배송완료",
