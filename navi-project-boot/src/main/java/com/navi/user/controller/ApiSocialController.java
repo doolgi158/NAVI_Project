@@ -5,7 +5,6 @@ import com.navi.user.domain.History;
 import com.navi.user.domain.User;
 import com.navi.user.dto.HistoryDTO;
 import com.navi.user.dto.SocialDTO;
-import com.navi.user.dto.UserDTO;
 import com.navi.user.enums.SocialState;
 import com.navi.user.repository.HistoryRepository;
 import com.navi.user.repository.UserRepository;
@@ -15,7 +14,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -26,7 +24,7 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-public class SocialController {
+public class ApiSocialController {
     private final SocialLoginService socialLoginService;
     private final JWTUtil jwtUtil;
     private final UserRepository userRepository;

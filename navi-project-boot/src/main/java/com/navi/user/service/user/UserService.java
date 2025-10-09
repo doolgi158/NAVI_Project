@@ -8,7 +8,8 @@ import java.util.List;
 public interface UserService {
     public Long register(UserRequestDTO userRequestDTO);
     public UserResponseDTO get(Long no);
+    public List<UserResponseDTO> userResponseList();
     public void modify(UserRequestDTO userRequestDTO);
     public void remove(Long no);
-    public List<UserResponseDTO> userResponseList();
+    public String findUserId(String name, String email);
 }

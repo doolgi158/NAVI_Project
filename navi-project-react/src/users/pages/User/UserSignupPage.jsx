@@ -1,6 +1,6 @@
 import { Form, Input, Button, DatePicker, Radio, Space, Row, Col } from "antd";
 import { motion } from "framer-motion";
-import MainLayout from "../layout/MainLayout";
+import MainLayout from "../../layout/MainLayout";
 
 const SignupPage = () => {
   const [form] = Form.useForm();

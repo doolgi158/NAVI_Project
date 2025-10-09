@@ -48,7 +48,8 @@ public class SecurityConfig {
         security.csrf(config -> config.disable());
 
         security.authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/users/login", "/api/users/logout", "/api/auth/oauth/**").permitAll()
+                        .requestMatchers("/api/users/login", "/api/users/logout", "/api/auth/oauth/**",
+                                "/api/users/find-id", "/api/users/find-pw").permitAll()
                         .anyRequest().authenticated());
 
         // 로그인 설정

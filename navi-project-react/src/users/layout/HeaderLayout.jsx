@@ -92,7 +92,7 @@ const HeaderLayout = () => {
             </Button>
             <Button
               type="primary"
-              href="/signup"
+              href="users/signup"
               className="bg-sb-teal hover:bg-sb-gold"
             >
               회원가입

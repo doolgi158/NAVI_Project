@@ -96,7 +96,7 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
                 {/* 아이디/비번 찾기 + 회원가입 */}
                 <div className="flex justify-between items-center mt-8">
                   <div className="flex flex-col items-center w-[48%]">
-                    <a href="/find-id" className="text-sm text-gray-600 mb-2">
+                    <a href="users/find-id" className="text-sm text-gray-600 mb-2">
                       아이디 찾기
                     </a>
                     <Button
@@ -109,7 +109,7 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
                   </div>
 
                   <div className="flex flex-col items-center w-[48%]">
-                    <a href="/forgot" className="text-sm text-gray-600 mb-2">
+                    <a href="users/forgot" className="text-sm text-gray-600 mb-2">
                       비밀번호 찾기
                     </a>
                     <Button

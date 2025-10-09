@@ -1,5 +1,4 @@
 import { lazy, Suspense } from "react";
-import { ModalProvider } from "../components/Login/ModalProvider.jsx";
 
 const Loading = <div></div>
 const FlightDetail = lazy(() => import("../../users/pages/flight/FlightDetailPage.jsx"))
@@ -12,9 +11,7 @@ const FlightRouter = () => {
         path: "",
         element: (
             <Suspense fallback={Loading}>
-                <ModalProvider>
-                    <Flight />
-                </ModalProvider>
+                <Flight />
             </Suspense>
         )
     },
@@ -23,9 +20,7 @@ const FlightRouter = () => {
         path: "detail",
         element: (
             <Suspense fallback={Loading}>
-                <ModalProvider>
-                    <FlightDetail />
-                </ModalProvider>
+                <FlightDetail />
             </Suspense>
         )
     },
@@ -33,9 +28,7 @@ const FlightRouter = () => {
         path: "rsv/:flightNo",
         element: (
             <Suspense fallback={Loading}>
-                <ModalProvider>
-                    <FlightRsv />
-                </ModalProvider>
+                <FlightRsv />
             </Suspense>
         )
     },

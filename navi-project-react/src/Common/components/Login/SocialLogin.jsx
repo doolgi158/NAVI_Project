@@ -8,9 +8,9 @@ const SocialLoginButton = ({ provider }) => {
 
     // 리다이렉트 URI 설정 (프론트엔드 주소)
     const REDIRECT_URIS = {
-        google: "http://localhost:5173/login/oauth2/redirect",
-        kakao: "http://localhost:5173/login/oauth2/redirect",
-        naver: "http://localhost:5173/login/oauth2/redirect",
+        google: "http://localhost:5173/users/login/oauth2/redirect",
+        kakao: "http://localhost:5173/users/login/oauth2/redirect",
+        naver: "http://localhost:5173/users/login/oauth2/redirect",
     };
 
     // 각 소셜 로그인 URL

@@ -1,4 +1,4 @@
-package com.navi.user.dto;
+package com.navi.user.dto.users;
 
 import com.navi.user.domain.User;
 import com.navi.user.enums.UserRole;
