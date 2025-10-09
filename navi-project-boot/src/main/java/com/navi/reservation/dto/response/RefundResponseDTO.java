@@ -1,17 +1,17 @@
 package com.navi.reservation.dto.response;
 
-/*
+import com.navi.reservation.domain.Refund;
+import lombok.*;
+
+import java.time.LocalDateTime;
+
+/**
  * =======================
  * [RefundResponseDTO]
  * : 환불 처리 결과 응답 DTO
  * =======================
  * ㄴ 결제 검증 및 환불 처리 후 결과 반환
  */
-
-import com.navi.reservation.domain.Refund;
-import lombok.*;
-
-import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor

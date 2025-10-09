@@ -33,7 +33,7 @@ public class AccRepositoryTests {
     /* === 관리자 CRUD === */
     @Test
     public void accInsertTest() {
-        Township townshipId = townshipRepository.findById(1L)   // Todo: townshipId 임시값
+        Township townshipId = townshipRepository.findById(2L)   // Todo: townshipId 임시값
                 .orElseThrow(() -> new IllegalArgumentException("해당 지역을 찾을 수 없습니다."));
 
         // 필수적으로 명시해줘야 하는 항목 : title, township, address
@@ -51,7 +51,7 @@ public class AccRepositoryTests {
 
     @Test
     public void accUpdateTest() {
-        accRepository.findById(1L).ifPresent(acc -> {
+        accRepository.findById(134L).ifPresent(acc -> {
             AccRequestDTO dto = AccRequestDTO.builder()
                     .title("업데이트 후 호텔")
                     .category("호텔")
@@ -65,7 +65,7 @@ public class AccRepositoryTests {
 
     @Test
     public void accDeleteTest() {
-        accRepository.deleteById(1L);
+        accRepository.deleteById(134L);
         log.info("NAVI_ACCOMMODATION 테이블 데이터 삭제 완료(accNo = 1)");
     }
 }

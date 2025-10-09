@@ -25,5 +25,6 @@ public interface RsvService {
     // 예약 단건 조회
     //Rsv findByReserveId(String reserveId);
 
-
+    /** === 결제 검증 완료 후 예약 확정 === */
+    RsvResponseDTO confirmPaymentRsv(String reserveId, String impUid, String paymentMethod);
 }

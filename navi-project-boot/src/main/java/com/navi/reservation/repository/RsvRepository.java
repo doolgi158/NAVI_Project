@@ -1,6 +1,7 @@
 package com.navi.reservation.repository;
 
 import com.navi.reservation.domain.Rsv;
+import com.navi.reservation.domain.RsvStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,8 +18,8 @@ public interface RsvRepository extends JpaRepository<Rsv, String> {
     List<Rsv> findAllByUser(@Param("userNo") Long userNo);
 
     // 결제상태별 조회
-    @Query("SELECT r FROM Rsv r WHERE r.paymentStatus = :status")
-    List<Rsv> findAllByPaymentStatus(@Param("status") Rsv.PaymentStatus status);
+    @Query("SELECT r FROM Rsv r WHERE r.rsvStatus = :status")
+    List<Rsv> findAllByRsvStatus(@Param("status") RsvStatus rsvStatus);
 
     /** === 사용자 기능 === */
     // 예약 ID로 단일 조회

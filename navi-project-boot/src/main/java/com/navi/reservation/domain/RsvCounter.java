@@ -27,16 +27,17 @@ public class RsvCounter {
 
     // 예약 대상 구분 (예: ACC, AIR, DLV)
     @Id @Column(name = "target_type", length = 3)
-    private String targetType;
+    @Enumerated(EnumType.STRING)
+    private RsvType rsvType;
 
     // 다음 시퀀스 번호 (예: 5 → 다음 예약 ID는 6)
     @Column(name = "next_seq", nullable = false)
     private Integer nextSeq;
 
     // 초기 생성자
-    public RsvCounter(String counterDate, String targetType) {
+    public RsvCounter(String counterDate, RsvType rsvType) {
         this.counterDate = counterDate;
-        this.targetType = targetType;
+        this.rsvType = rsvType;
         this.nextSeq = 1;
     }
 
@@ -58,6 +59,6 @@ public class RsvCounter {
     @AllArgsConstructor
     public static class PK implements Serializable {
         private String counterDate;
-        private String targetType;
+        private RsvType rsvType;
     }
 }
