@@ -1,7 +1,7 @@
 import { Suspense, lazy } from "react";
 import { ModalProvider } from "../components/Login/ModalProvider.jsx";
 
-const Loading = <div>Loading....</div>
+const Loading = <div></div>
 const AdminUsers = lazy(() => import("../../admin/pages/AdminUsersPage.jsx"))
 const AdminDashboard = lazy(() => import("../../admin/pages/AdminDashboardPage.jsx"))
 
