@@ -3,7 +3,8 @@ import { lazy, Suspense } from "react";
 const Loading = <div></div>
 const Signup = lazy(() => import("../../users/pages/User/UserSignupPage"));
 const Redirect = lazy(() => import("../../users/pages/User/RedirectPage"));
-const FindUser = lazy(() => import("../../users/pages/User/FindUserIdPage"));
+const FindID = lazy(() => import("../../users/pages/User/FindUserIdPage"));
+const FindPw = lazy(() => import("../../users/pages/User/FindUserPwPage"))
 
 const UserRouter = () => {
   return [
@@ -27,10 +28,18 @@ const UserRouter = () => {
         path: "find-id",
         element: (
             <Suspense fallback={Loading}>
-                <FindUser />
+                <FindID />
             </Suspense>
         )
     },
+    {
+        path: "find-password",
+        element: (
+            <Suspense fallback={Loading}>
+                <FindPw />
+            </Suspense>
+        )
+    }
     ]
 }
 

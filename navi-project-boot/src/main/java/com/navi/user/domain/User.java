@@ -14,7 +14,7 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 @Entity
 @Table(name = "navi_users")
 @SequenceGenerator(
@@ -74,5 +74,12 @@ public class User {
 
     public void clearRole(UserRole userRole) {
         userRoleList.clear();
+    }
+
+    // ✅ Builder로 비밀번호 변경 (임시 비밀번호용)
+    public User changePassword(String encodedPw) {
+        return this.toBuilder()   // 현재 필드들을 복제한 Builder 시작
+                .pw(encodedPw)    // 비밀번호만 교체
+                .build();
     }
 }

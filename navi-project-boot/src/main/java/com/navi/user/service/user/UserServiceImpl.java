@@ -3,6 +3,8 @@ package com.navi.user.service.user;
 import com.navi.user.domain.User;
 import com.navi.user.dto.users.UserRequestDTO;
 import com.navi.user.dto.users.UserResponseDTO;
+import com.navi.user.enums.UserRole;
+import com.navi.user.enums.UserState;
 import com.navi.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -72,5 +74,48 @@ public class UserServiceImpl implements UserService{
                 .signUp(user.getSignUp())
                 .build())
             .toList();
+    }
+
+    @Override
+    public UserResponseDTO signup(UserRequestDTO dto) {
+        // 아이디 중복검사
+        if (userRepository.existsById(dto.getId())) {
+            throw new IllegalArgumentException("이미 존재하는 아이디입니다.");
+        }
+
+        // 비밀번호 암호화
+        String encodedPw = passwordEncoder.encode(dto.getPw());
+
+        // Entity 생성
+        User user = User.builder()
+                .name(dto.getName())
+                .phone(dto.getPhone())
+                .birth(dto.getBirth())
+                .email(dto.getEmail())
+                .gender(dto.getGender())
+                .id(dto.getId())
+                .pw(encodedPw)
+                .local(dto.getLocal())
+                .userState(UserState.NORMAL)
+                .build();
+
+        user.addRole(UserRole.USER);
+
+        // 저장
+        User saved = userRepository.save(user);
+
+        // 반환 DTO
+        return UserResponseDTO.builder()
+                .no(saved.getNo())
+                .name(saved.getName())
+                .phone(saved.getPhone())
+                .birth(saved.getBirth())
+                .email(saved.getEmail())
+                .gender(saved.getGender())
+                .id(saved.getId())
+                .local(saved.getLocal())
+                .userState(saved.getUserState())
+                .signUp(saved.getSignUp())
+                .build();
     }
 }

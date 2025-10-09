@@ -130,7 +130,7 @@ const HeaderLayout = () => {
               <Button type="primary" block onClick={() => showModal("login")}>
                 로그인
               </Button>
-              <Button block href="/signup">
+              <Button block href="/users/signup">
                 회원가입
               </Button>
             </div>
