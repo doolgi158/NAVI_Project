@@ -32,32 +32,38 @@ const DeliveryPage = () => {
     }
 
     new window.daum.Postcode({
-      oncomplete: function (data) {
-        const addr = data.address;
-        setForm((prev) => ({ ...prev, address: addr }));
+  oncomplete: function (data) {
+    const addr = data.address;
+    const building = data.buildingName || "";
 
-        // ✅ 주소 선택 시 지도 자동 갱신
-        if (window.kakao?.maps?.services) {
-          const geocoder = new window.kakao.maps.services.Geocoder();
-          geocoder.addressSearch(addr, function (result, status) {
-            if (status === window.kakao.maps.services.Status.OK) {
-              const lat = result[0].y;
-              const lng = result[0].x;
+    setForm((prev) => ({
+      ...prev,
+      address: addr,
+      hotelName: building || prev.hotelName,
+    }));
 
-              updateMap({
-                title: form.hotelName || data.buildingName || "선택한 위치",
-                latitude: lat,
-                longitude: lng,
-              });
+    if (window.kakao?.maps?.services) {
+      const geocoder = new window.kakao.maps.services.Geocoder();
+      geocoder.addressSearch(addr, function (result, status) {
+        if (status === window.kakao.maps.services.Status.OK) {
+          const lat = result[0].y;
+          const lng = result[0].x;
 
-              setTimeout(() => relayoutMap(), 500);
-            } else {
-              message.error("주소를 찾을 수 없습니다.");
-            }
+          updateMap({
+            title: form.hotelName || building || "선택한 위치",
+            latitude: lat,
+            longitude: lng,
           });
+
+          setTimeout(() => relayoutMap(), 500);
+        } else {
+          message.error("주소를 찾을 수 없습니다.");
         }
-      },
-    }).open();
+      });
+    }
+  },
+}).open();
+
   };
 
   /** ✅ 예약 요청 */
@@ -185,7 +191,7 @@ const DeliveryPage = () => {
         <div className="bg-gray-100 rounded-2xl overflow-hidden">
           <div
             id={MAP_CONTAINER_ID}
-            style={{ width: "100%", height: "400px", borderRadius: "12px" }}
+            style={{ width: "100%", height: "550px", borderRadius: "12px"}}
           ></div>
         </div>
       </div>
