@@ -9,10 +9,27 @@ const UserMain = lazy(() => import("../../users/pages/UserMainPage.jsx"))
 const AdminUsers = lazy(() => import("../../admin/pages/AdminUsersPage.jsx"))
 const AdminDashboard = lazy(() => import("../../admin/pages/AdminDashboardPage.jsx"))
 const Signup = lazy(() => import("../../users/pages/UserSignupPage.jsx"))
-const AccList = lazy(() => import("../../users/pages/accommodation/AccListPage.jsx"))
-const AccDetail = lazy(() => import("../../users/pages/accommodation/AccDetailPage.jsx"))
+const AccList = lazy(() => import("../../users/pages/acc/AccListPage.jsx"))
+const AccDetail = lazy(() => import("../../users/pages/acc/AccDetailPage.jsx"))
+const Redirect = lazy(() => import("../../users/pages/RedirectPage.jsx"))
 
 const root = createBrowserRouter([
+    {
+        path: "/travel",
+        children: [...TravelRouter()]
+    },
+    {
+        path: "/flight",
+       children: [...FlightRouter()]
+    },
+    {
+        path:"/adm",
+        children: [...AdminRouter()]
+    },
+    {
+        path:"/accommodations",
+        children:[...AccRouter()]
+    },    
     {
         path: "/",
         element: (
@@ -58,29 +75,10 @@ const root = createBrowserRouter([
         )
     },
     {
-        path: "/travel",
-        children: [...TravelRouter()]
+        path: "/login/oauth2/redirect",
+        element: <Suspense fallback={Loading}><Redirect /> </Suspense>
     },
-    {
-        path: "/accommodations",
-        element: (
-            <Suspense fallback={Loading}>
-                <ModalProvider>
-                    <AccList />
-                </ModalProvider>
-            </Suspense>
-        )
-    },
-    {
-        path: "/accommodations/:accNo", 
-        element: (
-            <Suspense fallback={Loading}>
-                <ModalProvider>
-                    <AccDetail />
-                </ModalProvider>
-            </Suspense>
-        )
-    },
+    
 ]);
 
 export default root;
