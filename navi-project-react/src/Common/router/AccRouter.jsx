@@ -1,9 +1,8 @@
 import { Suspense, lazy } from "react";
-import { ModalProvider } from "../components/Login/ModalProvider.jsx";
 
-const Loading = <div>Loading....</div>
-const AccList = lazy(() => import("../../users/pages/accommodation/AccListPage.jsx"))
-const AccDetail = lazy(() => import("../../users/pages/accommodation/AccDetailPage.jsx"))
+const Loading = <div></div>
+const AccList = lazy(() => import("../../users/pages/acc/AccListPage.jsx"))
+const AccDetail = lazy(() => import("../../users/pages/acc/AccDetailPage.jsx"))
 
 const AccRouter = () => {
     return [
@@ -11,9 +10,7 @@ const AccRouter = () => {
         path: "",
         element: (
             <Suspense fallback={Loading}>
-                <ModalProvider>
-                    <AccList />
-                </ModalProvider>
+                <AccList />
             </Suspense>
         )
     },
@@ -21,9 +18,7 @@ const AccRouter = () => {
         path: ":accNo", 
         element: (
             <Suspense fallback={Loading}>
-                <ModalProvider>
-                    <AccDetail />
-                </ModalProvider>
+                <AccDetail />
             </Suspense>
         )
     },

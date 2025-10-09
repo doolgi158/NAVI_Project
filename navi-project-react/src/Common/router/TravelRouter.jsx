@@ -1,7 +1,6 @@
 import { Suspense, lazy } from "react";
-import { ModalProvider } from "../components/Login/ModalProvider.jsx";
 
-const Loading = <div>Loading....</div>
+const Loading = <div></div>
 const TravelList = lazy(() => import("../../users/pages/travel/TravelPage.jsx"))
 const TravelDetailPage = lazy(() => import("../../users/pages/travel/TravelDetailPage.jsx"))
 
@@ -12,9 +11,7 @@ const TravelRouter = () => {
             path:"",
             element:(
                 <Suspense fallback={Loading} >
-                    <ModalProvider>
-                        <TravelList />
-                    </ModalProvider>
+                    <TravelList />
                 </Suspense>
             )
         },
@@ -24,9 +21,7 @@ const TravelRouter = () => {
             path: "detail/:travelId",
             element: (
                 <Suspense fallback={Loading}>
-                    <ModalProvider>
-                        <TravelDetailPage />
-                    </ModalProvider>
+                    <TravelDetailPage />
                 </Suspense>
             )
         },

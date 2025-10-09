@@ -20,7 +20,7 @@ export const useLogin = () => {
       params.append("password", values.password);
       params.append("ip", ip);
 
-      const response = await axios.post(`${API_SERVER_HOST}/users/login`, params, {
+      const response = await axios.post(`${API_SERVER_HOST}/api/users/login`, params, {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         validateStatus: () => true,  // 에러 상태도 직접 처리
       });

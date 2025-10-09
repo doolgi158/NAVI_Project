@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Nationalized;
 
 /* [Column]
  * 0. no(roomNo)
@@ -46,7 +47,8 @@ public class Room {
     @JoinColumn(name="accNo", nullable = false)
     private Acc acc;
 
-    @Column(name = "room_name", columnDefinition = "NVARCHAR2(50)", nullable = false)
+    @Nationalized
+    @Column(name = "room_name", length = 50, nullable = false)
     private String roomName;
 
     @Column(name = "room_size")

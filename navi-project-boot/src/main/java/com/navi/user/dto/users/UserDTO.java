@@ -1,10 +1,11 @@
-package com.navi.user.dto;
+package com.navi.user.dto.users;
 
+import com.navi.user.domain.User;
+import com.navi.user.enums.UserRole;
 import com.navi.user.enums.UserState;
 
 import lombok.*;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -12,7 +13,7 @@ import java.util.stream.Collectors;
 @ToString
 @Getter
 @Setter
-public class UserDTO extends User {
+public class UserDTO extends org.springframework.security.core.userdetails.User {
     private long no;                // 사용자 번호
     private String name;            // 이름
     private String phone;           // 전화번호
@@ -53,5 +54,48 @@ public class UserDTO extends User {
         data.put("role", role);
 
         return data;
+    }
+
+    public static UserDTO fromEntity(User entity) {
+        List<String> roleList = entity.getUserRoleList() != null
+                ? entity.getUserRoleList().stream()
+                .map(UserRole::name)
+                .collect(Collectors.toList())
+                : new ArrayList<>();
+
+        UserDTO dto = new UserDTO(
+                entity.getName(),
+                entity.getPhone(),
+                entity.getBirth(),
+                entity.getEmail(),
+                entity.getId(),
+                entity.getPw(),
+                entity.getUserState(),
+                roleList
+        );
+
+        dto.setNo(entity.getNo());
+        dto.setGender(entity.getGender());
+        dto.setLocal(entity.getLocal());
+        dto.setSignUp(entity.getSignUp());
+        return dto;
+    }
+
+    public User toEntity() {
+        return User.builder()
+                .name(name)
+                .phone(phone)
+                .birth(birth)
+                .email(email)
+                .gender(gender)
+                .id(id)
+                .pw(pw)
+                .local(local)
+                .signUp(signUp)
+                .userState(userState)
+                .userRoleList(role.stream()
+                        .map(UserRole::valueOf)
+                        .collect(Collectors.toList()))
+                .build();
     }
 }
