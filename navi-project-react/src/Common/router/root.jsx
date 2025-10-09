@@ -3,14 +3,14 @@ import { createBrowserRouter } from "react-router-dom";
 import { ModalProvider } from "../components/Login/ModalProvider.jsx";
 import TravelRouter from "./TravelRouter.jsx";
 import FlightRouter from "./FlightRouter.jsx"
+import AdminRouter from "./AdminRouter.jsx";
+import AccRouter from "./AccRouter.jsx";
 
 const Loading = <div></div>
 const UserMain = lazy(() => import("../../users/pages/UserMainPage.jsx"))
 const AdminUsers = lazy(() => import("../../admin/pages/AdminUsersPage.jsx"))
 const AdminDashboard = lazy(() => import("../../admin/pages/AdminDashboardPage.jsx"))
 const Signup = lazy(() => import("../../users/pages/UserSignupPage.jsx"))
-const AccList = lazy(() => import("../../users/pages/acc/AccListPage.jsx"))
-const AccDetail = lazy(() => import("../../users/pages/acc/AccDetailPage.jsx"))
 const Redirect = lazy(() => import("../../users/pages/RedirectPage.jsx"))
 
 const root = createBrowserRouter([
@@ -59,10 +59,6 @@ const root = createBrowserRouter([
                 </ModalProvider>
             </Suspense>
         )
-    },
-    {
-        path: "/flight",
-        children: [...FlightRouter()]
     },
     {
         path: "/signup",
