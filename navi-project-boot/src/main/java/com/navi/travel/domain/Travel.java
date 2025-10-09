@@ -144,18 +144,41 @@ public class Travel extends BaseEntity { //등록일 수정일 자동생성 상�
         this.views = (this.views == null) ? 1L : this.views + 1;
     }
 
+    // ----------------------------------------------------------------------------------
+    // ✅ 좋아요 / 북마크 카운트 관련 로직 수정/추가
+    // ----------------------------------------------------------------------------------
+
     // 좋아요 카운트 증가
     public void incrementLikes() {
-        this.likes = this.likes + 1;
+        this.likes = (this.likes == null) ? 1L : this.likes + 1;
     }
 
-    // 좋아요 카운트 감소 (좋아요 취소시)
+    //좋아요 카운트 감소 (좋아요 취소시)
     public void decrementLikes() {
-        if (this.likes > 0) {
+        if (this.likes != null && this.likes > 0) {
             this.likes = this.likes - 1;
+        } else {
+            this.likes = 0L; // 혹시라도 null이거나 음수일 경우 0으로 보정
         }
     }
-    
+
+    //✅ 북마크 카운트 증가
+
+    public void incrementBookmark() {
+        this.bookmark = (this.bookmark == null) ? 1L : this.bookmark + 1;
+    }
+
+    ///북마크 카운트 감소 (북마크 취소시)
+    public void decrementBookmark() {
+        if (this.bookmark != null && this.bookmark > 0) {
+            this.bookmark = this.bookmark - 1;
+        } else {
+            this.bookmark = 0L; // 혹시라도 null이거나 음수일 경우 0으로 보정
+        }
+    }
+
+    // ----------------------------------------------------------------------------------
+
     //여행지 정보 수동 업데이트
     public void updateFromRequest(TravelRequestDTO dto) {
         if (StringUtils.hasText(dto.getContentsCd())) this.contentsCd = dto.getContentsCd();
@@ -168,13 +191,15 @@ public class Travel extends BaseEntity { //등록일 수정일 자동생성 상�
         if (dto.getLongitude() != null) this.longitude = dto.getLongitude();
         if (dto.getLatitude() != null) this.latitude = dto.getLatitude();
         if (StringUtils.hasText(dto.getCategoryName())) this.categoryName = dto.getCategoryName();
+
         if (StringUtils.hasText(dto.getRegion1Name())) this.region1Name = dto.getRegion1Name();
         if (StringUtils.hasText(dto.getRegion2Name())) this.region2Name = dto.getRegion2Name();
+
+        if (dto.getPhotoId() != null) this.photoId = dto.getPhotoId();
 
         if (StringUtils.hasText(dto.getImagePath())) {
             this.imagePath = dto.getImagePath();
         }
-        // DTO에 null이나 빈 문자열이 오더라도 기존 imagePath를 null로 만들지 않고 유지
 
         if (StringUtils.hasText(dto.getThumbnailPath())) {
             this.thumbnailPath = dto.getThumbnailPath();
