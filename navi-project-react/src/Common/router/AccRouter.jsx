@@ -8,25 +8,25 @@ const AccDetail = lazy(() => import("../../users/pages/acc/AccDetailPage.jsx"))
 const AccRouter = () => {
     return [
         {
-        path: "",
-        element: (
-            <Suspense fallback={Loading}>
-                <ModalProvider>
-                    <AccList />
-                </ModalProvider>
-            </Suspense>
-        )
-    },
-    {
-        path: ":accNo", 
-        element: (
-            <Suspense fallback={Loading}>
-                <ModalProvider>
-                    <AccDetail />
-                </ModalProvider>
-            </Suspense>
-        )
-    },
+            path: "",
+            element: (
+                <Suspense fallback={Loading}>
+                    <ModalProvider>
+                        <AccList />
+                    </ModalProvider>
+                </Suspense>
+            )
+        },
+        {
+            path: ":accNo", 
+            element: (
+                <Suspense fallback={Loading}>
+                    <ModalProvider>
+                        <AccDetail />
+                    </ModalProvider>
+                </Suspense>
+            )
+        },
     ]
 }
 

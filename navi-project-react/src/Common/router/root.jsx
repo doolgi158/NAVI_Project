@@ -9,8 +9,6 @@ import AccRouter from "./AccRouter.jsx";
 const Loading = <div></div>
 const UserMain = lazy(() => import("../../users/pages/UserMainPage.jsx"))
 const Signup = lazy(() => import("../../users/pages/UserSignupPage.jsx"))
-const AccList = lazy(() => import("../../users/pages/acc/AccListPage.jsx"))
-const AccDetail = lazy(() => import("../../users/pages/acc/AccDetailPage.jsx"))
 const Redirect = lazy(() => import("../../users/pages/RedirectPage.jsx"))
 
 const root = createBrowserRouter([
