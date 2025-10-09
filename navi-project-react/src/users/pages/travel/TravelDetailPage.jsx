@@ -2,14 +2,12 @@ import React, { useState, useEffect } from 'react';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import { 
-    Row, Col, Typography, Divider, Button, Space, 
-    Descriptions, Spin, Result, Tag, message,Carousel 
+import { Row, Col, Typography, Divider, Button, Space, 
+        Descriptions, Spin, Result, Tag, message,Carousel 
 } from 'antd'; 
-import { 
-    ShareAltOutlined, PhoneFilled, EnvironmentFilled,
-    ClockCircleFilled, CarFilled, CreditCardFilled, HomeFilled,
-    HeartOutlined, HeartFilled, BookOutlined, BookFilled 
+import {  ShareAltOutlined, PhoneFilled, EnvironmentFilled,
+          ClockCircleFilled, CarFilled, CreditCardFilled, HomeFilled,
+          HeartOutlined, HeartFilled, BookOutlined, BookFilled 
 } from '@ant-design/icons'; 
 import MainLayout from '../../layout/MainLayout';
 import { useKakaoMap } from '../../../Common/hooks/useKakaoMap.jsx'; 
@@ -54,13 +52,6 @@ const TravelDetailPage = () => {
         }).replace(/\./g, '. ').trim(); // 2023. 01. 01. 형태로
     };
 
-    // [삭제: 불필요한 초기 로딩 시뮬레이션]
-    // useEffect(() => {
-    //     // 데이터 로딩 시뮬레이션
-    //     setTimeout(() => {
-    //       setLoading(false);
-    //     }, 1000);
-    // }, []);
 
 
     // 1. 데이터 로드 (최초 1회)
@@ -224,10 +215,10 @@ const TravelDetailPage = () => {
       const infoData = [
         { label: '주소',  icon: <EnvironmentFilled style={{ color: '#1890ff' }} />, value: data.address || data.roadAddress || '-' },
         { label: '전화번호', icon: <PhoneFilled style={{ color: '#52c41a' }} />, value: data.phoneNo || '-' },
-        { label: '홈페이지', icon: <HomeFilled style={{ color: '#faad14' }} />, value: '-' }, 
-        { label: '이용 시간', icon: <ClockCircleFilled style={{ color: '#eb2f96' }} />, value: '-' },
-        { label: '주차 시설', icon: <CarFilled style={{ color: '#f5222d' }} />, value: '-' },
-        { label: '이용 요금',icon: <CreditCardFilled style={{ color: '#722ed1' }} />, value: '-' },
+        { label: '홈페이지', icon: <HomeFilled style={{ color: '#faad14' }} />, value: data.homepage || '-' }, 
+        { label: '이용 시간', icon: <ClockCircleFilled style={{ color: '#eb2f96' }} />, value:data.hours || '-' },
+        { label: '주차 시설', icon: <CarFilled style={{ color: '#f5222d' }} />, value: data.parking || '-' },
+        { label: '이용 요금',icon: <CreditCardFilled style={{ color: '#722ed1' }} />, value: data.fee || '-' },
     ];
 
     // 이미지 배열 처리 (쉼표로 구분된 URL 문자열 가정)
@@ -343,7 +334,7 @@ const TravelDetailPage = () => {
     return (
         <MainLayout>
             <Row justify="center" style={{ marginBottom: 80, backgroundColor: '#fff', minHeight: '100%' }}>
-                <Col xs={24} sm={22} lg={18} xl={14} style={{ padding: '0 24px' }}>
+                <Col  style={{ padding: '0 24px' }}>
                     
                     <div style={{ textAlign: 'center', margin: '40px 0 20px 0' }}>
                         <Text type="secondary" style={{ fontSize: '1.2em', marginBottom: 5, display: 'block', color: '#666' }}>

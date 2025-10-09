@@ -1,7 +1,6 @@
 import { Form, Input, Button, Card, message } from "antd";
 import { AnimatePresence, motion } from "framer-motion";
 import { useLogin } from "../../hooks/useLogin";
-import SocialLoginButton from "./SocialLogin";
 
 const LoginModal = ({ open = false, onClose = () => {} }) => {
   const [form] = Form.useForm();
@@ -20,24 +19,22 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
     }
   };
 
-  // ✅ 로그인 모달 안에서 소셜 로그인 시작
+  // 🔗 소셜 로그인 클릭 핸들러
   const handleSocialLogin = (provider) => {
-  const CLIENT_IDS = {
-    google: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-    kakao: import.meta.env.VITE_KAKAO_CLIENT_ID,
-    naver: import.meta.env.VITE_NAVER_CLIENT_ID,
+    switch (provider) {
+      case "google":
+        window.location.href = "http://localhost:8080/oauth2/authorization/google";
+        break;
+      case "kakao":
+        window.location.href = "http://localhost:8080/oauth2/authorization/kakao";
+        break;
+      case "naver":
+        window.location.href = "http://localhost:8080/oauth2/authorization/naver";
+        break;
+      default:
+        break;
+    }
   };
-
-  const REDIRECT_URI = "http://localhost:3000/login/oauth2/redirect";
-
-  const AUTH_URLS = {
-    google: `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_IDS.google}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=openid%20email%20profile`,
-    kakao: `https://kauth.kakao.com/oauth/authorize?client_id=${CLIENT_IDS.kakao}&redirect_uri=${REDIRECT_URI}&response_type=code`,
-    naver: `https://nid.naver.com/oauth2.0/authorize?client_id=${CLIENT_IDS.naver}&redirect_uri=${REDIRECT_URI}&response_type=code&state=naviState`,
-  };
-
-  window.location.href = AUTH_URLS[provider];
-};
 
   return (
     <AnimatePresence>
@@ -88,15 +85,39 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
 
                 {/* ✅ 소셜 로그인 영역 */}
                 <div className="flex flex-col gap-3 my-6">
-                  <SocialLoginButton provider="google" onClick={handleSocialLogin} />
-                  <SocialLoginButton provider="kakao" onClick={handleSocialLogin} />
-                  <SocialLoginButton provider="naver" onClick={handleSocialLogin} />
+                  <Button
+                    size="large"
+                    className="w-full bg-white border border-gray-300 hover:shadow-md flex items-center justify-center gap-2"
+                    onClick={() => handleSocialLogin("google")}
+                  >
+                    <span className="font-medium text-gray-700">
+                      Google 계정으로 로그인
+                    </span>
+                  </Button>
+
+                  <Button
+                    size="large"
+                    className="w-full bg-[#FEE500] hover:bg-[#fadb05] flex items-center justify-center gap-2"
+                    onClick={() => handleSocialLogin("kakao")}
+                  >
+                    <span className="font-medium text-gray-800">
+                      카카오 계정으로 로그인
+                    </span>
+                  </Button>
+
+                  <Button
+                    size="large"
+                    className="w-full bg-[#03C75A] hover:bg-[#02b153] flex items-center justify-center gap-2 text-white"
+                    onClick={() => handleSocialLogin("naver")}
+                  >
+                    <span className="font-medium">네이버 계정으로 로그인</span>
+                  </Button>
                 </div>
 
                 {/* 아이디/비번 찾기 + 회원가입 */}
                 <div className="flex justify-between items-center mt-8">
                   <div className="flex flex-col items-center w-[48%]">
-                    <a href="users/find-id" className="text-sm text-gray-600 mb-2">
+                    <a href="/find-id" className="text-sm text-gray-600 mb-2">
                       아이디 찾기
                     </a>
                     <Button
@@ -109,7 +130,7 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
                   </div>
 
                   <div className="flex flex-col items-center w-[48%]">
-                    <a href="users/forgot" className="text-sm text-gray-600 mb-2">
+                    <a href="/forgot" className="text-sm text-gray-600 mb-2">
                       비밀번호 찾기
                     </a>
                     <Button

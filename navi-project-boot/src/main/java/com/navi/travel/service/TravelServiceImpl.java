@@ -24,9 +24,10 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-
+import jakarta.persistence.EntityManager; // EntityManager import 추가
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -40,16 +41,21 @@ public class TravelServiceImpl implements TravelService {
     private final RestTemplate restTemplate;
     private final LikeRepository likeRepository;
     private final BookmarkRepository bookmarkRepository;
+    private final EntityManager em; // EntityManager 필드 추가
+
 
     public TravelServiceImpl(
             TravelRepository travelRepository,
             RestTemplate restTemplate,
             LikeRepository likeRepository,
-            BookmarkRepository bookmarkRepository){
+            BookmarkRepository bookmarkRepository,
+            EntityManager em // 생성자에 EntityManager 추가
+    ){
         this.travelRepository = travelRepository;
         this.restTemplate = restTemplate;
         this.likeRepository = likeRepository;
         this.bookmarkRepository = bookmarkRepository;
+        this.em = em; // 초기화
     }
 
     @Value("${url}")
@@ -137,7 +143,7 @@ public class TravelServiceImpl implements TravelService {
 
 
     // -------------------------------------------------------------
-    // getTravelList 메서드는 변경 사항이 없으므로 기존 로직 유지
+    // getTravelList 메서드: Specification 초기화 로직 수정 (where(null) -> not(null))
     // -------------------------------------------------------------
     @Override
     @Transactional(readOnly = true)
@@ -154,7 +160,8 @@ public class TravelServiceImpl implements TravelService {
         }
 
         // 3. Specification 초기화 (시작점: 항상 참)
-        Specification<Travel> spec = Specification.where(null);
+        // ✅ Deprecation 문제 해결: Specification.where(null) 대신 Specification.not(null) 사용
+        Specification<Travel> spec = Specification.not(null);
 
         // ⭐️ 3.1. 공개(state=1) 필터링 적용 (publicOnly가 true일 때만)
         if (publicOnly) {
@@ -182,7 +189,8 @@ public class TravelServiceImpl implements TravelService {
             if (!regionConditions.isEmpty()) {
                 Specification<Travel> regionSpec = regionConditions.stream()
                         .reduce(Specification::or)
-                        .orElse(Specification.where(null));
+                        // ✅ Specification.not(null) 사용
+                        .orElse(Specification.not(null));
 
                 spec = spec.and(regionSpec);
             }
@@ -228,26 +236,28 @@ public class TravelServiceImpl implements TravelService {
     // -------------------------------------------------------------
 
     @Override
-    @Transactional(readOnly = true)
-    public TravelDetailResponseDTO getTravelDetail(Long travelId, String id) { // ✅ id 매개변수 추가
+    @Transactional // ✅ 조회수 증가와 상세 정보 조회가 하나의 트랜잭션으로 처리되어야 함
+    public TravelDetailResponseDTO getTravelDetail(Long travelId, String id) { // ✅ id 매개변수 유지
         // 1. Travel 엔티티 조회
         Travel travel = travelRepository.findById(travelId)
                 .orElseThrow(() -> new NoSuchElementException("Travel not found with ID: " + travelId));
 
-        // TODO: 실제 인증 정보를 가져오는 로직으로 대체해야 합니다.
-        // 현재는 하드코딩된 값(80L)을 사용하거나, 인증 정보가 없으면 null을 사용한다고 가정합니다.
-//         String id = "navi38"; // ❌ 하드코딩 제거 (매개변수로 받음)
+        // 2. 조회수 증가 로직 호출 또는 직접 처리
+        // 직접 처리: 현재 조회수 + 1
+        travel.setViews(travel.getViews() + 1);
+        // 트랜잭션이 @Transactional로 묶여 있으므로 save는 생략 가능하지만 명시적으로 처리하는 것이 안전함.
+        // travelRepository.save(travel); // @Transactional이 붙어있어 자동 반영되지만, 명확성을 위해 코드를 여기에 추가할 수도 있음.
 
         boolean isLikedByUser = false;
         boolean isBookmarkedByUser = false;
 
         if (id != null) {
-            // 2. 좋아요/북마크 여부 확인 (ID 기반 리포지토리 메서드 사용)
+            // 3. 좋아요/북마크 여부 확인 (ID 기반 리포지토리 메서드 사용)
             isLikedByUser = likeRepository.existsByTravelIdAndId(travelId, id);
             isBookmarkedByUser = bookmarkRepository.existsByTravelIdAndId(travelId, id);
         }
 
-        // 3. Travel 엔티티와 사용자 상태 정보를 함께 DTO로 변환하여 반환
+        // 4. Travel 엔티티(업데이트된 조회수 포함)와 사용자 상태 정보를 함께 DTO로 변환하여 반환
         return TravelDetailResponseDTO.of(travel, isLikedByUser, isBookmarkedByUser);
     }
 
@@ -357,6 +367,7 @@ public class TravelServiceImpl implements TravelService {
         }
     }
 
+
     //여행지 수정, 등록
     @Transactional
     public TravelListResponseDTO saveTravel(TravelRequestDTO dto) {
@@ -373,6 +384,56 @@ public class TravelServiceImpl implements TravelService {
 
         } else {
             // 3. 등록 (Create)
+
+            // --- TRAVEL_SEQ 자동 생성 로직 시작 (travelId 설정) ---
+            // travelId가 null일 경우에만 시퀀스 값 생성 (등록 시)
+            if (dto.getTravelId() == null) {
+                Long nextTravelId;
+                try {
+                    // **[DB 쿼리]** TRAVEL_SEQ 시퀀스의 다음 값을 가져옵니다. (Oracle 기준)
+                    String travelSequenceQuery = "SELECT TRAVEL_SEQ.NEXTVAL FROM DUAL";
+                    // Number 타입으로 받고 longValue()를 사용하여 안전하게 Long으로 변환
+                    nextTravelId = ((Number) em.createNativeQuery(travelSequenceQuery).getSingleResult()).longValue();
+
+                    // 3. DTO에 travelId 설정 (이후 dto.toEntity() 시 Travel 엔티티의 ID로 사용됨)
+                    dto.setTravelId(nextTravelId);
+                    log.info("새로운 travelId 자동 생성 (TRAVEL_SEQ): {}", nextTravelId);
+                } catch (Exception e) {
+                    log.error("travelId 시퀀스 생성 중 오류 발생. DB 시퀀스(TRAVEL_SEQ)와 쿼리를 확인해주세요.", e);
+                    // 시퀀스 오류 시 예외를 던져 롤백 처리
+                    throw new RuntimeException("여행지 travelId 생성 실패.", e);
+                }
+            }
+            // --- TRAVEL_SEQ 자동 생성 로직 끝 ---
+
+            // --- CNTSA_ 시퀀스 자동 생성 로직 시작 (contentId 설정) ---
+            // contentId가 null 또는 비어있을 경우에만 시퀀스 값 생성
+            if (dto.getContentId() == null || dto.getContentId().trim().isEmpty()) {
+
+                // 1. DB 시퀀스에서 다음 값 가져오기
+                Long nextVal;
+                try {
+                    // **[DB 쿼리]** CNTSA_SEQ 시퀀스의 다음 값을 가져옵니다.
+                    // 사용하는 DB(Oracle, PostgreSQL 등)에 따라 DUAL 테이블이나 nextval 함수 이름이 다를 수 있습니다.
+                    // Oracle 기준으로 작성됨.
+                    String sequenceQuery = "SELECT CNTSA_SEQ.NEXTVAL FROM DUAL";
+                    nextVal = ((Number) em.createNativeQuery(sequenceQuery).getSingleResult()).longValue();
+
+                    // 2. CNTSA_000000000000001 형식으로 포맷팅 (총 15자리 일련번호)
+                    // %015d: 15자리까지 0으로 채움
+                    String formattedId = String.format("CNTSA_%015d", nextVal);
+
+                    // 3. DTO에 contentId 설정
+                    dto.setContentId(formattedId);
+                    log.info("새로운 contentId 자동 생성: {}", formattedId);
+                } catch (Exception e) {
+                    log.error("contentId 시퀀스 생성 중 오류 발생. DB 시퀀스(CNTSA_SEQ)와 쿼리를 확인해주세요.", e);
+                    // 시퀀스 오류 시 예외를 던져 롤백 처리
+                    throw new RuntimeException("여행지 contentId 생성 실패.", e);
+                }
+            }
+            // --- CNTSA_ 시퀀스 자동 생성 로직 끝 ---
+
             travel = dto.toEntity();
         }
 
@@ -391,10 +452,8 @@ public class TravelServiceImpl implements TravelService {
             throw new NoSuchElementException("Travel not found with ID: " + travelId);
         }
 
-        // 좋아요 및 북마크 기록이 있다면 이를 먼저 삭제하거나,
-        // 엔티티에 Cascade 옵션이 설정되어 있다면 자동으로 삭제됩니다. (옵션 미설정 시 수동 삭제 필요)
-
         travelRepository.deleteById(travelId);
     }
-    
+
+
 }

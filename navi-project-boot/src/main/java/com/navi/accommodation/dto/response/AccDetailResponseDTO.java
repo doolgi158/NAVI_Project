@@ -23,7 +23,7 @@ public class AccDetailResponseDTO {
     private Boolean hasParking;
 
     // 객실 리스트 포함
-    //private List<RsvDetailDTO> rooms;
+    private List<RsvDetailDTO> rooms;
     // 숙소 이미지 포함
     //private List<String> images;
 }

@@ -5,6 +5,7 @@ import com.navi.common.entity.BaseEntity;
 import com.navi.travel.dto.TravelRequestDTO;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.util.StringUtils;
 
 
 @Getter
@@ -99,11 +100,11 @@ public class Travel extends BaseEntity { //등록일 수정일 자동생성 상�
     private String thumbnailPath;   //서브사진경로
 
     @Builder.Default
-    @Column(name = "VIEWS_COUNT", nullable = false)
+    @Column(name = "VIEWS_COUNT", nullable = false,columnDefinition ="NUMBER default 0")
     private Long views = 0L; // 조회수 (초기값 0 설정)
 
     @Builder.Default
-    @Column(name = "LIKES_COUNT", nullable = false)
+    @Column(name = "LIKES_COUNT", nullable = false,columnDefinition ="NUMBER default 0")
     private Long likes = 0L; // 좋아요 수 (초기값 0 설정)
 
     @Builder.Default
@@ -112,6 +113,19 @@ public class Travel extends BaseEntity { //등록일 수정일 자동생성 상�
 
     @Column(name = "STATE", nullable = false,columnDefinition = "NUMBER(1) default 1" )
     private int state;  // 개시상태(공개, 비공개)
+
+    @Column(name="HOMEPAGE", length=500)
+    private String homepage;    //홈페이지
+
+    @Column(name="PARKING", length=2000)
+    private String parking;    //주차시설
+
+    @Column(name="FEE", length=2000)
+    private String fee;    //이용요금
+
+    @Column(name="HOURS", length=2000)
+    private String hours;    //이용시간
+
 
     /**
      * 외부 API 데이터를 기반으로 기존 엔티티의 필드 값을 업데이트하는 메소드
@@ -139,6 +153,10 @@ public class Travel extends BaseEntity { //등록일 수정일 자동생성 상�
         this.imagePath = newTravel.imagePath;
         this.thumbnailPath = newTravel.thumbnailPath;
         this.state = newTravel.state;
+        this.homepage = newTravel.homepage;
+        this.parking = newTravel.parking;
+        this.fee = newTravel.fee;
+        this.hours = newTravel.hours;
     }
 
     // 조회수를 1 증가
@@ -160,23 +178,35 @@ public class Travel extends BaseEntity { //등록일 수정일 자동생성 상�
     
     //여행지 정보 수동 업데이트
     public void updateFromRequest(TravelRequestDTO dto) {
-        this.contentsCd = dto.getContentsCd();
-        this.title = dto.getTitle();
-        this.introduction = dto.getIntroduction();
-        this.address = dto.getAddress();
-        this.roadAddress = dto.getRoadAddress();
-        this.phoneNo = dto.getPhoneNo();
-        this.tag = dto.getTag();
-        this.longitude = dto.getLongitude();
-        this.latitude = dto.getLatitude();
-        this.categoryName = dto.getCategoryName();
-        this.region1Name = dto.getRegion1Name();
-        this.region2Name = dto.getRegion2Name();
-        this.imagePath = dto.getImagePath();
-        this.thumbnailPath = dto.getThumbnailPath();
+        if (StringUtils.hasText(dto.getContentsCd())) this.contentsCd = dto.getContentsCd();
+        if (StringUtils.hasText(dto.getTitle())) this.title = dto.getTitle(); // 제목은 필수값이라 DTO에 항상 있을 것이지만 안전하게 처리
+        if (StringUtils.hasText(dto.getIntroduction())) this.introduction = dto.getIntroduction();
+        if (StringUtils.hasText(dto.getAddress())) this.address = dto.getAddress();
+        if (StringUtils.hasText(dto.getRoadAddress())) this.roadAddress = dto.getRoadAddress();
+        if (StringUtils.hasText(dto.getPhoneNo())) this.phoneNo = dto.getPhoneNo();
+        if (StringUtils.hasText(dto.getTag())) this.tag = dto.getTag();
+        if (dto.getLongitude() != null) this.longitude = dto.getLongitude();
+        if (dto.getLatitude() != null) this.latitude = dto.getLatitude();
+        if (StringUtils.hasText(dto.getCategoryName())) this.categoryName = dto.getCategoryName();
+        if (StringUtils.hasText(dto.getRegion1Name())) this.region1Name = dto.getRegion1Name();
+        if (StringUtils.hasText(dto.getRegion2Name())) this.region2Name = dto.getRegion2Name();
+
+        // 🔑 핵심 수정 부분: imagePath와 thumbnailPath가 DTO에 유효하게 들어있을 때만 업데이트
+        if (StringUtils.hasText(dto.getImagePath())) {
+            this.imagePath = dto.getImagePath();
+        }
+        // DTO에 null이나 빈 문자열이 오더라도 기존 imagePath를 null로 만들지 않고 유지
+
+        if (StringUtils.hasText(dto.getThumbnailPath())) {
+            this.thumbnailPath = dto.getThumbnailPath();
+        }
         this.state = dto.getState();
+        if (StringUtils.hasText(dto.getHomepage())) this.homepage = dto.getHomepage();
+        if (StringUtils.hasText(dto.getParking())) this.parking = dto.getParking();
+        if (StringUtils.hasText(dto.getFee())) this.fee = dto.getFee();
+        if (StringUtils.hasText(dto.getHours())) this.hours = dto.getHours();
         // contentId와 카운터 필드(views, likes, bookmark)는 여기서 업데이트하지 않습니다.
     }
-    
+
 
 }

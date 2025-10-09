@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 
+import java.util.UUID;
+
 // 여행지 등록 및 수정 요청을 받는 DTO
 @Getter
 @Setter
@@ -35,9 +37,21 @@ public class TravelRequestDTO {
     private String imagePath;       // 대표 이미지 경로
     private String thumbnailPath;   // 썸네일 경로
     private int state;          // 공개 상태 (1:공개, 0:비공개)
+    private String homepage;    //홈페이지
+    private String parking;     //주차정보
+    private String fee;         //이용요금
+    private String hours;       //이용시간
 
     // DTO를 Entity로 변환하는 메서드 (등록 시 사용)
     public Travel toEntity() {
+
+        //contentsId 자동생성
+        String generatedContentId = this.contentId;
+        if (generatedContentId == null || generatedContentId.trim().isEmpty()) {
+            generatedContentId = "CNTS-" + UUID.randomUUID().toString();
+        }
+
+
         return Travel.builder()
                 .contentId(this.contentId)
                 .contentsCd(this.contentsCd)
@@ -55,6 +69,10 @@ public class TravelRequestDTO {
                 .imagePath(this.imagePath)
                 .thumbnailPath(this.thumbnailPath)
                 .state(this.state)
+                .homepage(this.homepage)
+                .parking(this.parking)
+                .fee(this.fee)
+                .hours(this.hours)
                 // 신규 등록 시 조회수/좋아요/북마크는 0으로 초기화
                 .views(0L)
                 .likes(0L)

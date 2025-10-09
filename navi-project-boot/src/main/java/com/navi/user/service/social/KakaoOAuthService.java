@@ -8,13 +8,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -38,27 +37,20 @@ public class KakaoOAuthService {
     public SocialDTO getTokenInfo(String code) {
         RestTemplate restTemplate = new RestTemplate();
 
-        // access_token 발급 요청
+        // 🔹 1️⃣ access_token 발급 요청
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("grant_type", "authorization_code");
-        params.add("client_id", clientId);
-        params.add("client_secret", clientSecret);
-        params.add("redirect_uri", redirectUri);
-        params.add("code", code);
+        Map<String, String> params = new LinkedHashMap<>();
+        params.put("grant_type", "authorization_code");
+        params.put("client_id", clientId);
+        params.put("client_secret", clientSecret);
+        params.put("redirect_uri", redirectUri);
+        params.put("code", code);
 
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
+        HttpEntity<Map<String, String>> request = new HttpEntity<>(params, headers);
 
-        ResponseEntity<String> response;
-        try {
-            response = restTemplate.postForEntity(tokenUri, request, String.class);
-        } catch (HttpClientErrorException e) {
-            System.out.println("❌ Kakao Token Error: " + e.getResponseBodyAsString());
-            throw e;
-        }
-
+        ResponseEntity<String> response = restTemplate.postForEntity(tokenUri, request, String.class);
         if (response.getStatusCode() != HttpStatus.OK) {
             throw new RuntimeException("Kakao OAuth Token 요청 실패: " + response.getBody());
         }
@@ -68,11 +60,11 @@ public class KakaoOAuthService {
         String refreshToken = jsonObj.has("refresh_token") ? jsonObj.get("refresh_token").getAsString() : null;
         int expiresIn = jsonObj.has("expires_in") ? jsonObj.get("expires_in").getAsInt() : 3600;
 
-        // 요청 및 만료 시간
+        // 🔹 2️⃣ 요청 및 만료 시간
         LocalDateTime requestTime = LocalDateTime.now();
         LocalDateTime limitTime = requestTime.plusSeconds(expiresIn);
 
-        // 사용자 정보 요청
+        // 🔹 3️⃣ 사용자 정보 요청
         HttpHeaders userHeader = new HttpHeaders();
         userHeader.add("Authorization", "Bearer " + accessToken);
         HttpEntity<String> userEntity = new HttpEntity<>(userHeader);
@@ -82,12 +74,12 @@ public class KakaoOAuthService {
 
         System.out.println("✅ Kakao User Info: " + userJson);
 
-        // SocialDTO 생성
+        // 🔹 4️⃣ SocialDTO 생성
         return SocialDTO.builder()
                 .token(accessToken)
                 .refresh(refreshToken)
                 .confirm('T')
-                .type(SocialState.kakao)
+                .type(SocialState.KAKAO)
                 .request(requestTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
                 .limit(limitTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
                 .build();

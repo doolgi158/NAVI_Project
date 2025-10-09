@@ -30,7 +30,7 @@ public class Social {
     private String token;       // 리소스 토큰
 
     @Lob
-    @Column(name = "cer_refresh")
+    @Column(name = "cer_refresh", nullable = false)
     private String refresh;     // 리프레시 토큰
 
     @Enumerated(EnumType.STRING)
@@ -46,8 +46,4 @@ public class Social {
 
     @Column(name = "cer_confirm", nullable = false)
     private boolean confirm;       // 성공여부
-
-    @OneToOne
-    @JoinColumn(name = "user_no")
-    private User user;
 }

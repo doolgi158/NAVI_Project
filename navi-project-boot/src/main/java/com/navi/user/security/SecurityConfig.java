@@ -1,12 +1,9 @@
 package com.navi.user.security;
 
-import com.navi.user.repository.HistoryRepository;
 import com.navi.user.repository.TryLoginRepository;
-import com.navi.user.repository.UserRepository;
-import com.navi.user.security.Filter.JWTCheckFilter;
+//import com.navi.user.security.Filter.JWTCheckFilter;
 import com.navi.user.security.Filter.TryLoginFilter;
 import com.navi.user.security.handler.ApiFailHandler;
-import com.navi.user.security.handler.ApiLogoutSuccessHandler;
 import com.navi.user.security.handler.ApiSuccessHandler;
 import com.navi.user.security.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +15,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -30,9 +26,6 @@ import java.util.Arrays;
 public class SecurityConfig {
     private final TryLoginRepository tryLoginRepository;
     private final JWTUtil jwtUtil;
-    private final ApiLogoutSuccessHandler apiLogoutSuccessHandler;
-    private final UserRepository userRepository;
-    private final HistoryRepository historyRepository;
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity security) throws Exception {
@@ -47,24 +40,18 @@ public class SecurityConfig {
         // CSRF 설정
         security.csrf(config -> config.disable());
 
-        security.authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/users/login", "/api/users/logout", "/api/auth/oauth/**",
-                                "/api/users/find-id", "/api/users/find-pw").permitAll()
-                        .anyRequest().authenticated());
-
         // 로그인 설정
         security.formLogin(config -> {
             config.loginProcessingUrl("/api/users/login")
                     .usernameParameter("username")
                     .passwordParameter("password");
-            config.successHandler(new ApiSuccessHandler(tryLoginRepository, jwtUtil, userRepository, historyRepository));
+            config.successHandler(new ApiSuccessHandler(tryLoginRepository, jwtUtil));
             config.failureHandler(new ApiFailHandler(tryLoginRepository));
         });
 
-
         // JWT 체크 (토큰 정보가 있으면 로그인을 건너뛴다)
-        security.addFilterAfter(new JWTCheckFilter(jwtUtil), LogoutFilter.class);
-        security.addFilterAfter(new TryLoginFilter(tryLoginRepository), JWTCheckFilter.class);
+//        security.addFilterBefore(new JWTCheckFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
+//        security.addFilterBefore(new TryLoginFilter(tryLoginRepository), UsernamePasswordAuthenticationFilter.class);
         return security.build();
     }
 
@@ -78,7 +65,7 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(Arrays.asList("http://localhost:5173"));
+        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
         configuration.setAllowedMethods(Arrays.asList("POST", "GET", "DELETE", "PUT", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
         configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));

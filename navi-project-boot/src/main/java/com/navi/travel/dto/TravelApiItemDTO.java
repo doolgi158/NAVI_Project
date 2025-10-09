@@ -57,6 +57,19 @@ public class TravelApiItemDTO {
     @JsonProperty("repPhoto")
     private PhotoInfoDTO repPhoto;
 
+    @JsonProperty("homepage")
+    private String homepage;
+
+    @JsonProperty("parking")
+    private String parking;
+
+    @JsonProperty("fee")
+    private String fee;
+
+    // API 필드명이 'hours'일 경우
+    @JsonProperty("hours")
+    private String hours;
+
     /**
      * API DTO → Travel 엔티티 변환
      */
@@ -100,6 +113,10 @@ public class TravelApiItemDTO {
                         this.repPhoto != null && this.repPhoto.getPhotoId() != null
                                 ? this.repPhoto.getPhotoId().getThumbnailPath() : null
                 )
+                .homepage(this.homepage)
+                .parking(this.parking)
+                .fee(this.fee)
+                .hours(this.hours)
 
                 // 초기값 설정
                 .state(1) // 기본 공개 상태

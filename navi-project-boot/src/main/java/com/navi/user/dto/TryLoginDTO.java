@@ -16,9 +16,8 @@ public class TryLoginDTO extends TryLogin {
     private int count;                  // 시도 횟수
     private char state;                 // 성공 여부
     private LocalDateTime time;         // 로그인시도 시간
-    private LocalDateTime lockuntil;    // 해제 시간
     private String ip;                  // 요청한 PC의 IP
-    private String username;                // 이름
+    private LocalDateTime lockuntil;    // 해제 시간
 
     public static TryLoginDTO fromEntity(TryLogin entity) {
         TryLoginDTO dto = new TryLoginDTO();
@@ -26,9 +25,8 @@ public class TryLoginDTO extends TryLogin {
         dto.setCount(entity.getCount());
         dto.setState(entity.getState());
         dto.setTime(entity.getTime());
-        dto.setLockuntil(entity.getLockuntil());
         dto.setIp(entity.getIp());
-        dto.setUsername(entity.getUsername());
+        dto.setLockuntil(entity.getLockuntil());
         return dto;
     }
 }

@@ -9,7 +9,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Nationalized;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -53,7 +52,7 @@ public class Acc {
     private String title;
 
     @Builder.Default
-    @Nationalized @Column(length = 10)
+    @Column(columnDefinition = "NVARCHAR2(10)")
     private String category = "미확인";
 
     @Column(length = 40)
@@ -65,7 +64,7 @@ public class Acc {
     @Column(length = 200, nullable = false)
     private String address;
 
-    @Column(name = "mapy", precision = 10, scale = 7, columnDefinition = "NUMBER(10, 7)")
+    @Column(name = "mapy", precision = 10, scale = 7,columnDefinition = "NUMBER(10, 7)")
     private BigDecimal mapy;
 
     @Column(name = "mapx", precision = 10, scale = 7, columnDefinition = "NUMBER(10, 7)")

@@ -30,6 +30,11 @@ public class TravelDetailResponseDTO {
     private Long views;
     private Long likes;
     private Long bookmark;
+    private int state;
+    private String homepage;
+    private String parking;
+    private String fee;
+    private String hours;
 
     // ✅ 중요: 사용자 상태 값
     private boolean isLikedByUser;
@@ -69,6 +74,11 @@ public class TravelDetailResponseDTO {
                 .views(travel.getViews())
                 .likes(travel.getLikes())
                 .bookmark(travel.getBookmark())
+                .state(travel.getState())
+                .homepage(travel.getHomepage())
+                .parking(travel.getParking())
+                .fee(travel.getFee())
+                .hours(travel.getHours())
 
                 // ✅ 여기 반드시 추가해야 함 (사용자 상태값 반영)
                 .isLikedByUser(isLikedByUser)

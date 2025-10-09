@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
@@ -15,11 +16,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("select u from User u where u.id = :id")
     User getUser(@Param("id") String id);
 
-    @Query("select u from User u where u.id = :id")
-    Optional<User> findByUserId(@Param("id") String id);
-
-    boolean existsById(String id);
-
-    Optional<User> findByNameIgnoreCaseAndEmailIgnoreCase(String name, String email);
-
+    // Id로 User 엔티티를 찾기 위한 메서드
+    Optional<User> findById(String id);
 }

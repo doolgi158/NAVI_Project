@@ -1,6 +1,7 @@
 import { Suspense, lazy } from "react";
+import { ModalProvider } from "../components/Login/ModalProvider.jsx";
 
-const Loading = <div></div>
+const Loading = <div>Loading....</div>
 const AdminUsers = lazy(() => import("../../admin/pages/AdminUsersPage.jsx"))
 const AdminDashboard = lazy(() => import("../../admin/pages/AdminDashboardPage.jsx"))
 
@@ -14,7 +15,9 @@ const AdminRouter = () => {
              path: "dashboard",
              element: (
                  <Suspense fallback={Loading}>
-                    <AdminDashboard />
+                     <ModalProvider>
+                         <AdminDashboard />
+                     </ModalProvider>
                  </Suspense>
              )
          },
@@ -22,7 +25,9 @@ const AdminRouter = () => {
              path: "users",
              element: (
                  <Suspense fallback={Loading}>
-                    <AdminUsers />
+                     <ModalProvider>
+                         <AdminUsers />
+                     </ModalProvider>
                  </Suspense>
              )
          },
