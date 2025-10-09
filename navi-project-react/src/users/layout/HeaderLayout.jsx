@@ -5,7 +5,7 @@ import naviLogo from "../images/navi_logo.png";
 import { useModal } from "../../common/components/Login/ModalProvider";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "../../common/slice/loginSlice.js";
+import { setlogout } from "../../common/slice/loginSlice.js";
 
 const { Header } = Layout;
 
@@ -33,11 +33,30 @@ const HeaderLayout = () => {
         background: "#fff",
         padding: "0 24px",
         boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+         height: '64px',
       }}
     >
-      <Link to="/">
-        <Image src={naviLogo} alt="naviLogo" preview={false} width={130} />
-      </Link>
+      {/* 로고 섹션: 강제 중앙 정렬 및 line-height 0 적용  */}
+      <div 
+        style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          height: '100%', 
+          lineHeight: 0 // 글꼴 기반의 baseline 정렬 방지
+        }}
+      >
+        <Link to="/">
+          <Image 
+            src={naviLogo} 
+            alt="naviLogo" 
+            preview={false} 
+            width={130} 
+            style={{ 
+                display: 'block' // Image 컴포넌트를 block 레벨로 처리하여 정렬 명확히
+            }} 
+          />
+        </Link>
+      </div>
 
       <Menu
         mode="horizontal"
@@ -56,7 +75,7 @@ const HeaderLayout = () => {
           <Space>
             <Button
               type="default"
-              onClick={() => dispatch(logout())}
+              onClick={() => dispatch(setlogout())}
               className="text-red-500 hover:text-red-700"
             >
               로그아웃
@@ -99,7 +118,7 @@ const HeaderLayout = () => {
                 danger
                 block
                 onClick={() => {
-                dispatch(logout());   // Redux 상태 초기화
+                dispatch(setlogout());   // Redux 상태 초기화
                 setOpen(false);       // Drawer 닫기
                 }}
               >

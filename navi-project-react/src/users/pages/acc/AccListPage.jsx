@@ -24,7 +24,7 @@ const mockAccommodations = [
     },
 ];
 
-const AccSearchPage = () => {
+const AccListPage = () => {
     const navigate = useNavigate();
     const [searchType, setSearchType] = useState("region");
     const [isSearched, setIsSearched] = useState(false); 
@@ -141,4 +141,4 @@ const AccSearchPage = () => {
     );
 }
 
-export default AccSearchPage;
+export default AccListPage;
