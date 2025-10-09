@@ -1,7 +1,7 @@
 // FlightRsvInputPage.jsx
 import { useLocation, useParams } from "react-router-dom";
 import { useState } from "react";
-import MainLayout from "../layout/MainLayout";
+import MainLayout from "../../layout/MainLayout";
 
 const FlightRsvInputPage = () => {
   const { state } = useLocation();
@@ -11,12 +11,12 @@ const FlightRsvInputPage = () => {
   const selectedInbound = state?.selectedInbound;
   const passengerCount = state?.passengerCount || 1;
 
-  // ✅ 탑승객 정보 상태
+  // 탑승객 정보 상태
   const [passengers, setPassengers] = useState([
     { name: "", phone: "", email: "" },
   ]);
 
-  // ✅ 날짜 포맷 함수
+  // 날짜 포맷 함수
   const formatDateTime = (dateStr) => {
     if (!dateStr) return "";
     const date = new Date(dateStr);
@@ -30,33 +30,33 @@ const FlightRsvInputPage = () => {
     return `${year}.${month}.${day} (${dayOfWeek}) ${hours}:${minutes}`;
   };
 
-  // ✅ 탑승객 추가
+  // 탑승객 추가
   const handleAddPassenger = () => {
     setPassengers([...passengers, { name: "", phone: "", email: "" }]);
   };
 
-  // ✅ 탑승객 삭제
+  // 탑승객 삭제
   const handleRemovePassenger = (index) => {
     const updated = passengers.filter((_, i) => i !== index);
     setPassengers(updated);
   };
 
-  // ✅ 입력 변경 처리
+  // 입력 변경 처리
   const handleChange = (index, field, value) => {
     const updated = [...passengers];
     updated[index][field] = value;
     setPassengers(updated);
   };
 
-  // ✅ 예약 제출
+  // 예약 제출
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("🧾 예약 데이터:", {
+    console.log("예약 데이터:", {
       selectedOutbound,
       selectedInbound,
       passengers,
     });
-    alert(`✅ 예약 요청 완료 (${passengers.length}명)\n\n(현재는 테스트 단계입니다)`);
+    alert(`예약 요청 완료 (${passengers.length}명)\n\n(현재는 테스트 단계입니다)`);
   };
 
   return (
@@ -70,7 +70,7 @@ const FlightRsvInputPage = () => {
           탑승객 수: <span className="font-semibold">{passengers.length}</span>명
         </p>
 
-        {/* ✈️ 출발편 정보 */}
+        {/* 출발편 정보 */}
         {selectedOutbound && (
           <div className="mb-8 border border-blue-300 p-6 rounded-lg bg-blue-50">
             <h3 className="font-semibold text-blue-700 mb-2">출발편</h3>
@@ -90,7 +90,7 @@ const FlightRsvInputPage = () => {
           </div>
         )}
 
-        {/* 🛬 귀국편 정보 */}
+        {/* 귀국편 정보 */}
         {selectedInbound && (
           <div className="mb-8 border border-green-300 p-6 rounded-lg bg-green-50">
             <h3 className="font-semibold text-green-700 mb-2">귀국편</h3>
@@ -110,7 +110,7 @@ const FlightRsvInputPage = () => {
           </div>
         )}
 
-        {/* 🧍 예약자 정보 입력 */}
+        {/* 예약자 정보 입력 */}
         <div className="border-t border-gray-200 pt-6">
           <h3 className="font-semibold text-gray-700 mb-4">탑승객 정보 입력</h3>
 

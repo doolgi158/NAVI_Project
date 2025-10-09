@@ -33,7 +33,11 @@ const root = createBrowserRouter([
     {
         path:"/accommodations",
         children:[...AccRouter()]
-    },    
+    },
+    {
+        path:"/delivery",
+        children:[...DeliveryRouter()]
+    },
     {
         path: "/users",
         children: [...UserRouter()]
