@@ -68,3 +68,16 @@ export const getKakaoMapConfig = async () => {
     const response = await axios.get(`${BASE_PREFIX}/config/kakao`);
     return response.data;
 };
+
+// 회원가입 요청
+export const signup = async (userData) => {
+  try {
+    const response = await axios.post(`${BASE_PREFIX}/users/signup`, userData, {
+      headers: { "Content-Type": "application/json" },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("회원가입 실패:", error);
+    throw error.response?.data || error;
+  }
+};

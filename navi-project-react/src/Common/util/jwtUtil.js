@@ -1,4 +1,3 @@
-// src/util/jwtAxios.js
 import axios from "axios";
 import { getCookie, setCookie } from "./cookie";
 import { BASE_PREFIX } from "../api/naviApi";

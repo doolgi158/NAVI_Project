@@ -1,6 +1,8 @@
 package com.navi.user.controller;
 
+import com.navi.common.response.ApiResponse;
 import com.navi.user.dto.FindUserIdDTO;
+import com.navi.user.service.user.EmailService;
 import com.navi.user.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,6 +19,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ApiFindIdController {
     private final UserService userService;
+    private final EmailService emailService;
 
     @PostMapping("/find-id")
     public ResponseEntity<?> findUserId(@RequestBody FindUserIdDTO request) {
@@ -27,5 +30,18 @@ public class ApiFindIdController {
         }
 
         return ResponseEntity.ok(Map.of("userId", userId));
+    }
+
+    @PostMapping("/find-password")
+    public ApiResponse<?> findPassword(@RequestBody Map<String, String> request) {
+        String id = request.get("id");
+        String email = request.get("email");
+
+        boolean result = emailService.sendTempPassword(id, email);
+        if (result) {
+            return ApiResponse.success("임시 비밀번호가 이메일로 전송되었습니다.");
+        } else {
+            return ApiResponse.error("아이디 또는 이메일이 일치하지 않습니다.", 400, null);
+        }
     }
 }

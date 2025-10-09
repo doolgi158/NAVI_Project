@@ -1,7 +1,8 @@
 import { Form, Input, Button, Card, message } from "antd";
 import { AnimatePresence, motion } from "framer-motion";
-import { useLogin } from "../../hooks/useLogin";
+import { useLogin } from "../../hooks/useLogin.jsx";
 import SocialLoginButton from "./SocialLogin";
+import { Link } from "react-router-dom";
 
 const LoginModal = ({ open = false, onClose = () => {} }) => {
   const [form] = Form.useForm();
@@ -96,9 +97,9 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
                 {/* 아이디/비번 찾기 + 회원가입 */}
                 <div className="flex justify-between items-center mt-8">
                   <div className="flex flex-col items-center w-[48%]">
-                    <a href="users/find-id" className="text-sm text-gray-600 mb-2">
+                    <Link to="users/find-id" className="text-sm text-gray-600 mb-2" onClick={onClose}>
                       아이디 찾기
-                    </a>
+                    </Link>
                     <Button
                       type="primary"
                       htmlType="submit"
@@ -109,12 +110,12 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
                   </div>
 
                   <div className="flex flex-col items-center w-[48%]">
-                    <a href="users/forgot" className="text-sm text-gray-600 mb-2">
+                    <Link to="users/find-password" className="text-sm text-gray-600 mb-2" onClick={onClose}>
                       비밀번호 찾기
-                    </a>
+                    </Link>
                     <Button
                       type="default"
-                      href="/signup"
+                      href="/users/signup"
                       className="w-full h-11 border border-gray-300 font-semibold"
                     >
                       회원 가입
