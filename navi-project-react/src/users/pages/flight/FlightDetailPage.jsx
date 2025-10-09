@@ -44,7 +44,7 @@ const FlightDetailPage = () => {
     setInboundLoaded(false);
 
     axios
-      .post(`${API_SERVER_HOST}/flight/detail`, body)
+      .post(`${API_SERVER_HOST}/api/flight/detail`, body)
       .then((res) => {
         const data = Array.isArray(res.data) ? res.data : [];
 
@@ -175,7 +175,7 @@ const FlightDetailPage = () => {
           </div>
         )}
 
-        {/* ✅ 다음 단계 버튼 수정 완료 */}
+        {/* 다음 단계 버튼 수정 완료 */}
         <div className="flex justify-end mt-4">
           <button
             onClick={handleNextStep}

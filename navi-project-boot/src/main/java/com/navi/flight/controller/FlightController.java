@@ -15,7 +15,7 @@ import java.util.List;
  * - /api 제거 → 내부 도메인 기준 URL
  */
 @RestController
-@RequestMapping("/flight")
+@RequestMapping("/api/flight")
 @RequiredArgsConstructor
 public class FlightController {
 
