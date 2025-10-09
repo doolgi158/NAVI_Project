@@ -21,6 +21,7 @@ public class TravelListResponseDTO {
     private Double latitude;    //위도
     private String tag;     //태그
     private String phoneNo; //전화번호
+    private Long photoId;   //사진id
     private String imagePath;    //대표이미지 경로
     private String thumbnailPath;   // 썸네일 경로
     private Long views;         // 조회수
@@ -44,6 +45,7 @@ public class TravelListResponseDTO {
                 .latitude(travel.getLatitude())
                 .phoneNo(travel.getPhoneNo() != null ? travel.getPhoneNo() : null)
                 .tag(travel.getTag() != null ? travel.getTag() : null)
+                .photoId(travel.getPhotoId() != null? travel.getPhotoId() : null)
                 .imagePath(travel.getImagePath() != null ? travel.getImagePath() : null)
                 .thumbnailPath(travel.getThumbnailPath() != null ? travel.getThumbnailPath() : null)
                 .views(travel.getViews() != null ? travel.getViews() : 0L) // Long 타입 0L로 초기화

@@ -38,9 +38,6 @@ public class Travel extends BaseEntity { //등록일 수정일 자동생성 상�
     @Column(name = "CATEGORY_NAME", length = 150)
     private String categoryName;    //카테고리 이름 (숙박,축제/행사 등)
 
-    @Column(name = "CATEGORY_REF_ID", length = 150)
-    private String categoryRefId;   //카테고리 참조id
-
     // 기본 정보
     @Column(name = "TITLE", nullable = false, length = 500)
     private String title;   //여행지 제목
@@ -70,24 +67,12 @@ public class Travel extends BaseEntity { //등록일 수정일 자동생성 상�
     @Column(name = "latitude")
     private Double latitude; // 위도
 
-    // 지역 코드 정보
-    @Column(name = "REGION1_CD", length = 10)
-    private String region1Cd;   //시코드
-
+    // 지역 정보
     @Column(name = "REGION1_NAME", length = 150)
     private String region1Name;     //시명(제주시,서귀포시)
 
-    @Column(name = "REGION1_REF_ID", length = 150)
-    private String region1RefId;    //시참조id
-
-    @Column(name = "REGION2_CD", length = 10)
-    private String region2Cd;    //읍코드
-
     @Column(name = "REGION2_NAME", length = 150)
     private String region2Name; //읍명
-
-    @Column(name = "REGION2_REF_ID", length = 150)
-    private String region2RefId;    //읍참조id
 
     // 사진 정보
     @Column(name = "PHOTO_ID")
@@ -142,13 +127,8 @@ public class Travel extends BaseEntity { //등록일 수정일 자동생성 상�
         this.latitude = newTravel.latitude;
         this.contentsCd = newTravel.contentsCd;
         this.categoryName = newTravel.categoryName;
-        this.categoryRefId = newTravel.categoryRefId;
-        this.region1Cd = newTravel.region1Cd;
         this.region1Name = newTravel.region1Name;
-        this.region1RefId = newTravel.region1RefId;
-        this.region2Cd = newTravel.region2Cd;
         this.region2Name = newTravel.region2Name;
-        this.region2RefId = newTravel.region2RefId;
         this.photoId = newTravel.photoId;
         this.imagePath = newTravel.imagePath;
         this.thumbnailPath = newTravel.thumbnailPath;
@@ -191,7 +171,6 @@ public class Travel extends BaseEntity { //등록일 수정일 자동생성 상�
         if (StringUtils.hasText(dto.getRegion1Name())) this.region1Name = dto.getRegion1Name();
         if (StringUtils.hasText(dto.getRegion2Name())) this.region2Name = dto.getRegion2Name();
 
-        // 🔑 핵심 수정 부분: imagePath와 thumbnailPath가 DTO에 유효하게 들어있을 때만 업데이트
         if (StringUtils.hasText(dto.getImagePath())) {
             this.imagePath = dto.getImagePath();
         }

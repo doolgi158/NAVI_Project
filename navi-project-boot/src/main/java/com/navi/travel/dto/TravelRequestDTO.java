@@ -34,26 +34,28 @@ public class TravelRequestDTO {
     private String categoryName;    // 카테고리 이름
     private String region1Name;     // 지역1 이름 (시/도)
     private String region2Name;     // 지역2 이름 (시/군/구)
+    private Long photoId;           // 포토 아이디
     private String imagePath;       // 대표 이미지 경로
     private String thumbnailPath;   // 썸네일 경로
-    private int state;          // 공개 상태 (1:공개, 0:비공개)
-    private String homepage;    //홈페이지
-    private String parking;     //주차정보
-    private String fee;         //이용요금
-    private String hours;       //이용시간
+    private int state;              // 공개 상태 (1:공개, 0:비공개)
+    private String homepage;        // 홈페이지
+    private String parking;         // 주차정보
+    private String fee;             // 이용요금
+    private String hours;           // 이용시간
+
 
     // DTO를 Entity로 변환하는 메서드 (등록 시 사용)
     public Travel toEntity() {
 
-        //contentsId 자동생성
-        String generatedContentId = this.contentId;
-        if (generatedContentId == null || generatedContentId.trim().isEmpty()) {
-            generatedContentId = "CNTS-" + UUID.randomUUID().toString();
+        // contentId가 null이거나 비어있을 경우 UUID로 자동 생성
+        String finalContentId = this.contentId;
+        if (finalContentId == null || finalContentId.trim().isEmpty()) {
+            finalContentId = "CNTS-" + UUID.randomUUID().toString();
         }
 
 
         return Travel.builder()
-                .contentId(this.contentId)
+                .contentId(finalContentId) // ✅ 수정된 finalContentId 사용
                 .contentsCd(this.contentsCd)
                 .categoryName(this.categoryName)
                 .title(this.title)
@@ -66,6 +68,7 @@ public class TravelRequestDTO {
                 .latitude(this.latitude)
                 .region1Name(this.region1Name)
                 .region2Name(this.region2Name)
+                .photoId(this.photoId)
                 .imagePath(this.imagePath)
                 .thumbnailPath(this.thumbnailPath)
                 .state(this.state)
@@ -73,6 +76,7 @@ public class TravelRequestDTO {
                 .parking(this.parking)
                 .fee(this.fee)
                 .hours(this.hours)
+
                 // 신규 등록 시 조회수/좋아요/북마크는 0으로 초기화
                 .views(0L)
                 .likes(0L)
