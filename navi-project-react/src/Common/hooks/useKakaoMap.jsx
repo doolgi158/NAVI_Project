@@ -26,7 +26,7 @@ export const useKakaoMap = (containerId) => {
       loadKakaoSDK();
     } else {
       const script = document.createElement("script");
-      script.src = "//dapi.kakao.com/v2/maps/sdk.js?appkey=64f77515cbf4b9bf257e664e44b1ab9b&autoload=false";
+      script.src = "//dapi.kakao.com/v2/maps/sdk.js?appkey=64f77515cbf4b9bf257e664e44b1ab9b&libraries=services&autoload=false";
       script.async = true;
       script.onload = loadKakaoSDK;
       document.head.appendChild(script);
