@@ -28,6 +28,7 @@ import java.util.Arrays;
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
+
     private final TryLoginRepository tryLoginRepository;
     private final JWTUtil jwtUtil;
     private final ApiLogoutSuccessHandler apiLogoutSuccessHandler;
@@ -36,47 +37,61 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity security) throws Exception {
-        // CORS 설정
-        security.cors(httpSecurityCorsConfigurer -> {
-            httpSecurityCorsConfigurer.configurationSource(corsConfigurationSource());
-        });
 
-        // 세션 관리 정책 설정
-        security.sessionManagement(sessionConfig -> sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        // ✅ CORS 설정
+        security.cors(cors -> cors.configurationSource(corsConfigurationSource()));
 
-        // CSRF 설정
-        security.csrf(config -> config.disable());
+        // ✅ 세션 관리
+        security.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
+        // ✅ CSRF 비활성화
+        security.csrf(csrf -> csrf.disable());
+
+        // ✅ 요청 권한 설정
         security.authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/users/login", "/api/users/logout", "/api/auth/oauth/**",
-                                "/api/users/find-id", "/api/users/find-pw", "/api/users/signup", "/api/users/check-id",
-                                "api/users/send-email","api/users/verify-code", "api/users/find-password"
-                        ).permitAll()
-                        .anyRequest().authenticated());
+                .requestMatchers(
+                        // 로그인/회원가입 관련
+                        "/api/users/login",
+                        "/api/users/logout",
+                        "/api/auth/oauth/**",
+                        "/api/users/find-id",
+                        "/api/users/find-pw",
+                        "/api/users/signup",
+                        "/api/users/check-id",
+                        "/api/users/send-email",
+                        "/api/users/verify-code",
+                        "/api/users/find-password",
 
-        // 로그인 설정
+                        // ✅ 공공 데이터, 항공편, 짐배송 등
+                        "/api/flight/**",
+                        "/api/delivery/**"
+                ).permitAll()
+                .anyRequest().authenticated()
+        );
+
+        // ✅ 로그인 필터 설정
         security.formLogin(config -> {
             config.loginProcessingUrl("/api/users/login")
                     .usernameParameter("username")
-                    .passwordParameter("password");
-            config.successHandler(new ApiSuccessHandler(tryLoginRepository, jwtUtil, userRepository, historyRepository));
-            config.failureHandler(new ApiFailHandler(tryLoginRepository));
+                    .passwordParameter("password")
+                    .successHandler(new ApiSuccessHandler(tryLoginRepository, jwtUtil, userRepository, historyRepository))
+                    .failureHandler(new ApiFailHandler(tryLoginRepository));
         });
 
-
-        // JWT 체크 (토큰 정보가 있으면 로그인을 건너뛴다)
+        // ✅ JWT 필터 & 로그인 시도 필터 연결
         security.addFilterAfter(new JWTCheckFilter(jwtUtil), LogoutFilter.class);
         security.addFilterAfter(new TryLoginFilter(tryLoginRepository), JWTCheckFilter.class);
+
         return security.build();
     }
 
-    // Password 암호화
+    // ✅ PasswordEncoder
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // CORS 세부 설정
+    // ✅ CORS 세부 설정
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
