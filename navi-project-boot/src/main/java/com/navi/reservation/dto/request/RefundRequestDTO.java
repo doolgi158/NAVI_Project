@@ -1,15 +1,14 @@
 package com.navi.reservation.dto.request;
 
-/*
+import lombok.*;
+
+/**
  * ===========================================
  * [RefundRequestDTO]
  * : 환불 요청 시 클라이언트에서 전달되는 데이터 DTO
  * ===========================================
  * ㄴ 예약 ID 기준으로 환불 요청
  */
-
-import com.navi.reservation.domain.Refund;
-import lombok.*;
 
 @Data
 @NoArgsConstructor

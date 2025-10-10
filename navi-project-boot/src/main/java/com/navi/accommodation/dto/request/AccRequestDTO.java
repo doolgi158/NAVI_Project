@@ -1,25 +1,27 @@
 package com.navi.accommodation.dto.request;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-/* 숙소 등록, 수정 요청 */
+/**
+ * ============================================
+ * [AccRequestDTO]
+ * : 관리자 전용 숙소 등록 / 수정 요청 DTO
+ * ============================================
+ */
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class AccRequestDTO {
-    private String title;
-    private String category;
-    private String tel;
-    private String address;
-    private String overview;
-    private String checkInTime;
-    private String checkOutTime;
-    private Boolean hasCooking;
-    private Boolean hasParking;
-    private boolean isActive;
+    private String title;           // 숙소명
+    private String category;        // 숙소 유형
+    private String tel;             // 문의 전화번호
+    private String address;         // 전체 주소
+    private String overview;        // 숙소 설명
+    private String checkInTime;     // 체크인 시간
+    private String checkOutTime;    // 체크아웃 시간
+    private Boolean hasCooking;     // 취사 가능 여부
+    private Boolean hasParking;     // 주차 가능 여부
+    private boolean isActive;       // 운영 여부
 }

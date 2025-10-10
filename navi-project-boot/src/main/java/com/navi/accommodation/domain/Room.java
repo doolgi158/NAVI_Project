@@ -1,5 +1,6 @@
 package com.navi.accommodation.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.navi.accommodation.dto.api.RoomApiDTO;
 import com.navi.accommodation.dto.request.RoomRequestDTO;
 import jakarta.persistence.*;
@@ -22,16 +23,16 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name="navi_room")
+@Table(name="NAVI_ROOM")
 @SequenceGenerator(
-        name = "navi_room_generator",
-        sequenceName = "navi_room_seq",
+        name = "room_generator",
+        sequenceName = "ROOM_SEQ",
         initialValue = 1,
         allocationSize = 1)
 public class Room {
-    @Id
-    @Column(name = "room_no")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "navi_room_generator")
+    /* === COLUMN 정의 === */
+    @Id @Column(name = "room_no")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "room_generator")
     private Long roomNo;
 
     @Column(name = "room_id", length = 20, unique = true, updatable = false)
@@ -44,6 +45,7 @@ public class Room {
     // FK 설정
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name="accNo", nullable = false)
+    @JsonBackReference
     private Acc acc;
 
     @Column(name = "room_name", columnDefinition = "NVARCHAR2(50)", nullable = false)
@@ -80,7 +82,7 @@ public class Room {
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
 
-    // INSERT 전 기본값 보정
+    /* === 기본값 보정 === */
     @PrePersist
     public void prePersist() {
         if (roomCnt == null) roomCnt = 1;
