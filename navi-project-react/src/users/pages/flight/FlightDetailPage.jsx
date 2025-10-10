@@ -18,8 +18,8 @@ const FlightDetailPage = () => {
   const [inboundLoaded, setInboundLoaded] = useState(false);
   const [noInbound, setNoInbound] = useState(false);
   const [sortOption, setSortOption] = useState("time");
-  const [currentPage, setCurrentPage] = useState(1); // 현재 페이지
-  const itemsPerPage = 10; // 한 페이지당 항공편 수
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const { depAirport, arrAirport, depDate, arrDate, seatClass } = state || {};
 
@@ -75,7 +75,7 @@ const FlightDetailPage = () => {
       .then((res) => {
         const data = Array.isArray(res.data) ? res.data : [];
         setFlights(data);
-        setCurrentPage(1); // 페이지 초기화
+        setCurrentPage(1);
         setLoading(false);
 
         if (step === "inbound") {
@@ -124,14 +124,14 @@ const FlightDetailPage = () => {
     (step === "inbound" &&
       (loading || !inboundLoaded || noInbound || flights.length === 0));
 
-  // 정렬 로직
+  // 정렬
   const sortedFlights = [...flights].sort((a, b) => {
     if (sortOption === "priceAsc") return a.price - b.price;
     if (sortOption === "priceDesc") return b.price - a.price;
     return new Date(a.depTime) - new Date(b.depTime);
   });
 
-  // 페이징 로직
+  // 페이징
   const totalPages = Math.ceil(sortedFlights.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedFlights = sortedFlights.slice(
@@ -143,10 +143,36 @@ const FlightDetailPage = () => {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
 
+  const renderPageNumbers = () => {
+    const pages = [];
+    const maxButtons = 5;
+    let start = Math.max(currentPage - Math.floor(maxButtons / 2), 1);
+    let end = Math.min(start + maxButtons - 1, totalPages);
+    if (end - start < maxButtons - 1)
+      start = Math.max(end - maxButtons + 1, 1);
+
+    for (let i = start; i <= end; i++) {
+      pages.push(
+        <button
+          key={i}
+          onClick={() => goToPage(i)}
+          className={`px-3 py-1 rounded-md text-sm ${
+            currentPage === i
+              ? "bg-blue-600 text-white"
+              : "text-blue-600 hover:bg-blue-50"
+          }`}
+        >
+          {i}
+        </button>
+      );
+    }
+    return pages;
+  };
+
   return (
     <MainLayout>
       <div className="max-w-4xl mx-auto mt-10 bg-white p-8 shadow-lg rounded-xl">
-        {/* 제목 + 정렬 옵션 */}
+        {/* 상단 타이틀 + 정렬 */}
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold text-blue-800">
             {step === "outbound" ? "출발편 선택" : "귀국편 선택"}
@@ -163,6 +189,7 @@ const FlightDetailPage = () => {
           </select>
         </div>
 
+        {/* 로딩/결과 */}
         {loading && <p>데이터를 불러오는 중...</p>}
         {!loading && paginatedFlights.length === 0 && !noInbound && (
           <p className="text-gray-500 text-center">항공편이 없습니다.</p>
@@ -220,7 +247,18 @@ const FlightDetailPage = () => {
             </div>
 
             {/* 페이지네이션 */}
-            <div className="flex justify-center items-center gap-2 mt-6">
+            <div className="flex justify-center items-center gap-2 mt-6 flex-wrap">
+              <button
+                onClick={() => goToPage(1)}
+                disabled={currentPage === 1}
+                className={`px-3 py-1 rounded-md text-sm ${
+                  currentPage === 1
+                    ? "text-gray-400 bg-gray-100 cursor-not-allowed"
+                    : "text-blue-600 hover:underline"
+                }`}
+              >
+                처음
+              </button>
               <button
                 onClick={() => goToPage(currentPage - 1)}
                 disabled={currentPage === 1}
@@ -233,19 +271,7 @@ const FlightDetailPage = () => {
                 이전
               </button>
 
-              {[...Array(totalPages)].map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => goToPage(i + 1)}
-                  className={`px-3 py-1 rounded-md text-sm ${
-                    currentPage === i + 1
-                      ? "bg-blue-600 text-white"
-                      : "text-blue-600 hover:bg-blue-50"
-                  }`}
-                >
-                  {i + 1}
-                </button>
-              ))}
+              {renderPageNumbers()}
 
               <button
                 onClick={() => goToPage(currentPage + 1)}
@@ -258,10 +284,22 @@ const FlightDetailPage = () => {
               >
                 다음
               </button>
+              <button
+                onClick={() => goToPage(totalPages)}
+                disabled={currentPage === totalPages}
+                className={`px-3 py-1 rounded-md text-sm ${
+                  currentPage === totalPages
+                    ? "text-gray-400 bg-gray-100 cursor-not-allowed"
+                    : "text-blue-600 hover:underline"
+                }`}
+              >
+                마지막
+              </button>
             </div>
           </>
         )}
 
+        {/* 다음 단계 버튼 */}
         <div className="flex justify-end mt-6">
           <button
             onClick={handleNextStep}
