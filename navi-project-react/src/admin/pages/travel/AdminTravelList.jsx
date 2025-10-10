@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchTravelList, deleteTravel } from '../../../common/api/travelApi';
+import { fetchTravelList, deleteTravel } from '../../../Common/api/travelApi';
 
 import { Table, Button, Space, Popconfirm, Tag, message, Spin, Typography, Input, Image } from 'antd'; // Image 컴포넌트 추가
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons';

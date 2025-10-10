@@ -33,7 +33,7 @@ public class TravelController {
     public Page<TravelListResponseDTO> getList(
             @PageableDefault(
                     size = 10,
-                    sort = "contentsCd,asc,updatedAt",
+                    sort = "contentsCd",
                     direction = Sort.Direction.DESC
             ) Pageable pageable,
             @RequestParam(value = "region2Name", required = false) String region2NameCsv,
