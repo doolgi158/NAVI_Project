@@ -3,7 +3,7 @@ package com.navi.flight.dto;
 import lombok.*;
 import java.time.LocalDateTime;
 
-/**
+/*
  * 항공편 검색 결과 DTO
  * - DB Entity 그대로 노출하지 않고
  * - 필요한 값만 가공해서 반환

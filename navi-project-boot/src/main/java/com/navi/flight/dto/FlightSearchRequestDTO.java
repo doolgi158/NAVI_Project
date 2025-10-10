@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
+/*
  * 항공편 검색 조건 DTO
  * - 클라이언트에서 조회 조건을 보낼 때 사용
  * - 공항명 대신 코드(GMP, CJU ...)를 기준으로 검색
