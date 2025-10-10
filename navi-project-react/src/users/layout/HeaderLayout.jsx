@@ -5,7 +5,7 @@ import naviLogo from "../images/navi_logo.png";
 import { useModal } from "../../common/components/Login/ModalProvider";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "../../common/slice/loginSlice.js";
+import { setlogout } from "../../common/slice/loginSlice.js";
 
 const { Header } = Layout;
 
@@ -75,7 +75,7 @@ const HeaderLayout = () => {
           <Space>
             <Button
               type="default"
-              onClick={() => dispatch(logout())}
+              onClick={() => dispatch(setlogout())}
               className="text-red-500 hover:text-red-700"
             >
               로그아웃
@@ -92,10 +92,11 @@ const HeaderLayout = () => {
             </Button>
             <Button
               type="primary"
-              href="/signup"
               className="bg-sb-teal hover:bg-sb-gold"
             >
-              회원가입
+              <Link to="/users/signup">
+                회원가입
+              </Link>
             </Button>
           </Space>
       }
@@ -118,7 +119,7 @@ const HeaderLayout = () => {
                 danger
                 block
                 onClick={() => {
-                dispatch(logout());   // Redux 상태 초기화
+                dispatch(setlogout());   // Redux 상태 초기화
                 setOpen(false);       // Drawer 닫기
                 }}
               >

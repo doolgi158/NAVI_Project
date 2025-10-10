@@ -49,12 +49,12 @@ public class SecurityConfig {
         security.csrf(config -> config.disable());
 
         security.authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/users/login", "/api/users/logout", "/api/auth/oauth/**",
-                        "/api/users/find-id", "/api/users/find-pw", "/api/users/signup", "/api/users/check-id",
-                        "api/users/send-email","api/users/verify-code", "api/users/find-password", "api/flight",
-                        "api/flight/detail", "/api/seats/**", "/travel/**"
-                ).permitAll()
-                .anyRequest().authenticated());
+                        .requestMatchers("/api/users/login", "/api/users/logout", "/api/auth/oauth/**",
+                                "/api/users/find-id", "/api/users/find-pw", "/api/users/signup", "/api/users/check-id",
+                                "api/users/send-email","api/users/verify-code", "api/users/find-password", "api/flight",
+                                "api/flight/detail", "/api/seats/**", "/travel/**"
+                        ).permitAll()
+                        .anyRequest().authenticated());
 
         // 로그인 설정
         security.formLogin(config -> {

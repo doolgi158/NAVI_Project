@@ -8,7 +8,7 @@ import { useModal } from "../components/Login/ModalProvider";
 export const useSignupForm = (form) => {
   const { showModal } = useModal();
 
-  // ✅ 상태값
+  // 상태값
   const [idChecked, setIdChecked] = useState(false);
   const [idStatus, setIdStatus] = useState("");
   const [idMessage, setIdMessage] = useState("");
@@ -22,7 +22,7 @@ export const useSignupForm = (form) => {
   const [emailCodeStatus, setEmailCodeStatus] = useState("");
   const [emailCodeMessage, setEmailCodeMessage] = useState("");
 
-  // ✅ 아이디 중복 검사
+  // 아이디 중복 검사
   const handleCheckId = async () => {
     const idValue = form.getFieldValue("id");
 
@@ -59,7 +59,7 @@ export const useSignupForm = (form) => {
     }
   };
 
-  // ✅ 회원가입 처리
+  // 회원가입 처리
   const handleSubmit = async (values) => {
     if (!idChecked) {
       message.warning("아이디 중복 검사를 먼저 진행해주세요.");
@@ -94,7 +94,7 @@ export const useSignupForm = (form) => {
     }
   };
 
-  // ✅ input 변경 시 상태 초기화
+  // input 변경 시 상태 초기화
   const resetIdState = () => {
     setIdChecked(false);
     setIdStatus("");
@@ -102,7 +102,7 @@ export const useSignupForm = (form) => {
   };
 
 
-// ✅ 이메일 인증 코드 발송
+// 이메일 인증 코드 발송
 const handleSendEmail = async () => {
   const emailValue = form.getFieldValue("email");
   if (!emailValue) {
@@ -134,7 +134,7 @@ const handleSendEmail = async () => {
   }
 };
 
-// ✅ 인증 코드 확인
+// 인증 코드 확인
 const handleVerifyCode = async () => {
   const emailValue = form.getFieldValue("email");
 

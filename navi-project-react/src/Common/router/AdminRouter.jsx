@@ -1,10 +1,8 @@
 import { Suspense, lazy } from "react";
-import { ModalProvider } from "../components/Login/ModalProvider.jsx";
 
 const Loading = <div>Loading....</div>
 const AdminUsers = lazy(() => import("../../admin/pages/AdminUsersPage.jsx"))
 const AdminDashboard = lazy(() => import("../../admin/pages/AdminDashboardPage.jsx"))
-
 const AdminTravelList = lazy(() => import("../../admin/pages/travel/AdminTravelList.jsx"))
 const AdminTravelForm  = lazy(() => import("../../admin/pages/travel/AdminTravelForm.jsx"))
 
@@ -15,9 +13,7 @@ const AdminRouter = () => {
              path: "dashboard",
              element: (
                  <Suspense fallback={Loading}>
-                     <ModalProvider>
-                         <AdminDashboard />
-                     </ModalProvider>
+                    <AdminDashboard />
                  </Suspense>
              )
          },
@@ -25,9 +21,7 @@ const AdminRouter = () => {
              path: "users",
              element: (
                  <Suspense fallback={Loading}>
-                     <ModalProvider>
-                         <AdminUsers />
-                     </ModalProvider>
+                    <AdminUsers />
                  </Suspense>
              )
          },
@@ -37,9 +31,7 @@ const AdminRouter = () => {
              path: "travel",
              element: (
                  <Suspense fallback={Loading}>
-                     <ModalProvider>
-                         <AdminTravelList  />
-                     </ModalProvider>
+                    <AdminTravelList  />
                  </Suspense>
              )
          },
@@ -48,9 +40,7 @@ const AdminRouter = () => {
              path: "travel/register",
              element: (
                  <Suspense fallback={Loading}>
-                     <ModalProvider>
-                         <AdminTravelForm />
-                     </ModalProvider>
+                    <AdminTravelForm />
                  </Suspense>
              )
          },
@@ -59,13 +49,37 @@ const AdminRouter = () => {
              path: "travel/edit/:travelId",
              element: (
                  <Suspense fallback={Loading}>
-                     <ModalProvider>
-                         <AdminTravelForm  />
-                     </ModalProvider>
+                    <AdminTravelForm  />
                  </Suspense>
              )
          },
-         
+          //travel 관리자 페이지 라우팅
+         {
+             path: "travel",
+             element: (
+                 <Suspense fallback={Loading}>
+                    <AdminTravelList  />
+                 </Suspense>
+             )
+         },
+         //travel 등록 페이지 라우팅
+         {
+             path: "travel/register",
+             element: (
+                 <Suspense fallback={Loading}>
+                    <AdminTravelForm />
+                 </Suspense>
+             )
+         },
+         //travel 수정 페이지 라우팅
+         {
+             path: "travel/edit/:travelId",
+             element: (
+                 <Suspense fallback={Loading}>
+                    <AdminTravelForm  />
+                 </Suspense>
+             )
+         },
     ]
 }
 

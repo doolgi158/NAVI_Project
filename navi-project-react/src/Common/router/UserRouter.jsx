@@ -1,10 +1,10 @@
 import { lazy, Suspense } from "react";
 
 const Loading = <div></div>
-const Signup = lazy(() => import("../../users/pages/User/UserSignupPage"));
-const Redirect = lazy(() => import("../../users/pages/User/RedirectPage"));
-const FindID = lazy(() => import("../../users/pages/User/FindUserIdPage"));
-const FindPw = lazy(() => import("../../users/pages/User/FindUserPwPage"))
+const Signup = lazy(() => import("../../users/pages/user/UserSignupPage"));
+const Redirect = lazy(() => import("../../users/pages/user/RedirectPage"));
+const FindID = lazy(() => import("../../users/pages/user/FindUserIdPage"));
+const FindPw = lazy(() => import("../../users/pages/user/FindUserPwPage"))
 
 const UserRouter = () => {
   return [

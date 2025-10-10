@@ -43,9 +43,7 @@ const root = createBrowserRouter([
         path: "/",
         element: (
             <Suspense fallback={Loding}>
-                <ModalProvider>
-                    <UserMain />
-                </ModalProvider>
+                <Main />
             </Suspense>
         )
     },

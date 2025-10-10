@@ -2,6 +2,7 @@ package com.navi.user.security.Filter;
 
 import com.google.gson.Gson;
 import com.navi.common.response.ApiResponse;
+import com.navi.user.enums.UserRole;
 import com.navi.user.security.util.JWTUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
