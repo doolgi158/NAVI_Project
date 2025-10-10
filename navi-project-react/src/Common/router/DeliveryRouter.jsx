@@ -1,4 +1,3 @@
-// src/Common/router/DeliveryRouter.jsx
 import { lazy, Suspense } from "react";
 import { ModalProvider } from "../components/Login/ModalProvider.jsx";
 

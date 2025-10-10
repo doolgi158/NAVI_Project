@@ -20,7 +20,7 @@ const HeaderLayout = () => {
     { key: "2", label: <Link to="/accommodations">숙소</Link> },
     { key: "3", label: <Link to="/flight">교통</Link> },
     { key: "4", label: <Link to="/plans">여행계획</Link> },
-    { key: "5", label: <Link to="/delivery">짐 배송</Link> },
+    { key: "5", label: <Link to="/deliveries">짐 배송</Link> },
     { key: "6", label: <Link to="/board">게시판</Link> },
   ];
 
@@ -71,7 +71,7 @@ const HeaderLayout = () => {
         className="hidden md:flex"
       />
       {
-        loginstate.username ?
+        loginstate.token ?
           <Space>
             <Button
               type="default"
@@ -113,7 +113,7 @@ const HeaderLayout = () => {
       >
         <Menu mode="vertical" items={items} style={{ color: "#2F3E46" }} />
         {
-          loginstate.username ?
+          loginstate.token ?
             <div className="mt-4 flex flex-col gap-2">
               <Button
                 danger

@@ -44,7 +44,7 @@ public class User {
     @Column(name = "user_gender")
     private char gender;        // 성별
 
-    @Column(name = "user_ID", nullable = false)
+    @Column(name = "user_ID", nullable = false, unique = true)
     private String id;          // 아이디
 
     @Column(name = "user_PW", nullable = false)
@@ -64,6 +64,13 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserState userState; // 유저 상태
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Social social;      // 소셜 로그인
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<History> histories = new ArrayList<>();    // 로그인 이력
+
     @ElementCollection(fetch = FetchType.LAZY)
     @Builder.Default
     private List<UserRole> userRoleList = new ArrayList<>();
@@ -71,7 +78,6 @@ public class User {
     public void addRole(UserRole userRole) {
         userRoleList.add(userRole);
     }
-
     public void clearRole(UserRole userRole) {
         userRoleList.clear();
     }

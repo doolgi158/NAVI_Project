@@ -5,7 +5,6 @@ import FlightRouter from "./FlightRouter.jsx";
 import AdminRouter from "./AdminRouter.jsx";
 import AccRouter from "./AccRouter.jsx";
 import UserRouter from "./UserRouter.jsx";
-import DeliveryRouter from "./DeliveryRouter.jsx"
 
 const Loding = <div></div>
 const Main = lazy(() => import("../../users/pages/UserMainPage.jsx"))
@@ -15,6 +14,10 @@ const root = createBrowserRouter([
     { 
         element: <Appshell />,
         children: [
+    {
+        path: "/",
+        element: <Suspense fallback={Loding}><Main /></Suspense>
+    },
     {
         path: "/travel",
         children: [...TravelRouter()]
@@ -30,22 +33,10 @@ const root = createBrowserRouter([
     {
         path:"/accommodations",
         children:[...AccRouter()]
-    },
+    },    
     {
-        path:"/users",
-        children:[...UserRouter()]
-    },
-    {
-        path:"/delivery",
-        children:[...DeliveryRouter()]
-    },
-    {
-        path: "/",
-        element: (
-            <Suspense fallback={Loding}>
-                <Main />
-            </Suspense>
-        )
+        path: "/users",
+        children: [...UserRouter()]
     },
 ]
 }

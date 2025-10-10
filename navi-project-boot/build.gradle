@@ -53,6 +53,9 @@ dependencies {
     // Spring WebFlux 스타터 (WebClient를 사용하기 위해 필요)
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
+    // 이메일 전송을 위한 의존성
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+
     // https://mvnrepository.com/artifact/com.oracle.database.security/osdt_cert
     implementation 'com.oracle.database.security:osdt_cert:21.17.0.0'
 

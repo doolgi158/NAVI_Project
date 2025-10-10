@@ -100,7 +100,7 @@ public class AccServiceImpl implements AccService{
         // Todo: 주소 매핑 로직 완성 후 변경 예정
         //Township township = TownshipRepository.findTownshipByAddress(...);
         Township townshipId = townshipRepository.findById(1L)   // Todo: townshipId 임시값
-                        .orElseThrow(() -> new IllegalArgumentException("해당 지역을 찾을 수 없습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("해당 지역을 찾을 수 없습니다."));
         acc.changeFromApiDTO(dto, townshipId);
 
         accRepository.save(acc);
