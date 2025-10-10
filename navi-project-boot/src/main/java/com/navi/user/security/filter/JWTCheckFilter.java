@@ -2,7 +2,7 @@ package com.navi.user.security.filter;
 
 import com.google.gson.Gson;
 import com.navi.common.response.ApiResponse;
-import com.navi.user.enums.UserRole;
+import com.navi.user.dto.JWTClaimDTO;
 import com.navi.user.security.util.JWTUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -10,14 +10,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +28,6 @@ public class JWTCheckFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String header = request.getHeader("Authorization");
-        System.out.println("🔍 Authorization Header: " + header);
 
         // 토큰이 없거나 Bearer 형식이 아닌 경우
         if (header == null || !header.startsWith("Bearer ")) {
@@ -52,25 +49,15 @@ public class JWTCheckFilter extends OncePerRequestFilter {
             try {
                 // JWT 검증
                 String accessToken = authHeader.substring(7);
-                Map<String, Object> claims = jwtUtil.validateToken(accessToken);
 
-                // 사용자 식별 정보 추출
-                String username = (String) claims.get("username");
-                if (username == null) {
-                    username = (String) claims.get("provider"); // 소셜 로그인용 키
-                }
-
-                username = (String) claims.get("id"); // 토큰에 넣은 사용자 id 클레임
-
-                String role = (String) claims.get("role");
-                if (role == null) {
-                    role = "USER"; // 기본값
-                }
-
-                List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
+                JWTClaimDTO claim = jwtUtil.validateAndParse(accessToken);
+                String role = claim.getPrimaryRole();
+                List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
 
                 UsernamePasswordAuthenticationToken auth =
-                        new UsernamePasswordAuthenticationToken(username, null, authorities);
+                        new UsernamePasswordAuthenticationToken(
+                                claim.getId(), null, List.of(new SimpleGrantedAuthority(role))
+                        );
                 SecurityContextHolder.getContext().setAuthentication(auth);
 
             } catch (Exception e) {
@@ -101,7 +88,7 @@ public class JWTCheckFilter extends OncePerRequestFilter {
         // 로그인 없이 접근 가능한 페이지 건너뜀
         return path.startsWith("/api/users/signup")
                 || path.startsWith("/api/users/login")
-                || path.startsWith("/api/travels/")
+                || path.startsWith("/api/travel/")
                 || path.startsWith("/api/transports")
                 || path.startsWith("/api/accommodations")
                 || path.startsWith("/api/posts")

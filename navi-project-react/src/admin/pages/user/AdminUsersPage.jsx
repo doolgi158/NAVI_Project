@@ -28,7 +28,7 @@ const AdminUsersPage = () => {
     try {
       const token = localStorage.getItem("accessToken");
 
-      const res = await axios.get(`${API_SERVER_HOST}/api/admin/users`, {
+      const res = await axios.get(`${API_SERVER_HOST}/api/adm/users`, {
         params: { page: pageNum - 1, size, keyword, field },
           headers: {
           Authorization: `Bearer ${token}`,
@@ -59,78 +59,55 @@ const AdminUsersPage = () => {
       message.success("삭제되었습니다.");
       fetchUsers(page, search, filterField);
     } catch (err) {
-      console.error(err);
       message.error("삭제 중 오류가 발생했습니다.");
     }
   };
 
-  // 테이블 컬럼
-  const columns = [
-    { title: "번호", dataIndex: "userNo", key: "userNo", align: "center", width: 80 },
-    { title: "아이디", dataIndex: "userId", key: "userId", align: "center", width: 120 },
-    { title: "이름", dataIndex: "userName", key: "userName", align: "center", width: 100 },
-    {
-      title: "성별",
-      dataIndex: "userGender",
-      key: "userGender",
-      align: "center",
-      width: 80,
-      render: (gender) => (gender === "M" ? "남" : gender === "F" ? "여" : "-"),
-    },
-    { title: "생년월일", dataIndex: "userBirth", key: "userBirth", align: "center", width: 120 },
-    { title: "이메일", dataIndex: "userEmail", key: "userEmail", align: "center", width: 200 },
-    { title: "연락처", dataIndex: "userPhone", key: "userPhone", align: "center", width: 140 },
-    { title: "내/외국인", dataIndex: "userLocal", key: "userLocal", align: "center", width: 100 },
-    {
-      title: "상태",
-      dataIndex: "userState",
-      key: "userState",
-      align: "center",
-      width: 100,
-      render: (state) =>
-        state === "NORMAL" ? (
-          <Tag color="green">정상</Tag>
-        ) : state === "SLEEP" ? (
-          <Tag color="gray">휴면</Tag>
-        ) : (
-          <Tag color="red">탈퇴</Tag>
-        ),
-    },
-    { title: "가입일", dataIndex: "userSignup", key: "userSignup", align: "center", width: 160 },
-    { title: "IP", dataIndex: "historyIp", key: "historyIp", align: "center", width: 130 },
-    {
-      title: "로그인 시간",
-      dataIndex: "historyLogin",
-      key: "historyLogin",
-      align: "center",
-      width: 160,
-      render: (val) => val || "-",
-    },
-    {
-      title: "로그아웃 시간",
-      dataIndex: "historyLogout",
-      key: "historyLogout",
-      align: "center",
-      width: 160,
-      render: (val) => val || "-",
-    },
-    {
-      title: "관리",
-      key: "actions",
-      align: "center",
-      width: 120,
-      render: (_, record) => (
-        <Button
-          type="primary"
-          danger
-          icon={<DeleteOutlined />}
-          onClick={() => handleDelete(record.userNo)}
-        >
-          삭제
-        </Button>
+const columns = [
+  // 🧍 기본 정보
+  { title: "번호", dataIndex: "userNo", key: "userNo", align: "center", width: 70, },
+  { title: "아이디", dataIndex: "userId", key: "userId", align: "center", width: 120, },
+  { title: "이름", dataIndex: "userName", key: "userName", align: "center", width: 100, },
+  { title: "성별", dataIndex: "userGender", key: "userGender", align: "center", width: 80,
+    render: (gender) => gender === "M" ? "남" : gender === "F" ? "여" : "-", },
+  { title: "생년월일", dataIndex: "userBirth", key: "userBirth", align: "center", width: 120, },
+  { title: "내/외국인", dataIndex: "userLocal", key: "userLocal", align: "center", width: 90, },
+
+  // ✉️ 연락/계정 정보
+  { title: "이메일", dataIndex: "userEmail", key: "userEmail", align: "center", width: 200, ellipsis: true, },
+  { title: "연락처", dataIndex: "userPhone", key: "userPhone", align: "center", width: 130, },
+  { title: "가입일", dataIndex: "userSignup", key: "userSignup", align: "center", width: 160, },
+
+  // 🕓 접속/활동 정보
+  { title: "상태", dataIndex: "userState", key: "userState", align: "center", width: 90,
+    render: (state) => state === "NORMAL" ?(
+        <Tag color="green">정상</Tag>
+      ) : state === "SLEEP" ? (
+        <Tag color="gray">휴면</Tag>
+      ) : (
+        <Tag color="red">탈퇴</Tag>
       ),
-    },
-  ];
+  },
+  { title: "IP", dataIndex: "historyIp", key: "historyIp", align: "center", width: 130, },
+  { title: "로그인 시간", dataIndex: "historyLogin", key: "historyLogin", align: "center", width: 160,
+    render: (val) => val || "-", },
+  { title: "로그아웃 시간", dataIndex: "historyLogout", key: "historyLogout", align: "center", width: 160,
+    render: (val) => val || "-", },
+
+  // ⚙️ 관리
+  { title: "관리", key: "actions", align: "center", fixed: "right", width: 100,
+    render: (_, record) => (
+      <Button
+        type="primary"
+        danger
+        icon={<DeleteOutlined />}
+        onClick={() => handleDelete(record.userNo)}
+      >
+        삭제
+      </Button>
+    ),
+  },
+];
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
@@ -215,7 +192,8 @@ const AdminUsersPage = () => {
                 }
               },
             }}
-            scroll={{ y: 600, x: 1500 }}
+            scroll={{ x: 1600, y: 600 }}
+            sticky={{ offsetHeader: 64 }}
           />
         </Content>
       </Layout>

@@ -30,7 +30,7 @@ const loginSlice = createSlice({
       state.username = action.payload.username;
       state.token = action.payload.token;
       state.ip = action.payload.ip;
-      
+
       // 에러가 없을 때만 쿠키 저장
       if(!action.payload.error){
         setCookie("userCookie", JSON.stringify(action.payload), 1);
@@ -54,7 +54,6 @@ const loginSlice = createSlice({
           },
         }
       ).catch((err) => {
-        console.error("❌ 로그아웃 기록 전송 실패:", err);
       });
 
       // 로컬 저장소 초기화

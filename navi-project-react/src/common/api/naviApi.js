@@ -83,7 +83,6 @@ export const socialLogin = async (provider, code) => {
     const response = await axios.get(`${API_BASE}/oauth/${provider}?code=${code}`);
     return response.data;
   } catch (error) {
-    console.error("❌ 소셜 로그인 오류:", error);
     throw error;
   }
 };
@@ -104,7 +103,6 @@ export const signup = async (userData) => {
     });
     return response.data;
   } catch (error) {
-    console.error("회원가입 실패:", error);
     throw error.response?.data || error;
   }
 };

@@ -12,7 +12,7 @@ public class AdminUserDTO {
     private Long userNo;            // 사용자 번호
     private String userId;          // 아이디
     private String userName;        // 이름
-    private char userGender;        // 성별
+    private String userGender;      // 성별
     private String userBirth;       // 생년월일
     private String userEmail;       // 이메일
     private String userPhone;       // 전화번호
@@ -21,7 +21,7 @@ public class AdminUserDTO {
     private String userState;       // 상태 (정상/휴면/탈퇴 등)
 
     // History 테이블
-    private String historyIp;               // 로그인 IP
+    private String historyIp;        // 로그인 IP
     private String historyLogin;     // 로그인 시각
     private String historyLogout;    // 로그아웃 시각
 }

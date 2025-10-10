@@ -5,11 +5,6 @@ import MainLayout from "../layout/MainLayout";
 const SignupPage = () => {
   const [form] = Form.useForm();
 
-  const handleSubmit = (values) => {
-    console.log("회원가입 데이터:", values);
-    // TODO: axios.post("/api/users/signup", values)
-  };
-
   return (
     <MainLayout>
     <div className="flex justify-center items-center py-12 bg-gray-50 min-h-[80vh]">

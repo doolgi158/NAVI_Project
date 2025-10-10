@@ -57,7 +57,6 @@ jwtAxios.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return jwtAxios(originalRequest);
       } catch (refreshError) {
-        console.error("🔴 Refresh Token expired or invalid:", refreshError);
         return Promise.reject(refreshError);
       }
     }

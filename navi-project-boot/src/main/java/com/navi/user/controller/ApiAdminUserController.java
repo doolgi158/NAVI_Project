@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/admin/users")
+@RequestMapping("/api/adm/users")
 @RequiredArgsConstructor
 public class ApiAdminUserController {
     private final UserRepository userRepository;
@@ -84,7 +84,7 @@ public class ApiAdminUserController {
                     .userBirth(user.getBirth())
                     .userEmail(user.getEmail())
                     .userPhone(user.getPhone())
-                    .userLocal(user.getLocal() == 'L' ? "내국인" : "외국인")
+                    .userLocal(user.getLocal().equals("L") ? "내국인" : "외국인")
                     .userSignup(user.getSignUp())
                     .userState(user.getUserState().toString())
                     .historyIp(recentHistory != null ? recentHistory.getIp() : "-")

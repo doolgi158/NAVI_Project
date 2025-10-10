@@ -1,5 +1,6 @@
 package com.navi.user.security;
 
+import com.navi.user.enums.UserRole;
 import com.navi.user.repository.HistoryRepository;
 import com.navi.user.repository.TryLoginRepository;
 import com.navi.user.repository.UserRepository;
@@ -56,7 +57,8 @@ public class SecurityConfig {
                         "/api/users/send-email", "/api/users/verify-code", "/api/users/find-password", "/api/seats/**",
                         "/travel/**", "/api/flight/**", "/api/delivery/**"
                 ).permitAll()
-                .requestMatchers("/api/adm/**").hasRole("ADMIN")
+                .requestMatchers("/api/adm/**").hasAuthority(UserRole.ADMIN.name())
+                .requestMatchers("/api/auth/me").hasAuthority(UserRole.USER.name())
                 .anyRequest().authenticated()
         );
 

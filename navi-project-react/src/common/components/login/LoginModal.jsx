@@ -1,12 +1,18 @@
 import { Form, Input, Button, Card, message } from "antd";
 import { AnimatePresence, motion } from "framer-motion";
 import { useLogin } from "../../hooks/useLogin.jsx";
-import SocialLoginButton from "./SocialLogin";
 import { Link } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import SocialLoginButton from "./SocialLogin";
 
 const LoginModal = ({ open = false, onClose = () => {} }) => {
   const [form] = Form.useForm();
   const { login } = useLogin();
+
+  const [clickedInside, setClickedInside] = useState(false);
+
+  // 다음 input 이동을 위한 ref
+  const passwordRef = useRef(null);
 
   const handleSubmit = async (values) => {
     const result = await login(values);
@@ -20,6 +26,21 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
       form.resetFields(["password"]);
     }
   };
+
+  // 배경 클릭 시 닫기
+  const handleBackgroundClick = (e) => {
+    // 모달 안 클릭한 적 없거나, 현재 클릭이 배경이라면 닫기
+    if (!clickedInside && e.target === e.currentTarget) {
+      onClose();
+    }
+    setClickedInside(false);
+  };
+  // 모달이 닫힐 때 입력값 초기화
+  useEffect(() => {
+    if (!open) {
+      form.resetFields();
+    }
+  }, [open, form]);
 
   // 로그인 모달 안에서 소셜 로그인 시작
   const handleSocialLogin = (provider) => {
@@ -48,14 +69,23 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onClick={onClose}
+          onMouseDown={(e) => {
+            // 배경 클릭 시 모달 외부 클릭으로 인식
+            if (e.target === e.currentTarget) {
+              setClickedInside(false);
+            }
+          }}
+          onMouseUp={handleBackgroundClick}
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
             transition={{ duration: 0.3 }}
-            onClick={(e) => e.stopPropagation()}
+            onMouseDown={(e) => {
+              e.stopPropagation();
+              setClickedInside(true);
+            }}
           >
             <Card
               className="w-full max-w-md p-6 rounded-2xl shadow-lg bg-white relative"
@@ -76,7 +106,16 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
                   name="username"
                   rules={[{ required: true, message: "아이디를 입력하세요" }]}
                 >
-                  <Input placeholder="아이디 입력" size="large" />
+                  <Input
+                    placeholder="아이디 입력"
+                    size="large"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault(); // 폼 제출 방지
+                        passwordRef.current?.focus(); // 다음 input 포커스
+                      }
+                    }}
+                  />
                 </Form.Item>
 
                 <Form.Item
@@ -84,7 +123,17 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
                   name="password"
                   rules={[{ required: true, message: "비밀번호를 입력하세요" }]}
                 >
-                  <Input.Password placeholder="비밀번호 입력" size="large" />
+                  <Input.Password
+                    ref={passwordRef}
+                    placeholder="비밀번호 입력"
+                    size="large"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        form.submit(); // ✅ 마지막 input → submit 실행
+                      }
+                    }}
+                  />
                 </Form.Item>
 
                 {/* 소셜 로그인 영역 */}

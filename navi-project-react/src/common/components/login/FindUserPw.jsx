@@ -1,25 +1,32 @@
 import { useRef, useState } from "react";
 import { Form, Input, Button, message } from "antd";
 import axios from "axios";
+import { useModal } from "../../../common/components/Login/ModalProvider";
 
-const FindUserId = ({ onResult }) => {
+const FindUserPw = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const { showModal } = useModal();
   const emailRef = useRef(null);
 
-  // 아이디 찾기 요청
+  // 비밀번호 찾기 처리
   const handleSubmit = async (values) => {
     try {
       setLoading(true);
-      const res = await axios.post("http://localhost:8080/api/users/find-id", values);
+      const res = await axios.post(
+        "http://localhost:8080/api/users/find-password",
+        values
+      );
 
-      if (res.data.userId) {
-        message.success("아이디를 성공적으로 찾았습니다!");
-        onResult(`회원님의 아이디는 "${res.data.userId}" 입니다.`);
+      if (res.data.status === 200) {
+        message.success("임시 비밀번호가 이메일로 전송되었습니다!");
         form.resetFields();
+
+        setTimeout(() => {
+          showModal("login");
+        }, 600);
       } else {
-        message.error(res.data.message || "입력하신 정보와 일치하는 아이디가 없습니다.");
-        onResult("입력하신 정보와 일치하는 아이디가 없습니다.");
+        message.error(res.data.message || "아이디 또는 이메일이 일치하지 않습니다.");
       }
     } catch (err) {
       message.error("서버 오류가 발생했습니다.");
@@ -35,15 +42,15 @@ const FindUserId = ({ onResult }) => {
       onFinish={handleSubmit}
       className="text-gray-700"
     >
-      {/* 이름 입력 */}
+      {/* 아이디 */}
       <Form.Item
-        label={<span className="text-lg text-gray-800">이름</span>}
-        name="name"
-        rules={[{ required: true, message: "이름을 입력하세요." }]}
+        label={<span className="text-lg text-gray-800">아이디</span>}
+        name="id"
+        rules={[{ required: true, message: "아이디를 입력하세요." }]}
       >
         <Input
           size="large"
-          placeholder="이름을 입력하세요"
+          placeholder="아이디를 입력하세요"
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               e.preventDefault();
@@ -53,7 +60,7 @@ const FindUserId = ({ onResult }) => {
         />
       </Form.Item>
 
-      {/* 이메일 입력 */}
+      {/* 이메일 */}
       <Form.Item
         label={<span className="text-lg text-gray-800">이메일</span>}
         name="email"
@@ -85,11 +92,11 @@ const FindUserId = ({ onResult }) => {
           loading={loading}
           className="bg-[#4A9E8C] hover:bg-[#3A8576] h-12 text-lg font-semibold active:scale-95 transition-transform"
         >
-          아이디 찾기
+          임시 비밀번호 발송
         </Button>
       </Form.Item>
     </Form>
   );
 };
 
-export default FindUserId;
+export default FindUserPw;
