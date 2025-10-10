@@ -13,13 +13,16 @@ import java.util.List;
 public interface AccService {
     /** === 관리자 전용 API 적재 === */
     // 최초 적재(acc_list.json)
-    public void loadFromJsonFile() throws IOException;
+    public void loadApiFromJsonFile() throws IOException;
     // 신규 데이터 삽입(acc_list.json)
     public void insertInitialFromApi(AccApiDTO dto);
     // 최초 적재(acc_basic.json & acc_extra.json)
-    public void updateFromJsonFile() throws IOException;
+    public void updateApiFromJsonFile() throws IOException;
     // 기존 데이터 갱신(acc_basic.json & acc_extra.json)
     public void updateInitialFromApi(Acc acc, AccApiDTO dto);
+
+    /** === 숙소 데이터 추가 적재 === */
+    void loadFromAdminJsonFile() throws IOException;
 
     /** === 관리자 전용 CRUD === */
     Acc createAcc(AccRequestDTO dto);

@@ -25,7 +25,7 @@ public class RoomServiceImpl implements RoomService {
 
     /* === 관리자 전용 API 적재 === */
     //JSON 파일 경로 지정
-    @Value("classpath:accMockData/acc_rooms.json")   // 숙소 전체 리스트(최초 적재)
+    @Value("classpath:mockData/acc_rooms.json")   // 숙소 전체 리스트(최초 적재)
     private Resource roomFile;
 
     @Override

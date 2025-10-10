@@ -21,12 +21,12 @@ public class AccRepositoryTests {
     /* === API 데이터 적재 === */
     @Test
     public void loadAccData() throws Exception {
-        accService.loadFromJsonFile();
+        accService.loadApiFromJsonFile();
         log.info("API 데이터 DB 초기 적재 완료");
     }
     @Test
     public void updateAccData() throws Exception {
-        accService.updateFromJsonFile();
+        accService.updateApiFromJsonFile();
         log.info("API 데이터 DB 초기 업데이트 완료");
     }
 

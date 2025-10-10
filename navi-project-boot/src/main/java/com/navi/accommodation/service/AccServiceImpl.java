@@ -32,65 +32,95 @@ public class AccServiceImpl implements AccService{
 
     /** === JSON 파일 경로 === */
     // Resource : 파일 접근 추상화 인터페이스 (로컬, S3 등 어떤 경로든 동일한 방식으로 접근 가능)
-    @Value("classpath:accMockData/acc_list.json")   // 숙소 전체 리스트(최초 적재)
+    @Value("classpath:mockData/acc_list.json")   // 숙소 전체 리스트(최초 적재)
     private Resource listFile;
-    @Value("classpath:accMockData/acc_basic.json")  // 특정 숙소 정보(보강 업데이트)
+    @Value("classpath:mockData/acc_basic.json")  // 특정 숙소 정보(보강 업데이트)
     private Resource basicFile;
-    @Value("classpath:accMockData/acc_extra.json")  // 특정 숙소 추가 정보(보강 업데이트)
+    @Value("classpath:mockData/acc_extra.json")  // 특정 숙소 추가 정보(보강 업데이트)
     private Resource extraFile;
+    @Value("classpath:mockData/acc_add.json")    // 숙소 데이터 추가(최초 적재)
+    private Resource addFile;
 
     /** === 관리자 전용 API 적재 === */
     @Override
     // INSERT 전용 (insertOnly = true)
-    public void loadFromJsonFile() throws IOException {
+    public void loadApiFromJsonFile() throws IOException {
         log.info("[API] 숙소 리스트 파일 적재 시작");
-        processJson(listFile, true);
+        processJson(listFile, AccApiDTO.class, true);
         log.info("[API] 숙소 리스트 파일 적재 완료");
     }
 
     @Override
     // UPDATE 전용 (insertOnly = false)
-    public void updateFromJsonFile() throws IOException {
+    public void updateApiFromJsonFile() throws IOException {
         log.info("[API] 숙소 상세 파일 갱신 시작");
-        processJson(basicFile, false);
-        processJson(extraFile, false);
+        processJson(basicFile, AccApiDTO.class, false);
+        processJson(extraFile, AccApiDTO.class, false);
         log.info("[API] 숙소 상세 파일 갱신 완료");
     }
 
+    /** === 숙소 데이터 추가 적재 === */
+    @Override
+    public void loadFromAdminJsonFile() throws IOException {
+        log.info("[ADMIN] 관리자 전용 JSON 파일 적재 시작");
+        processJson(addFile, AccRequestDTO.class, true);
+        log.info("[ADMIN] 관리자 전용 JSON 파일 적재 완료");
+    }
+
     /** JSON 파일 처리 - DB 적재 (공용 메서드) */
-    public void processJson(Resource file, boolean insertOnly) throws IOException {
+    public <T> void processJson(Resource file, Class<T> dtoClass, boolean insertOnly) throws IOException {
         // JSON 전체를 트리 형태의 구조로 파싱하여 JsonNode 타입으로 반환
         // JsonNode는 Map(key-value)처럼 계층 구조를 탐색할 수 있게 해줌
         JsonNode root = objectMapper.readTree(file.getInputStream());
-        // JSON의 깊은 계층까지 순차 접근
         JsonNode items = root.path("response").path("body").path("items");
+
         // items는 배열(ArrayNode)이므로, for 문으로 반복 탐색 가능
         for(JsonNode wrapper : items){
             JsonNode item = wrapper.path("item");
             // JSON의 item 내용을 AccApiDTO에 매핑
-            AccApiDTO dto = objectMapper.treeToValue(item, AccApiDTO.class);
+            T dto = objectMapper.treeToValue(item, dtoClass);
 
-            if(dto.getContentId() == null || dto.getContentId().isBlank()) {
-                log.warn("contentId 없음 -> SKIP: {}", dto);
-                continue;
-            }
-
-            Long contentId = Long.parseLong(dto.getContentId());
-
-            if(insertOnly) {
-                accRepository.findByContentId(contentId)
-                        .ifPresentOrElse(
-                                acc -> log.info("이미 존재 -> SKIP: {}", contentId),
-                                () -> insertInitialFromApi(dto)
-                        );
-            } else {
-                accRepository.findByContentId(contentId)
-                        .ifPresentOrElse(
-                                acc -> updateInitialFromApi(acc, dto),
-                                () -> log.warn("업데이트 대상 없음 (contentId = {})", contentId)
-                        );
+            if (dto instanceof AccApiDTO apiDto) {
+                handleApiDto(apiDto, insertOnly);
+            } else if (dto instanceof AccRequestDTO reqDto) {
+                handleRequestDto(reqDto);
             }
         }
+    }
+
+    private void handleApiDto(AccApiDTO apiDto, boolean insertOnly) {
+        if(apiDto.getContentId() == null || apiDto.getContentId().isBlank()) {
+            log.warn("[API] contentId 없음 -> SKIP: {}", apiDto);
+            return;
+        }
+
+        Long contentId = Long.parseLong(apiDto.getContentId());
+        if(insertOnly) {
+            accRepository.findByContentId(contentId)
+                    .ifPresentOrElse(
+                            acc -> log.warn("[API] 이미 존재 -> SKIP: {}", contentId),
+                            () -> insertInitialFromApi(apiDto)
+                    );
+        } else {
+            accRepository.findByContentId(contentId)
+                    .ifPresentOrElse(
+                            acc -> updateInitialFromApi(acc, apiDto),
+                            () -> log.warn("[API] 업데이트 대상 없음 - contentId: {}", contentId)
+                    );
+        }
+    }
+
+    private void handleRequestDto(AccRequestDTO reqDto) {
+        boolean exists = accRepository.existsByTitleAndAddress(reqDto.getTitle(), reqDto.getAddress());
+
+        if (exists) {
+            log.warn("[ADMIN] 중복 SKIP -> {}", reqDto.getTitle());
+            return;
+        }
+
+        Acc acc = Acc.builder().build();
+        acc.changeFromRequestDTO(reqDto);
+        accRepository.save(acc);
     }
 
     /** 신규 데이터 삽입 (acc_list.json 전용) */
@@ -104,7 +134,7 @@ public class AccServiceImpl implements AccService{
         acc.changeFromApiDTO(dto, townshipId);
 
         accRepository.save(acc);
-        log.info("INSERT 성공 (contentId = {})", acc.getContentId());
+        log.info("[API] INSERT 성공 (contentId = {})", acc.getContentId());
     }
 
     @Override
@@ -113,7 +143,7 @@ public class AccServiceImpl implements AccService{
         acc.changeFromApiDTO(dto, townshipId);
 
         accRepository.save(acc);
-        log.info("UPDATE 성공 (contentId = {})", dto.getContentId());
+        log.info("[API] UPDATE 성공 (contentId = {})", dto.getContentId());
     }
 
     /** === 관리자 전용 CRUD === */
