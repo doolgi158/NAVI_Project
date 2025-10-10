@@ -16,7 +16,7 @@ const SignupForm = () => {
 
   const {
     resetIdState,
-    // ✅ 이메일 인증 관련 상태 & 함수
+    // 이메일 인증 관련 상태 & 함수
     emailVerified,
     emailStatus,
     emailMessage,
@@ -31,7 +31,7 @@ const SignupForm = () => {
     emailCodeMessage,
   } = useSignupForm(form);
 
-  // ✅ 아이디 중복 검사
+  // 아이디 중복 검사
   const handleCheckId = async () => {
     const idValue = form.getFieldValue("id");
 console.log(emailSent);
@@ -68,7 +68,7 @@ console.log(emailSent);
     }
   };
 
-  // ✅ 회원가입 처리
+  // 회원가입 처리
   const handleSubmit = async (values) => {
     if (!idChecked) {
       message.warning("아이디 중복 검사를 먼저 진행해주세요.");
@@ -146,7 +146,7 @@ console.log(emailSent);
         </Space.Compact>
       </Form.Item>
 
-      {/* ✅ 비밀번호 유효성 검사 */}
+      {/* 비밀번호 유효성 검사 */}
       <Form.Item
         label="비밀번호"
         name="pw"
@@ -223,7 +223,7 @@ console.log(emailSent);
         </Col>
       </Row>
 
-      {/* ✅ 전화번호 유효성 검사 */}
+      {/* 전화번호 유효성 검사 */}
       <Form.Item
         label="전화번호"
         name="phone"
@@ -239,7 +239,7 @@ console.log(emailSent);
         <Input placeholder="숫자만 입력 (예: 01012345678)" size="large" />
       </Form.Item>
 
-      {/* ✅ 이메일 + 인증코드 */}
+      {/* 이메일 + 인증코드 */}
       <Form.Item
         label="이메일"
         name="email"
@@ -269,7 +269,7 @@ console.log(emailSent);
         </Space.Compact>
       </Form.Item>
 
-      {/* ✅ 인증 코드 입력란 */}
+      {/* 인증 코드 입력란 */}
       {emailSent && !emailVerified && (
         <Form.Item label="인증 코드"  validateStatus={emailCodeStatus} help={emailCodeMessage}>
           <Space.Compact className="w-full">

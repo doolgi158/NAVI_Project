@@ -21,22 +21,24 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
     }
   };
 
-  // 🔗 소셜 로그인 클릭 핸들러
+  // 로그인 모달 안에서 소셜 로그인 시작
   const handleSocialLogin = (provider) => {
-    switch (provider) {
-      case "google":
-        window.location.href = "http://localhost:8080/oauth2/authorization/google";
-        break;
-      case "kakao":
-        window.location.href = "http://localhost:8080/oauth2/authorization/kakao";
-        break;
-      case "naver":
-        window.location.href = "http://localhost:8080/oauth2/authorization/naver";
-        break;
-      default:
-        break;
-    }
+  const CLIENT_IDS = {
+    google: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+    kakao: import.meta.env.VITE_KAKAO_CLIENT_ID,
+    naver: import.meta.env.VITE_NAVER_CLIENT_ID,
   };
+
+  const REDIRECT_URI = "http://localhost:3000/login/oauth2/redirect";
+
+  const AUTH_URLS = {
+    google: `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_IDS.google}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=openid%20email%20profile`,
+    kakao: `https://kauth.kakao.com/oauth/authorize?client_id=${CLIENT_IDS.kakao}&redirect_uri=${REDIRECT_URI}&response_type=code`,
+    naver: `https://nid.naver.com/oauth2.0/authorize?client_id=${CLIENT_IDS.naver}&redirect_uri=${REDIRECT_URI}&response_type=code&state=naviState`,
+  };
+
+  window.location.href = AUTH_URLS[provider];
+};
 
   return (
     <AnimatePresence>
@@ -85,35 +87,11 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
                   <Input.Password placeholder="비밀번호 입력" size="large" />
                 </Form.Item>
 
-                {/* ✅ 소셜 로그인 영역 */}
+                {/* 소셜 로그인 영역 */}
                 <div className="flex flex-col gap-3 my-6">
-                  <Button
-                    size="large"
-                    className="w-full bg-white border border-gray-300 hover:shadow-md flex items-center justify-center gap-2"
-                    onClick={() => handleSocialLogin("google")}
-                  >
-                    <span className="font-medium text-gray-700">
-                      Google 계정으로 로그인
-                    </span>
-                  </Button>
-
-                  <Button
-                    size="large"
-                    className="w-full bg-[#FEE500] hover:bg-[#fadb05] flex items-center justify-center gap-2"
-                    onClick={() => handleSocialLogin("kakao")}
-                  >
-                    <span className="font-medium text-gray-800">
-                      카카오 계정으로 로그인
-                    </span>
-                  </Button>
-
-                  <Button
-                    size="large"
-                    className="w-full bg-[#03C75A] hover:bg-[#02b153] flex items-center justify-center gap-2 text-white"
-                    onClick={() => handleSocialLogin("naver")}
-                  >
-                    <span className="font-medium">네이버 계정으로 로그인</span>
-                  </Button>
+                  <SocialLoginButton provider="google" onClick={handleSocialLogin} />
+                  <SocialLoginButton provider="kakao" onClick={handleSocialLogin} />
+                  <SocialLoginButton provider="naver" onClick={handleSocialLogin} />
                 </div>
 
                 {/* 아이디/비번 찾기 + 회원가입 */}
