@@ -17,7 +17,7 @@ import java.util.Map;
 public class JWTUtil {
     private final SecretKey secretKey;
 
-    // ✅ application.properties에서 secret 읽기
+    // application.properties에서 secret 읽기
     public JWTUtil(@Value("${jwt.secret}") String secret) {
         // Base64 인코딩 필수 (JJWT 0.11.x 이상)
         this.secretKey = Keys.hmacShaKeyFor(Base64.getEncoder().encode(secret.getBytes(StandardCharsets.UTF_8)));

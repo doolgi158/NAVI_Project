@@ -1,5 +1,4 @@
 import { lazy, Suspense } from "react";
-import { ModalProvider } from "../components/Login/ModalProvider.jsx";
 
 const Loading = <div></div>;
 
@@ -12,9 +11,7 @@ const DeliveryRouter = () => [
     path: "",
     element: (
       <Suspense fallback={Loading}>
-        <ModalProvider>
-          <DeliveryPage />
-        </ModalProvider>
+        <DeliveryPage />
       </Suspense>
     ),
   },
@@ -22,9 +19,7 @@ const DeliveryRouter = () => [
     path: "list",
     element: (
       <Suspense fallback={Loading}>
-        <ModalProvider>
-          <DeliveryListPage />
-        </ModalProvider>
+        <DeliveryListPage />
       </Suspense>
     ),
   },
@@ -32,9 +27,7 @@ const DeliveryRouter = () => [
     path: "detail/:id",
     element: (
       <Suspense fallback={Loading}>
-        <ModalProvider>
-          <DeliveryDetailPage />
-        </ModalProvider>
+        <DeliveryDetailPage />
       </Suspense>
     ),
   },

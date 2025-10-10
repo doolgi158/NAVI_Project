@@ -39,6 +39,13 @@ public class ApiSuccessHandler implements AuthenticationSuccessHandler {
         UserSecurityDTO userSecurityDTO = (UserSecurityDTO) authentication.getPrincipal();
         Map<String, Object> claims = userSecurityDTO.getClaims();
 
+        if (userSecurityDTO.getAuthorities() != null && !userSecurityDTO.getAuthorities().isEmpty()) {
+            String role = userSecurityDTO.getAuthorities().iterator().next().getAuthority(); // 예: ROLE_ADMIN
+            claims.put("role", role);
+        } else {
+            claims.put("role", "ROLE_USER"); // 기본값
+        }
+
         String accessToken = jwtUtil.generateToken(claims, 10);
         String refreshToken = jwtUtil.generateToken(claims, 60 * 24);
 

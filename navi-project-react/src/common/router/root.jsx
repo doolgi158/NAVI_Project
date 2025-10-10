@@ -5,6 +5,7 @@ import FlightRouter from "./FlightRouter.jsx";
 import AdminRouter from "./AdminRouter.jsx";
 import AccRouter from "./AccRouter.jsx";
 import UserRouter from "./UserRouter.jsx";
+import DeliveryRouter from "./DeliveryRouter.jsx";
 
 const Loding = <div></div>
 const Main = lazy(() => import("../../users/pages/UserMainPage.jsx"))
@@ -37,6 +38,10 @@ const root = createBrowserRouter([
     {
         path: "/users",
         children: [...UserRouter()]
+    },
+        {
+        path: "/deliveries",
+        children: [...DeliveryRouter()]
     },
 ]
 }
