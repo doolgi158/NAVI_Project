@@ -30,7 +30,7 @@ public class ApiFailHandler implements AuthenticationFailureHandler {
         tryLoginRepository.recordLoginAttempt(ip, username, false);
 
         ApiResponse<Object> apiResponse = ApiResponse.error(
-                "로그인 실패",
+            "로그인 실패",
                 401,
                 "id: " + username
         );

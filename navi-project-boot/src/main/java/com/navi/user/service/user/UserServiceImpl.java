@@ -73,18 +73,18 @@ public class UserServiceImpl implements UserService{
         List<User> userList = userRepository.findAll();
 
         return userList.stream().map(user -> UserResponseDTO.builder()
-                        .no(user.getNo())
-                        .name(user.getName())
-                        .phone(user.getPhone())
-                        .birth(user.getBirth())
-                        .email(user.getEmail())
-                        .gender(user.getGender())
-                        .id(user.getId())
-                        .local(user.getLocal())
-                        .userState(user.getUserState())
-                        .signUp(user.getSignUp())
-                        .build())
-                .toList();
+                .no(user.getNo())
+                .name(user.getName())
+                .phone(user.getPhone())
+                .birth(user.getBirth())
+                .email(user.getEmail())
+                .gender(user.getGender())
+                .id(user.getId())
+                .local(user.getLocal())
+                .userState(user.getUserState())
+                .signUp(user.getSignUp())
+                .build())
+            .toList();
     }
 
     @Override
