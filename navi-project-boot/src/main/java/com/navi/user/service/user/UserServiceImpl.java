@@ -58,22 +58,33 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
+    public String findUserId(String name, String email) {
+        String n = name == null ? "" : name.trim();
+        String e = email == null ? "" : email.trim();
+
+        return userRepository
+                .findByNameIgnoreCaseAndEmailIgnoreCase(n, e)
+                .map(User::getId) // 로그인 아이디 필드명에 맞게 수정 (예: getUserId)
+                .orElse(null);
+    }
+
+    @Override
     public List<UserResponseDTO> userResponseList() {
         List<User> userList = userRepository.findAll();
 
         return userList.stream().map(user -> UserResponseDTO.builder()
-                .no(user.getNo())
-                .name(user.getName())
-                .phone(user.getPhone())
-                .birth(user.getBirth())
-                .email(user.getEmail())
-                .gender(user.getGender())
-                .id(user.getId())
-                .local(user.getLocal())
-                .userState(user.getUserState())
-                .signUp(user.getSignUp())
-                .build())
-            .toList();
+                        .no(user.getNo())
+                        .name(user.getName())
+                        .phone(user.getPhone())
+                        .birth(user.getBirth())
+                        .email(user.getEmail())
+                        .gender(user.getGender())
+                        .id(user.getId())
+                        .local(user.getLocal())
+                        .userState(user.getUserState())
+                        .signUp(user.getSignUp())
+                        .build())
+                .toList();
     }
 
     @Override

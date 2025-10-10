@@ -9,6 +9,7 @@ import com.navi.user.security.handler.ApiFailHandler;
 import com.navi.user.security.handler.ApiLogoutSuccessHandler;
 import com.navi.user.security.handler.ApiSuccessHandler;
 import com.navi.user.security.util.JWTUtil;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,17 +43,18 @@ public class SecurityConfig {
         });
 
         // 세션 관리 정책 설정
-        security.sessionManagement(sessionConfig -> sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
+        //security.sessionManagement(sessionConfig -> sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        security.sessionManagement(sessionConfig -> sessionConfig.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED));
         // CSRF 설정
         security.csrf(config -> config.disable());
 
         security.authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/users/login", "/api/users/logout", "/api/auth/oauth/**",
-                                "/api/users/find-id", "/api/users/find-pw", "/api/users/signup", "/api/users/check-id",
-                                "api/users/send-email","api/users/verify-code", "api/users/find-password"
-                        ).permitAll()
-                        .anyRequest().authenticated());
+                .requestMatchers("/api/users/login", "/api/users/logout", "/api/auth/oauth/**",
+                        "/api/users/find-id", "/api/users/find-pw", "/api/users/signup", "/api/users/check-id",
+                        "api/users/send-email","api/users/verify-code", "api/users/find-password", "api/flight",
+                        "api/flight/detail", "/api/seats/**", "/travel/**"
+                ).permitAll()
+                .anyRequest().authenticated());
 
         // 로그인 설정
         security.formLogin(config -> {
@@ -62,6 +64,14 @@ public class SecurityConfig {
             config.successHandler(new ApiSuccessHandler(tryLoginRepository, jwtUtil, userRepository, historyRepository));
             config.failureHandler(new ApiFailHandler(tryLoginRepository));
         });
+
+        security.exceptionHandling(exception ->
+                exception.authenticationEntryPoint((request, response, authException) -> {
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.getWriter().write("{\"error\": \"Unauthorized or token expired\"}");
+                })
+        );
 
 
         // JWT 체크 (토큰 정보가 있으면 로그인을 건너뛴다)

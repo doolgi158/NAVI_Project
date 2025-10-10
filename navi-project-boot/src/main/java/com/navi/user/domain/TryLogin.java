@@ -40,12 +40,15 @@ public class TryLogin extends BaseEntity {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime time;    // 로그인시도 시간
 
-    @Column(name = "try_ip", nullable = false, unique = true)
-    private String ip;      // 요청한 PC의 IP
-
     @Column(name = "try_lockuntil")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime lockuntil; // 로그인 해제 시간
+
+    @Column(name = "try_ip", nullable = false)
+    private String ip;      // IP
+
+    @Column(name = "try_name", nullable = false)
+    private String username;    // 이름
 
     // 실패 시 카운트 증가
     public void increaseCount() {

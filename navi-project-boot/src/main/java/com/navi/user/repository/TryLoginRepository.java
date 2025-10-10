@@ -1,6 +1,7 @@
 package com.navi.user.repository;
 
 import com.navi.user.domain.TryLogin;
+import com.navi.user.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,14 +11,15 @@ import java.util.Optional;
 
 @Repository
 public interface TryLoginRepository extends JpaRepository<TryLogin, Long> {
-    // 특정 IP로 마지막 시도 찾기
-    Optional<TryLogin> findByIp(String ip);
+    // IP + username으로 조회
+    Optional<TryLogin> findByIpAndUsername(String ip, String username);
 
     // 로그인 시도 기록 업데이트
     @Transactional
-    default void recordLoginAttempt(String ip, boolean success) {
-        TryLogin record = findByIp(ip).orElseGet(() -> TryLogin.builder()
+    default void recordLoginAttempt(String ip, String username, boolean success) {
+        TryLogin record = findByIpAndUsername(ip, username).orElseGet(() -> TryLogin.builder()
                 .ip(ip)
+                .username(username)
                 .count(0)
                 .state('F')
                 .time(LocalDateTime.now())
@@ -39,8 +41,8 @@ public interface TryLoginRepository extends JpaRepository<TryLogin, Long> {
 
     // 현재 차단된 IP인지 확인
     @Transactional
-    default boolean isIpLocked(String ip) {
-        Optional<TryLogin> record = findByIp(ip);
+    default boolean isLoginLocked(String ip, String username) {
+        Optional<TryLogin> record = findByIpAndUsername(ip, username);
         if(record.isEmpty()) return false;
 
         TryLogin tryLogin = record.get();
