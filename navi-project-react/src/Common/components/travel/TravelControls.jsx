@@ -10,7 +10,7 @@ const TravelControls = ({
     selectedRegions, 
     pageParam, 
     // FilterPanel props
-    regionTags, selectedCategory, handleCategoryChange, 
+    regionTags, handleCategoryChange, 
     handleRegionSelect, handleSelectAllRegions, handleDeselectAllRegions, 
     isRegionPanelOpen, categories,
     
@@ -19,6 +19,7 @@ const TravelControls = ({
 }) => {
 
     // 필터 적용 여부를 확인하는 로직 (뱃지 표시에 사용)
+    // pageParam.category가 '전체'가 아니거나, selectedRegions에 선택된 지역이 있으면 필터 적용으로 간주
     const isFilterActive = selectedRegions.length > 0 || pageParam.category !== '전체';
 
     // 필터 버튼 클릭 시 실행할 핸들러 (로직 전체 변경)
@@ -73,11 +74,12 @@ const TravelControls = ({
                         <span className="text-gray-400">|</span>
                         {/* 인기순 버튼 (likes 기준) */}
                         <button 
-                            className={`${activeSort === 'likes,desc' ? 'text-blue-600 font-bold' : 'text-gray-500 hover:text-blue-600'} pb-1 transition`}
-                            onClick={() => handleSortChange('likes,desc')}
+                            className={`${activeSort === 'likesCount,desc' ? 'text-blue-600 font-bold' : 'text-gray-500 hover:text-blue-600'} pb-1 transition`}
+                            onClick={() => handleSortChange('likesCount,desc')}
                         >
                             인기순
                         </button>
+                        <span className="text-gray-400">|</span>
                         {/* 조회순 버튼 (views 기준) */}
                         <button 
                             className={`${activeSort === 'views,desc' ? 'text-blue-600 font-bold' : 'text-gray-500 hover:text-blue-600'} pb-1 transition`}
@@ -100,10 +102,13 @@ const TravelControls = ({
                         {/* 뱃지 표시 로직 */}
                         {isFilterActive ? (
                             <span className="ml-1 px-1 bg-red-500 text-white rounded-full text-xs font-bold">
-                                {(
-                                    selectedRegions.length + 
-                                    (pageParam.category !== '전체' ? '' : 0) // 카테고리 필터가 '전체'가 아니면 1을 더합니다.
-                                ).toLocaleString()}
+                                {
+                                    // 지역 필터 개수 + 카테고리 필터 적용 여부 (적용되었으면 1, 아니면 0)
+                                    (
+                                        selectedRegions.length + 
+                                        (pageParam.category !== '전체' ? '' : 0) // 카테고리 필터가 '전체'가 아니면 1을 더합니다.
+                                    ).toLocaleString()
+                                }
                             </span>
                         ) : null}
                     </span>
@@ -119,7 +124,8 @@ const TravelControls = ({
                 handleSelectAllRegions={handleSelectAllRegions} 
                 handleDeselectAllRegions={handleDeselectAllRegions} 
                 categories={categories}
-                activeCategory={pageParam.categoryName}
+                // *수정*: pageParam.category는 카테고리 '값' (예: "SIGHTSEEING")을 담고 있으므로 이를 selectedCategory로 전달
+                selectedCategory={pageParam.category} 
                 handleCategoryChange={handleCategoryChange}
             />
         </div>

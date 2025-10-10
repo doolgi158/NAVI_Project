@@ -29,8 +29,8 @@ public class TravelDetailResponseDTO {
     private String imagePath;
     private String thumbnailPath;
     private Long views;
-    private Long likes;
-    private Long bookmark;
+    private Long likesCount;
+    private Long bookmarkCount;
     private int state;
     private String homepage;
     private String parking;
@@ -44,7 +44,7 @@ public class TravelDetailResponseDTO {
     private LocalDate updatedAt;
     private LocalDate createdAt;
 
-    public static TravelDetailResponseDTO of(Travel travel, boolean isLikedByUser, boolean isBookmarkedByUser) {
+    public static TravelDetailResponseDTO of(Travel travel, Long likesCount, Long bookmarkCount, boolean isLikedByUser, boolean isBookmarkedByUser) {
         LocalDateTime createdAtLDT = null;
         LocalDateTime updatedAtLDT = null;
 
@@ -74,8 +74,8 @@ public class TravelDetailResponseDTO {
                 .imagePath(travel.getImagePath())
                 .thumbnailPath(travel.getThumbnailPath())
                 .views(travel.getViews())
-                .likes(travel.getLikes())
-                .bookmark(travel.getBookmark())
+                .likesCount(likesCount)
+                .bookmarkCount(bookmarkCount)
                 .state(travel.getState())
                 .homepage(travel.getHomepage())
                 .parking(travel.getParking())

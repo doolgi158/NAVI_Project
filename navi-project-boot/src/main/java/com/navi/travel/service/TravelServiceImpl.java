@@ -10,11 +10,14 @@ import com.navi.travel.dto.TravelRequestDTO;
 import com.navi.travel.repository.LikeRepository;
 import com.navi.travel.repository.TravelRepository;
 import com.navi.travel.repository.BookmarkRepository;
+import com.navi.user.domain.User;
+import com.navi.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
 import org.springframework.http.*;
@@ -27,7 +30,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import jakarta.persistence.EntityManager;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -42,8 +45,8 @@ public class TravelServiceImpl implements TravelService {
     private final LikeRepository likeRepository;
     private final BookmarkRepository bookmarkRepository;
     private final EntityManager em;
+    private final UserRepository userRepository;
 
-    // API 동기화 목표 건수 (클래스 레벨 상수로 선언하여 코드 가독성 향상)
     private static final int TARGET_SYNC_COUNT = 5796;
 
 
@@ -52,13 +55,15 @@ public class TravelServiceImpl implements TravelService {
             RestTemplate restTemplate,
             LikeRepository likeRepository,
             BookmarkRepository bookmarkRepository,
-            EntityManager em
+            EntityManager em,
+            UserRepository userRepository
     ){
         this.travelRepository = travelRepository;
         this.restTemplate = restTemplate;
         this.likeRepository = likeRepository;
         this.bookmarkRepository = bookmarkRepository;
         this.em = em;
+        this.userRepository = userRepository;
     }
 
     @Value("${url}")
@@ -71,120 +76,140 @@ public class TravelServiceImpl implements TravelService {
         saveApiData();
     }
 
-    // 조회수 로직
+    // 조회수 증가 로직
     @Transactional
     public void incrementViews(Long travelId) {
-        Travel travel = travelRepository.findById(travelId)
-                .orElseThrow(() -> new NoSuchElementException("여행지 ID를 찾을 수 없습니다: " + travelId));
-
-        // ✅ Dirty Checking을 활용하여 별도의 save() 호출 없이도 트랜잭션 종료 시 반영됨
-        travel.setViews(travel.getViews() + 1);
-        // travelRepository.save(travel); // Dirty Checking으로 생략 가능하나, 필요시 주석 해제 가능
+        travelRepository.incrementViews(travelId);
     }
 
+    // toggleLike 메서드
     @Override
     @Transactional
-    public boolean toggleLike(Long travelId, String id) { // ✅ id로 변수명 통일
-        // 1. Travel 엔티티 조회 (카운트 업데이트 및 예외 처리를 위해 필요)
+    public boolean toggleLike(Long travelId, String id) {
+        // [요구사항 1] 비로그인 사용자 처리
+        if (id == null || id.trim().isEmpty()) {
+            return false;
+        }
+
+        // 1. 여행지 엔티티 조회
         Travel travel = travelRepository.findById(travelId)
                 .orElseThrow(() -> new EntityNotFoundException("여행지를 찾을 수 없습니다. (Travel ID: " + travelId + ")"));
 
-        // 2. Like 기록 조회 (ID 기반)
-        Optional<Like> existingLike = likeRepository.findByTravelIdAndId(travelId, id);
+        // 2. User 엔티티 조회
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("사용자를 찾을 수 없습니다. (User ID: " + id + ")"));
 
+
+        // 3. 기존 좋아요 기록 조회
+        Optional<Like> existingLike = likeRepository.findByTravelIdAndId(travelId, id);
         boolean likedBefore = existingLike.isPresent();
 
-
         if (likedBefore) {
-            // 3. 이미 눌러있으면 → 삭제 (ID 기반 리포지토리 메서드 사용)
+            // [요구사항 3] 기존 기록이 있으면 삭제 (좋아요 취소)
             likeRepository.deleteByTravelIdAndId(travelId, id);
-            travel.decrementLikes(); // ✅ 엔티티의 decrement/increment 메서드 활용
         } else {
-            // 4. 없으면 → 추가 (ID 기반 생성자 사용)
-            Like newLike = new Like(travelId, id);
+            // [요구사항 2] 기존 기록이 없으면 추가 (좋아요)
+            Like newLike = new Like(travel, user);
             likeRepository.save(newLike);
-            travel.incrementLikes(); // ✅ 엔티티의 decrement/increment 메서드 활용
         }
 
-        // 5. 좋아요 카운트 업데이트 (Travel ID 기반)
-        // JPA Entity 메서드를 사용했으므로 DB 쿼리 기반 카운트를 제거하여 성능 개선 및 쿼리 감소
-        // long likeCount = likeRepository.countByTravelId(travelId);
-        // travel.setLikes(likeCount);
-        // travelRepository.save(travel); // Dirty Checking으로 생략 가능
-
-        // ✅ 현재 상태 반환 (true = 새로 추가됨, false = 취소됨)
         return !likedBefore;
     }
 
-    /**
-     * ✅ 북마크 토글 (ID 기반 로직으로 수정)
-     */
+    // toggleBookmark 메서드
     @Override
     @Transactional
-    public boolean toggleBookmark(Long travelId, String id) { // ✅ id로 변수명 통일
-        // 1. Travel 엔티티 조회 (카운트 업데이트 및 예외 처리를 위해 필요)
+    public boolean toggleBookmark(Long travelId, String id) {
+        // [요구사항 1] 비로그인 사용자 처리
+        if (id == null || id.trim().isEmpty()) {
+            return false;
+        }
+
+        // 1. 여행지 엔티티 조회
         Travel travel = travelRepository.findById(travelId)
                 .orElseThrow(() -> new EntityNotFoundException("여행지를 찾을 수 없습니다. (Travel ID: " + travelId + ")"));
 
-        // 2. Bookmark 기록 조회 (ID 기반)
-        Optional<Bookmark> existingBookmark = bookmarkRepository.findByTravelIdAndId(travelId, id);
+        // 2. User 엔티티 조회
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("사용자를 찾을 수 없습니다. (User ID: " + id + ")"));
 
+
+        // 3. 기존 북마크 기록 조회
+        Optional<Bookmark> existingBookmark = bookmarkRepository.findByTravelIdAndId(travelId, id);
         boolean bookmarkedBefore = existingBookmark.isPresent();
 
         if (bookmarkedBefore) {
-            // 3. 이미 눌러있으면 → 삭제 (ID 기반 리포지토리 메서드 사용)
+            // [요구사항 3] 기존 기록이 있으면 삭제 (북마크 취소)
             bookmarkRepository.deleteByTravelIdAndId(travelId, id);
-            travel.decrementBookmark(); // ✅ Travel 엔티티에 북마크 카운트 감소 메서드가 있다고 가정하고 호출
         } else {
-            // 4. 없으면 → 추가 (ID 기반 생성자 사용)
-            Bookmark newBookmark = new Bookmark(travelId, id);
+            // [요구사항 2] 기존 기록이 없으면 추가 (북마크)
+            Bookmark newBookmark = new Bookmark(travel, user);
             bookmarkRepository.save(newBookmark);
-            travel.incrementBookmark(); // ✅ Travel 엔티티에 북마크 카운트 증가 메서드가 있다고 가정하고 호출
         }
 
-        // 5. 북마크 카운트 업데이트
-        // JPA Entity 메서드를 사용했으므로 DB 쿼리 기반 카운트를 제거하여 성능 개선 및 쿼리 감소
-        // long bookmarkCount = bookmarkRepository.countByTravelId(travelId);
-        // travel.setBookmark(bookmarkCount);
-        // travelRepository.save(travel); // Dirty Checking으로 생략 가능
-
-        // ✅ 현재 상태 반환 (true = 새로 추가됨, false = 취소됨)
         return !bookmarkedBefore;
     }
 
-
     // -------------------------------------------------------------
-    // getTravelList 메서드: Specification 초기화 로직 수정 (where(null) -> not(null))
+    // getTravelList 메서드 (정렬 및 카운트 로직 추가)
     // -------------------------------------------------------------
+    /**
+     * Travel 목록을 조회하고 필터링/정렬 기준에 따라 결과를 반환합니다.
+     * Specification.where(null) 대신 초기 null 체크 후 Specification을 구성하는 방식을 사용합니다.
+     */
     @Override
     @Transactional(readOnly = true)
     public Page<TravelListResponseDTO> getTravelList(Pageable pageable, List<String> region2Names, String category, String search, boolean publicOnly) {
-        // 1. 필터 및 검색 조건 유무 확인
+
+        Sort sort = pageable.getSort();
+        // 'likesCount' 정렬 옵션이 있는지 확인하고, 있으면 제거한 나머지 정렬 옵션 리스트를 만듭니다.
+        List<Sort.Order> remainingOrders = new ArrayList<>();
+        boolean sortByLikes = false;
+
+        for (Sort.Order order : sort) {
+            if (order.getProperty().equals("likesCount")) {
+                sortByLikes = true;
+                // likesCount는 커스텀 쿼리에서 처리할 것이므로, remainingOrders 리스트에는 추가하지 않습니다.
+            } else {
+                remainingOrders.add(order);
+            }
+        }
+
+        Page<Travel> travelPage = null; // 초기화하지 않고, 필요 시점에만 할당
+        Specification<Travel> spec = null; // Specification.where(null) 대신 null로 초기화
+
+        // 검색/필터링 조건이 없을 때, 정렬에 따라 최적화된 Repository 메서드를 사용합니다.
         boolean noRegionFilter = (region2Names == null || region2Names.isEmpty());
         boolean noCategoryFilter = !StringUtils.hasText(category) || "전체".equalsIgnoreCase(category.trim());
         boolean noSearchFilter = !StringUtils.hasText(search);
 
-        // 2. 조건이 아예 없으면 전체 목록 반환 (500 오류 방지) - 로직 그대로 유지
-        if (noRegionFilter && noCategoryFilter && noSearchFilter && !publicOnly) {
-            // publicOnly가 false(관리자)이고 검색 조건이 없으면 전체 반환
-            return travelRepository.findAll(pageable).map(TravelListResponseDTO::of);
+        // ------------------------------------------------
+        // 1. 좋아요 순 정렬 (likesCount) 처리
+        // ------------------------------------------------
+        if (sortByLikes && noRegionFilter && noCategoryFilter && noSearchFilter && !publicOnly) {
+            // 필터링/검색 조건 없이 오직 'likesCount' 정렬만 요청되었을 경우, 커스텀 쿼리 사용
+            travelPage = travelRepository.findAllOrderByLikesCount(pageable);
+        } else if (sortByLikes) {
+            // 필터링/검색 조건과 함께 'likesCount' 정렬이 요청되었을 경우,
+            // JPA Specification은 좋아요 수 정렬을 지원하기 어렵기 때문에 일반 정렬로 대체합니다.
+            log.warn("'likesCount' 정렬은 필터링/검색 조건과 함께 사용할 경우 성능 문제가 있거나 지원되지 않을 수 있습니다. 일반 정렬로 대체합니다.");
         }
 
-        // 3. Specification 초기화 (시작점: 항상 참)
-        Specification<Travel> spec = Specification.not(null);
+        // ------------------------------------------------
+        // 2. 일반 정렬 및 필터링/검색 처리
+        // ------------------------------------------------
 
-        // ⭐️ 3.1. 공개(state=1) 필터링 적용 (publicOnly가 true일 때만)
+        // Specification 구성 헬퍼 메서드는 아래에서 클래스 레벨로 이동했습니다.
+
+        // publicOnly 필터 적용
         if (publicOnly) {
             Specification<Travel> publicSpec = (root, query, criteriaBuilder) ->
-                    criteriaBuilder.equal(root.get("state"), 1); // state=1 (공개)
-            spec = spec.and(publicSpec);
+                    criteriaBuilder.equal(root.get("state"), 1);
+            spec = combineSpec(spec, publicSpec);
         }
 
-
-        // 4. 지역 필터링 (region2Name) 적용
+        // Region 필터 적용
         if (!noRegionFilter) {
-
-            // 4-1. 입력된 지역 이름 리스트를 OR Specification 리스트로 변환
             List<Specification<Travel>> regionConditions = region2Names.stream()
                     .filter(StringUtils::hasText)
                     .map(regionName -> (Specification<Travel>) (root, query, criteriaBuilder) ->
@@ -195,20 +220,19 @@ public class TravelServiceImpl implements TravelService {
                     )
                     .collect(Collectors.toList());
 
-            // 4-2. 모든 지역 조건을 OR로 결합하여 spec에 AND로 추가
             if (!regionConditions.isEmpty()) {
+                // Specification.where(null)을 사용하지 않고 reduce의 초기값으로 null을 사용하며, or 조건으로 연결합니다.
                 Specification<Travel> regionSpec = regionConditions.stream()
-                        .reduce(Specification::or)
-                        // ✅ Specification.not(null) 사용
-                        .orElse(Specification.not(null));
+                        .reduce(null, (current, next) -> current == null ? next : current.or(next));
 
-                spec = spec.and(regionSpec);
+                if (regionSpec != null) {
+                    spec = combineSpec(spec, regionSpec);
+                }
             }
         }
 
-        // 5. 카테고리 필터링 (categoryName) 적용
+        // Category 필터 적용
         if (!noCategoryFilter) {
-
             final String trimmedCategory = category.trim();
             final String lowerWildcardCategory = "%" + trimmedCategory.toLowerCase() + "%";
 
@@ -218,10 +242,10 @@ public class TravelServiceImpl implements TravelService {
                             lowerWildcardCategory
                     );
 
-            spec = spec.and(categorySpec);
+            spec = combineSpec(spec, categorySpec);
         }
 
-        // 6. 제목(title) 부분 일치 검색 필터링 (Search) 적용
+        // Search 필터 적용
         if (!noSearchFilter) {
             final String trimmedSearch = search.trim();
             final String lowerWildcardSearch = "%" + trimmedSearch.toLowerCase() + "%";
@@ -232,53 +256,105 @@ public class TravelServiceImpl implements TravelService {
                             lowerWildcardSearch
                     );
 
-            spec = spec.and(searchSpec);
+            spec = combineSpec(spec, searchSpec);
         }
 
-        // 7. Specification이 적용된 findAll 호출
-        Page<Travel> travelPage = travelRepository.findAll(spec, pageable);
+        // 새로운 Pageable 객체 생성 (likesCount 정렬 제거 후 남은 정렬 옵션 적용)
+        Sort newSort = Sort.by(remainingOrders);
+        Pageable newPageable = org.springframework.data.domain.PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                // 정렬 옵션이 없으면 기본값으로 travelId,desc 적용 (기본 키를 기준으로 최신순 정렬)
+                newSort.isUnsorted() ? Sort.by("travelId").descending() : newSort
+        );
 
-        // Travel 엔티티 Page를 DTO Page로 변환
-        return travelPage.map(TravelListResponseDTO::of);
+        // travelPage가 null인 경우 (즉, 좋아요 정렬 커스텀 쿼리를 타지 않은 경우)에만 findAll을 호출합니다.
+        if (travelPage == null) {
+            if (spec == null) {
+                // 필터링 조건이 전혀 없는 경우
+                travelPage = travelRepository.findAll(newPageable);
+            } else {
+                // 필터링 조건이 있는 경우 (null이 아닌 spec 사용)
+                travelPage = travelRepository.findAll(spec, newPageable);
+            }
+        }
+
+        // 최종 DTO로 변환 및 좋아요/북마크 카운트 첨부
+        Page<TravelListResponseDTO> pageDto = travelPage.map(TravelListResponseDTO::of);
+        return attachLikesAndBookmarks(pageDto);
+    }
+
+    /**
+     * Specification 구성 헬퍼 메서드
+     * 두 Specification을 'and' 조건으로 결합합니다.
+     */
+    private Specification<Travel> combineSpec(Specification<Travel> currentSpec, Specification<Travel> newSpec) {
+        if (currentSpec == null) {
+            return newSpec;
+        }
+        return currentSpec.and(newSpec);
+    }
+
+    /**
+     * TravelListResponseDTO 리스트에 Likes와 Bookmark 카운트를 Repository에서 조회하여 추가하는 헬퍼 메서드
+     */
+    private Page<TravelListResponseDTO> attachLikesAndBookmarks(Page<TravelListResponseDTO> pageDto) {
+        if (pageDto.isEmpty()) {
+            return pageDto;
+        }
+
+        pageDto.getContent().forEach(dto -> {
+            Long travelId = dto.getTravelId();
+
+            // DTO 필드명 변경에 맞춰 setLikesCount()와 setBookmarkCount() 사용
+            dto.setLikesCount(likeRepository.countByTravelId(travelId));
+            dto.setBookmarkCount(bookmarkRepository.countByTravelId(travelId));
+        });
+
+        return pageDto;
     }
     // -------------------------------------------------------------
-    //  getTravelList 메서드 수정 끝
+    // getTravelList 메서드 수정 끝
     // -------------------------------------------------------------
 
     @Override
-    @Transactional // ✅ 조회수 증가와 상세 정보 조회가 하나의 트랜잭션으로 처리되어야 함
-    public TravelDetailResponseDTO getTravelDetail(Long travelId, String id) { // ✅ id 매개변수 유지
-        // 1. Travel 엔티티 조회
+    @Transactional(readOnly = true)
+    public TravelDetailResponseDTO getTravelDetail(Long travelId, String id) {
         Travel travel = travelRepository.findById(travelId)
                 .orElseThrow(() -> new NoSuchElementException("Travel not found with ID: " + travelId));
 
-        // 2. 조회수 증가 로직 (Dirty Checking에 의해 트랜잭션 종료 시 반영됨)
-        travel.incrementViews(); // ✅ 엔티티의 incrementViews() 메서드 활용 (더 명확함)
+        travelRepository.incrementViews(travelId);
+
+        em.refresh(travel);
+
+        // 실시간 좋아요/북마크 카운트 조회
+        Long likesCount = likeRepository.countByTravelId(travelId);
+        Long bookmarkCount = bookmarkRepository.countByTravelId(travelId);
+
 
         boolean isLikedByUser = false;
         boolean isBookmarkedByUser = false;
 
-        if (id != null) {
-            // 3. 좋아요/북마크 여부 확인 (ID 기반 리포지토리 메서드 사용)
+        if (id != null && !id.trim().isEmpty()) {
             isLikedByUser = likeRepository.existsByTravelIdAndId(travelId, id);
             isBookmarkedByUser = bookmarkRepository.existsByTravelIdAndId(travelId, id);
         }
 
-        // 4. Travel 엔티티(업데이트된 조회수 포함)와 사용자 상태 정보를 함께 DTO로 변환하여 반환
-        return TravelDetailResponseDTO.of(travel, isLikedByUser, isBookmarkedByUser);
+        // TravelDetailResponseDTO.of()는 현재 5개의 인수를 받도록 구성되어 있습니다.
+        return TravelDetailResponseDTO.of(travel, likesCount, bookmarkCount, isLikedByUser, isBookmarkedByUser);
     }
 
+
     @Override
-    @Transactional // ✅ API 동기화 전체를 하나의 트랜잭션으로 처리
+    @Transactional
     public int saveApiData() {
         int totalSavedCount = 0;
         int currentPage = 1;
-        final int pageSize = 100; // 페이지당 100개
+        final int pageSize = 100;
         boolean hasMoreData = true;
 
         log.info("--- 제주 API 데이터 전체 동기화 시작 (목표 건수: {}, 페이지당 {}개) ---", TARGET_SYNC_COUNT, pageSize);
 
-        // ✅ 목표 건수(5796)에 도달할 때까지 반복
         while (totalSavedCount < TARGET_SYNC_COUNT && hasMoreData) {
             TravelApiResponseBody responseBody = fetchTravelDataFromApi(currentPage, pageSize);
 
@@ -296,23 +372,17 @@ public class TravelServiceImpl implements TravelService {
                 continue;
             }
 
-            int pageSavedCount = 0; // 이번 페이지에서 실제 저장(추가/업데이트)된 건수
+            int pageSavedCount = 0;
 
             for (Travel newTravel : travelList) {
-                // ✅ 목표 건수 초과 시, 루프 종료 (while 조건과 함께 이중 안전장치)
                 if (totalSavedCount >= TARGET_SYNC_COUNT) {
                     break;
                 }
 
-                //데이터 1건당 SELECT 쿼리 1회와 INSERT 또는 UPDATE 쿼리 1회를 발생
                 Optional<Travel> existing = travelRepository.findByContentId(newTravel.getContentId());
                 if (existing.isPresent()) {
-                    // 엔티티가 이미 존재하는 경우 업데이트
-                    // ✅ 기존 엔티티의 카운터 필드(views, likes, bookmark)는 유지하고 API 필드만 업데이트
                     existing.get().updateFromApi(newTravel);
-                    // save 호출 생략 가능 (Dirty Checking)
                 } else {
-                    // 새로운 엔티티인 경우 저장 (DB SEQUENCE가 아닌 DTO에서 생성된 ID가 사용됨)
                     travelRepository.save(newTravel);
                 }
 
@@ -322,7 +392,6 @@ public class TravelServiceImpl implements TravelService {
 
             log.info("페이지 {} 처리 완료 (이번 페이지 저장: {}, 누적: {})", currentPage, pageSavedCount, totalSavedCount);
 
-            // ✅ 페이지당 처리된 건수가 pageSize보다 적으면 마지막 페이지로 간주 (종료 조건)
             if (responseBody.getTravelItems().size() < pageSize || totalSavedCount >= TARGET_SYNC_COUNT) {
                 hasMoreData = false;
             }
@@ -333,7 +402,6 @@ public class TravelServiceImpl implements TravelService {
         return totalSavedCount;
     }
 
-    //지정된 페이지의 여행지 데이터를 API에서 가져옵니다.
     private TravelApiResponseBody fetchTravelDataFromApi(int page, int pageSize) {
         URI uri = UriComponentsBuilder.fromUriString(apiUrl)
                 .queryParam("apiKey", apiKey)
@@ -377,57 +445,26 @@ public class TravelServiceImpl implements TravelService {
         }
     }
 
-
-    //여행지 수정, 등록
     @Transactional
     public TravelListResponseDTO saveTravel(TravelRequestDTO dto) {
         Travel travel;
 
-        // travelId가 존재하면 수정
         if (dto.getTravelId() != null) {
-            // 1. 수정 (Update)
             travel = travelRepository.findById(dto.getTravelId())
                     .orElseThrow(() -> new NoSuchElementException("Travel not found with ID: " + dto.getTravelId()));
 
-            // 2. 엔티티 업데이트 (Dirty Checking)
             travel.updateFromRequest(dto);
 
         } else {
-            // 3. 등록 (Create)
-
-            // ✅ travelId 시퀀스 생성 로직을 등록(Create) 조건문 안으로 이동하여 일관성 확보
-            // --- TRAVEL_SEQ 자동 생성 로직 시작 (travelId 설정) ---
-            Long nextTravelId;
-            try {
-                // **[DB 쿼리]** TRAVEL_SEQ 시퀀스의 다음 값을 가져옵니다. (Oracle 기준)
-                String travelSequenceQuery = "SELECT TRAVEL_SEQ.NEXTVAL FROM DUAL";
-                nextTravelId = ((Number) em.createNativeQuery(travelSequenceQuery).getSingleResult()).longValue();
-
-                // 3. DTO에 travelId 설정 (이후 dto.toEntity() 시 Travel 엔티티의 ID로 사용됨)
-                // dto.setTravelId(nextTravelId); // ✅ toEntity()에서 사용되지 않으므로 제거 (Travel 엔티티에 @GeneratedValue가 있으므로)
-                log.info("새로운 travelId 시퀀스 값 가져오기 (TRAVEL_SEQ): {}", nextTravelId);
-            } catch (Exception e) {
-                log.error("travelId 시퀀스 생성 중 오류 발생. DB 시퀀스(TRAVEL_SEQ)와 쿼리를 확인해주세요.", e);
-                throw new RuntimeException("여행지 travelId 생성 실패.", e);
-            }
-            // --- TRAVEL_SEQ 자동 생성 로직 끝 ---
-
-
-            // --- CNTSA_ 시퀀스 자동 생성 로직 시작 (contentId 설정) ---
-            // contentId가 null 또는 비어있을 경우에만 시퀀스 값 생성
             if (dto.getContentId() == null || dto.getContentId().trim().isEmpty()) {
 
-                // 1. DB 시퀀스에서 다음 값 가져오기
                 Long nextVal;
                 try {
-                    // **[DB 쿼리]** CNTSA_SEQ 시퀀스의 다음 값을 가져옵니다.
                     String sequenceQuery = "SELECT CNTSA_SEQ.NEXTVAL FROM DUAL";
                     nextVal = ((Number) em.createNativeQuery(sequenceQuery).getSingleResult()).longValue();
 
-                    // 2. CNTSA_000000000000001 형식으로 포맷팅 (총 15자리 일련번호)
                     String formattedId = String.format("CNTSA_%015d", nextVal);
 
-                    // 3. DTO에 contentId 설정
                     dto.setContentId(formattedId);
                     log.info("새로운 contentId 자동 생성: {}", formattedId);
                 } catch (Exception e) {
@@ -435,30 +472,22 @@ public class TravelServiceImpl implements TravelService {
                     throw new RuntimeException("여행지 contentId 생성 실패.", e);
                 }
             }
-            // --- CNTSA_ 시퀀스 자동 생성 로직 끝 ---
 
             travel = dto.toEntity();
         }
 
-        // 4. 저장 (JPA save는 C/U를 모두 처리)
         Travel savedTravel = travelRepository.save(travel);
 
-        // 5. 응답 DTO로 변환하여 반환
+        // 등록 시에는 카운터가 0이므로, 별도의 카운트 조회 없이 DTO로 변환하여 반환
         return TravelListResponseDTO.of(savedTravel);
     }
 
-    //여행지 삭제
     @Transactional
     public void deleteTravel(Long travelId) {
-        // 삭제 대상이 존재하는지 확인
         if (!travelRepository.existsById(travelId)) {
             throw new NoSuchElementException("Travel not found with ID: " + travelId);
         }
 
         travelRepository.deleteById(travelId);
     }
-
-    // ✅ 좋아요 카운트 감소를 위해 Travel 엔티티의 메서드 호출을 가정하고 추가
-    // Travel 엔티티에 이 메서드가 정의되어 있어야 합니다.
-    // public void decrementBookmark() { /*... */ }
 }

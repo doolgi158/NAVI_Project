@@ -37,7 +37,7 @@ const TravelCard = ({ item, onClick, isSelected, onMouseEnter, onMouseLeave }) =
 
         <div className="flex items-center space-x-1">
           <i className="bi bi-suit-heart-fill text-red-500"></i>
-          <span>{item.likes.toLocaleString()}</span>
+          <span>{item.likesCount.toLocaleString()}</span>
         </div>
 
 
