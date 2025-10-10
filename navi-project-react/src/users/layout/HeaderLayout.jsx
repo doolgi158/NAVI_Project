@@ -5,7 +5,7 @@ import naviLogo from "../images/navi_logo.png";
 import { useModal } from "../../common/components/Login/ModalProvider";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "../../common/slice/loginSlice.js";
+import { setlogout } from "../../common/slice/loginSlice.js";
 
 const { Header } = Layout;
 
@@ -20,7 +20,7 @@ const HeaderLayout = () => {
     { key: "2", label: <Link to="/accommodations">숙소</Link> },
     { key: "3", label: <Link to="/flight">교통</Link> },
     { key: "4", label: <Link to="/plans">여행계획</Link> },
-    { key: "5", label: <Link to="/delivery">짐 배송</Link> },
+    { key: "5", label: <Link to="/deliveries">짐 배송</Link> },
     { key: "6", label: <Link to="/board">게시판</Link> },
   ];
 
@@ -71,11 +71,11 @@ const HeaderLayout = () => {
         className="hidden md:flex"
       />
       {
-        loginstate.username ?
+        loginstate.token ?
           <Space>
             <Button
               type="default"
-              onClick={() => dispatch(logout())}
+              onClick={() => dispatch(setlogout())}
               className="text-red-500 hover:text-red-700"
             >
               로그아웃
@@ -92,10 +92,11 @@ const HeaderLayout = () => {
             </Button>
             <Button
               type="primary"
-              href="/signup"
               className="bg-sb-teal hover:bg-sb-gold"
             >
-              회원가입
+              <Link to="/users/signup">
+                회원가입
+              </Link>
             </Button>
           </Space>
       }
@@ -112,13 +113,13 @@ const HeaderLayout = () => {
       >
         <Menu mode="vertical" items={items} style={{ color: "#2F3E46" }} />
         {
-          loginstate.username ?
+          loginstate.token ?
             <div className="mt-4 flex flex-col gap-2">
               <Button
                 danger
                 block
                 onClick={() => {
-                dispatch(logout());   // Redux 상태 초기화
+                dispatch(setlogout());   // Redux 상태 초기화
                 setOpen(false);       // Drawer 닫기
                 }}
               >
