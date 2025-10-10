@@ -92,10 +92,11 @@ const HeaderLayout = () => {
             </Button>
             <Button
               type="primary"
-              href="users/signup"
               className="bg-sb-teal hover:bg-sb-gold"
             >
-              회원가입
+              <Link to="/users/signup">
+                회원가입
+              </Link>
             </Button>
           </Space>
       }
