@@ -8,6 +8,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.math.BigDecimal;
+import java.util.Optional;
+
 @SpringBootTest
 @Slf4j
 public class AccRepositoryTests {
@@ -16,13 +19,20 @@ public class AccRepositoryTests {
 
     @Test
     public void accInsertTest() {
-        // 필수적으로 명시해줘야 하는 항목 : title, township, address
-        // 나머지는 기본값 보정해서 상관없음 (Acc Entity 참고)
         Acc acc = Acc.builder()
                 .title("제주 선샤인 호텔")
+                .category("호텔")
                 .tel("064-123-4567")
-                .townshipId(1) // 임시값
+                .townshipId(1) // 임시 세팅
                 .address("제주특별자치도 제주시 애월읍 123-45")
+                .mapx(new BigDecimal("126.5432100"))
+                .mapy(new BigDecimal("33.1234567"))
+                .overview("해변과 가까운 프리미엄 호텔")
+                .checkInTime("15:00")
+                .checkOutTime("11:00")
+                .hasCooking(false)
+                .hasParking(true)
+                .isActive(true)
                 .build();
 
         accRepository.save(acc);
@@ -31,35 +41,21 @@ public class AccRepositoryTests {
 
     @Test
     public void accUpdateTest() {
-        accRepository.findById(1L).ifPresent(acc -> {
+        Optional<Acc> accOptional = accRepository.findById(1L);
+        if(accOptional.isPresent()) {
+            Acc acc = accOptional.get();
             AccRequestDTO dto = AccRequestDTO.builder()
                     .title("업데이트 후 호텔")
-                    .category("호텔")
-                    .hasParking(true)
                     .build();
             acc.changeFromRequestDTO(dto);
             accRepository.save(acc);
             log.info("NAVI_ACCOMMODATION 테이블 데이터 수정 완료");
-        });
+        }
     }
 
     @Test
     public void accDeleteTest() {
-        accRepository.deleteById(2L);
+        accRepository.deleteById(1L);
         log.info("NAVI_ACCOMMODATION 테이블 데이터 삭제 완료");
-    }
-
-    @Autowired
-    private AccService accService;
-
-    @Test
-    public void loadAccData() throws Exception {
-        accService.loadFromJsonFile();
-        log.info("API 데이터 DB 초기 적재 완료");
-    }
-    @Test
-    public void updateAccData() throws Exception {
-        accService.updateFromJsonFile();
-        log.info("API 데이터 DB 초기 업데이트 완료");
     }
 }
