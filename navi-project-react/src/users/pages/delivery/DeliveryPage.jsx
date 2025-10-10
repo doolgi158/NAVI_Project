@@ -26,7 +26,7 @@ const DeliveryPage = () => {
   const [estimatedFare, setEstimatedFare] = useState(null);
   const MAP_CONTAINER_ID = "delivery-map";
   const mapRef = useRef(null);
-  const markersRef = useRef({ from: null, to: null });
+  const markersRef = useRef({ fromAddress: null, toAddress: null });
   const lineRef = useRef(null);
 
   const handleChange = (key, value) => {
@@ -45,10 +45,52 @@ const DeliveryPage = () => {
     }
   }, [form.bagSize, form.bagCount]);
 
+  /** ✅ 지도 SDK 완전 로드 후 초기화 */
+  useEffect(() => {
+    const loadKakaoMap = () => {
+      if (window.kakao && window.kakao.maps) {
+        // SDK가 이미 로드되어 있다면
+        window.kakao.maps.load(() => {
+          initMap();
+        });
+      } else {
+        // SDK 동적 로드
+        const script = document.createElement("script");
+        script.src =
+          "//dapi.kakao.com/v2/maps/sdk.js?appkey=YOUR_APP_KEY&autoload=false&libraries=services";
+        script.async = true;
+        script.onload = () => {
+          window.kakao.maps.load(() => {
+            initMap();
+          });
+        };
+        document.head.appendChild(script);
+      }
+    };
+
+    const initMap = () => {
+      const container = document.getElementById(MAP_CONTAINER_ID);
+      if (!container) return;
+
+      const kakao = window.kakao;
+      mapRef.current = new kakao.maps.Map(container, {
+        center: new kakao.maps.LatLng(33.5055, 126.495),
+        level: 6,
+      });
+    };
+
+    loadKakaoMap();
+  }, []);
+
   /** ✅ 카카오 주소 검색 */
   const handleSearchAddress = (targetKey) => {
+    // 주소 검색 SDK가 안 불러와졌다면 로드
     if (!window.daum || !window.daum.Postcode) {
-      message.error("카카오 주소 검색 SDK가 아직 로드되지 않았어요.");
+      const script = document.createElement("script");
+      script.src = "//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+      script.async = true;
+      script.onload = () => handleSearchAddress(targetKey);
+      document.head.appendChild(script);
       return;
     }
 
@@ -58,14 +100,19 @@ const DeliveryPage = () => {
         setForm((prev) => ({ ...prev, [targetKey]: addr }));
 
         const { kakao } = window;
+        if (!kakao || !kakao.maps || !kakao.maps.services) {
+          message.error("지도 API가 아직 준비되지 않았습니다.");
+          return;
+        }
+
         const geocoder = new kakao.maps.services.Geocoder();
 
         geocoder.addressSearch(addr, (result, status) => {
           if (status === kakao.maps.services.Status.OK) {
             const lat = parseFloat(result[0].y);
             const lng = parseFloat(result[0].x);
-
             const position = new kakao.maps.LatLng(lat, lng);
+
             if (!mapRef.current) {
               const container = document.getElementById(MAP_CONTAINER_ID);
               mapRef.current = new kakao.maps.Map(container, {
@@ -142,17 +189,6 @@ const DeliveryPage = () => {
     console.log("📦 예약 요청 데이터:", payload);
     message.success("예약 요청이 완료되었습니다!");
   };
-
-  // ✅ 지도 초기 로드
-  useEffect(() => {
-    if (window.kakao?.maps) {
-      const container = document.getElementById(MAP_CONTAINER_ID);
-      mapRef.current = new window.kakao.maps.Map(container, {
-        center: new window.kakao.maps.LatLng(33.5055, 126.495),
-        level: 6,
-      });
-    }
-  }, []);
 
   return (
     <MainLayout>
@@ -276,7 +312,7 @@ const DeliveryPage = () => {
         <div className="bg-gray-100 rounded-2xl overflow-hidden">
           <div
             id={MAP_CONTAINER_ID}
-            style={{ width: "100%", height: "550px", borderRadius: "12px" }}
+            style={{ width: "100%", height: "650px", borderRadius: "12px" }}
           ></div>
         </div>
       </div>
