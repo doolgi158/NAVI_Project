@@ -66,6 +66,7 @@ const loginSlice = createSlice({
       state.username = "";
       state.token = "";
       state.ip = "";
+      delete axios.defaults.headers.common["Authorization"];
     },
   },
 });

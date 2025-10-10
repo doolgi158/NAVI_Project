@@ -8,7 +8,7 @@ import UserRouter from "./UserRouter.jsx";
 import DeliveryRouter from "./DeliveryRouter.jsx"
 
 const Loding = <div></div>
-const Main = lazy(() => import("../../users/pages/UserMainPage.jsx"))
+const UserMain = lazy(() => import("../../users/pages/UserMainPage.jsx"))
 const Appshell = lazy(() => import("../../Appshell.jsx"))
 
 const root = createBrowserRouter([
@@ -43,9 +43,7 @@ const root = createBrowserRouter([
         path: "/",
         element: (
             <Suspense fallback={Loding}>
-                <ModalProvider>
                     <UserMain />
-                </ModalProvider>
             </Suspense>
         )
     },
