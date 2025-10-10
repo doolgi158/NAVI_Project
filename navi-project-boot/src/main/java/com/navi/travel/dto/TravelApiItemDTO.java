@@ -48,14 +48,21 @@ public class TravelApiItemDTO {
     @JsonProperty("phoneno")
     private String phoneNo;
 
-    @JsonProperty("region1cd")
-    private NestedCodeDTO region1cd;
-
-    @JsonProperty("region2cd")
-    private NestedCodeDTO region2cd;
-
     @JsonProperty("repPhoto")
     private PhotoInfoDTO repPhoto;
+
+    @JsonProperty("homepage")
+    private String homepage;
+
+    @JsonProperty("parking")
+    private String parking;
+
+    @JsonProperty("fee")
+    private String fee;
+
+    // API 필드명이 'hours'일 경우
+    @JsonProperty("hours")
+    private String hours;
 
     /**
      * API DTO → Travel 엔티티 변환
@@ -71,21 +78,10 @@ public class TravelApiItemDTO {
                 .tag(this.tag)
                 .latitude(this.latitude)  // Double 변환 제거
                 .longitude(this.longitude)
-
-                // contentscd 매핑
                 .contentsCd(this.contentscd != null ? this.contentscd.getValue() : null)
                 .categoryName(this.contentscd != null ? this.contentscd.getLabel() : null)
-                .categoryRefId(this.contentscd != null ? this.contentscd.getRefId() : null)
-
-                // region1cd 매핑
-                .region1Cd(this.region1cd != null ? this.region1cd.getValue() : null)
-                .region1Name(this.region1cd != null ? this.region1cd.getLabel() : null)
-                .region1RefId(this.region1cd != null ? this.region1cd.getRefId() : null)
-
-                // region2cd 매핑
-                .region2Cd(this.region2cd != null ? this.region2cd.getValue() : null)
-                .region2Name(this.region2cd != null ? this.region2cd.getLabel() : null)
-                .region2RefId(this.region2cd != null ? this.region2cd.getRefId() : null)
+                .region1Name(null) // API 코드 필드 제거에 따라 null로 설정하거나 제거 (일단 null 유지)
+                .region2Name(null) // API 코드 필드 제거에 따라 null로 설정하거나 제거 (일단 null 유지)
 
                 // repPhoto 매핑
                 .photoId(
@@ -100,6 +96,10 @@ public class TravelApiItemDTO {
                         this.repPhoto != null && this.repPhoto.getPhotoId() != null
                                 ? this.repPhoto.getPhotoId().getThumbnailPath() : null
                 )
+                .homepage(this.homepage)
+                .parking(this.parking)
+                .fee(this.fee)
+                .hours(this.hours)
 
                 // 초기값 설정
                 .state(1) // 기본 공개 상태

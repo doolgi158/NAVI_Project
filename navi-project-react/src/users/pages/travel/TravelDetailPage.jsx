@@ -2,14 +2,12 @@ import React, { useState, useEffect } from 'react';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import { 
-    Row, Col, Typography, Divider, Button, Space, 
-    Descriptions, Spin, Result, Tag, message,Carousel 
+import { Row, Col, Typography, Divider, Button, Space, 
+        Descriptions, Spin, Result, Tag, message,Carousel 
 } from 'antd'; 
-import { 
-    ShareAltOutlined, PhoneFilled, EnvironmentFilled,
-    ClockCircleFilled, CarFilled, CreditCardFilled, HomeFilled,
-    HeartOutlined, HeartFilled, BookOutlined, BookFilled 
+import {  ShareAltOutlined, PhoneFilled, EnvironmentFilled,
+          ClockCircleFilled, CarFilled, CreditCardFilled, HomeFilled,
+          HeartOutlined, HeartFilled, BookOutlined, BookFilled 
 } from '@ant-design/icons'; 
 import MainLayout from '../../layout/MainLayout';
 import { useKakaoMap } from '../../../Common/hooks/useKakaoMap.jsx'; 
@@ -17,7 +15,9 @@ import { useKakaoMap } from '../../../Common/hooks/useKakaoMap.jsx';
 
 const { Title, Text, Paragraph } = Typography;
 
-const TravelDetailPage = () => {
+// currentUserId가 제공되지 않을 경우 'navi48'을 기본값으로 사용 (테스트용)
+const TravelDetailPage = ({ id  = 'navi48'}) => { 
+// const TravelDetailPage = ({ id }) => { // 만약 prop을 넘기지 않았을 때 로그아웃 상태로 테스트하려면 이 코드를 사용하세요.
     const { travelId } = useParams();
     const [travelDetail, setTravelDetail] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -51,16 +51,9 @@ const TravelDetailPage = () => {
             year: 'numeric',
             month: '2-digit',
             day: '2-digit',
-        }).replace(/\./g, '. ').trim(); // 2023. 01. 01. 형태로
+        }).replace(/\./g, '. ').trim(); 
     };
 
-    // [삭제: 불필요한 초기 로딩 시뮬레이션]
-    // useEffect(() => {
-    //     // 데이터 로딩 시뮬레이션
-    //     setTimeout(() => {
-    //       setLoading(false);
-    //     }, 1000);
-    // }, []);
 
 
     // 1. 데이터 로드 (최초 1회)
@@ -74,7 +67,9 @@ const TravelDetailPage = () => {
         const fetchTravelDetail = async () => {
             setLoading(true);
             setError(null);
-            const apiUrl = `/api/travel/detail/${travelId}`;
+            
+            // [수정] currentUserId를 사용하여 API 호출 URL 생성
+            const apiUrl = `/api/travel/detail/${travelId}` + (id ? `?id=${id}` : '');
             const viewsApiUrl = `/api/travel/views/${travelId}`;
 
             try { 
@@ -87,13 +82,13 @@ const TravelDetailPage = () => {
             try {
                 const res = await axios.get(apiUrl);
                 setTravelDetail(res.data);
+                
                 // 서버 응답에 따라 초기 좋아요/북마크 상태 및 카운트 설정
                 setCurrentLikes(res.data.likes || 0);
-                setIsLiked(res.data.isLiked || false); // isLiked 상태가 true/false로 온다고 가정
+                setIsLiked(res.data.isLiked || false); 
 
-                // [수정] isBookmarked가 카운트인지 여부인지 명확하지 않아 임시 수정 (만약 서버에서 카운트를 따로 준다면 수정 필요)
-                setCurrentBookmarks(res.data.bookmarkCount || 0); // 북마크 카운트
-                setIsBookmarked(res.data.isBookmarked || false); // 북마크 여부
+                setCurrentBookmarks(res.data.bookmarkCount || 0); 
+                setIsBookmarked(res.data.isBookmarked || false); 
                 
             } catch (err) {
                 console.error("detail load failed", err);
@@ -104,9 +99,9 @@ const TravelDetailPage = () => {
         };
 
         fetchTravelDetail();
-    }, [travelId]);
+    }, [travelId, id]); // [수정] 의존성 배열에 id 추가
 
-    // 2. 🗺️ 초기 지도 설정 및 업데이트
+    // 2. 🗺️ 초기 지도 설정 및 업데이트 (로직 유지)
     useEffect(() => {
         if (isMapLoaded && travelDetail) {
             console.log("[TravelPage] Map and Data Ready: Calling initial updateMap.");
@@ -122,26 +117,33 @@ const TravelDetailPage = () => {
         }
     }, [isMapLoaded, travelDetail, updateMap, relayoutMap]); 
 
-    // 3. ❤️ 좋아요 버튼 클릭 핸들러 (좋아요/취소 토글 로직)
+    // 3. ❤️ 좋아요 버튼 클릭 핸들러
       const handleLikeClick = async () => {
+        // [수정] currentUserId를 사용하여 로그인 여부 체크
+        if (!id) {
+            message.warning('로그인 후 이용 가능합니다.');
+            return;
+        }
+
         if (isLiking) return;
 
         setIsLiking(true);
 
         try {
-            // 실제 API 호출 주석 처리
-            // await axios.post(`/api/travel/like/${travelId}`); 
-
-            if (isLiked) {
-                setIsLiked(false);
-                setCurrentLikes(prev => Math.max(0, prev - 1));
-                message.success('좋아요를 취소했습니다.');
-            } else {
+            // [수정] 실제 API 호출: currentUserId를 사용
+            const response = await axios.post(`/api/travel/like/${travelId}?id=${id}`);
+            const isNewLike = response.data; // true: 좋아요 추가됨, false: 좋아요 취소됨
+            
+            if (isNewLike) {
                 setIsLiked(true);
                 setCurrentLikes(prev => prev + 1);
                 message.success('좋아요를 눌렀습니다! ');
+            } else {
+                setIsLiked(false);
+                setCurrentLikes(prev => Math.max(0, prev - 1));
+                message.success('좋아요를 취소했습니다.');
             }
-            await new Promise(resolve => setTimeout(resolve, 300)); // UI 반영을 위한 딜레이
+            
         } catch (error) {
             console.error("Like operation failed:", error);
             message.error('좋아요 처리에 실패했습니다. ');
@@ -152,24 +154,30 @@ const TravelDetailPage = () => {
 
     // 4. 📚 북마크 버튼 클릭 핸들러
     const handleBookmarkClick = async () => {
+        // [수정] currentUserId를 사용하여 로그인 여부 체크
+        if (!id) {
+            message.warning('로그인 후 이용 가능합니다.');
+            return;
+        }
+
         if (isBookmarking) return;
 
         setIsBookmarking(true);
 
         try {
-            // 북마크 API 호출 주석 처리
-            // await axios.post(`/api/travel/bookmark/${travelId}`); 
+            // [수정] 실제 API 호출: currentUserId를 사용
+            const response = await axios.post(`/api/travel/bookmark/${travelId}?id=${id}`);
+            const isNewBookmark = response.data; // true: 북마크 추가됨, false: 북마크 취소됨
             
-            if (isBookmarked) {
-                setIsBookmarked(false);
-                setCurrentBookmarks(prev => Math.max(0, prev - 1));
-                message.success('북마크를 취소했습니다.');
-            } else {
+            if (isNewBookmark) {
                 setIsBookmarked(true);
                 setCurrentBookmarks(prev => prev + 1);
                 message.success('북마크에 추가했습니다! ');
+            } else {
+                setIsBookmarked(false);
+                setCurrentBookmarks(prev => Math.max(0, prev - 1));
+                message.success('북마크를 취소했습니다.');
             }
-            await new Promise(resolve => setTimeout(resolve, 300)); // UI 반영을 위한 딜레이
 
         } catch (error) {
             console.error("Bookmark operation failed:", error);
@@ -180,7 +188,7 @@ const TravelDetailPage = () => {
     };
 
 
-      // 5. 🚀 공유하기 버튼 클릭 핸들러 
+      // 5. 🚀 공유하기 버튼 클릭 핸들러 (로직 유지)
     const handleShareClick = async () => {
         try {
             const currentUrl = "http://localhost:5173/Travel/detail/" + travelId; 
@@ -224,10 +232,10 @@ const TravelDetailPage = () => {
       const infoData = [
         { label: '주소',  icon: <EnvironmentFilled style={{ color: '#1890ff' }} />, value: data.address || data.roadAddress || '-' },
         { label: '전화번호', icon: <PhoneFilled style={{ color: '#52c41a' }} />, value: data.phoneNo || '-' },
-        { label: '홈페이지', icon: <HomeFilled style={{ color: '#faad14' }} />, value: '-' }, 
-        { label: '이용 시간', icon: <ClockCircleFilled style={{ color: '#eb2f96' }} />, value: '-' },
-        { label: '주차 시설', icon: <CarFilled style={{ color: '#f5222d' }} />, value: '-' },
-        { label: '이용 요금',icon: <CreditCardFilled style={{ color: '#722ed1' }} />, value: '-' },
+        { label: '홈페이지', icon: <HomeFilled style={{ color: '#faad14' }} />, value: data.homepage || '-' }, 
+        { label: '이용 시간', icon: <ClockCircleFilled style={{ color: '#eb2f96' }} />, value:data.hours || '-' },
+        { label: '주차 시설', icon: <CarFilled style={{ color: '#f5222d' }} />, value: data.parking || '-' },
+        { label: '이용 요금',icon: <CreditCardFilled style={{ color: '#722ed1' }} />, value: data.fee || '-' },
     ];
 
     // 이미지 배열 처리 (쉼표로 구분된 URL 문자열 가정)
@@ -316,7 +324,7 @@ const TravelDetailPage = () => {
                                 backgroundColor: '#f0f0f0', 
                                 zIndex: 100, // 지도를 확실히 덮도록 높은 zIndex 설정
                             }}>
-                                {/* [수정] Spinning prop 제거하고 tip을 추가하여 nest 패턴을 유지하고 경고 해결 */}
+                                {/* [수정] Spinning prop 제거하고 tip을 추가하여 nest 패턴을 유지하고 경고 해결 */}
                                <Spin size="large" tip="지도 로딩 중..." />
                             </div>
                         )}
@@ -343,7 +351,7 @@ const TravelDetailPage = () => {
     return (
         <MainLayout>
             <Row justify="center" style={{ marginBottom: 80, backgroundColor: '#fff', minHeight: '100%' }}>
-                <Col xs={24} sm={22} lg={18} xl={14} style={{ padding: '0 24px' }}>
+                <Col  style={{ padding: '0 24px' }}>
                     
                     <div style={{ textAlign: 'center', margin: '40px 0 20px 0' }}>
                         <Text type="secondary" style={{ fontSize: '1.2em', marginBottom: 5, display: 'block', color: '#666' }}>
@@ -362,9 +370,13 @@ const TravelDetailPage = () => {
                                             type="text"
                                             onClick={handleLikeClick}
                                             disabled={isLiking}
-                                            loading={isLiking}
+                                            loading={isLiking} 
                                             style={{ padding: 0, height: 'auto' }}
-                                            icon={isLiked ? <HeartFilled style={{ fontSize: '2.5em', color: '#ff4d4f', transition: 'transform 0.2s' }} /> : <HeartOutlined style={{ fontSize: '2.5em', color: '#999', transition: 'transform 0.2s' }} />}
+                                            icon={
+                                                isLiked 
+                                                ? <HeartFilled style={{ fontSize: '2.5em', color: '#ff4d4f', transition: 'transform 0.2s' }} /> 
+                                                : <HeartOutlined style={{ fontSize: '2.5em', color: '#999', transition: 'transform 0.2s' }} />
+                                            }
                                         />
                                         <Text type="secondary" style={{ fontSize: '0.8em', marginTop: 4, fontWeight: 'bold', color: isLiked ? '#ff4d4f' : '#999' }}>
                                             {currentLikes}
@@ -379,7 +391,11 @@ const TravelDetailPage = () => {
                                             disabled={isBookmarking} 
                                             loading={isBookmarking} 
                                             style={{ padding: 0, height: 'auto' }}
-                                            icon={isBookmarked ? <BookFilled style={{ fontSize: '2.5em', color: '#52c41a', transition: 'transform 0.2s' }} /> : <BookOutlined style={{ fontSize: '2.5em', color: '#999', transition: 'transform 0.2s' }} />}
+                                            icon={
+                                                isBookmarked 
+                                                ? <BookFilled style={{ fontSize: '2.5em', color: '#52c41a', transition: 'transform 0.2s' }} /> 
+                                                : <BookOutlined style={{ fontSize: '2.5em', color: '#999', transition: 'transform 0.2s' }} />
+                                            }
                                         />
                                         <Text type="secondary" style={{ fontSize: '0.8em', marginTop: 4, fontWeight: 'bold', color: isBookmarked ? '#52c41a' : '#999' }}>
                                             {currentBookmarks}

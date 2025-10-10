@@ -15,7 +15,7 @@ import java.util.List;
  * - /api 제거 → 내부 도메인 기준 URL
  */
 @RestController
-@RequestMapping("/flight")
+@RequestMapping("/api/flight")
 @RequiredArgsConstructor
 public class FlightController {
 
@@ -33,9 +33,9 @@ public class FlightController {
      */
     @PostMapping(value = "/detail", consumes = MediaType.APPLICATION_JSON_VALUE)
     public List<FlightDetailResponseDTO> getFlightList(@RequestBody FlightSearchRequestDTO dto) {
-        System.out.println("📥 [FlightController] 요청 도착 → " + dto);
+        System.out.println("[FlightController] 요청 도착 → " + dto);
         List<FlightDetailResponseDTO> result = flightService.searchFlights(dto);
-        System.out.println("📤 [FlightController] 응답 항목 수 = " + result.size());
-        return result; // ✅ 순수 리스트 반환
+        System.out.println("[FlightController] 응답 항목 수 = " + result.size());
+        return result; // 순수 리스트 반환
     }
 }

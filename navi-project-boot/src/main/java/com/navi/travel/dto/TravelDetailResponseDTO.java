@@ -15,7 +15,6 @@ public class TravelDetailResponseDTO {
     private String contentId;
     private String contentsCd;
     private String categoryName;
-    private String categoryRefId;
     private String title;
     private String introduction;
     private String address;
@@ -26,10 +25,17 @@ public class TravelDetailResponseDTO {
     private Double latitude;
     private String region1Name;
     private String region2Name;
+    private Long photoId;
     private String imagePath;
+    private String thumbnailPath;
     private Long views;
     private Long likes;
     private Long bookmark;
+    private int state;
+    private String homepage;
+    private String parking;
+    private String fee;
+    private String hours;
 
     // ✅ 중요: 사용자 상태 값
     private boolean isLikedByUser;
@@ -54,7 +60,6 @@ public class TravelDetailResponseDTO {
                 .contentId(travel.getContentId())
                 .contentsCd(travel.getContentsCd())
                 .categoryName(travel.getCategoryName())
-                .categoryRefId(travel.getCategoryRefId())
                 .title(travel.getTitle())
                 .introduction(travel.getIntroduction())
                 .address(travel.getAddress())
@@ -65,10 +70,17 @@ public class TravelDetailResponseDTO {
                 .latitude(travel.getLatitude())
                 .region1Name(travel.getRegion1Name())
                 .region2Name(travel.getRegion2Name())
+                .photoId(travel.getPhotoId())
                 .imagePath(travel.getImagePath())
+                .thumbnailPath(travel.getThumbnailPath())
                 .views(travel.getViews())
                 .likes(travel.getLikes())
                 .bookmark(travel.getBookmark())
+                .state(travel.getState())
+                .homepage(travel.getHomepage())
+                .parking(travel.getParking())
+                .fee(travel.getFee())
+                .hours(travel.getHours())
 
                 // ✅ 여기 반드시 추가해야 함 (사용자 상태값 반영)
                 .isLikedByUser(isLikedByUser)

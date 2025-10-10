@@ -24,12 +24,16 @@ public class TravelController {
 
     private final TravelService travelService;
 
-    // ✅ 제주도 여행정보 리스트 화면 (페이지네이션 적용)
+    // --------------------------------------------------------------------
+    //                 ✅ 사용자(Public) API 영역 (state=1 공개 항목만 처리)
+    // --------------------------------------------------------------------
+
+    // 1. 여행지 목록 조회 (사용자용: 공개(state=1)된 항목만 조회)
     @GetMapping
     public Page<TravelListResponseDTO> getList(
             @PageableDefault(
                     size = 10,
-                    sort = "contentsCd,asc,updatedAt",
+                    sort = "contentsCd",
                     direction = Sort.Direction.DESC
             ) Pageable pageable,
             @RequestParam(value = "region2Name", required = false) String region2NameCsv,
@@ -49,17 +53,16 @@ public class TravelController {
             }
         }
 
-        return travelService.getTravelList(pageable, region2Names, categoryName, search);
+        // 'publicOnly=true'를 전달하여 공개 상태(state=1) 항목만 조회
+        return travelService.getTravelList(pageable, region2Names, categoryName, search, true);
     }
 
-    // ✅ 상세내용 화면 (id String 타입으로 전달)
+    // 2. 상세내용 조회 (사용자/공통)
     @GetMapping("/detail/{travelId}")
     public ResponseEntity<TravelDetailResponseDTO> getTravelDetail(@PathVariable("travelId") Long travelId) {
-        // ⚠️ 임시 사용자 ID 설정: navi38 임의값인 "navi38" 사용 (String 타입)
-        String id = "navi38"; // navi38 임의 사용자 ID (추후 JWT 연동 필요)
+        String id = "navi38"; // 임시 사용자 ID
 
         try {
-            // id를 서비스 메서드에 전달 (서비스 시그니처도 String으로 변경 필요)
             TravelDetailResponseDTO detailDTO = travelService.getTravelDetail(travelId, id);
             return ResponseEntity.ok(detailDTO);
         } catch (NoSuchElementException e) {
@@ -70,7 +73,7 @@ public class TravelController {
         }
     }
 
-    // ✅ 조회수 증가
+    // 3. 조회수 증가
     @PostMapping("/views/{travelId}")
     public ResponseEntity<Void> incrementViews(@PathVariable("travelId") Long travelId) {
         try {
@@ -84,15 +87,14 @@ public class TravelController {
         }
     }
 
-    // ✅ 좋아요 토글 (id String 타입으로 변경)
+    // 4. 좋아요 토글
     @PostMapping("/like/{travelId}")
     public ResponseEntity<String> toggleLike(@PathVariable Long travelId) {
-        String id = "navi38"; // String 타입으로 변경 및 "navi38" 사용
+        String id = "navi38"; // 임시 사용자 ID
 
         try {
-            // id를 서비스 메서드에 전달 (서비스 시그니처도 String으로 변경 필요)
             boolean isAdded = travelService.toggleLike(travelId, id);
-
+            // ... (응답 로직 유지)
             if (isAdded) {
                 return ResponseEntity.status(HttpStatus.CREATED).body("좋아요가 성공적으로 추가되었습니다.");
             } else {
@@ -106,15 +108,14 @@ public class TravelController {
         }
     }
 
-    // ✅ 북마크 토글 (id String 타입으로 변경)
+    // 5. 북마크 토글
     @PostMapping("/bookmark/{travelId}")
     public ResponseEntity<String> toggleBookmark(@PathVariable Long travelId) {
-        String id = "navi38"; // String 타입으로 변경 및 "navi38" 사용
+        String id = "navi38"; // 임시 사용자 ID
 
         try {
-            // id를 서비스 메서드에 전달 (서비스 시그니처도 String으로 변경 필요)
             boolean isAdded = travelService.toggleBookmark(travelId, id);
-
+            // ... (응답 로직 유지)
             if (isAdded) {
                 return ResponseEntity.status(HttpStatus.CREATED).body("북마크가 성공적으로 추가되었습니다.");
             } else {
@@ -125,18 +126,6 @@ public class TravelController {
         } catch (Exception e) {
             System.err.println("북마크 처리 중 서버 오류 발생: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 내부 오류: " + e.getMessage());
-        }
-    }
-
-    // ✅ API 데이터 저장
-    @PostMapping("/load_save")
-    public String load_save() {
-        try {
-            int count = travelService.saveApiData();
-            return "API 데이터 저장 완료 총 " + count + " 건 처리됨.";
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "API 데이터 저장 중 오류 발생: " + e.getMessage();
         }
     }
 }
