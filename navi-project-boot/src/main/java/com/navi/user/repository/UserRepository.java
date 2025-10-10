@@ -15,8 +15,15 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("select u from User u where u.id = :id")
     User getUser(@Param("id") String id);
 
-    boolean existsById(String id);
-
     @Query("select u from User u where u.id = :id")
     Optional<User> findByUserId(@Param("id") String id);
+
+    // 공백 없이 name과 email을 기준으로 User의 데이터를 가져온다.
+    Optional<User> findByNameIgnoreCaseAndEmailIgnoreCase(String name, String email);
+
+    Optional<User>findByIdAndEmail(String id, String email);
+    Optional<User> findById(String id);
+    Optional<User> findByEmail(String email);
+    boolean existsById(String id);
+
 }

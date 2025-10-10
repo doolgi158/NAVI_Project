@@ -65,17 +65,15 @@ public class TravelTests {
      * 테스트의 독립성을 위해 데이터를 생성 후 조회합니다.
      */
     @Test
-    @Transactional // 테스트 후 DB 롤백 처리
+    //@Transactional // 테스트 후 DB 롤백 처리
     public void testRead() {
         // Arrange (데이터 준비)
         // 1. 테스트용 Travel 엔티티를 생성하고 DB에 저장합니다.
         Travel travel = Travel.builder()
                 .contentId("TEST_READ_001")
                 .title("테스트 조회용 여행지")
-                .contentsCd("R001")
+                .contentsCd("C1")
                 .state(1)
-                .longitude(126.5)
-                .latitude(33.4)
                 .build();
 
         Travel savedTravel = travelRepository.save(travel);

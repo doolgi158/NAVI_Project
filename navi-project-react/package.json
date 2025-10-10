@@ -17,6 +17,7 @@
     "bootstrap": "^5.3.8",
     "bootstrap-icons": "^1.13.1",
     "framer-motion": "^12.23.22",
+    "lucide-react": "^0.545.0",
     "react": "18.2.0",
     "react-bootstrap": "^2.10.10",
     "react-cookie": "^8.0.1",

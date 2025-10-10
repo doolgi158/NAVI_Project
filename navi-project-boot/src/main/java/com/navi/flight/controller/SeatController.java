@@ -19,13 +19,13 @@ public class SeatController {
 
     private final SeatService seatService;
 
-    /** ✅ 전체 항공편별 좌석 현황 조회 */
+    /* 전체 항공편별 좌석 현황 조회 */
     @GetMapping("/status")
     public List<SeatStatusDTO> getAllSeatStatus() {
         return seatService.getSeatStatusByFlight();
     }
 
-    /** ✅ 특정 항공편 좌석 현황 조회 */
+    /* 특정 항공편 좌석 현황 조회 */
     @GetMapping("/status/{flightId}")
     public SeatStatusDTO getSeatStatusByFlightId(@PathVariable("flightId") String flightId) {
         return seatService.getSeatStatusByFlightId(flightId);

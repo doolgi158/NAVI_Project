@@ -1,10 +1,9 @@
 package com.navi.user.service.social;
 
 import com.navi.user.domain.History;
-import com.navi.user.domain.Social;
 import com.navi.user.domain.User;
 import com.navi.user.dto.SocialDTO;
-import com.navi.user.dto.UserDTO;
+import com.navi.user.dto.users.UserDTO;
 import com.navi.user.enums.SocialState;
 import com.navi.user.enums.UserRole;
 import com.navi.user.enums.UserState;
