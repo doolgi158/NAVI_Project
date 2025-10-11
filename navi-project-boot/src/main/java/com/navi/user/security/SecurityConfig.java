@@ -55,7 +55,8 @@ public class SecurityConfig {
                 .requestMatchers( "/api/users/login", "/api/users/logout", "/api/auth/oauth/**",
                         "/api/users/find-id", "/api/users/find-pw", "/api/users/signup", "/api/users/check-id",
                         "/api/users/send-email", "/api/users/verify-code", "/api/users/find-password", "/api/seats/**",
-                        "/travel/**", "/api/flight/**", "/api/delivery/**", "/api/accommodations/**", "/api/townships/**"
+                        "/travel/**", "/api/flight/**", "/api/delivery/**", "/api/accommodations/**", "/api/townships/**",
+                        "/api/rooms/**"
                 ).permitAll()
                 .requestMatchers("/api/adm/**").hasAuthority(UserRole.ADMIN.name())
                 .requestMatchers("/api/auth/me").hasAuthority(UserRole.USER.name())

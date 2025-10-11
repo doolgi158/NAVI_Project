@@ -100,7 +100,7 @@ public class AccServiceImpl implements AccService{
     @Transactional(readOnly = true)
     public AccDetailResponseDTO getAccDetail(String accId) {
         // TODO: 숙소 + 객실 + 이미지 조합 응답
-        Acc acc = accRepository.findById(Long.parseLong(accId))
+        Acc acc = accRepository.findByAccId(accId)
                 .orElseThrow(() -> new IllegalArgumentException("숙소를 찾을 수 없습니다."));
         return AccDetailResponseDTO.fromEntity(acc);
     }

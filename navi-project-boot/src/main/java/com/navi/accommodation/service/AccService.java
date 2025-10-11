@@ -9,6 +9,7 @@ import com.navi.accommodation.dto.response.AccListResponseDTO;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 public interface AccService {
     /* === 관리자 전용 CRUD (View) === */
@@ -16,13 +17,10 @@ public interface AccService {
     Acc createAcc(AccRequestDTO dto);
     Acc updateAcc(Long accNo, AccRequestDTO dto);
     void deleteAcc(Long accNo);
-    // 숙소 전체 리스트 조회
-    // Todo: 페이징 처리해서 보여줘야 함
     List<Acc> getAllAcc();
 
     /* === 사용자 전용 조회 (View) === */
     // 숙소 리스트 조회 (검색 조건 필터링)
-    // Todo: 페이징 처리해서 보여줘야 함
     List<AccListResponseDTO> searchAccommodations(AccSearchRequestDTO dto);
     // 숙소 상세 조회
     AccDetailResponseDTO getAccDetail(String accId);

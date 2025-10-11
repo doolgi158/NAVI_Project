@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.navi.accommodation.domain.Acc;
 import com.navi.accommodation.domain.Room;
 import com.navi.accommodation.dto.api.RoomApiDTO;
+import com.navi.accommodation.dto.request.RoomRequestDTO;
+import com.navi.accommodation.dto.response.RoomListResponseDTO;
+import com.navi.accommodation.dto.response.RoomResponseDTO;
 import com.navi.accommodation.repository.AccRepository;
 import com.navi.accommodation.repository.RoomRepository;
 import lombok.RequiredArgsConstructor;
@@ -12,75 +15,82 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Transactional
 public class RoomServiceImpl implements RoomService {
     public final AccRepository accRepository;
     public final RoomRepository roomRepository;
-    public final ObjectMapper objectMapper;
 
-    /* === 관리자 전용 API 적재 === */
-    //JSON 파일 경로 지정
-    @Value("classpath:mockData/acc_rooms.json")   // 숙소 전체 리스트(최초 적재)
-    private Resource roomFile;
+    /* === 관리자 전용 CRUD === */
+    @Override
+    public RoomResponseDTO createRoom(Long accNo, RoomRequestDTO dto) {
+        Acc acc = accRepository.findById(accNo)
+                .orElseThrow(() -> new IllegalArgumentException("숙소가 존재하지 않습니다."));
+
+        Room room = Room.builder()
+                .acc(acc)
+                .roomName(dto.getRoomName())
+                .roomSize(Integer.parseInt(dto.getRoomSize()))
+                .roomCnt(Integer.parseInt(dto.getRoomCnt()))
+                .baseCnt(Integer.parseInt(dto.getBaseCnt()))
+                .maxCnt(Integer.parseInt(dto.getMaxCnt()))
+                .weekdayFee(Integer.parseInt(dto.getWeekdayFee()))
+                .weekendFee(Integer.parseInt(dto.getWeekendFee()))
+                .hasWifi("1".equals(dto.getHasWifi()))
+                .build();
+
+        Room saved = roomRepository.save(room);
+        log.info("[ADMIN] 객실 등록 완료 → {} ({})", saved.getRoomName(), acc.getTitle());
+
+        return RoomResponseDTO.fromEntity(saved);
+    }
 
     @Override
-    public void loadFromJsonFile() throws IOException {
-        processJson(roomFile);
-        log.info("객실 JSON 데이터 초기 적재 완료 ✅");
+    public RoomResponseDTO updateRoom(Long roomNo, RoomRequestDTO dto) {
+        return null;
     }
 
-    private void processJson(Resource file) throws IOException {
-        JsonNode root = objectMapper.readTree(file.getInputStream());
-        JsonNode items = root.path("response").path("body").path("items");
+    @Override
+    public List<RoomResponseDTO> getRoomsByAcc(Long accNo) {
+        return List.of();
+    }
 
-        for (JsonNode wrapper : items) {
-            // .asText() : JsonNode 내부 값을 String 으로 변환하고 null일 경우 null로 반환
-            String contentIdStr = wrapper.path("contentid").asText(null);
-            if (contentIdStr == null || contentIdStr.isBlank()) continue;
+    @Override
+    public void deleteRoom(Long roomNo) {
 
-            Long contentId = Long.parseLong(contentIdStr);
+    }
 
-            // 숙소 찾기 (FK)
-            Acc acc = accRepository.findByContentId(contentId)
-                    .orElseThrow(() -> new IllegalArgumentException("해당 숙소 없음: " + contentId));
+    /* 사용자 전용 */
+    // 숙소별 객실 리스트 조회
+    @Override
+    public List<RoomListResponseDTO> getRoomList(String accId) {
+        List<Room> rooms = roomRepository.findByAcc_AccId(accId);
 
-            // 객실 리스트
-            JsonNode roomArray = wrapper.path("item");
-            if (!roomArray.isArray()) continue;
-
-            for (JsonNode roomNode : roomArray) {
-                RoomApiDTO dto = objectMapper.treeToValue(roomNode, RoomApiDTO.class);
-
-                // 객실명(roomtitle)이 없는 경우 SKIP
-                if (dto.getRoomName() == null || dto.getRoomName().isBlank()) {
-                    log.warn("roomtitle 누락 → 등록 SKIP (contentId={})", dto.getContentId());
-                    continue;
-                }
-
-                // 중복 검사: 동일 숙소 내 동일 객실명 존재 시 skip
-                boolean exists = roomRepository.findAllByContentId(contentId)
-                        .stream().anyMatch(r -> r.getRoomName().equals(dto.getRoomName()));
-
-                if (exists) {
-                    log.info("이미 존재 → SKIP: [{}] {}", contentId, dto.getRoomName());
-                    continue;
-                }
-
-                Room room = Room.builder()
-                        .acc(acc)
-                        .build();
-                room.changeFromApiDTO(dto);
-
-                roomRepository.save(room);
-                log.info("객실 등록 완료: [{}] {}", contentId, dto.getRoomName());
-            }
+        if (rooms.isEmpty()) {
+            log.warn("[USER] 해당 숙소({})의 객실 정보가 없습니다.", accId);
+            return List.of();
         }
+
+        return rooms.stream()
+                .map(RoomListResponseDTO::fromEntity)
+                .collect(Collectors.toList());
     }
+    // 객실 상세 조회
+    @Override
+    public RoomResponseDTO getRoomDetail(String roomId) {
+        /*Room room = roomRepository.findByRoomId(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 객실입니다."));
 
-
+        log.info("[USER] 객실 상세 조회 완료 - roomId: {}", roomId);
+        return RoomResponseDTO.fromEntity(room);*/
+        return null;
+    }
 }

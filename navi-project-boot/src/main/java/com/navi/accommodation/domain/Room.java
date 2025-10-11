@@ -58,7 +58,7 @@ public class Room {
 
     @Builder.Default
     @Column(nullable = false)
-    private Integer roomCnt = 1;
+    private Integer roomCnt = 4;
 
     @Builder.Default
     @Column(name = "base_cnt", nullable = false)
@@ -87,12 +87,13 @@ public class Room {
     /* === 기본값 보정 === */
     @PrePersist
     public void prePersist() {
-        if (roomCnt == null) roomCnt = 1;
+        if (roomCnt == null) roomCnt = 4;
         if (baseCnt == null) baseCnt = 2;
         if (maxCnt == null) maxCnt = 2;
         if (weekdayFee == null) weekdayFee = 0;
         if (weekendFee == null) weekendFee = 0;
         if (isActive == null) isActive = true;
+        if (hasWifi == null) hasWifi = true;
 
         // room_id 자동 세팅
         if(roomId == null && roomNo != null){
@@ -100,10 +101,22 @@ public class Room {
         }
     }
 
-    // change 메서드
     /* === AccApiDTO : API 적재 전용 === */
     public void changeFromApiDTO(RoomApiDTO dto) {
         if (nonEmptyOrNull(dto.getContentId()) != null) contentId = Long.parseLong(dto.getContentId());
+        if (nonEmptyOrNull(dto.getRoomName()) != null) roomName = dto.getRoomName();
+        if (nonEmptyOrNull(dto.getRoomSize()) != null) roomSize = Integer.parseInt(dto.getRoomSize());
+
+        roomCnt = parseOrDefault(dto.getRoomCnt(), 1);
+        baseCnt = parseOrDefault(dto.getBaseCnt(), 2);
+        maxCnt = parseOrDefault(dto.getMaxCnt(), baseCnt);
+
+        if (nonEmptyOrNull(dto.getWeekdayFee()) != null) weekdayFee = Integer.parseInt(dto.getWeekdayFee());
+        if (nonEmptyOrNull(dto.getWeekendFee()) != null) weekendFee = Integer.parseInt(dto.getWeekendFee());
+        if (nonEmptyOrNull(dto.getHasWifi()) != null) hasWifi = "1".equals(dto.getHasWifi());
+    }
+    /* === AccRequestDTO : 관리자 전용 === */
+    public void changeFromRequestDTO(RoomRequestDTO dto) {
         if (nonEmptyOrNull(dto.getRoomName()) != null) roomName = dto.getRoomName();
         if (nonEmptyOrNull(dto.getRoomSize()) != null) roomSize = Integer.parseInt(dto.getRoomSize());
         if (nonEmptyOrNull(dto.getRoomCnt()) != null) roomCnt = Integer.parseInt(dto.getRoomCnt());
@@ -113,13 +126,21 @@ public class Room {
         if (nonEmptyOrNull(dto.getWeekendFee()) != null) weekendFee = Integer.parseInt(dto.getWeekendFee());
         if (nonEmptyOrNull(dto.getHasWifi()) != null) hasWifi = "1".equals(dto.getHasWifi());
     }
-    /* === AccRequestDTO : 관지자 전용 === */
-    public void changeFromRequestDTO(RoomRequestDTO dto) {
-
+    /* === 가격 변경 === */
+    public void changePrice(Integer weekdayFee, Integer weekendFee) {
+        if (weekdayFee != null) this.weekdayFee = weekdayFee;
+        if (weekendFee != null) this.weekendFee = weekendFee;
     }
-
-    /* 문자열 유효성 검증용 유틸 메서드 */
+    /* 유효성 검증용 유틸 메서드 */
     private String nonEmptyOrNull(String value) {
         return (value != null && !value.isBlank()) ? value : null;
+    }
+    private Integer parseOrDefault(String value, int defaultVal) {
+        try {
+            int result = Integer.parseInt(value);
+            return result >= 0 ? result : defaultVal;
+        } catch (Exception e) {
+            return defaultVal;
+        }
     }
 }

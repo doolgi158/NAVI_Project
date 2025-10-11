@@ -16,6 +16,7 @@ import java.util.List;
 public class AccDetailResponseDTO {
     /* 숙소 기본 정보 */
     private String accId;                   // 숙소 ID
+    private String title;                   // 숙소명
     private String category;                // 숙소 유형
     private String tel;                     // 문의 전화번호
     private String address;                 // 전체 주소
@@ -34,6 +35,7 @@ public class AccDetailResponseDTO {
     public static AccDetailResponseDTO fromEntity(Acc acc) {
         return AccDetailResponseDTO.builder()
                 .accId(acc.getAccId())
+                .title(acc.getTitle())
                 .category(acc.getCategory())
                 .tel(acc.getTel())
                 .address(acc.getAddress())

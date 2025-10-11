@@ -12,6 +12,7 @@ import java.util.Optional;
 @Repository
 public interface AccRepository extends JpaRepository<Acc, Long> {
     Optional<Acc> findByContentId(Long contentId);
+    Optional<Acc> findByAccId(String accId);
 
     /* 숙소명으로 찾기 */
     @Query("SELECT a FROM Acc a WHERE LOWER(a.title) LIKE %:keyword%")
@@ -20,4 +21,8 @@ public interface AccRepository extends JpaRepository<Acc, Long> {
     /* 지역별 찾기 */
     @Query("SELECT a FROM Acc a WHERE a.township.townshipName = :townshipName")
     List<Acc>findByTownshipName(@Param("townshipName") String townshipName);
+
+    /* contentId = null인 숙소 찾기 (관리자용) */
+    @Query("SELECT a FROM Acc a WHERE a.contentId IS NULL")
+    List<Acc> findAllWithoutContentId();
 }
