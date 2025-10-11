@@ -29,7 +29,7 @@ public class AccServiceImpl implements AccService{
     private final AccRepository accRepository;
     private final TownshipRepository townshipRepository;
 
-    /** === 관리자 전용 CRUD === */
+    /* === 관리자 전용 CRUD === */
     @Override
     public Acc createAcc(AccRequestDTO dto) {
         Acc acc = Acc.builder().build();
@@ -67,25 +67,41 @@ public class AccServiceImpl implements AccService{
         accRepository.delete(acc);
     }
 
-    /** === 조회 (공통) === */
+    /* === 공통 조회 === */
     @Override
     @Transactional(readOnly = true)
     public List<Acc> getAllAcc() {
         return accRepository.findAll();
     }
 
-    /** === 사용자 전용 조회 === */
+    /* === 사용자 전용 조회 === */
     @Override
     @Transactional(readOnly = true)
     public List<AccListResponseDTO> searchAccommodations(AccSearchRequestDTO dto) {
-        // TODO: 지역명 기반 필터링 + 날짜/인원 조건 추가 예정
-        return List.of();
+        List<Acc> accList;
+
+        // 지역 기반 검색
+        if(dto.getTownshipName() != null && !dto.getTownshipName().isEmpty()) {
+            accList = accRepository.findByTownshipName(dto.getTownshipName());
+        }
+        // 숙소명 기반 검색
+        else if(dto.getTitle() != null && !dto.getTitle().isEmpty()) {
+            accList = accRepository.findByTitle(dto.getTitle());
+        }
+        else {
+            // Todo: 임시방편
+            accList = accRepository.findAll();
+        }
+
+        return accList.stream().map(AccListResponseDTO::fromEntity).toList();
     }
 
     @Override
     @Transactional(readOnly = true)
     public AccDetailResponseDTO getAccDetail(String accId) {
         // TODO: 숙소 + 객실 + 이미지 조합 응답
-        return null;
+        Acc acc = accRepository.findById(Long.parseLong(accId))
+                .orElseThrow(() -> new IllegalArgumentException("숙소를 찾을 수 없습니다."));
+        return AccDetailResponseDTO.fromEntity(acc);
     }
 }

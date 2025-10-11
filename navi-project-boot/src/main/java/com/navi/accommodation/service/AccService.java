@@ -12,6 +12,7 @@ import java.util.List;
 
 public interface AccService {
     /* === 관리자 전용 CRUD (View) === */
+    // Todo: 메서드 반환값 확인해보고 수정필수
     Acc createAcc(AccRequestDTO dto);
     Acc updateAcc(Long accNo, AccRequestDTO dto);
     void deleteAcc(Long accNo);
@@ -21,6 +22,7 @@ public interface AccService {
 
     /* === 사용자 전용 조회 (View) === */
     // 숙소 리스트 조회 (검색 조건 필터링)
+    // Todo: 페이징 처리해서 보여줘야 함
     List<AccListResponseDTO> searchAccommodations(AccSearchRequestDTO dto);
     // 숙소 상세 조회
     AccDetailResponseDTO getAccDetail(String accId);
