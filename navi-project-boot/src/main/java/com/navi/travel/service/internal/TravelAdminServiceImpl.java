@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.NoSuchElementException;
+import java.util.UUID;
 
 // (여행지 CRUD)
 @Slf4j
@@ -38,6 +39,7 @@ public class TravelAdminServiceImpl implements TravelAdminService{
 
         } else {
             if (dto.getContentId() == null || dto.getContentId().trim().isEmpty()) {
+                dto.setContentId("CNTSA_" + UUID.randomUUID().toString());
 
                 Long nextVal;
                 try {

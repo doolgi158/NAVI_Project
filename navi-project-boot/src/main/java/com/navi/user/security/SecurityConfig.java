@@ -58,7 +58,6 @@ public class SecurityConfig {
                         "/travel/**", "/api/flight/**", "/api/delivery/**"
                 ).permitAll()
                 .requestMatchers("/api/adm/**").hasAuthority(UserRole.ADMIN.name())
-                .requestMatchers("/api/auth/me").hasAuthority(UserRole.USER.name())
                 .anyRequest().authenticated()
         );
 

@@ -8,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface TravelQueryService {
-//    TravelDetailResponseDTO getTravelDetail(Long travelId, String id);
-//
-//    Page<TravelListResponseDTO> getTravelList(Pageable pageable, List<String> region2Names, String category, String search, boolean publicOnly);
+    TravelDetailResponseDTO getTravelDetail(Long travelId, String id);
+
+    Page<TravelListResponseDTO> getTravelList(Pageable pageable, List<String> region2Names, String category, String search, boolean publicOnly);
 }

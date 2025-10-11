@@ -42,7 +42,7 @@ const TravelCard = ({ item, onClick, isSelected, onMouseEnter, onMouseLeave }) =
 
 
         <div className="flex items-center space-x-1">
-          <i className="bi bi-bookmarkCount-fill text-green-500"></i>
+          <i className="bi bi-bookmark-fill text-green-500"></i>
           <span>{item.bookmarkCount?.toLocaleString() || 0}</span>
         </div>
       </div>

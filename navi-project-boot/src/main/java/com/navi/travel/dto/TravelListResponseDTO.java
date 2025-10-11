@@ -52,7 +52,7 @@ public class TravelListResponseDTO {
                 .views(travel.getViews() != null ? travel.getViews() : 0L) // Long 타입 0L로 초기화
                 .state(travel.getState())
                 .updatedAt(travel.getUpdatedAt())
-                .createdAt(travel.getUpdatedAt())
+                .createdAt(travel.getCreatedAt())
                 .build();
     }
 
