@@ -26,14 +26,15 @@ const RedirectPage = () => {
     axios
       .get(`http://localhost:8080/api/auth/oauth/${provider}?code=${code}`)
       .then((res) => {
+        const data = res.data.data;
         dispatch(setlogin({ 
-          username: res.data.id,
-          token: res.data.accessToken,
-          ip: res.data.ip
+          username: data.id,
+          token: data.accessToken,
+          ip: data.ip
         }));
 
-        localStorage.setItem("accessToken", res.data.accessToken);
-        localStorage.setItem("refreshToken", res.data.refreshToken);
+        localStorage.setItem("accessToken", data.accessToken);
+        localStorage.setItem("refreshToken", data.refreshToken);
 
         navigate("/");
       })
