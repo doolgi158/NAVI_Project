@@ -19,7 +19,7 @@ import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/travel")
+@RequestMapping("/api/travel")
 @RequiredArgsConstructor
 public class TravelController {
 

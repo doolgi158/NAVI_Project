@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.NoSuchElementException;
 
 @RestController
-@RequestMapping("/adm")
+@RequestMapping("/api/adm")
 @RequiredArgsConstructor
 public class TravelAdminController {
 
