@@ -1,48 +1,48 @@
-//package com.navi.travel.service.internal;
-//
+package com.navi.travel.service.internal;
+
 //import com.navi.travel.domain.Bookmark;
 //import com.navi.travel.domain.Like;
 //import com.navi.travel.domain.Travel;
 //import com.navi.travel.repository.BookmarkRepository;
 //import com.navi.travel.repository.LikeRepository;
-//import com.navi.travel.repository.TravelRepository;
-//import com.navi.user.domain.User;
-//import com.navi.user.repository.UserRepository;
-//import jakarta.persistence.EntityNotFoundException;
-//import org.springframework.stereotype.Service;
-//import org.springframework.transaction.annotation.Transactional;
-//
-//import java.util.NoSuchElementException;
-//import java.util.Optional;
-//
-//// (좋아요, 북마크, 뷰 증가)
-//@Service
-//@Transactional
-//public class TravelActionServiceImpl implements TravelActionService{
-//    private final TravelRepository travelRepository;
+import com.navi.travel.repository.TravelRepository;
+import com.navi.user.domain.User;
+import com.navi.user.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.NoSuchElementException;
+import java.util.Optional;
+
+// (좋아요, 북마크, 뷰 증가)
+@Service
+@Transactional
+public class TravelActionServiceImpl implements TravelActionService{
+    private final TravelRepository travelRepository;
 //    private final LikeRepository likeRepository;
 //    private final BookmarkRepository bookmarkRepository;
-//    private final UserRepository userRepository;
-//
-//    public TravelActionServiceImpl(
-//            TravelRepository travelRepository,
+    private final UserRepository userRepository;
+
+    public TravelActionServiceImpl(
+            TravelRepository travelRepository,
 //            LikeRepository likeRepository,
 //            BookmarkRepository bookmarkRepository,
-//            UserRepository userRepository
-//    ) {
-//        this.travelRepository = travelRepository;
+            UserRepository userRepository
+    ) {
+        this.travelRepository = travelRepository;
 //        this.likeRepository = likeRepository;
 //        this.bookmarkRepository = bookmarkRepository;
-//        this.userRepository = userRepository;
-//    }
-//
-//    // 조회수 증가 로직
-//    @Transactional
-//    public void incrementViews(Long travelId) {
-//        travelRepository.incrementViews(travelId);
-//    }
-//
-//    // toggleLike 메서드
+        this.userRepository = userRepository;
+    }
+
+    // 조회수 증가 로직
+    @Transactional
+    public void incrementViews(Long travelId) {
+        travelRepository.incrementViews(travelId);
+    }
+
+    // toggleLike 메서드
 //    @Transactional
 //    public boolean toggleLike(Long travelId, String id) {
 //        // [요구사항 1] 비로그인 사용자 처리
@@ -74,8 +74,8 @@
 //
 //        return !likedBefore;
 //    }
-//
-//    // toggleBookmark 메서드
+
+    // toggleBookmark 메서드
 //    @Transactional
 //    public boolean toggleBookmark(Long travelId, String id) {
 //        // [요구사항 1] 비로그인 사용자 처리
@@ -107,4 +107,4 @@
 //
 //        return !bookmarkedBefore;
 //    }
-//}
+}

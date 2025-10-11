@@ -1,54 +1,54 @@
-//package com.navi.travel.service.internal;
-//
-//import com.navi.travel.domain.Travel;
-//import com.navi.travel.dto.TravelDetailResponseDTO;
-//import com.navi.travel.dto.TravelListResponseDTO;
+package com.navi.travel.service.internal;
+
+import com.navi.travel.domain.Travel;
+import com.navi.travel.dto.TravelDetailResponseDTO;
+import com.navi.travel.dto.TravelListResponseDTO;
 //import com.navi.travel.repository.BookmarkRepository;
 //import com.navi.travel.repository.LikeRepository;
-//import com.navi.travel.repository.TravelRepository;
-//import jakarta.persistence.EntityManager;
-//import lombok.extern.slf4j.Slf4j;
-//import org.springframework.data.domain.Page;
-//import org.springframework.data.domain.Pageable;
-//import org.springframework.data.domain.Sort;
-//import org.springframework.data.jpa.domain.Specification;
-//import org.springframework.stereotype.Service;
-//import org.springframework.transaction.annotation.Transactional;
-//import org.springframework.util.StringUtils;
-//
-//import java.util.ArrayList;
-//import java.util.List;
-//import java.util.NoSuchElementException;
-//import java.util.stream.Collectors;
-//
-//// (여행지 조회 및 검색/필터링)
-//@Slf4j
-//@Service
-//@Transactional(readOnly = true)
-//public class TravelQueryServiceImpl implements TravelQueryService{
-//    private final TravelRepository travelRepository;
+import com.navi.travel.repository.TravelRepository;
+import jakarta.persistence.EntityManager;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
+
+// (여행지 조회 및 검색/필터링)
+@Slf4j
+@Service
+@Transactional(readOnly = true)
+public class TravelQueryServiceImpl implements TravelQueryService{
+    private final TravelRepository travelRepository;
 //    private final LikeRepository likeRepository;
 //    private final BookmarkRepository bookmarkRepository;
-//    private final TravelActionService travelActionService; // 뷰 카운트 증가 위임
-//    private final EntityManager em;
-//
-//    public TravelQueryServiceImpl(
-//            TravelRepository travelRepository,
+    private final TravelActionService travelActionService; // 뷰 카운트 증가 위임
+    private final EntityManager em;
+
+    public TravelQueryServiceImpl(
+            TravelRepository travelRepository,
 //            LikeRepository likeRepository,
 //            BookmarkRepository bookmarkRepository,
-//            TravelActionService travelActionService,
-//            EntityManager em
-//    ) {
-//        this.travelRepository = travelRepository;
+            TravelActionService travelActionService,
+            EntityManager em
+    ) {
+        this.travelRepository = travelRepository;
 //        this.likeRepository = likeRepository;
 //        this.bookmarkRepository = bookmarkRepository;
-//        this.travelActionService = travelActionService;
-//        this.em = em;
-//    }
-//
-//    /**
-//     * Travel 목록을 조회하고 필터링/정렬 기준에 따라 결과를 반환합니다.
-//     */
+        this.travelActionService = travelActionService;
+        this.em = em;
+    }
+
+    /**
+     * Travel 목록을 조회하고 필터링/정렬 기준에 따라 결과를 반환합니다.
+     */
 //    public Page<TravelListResponseDTO> getTravelList(Pageable pageable, List<String> region2Names, String category, String search, boolean publicOnly) {
 //
 //        Sort sort = pageable.getSort();
@@ -170,10 +170,10 @@
 //        Page<TravelListResponseDTO> pageDto = travelPage.map(TravelListResponseDTO::of);
 //        return attachLikesAndBookmarks(pageDto);
 //    }
-//
-//    /**
-//     * Travel 상세 정보를 조회합니다.
-//     */
+
+    /**
+     * Travel 상세 정보를 조회합니다.
+     */
 //    public TravelDetailResponseDTO getTravelDetail(Long travelId, String id) {
 //        Travel travel = travelRepository.findById(travelId)
 //                .orElseThrow(() -> new NoSuchElementException("Travel not found with ID: " + travelId));
@@ -200,20 +200,20 @@
 //
 //        return TravelDetailResponseDTO.of(travel, likesCount, bookmarkCount, isLikedByUser, isBookmarkedByUser);
 //    }
-//
-//    /**
-//     * Specification 구성 헬퍼 메서드: 두 Specification을 'and' 조건으로 결합합니다.
-//     */
-//    private Specification<Travel> combineSpec(Specification<Travel> currentSpec, Specification<Travel> newSpec) {
-//        if (currentSpec == null) {
-//            return newSpec;
-//        }
-//        return currentSpec.and(newSpec);
-//    }
-//
-//    /**
-//     * TravelListResponseDTO 리스트에 Likes와 Bookmark 카운트를 Repository에서 조회하여 추가하는 헬퍼 메서드
-//     */
+
+    /**
+     * Specification 구성 헬퍼 메서드: 두 Specification을 'and' 조건으로 결합합니다.
+     */
+    private Specification<Travel> combineSpec(Specification<Travel> currentSpec, Specification<Travel> newSpec) {
+        if (currentSpec == null) {
+            return newSpec;
+        }
+        return currentSpec.and(newSpec);
+    }
+
+    /**
+     * TravelListResponseDTO 리스트에 Likes와 Bookmark 카운트를 Repository에서 조회하여 추가하는 헬퍼 메서드
+     */
 //    private Page<TravelListResponseDTO> attachLikesAndBookmarks(Page<TravelListResponseDTO> pageDto) {
 //        if (pageDto.isEmpty()) {
 //            return pageDto;
@@ -228,4 +228,4 @@
 //
 //        return pageDto;
 //    }
-//}
+}

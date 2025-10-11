@@ -16,10 +16,10 @@ public interface TravelService {
     int saveApiData();
 
     // 여행지 리스트 조회 (필터링, 검색, 페이징 포함)
-    Page<TravelListResponseDTO> getTravelList(Pageable pageable, List<String> region2Names, String category,String search, boolean publicOnly);
+//    Page<TravelListResponseDTO> getTravelList(Pageable pageable, List<String> region2Names, String category,String search, boolean publicOnly);
 
     // 여행지 상세 정보 조회 (✅ userId 타입: String으로 변경)
-    TravelDetailResponseDTO getTravelDetail(Long travelId, String id);
+//    TravelDetailResponseDTO getTravelDetail(Long travelId, String id);
 
     //여행지 등록 및 수정
     TravelListResponseDTO saveTravel(TravelRequestDTO dto);
@@ -31,10 +31,10 @@ public interface TravelService {
     void incrementViews(Long travelId);
 
     // 좋아요 상태 토글 (✅ userId 타입: String으로 변경)
-    boolean  toggleLike(Long travelId, String userId);
+//    boolean  toggleLike(Long travelId, String userId);
 
     // 북마크 상태 토글 (✅ userId 타입: String으로 변경)
-    boolean  toggleBookmark(Long travelId, String userId);
+//    boolean  toggleBookmark(Long travelId, String userId);
 
 
 
