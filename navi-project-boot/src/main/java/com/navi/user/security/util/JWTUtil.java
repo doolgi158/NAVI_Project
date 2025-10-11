@@ -96,4 +96,17 @@ public class JWTUtil {
             throw new CustomException(e.getMessage(), 500, null);
         }
     }
+
+    public String getUserIdFromToken(String token) {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(secretKey)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+            return (String) claims.get("id");
+        } catch (JwtException e) {
+            throw new RuntimeException("유효하지 않은 토큰입니다.");
+        }
+    }
 }

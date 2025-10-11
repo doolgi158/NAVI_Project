@@ -1,6 +1,5 @@
 import { Suspense, lazy } from "react";
 
-const Loading = <div></div>
 const AdminUsers = lazy(() => import("../../admin/pages/user/AdminUsersPage.jsx"))
 const AdminDashboard = lazy(() => import("../../admin/pages/AdminDashboardPage.jsx"))
 const AdminTravelList = lazy(() => import("../../admin/pages/travel/AdminTravelList.jsx"))
@@ -22,8 +21,10 @@ const AdminRouter = () => {
          {
              path: "users",
              element: (
-                 <Suspense fallback={Loading}>
-                    <AdminUsers />
+                 <Suspense fallback={<div></div>}>
+                    <ProtectedRoute requiredRole="ADMIN">
+                        <AdminUsers />
+                    </ProtectedRoute>                    
                  </Suspense>
              )
          },
@@ -31,8 +32,10 @@ const AdminRouter = () => {
          {
              path: "travel",
              element: (
-                 <Suspense fallback={Loading}>
-                    <AdminTravelList  />
+                 <Suspense fallback={<div></div>}>
+                    <ProtectedRoute requiredRole="ADMIN">
+                        <AdminTravelList  />
+                    </ProtectedRoute>
                  </Suspense>
              )
          },
@@ -40,8 +43,10 @@ const AdminRouter = () => {
          {
              path: "travel/register",
              element: (
-                 <Suspense fallback={Loading}>
-                    <AdminTravelForm />
+                 <Suspense fallback={<div></div>}>
+                    <ProtectedRoute requiredRole="ADMIN">
+                        <AdminTravelForm />
+                    </ProtectedRoute>
                  </Suspense>
              )
          },
@@ -49,8 +54,10 @@ const AdminRouter = () => {
          {
              path: "travel/edit/:travelId",
              element: (
-                 <Suspense fallback={Loading}>
-                    <AdminTravelForm  />
+                 <Suspense fallback={<div></div>}>
+                    <ProtectedRoute requiredRole="ADMIN">
+                        <AdminTravelForm  />
+                    </ProtectedRoute>
                  </Suspense>
              )
          },

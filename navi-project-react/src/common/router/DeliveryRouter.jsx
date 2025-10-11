@@ -1,4 +1,5 @@
 import { lazy, Suspense } from "react";
+import ProtectedRoute from "./ProtectedRoute.jsx";
 
 const Loading = <div></div>;
 
@@ -27,7 +28,9 @@ const DeliveryRouter = () => [
     path: "detail/:id",
     element: (
       <Suspense fallback={Loading}>
-        <DeliveryDetailPage />
+        <ProtectedRoute requiredRole="USER">
+          <DeliveryDetailPage />
+        </ProtectedRoute>
       </Suspense>
     ),
   },
