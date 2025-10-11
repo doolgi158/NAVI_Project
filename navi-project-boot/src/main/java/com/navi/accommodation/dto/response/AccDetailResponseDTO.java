@@ -1,6 +1,7 @@
 package com.navi.accommodation.dto.response;
 
 import com.navi.accommodation.domain.Acc;
+import com.navi.room.dto.response.RoomResponseDTO;
 import lombok.*;
 
 import java.util.List;

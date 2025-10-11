@@ -1,9 +1,8 @@
-package com.navi.reservation.domain;
+package com.navi.reservation.domain.enums;
 
 public enum PaymentMethod {
     KAKAOPAY,
     TOSSPAYMENTS,
-    NAVERPAY,
     CARD,
     ETC; // 기타
 

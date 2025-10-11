@@ -11,7 +11,7 @@ import java.util.List;
 
 @Repository
 public interface AccRsvRepository extends JpaRepository<AccRsv, Long> {
-    // 전체 숙소 예약 상세 목록 조회
+    // 전체 숙소 예약 상세 목록 조회(관리자용)
     @Query("SELECT ar FROM AccRsv ar ORDER BY ar.startDate DESC")
     List<AccRsv> findAllDetails();
 

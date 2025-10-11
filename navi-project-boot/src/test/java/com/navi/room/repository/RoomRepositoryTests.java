@@ -1,7 +1,7 @@
-package com.navi.accommodation.repository;
+package com.navi.room.repository;
 
-import com.navi.accommodation.service.RoomService;
-import com.navi.accommodation.service.RoomSyncService;
+import com.navi.room.service.RoomService;
+import com.navi.room.service.RoomSyncService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -41,20 +41,40 @@ const AccDetailPage = () => {
     fetchData();
   }, [accId]);
 
-  const handleReserve = (room) => {
-    navigate(`/accommodations/${accId}/${room.roomId}/reservation`, {
-      state: {
-        accName: accData?.title || accData?.name,
-        room: {
-          roomId: room.roomId,
-          roomName: room.roomName,
-          maxCnt: room.maxCnt,
-          weekdayFee: room.weekdayFee,
-          weekendFee: room.weekendFee,
+  const handleReserve = async (room) => {
+    try {
+      // ✅ 예약 마스터 생성 (백엔드 호출)
+      const res = await axios.post("http://localhost:8080/api/reservation/pre", {
+        userNo: 1,                 // 임시 회원번호 (로그인 연동 시 수정 예정)
+        rsvType: "ACC",            // 숙소 예약
+        targetId: room.roomId,     // 객실 ID
+        totalAmount: room.weekdayFee || 100000,
+        paymentMethod: "KAKAOPAY", // 임시 결제수단
+      });
+
+      const reserveId = res.data.reserveId;
+      console.log("✅ 예약 마스터 생성 완료:", reserveId);
+
+      // ✅ 예약 정보 입력 페이지로 이동 (예약ID 함께 전달)
+      navigate(`/accommodations/${accId}/${room.roomId}/reservation`, {
+        state: {
+          accName: accData?.title || accData?.name,
+          room: {
+            roomId: room.roomId,
+            roomName: room.roomName,
+            maxCnt: room.maxCnt,
+            weekdayFee: room.weekdayFee,
+            weekendFee: room.weekendFee,
+          },
+          reserveId, // ✅ 예약ID 전달
         },
-      },
-    });
+      });
+    } catch (err) {
+      console.error("❌ 예약 생성 실패:", err);
+      message.error("이미 예약 중이거나 오류가 발생했습니다.");
+    }
   };
+
 
   if (loading) {
     return (

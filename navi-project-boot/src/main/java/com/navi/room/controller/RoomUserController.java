@@ -1,7 +1,7 @@
-package com.navi.accommodation.controller;
+package com.navi.room.controller;
 
-import com.navi.accommodation.dto.response.RoomListResponseDTO;
-import com.navi.accommodation.service.RoomService;
+import com.navi.room.dto.response.RoomListResponseDTO;
+import com.navi.room.service.RoomService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;

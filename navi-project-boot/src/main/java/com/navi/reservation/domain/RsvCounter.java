@@ -1,5 +1,6 @@
 package com.navi.reservation.domain;
 
+import com.navi.reservation.domain.enums.RsvType;
 import jakarta.persistence.*;
 import lombok.*;
 

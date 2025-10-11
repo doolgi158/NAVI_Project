@@ -1,8 +1,8 @@
 package com.navi.reservation.dto.response;
 
-import com.navi.reservation.domain.PaymentMethod;
-import com.navi.reservation.domain.RsvStatus;
-import com.navi.reservation.domain.RsvType;
+import com.navi.reservation.domain.enums.PaymentMethod;
+import com.navi.reservation.domain.enums.RsvStatus;
+import com.navi.reservation.domain.enums.RsvType;
 import lombok.*;
 
 import java.time.LocalDateTime;

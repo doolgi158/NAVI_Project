@@ -1,13 +1,9 @@
-package com.navi.accommodation.service;
+package com.navi.room.service;
 
-import com.navi.accommodation.domain.Acc;
-import com.navi.accommodation.dto.api.AccApiDTO;
-import com.navi.accommodation.dto.request.AccRequestDTO;
-import com.navi.accommodation.dto.request.RoomRequestDTO;
-import com.navi.accommodation.dto.response.RoomListResponseDTO;
-import com.navi.accommodation.dto.response.RoomResponseDTO;
+import com.navi.room.dto.request.RoomRequestDTO;
+import com.navi.room.dto.response.RoomListResponseDTO;
+import com.navi.room.dto.response.RoomResponseDTO;
 
-import java.io.IOException;
 import java.util.List;
 
 public interface RoomService {

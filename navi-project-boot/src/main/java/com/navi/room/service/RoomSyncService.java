@@ -1,12 +1,12 @@
-package com.navi.accommodation.service;
+package com.navi.room.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.navi.accommodation.domain.Acc;
-import com.navi.accommodation.domain.Room;
-import com.navi.accommodation.dto.api.RoomApiDTO;
+import com.navi.room.domain.Room;
+import com.navi.room.dto.api.RoomApiDTO;
 import com.navi.accommodation.repository.AccRepository;
-import com.navi.accommodation.repository.RoomRepository;
+import com.navi.room.repository.RoomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

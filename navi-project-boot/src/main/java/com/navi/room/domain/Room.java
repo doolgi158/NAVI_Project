@@ -1,8 +1,9 @@
-package com.navi.accommodation.domain;
+package com.navi.room.domain;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.navi.accommodation.dto.api.RoomApiDTO;
-import com.navi.accommodation.dto.request.RoomRequestDTO;
+import com.navi.accommodation.domain.Acc;
+import com.navi.room.dto.api.RoomApiDTO;
+import com.navi.room.dto.request.RoomRequestDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

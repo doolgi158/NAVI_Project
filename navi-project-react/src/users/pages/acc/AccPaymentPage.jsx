@@ -1,18 +1,20 @@
 import React from "react";
-import { useParams, useLocation } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import MainLayout from "../../layout/MainLayout";
-import { Card, Typography, Steps, Button, Radio, Divider, Space } from "antd";
+import { Card, Typography, Steps, Button, Radio, Divider, Space, message } from "antd";
+import axios from "axios";
 
 const { Title, Text } = Typography;
 
 const AccPaymentPage = () => {
-  const { accNo, roomId } = useParams();
+  const { accId, roomId } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
   const { room, accName, formData } = location.state || {}; // 예약 페이지에서 전달받은 데이터
 
   const [paymentMethod, setPaymentMethod] = React.useState("kakaopay");
 
-  // ✅ 아임포트 결제 요청 함수
+  /** ✅ 결제 요청 함수 */
   const handlePayment = () => {
     const { IMP } = window;
     if (!IMP) {
@@ -20,17 +22,17 @@ const AccPaymentPage = () => {
       return;
     }
 
-    // ✅ 아임포트 테스트용 식별코드
-    IMP.init("imp10391932");
+    // ✅ 아임포트 식별코드 (테스트용)
+    IMP.init("imp37084063");
 
-    // ✅ 결제 요청 정보 구성
+    // ✅ 결제 정보 구성
     const paymentData = {
       pg:
         paymentMethod === "kakaopay"
           ? "kakaopay.TC0ONETIME"
           : paymentMethod === "tosspay"
           ? "tosspayments.iamporttest_20240601"
-          : "html5_inicis.INIpayTest", // 카드 결제용 테스트 PG
+          : "html5_inicis.INIpayTest", // 카드 테스트용
       pay_method: "card",
       merchant_uid: `order_${new Date().getTime()}`, // 고유 주문번호
       name: `${accName || "숙소"} 예약 결제`,
@@ -40,19 +42,42 @@ const AccPaymentPage = () => {
       buyer_email: formData?.email || "example@email.com",
     };
 
-    console.log("결제 요청 데이터:", paymentData);
+    console.log("💳 결제 요청 데이터:", paymentData);
 
     // ✅ 결제창 호출
     IMP.request_pay(paymentData, async (rsp) => {
       if (rsp.success) {
         console.log("✅ 결제 성공:", rsp);
-        alert(`결제 성공!\n결제번호: ${rsp.imp_uid}\n주문번호: ${rsp.merchant_uid}`);
+        message.success("결제가 성공적으로 완료되었습니다!");
 
-        // 👉 여기서 백엔드 검증 요청 (다음 단계에서 구현 예정)
-        // await fetch("/api/payment/verify", { ... })
+        try {
+          // ✅ 백엔드 결제 검증 요청
+          const verifyRes = await axios.post(
+            "http://localhost:8080/api/payment/verify",
+            {
+              impUid: rsp.imp_uid,
+              merchantUid: rsp.merchant_uid,
+            }
+          );
+
+          const result = verifyRes.data;
+          console.log("🧾 결제 검증 결과:", result);
+
+          if (result.status === "paid") {
+            message.success("결제 검증 완료! 예약이 확정됩니다.");
+
+            // 👉 예약 완료 페이지로 이동 (또는 예약 API 호출)
+            navigate("/reservation/complete", { state: { result } });
+          } else {
+            message.warning(`결제 상태: ${result.status} (결제 실패 또는 취소됨)`);
+          }
+        } catch (error) {
+          console.error("❌ 결제 검증 실패:", error);
+          message.error("결제 검증 중 오류가 발생했습니다.");
+        }
       } else {
         console.error("❌ 결제 실패:", rsp.error_msg);
-        alert("결제 실패: " + rsp.error_msg);
+        message.error("결제 실패: " + rsp.error_msg);
       }
     });
   };
@@ -164,12 +189,8 @@ const AccPaymentPage = () => {
                   {room?.type || "객실 정보 없음"}
                 </Title>
 
-                <Text className="block text-gray-500 mb-1">
-                  숙소번호: {accNo}
-                </Text>
-                <Text className="block text-gray-500 mb-1">
-                  객실번호: {roomId}
-                </Text>
+                <Text className="block text-gray-500 mb-1">숙소ID: {accId}</Text>
+                <Text className="block text-gray-500 mb-1">객실ID: {roomId}</Text>
                 <Text className="text-lg text-gray-600 mb-1">
                   최대 인원 {room?.max || "-"}명
                 </Text>

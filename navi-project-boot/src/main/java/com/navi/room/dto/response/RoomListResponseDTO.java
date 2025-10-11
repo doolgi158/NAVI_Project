@@ -1,6 +1,6 @@
-package com.navi.accommodation.dto.response;
+package com.navi.room.dto.response;
 
-import com.navi.accommodation.domain.Room;
+import com.navi.room.domain.Room;
 import lombok.*;
 
 @Data

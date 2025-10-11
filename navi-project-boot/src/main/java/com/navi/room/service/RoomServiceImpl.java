@@ -1,23 +1,17 @@
-package com.navi.accommodation.service;
+package com.navi.room.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.navi.accommodation.domain.Acc;
-import com.navi.accommodation.domain.Room;
-import com.navi.accommodation.dto.api.RoomApiDTO;
-import com.navi.accommodation.dto.request.RoomRequestDTO;
-import com.navi.accommodation.dto.response.RoomListResponseDTO;
-import com.navi.accommodation.dto.response.RoomResponseDTO;
+import com.navi.room.domain.Room;
+import com.navi.room.dto.request.RoomRequestDTO;
+import com.navi.room.dto.response.RoomListResponseDTO;
+import com.navi.room.dto.response.RoomResponseDTO;
 import com.navi.accommodation.repository.AccRepository;
-import com.navi.accommodation.repository.RoomRepository;
+import com.navi.room.repository.RoomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 

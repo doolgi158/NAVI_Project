@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.navi.accommodation.dto.api.AccApiDTO;
 import com.navi.accommodation.dto.request.AccRequestDTO;
 import com.navi.location.domain.Township;
+import com.navi.room.domain.Room;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Nationalized;
