@@ -176,9 +176,6 @@ public class TravelQueryServiceImpl implements TravelQueryService{
      */
     public TravelDetailResponseDTO getTravelDetail(Long travelId, String id) {
 
-        // 뷰 카운트 증가 로직을 TravelActionService에 위임
-        travelActionService.incrementViews(travelId);
-
         Travel travel = travelRepository.findById(travelId)
                 .orElseThrow(() -> new NoSuchElementException("Travel not found with ID: " + travelId));
 

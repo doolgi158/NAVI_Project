@@ -45,7 +45,6 @@ export const useTravelList = () => {
   // ⭐ 새로고침 감지 → 세션 초기화 먼저 수행
   const navType = performance?.getEntriesByType('navigation')?.[0]?.type;
   if (navType === 'reload') {
-    console.log('🔄 새로고침 감지됨 → 전체 필터 초기화');
     sessionStorage.removeItem('travelListSort');
     sessionStorage.removeItem('travelListCategory');
     sessionStorage.removeItem('travelListSearch');

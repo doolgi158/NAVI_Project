@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../../common/api/naviApi.js'
 import {
   Row, Col, Typography, Divider, Button, Space,
   Descriptions, Spin, Result, Tag, message, Carousel
@@ -58,12 +58,12 @@ const TravelDetailPage = ({ id }) => {
 
     const fetchTravelDetail = async () => {
       setLoading(true);
-      const apiUrl = `/api/travel/detail/${travelId}` + (id ? `?id=${id}` : '');
-      const viewsApiUrl = `/api/travel/views/${travelId}`;
+      const apiUrl = `/travel/detail/${travelId}` + (id ? `?id=${id}` : '');
+      const viewsApiUrl = `/travel/views/${travelId}`;
 
       // 조회수 증가
       try {
-        axios.post(viewsApiUrl)
+        api.post(viewsApiUrl)
           .then(() => setTravelDetail(prev => prev ? {
             ...prev,
             views: (prev.views || 0) + 1
@@ -75,7 +75,7 @@ const TravelDetailPage = ({ id }) => {
 
       // 상세 정보 불러오기
       try {
-        const res = await axios.get(apiUrl);
+        const res = await api.get(apiUrl);
         setTravelDetail(res.data);
         setCurrentLikeCount(res.data.likesCount || 0);
         setIsLiked(res.data.isLiked || false);
@@ -112,7 +112,7 @@ const TravelDetailPage = ({ id }) => {
     setIsLiking(true);
 
     try {
-      const res = await axios.post(`/api/travel/like/${travelId}?id=${id}`);
+      const res = await api.post(`/travel/like/${travelId}?id=${id}`);
       const msg = res.data;
       if (msg.includes("추가")) {
         setIsLiked(true);
@@ -136,7 +136,7 @@ const TravelDetailPage = ({ id }) => {
     setIsBookmarking(true);
 
     try {
-      const res = await axios.post(`/api/travel/bookmark/${travelId}?id=${id}`);
+      const res = await api.post(`/travel/bookmark/${travelId}?id=${id}`);
       const msg = res.data;
       if (msg.includes("추가")) {
         setIsBookmarked(true);

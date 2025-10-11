@@ -63,7 +63,7 @@ const TravelControls = ({
 
   const selectedCategory = pageParam?.categoryName ?? '전체';
   const filterBadgeCount =
-    (selectedRegions?.length ?? 0) + (hasCategoryFilter ? '' : 0);
+    (selectedRegions?.length ?? 0) + (hasCategoryFilter ? 1 : 0);
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200">

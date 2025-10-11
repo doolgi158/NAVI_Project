@@ -72,8 +72,21 @@ public class TravelController {
         }
     }
 
+    /** 3. 조회수 증가 */
+    @PostMapping("/views/{travelId}")
+    public ResponseEntity<Void> incrementViews(@PathVariable("travelId") Long travelId) {
+        try {
+            travelService.incrementViews(travelId);
+            return ResponseEntity.noContent().build(); // 204 No Content
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.notFound().build(); // 404 Not Found
+        } catch (Exception e) {
+            System.err.println("조회수 증가 중 서버 오류 발생: " + e.getMessage());
+            return ResponseEntity.internalServerError().build(); // 500 Internal Server Error
+        }
+    }
 
-    /** 3. 좋아요 토글 */
+    /** 4. 좋아요 토글 */
     @PostMapping("/like/{travelId}")
     public ResponseEntity<String> toggleLike(@PathVariable Long travelId) {
         String id = null;
@@ -97,7 +110,7 @@ public class TravelController {
         }
     }
 
-    /** 4. 북마크 토글 */
+    /** 5. 북마크 토글 */
     @PostMapping("/bookmark/{travelId}")
     public ResponseEntity<String> toggleBookmark(@PathVariable Long travelId) {
         String id = null;
