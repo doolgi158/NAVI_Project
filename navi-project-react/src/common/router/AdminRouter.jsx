@@ -1,20 +1,22 @@
 import { Suspense, lazy } from "react";
-import AdminTravelForm from "../../admin/pages/travel/AdminTravelForm.jsx";
-import AdminTravelList from "../../admin/pages/travel/AdminTravelList.jsx"; 
 
 const Loading = <div></div>
 const AdminUsers = lazy(() => import("../../admin/pages/user/AdminUsersPage.jsx"))
 const AdminDashboard = lazy(() => import("../../admin/pages/AdminDashboardPage.jsx"))
+const AdminTravelList = lazy(() => import("../../admin/pages/travel/AdminTravelList.jsx"))
+const AdminTravelForm = lazy(() => import("../../admin/pages/travel/AdminTravelForm.jsx"))
+const ProtectedRoute = lazy(() => import("./ProtectedRoute.jsx"))
 
 const AdminRouter = () => {
-    return [     
-    
+    return [      
          {
              path: "dashboard",
              element: (
-                 <Suspense fallback={Loading}>
-                    <AdminDashboard />
-                 </Suspense>
+                <Suspense fallback={<div></div>}>
+                    <ProtectedRoute requiredRole="ADMIN">
+                        <AdminDashboard />
+                    </ProtectedRoute> 
+                </Suspense>
              )
          },
          {

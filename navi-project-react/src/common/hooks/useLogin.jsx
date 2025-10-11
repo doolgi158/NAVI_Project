@@ -10,6 +10,8 @@ export const useLogin = () => {
 
   const login = async (values) => {
     try {
+      localStorage.setItem("redirectAfterLogin", window.location.pathname);
+
       // 로그인 요청
       const params = new URLSearchParams();
       params.append("username", values.username);
@@ -32,13 +34,17 @@ export const useLogin = () => {
         axios.defaults.headers.common["Authorization"] = `Bearer ${data.accessToken}`;
 
         // Redux 상태 갱신
-        dispatch(setlogin({ username: values.username, token: data.accessToken }));
+        dispatch(setlogin({ username: values.username, token: data.accessToken , role: data.role, ip: data.ip }));
+        
+        // 리디렉션 처리
+        const redirectPath = localStorage.getItem("redirectAfterLogin") || "/";
+        localStorage.removeItem("redirectAfterLogin");
 
         // 관리자 전용 페이지 분기
         if (data.id === "naviadmin") {
           navigate("/adm/dashboard");
         } else {
-          navigate("/"); // 일반 사용자 메인으로 이동
+          navigate(redirectPath);
         }
 
         return { success: true, message: "로그인 성공" };
