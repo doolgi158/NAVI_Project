@@ -30,7 +30,7 @@ public class ApiSocialController {
 
     private static final DateTimeFormatter DT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    // ✅ 소셜 로그인: 응답을 ApiResponse로, enum 안전 변환
+    // 소셜 로그인: 응답을 ApiResponse로, enum 안전 변환
     @GetMapping("/api/auth/oauth/{provider}")
     public ApiResponse<?> oauthLogin(
             @PathVariable("provider") String providerStr,
@@ -40,7 +40,7 @@ public class ApiSocialController {
         // provider 소문자/대문자 모두 허용
         SocialState provider;
         try {
-            provider = SocialState.valueOf(providerStr.toUpperCase(Locale.ROOT));
+            provider = SocialState.valueOf(providerStr.toLowerCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
             return ApiResponse.error("지원하지 않는 소셜 로그인 타입입니다: " + providerStr, 400, null);
         }
@@ -71,7 +71,7 @@ public class ApiSocialController {
         data.put("ip", ip);
         data.put("oauth", oauth);
 
-        // ✅ 프런트가 기대하는 형태로 래핑
+        // 프런트가 기대하는 형태로 래핑
         return ApiResponse.success(data);
     }
 

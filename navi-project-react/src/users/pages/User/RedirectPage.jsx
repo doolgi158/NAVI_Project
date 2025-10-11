@@ -13,7 +13,7 @@ const RedirectPage = () => {
     const code = searchParams.get("code");
     if (!code) return;
 
-    // ✅ provider 추출 (Google, Kakao, Naver 중 어느 것인지)
+    // provider 추출 (Google, Kakao, Naver 중 어느 것인지)
     const url = new URL(window.location.href);
     let provider = "kakao";
     
@@ -22,7 +22,7 @@ const RedirectPage = () => {
     else if (url.href.includes("navi")) provider = "naver";
 
     if (!provider) return;
-    // ✅ 백엔드 요청
+    // 백엔드 요청
     axios
       .get(`http://localhost:8080/api/auth/oauth/${provider}?code=${code}`)
       .then((res) => {
@@ -41,7 +41,7 @@ const RedirectPage = () => {
         alert("로그인에 실패했습니다. 다시 시도해주세요.");
         navigate("/");
       });
-  }, []);
+  }, [searchParams, dispatch, navigate]);
 
   return (
     <div className="flex flex-col justify-center items-center min-h-screen text-gray-700">

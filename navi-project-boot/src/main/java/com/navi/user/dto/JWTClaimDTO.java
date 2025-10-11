@@ -17,6 +17,7 @@ public class JWTClaimDTO {
     private String birth;     // 생년월일
     private String provider;  // 소셜 로그인 제공자 (google, kakao 등)
     private List<UserRole> role;    // 권한
+    private String ip;
     private String accessToken;
     private String refreshToken;
 
