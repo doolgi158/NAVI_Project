@@ -1,7 +1,7 @@
-import React from 'react';
-import { useParams, useLocation } from 'react-router-dom';
-import MainLayout from '../../layout/MainLayout';
-import { Card, Typography, Steps, Button, Radio, Divider, Space } from 'antd';
+import React from "react";
+import { useParams, useLocation } from "react-router-dom";
+import MainLayout from "../../layout/MainLayout";
+import { Card, Typography, Steps, Button, Radio, Divider, Space } from "antd";
 
 const { Title, Text } = Typography;
 
@@ -10,37 +10,75 @@ const AccPaymentPage = () => {
   const location = useLocation();
   const { room, accName, formData } = location.state || {}; // 예약 페이지에서 전달받은 데이터
 
-  const [paymentMethod, setPaymentMethod] = React.useState('kakaopay');
+  const [paymentMethod, setPaymentMethod] = React.useState("kakaopay");
 
+  // ✅ 아임포트 결제 요청 함수
   const handlePayment = () => {
-    console.log('결제 시도:', { paymentMethod, formData, accNo, roomId });
-    alert(`결제 테스트 실행 (${paymentMethod})`);
+    const { IMP } = window;
+    if (!IMP) {
+      alert("아임포트 SDK가 로드되지 않았습니다. index.html을 확인하세요.");
+      return;
+    }
+
+    // ✅ 아임포트 테스트용 식별코드
+    IMP.init("imp10391932");
+
+    // ✅ 결제 요청 정보 구성
+    const paymentData = {
+      pg:
+        paymentMethod === "kakaopay"
+          ? "kakaopay.TC0ONETIME"
+          : paymentMethod === "tosspay"
+          ? "tosspayments.iamporttest_20240601"
+          : "html5_inicis.INIpayTest", // 카드 결제용 테스트 PG
+      pay_method: "card",
+      merchant_uid: `order_${new Date().getTime()}`, // 고유 주문번호
+      name: `${accName || "숙소"} 예약 결제`,
+      amount: room?.price || 200000,
+      buyer_name: formData?.name || "홍길동",
+      buyer_tel: formData?.phone || "010-0000-0000",
+      buyer_email: formData?.email || "example@email.com",
+    };
+
+    console.log("결제 요청 데이터:", paymentData);
+
+    // ✅ 결제창 호출
+    IMP.request_pay(paymentData, async (rsp) => {
+      if (rsp.success) {
+        console.log("✅ 결제 성공:", rsp);
+        alert(`결제 성공!\n결제번호: ${rsp.imp_uid}\n주문번호: ${rsp.merchant_uid}`);
+
+        // 👉 여기서 백엔드 검증 요청 (다음 단계에서 구현 예정)
+        // await fetch("/api/payment/verify", { ... })
+      } else {
+        console.error("❌ 결제 실패:", rsp.error_msg);
+        alert("결제 실패: " + rsp.error_msg);
+      }
+    });
   };
 
   return (
     <MainLayout>
-      <div className="min-h-screen bg-[#FFFBEA] flex justify-center items-center py-12 px-8">
+      <div className="min-h-screen bg-[#FFFBEA] flex justify-center pt-10 pb-12 px-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full max-w-7xl">
-
           {/* === 왼쪽: 결제 정보 === */}
           <Card
             className="lg:col-span-2"
             style={{
               borderRadius: 16,
-              boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
-              backgroundColor: '#FFFFFF',
+              boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
+              backgroundColor: "#FFFFFF",
             }}
             styles={{
-              body: { padding: '32px' },
+              body: { padding: "32px" },
             }}
           >
-            {/* ✅ Steps: 현재 2단계 */}
             <Steps
               current={1}
               items={[
-                { title: '예약 정보 입력' },
-                { title: '결제 진행' },
-                { title: '예약 완료' },
+                { title: "예약 정보 입력" },
+                { title: "결제 진행" },
+                { title: "예약 완료" },
               ]}
               style={{ marginBottom: 40 }}
             />
@@ -67,44 +105,45 @@ const AccPaymentPage = () => {
 
             <Divider />
 
-            {/* ✅ 결제 정보 요약 */}
+            {/* ✅ 예약 정보 확인 */}
             <div className="space-y-2">
               <Title level={5}>예약 정보 확인</Title>
               <Text className="block text-gray-600">
-                예약자명: <strong>{formData?.name || '홍길동'}</strong>
+                예약자명: <strong>{formData?.name || "홍길동"}</strong>
               </Text>
               <Text className="block text-gray-600">
-                연락처: <strong>{formData?.phone || '010-0000-0000'}</strong>
+                연락처: <strong>{formData?.phone || "010-0000-0000"}</strong>
               </Text>
               <Text className="block text-gray-600">
-                이메일: <strong>{formData?.email || 'example@email.com'}</strong>
+                이메일: <strong>{formData?.email || "example@email.com"}</strong>
               </Text>
               <Text className="block text-gray-600">
-                숙박 일정:{' '}
+                숙박 일정:{" "}
                 <strong>
-                  {formData?.dateRange?.join(' ~ ') || '2025-10-10 ~ 2025-10-12'}
+                  {formData?.dateRange?.join(" ~ ") || "2025-10-10 ~ 2025-10-12"}
                 </strong>
               </Text>
               <Text className="block text-gray-600">
                 인원: <strong>{formData?.guestCount || 2}명</strong>
               </Text>
               <Text className="block text-gray-600 mt-4 text-lg">
-                총 결제 금액:{' '}
+                총 결제 금액:{" "}
                 <span className="text-blue-600 font-bold text-xl">
-                  {room?.price ? `${room.price.toLocaleString()}원` : '200,000원'}
+                  {room?.price
+                    ? `${room.price.toLocaleString()}원`
+                    : "200,000원"}
                 </span>
               </Text>
             </div>
           </Card>
 
-          {/* === 오른쪽: 숙소 + 객실 요약 정보 (예약페이지 동일 구조) === */}
+          {/* === 오른쪽: 숙소 요약 === */}
           <div className="flex flex-col justify-between h-full">
-            {/* 객실 정보 카드 */}
             <Card
               style={{
                 borderRadius: 16,
                 boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
-                backgroundColor: "#FDF6D8", // 나비색
+                backgroundColor: "#FDF6D8",
               }}
               styles={{
                 body: { padding: "24px" },
@@ -142,7 +181,7 @@ const AccPaymentPage = () => {
               </div>
             </Card>
 
-            {/* ✅ 결제 버튼 — 예약페이지와 동일 위치 */}
+            {/* ✅ 결제 버튼 */}
             <div className="mt-6">
               <Button
                 type="primary"

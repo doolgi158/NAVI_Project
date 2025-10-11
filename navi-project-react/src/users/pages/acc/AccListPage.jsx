@@ -48,8 +48,7 @@ const AccListPage = () => {
 
     return (
         <MainLayout>
-            <div className="min-h-screen bg-[#fffde8] flex flex-col items-center pt-10 px-4">
-                
+            <div className="min-h-screen bg-[#fffde8] flex flex-col items-center pt-10 pb-12 px-8">
                 {/* 메인 컨테이너 */}
                 <div className="w-full max-w-7xl"> 
                     
