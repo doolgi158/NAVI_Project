@@ -30,7 +30,7 @@ const loginSlice = createSlice({
       state.username = action.payload.username;
       state.token = action.payload.token;
       state.ip = action.payload.ip;
-
+console.log(action);
       // 에러가 없을 때만 쿠키 저장
       if(!action.payload.error){
         setCookie("userCookie", JSON.stringify(action.payload), 1);

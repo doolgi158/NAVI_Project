@@ -89,7 +89,7 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
           >
             <Card
               className="w-full max-w-md p-6 rounded-2xl shadow-lg bg-white relative"
-              bordered={false}
+              variant="borderless"
             >
               <button
                 onClick={onClose}
@@ -100,7 +100,7 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
 
               <h2 className="text-center text-2xl font-bold mb-6">로그인</h2>
 
-              <Form form={form} layout="vertical" onFinish={handleSubmit}>
+              <Form form={form} layout="vertical" preserve={false} onFinish={handleSubmit} key={open ? "open" : "closed"}>
                 <Form.Item
                   label="아이디"
                   name="username"
@@ -130,7 +130,7 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         e.preventDefault();
-                        form.submit(); // ✅ 마지막 input → submit 실행
+                        form.submit();
                       }
                     }}
                   />

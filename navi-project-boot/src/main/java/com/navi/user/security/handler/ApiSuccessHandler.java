@@ -81,14 +81,37 @@ public class ApiSuccessHandler implements AuthenticationSuccessHandler {
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType("application/json; charset=UTF-8");
 
-        try (PrintWriter out = response.getWriter()) {
-            out.println(gson.toJson(
-                    Map.of(
-                            "status", 200,
-                            "message", message,
-                            "data", body
-                    )
-            ));
+        if (body instanceof JWTClaimDTO claim) {
+            // null-safe 처리
+            String id = claim.getId() != null ? claim.getId() : "unknown";
+            String access = claim.getAccessToken() != null ? claim.getAccessToken() : "";
+            String refresh = claim.getRefreshToken() != null ? claim.getRefreshToken() : "";
+            String ip = claim.getIp() != null ? claim.getIp() : "0.0.0.0";
+
+            try (PrintWriter out = response.getWriter()) {
+                out.println(gson.toJson(
+                        Map.of(
+                                "status", 200,
+                                "message", message,
+                                "id", id,
+                                "accessToken", access,
+                                "refreshToken", refresh,
+                                "ip", ip
+                        )
+                ));
+                out.flush();
+            }
+        } else {
+            try (PrintWriter out = response.getWriter()) {
+                out.println(gson.toJson(
+                        Map.of(
+                                "status", 200,
+                                "message", message,
+                                "data", body != null ? body : "null"
+                        )
+                ));
+                out.flush();
+            }
         }
     }
 }

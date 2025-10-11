@@ -10,21 +10,17 @@ export const useLogin = () => {
 
   const login = async (values) => {
     try {
-      // 클라이언트 IP 조회      
-      const ipRes = await axios.get("https://api.ipify.org?format=json");
-      const ip = ipRes.data.ip;
-
       // 로그인 요청
       const params = new URLSearchParams();
       params.append("username", values.username);
       params.append("password", values.password);
-      params.append("ip", ip);
+      params.append("ip", values.ip);
 
       const response = await axios.post(`${API_SERVER_HOST}/api/users/login`, params, {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         validateStatus: () => true,  // 에러 상태도 직접 처리
       });
-      
+
       // 상태 코드별 처리
       if (response.status === 200) {
         const data = response.data;
