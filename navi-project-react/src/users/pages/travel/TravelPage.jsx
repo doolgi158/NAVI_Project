@@ -2,15 +2,33 @@ import React, { useEffect, useCallback, useRef, useState } from 'react';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import MainLayout from '../../layout/MainLayout.jsx';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux'; // ✅ Redux에서 로그인 사용자 정보 불러옴
+import api from '../../../common/api/naviApi.js';
 import { useKakaoMap } from '../../../common/hooks/useKakaoMap.jsx';
 import { useTravelList } from '../../../common/hooks/useTravelList.jsx';
 import TravelCard from '../../../common/components/travel/TravelCard.jsx';
 import Pagination from '../../../common/components/travel/Pagination.jsx';
 import TravelControls from '../../../common/components/travel/TravelControls.jsx';
 
-const TravelPage = () => {
+const TravelPage = ({ user }) => {
   const navigate = useNavigate();
 
+  /** ✅ Redux store에서 로그인 정보 가져오기 */
+  const reduxUser = useSelector((state) => state.login);
+
+  /** ✅ userId 확인 (prop 우선, 없으면 Redux) */
+  const userId = user?.username || reduxUser?.username || null;
+
+
+  /** ✅ 토큰 재적용 확인 */
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    }
+  }, []);
+
+  /** ✅ 사용자 ID 기반으로 훅 초기화 */
   const {
     pageResult,
     pageParam,
@@ -33,9 +51,11 @@ const TravelPage = () => {
     handleSelectAllRegions,
     handleDeselectAllRegions,
     categories,
-  } = useTravelList();
+  } = useTravelList(userId);
 
+  /** ✅ 지도 훅 */
   const { isMapLoaded, updateMap, resetMap } = useKakaoMap('kakao-map-container');
+
   const [searchText, setSearchText] = useState(pageParam?.search || '');
   const searchInputRef = useRef(null);
 
@@ -59,10 +79,9 @@ const TravelPage = () => {
     handleSearch('');
   }, [handleSearch]);
 
-  /** ✅ 여행지 클릭 → 상세페이지 이동 (조회수 API 호출 X) */
+  /** ✅ 상세페이지 이동 */
   const handleCardClick = useCallback(
     (item) => {
-      // 상태 저장 (뒤로가기 복원용)
       sessionStorage.setItem('travelListPage', pageParam?.page?.toString() || '1');
       sessionStorage.setItem('travelListScrollY', window.scrollY.toString());
       sessionStorage.setItem('travelListSort', pageParam?.sort?.toString() || '');
@@ -70,11 +89,7 @@ const TravelPage = () => {
       sessionStorage.setItem('travelListCategory', pageParam?.categoryName || '전체');
       sessionStorage.setItem('travelListRegions', JSON.stringify(selectedRegions || []));
       sessionStorage.setItem('travelLastViewedId', item.travelId.toString());
-
       setSelectedItem(item);
-
-      // ✅ 조회수 API 호출 제거
-      // ✅ 상세페이지 이동 시 백엔드에서 자동 +1 처리됨
       navigate(`/travel/detail/${item.travelId}`);
     },
     [navigate, pageParam, selectedRegions, setSelectedItem]
@@ -88,83 +103,17 @@ const TravelPage = () => {
     [handleLocalSearchSubmit]
   );
 
-  /** ✅ 정렬 초기 복원 */
+  /** ✅ 스크롤 복원 */
   useEffect(() => {
-    const savedSort = sessionStorage.getItem('travelListSort');
-    if (savedSort && savedSort !== pageParam?.sort) {
-      handleSortChange(savedSort);
-    }
-  }, []); // 최초 1회 실행
-
-  /** ✅ 정렬 변경 시 세션에 저장 */
-  const handleSortChangeWithSession = useCallback(
-    (sortType) => {
-      handleSortChange(sortType);
-      sessionStorage.setItem('travelListSort', sortType);
-    },
-    [handleSortChange]
-  );
-
-  /** ✅ 페이지 복원 (뒤로가기/새로고침 시) */
-  useEffect(() => {
-    const savedPage = sessionStorage.getItem('travelListPage');
-    const savedSort = sessionStorage.getItem('travelListSort');
-    const savedSearch = sessionStorage.getItem('travelListSearch');
-    const savedCategory = sessionStorage.getItem('travelListCategory');
-    const savedRegionsJson = sessionStorage.getItem('travelListRegions');
-
-    if (savedSort && savedSort !== pageParam?.sort) handleSortChange(savedSort);
-    if (savedCategory && savedCategory !== pageParam?.categoryName)
-      handleCategoryChange(savedCategory);
-    if (savedSearch && savedSearch !== pageParam?.search) handleSearch(savedSearch);
-    if (savedPage && parseInt(savedPage, 10) !== pageParam?.page)
-      handlePageClick(parseInt(savedPage, 10));
-
-    setSearchText(pageParam?.search || '');
-
-    if (savedPage || savedSort || savedSearch || savedCategory || savedRegionsJson) {
-      sessionStorage.removeItem('travelListPage');
-      sessionStorage.removeItem('travelListScrollY');
-      sessionStorage.removeItem('travelListSearch');
-      sessionStorage.removeItem('travelListCategory');
-      sessionStorage.removeItem('travelListRegions');
-    }
-
     const savedScroll = sessionStorage.getItem('travelListScrollY');
     if (savedScroll) {
-      setTimeout(() => {
-        window.scrollTo(0, parseInt(savedScroll, 10));
-      }, 100);
+      setTimeout(() => window.scrollTo(0, parseInt(savedScroll, 10)), 100);
     }
-  }, [
-    pageParam?.search,
-    pageParam?.page,
-    pageParam?.sort,
-    pageParam?.categoryName,
-    handlePageClick,
-    handleSortChange,
-    handleCategoryChange,
-    handleSearch,
-  ]);
-
-  /** ✅ 마지막 본 항목 복원 */
-  useEffect(() => {
-    if (pageResult?.dtoList?.length > 0 && selectedItem === null) {
-      const lastViewedId = sessionStorage.getItem('travelLastViewedId');
-      if (lastViewedId) {
-        const found = pageResult.dtoList.find(
-          (item) => item.travelId.toString() === lastViewedId
-        );
-        if (found) setSelectedItem(found);
-        sessionStorage.removeItem('travelLastViewedId');
-      }
-    }
-  }, [pageResult.dtoList, setSelectedItem, selectedItem]);
+  }, []);
 
   /** ✅ 지도 표시 로직 */
   useEffect(() => {
     if (!isMapLoaded) return;
-
     if (pageResult.totalElements === 0 && !showLoading) {
       resetMap();
       setSelectedItem(null);
@@ -191,7 +140,9 @@ const TravelPage = () => {
   return (
     <MainLayout>
       <div className="py-8 min-h-[calc(100vh-140px)] space-y-8">
-        {/* 검색창 */}
+       
+
+        {/* ✅ 검색창 */}
         <div className="flex justify-center">
           <div className="w-full max-w-3xl flex shadow-lg rounded-lg overflow-hidden border border-blue-300">
             <input
@@ -221,12 +172,12 @@ const TravelPage = () => {
           </div>
         </div>
 
-        {/* 필터 & 정렬 */}
+        {/* ✅ 필터 & 정렬 */}
         <TravelControls
           totalElements={pageResult?.totalElements || 0}
           showLoading={showLoading}
           activeSort={getActiveSort}
-          handleSortChange={handleSortChangeWithSession}
+          handleSortChange={handleSortChange}
           toggleRegionPanel={toggleRegionPanel}
           selectedRegions={selectedRegions || []}
           pageParam={pageParam || { categoryName: '전체' }}
@@ -241,45 +192,29 @@ const TravelPage = () => {
           handleClearFilter={handleClearFilter}
         />
 
-        {/* 목록 + 지도 */}
+        {/* ✅ 목록 & 지도 */}
         <div className="flex flex-col lg:flex-row gap-6">
+          {/* 좌측 리스트 */}
           <div className="lg:w-4/12 flex flex-col space-y-4">
             {showLoading ? (
               <div className="p-12 text-center text-gray-500 bg-white rounded-lg shadow-md min-h-[400px] flex flex-col items-center justify-center">
-                <svg
-                  className="animate-spin h-8 w-8 text-blue-500 mb-4"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  />
+                <svg className="animate-spin h-8 w-8 text-blue-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>
                 <p className="text-lg font-medium">데이터를 불러오는 중입니다...</p>
               </div>
             ) : hasError || pageResult.dtoList?.length === 0 ? (
               <div className="p-12 text-center text-red-500 border border-red-200 rounded-lg bg-red-50 font-bold text-lg shadow-md min-h-[400px] flex flex-col items-center justify-center">
                 찾을 수 없습니다
-                <p className="text-sm font-normal mt-2 text-red-400">
-                  검색 결과가 없거나 데이터를 불러오는 데 실패했습니다.
-                </p>
+                <p className="text-sm font-normal mt-2 text-red-400">검색 결과가 없거나 데이터를 불러오는 데 실패했습니다.</p>
               </div>
             ) : (
               <div className="space-y-4">
                 {pageResult.dtoList.map((item) => (
                   <TravelCard
                     key={item.travelId}
+                    user={{ username: userId }} // ✅ 명시적으로 user 전달
                     item={item}
                     onClick={handleCardClick}
                     isSelected={selectedItem && selectedItem.travelId === item.travelId}
@@ -291,7 +226,7 @@ const TravelPage = () => {
             )}
           </div>
 
-          {/* 지도 */}
+          {/* 우측 지도 */}
           <div className="lg:w-8/12">
             <div className="relative border-2 border-gray-300 rounded-lg shadow-2xl h-[700px] sticky top-6 overflow-hidden">
               <div id="kakao-map-container" style={{ width: '100%', height: '100%' }}>
@@ -314,7 +249,7 @@ const TravelPage = () => {
           </div>
         </div>
 
-        {/* 페이지네이션 */}
+        {/* ✅ 페이지네이션 */}
         {pageResult.totalPages > 1 && !hasError && (
           <Pagination pageResult={pageResult} handlePageClick={handlePageClick} loading={showLoading} />
         )}

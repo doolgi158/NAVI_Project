@@ -55,7 +55,6 @@ public class TravelServiceImpl implements TravelService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public TravelDetailResponseDTO getTravelDetail(Long travelId, String id) {
         return travelQueryService.getTravelDetail(travelId, id);
     }

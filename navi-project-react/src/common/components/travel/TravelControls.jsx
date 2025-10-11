@@ -45,9 +45,9 @@ const TravelControls = ({
   );
 
   const baseBtn =
-    'px-4 py-2 text-sm border rounded-md shadow-sm transition-all duration-300 flex items-center space-x-1';
+    'px-4 py-2 text-sm border rounded-md shadow-sm transition-all duration-300 flex items-center  space-x-1';
   const btnDefault =
-    'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:scale-105';
+    'bg-blue-500 text-white border-gray-300 hover:bg-gray-50 hover:scale-105';
   const btnActive = 'bg-blue-500 text-white border-blue-500 hover:bg-blue-600';
   const btnOpen = 'bg-teal-500 text-white hover:bg-teal-700';
 

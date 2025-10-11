@@ -42,19 +42,16 @@ public class TravelActionServiceImpl implements TravelActionService {
      */
     @Transactional
     public boolean toggleLike(Long travelId, String userId) {
-        if (userId == null || userId.isBlank()) {
+        if (userId == null || userId.isBlank() || "anonymousUser".equals(userId)) {
             throw new IllegalArgumentException("로그인 후 이용 가능합니다.");
         }
 
-        // 1️⃣ 여행지 조회
         Travel travel = travelRepository.findById(travelId)
                 .orElseThrow(() -> new EntityNotFoundException("여행지를 찾을 수 없습니다. (Travel ID: " + travelId + ")"));
 
-        // 2️⃣ 사용자 조회
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다. (User ID: " + userId + ")"));
 
-        // 3️⃣ 기존 좋아요 여부 확인
         Optional<Like> existingLike = likeRepository.findByTravelIdAndId(travelId, userId);
         boolean likedBefore = existingLike.isPresent();
 
@@ -62,7 +59,7 @@ public class TravelActionServiceImpl implements TravelActionService {
             likeRepository.deleteByTravelIdAndId(travelId, userId);
         } else {
             Like like = new Like(travel, user);
-            like.setUserId(userId); // 🔹 user_id 문자열 컬럼 값 세팅
+            like.setUserId(userId); // user_id 문자열 컬럼 값 세팅
             likeRepository.save(like);
         }
 
@@ -74,19 +71,16 @@ public class TravelActionServiceImpl implements TravelActionService {
      */
     @Transactional
     public boolean toggleBookmark(Long travelId, String userId) {
-        if (userId == null || userId.isBlank()) {
+        if (userId == null || userId.isBlank() || "anonymousUser".equals(userId)) {
             throw new IllegalArgumentException("로그인 후 이용 가능합니다.");
         }
 
-        // 1️⃣ 여행지 조회
         Travel travel = travelRepository.findById(travelId)
                 .orElseThrow(() -> new EntityNotFoundException("여행지를 찾을 수 없습니다. (Travel ID: " + travelId + ")"));
 
-        // 2️⃣ 사용자 조회
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다. (User ID: " + userId + ")"));
 
-        // 3️⃣ 기존 북마크 여부 확인
         Optional<Bookmark> existingBookmark = bookmarkRepository.findByTravelIdAndId(travelId, userId);
         boolean bookmarkedBefore = existingBookmark.isPresent();
 
@@ -94,7 +88,7 @@ public class TravelActionServiceImpl implements TravelActionService {
             bookmarkRepository.deleteByTravelIdAndId(travelId, userId);
         } else {
             Bookmark bookmark = new Bookmark(travel, user);
-            bookmark.setUserId(userId); // 🔹 user_id 문자열 컬럼 값 세팅
+            bookmark.setUserId(userId);
             bookmarkRepository.save(bookmark);
         }
 

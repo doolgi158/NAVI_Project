@@ -1,5 +1,6 @@
 package com.navi.travel.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.navi.travel.domain.Travel;
 import lombok.Builder;
 import lombok.Getter;
@@ -41,7 +42,10 @@ public class TravelDetailResponseDTO {
     private String hours;
 
     // ✅ 사용자 상태 값
+    @JsonProperty("likedByUser")
     private boolean isLikedByUser;
+
+    @JsonProperty("bookmarkedByUser")
     private boolean isBookmarkedByUser;
 
     private LocalDate updatedAt;

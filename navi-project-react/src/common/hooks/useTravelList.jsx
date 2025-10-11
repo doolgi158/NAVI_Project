@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import axios from 'axios';
+import api from '../../common/api/naviApi.js';
 import { useTravelListFilter } from './useTravelListFilter.jsx';
 
 const categories = ['전체', '관광지', '음식점', '쇼핑'];
 
 // ✅ 여행지 목록 API 호출 함수
-const getTravelData = async (domain, pageParam, filterQuery) => {
-  const apiUrl = `/api/${domain}`;
+const getTravelData = async (domain, pageParam, filterQuery, userId) => {
+  const apiUrl = `/${domain}`;
   const sortArray = pageParam.sort ? pageParam.sort.split(',') : [];
   const sortParams = [];
 
@@ -32,8 +32,11 @@ const getTravelData = async (domain, pageParam, filterQuery) => {
     queryString += `&search=${encodedSearch}`;
   }
 
+  // ✅ 로그인 사용자가 있다면 쿼리 파라미터로 id 전달
+  if (userId) queryString += `&id=${userId}`;
+
   try {
-    const response = await axios.get(apiUrl + queryString);
+    const response = await api.get(apiUrl + queryString);
     return response.data;
   } catch (error) {
     console.error('여행지 목록 로딩 실패:', error.message);
@@ -41,8 +44,8 @@ const getTravelData = async (domain, pageParam, filterQuery) => {
   }
 };
 
-export const useTravelList = () => {
-  // ⭐ 새로고침 감지 → 세션 초기화 먼저 수행
+export const useTravelList = (userId) => {
+  // ⭐ 새로고침 시 세션 초기화
   const navType = performance?.getEntriesByType('navigation')?.[0]?.type;
   if (navType === 'reload') {
     sessionStorage.removeItem('travelListSort');
@@ -98,50 +101,53 @@ export const useTravelList = () => {
   });
 
   // ✅ 여행지 목록 불러오기
-  const fetchTravelList = useCallback((param, query) => {
-    if (isLoadingRef.current) return;
+  const fetchTravelList = useCallback(
+    (param, query) => {
+      if (isLoadingRef.current) return;
 
-    isLoadingRef.current = true;
-    setShowLoading(true);
-    setHasError(false);
+      isLoadingRef.current = true;
+      setShowLoading(true);
+      setHasError(false);
 
-    getTravelData('travel', param, query)
-      .then((data) => {
-        const fetchedList = data.content || [];
-        const currentPage = data.number + 1;
-        const startBlock = Math.floor(data.number / 10) * 10 + 1;
-        const endBlock = Math.min(data.totalPages, startBlock + 9);
-        const pageList = Array.from({ length: endBlock - startBlock + 1 }, (_, i) => startBlock + i);
+      getTravelData('travel', param, query, userId)
+        .then((data) => {
+          const fetchedList = data.content || [];
+          const currentPage = data.number + 1;
+          const startBlock = Math.floor(data.number / 10) * 10 + 1;
+          const endBlock = Math.min(data.totalPages, startBlock + 9);
+          const pageList = Array.from({ length: endBlock - startBlock + 1 }, (_, i) => startBlock + i);
 
-        setPageResult({
-          dtoList: fetchedList,
-          totalElements: data.totalElements,
-          totalPages: data.totalPages,
-          page: currentPage,
-          size: data.size,
-          startPage: startBlock,
-          endPage: endBlock,
-          pageList,
+          setPageResult({
+            dtoList: fetchedList,
+            totalElements: data.totalElements,
+            totalPages: data.totalPages,
+            page: currentPage,
+            size: data.size,
+            startPage: startBlock,
+            endPage: endBlock,
+            pageList,
+          });
+
+          setSelectedItem((prev) => {
+            const existsInNewList = prev
+              ? fetchedList.some((it) => it.travelId === prev.travelId)
+              : false;
+            return !prev || !existsInNewList ? fetchedList[0] || null : prev;
+          });
+          setHoveredItem(null);
+        })
+        .catch(() => setHasError(true))
+        .finally(() => {
+          isLoadingRef.current = false;
+          setShowLoading(false);
         });
-
-        setSelectedItem((prev) => {
-          const existsInNewList = prev
-            ? fetchedList.some((it) => it.travelId === prev.travelId)
-            : false;
-          return !prev || !existsInNewList ? fetchedList[0] || null : prev;
-        });
-        setHoveredItem(null);
-      })
-      .catch(() => setHasError(true))
-      .finally(() => {
-        isLoadingRef.current = false;
-        setShowLoading(false);
-      });
-  }, []);
+    },
+    [userId]
+  );
 
   useEffect(() => {
     fetchTravelList(pageParam, regionFilterProps.filterQuery);
-  }, [pageParam, regionFilterProps.filterQuery, fetchTravelList]);
+  }, [pageParam, regionFilterProps.filterQuery, userId, fetchTravelList]);
 
   // ✅ 페이지 클릭
   const handlePageClick = useCallback(
@@ -155,7 +161,6 @@ export const useTravelList = () => {
     [showLoading, pageResult.totalPages]
   );
 
-  // ✅ 정렬 변경
   const handleSortChange = useCallback((sortType) => {
     if (!sortType) return;
     const newSort = `${sortType},contentsCd,asc`;
@@ -164,19 +169,16 @@ export const useTravelList = () => {
     sessionStorage.removeItem('travelListPage');
   }, []);
 
-  // ✅ 카테고리 변경
   const handleCategoryChange = useCallback((categoryName) => {
     sessionStorage.setItem('travelListCategory', categoryName);
     setPageParam((prev) => ({ ...prev, page: 1, categoryName }));
   }, []);
 
-  // ✅ 검색
   const handleSearch = useCallback((searchTerm) => {
     sessionStorage.setItem('travelListSearch', searchTerm);
     setPageParam((prev) => ({ ...prev, page: 1, search: searchTerm }));
   }, []);
 
-  // ✅ 정렬 상태 확인
   const getActiveSort = () => {
     const currentSort = pageParam.sort || '';
     if (currentSort.includes('likesCount,desc')) return 'likesCount,desc';
