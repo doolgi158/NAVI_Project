@@ -1,5 +1,6 @@
 package com.navi.user.repository;
 
+import com.navi.image.domain.Image;
 import com.navi.user.domain.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -37,4 +38,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Page<User> findBySignUpContaining(String signUp, Pageable pageable);
     Page<User> findByLocal(char local, Pageable pageable);
     Page<User> findByUserStateIgnoreCase(String state, Pageable pageable);
+
+    Optional<Image> findByNo(Long userNo);
+    void deleteByNo(Long userNo);
 }
