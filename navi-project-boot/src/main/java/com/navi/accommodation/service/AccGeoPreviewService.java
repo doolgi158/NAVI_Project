@@ -37,12 +37,16 @@ public class AccGeoPreviewService {
 
         for (Acc acc : accList) {
             String address = acc.getAddress();
+            String title = acc.getTitle();
+
             if (address == null || address.isBlank()) {
+                log.warn("[GEO] 주소 없음 → SKIP: {}", acc.getAccNo());
                 continue;
             }
 
-            GeoResult geo = kakaoGeoService.getCoordinatesAndTownship(address);
+            GeoResult geo = kakaoGeoService.getCoordinatesAndTownship(address, title);
             if (geo == null) {
+                log.warn("[GEO] 좌표 변환 실패 → {}", address);
                 continue;
             }
 

@@ -3,6 +3,7 @@ package com.navi.accommodation.repository;
 import com.navi.accommodation.domain.Acc;
 import com.navi.accommodation.dto.request.AccRequestDTO;
 import com.navi.accommodation.service.AccService;
+import com.navi.accommodation.service.AccSyncService;
 import com.navi.location.domain.Township;
 import com.navi.location.repository.TownshipRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,18 +17,31 @@ import org.springframework.boot.test.context.SpringBootTest;
 public class AccRepositoryTests {
     @Autowired private AccRepository accRepository;
     @Autowired private AccService accService;
+    @Autowired private AccSyncService accSyncService;
     @Autowired private TownshipRepository townshipRepository;
 
     /* === API 데이터 적재 === */
     @Test
     public void loadAccData() throws Exception {
-        accService.loadApiFromJsonFile();
+        accSyncService.loadApiFromJsonFile();
         log.info("API 데이터 DB 초기 적재 완료");
     }
     @Test
     public void updateAccData() throws Exception {
-        accService.updateApiFromJsonFile();
+        accSyncService.updateApiFromJsonFile();
         log.info("API 데이터 DB 초기 업데이트 완료");
+    }
+    @Test
+    public void loadAdminAccData() throws Exception {
+        accSyncService.loadFromAdminJsonFile();
+        log.info("✅ 관리자 JSON 데이터 추가 적재 완료");
+    }
+
+    /* === KakaoGeo 기반 주소 -> 좌표 + 읍면동 동기화 === */
+    @Test
+    public void updateAllData() {
+        accSyncService.updateAll();
+        log.info("✅ KakaoGeo 기반 좌표 및 읍면동 전체 동기화 완료");
     }
 
     /* === 관리자 CRUD === */
