@@ -3,7 +3,7 @@ import AdminTravelForm from "../../admin/pages/travel/AdminTravelForm.jsx";
 import AdminTravelList from "../../admin/pages/travel/AdminTravelList.jsx"; 
 
 const Loading = <div></div>
-const AdminUsers = lazy(() => import("../../admin/pages/AdminUsersPage.jsx"))
+const AdminUsers = lazy(() => import("../../admin/pages/user/AdminUsersPage.jsx"))
 const AdminDashboard = lazy(() => import("../../admin/pages/AdminDashboardPage.jsx"))
 
 const AdminRouter = () => {

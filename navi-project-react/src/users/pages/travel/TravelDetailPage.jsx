@@ -10,13 +10,13 @@ import {  ShareAltOutlined, PhoneFilled, EnvironmentFilled,
           HeartOutlined, HeartFilled, BookOutlined, BookFilled 
 } from '@ant-design/icons'; 
 import MainLayout from '../../layout/MainLayout';
-import { useKakaoMap } from '../../../Common/hooks/useKakaoMap.jsx'; 
+import { useKakaoMap } from '../../../common/hooks/useKakaoMap.jsx'; 
 
 
 const { Title, Text, Paragraph } = Typography;
 
 // currentUserId가 제공되지 않을 경우 'navi48'을 기본값으로 사용 (테스트용)
-const TravelDetailPage = ({ id  = 'navi48'}) => { 
+const TravelDetailPage = ({ id  = 'navi48'}) => { 
 // const TravelDetailPage = ({ id }) => { // 만약 prop을 넘기지 않았을 때 로그아웃 상태로 테스트하려면 이 코드를 사용하세요.
     const { travelId } = useParams();
     const [travelDetail, setTravelDetail] = useState(null);
@@ -25,7 +25,7 @@ const TravelDetailPage = ({ id  = 'navi48'}) => {
     
     // 좋아요 상태 및 카운트 관리
     const [isLiked, setIsLiked] = useState(false); 
-    const [currentLikes, setCurrentLikes] = useState(0); 
+    const [currentLikeCount, setCurrentLikeCount] = useState(0); 
     const [isLiking, setIsLiking] = useState(false); 
 
     // 북마크 상태 및 카운트 관리
@@ -68,7 +68,7 @@ const TravelDetailPage = ({ id  = 'navi48'}) => {
             setLoading(true);
             setError(null);
             
-            // [수정] currentUserId를 사용하여 API 호출 URL 생성
+            // [수정] currentUserId를 사용하여 API 호출 URL 생성
             const apiUrl = `/api/travel/detail/${travelId}` + (id ? `?id=${id}` : '');
             const viewsApiUrl = `/api/travel/views/${travelId}`;
 
@@ -84,7 +84,7 @@ const TravelDetailPage = ({ id  = 'navi48'}) => {
                 setTravelDetail(res.data);
                 
                 // 서버 응답에 따라 초기 좋아요/북마크 상태 및 카운트 설정
-                setCurrentLikes(res.data.likes || 0);
+                setCurrentLikeCount(res.data.likesCount || 0);
                 setIsLiked(res.data.isLiked || false); 
 
                 setCurrentBookmarks(res.data.bookmarkCount || 0); 
@@ -131,16 +131,16 @@ const TravelDetailPage = ({ id  = 'navi48'}) => {
 
         try {
             // [수정] 실제 API 호출: currentUserId를 사용
-            const response = await axios.post(`/api/travel/like/${travelId}?id=${id}`);
-            const isNewLike = response.data; // true: 좋아요 추가됨, false: 좋아요 취소됨
-            
-            if (isNewLike) {
+            const response = await axios.post(`/api/travel/like/${travelId}?id=${id}`);
+            const isNewLike = response.data; // true: 좋아요 추가됨, false: 좋아요 취소됨
+            
+            if (isNewLike) {
                 setIsLiked(true);
-                setCurrentLikes(prev => prev + 1);
+                setCurrentLikeCount(prev => prev + 1);
                 message.success('좋아요를 눌렀습니다! ');
             } else {
                 setIsLiked(false);
-                setCurrentLikes(prev => Math.max(0, prev - 1));
+                setCurrentLikeCount(prev => Math.max(0, prev - 1));
                 message.success('좋아요를 취소했습니다.');
             }
             
@@ -154,7 +154,7 @@ const TravelDetailPage = ({ id  = 'navi48'}) => {
 
     // 4. 📚 북마크 버튼 클릭 핸들러
     const handleBookmarkClick = async () => {
-        // [수정] currentUserId를 사용하여 로그인 여부 체크
+        // [수정] currentUserId를 사용하여 로그인 여부 체크
         if (!id) {
             message.warning('로그인 후 이용 가능합니다.');
             return;
@@ -166,8 +166,8 @@ const TravelDetailPage = ({ id  = 'navi48'}) => {
 
         try {
             // [수정] 실제 API 호출: currentUserId를 사용
-            const response = await axios.post(`/api/travel/bookmark/${travelId}?id=${id}`);
-            const isNewBookmark = response.data; // true: 북마크 추가됨, false: 북마크 취소됨
+            const response = await axios.post(`/api/travel/bookmark/${travelId}?id=${id}`);
+            const isNewBookmark = response.data; // true: 북마크 추가됨, false: 북마크 취소됨
             
             if (isNewBookmark) {
                 setIsBookmarked(true);
@@ -301,7 +301,7 @@ const TravelDetailPage = ({ id  = 'navi48'}) => {
             </div>
 
             <div style={{ paddingBottom: 20 }}>
-                <Title level={4} style={{ borderLeft: '4px solid #1890ff', paddingLeft: 10, marginBottom: 20 }}>위치</Title>
+                <Title level={4} style={{ borderLeft: '4px solid #1890ff', paddingLeft: 10, marginTop: 40, marginBottom: 20 }}>위치</Title>
                 <div style={{ marginTop: 10, marginBottom: 20, border: '1px solid #ccc', borderRadius: 8,  position: 'relative', zIndex: 10 }}>
                     {/* 맵 컨테이너 ID 사용 및 기본 크기 지정 */}
                     <div id={MAP_CONTAINER_ID} 
@@ -351,7 +351,17 @@ const TravelDetailPage = ({ id  = 'navi48'}) => {
     return (
         <MainLayout>
             <Row justify="center" style={{ marginBottom: 80, backgroundColor: '#fff', minHeight: '100%' }}>
-                <Col  style={{ padding: '0 24px' }}>
+                {/*                     핵심 수정: Col에 span={24}와 함께 최대 너비를 지정하여 
+                    모든 상세 페이지의 컨텐츠 너비를 1200px로 고정합니다.
+                */}
+                <Col 
+                    span={24} 
+                    style={{ 
+                        padding: '0 24px', 
+                        maxWidth: 1200, 
+                        width: '100%',
+                    }}
+                >
                     
                     <div style={{ textAlign: 'center', margin: '40px 0 20px 0' }}>
                         <Text type="secondary" style={{ fontSize: '1.2em', marginBottom: 5, display: 'block', color: '#666' }}>
@@ -373,13 +383,13 @@ const TravelDetailPage = ({ id  = 'navi48'}) => {
                                             loading={isLiking} 
                                             style={{ padding: 0, height: 'auto' }}
                                             icon={
-                                                isLiked 
-                                                ? <HeartFilled style={{ fontSize: '2.5em', color: '#ff4d4f', transition: 'transform 0.2s' }} /> 
-                                                : <HeartOutlined style={{ fontSize: '2.5em', color: '#999', transition: 'transform 0.2s' }} />
-                                            }
+                                                isLiked 
+                                                ? <HeartFilled style={{ fontSize: '2.5em', color: '#ff4d4f', transition: 'transform 0.2s' }} /> 
+                                                : <HeartOutlined style={{ fontSize: '2.5em', color: '#999', transition: 'transform 0.2s' }} />
+                                            }
                                         />
                                         <Text type="secondary" style={{ fontSize: '0.8em', marginTop: 4, fontWeight: 'bold', color: isLiked ? '#ff4d4f' : '#999' }}>
-                                            {currentLikes}
+                                            {currentLikeCount}
                                         </Text>
                                     </Space>
                                     
@@ -392,10 +402,10 @@ const TravelDetailPage = ({ id  = 'navi48'}) => {
                                             loading={isBookmarking} 
                                             style={{ padding: 0, height: 'auto' }}
                                             icon={
-                                                isBookmarked 
-                                                ? <BookFilled style={{ fontSize: '2.5em', color: '#52c41a', transition: 'transform 0.2s' }} /> 
-                                                : <BookOutlined style={{ fontSize: '2.5em', color: '#999', transition: 'transform 0.2s' }} />
-                                            }
+                                                isBookmarked 
+                                                ? <BookFilled style={{ fontSize: '2.5em', color: '#52c41a', transition: 'transform 0.2s' }} /> 
+                                                : <BookOutlined style={{ fontSize: '2.5em', color: '#999', transition: 'transform 0.2s' }} />
+                                            }
                                         />
                                         <Text type="secondary" style={{ fontSize: '0.8em', marginTop: 4, fontWeight: 'bold', color: isBookmarked ? '#52c41a' : '#999' }}>
                                             {currentBookmarks}

@@ -51,7 +51,6 @@ export const useSignupForm = (form) => {
         setIdChecked(false);
       }
     } catch (err) {
-      console.error("중복 검사 오류:", err);
       message.error("아이디 중복 검사 중 오류가 발생했습니다.");
       setIdStatus("error");
       setIdMessage("서버 오류로 중복 검사를 수행할 수 없습니다.");
@@ -89,7 +88,6 @@ export const useSignupForm = (form) => {
         }, 600);
       }
     } catch (err) {
-      console.error("회원가입 오류:", err);
       message.error(err.message || "회원가입 중 오류가 발생했습니다.");
     }
   };
@@ -125,7 +123,6 @@ const handleSendEmail = async () => {
       setEmailCodeMessage("");
     }
   } catch (err) {
-    console.error("이메일 전송 오류:", err);
     message.error("이메일 발송 중 오류가 발생했습니다.");
     setEmailStatus("error");
     setEmailMessage("메일 전송 실패");
@@ -159,7 +156,6 @@ const handleVerifyCode = async () => {
       setEmailMessage("✅ 인증 완료");
     }
   } catch (err) {
-    console.error("인증 확인 오류:", err);
     message.error("서버 오류로 인증을 확인할 수 없습니다.");
     setEmailCodeStatus("error");
     setEmailCodeMessage("❌ 인증 코드가 올바르지 않습니다.");    

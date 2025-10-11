@@ -28,37 +28,37 @@ public class TravelAdminController {
 
     // 1. 여행지 관리 목록 조회 (READ - 관리자용: 모든 state 항목 조회)
     // 최종 경로: /adm/travel
-    @GetMapping("/travel")
-    // @Secured("ROLE_ADMIN") // 보안 적용 시
-    public Page<TravelListResponseDTO> getAdminList(
-            @PageableDefault(
-                    size = 10,
-                    sort = "travelId",
-                    direction = Sort.Direction.DESC
-            ) Pageable pageable,
-            @RequestParam(value = "search", required = false) String search
-    ) {
-        // 'publicOnly=false'를 전달하여 모든 상태 항목 조회 (TravelService 로직 재활용)
-        return travelService.getTravelList(pageable, null, null, search, false);
-    }
+//    @GetMapping("/travel")
+//    // @Secured("ROLE_ADMIN") // 보안 적용 시
+//    public Page<TravelListResponseDTO> getAdminList(
+//            @PageableDefault(
+//                    size = 10,
+//                    sort = "travelId",
+//                    direction = Sort.Direction.DESC
+//            ) Pageable pageable,
+//            @RequestParam(value = "search", required = false) String search
+//    ) {
+//        // 'publicOnly=false'를 전달하여 모든 상태 항목 조회 (TravelService 로직 재활용)
+//        return travelService.getTravelList(pageable, null, null, search, false);
+//    }
 
     // 2. 여행지 상세 조회 (READ - 단일 항목)
     // 최종 경로: /adm/travel/{travelId}
-    @GetMapping("/travel/detail/{travelId}")
-    // @Secured("ROLE_ADMIN")
-    public ResponseEntity<TravelDetailResponseDTO> getTravelDetail(@PathVariable Long travelId,String id) {
-        try {
-            TravelDetailResponseDTO detail = travelService.getTravelDetail(travelId,id);
-            return ResponseEntity.ok(detail);
-        } catch (NoSuchElementException e) {
-            // ID에 해당하는 여행지가 없을 경우 404 Not Found 반환
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        } catch (Exception e) {
-            System.err.println("여행지 상세 조회 중 서버 오류 발생: " + e.getMessage());
-            // 기타 예상치 못한 오류 발생 시 500 Internal Server Error 반환
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
+//    @GetMapping("/travel/detail/{travelId}")
+//    // @Secured("ROLE_ADMIN")
+//    public ResponseEntity<TravelDetailResponseDTO> getTravelDetail(@PathVariable Long travelId,String id) {
+//        try {
+//            TravelDetailResponseDTO detail = travelService.getTravelDetail(travelId,id);
+//            return ResponseEntity.ok(detail);
+//        } catch (NoSuchElementException e) {
+//            // ID에 해당하는 여행지가 없을 경우 404 Not Found 반환
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+//        } catch (Exception e) {
+//            System.err.println("여행지 상세 조회 중 서버 오류 발생: " + e.getMessage());
+//            // 기타 예상치 못한 오류 발생 시 500 Internal Server Error 반환
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+//        }
+//    }
 
     // 2. 여행지 등록/수정 (CREATE/UPDATE)
     // 최종 경로: /adm/travel

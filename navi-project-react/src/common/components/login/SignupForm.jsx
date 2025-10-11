@@ -34,7 +34,7 @@ const SignupForm = () => {
   // 아이디 중복 검사
   const handleCheckId = async () => {
     const idValue = form.getFieldValue("id");
-console.log(emailSent);
+
     if (!idValue) {
       message.warning("아이디를 입력하세요.");
       setIdStatus("error");
@@ -60,7 +60,6 @@ console.log(emailSent);
         setIdChecked(false);
       }
     } catch (err) {
-      console.error("중복 검사 오류:", err);
       message.error("아이디 중복 검사 중 오류가 발생했습니다.");
       setIdStatus("error");
       setIdMessage("서버 오류로 중복 검사를 수행할 수 없습니다.");
@@ -92,7 +91,6 @@ console.log(emailSent);
         setTimeout(() => showModal("login"), 600);
       }
     } catch (err) {
-      console.error("회원가입 오류:", err);
       message.error(err.message || "회원가입 중 오류가 발생했습니다.");
     }
   };
@@ -208,8 +206,8 @@ console.log(emailSent);
         <Col span={12}>
           <Form.Item label="내/외국인 구분" name="local">
             <Radio.Group>
-              <Radio value="local">내국인</Radio>
-              <Radio value="foreigner">외국인</Radio>
+              <Radio value="L">내국인</Radio>
+              <Radio value="F">외국인</Radio>
             </Radio.Group>
           </Form.Item>
         </Col>

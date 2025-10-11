@@ -1,6 +1,8 @@
 package com.navi.user.repository;
 
 import com.navi.user.domain.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -26,4 +28,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
     boolean existsById(String id);
 
+    // admin user 데이터 불러오기
+    Page<User> findByNameContainingIgnoreCaseOrIdContainingIgnoreCase(String name, String id, Pageable pageable);
+    Page<User> findByIdContainingIgnoreCase(String id, Pageable pageable);
+    Page<User> findByNameContainingIgnoreCase(String name, Pageable pageable);
+    Page<User> findByEmailContainingIgnoreCase(String email, Pageable pageable);
+    Page<User> findByPhoneContainingIgnoreCase(String phone, Pageable pageable);
+    Page<User> findBySignUpContaining(String signUp, Pageable pageable);
+    Page<User> findByLocal(char local, Pageable pageable);
+    Page<User> findByUserStateIgnoreCase(String state, Pageable pageable);
 }

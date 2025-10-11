@@ -10,21 +10,17 @@ export const useLogin = () => {
 
   const login = async (values) => {
     try {
-      // 클라이언트 IP 조회      
-      const ipRes = await axios.get("https://api.ipify.org?format=json");
-      const ip = ipRes.data.ip;
-
       // 로그인 요청
       const params = new URLSearchParams();
       params.append("username", values.username);
       params.append("password", values.password);
-      params.append("ip", ip);
+      params.append("ip", values.ip);
 
       const response = await axios.post(`${API_SERVER_HOST}/api/users/login`, params, {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         validateStatus: () => true,  // 에러 상태도 직접 처리
       });
-      
+
       // 상태 코드별 처리
       if (response.status === 200) {
         const data = response.data;
@@ -49,19 +45,14 @@ export const useLogin = () => {
       }
 
       if (response.status === 403) {
-        alert("❗ 5회 이상 로그인 실패로 10분간 로그인 차단되었습니다.");
         return { success: false, message: "5회 이상 실패로 10분간 로그인 차단되었습니다." };
       }
 
       if (response.status === 401) {
-        alert("❗ 아이디 또는 비밀번호가 올바르지 않습니다.");
         return { success: false, message: "아이디 또는 비밀번호가 올바르지 않습니다." };
       }
-      alert("❗ 알 수 없는 오류가 발생했습니다. 관리자에게 문의하세요.");
-
       return { success: false, message: "서버 응답을 처리할 수 없습니다." };
     } catch (error) {
-      alert("❗ 서버에 연결할 수 없습니다. 잠시 후 다시 시도하세요.");
       return { success: false, message: "서버에 연결할 수 없습니다." };
     }
   };

@@ -26,11 +26,7 @@ const DeliveryPage = () => {
   const [estimatedFare, setEstimatedFare] = useState(null);
   const MAP_CONTAINER_ID = "delivery-map";
   const mapRef = useRef(null);
-<<<<<<< HEAD
-  const markersRef = useRef({ from: null, to: null });
-=======
   const markersRef = useRef({ fromAddress: null, toAddress: null });
->>>>>>> 72d6a045916dd3028cf790a94dbb3c6b1a2b5036
   const lineRef = useRef(null);
 
   const handleChange = (key, value) => {
@@ -49,13 +45,7 @@ const DeliveryPage = () => {
     }
   }, [form.bagSize, form.bagCount]);
 
-<<<<<<< HEAD
-  /** ✅ 카카오 주소 검색 */
-  const handleSearchAddress = (targetKey) => {
-    if (!window.daum || !window.daum.Postcode) {
-      message.error("카카오 주소 검색 SDK가 아직 로드되지 않았어요.");
-=======
-  /** ✅ 지도 SDK 완전 로드 후 초기화 */
+  /** 지도 SDK 완전 로드 후 초기화 */
   useEffect(() => {
     const loadKakaoMap = () => {
       if (window.kakao && window.kakao.maps) {
@@ -92,7 +82,7 @@ const DeliveryPage = () => {
     loadKakaoMap();
   }, []);
 
-  /** ✅ 카카오 주소 검색 */
+  /** 카카오 주소 검색 */
   const handleSearchAddress = (targetKey) => {
     // 주소 검색 SDK가 안 불러와졌다면 로드
     if (!window.daum || !window.daum.Postcode) {
@@ -101,7 +91,6 @@ const DeliveryPage = () => {
       script.async = true;
       script.onload = () => handleSearchAddress(targetKey);
       document.head.appendChild(script);
->>>>>>> 72d6a045916dd3028cf790a94dbb3c6b1a2b5036
       return;
     }
 
@@ -111,27 +100,19 @@ const DeliveryPage = () => {
         setForm((prev) => ({ ...prev, [targetKey]: addr }));
 
         const { kakao } = window;
-<<<<<<< HEAD
-=======
         if (!kakao || !kakao.maps || !kakao.maps.services) {
           message.error("지도 API가 아직 준비되지 않았습니다.");
           return;
         }
 
->>>>>>> 72d6a045916dd3028cf790a94dbb3c6b1a2b5036
         const geocoder = new kakao.maps.services.Geocoder();
 
         geocoder.addressSearch(addr, (result, status) => {
           if (status === kakao.maps.services.Status.OK) {
             const lat = parseFloat(result[0].y);
             const lng = parseFloat(result[0].x);
-<<<<<<< HEAD
-
-            const position = new kakao.maps.LatLng(lat, lng);
-=======
             const position = new kakao.maps.LatLng(lat, lng);
 
->>>>>>> 72d6a045916dd3028cf790a94dbb3c6b1a2b5036
             if (!mapRef.current) {
               const container = document.getElementById(MAP_CONTAINER_ID);
               mapRef.current = new kakao.maps.Map(container, {
@@ -150,7 +131,7 @@ const DeliveryPage = () => {
             });
             markersRef.current[targetKey] = marker;
 
-            // ✅ 출발지-도착지 연결선
+            // 출발지-도착지 연결선
             const fromMarker = markersRef.current.fromAddress;
             const toMarker = markersRef.current.toAddress;
 
@@ -183,7 +164,7 @@ const DeliveryPage = () => {
     }).open();
   };
 
-  /** ✅ 예약 요청 */
+  /** 예약 요청 */
   const handleSubmit = () => {
     const required = [
       "senderName",
@@ -209,20 +190,6 @@ const DeliveryPage = () => {
     message.success("예약 요청이 완료되었습니다!");
   };
 
-<<<<<<< HEAD
-  // ✅ 지도 초기 로드
-  useEffect(() => {
-    if (window.kakao?.maps) {
-      const container = document.getElementById(MAP_CONTAINER_ID);
-      mapRef.current = new window.kakao.maps.Map(container, {
-        center: new window.kakao.maps.LatLng(33.5055, 126.495),
-        level: 6,
-      });
-    }
-  }, []);
-
-=======
->>>>>>> 72d6a045916dd3028cf790a94dbb3c6b1a2b5036
   return (
     <MainLayout>
       <div className="max-w-5xl mx-auto mt-10 grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -243,7 +210,7 @@ const DeliveryPage = () => {
             className="mb-3"
           />
 
-          {/* ✅ 배송 방향 */}
+          {/* 배송 방향 */}
           <h3 className="font-semibold mb-2">배송 방향</h3>
           <div className="flex gap-4 mb-4">
             <label>
@@ -329,7 +296,7 @@ const DeliveryPage = () => {
             onChange={(e) => handleChange("memo", e.target.value)}
           />
 
-          {/* ✅ 예상 요금 표시 */}
+          {/* 예상 요금 표시 */}
           {estimatedFare && (
             <div className="text-center text-lg font-semibold text-blue-600 mb-4">
               예상 요금: {estimatedFare.toLocaleString()}원
@@ -345,11 +312,7 @@ const DeliveryPage = () => {
         <div className="bg-gray-100 rounded-2xl overflow-hidden">
           <div
             id={MAP_CONTAINER_ID}
-<<<<<<< HEAD
-            style={{ width: "100%", height: "550px", borderRadius: "12px" }}
-=======
             style={{ width: "100%", height: "650px", borderRadius: "12px" }}
->>>>>>> 72d6a045916dd3028cf790a94dbb3c6b1a2b5036
           ></div>
         </div>
       </div>
