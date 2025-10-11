@@ -39,9 +39,9 @@ const root = createBrowserRouter([
         path: "/users",
         children: [...UserRouter()]
     },
-        {
-        path: "/deliveries",
-        children: [...DeliveryRouter()]
+    {
+        path:"/delivery",
+        children:[...DeliveryRouter()]
     },
 ]
 }

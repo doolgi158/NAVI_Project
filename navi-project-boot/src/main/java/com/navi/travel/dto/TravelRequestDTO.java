@@ -55,7 +55,7 @@ public class TravelRequestDTO {
 
 
         return Travel.builder()
-                .contentId(finalContentId) // ✅ 수정된 finalContentId 사용
+                .contentId(finalContentId)
                 .contentsCd(this.contentsCd)
                 .categoryName(this.categoryName)
                 .title(this.title)
@@ -77,10 +77,7 @@ public class TravelRequestDTO {
                 .fee(this.fee)
                 .hours(this.hours)
 
-                // 신규 등록 시 조회수/좋아요/북마크는 0으로 초기화
                 .views(0L)
-                .likes(0L)
-                .bookmark(0L)
                 .build();
     }
 }

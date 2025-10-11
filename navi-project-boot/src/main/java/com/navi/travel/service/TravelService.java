@@ -9,6 +9,9 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface TravelService {
+    // ---------------------- API 동기화 ----------------------
+    void syncTravelData();
+
     // API 데이터 저장 및 동기화
     int saveApiData();
 

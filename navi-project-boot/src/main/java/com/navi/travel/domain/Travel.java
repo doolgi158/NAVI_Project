@@ -53,7 +53,6 @@ public class Travel extends BaseEntity { //등록일 수정일 자동생성 상�
     @Column(name = "ROAD_ADDRESS", length = 500)
     private String roadAddress;     //도로명 주소
 
-
     @Column(name = "PHONE_NO", length = 50)
     private String phoneNo;     //전화번호
 
@@ -88,13 +87,8 @@ public class Travel extends BaseEntity { //등록일 수정일 자동생성 상�
     @Column(name = "VIEWS_COUNT", nullable = false,columnDefinition ="NUMBER default 0")
     private Long views = 0L; // 조회수 (초기값 0 설정)
 
-    @Builder.Default
-    @Column(name = "LIKES_COUNT", nullable = false,columnDefinition ="NUMBER default 0")
-    private Long likes = 0L; // 좋아요 수 (초기값 0 설정)
-
-    @Builder.Default
-    @Column(name = "BOOKMARK_COUNT", nullable = false, columnDefinition = "NUMBER default 0")
-    private Long bookmark = 0L; // 북마크 수 (초기값 0 설정)
+    // ⭐️ likes 카운트 필드 제거 (LikeRepository에서 실시간 카운트)
+    // ⭐️ bookmark 카운트 필드 제거 (BookmarkRepository에서 실시간 카운트)
 
     @Column(name = "STATE", nullable = false,columnDefinition = "NUMBER(1) default 1" )
     private int state;  // 개시상태(공개, 비공개)
@@ -114,7 +108,6 @@ public class Travel extends BaseEntity { //등록일 수정일 자동생성 상�
 
     /**
      * 외부 API 데이터를 기반으로 기존 엔티티의 필드 값을 업데이트하는 메소드
-     * (콘텐츠 ID(contentId)가 이미 존재할 때 사용)
      */
     public void updateFromApi(Travel newTravel) {
         this.title = newTravel.title;
@@ -139,50 +132,15 @@ public class Travel extends BaseEntity { //등록일 수정일 자동생성 상�
         this.hours = newTravel.hours;
     }
 
-    // 조회수를 1 증가
+    // 조회수를 1 증가 (TravelServiceImpl에서 TravelRepository의 @Modifying 쿼리로 대체)
     public void incrementViews() {
         this.views = (this.views == null) ? 1L : this.views + 1;
     }
 
-    // ----------------------------------------------------------------------------------
-    // ✅ 좋아요 / 북마크 카운트 관련 로직 수정/추가
-    // ----------------------------------------------------------------------------------
-
-    // 좋아요 카운트 증가
-    public void incrementLikes() {
-        this.likes = (this.likes == null) ? 1L : this.likes + 1;
-    }
-
-    //좋아요 카운트 감소 (좋아요 취소시)
-    public void decrementLikes() {
-        if (this.likes != null && this.likes > 0) {
-            this.likes = this.likes - 1;
-        } else {
-            this.likes = 0L; // 혹시라도 null이거나 음수일 경우 0으로 보정
-        }
-    }
-
-    //✅ 북마크 카운트 증가
-
-    public void incrementBookmark() {
-        this.bookmark = (this.bookmark == null) ? 1L : this.bookmark + 1;
-    }
-
-    ///북마크 카운트 감소 (북마크 취소시)
-    public void decrementBookmark() {
-        if (this.bookmark != null && this.bookmark > 0) {
-            this.bookmark = this.bookmark - 1;
-        } else {
-            this.bookmark = 0L; // 혹시라도 null이거나 음수일 경우 0으로 보정
-        }
-    }
-
-    // ----------------------------------------------------------------------------------
-
     //여행지 정보 수동 업데이트
     public void updateFromRequest(TravelRequestDTO dto) {
         if (StringUtils.hasText(dto.getContentsCd())) this.contentsCd = dto.getContentsCd();
-        if (StringUtils.hasText(dto.getTitle())) this.title = dto.getTitle(); // 제목은 필수값이라 DTO에 항상 있을 것이지만 안전하게 처리
+        if (StringUtils.hasText(dto.getTitle())) this.title = dto.getTitle();
         if (StringUtils.hasText(dto.getIntroduction())) this.introduction = dto.getIntroduction();
         if (StringUtils.hasText(dto.getAddress())) this.address = dto.getAddress();
         if (StringUtils.hasText(dto.getRoadAddress())) this.roadAddress = dto.getRoadAddress();
@@ -209,7 +167,7 @@ public class Travel extends BaseEntity { //등록일 수정일 자동생성 상�
         if (StringUtils.hasText(dto.getParking())) this.parking = dto.getParking();
         if (StringUtils.hasText(dto.getFee())) this.fee = dto.getFee();
         if (StringUtils.hasText(dto.getHours())) this.hours = dto.getHours();
-        // contentId와 카운터 필드(views, likes, bookmark)는 여기서 업데이트하지 않습니다.
+
     }
 
 

@@ -3,11 +3,12 @@ package com.navi.travel.dto;
 import com.navi.travel.domain.Travel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 
-
+@Setter
 @Getter
 @Builder
 public class TravelListResponseDTO {
@@ -25,8 +26,8 @@ public class TravelListResponseDTO {
     private String imagePath;    //대표이미지 경로
     private String thumbnailPath;   // 썸네일 경로
     private Long views;         // 조회수
-    private Long likes;         // 좋아요 수
-    private Long bookmark;      //북마크 수
+    private Long likesCount;         // 좋아요 수
+    private Long bookmarkCount;      //북마크 수
     private int state;          //상태
     private LocalDateTime  updatedAt; //수정일
     private LocalDateTime  createdAt; //등록일
@@ -49,11 +50,10 @@ public class TravelListResponseDTO {
                 .imagePath(travel.getImagePath() != null ? travel.getImagePath() : null)
                 .thumbnailPath(travel.getThumbnailPath() != null ? travel.getThumbnailPath() : null)
                 .views(travel.getViews() != null ? travel.getViews() : 0L) // Long 타입 0L로 초기화
-                .likes(travel.getLikes() != null ? travel.getLikes() : 0L)   // Long 타입 0L로 초기화
-                .bookmark(travel.getBookmark() != null ? travel.getBookmark() : 0L)   // Long 타입 0L로 초기화
                 .state(travel.getState())
                 .updatedAt(travel.getUpdatedAt())
                 .createdAt(travel.getUpdatedAt())
                 .build();
     }
+
 }

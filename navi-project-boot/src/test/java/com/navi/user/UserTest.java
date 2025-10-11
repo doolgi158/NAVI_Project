@@ -28,6 +28,7 @@ public class UserTest {
                 .phone("01012341234")
                 .birth("2025-08-29")
                 .email("enfrlwlapdlf@gmail.com")
+                .perNum(passwordEncoder.encode("2508293123456"))
                 .id("naviadmin")
                 .pw(passwordEncoder.encode("skqlAdmin1234!"))
                 .userState(UserState.NORMAL)
@@ -42,12 +43,16 @@ public class UserTest {
         Random random = new Random();
         SecureRandom secureRandom = new SecureRandom();
         StringBuilder phone = new StringBuilder();
+        StringBuilder personal = new StringBuilder();
         StringBuilder password = new StringBuilder();
         UserState[] values = UserState.values();
 
-        for(int i = 1; i <= 1000; i++) {
+        for(int i = 0; i <= 100; i++) {
             for (int j = 0; j < 8; j++) {
                 phone.append(random.nextInt(10));
+            }
+            for (int j = 0; j < 13; j++) {
+                personal.append(random.nextInt(10));
             }
             password.append("user").append(i).append("!");
 
@@ -59,6 +64,7 @@ public class UserTest {
                     .phone("010" + phonenum)
                     .birth(phone.toString())
                     .email("user" + i + "@naver.com")
+                    .perNum(passwordEncoder.encode(personal.toString()))
                     .id("navi" + i)
                     .pw(passwordEncoder.encode(password.toString()))
                     .userState(state)
@@ -66,6 +72,7 @@ public class UserTest {
             user.addRole(UserRole.USER);
             userRepository.save(user);
             phone.setLength(0);
+            personal.setLength(0);
             password.setLength(0);
         }
     }
