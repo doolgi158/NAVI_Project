@@ -17,8 +17,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * ✈️ FlightServiceImpl
+/*
+ * FlightServiceImpl
  * - 항공편 저장 및 조회 담당
  * - 좌석 생성은 SeatService에서 지연 처리
  */
@@ -29,8 +29,8 @@ public class FlightServiceImpl implements FlightService {
     private final FlightRepository flightRepository;
     private final AirportRepository airportRepository;
 
-    /**
-     * ✅ API 공항명 → DB 공항 엔티티 매핑
+    /*
+     * API 공항명 → DB 공항 엔티티 매핑
      */
     private Airport resolveAirportByApiName(String apiName) {
         if ("부산".equals(apiName) || "김해".equals(apiName)) {
@@ -42,8 +42,8 @@ public class FlightServiceImpl implements FlightService {
                 .orElseThrow(() -> new RuntimeException("공항 정보 없음: " + apiName));
     }
 
-    /**
-     * ✅ 항공편 저장 (좌석은 생성하지 않음)
+    /*
+     * 항공편 저장 (좌석은 생성하지 않음)
      */
     @Override
     public void saveFlight(ApiFlightDTO dto) {
@@ -70,8 +70,8 @@ public class FlightServiceImpl implements FlightService {
         flightRepository.save(flight);
     }
 
-    /**
-     * ✅ 항공편 조회
+    /*
+     * 항공편 조회
      */
     @Override
     public List<FlightDetailResponseDTO> searchFlights(FlightSearchRequestDTO requestDTO) {

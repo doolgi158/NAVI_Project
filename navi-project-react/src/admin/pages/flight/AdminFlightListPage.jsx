@@ -10,11 +10,23 @@ const AdminFlightListPage = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // 항공편 목록 불러오기
+  // ✅ 항공편 목록 불러오기 (JWT 인증 포함)
   const fetchFlights = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(API);
+      const token = localStorage.getItem("ACCESS_TOKEN"); // ✅ JWT 가져오기
+      if (!token) {
+        message.warning("로그인이 필요합니다.");
+        setLoading(false);
+        return;
+      }
+
+      const res = await axios.get(API, {
+        headers: {
+          Authorization: `Bearer ${token}`, // ✅ JWT 헤더 추가
+        },
+      });
+
       console.log("🛫 API 응답:", res.data);
 
       // ✅ 안전한 배열 처리 (data 또는 data.data 지원)
@@ -32,19 +44,30 @@ const AdminFlightListPage = () => {
     fetchFlights();
   }, []);
 
-  // 항공편 삭제
+  // ✅ 항공편 삭제 (JWT 포함)
   const handleDelete = async (record) => {
     try {
+      const token = localStorage.getItem("ACCESS_TOKEN");
+      if (!token) {
+        message.warning("로그인이 필요합니다.");
+        return;
+      }
+
       const { flightId, depTime } = record;
-      await axios.delete(`${API}/${flightId}/${depTime}`);
+      await axios.delete(`${API}/${flightId}/${depTime}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
       message.success("항공편이 삭제되었습니다.");
       fetchFlights();
     } catch (err) {
+      console.error("❌ 삭제 오류:", err);
       message.error("삭제 중 오류가 발생했습니다.");
     }
   };
 
-  // 테이블 컬럼 정의
   const columns = [
     {
       title: "항공편명",
@@ -127,7 +150,7 @@ const AdminFlightListPage = () => {
 
       <Table
         columns={columns}
-        dataSource={Array.isArray(flights) ? flights : []} // ✅ 안전 처리
+        dataSource={Array.isArray(flights) ? flights : []}
         rowKey={(record) => `${record.flightId}_${record.depTime}`}
         loading={loading}
         bordered

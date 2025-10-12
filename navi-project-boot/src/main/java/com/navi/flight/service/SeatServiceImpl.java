@@ -21,8 +21,8 @@ public class SeatServiceImpl implements SeatService {
     private final FlightRepository flightRepository;
     private final SeatRepository seatRepository;
 
-    /**
-     * ✅ 항공편 좌석 조회 (자동 생성 포함)
+    /*
+     * 항공편 좌석 조회 (자동 생성 포함)
      */
     @Override
     @Transactional
@@ -32,7 +32,7 @@ public class SeatServiceImpl implements SeatService {
 
         List<Seat> seats;
 
-        // ✅ 좌석 생성 여부 확인
+        // 좌석 생성 여부 확인
         boolean seatExists = seatRepository.existsByFlightId(flight.getFlightId());
         if (flight.isSeatInitialized() || seatExists) {
             seats = seatRepository.findByFlightAndDepTime(flightId, depTime);
@@ -50,8 +50,8 @@ public class SeatServiceImpl implements SeatService {
         return convertToDTOList(flight, seats);
     }
 
-    /**
-     * ✅ Seat → SeatResponseDTO 변환
+    /*
+     * Seat → SeatResponseDTO 변환
      */
     private List<SeatResponseDTO> convertToDTOList(Flight flight, List<Seat> seats) {
         return seats.stream()
@@ -72,8 +72,8 @@ public class SeatServiceImpl implements SeatService {
                 .toList();
     }
 
-    /**
-     * ✅ 좌석 자동 생성 로직
+    /*
+     * 좌석 자동 생성 로직
      *  - 1~4행: 프레스티지 (2-2)
      *  - 5~10행: 일반 (3-3, +10,000)
      *  - 11~12행: 비상구 (3-3, +20,000)
@@ -110,8 +110,8 @@ public class SeatServiceImpl implements SeatService {
         }
     }
 
-    /**
-     * ✅ 자동 좌석 배정 (예: 랜덤 or 연속 좌석)
+    /*
+     * 자동 좌석 배정 (예: 랜덤 or 연속 좌석)
      */
     @Override
     @Transactional

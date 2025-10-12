@@ -67,6 +67,7 @@ public class SecurityConfig {
                         "/api/delivery/**",
                         "/api/seats/**"
                 ).permitAll()
+                .requestMatchers("/api/admin/**").authenticated()
                 .anyRequest().authenticated()
         );
 

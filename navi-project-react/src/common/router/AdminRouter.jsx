@@ -1,7 +1,7 @@
 import { Suspense, lazy } from "react";
 
 const Loading = <div></div>;
-const AdminUsers = lazy(() => import("../../admin/pages/AdminUsersPage.jsx"));
+const AdminUsers = lazy(() => import("../../admin/pages/user/AdminUsersPage.jsx"));
 const AdminDashboard = lazy(() => import("../../admin/pages/AdminDashboardPage.jsx"));
 const AdminFlightList = lazy(() => import("../../admin/pages/flight/AdminFlightListPage.jsx"));
 const AdminFlightForm = lazy(() => import("../../admin/pages/flight/AdminFlightFormPage.jsx"));

@@ -13,7 +13,7 @@ const AdminSiderLayout = () => {
     "1" : () => navigate("/adm/Users"),
     "2" : () => navigate("/adm/travels"),
     "3" : () => navigate("/adm/accommodations"),
-    "4" : () => navigate("/adm/transports"),
+    "4" : () => navigate("/adm/flight"),
     "5" : () => navigate("/adm/plans"),
     "6" : () => navigate("/adm/deliveries"),
     "7" : () => navigate("/adm/payments"),
