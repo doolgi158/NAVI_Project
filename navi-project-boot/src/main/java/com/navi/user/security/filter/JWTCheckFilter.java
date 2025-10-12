@@ -9,6 +9,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,7 +19,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
-
+@Slf4j
 @RequiredArgsConstructor
 public class JWTCheckFilter extends OncePerRequestFilter {
     private final JWTUtil jwtUtil;
@@ -52,12 +53,14 @@ public class JWTCheckFilter extends OncePerRequestFilter {
 
                 JWTClaimDTO claim = jwtUtil.validateAndParse(accessToken);
                 String role = claim.getPrimaryRole();
-                List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
+                List<SimpleGrantedAuthority> authorities = claim.getRole().stream()
+                        .map(r -> new SimpleGrantedAuthority("ROLE_" + r))
+                        .toList();
 
                 UsernamePasswordAuthenticationToken auth =
                         new UsernamePasswordAuthenticationToken(
-                                claim.getId(), null, List.of(new SimpleGrantedAuthority(role))
-                        );
+                                claim.getId(), null, authorities);
+
                 SecurityContextHolder.getContext().setAuthentication(auth);
 
             } catch (Exception e) {
@@ -73,6 +76,8 @@ public class JWTCheckFilter extends OncePerRequestFilter {
             }
         }
 
+        log.info("[JWT FILTER] Header: {}", request.getHeader("Authorization"));
+        log.info("[JWT FILTER] Auth set: {}", SecurityContextHolder.getContext().getAuthentication());
         filterChain.doFilter(request, response);
     }
 

@@ -34,7 +34,7 @@ export const useLogin = () => {
         axios.defaults.headers.common["Authorization"] = `Bearer ${data.accessToken}`;
 
         // Redux 상태 갱신
-        dispatch(setlogin({ username: values.username, token: data.accessToken , role: data.role, ip: data.ip }));
+        dispatch(setlogin({ username: values.username, token: data.accessToken , role: data.roles, ip: data.ip }));
         
         // 리디렉션 처리
         const redirectPath = localStorage.getItem("redirectAfterLogin") || "/";

@@ -12,14 +12,17 @@ import com.navi.user.security.handler.ApiSuccessHandler;
 import com.navi.user.security.util.JWTUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -52,7 +55,7 @@ public class SecurityConfig {
         // 요청별 권한 설정 (anyRequest는 반드시 마지막!)
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers("/api/adm/**").hasRole(UserRole.ADMIN.name())
+                .requestMatchers("api/adm/**").hasRole(UserRole.ADMIN.name())
                 .requestMatchers("/api/users/**", "/api/seats/**", "/travel/**", "/api/flight/**", "/api/delivery/**")
                         .permitAll()
 //                .hasAnyRole(UserRole.USER.name(), UserRole.ADMIN.name())
@@ -78,7 +81,7 @@ public class SecurityConfig {
         );
 
         // JWT 필터 추가
-        http.addFilterAfter(new JWTCheckFilter(jwtUtil), LogoutFilter.class);
+        http.addFilterBefore(new JWTCheckFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
         http.addFilterAfter(new TryLoginFilter(tryLoginRepository), JWTCheckFilter.class);
 
         return http.build();
