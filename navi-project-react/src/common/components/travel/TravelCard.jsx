@@ -27,14 +27,16 @@ const TravelCard = ({ item, onClick, isSelected, onMouseEnter, onMouseLeave }) =
       const res = await api.post(`/travel/like/${item.travelId}?id=${userId}`, null, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const msg = res.data;
 
-      if (msg.includes('추가')) {
-        setIsLiked(true);
-        setLikeCount((prev) => prev + 1);
+      // ✅ 백엔드에서 JSON 응답을 받음
+      const { success, liked, message: serverMessage } = res.data;
+
+      if (success) {
+        setIsLiked(liked);
+        setLikeCount((prev) => (liked ? prev + 1 : Math.max(0, prev - 1)));
+        message.success(serverMessage);
       } else {
-        setIsLiked(false);
-        setLikeCount((prev) => Math.max(0, prev - 1));
+        message.warning(serverMessage || '좋아요 처리 실패');
       }
     } catch (err) {
       console.error('❌ 좋아요 실패:', err);
@@ -56,14 +58,15 @@ const TravelCard = ({ item, onClick, isSelected, onMouseEnter, onMouseLeave }) =
       const res = await api.post(`/travel/bookmark/${item.travelId}?id=${userId}`, null, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const msg = res.data;
 
-      if (msg.includes('추가')) {
-        setIsBookmarked(true);
-        setBookmarkCount((prev) => prev + 1);
+      const { success, bookmarked, message: serverMessage } = res.data;
+
+      if (success) {
+        setIsBookmarked(bookmarked);
+        setBookmarkCount((prev) => (bookmarked ? prev + 1 : Math.max(0, prev - 1)));
+        message.success(serverMessage);
       } else {
-        setIsBookmarked(false);
-        setBookmarkCount((prev) => Math.max(0, prev - 1));
+        message.warning(serverMessage || '북마크 처리 실패');
       }
     } catch (err) {
       console.error('❌ 북마크 실패:', err);

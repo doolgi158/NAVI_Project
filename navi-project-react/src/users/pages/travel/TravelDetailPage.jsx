@@ -63,7 +63,7 @@ const TravelDetailPage = () => {
         setLoading(true);
 
         const detailUrl = userId
-          ? `/travel/detail/${travelId}?id=${userId}`
+          ? `/travel/detail/${travelId}`
           : `/travel/detail/${travelId}`;
         const viewsUrl = `/travel/views/${travelId}`;
 
@@ -101,58 +101,61 @@ const TravelDetailPage = () => {
   }, [isMapLoaded, travelDetail]);
 
   /** ❤️ 좋아요 처리 */
-  const handleLikeClick = async () => {
-    if (!userId || !token) return message.warning('로그인 후 이용 가능합니다.');
-    if (loadingLike) return;
-    setLoadingLike(true);
+const handleLikeClick = async () => {
+  if (!userId || !token) return message.warning('로그인 후 이용 가능합니다.');
+  if (loadingLike) return;
+  setLoadingLike(true);
 
-    try {
-      const res = await api.post(`/travel/like/${travelId}?id=${userId}`, null, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const msg = res.data;
+  try {
+    const res = await api.post(`/travel/like/${travelId}`, null, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-      if (msg.includes("추가")) {
-        setIsLiked(true);
-        setLikeCount(prev => prev + 1);
-      } else {
-        setIsLiked(false);
-        setLikeCount(prev => Math.max(0, prev - 1));
-      }
-    } catch (err) {
-      console.error("좋아요 실패:", err);
-      message.error('좋아요 처리 중 오류가 발생했습니다.');
-    } finally {
-      setLoadingLike(false);
+    // ✅ JSON 응답 구조
+    const { success, liked, message: serverMessage } = res.data;
+
+    if (success) {
+      setIsLiked(liked);
+      setLikeCount((prev) => (liked ? prev + 1 : Math.max(0, prev - 1)));
+      message.success(serverMessage || '좋아요 상태 변경');
+    } else {
+      message.warning(serverMessage || '좋아요 처리 실패');
     }
-  };
+  } catch (err) {
+    console.error("❌ 좋아요 실패:", err);
+    message.error('좋아요 처리 중 오류가 발생했습니다.');
+  } finally {
+    setLoadingLike(false);
+  }
+};
 
-  /** 📚 북마크 처리 */
-  const handleBookmarkClick = async () => {
-    if (!userId || !token) return message.warning('로그인 후 이용 가능합니다.');
-    if (loadingBookmark) return;
-    setLoadingBookmark(true);
+/** 📚 북마크 처리 */
+const handleBookmarkClick = async () => {
+  if (!userId || !token) return message.warning('로그인 후 이용 가능합니다.');
+  if (loadingBookmark) return;
+  setLoadingBookmark(true);
 
-    try {
-      const res = await api.post(`/travel/bookmark/${travelId}?id=${userId}`, null, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const msg = res.data;
+  try {
+    const res = await api.post(`/travel/bookmark/${travelId}`, null, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-      if (msg.includes("추가")) {
-        setIsBookmarked(true);
-        setBookmarkCount(prev => prev + 1);
-      } else {
-        setIsBookmarked(false);
-        setBookmarkCount(prev => Math.max(0, prev - 1));
-      }
-    } catch (err) {
-      console.error("북마크 실패:", err);
-      message.error('북마크 처리 중 오류가 발생했습니다.');
-    } finally {
-      setLoadingBookmark(false);
+    const { success, bookmarked, message: serverMessage } = res.data;
+
+    if (success) {
+      setIsBookmarked(bookmarked);
+      setBookmarkCount((prev) => (bookmarked ? prev + 1 : Math.max(0, prev - 1)));
+      message.success(serverMessage || '북마크 상태 변경');
+    } else {
+      message.warning(serverMessage || '북마크 처리 실패');
     }
-  };
+  } catch (err) {
+    console.error("❌ 북마크 실패:", err);
+    message.error('북마크 처리 중 오류가 발생했습니다.');
+  } finally {
+    setLoadingBookmark(false);
+  }
+};
 
   /** 🔗 공유하기 */
   const handleShareClick = async () => {
