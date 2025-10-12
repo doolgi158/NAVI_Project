@@ -4,7 +4,8 @@ const Loading = <div></div>
 const Signup = lazy(() => import("../../users/pages/user/UserSignupPage"));
 const Redirect = lazy(() => import("../../users/pages/user/RedirectPage"));
 const FindID = lazy(() => import("../../users/pages/user/FindUserIdPage"));
-const FindPw = lazy(() => import("../../users/pages/user/FindUserPwPage"))
+const FindPw = lazy(() => import("../../users/pages/user/FindUserPwPage"));
+const Mypage = lazy(() => import("../../users/pages/user/UserMyPage"));
 
 const UserRouter = () => {
   return [
@@ -37,6 +38,14 @@ const UserRouter = () => {
         element: (
             <Suspense fallback={Loading}>
                 <FindPw />
+            </Suspense>
+        )
+    },
+    {
+        path: "mypage",
+        element: (
+            <Suspense fallback={Loading}>
+                <Mypage />
             </Suspense>
         )
     }

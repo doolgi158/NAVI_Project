@@ -52,14 +52,10 @@ public class SecurityConfig {
         // 요청별 권한 설정 (anyRequest는 반드시 마지막!)
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers( "/api/users/login", "/api/users/logout", "/api/auth/oauth/**",
-                        "/api/users/find-id", "/api/users/find-pw", "/api/users/signup", "/api/users/check-id",
-                        "/api/users/send-email", "/api/users/verify-code", "/api/users/find-password", "/api/seats/**",
-                        "/travel/**", "/api/flight/**", "/api/delivery/**"
-                ).permitAll()
-                .requestMatchers("/api/adm/**").hasAuthority(UserRole.ADMIN.name())
-                .requestMatchers("/api/auth/me").hasAuthority(UserRole.USER.name())
-                .anyRequest().authenticated()
+                .requestMatchers("/api/adm/**").hasRole(UserRole.ADMIN.name())
+//                .requestMatchers("/api/users/**", "/api/seats/**", "/travel/**", "/api/flight/**", "/api/delivery/**")
+//                .hasAnyRole(UserRole.USER.name(), UserRole.ADMIN.name())
+                .anyRequest().permitAll()
         );
 
         // 폼 로그인

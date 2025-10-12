@@ -1,18 +1,25 @@
 package com.navi.user.service.user;
 
+import com.navi.image.domain.Image;
+import com.navi.image.repository.ImageRepository;
 import com.navi.user.domain.User;
 import com.navi.user.dto.users.UserRequestDTO;
 import com.navi.user.dto.users.UserResponseDTO;
 import com.navi.user.enums.UserRole;
 import com.navi.user.enums.UserState;
 import com.navi.user.repository.UserRepository;
+import com.navi.user.security.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-import java.util.Optional;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -20,71 +27,91 @@ public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
+    private final JWTUtil jwtUtil;
+    private final ImageRepository imageRepository;
 
-    @Override
-    public Long register(UserRequestDTO userRequestDTO) {
-        User user = modelMapper.map(userRequestDTO, User.class);
-        User savedUser = userRepository.save(user);
-
-        return savedUser.getNo();
-    }
+    private static final String PROFILE_DIR = "C:/NAVI_Project/serverImage";
 
     @Override
     public UserResponseDTO get(Long no) {
-        Optional<User> result = userRepository.findById(no);
-        User user = result.orElseThrow();
-        return modelMapper.map(user, UserResponseDTO.class);
-    }
-
-    @Override
-    public void modify(UserRequestDTO userRequestDTO) {
-        Optional<User> result = userRepository.findById(userRequestDTO.getNo());
-        User user = result.orElseThrow();
-
-        User changeData = User.builder()
-                .name(user.getName())
-                .phone(user.getPhone())
-                .birth(user.getBirth())
-                .email(user.getEmail())
-                .gender(user.getGender())
-                .local(user.getLocal())
-                .build();
-        userRepository.save(changeData);
-    }
-
-    @Override
-    public void remove(Long no) {
-        userRepository.deleteById(no);
+        User user = userRepository.findById(no)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        Image profile = imageRepository.findByUser_No(no).orElse(null);
+        return UserResponseDTO.from(user, profile);
     }
 
     @Override
     public String findUserId(String name, String email) {
-        String n = name == null ? "" : name.trim();
-        String e = email == null ? "" : email.trim();
-
-        return userRepository
-                .findByNameIgnoreCaseAndEmailIgnoreCase(n, e)
-                .map(User::getId) // 로그인 아이디 필드명에 맞게 수정 (예: getUserId)
-                .orElse(null);
+        return userRepository.findByNameIgnoreCaseAndEmailIgnoreCase(
+                name == null ? "" : name.trim(),
+                email == null ? "" : email.trim()
+        ).map(User::getId).orElse(null);
     }
 
     @Override
-    public List<UserResponseDTO> userResponseList() {
-        List<User> userList = userRepository.findAll();
+    public UserResponseDTO getMyInfo(String token) {
+        var claims = jwtUtil.validateAndParse(token.replace("Bearer ", ""));
+        String id = claims.getId();
 
-        return userList.stream().map(user -> UserResponseDTO.builder()
-                .no(user.getNo())
-                .name(user.getName())
-                .phone(user.getPhone())
-                .birth(user.getBirth())
-                .email(user.getEmail())
-                .gender(user.getGender())
-                .id(user.getId())
-                .local(user.getLocal())
-                .userState(user.getUserState())
-                .signUp(user.getSignUp())
-                .build())
-            .toList();
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        Image profile = imageRepository.findByUser_No(user.getNo()).orElse(null);
+        return UserResponseDTO.from(user, profile);
+    }
+
+    @Override
+    @Transactional
+    public String uploadProfile(String token, MultipartFile file) {
+        String userId = jwtUtil.getUserIdFromToken(token.replace("Bearer ", ""));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        try {
+            Files.createDirectories(Paths.get(PROFILE_DIR));
+            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+            Path filePath = Paths.get(PROFILE_DIR, fileName);
+            file.transferTo(filePath.toFile());
+            String url = "/uploads/profile/" + fileName;
+
+            // 기존 이미지 삭제
+            imageRepository.findByUser_No(user.getNo()).ifPresent(imageRepository::delete);
+
+            // 새 이미지 저장
+            Image image = Image.builder()
+                    .user(user)
+                    .profileUrl(url)
+                    .build();
+
+            imageRepository.save(image);
+            return url;
+        } catch (Exception e) {
+            throw new RuntimeException("파일 업로드 실패", e);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void deleteProfile(String token) {
+        String userId = jwtUtil.getUserIdFromToken(token.replace("Bearer ", ""));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        imageRepository.deleteByUser_No(user.getNo());
+    }
+
+    @Override
+    @Transactional
+    public void changePassword(String token, String oldPw, String newPw) {
+        String userId = jwtUtil.getUserIdFromToken(token.replace("Bearer ", ""));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        if (!passwordEncoder.matches(oldPw, user.getPw())) {
+            throw new RuntimeException("현재 비밀번호가 일치하지 않습니다.");
+        }
+
+        userRepository.save(user.changePassword(passwordEncoder.encode(newPw)));
     }
 
     @Override

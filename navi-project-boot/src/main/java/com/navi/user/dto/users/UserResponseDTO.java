@@ -1,5 +1,7 @@
 package com.navi.user.dto.users;
 
+import com.navi.image.domain.Image;
+import com.navi.user.domain.User;
 import com.navi.user.enums.UserState;
 import lombok.*;
 
@@ -19,4 +21,20 @@ public class UserResponseDTO {
     private UserState userState;    // 유저 상태
     private String signUp;          // 가입일
     private String token;           // 토큰
+    private String profileUrl;      // 프로필 URL
+
+    public static UserResponseDTO from(User user, Image profile) {
+        return UserResponseDTO.builder()
+                .no(user.getNo())
+                .id(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .birth(user.getBirth())
+                .gender(user.getGender())
+                .local(user.getLocal())
+                .signUp(user.getSignUp())
+                .profileUrl(profile != null ? profile.getProfileUrl() : null)
+                .build();
+    }
 }

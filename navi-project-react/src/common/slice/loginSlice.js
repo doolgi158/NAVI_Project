@@ -6,6 +6,7 @@ import axios from "axios";
 const initState = {
   username: "",
   token: "",
+  role:"",
   ip: "",
 };
 
@@ -25,11 +26,12 @@ const loginSlice = createSlice({
   initialState: loadUserCookie() || initState,
   reducers: {
     setlogin: (state, action) => {
-      const payload = action.payload;
+      const { username, token, role, ip } = action.payload;
 
-      state.username = action.payload.username;
-      state.token = action.payload.token;
-      state.ip = action.payload.ip;
+      state.username = username;
+      state.token = token;
+      state.role = role;
+      state.ip = ip;
       
       // 에러가 없을 때만 쿠키 저장
       if(!action.payload.error){
