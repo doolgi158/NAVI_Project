@@ -11,7 +11,7 @@ export const useLogin = () => {
   const login = async (values) => {
     try {
       localStorage.setItem("redirectAfterLogin", window.location.pathname);
-console(values);
+
       // 로그인 요청
       const params = new URLSearchParams();
       params.append("username", values.username);
@@ -25,23 +25,24 @@ console(values);
 
       // 상태 코드별 처리
       if (response.status === 200) {
-        const data = response.data;
-console.log(data);
+        const { accessToken, refreshToken, username, roles, ip } = response.data;
+        console.log(response.data);
         // JWT 토큰 저장
-        localStorage.setItem("accessToken", data.accessToken);
-        localStorage.setItem("refreshToken", data.refreshToken);
+        localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("refreshToken", refreshToken);
+        localStorage.setItem("username", username);
 
-        axios.defaults.headers.common["Authorization"] = `Bearer ${data.accessToken}`;
+        axios.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
 
         // Redux 상태 갱신
-        dispatch(setlogin({ username: values.username, token: data.accessToken , role: data.roles, ip: data.ip }));
-        
+        dispatch(setlogin({ username: username, token: accessToken , role: roles, ip: ip }));
+
         // 리디렉션 처리
         const redirectPath = localStorage.getItem("redirectAfterLogin") || "/";
         localStorage.removeItem("redirectAfterLogin");
 
         // 관리자 전용 페이지 분기
-        if (data.id === "naviadmin") {
+        if (username === "naviadmin") {
           navigate("/adm/dashboard");
         } else {
           navigate(redirectPath);
