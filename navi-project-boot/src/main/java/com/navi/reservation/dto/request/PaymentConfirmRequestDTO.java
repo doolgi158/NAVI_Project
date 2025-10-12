@@ -1,7 +1,7 @@
 package com.navi.reservation.dto.request;
 
-import com.navi.reservation.domain.PaymentMethod;
-import com.navi.reservation.domain.RsvType;
+import com.navi.reservation.domain.enums.PaymentMethod;
+import com.navi.reservation.domain.enums.RsvType;
 import lombok.*;
 
 /**

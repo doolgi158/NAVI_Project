@@ -1,7 +1,7 @@
 package com.navi.reservation.service;
 
 import com.navi.reservation.domain.RsvCounter;
-import com.navi.reservation.domain.RsvType;
+import com.navi.reservation.domain.enums.RsvType;
 import com.navi.reservation.repository.RsvCounterRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

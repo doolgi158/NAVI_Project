@@ -8,12 +8,14 @@ package com.navi.accommodation.domain;
  */
 
 import com.navi.reservation.domain.Rsv;
+import com.navi.room.domain.Room;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
 
 @Getter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity

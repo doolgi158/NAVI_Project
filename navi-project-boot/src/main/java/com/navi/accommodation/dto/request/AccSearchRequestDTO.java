@@ -4,12 +4,9 @@ import lombok.*;
 
 import java.time.LocalDate;
 
-/**
- * ========================
- * [AccSearchRequestDTO]
- * : 숙소 검색 조건 요청 DTO
- * ========================
- */
+/* ====[AccSearchRequestDTO]====
+      숙소 검색 조건 요청 DTO
+   =============================*/
 
 @Data
 @AllArgsConstructor
@@ -21,4 +18,6 @@ public class AccSearchRequestDTO {
     private LocalDate checkOut;     // 체크아웃 날짜
     private Integer guestCount;     // 투숙 인원
     private Integer roomCount;      // 필요한 객실 수
+
+    private String title;           // 숙소명
 }

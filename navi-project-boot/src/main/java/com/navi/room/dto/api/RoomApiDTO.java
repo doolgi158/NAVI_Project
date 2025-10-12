@@ -1,4 +1,4 @@
-package com.navi.accommodation.dto.api;
+package com.navi.room.dto.api;
 
 /* 외부 API DB 매핑용 DTO - 객실 */
 

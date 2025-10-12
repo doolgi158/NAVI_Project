@@ -17,14 +17,14 @@ import java.util.List;
 public class AccUserController {
     private final AccService accService;
 
-    /** === 숙소 리스트 조회 === */
+    /* === 숙소 리스트 조회 === */
     @GetMapping("/accommodations")
     public List<AccListResponseDTO> getAccommodationList(@ModelAttribute AccSearchRequestDTO dto) {
         log.info("[USER] 숙소 리스트 조회 요청 - 조건: {}", dto);
         return accService.searchAccommodations(dto);
     }
 
-    /** === 숙소 상세 조회 === */
+    /* === 숙소 상세 조회 === */
     @GetMapping("/accommodations/{accId}")
     public AccDetailResponseDTO getAccommodationDetail(@PathVariable String accId) {
         log.info("[USER] 숙소 상세 조회 요청 - accId: {}", accId);

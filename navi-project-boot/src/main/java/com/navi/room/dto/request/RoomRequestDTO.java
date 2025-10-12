@@ -1,4 +1,4 @@
-package com.navi.accommodation.dto.request;
+package com.navi.room.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

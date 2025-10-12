@@ -1,6 +1,6 @@
 package com.navi.accommodation.dto.request;
 
-/*
+/**
  * ============================
  * [AccRsvDetailRequestDTO]
  * : 숙소 예약 상세 등록 요청 DTO

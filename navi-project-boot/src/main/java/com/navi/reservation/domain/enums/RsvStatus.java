@@ -1,4 +1,4 @@
-package com.navi.reservation.domain;
+package com.navi.reservation.domain.enums;
 
 public enum RsvStatus {
     WAITING_PAYMENT,    // 결제 대기

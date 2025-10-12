@@ -19,6 +19,13 @@ const TravelPage = ({ user }) => {
   /** ✅ userId 확인 (prop 우선, 없으면 Redux) */
   const userId = user?.username || reduxUser?.username || null;
 
+  /** ✅ 정렬 초기 복원 */
+  useEffect(() => {
+    const savedSort = sessionStorage.getItem('travelListSort');
+    if (savedSort && savedSort !== pageParam?.sort) {
+      handleSortChange(savedSort);
+    }
+  }, []); // 최초 1회 실행
 
   /** ✅ 토큰 재적용 확인 */
   useEffect(() => {

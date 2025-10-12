@@ -1,17 +1,17 @@
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
-import MainLayout from '../../layout/MainLayout';
 import { Card, Typography, Form, Input, DatePicker, Select, Button, Steps } from 'antd';
+import MainLayout from '../../layout/MainLayout';
 
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 
 const AccReservationPage = () => {
   const { accNo, roomId } = useParams();
+  const location = useLocation();
+
   const { room, accName } = location.state || {}; // 숙소명 + 객실 정보
 
-  const location = useLocation();
   const navigate = useNavigate(); // ✅ 페이지 이동용
-
   const [form] = Form.useForm();
 
   /** ✅ 폼 제출 시 결제 페이지로 이동 */
@@ -24,7 +24,7 @@ const AccReservationPage = () => {
 
   return (
     <MainLayout>
-      <div className="min-h-screen bg-[#FFFBEA] flex justify-center items-center py-12 px-8">
+      <div className="min-h-screen bg-[#FFFBEA] flex justify-center pt-10 pb-12 px-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full max-w-7xl">
 
           {/* === 왼쪽: 예약 입력 폼 === */}
