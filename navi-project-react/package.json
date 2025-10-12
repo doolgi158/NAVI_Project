@@ -21,7 +21,10 @@
     "react": "18.2.0",
     "react-bootstrap": "^2.10.10",
     "react-cookie": "^8.0.1",
+    "react-daum-postcode": "^3.2.0",
     "react-dom": "18.2.0",
+    "react-quill": "^2.0.0",
+    "react-quill-image-uploader": "^0.1.1",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.9.3"
   },

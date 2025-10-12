@@ -11,7 +11,7 @@ export const useLogin = () => {
   const login = async (values) => {
     try {
       localStorage.setItem("redirectAfterLogin", window.location.pathname);
-console(values);
+
       // 로그인 요청
       const params = new URLSearchParams();
       params.append("username", values.username);
@@ -26,7 +26,7 @@ console(values);
       // 상태 코드별 처리
       if (response.status === 200) {
         const data = response.data;
-console.log(data);
+
         // JWT 토큰 저장
         localStorage.setItem("accessToken", data.accessToken);
         localStorage.setItem("refreshToken", data.refreshToken);
