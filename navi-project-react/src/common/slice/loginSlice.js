@@ -26,7 +26,7 @@ const loginSlice = createSlice({
   initialState: loadUserCookie() || initState,
   reducers: {
     setlogin: (state, action) => {
-      
+      console.log(action.payload);
       const { username, token, role, ip } = action.payload;
       // roles 배열이면 첫 번째만 사용
       let roleValue = "";
