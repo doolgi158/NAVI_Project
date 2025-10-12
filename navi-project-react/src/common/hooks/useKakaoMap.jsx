@@ -17,7 +17,6 @@ export const useKakaoMap = (containerId) => {
       if (window.kakao && window.kakao.maps) {
         window.kakao.maps.load(() => {
           setIsMapLoaded(true);
-          console.log("[KakaoMap] SDK loaded");
         });
       }
     };
@@ -83,9 +82,7 @@ export const useKakaoMap = (containerId) => {
           mapRef.current.setCenter(currentCenter);
         }
       }
-      console.log("[KakaoMap] relayout/resize executed");
     } catch (err) {
-      console.error("[KakaoMap] relayoutMap error:", err);
     }
   }, [containerId]);
 

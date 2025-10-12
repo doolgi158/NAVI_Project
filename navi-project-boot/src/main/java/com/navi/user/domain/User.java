@@ -42,7 +42,7 @@ public class User {
     private String email;       // 이메일
 
     @Column(name = "user_gender")
-    private char gender;        // 성별
+    private String gender;        // 성별
 
     @Column(name = "user_ID", nullable = false, unique = true)
     private String id;          // 아이디
@@ -51,7 +51,7 @@ public class User {
     private String pw;          // 비밀번호
 
     @Column(name = "user_local")
-    private char local;         // 내/외국인
+    private String local;         // 내/외국인
 
     @Column(name = "user_signup", updatable = false)
     @ColumnDefault(value = "sysdate")

@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @Builder
@@ -16,7 +17,7 @@ public class JWTClaimDTO {
     private String phone;     // 전화번호
     private String birth;     // 생년월일
     private String provider;  // 소셜 로그인 제공자 (google, kakao 등)
-    private List<UserRole> role;    // 권한
+    private List<String> role;    // 권한
     private String ip;
     private String accessToken;
     private String refreshToken;
@@ -29,7 +30,11 @@ public class JWTClaimDTO {
                 .email(user.getEmail())
                 .phone(user.getPhone())
                 .birth(user.getBirth())
-                .role(user.getUserRoleList())
+                .role(
+                        user.getUserRoleList().stream()
+                                .map(UserRole::name)
+                                .collect(Collectors.toList())
+                )
                 .build();
     }
 
@@ -39,12 +44,12 @@ public class JWTClaimDTO {
                 .provider(provider)
                 .email(email)
                 .name(name)
-                .role(List.of(UserRole.USER))
+                .role(List.of(UserRole.USER.name())) // Enum.name() → String
                 .build();
     }
 
     // 가장 첫 번째 권한 반환 (편의 메서드)
     public String getPrimaryRole() {
-        return role != null && !role.isEmpty() ? role.get(0).name() : UserRole.USER.name();
+        return role != null && !role.isEmpty() ? role.get(0) : UserRole.USER.name();
     }
 }

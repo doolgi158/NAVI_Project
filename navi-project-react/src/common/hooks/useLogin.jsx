@@ -10,11 +10,9 @@ export const useLogin = () => {
 
   const login = async (values) => {
     try {
-      // ✅ 클라이언트 IP 조회      
-      const ipRes = await axios.get("https://api.ipify.org?format=json");
-      const ip = ipRes.data.ip;
-
-      // ✅ 로그인 요청
+      localStorage.setItem("redirectAfterLogin", window.location.pathname);
+console(values);
+      // 로그인 요청
       const params = new URLSearchParams();
       params.append("username", values.username);
       params.append("password", values.password);
@@ -28,13 +26,17 @@ export const useLogin = () => {
       // ✅ 상태 코드별 처리
       if (response.status === 200) {
         const data = response.data;
-
+console.log(data);
         // JWT 토큰 저장
         localStorage.setItem("accessToken", data.accessToken);
         localStorage.setItem("refreshToken", data.refreshToken);
 
         // Redux 상태 갱신
-        dispatch(setlogin({ username: values.username, token: data.accessToken }));
+        dispatch(setlogin({ username: values.username, token: data.accessToken , role: data.roles, ip: data.ip }));
+        
+        // 리디렉션 처리
+        const redirectPath = localStorage.getItem("redirectAfterLogin") || "/";
+        localStorage.removeItem("redirectAfterLogin");
 
         // 관리자 전용 페이지 분기
         if (data.id === "naviadmin") {

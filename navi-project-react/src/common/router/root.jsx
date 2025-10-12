@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { createBrowserRouter } from "react-router-dom";
 import TravelRouter from "./TravelRouter.jsx";
+import PlanRouter from "./PlanRouter.jsx";
 import FlightRouter from "./FlightRouter.jsx";
 import AdminRouter from "./AdminRouter.jsx";
 import AccRouter from "./AccRouter.jsx";
@@ -22,6 +23,10 @@ const root = createBrowserRouter([
     {
         path: "/travel",
         children: [...TravelRouter()]
+    },
+    {
+        path: "/plans",
+        children: [...PlanRouter()]
     },
     {
         path: "/flight",

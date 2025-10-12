@@ -1,0 +1,106 @@
+package com.navi.accommodation.service;
+
+import com.navi.accommodation.domain.AccRsv;
+import com.navi.room.domain.Room;
+import com.navi.accommodation.dto.response.AccRsvResponseDTO;
+import com.navi.accommodation.repository.AccRsvRepository;
+import com.navi.room.repository.RoomRepository;
+import com.navi.reservation.domain.Rsv;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+@Transactional(readOnly = true)
+public class AccRsvServiceImpl implements AccRsvService {
+
+    private final AccRsvRepository accRsvRepository;
+    private final RoomRepository roomRepository;
+
+    /** === 숙소 상세 예약 생성 === */
+    @Override
+    @Transactional
+    public void createAccReservation(Rsv rsv) {
+        log.info("[AccRsvService] 숙소 상세 예약 생성 시작 - reserveId: {}", rsv.getReserveId());
+
+        Room room = roomRepository.findByRoomId(rsv.getTargetId())
+                .orElseThrow(() -> new IllegalArgumentException("해당 객실 정보를 찾을 수 없습니다: " + rsv.getTargetId()));
+
+        LocalDate startDate = LocalDate.now();
+        LocalDate endDate = startDate.plusDays(2);
+        int quantity = 1;
+
+        int stayNights = (int) (endDate.toEpochDay() - startDate.toEpochDay());
+
+        int totalAmount = 0;
+        LocalDate date = startDate;
+        for (int i = 0; i < stayNights; i++) {
+            DayOfWeek day = date.getDayOfWeek();
+            boolean isWeekend = (day == DayOfWeek.FRIDAY || day == DayOfWeek.SATURDAY);
+            totalAmount += isWeekend ? room.getWeekendFee() : room.getWeekdayFee();
+            date = date.plusDays(1);
+        }
+        totalAmount *= quantity;
+
+        int roomPrice = room.getWeekdayFee();
+
+        AccRsv accRsv = AccRsv.builder()
+                .rsv(rsv)
+                .room(room)
+                .quantity(quantity)
+                .roomPrice(roomPrice)
+                .totalAmount(totalAmount)
+                .startDate(startDate)
+                .endDate(endDate)
+                .build();
+
+        accRsvRepository.save(accRsv);
+        log.info("[AccRsvService] 숙소 상세 예약 생성 완료 → detailId={}, reserveId={}, totalAmount={}",
+                accRsv.getDetailId(), rsv.getReserveId(), totalAmount);
+    }
+
+    /** === 전체 예약 상세 목록 조회 === */
+    @Override
+    public List<AccRsvResponseDTO> findAllDetails() {
+        return accRsvRepository.findAllDetails()
+                .stream()
+                .map(AccRsvResponseDTO::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    /** === 사용자 ID 기준 예약 목록 조회 === */
+    @Override
+    public List<AccRsvResponseDTO> findAllByUserNo(Long userNo) {
+        return accRsvRepository.findAllByUserNo(userNo)
+                .stream()
+                .map(AccRsvResponseDTO::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    /** === 예약 ID 기준 숙소 상세 예약 조회 === */
+    @Override
+    public List<AccRsvResponseDTO> findAllByReserveId(String reserveId) {
+        return accRsvRepository.findAllByReserveId(reserveId)
+                .stream()
+                .map(AccRsvResponseDTO::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    /** === 체크인 날짜 조회 === */
+    @Override
+    public LocalDate findCheckInDateByReserveId(String reserveId) {
+        LocalDate date = accRsvRepository.findCheckInDateByReserveId(reserveId);
+        if (date == null) {
+            throw new IllegalArgumentException("해당 예약의 체크인 날짜를 찾을 수 없습니다.");
+        }
+        return date;
+    }
+}

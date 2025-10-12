@@ -25,12 +25,21 @@ const loginSlice = createSlice({
   initialState: loadUserCookie() || initState,
   reducers: {
     setlogin: (state, action) => {
-      const payload = action.payload;
-
-      state.username = action.payload.username;
-      state.token = action.payload.token;
-      state.ip = action.payload.ip;
+      console.log(action.payload);
+      const { username, token, role, ip } = action.payload;
+      // roles 배열이면 첫 번째만 사용
+      let roleValue = "";
+      if (Array.isArray(role)) {
+        roleValue = role[0];
+      } else {
+        roleValue = role;
+      }   
       
+      state.username = username;
+      state.token = token;
+      state.role = roleValue;
+      state.ip = ip;
+
       // 에러가 없을 때만 쿠키 저장
       if(!action.payload.error){
         setCookie("userCookie", JSON.stringify(action.payload), 1);
