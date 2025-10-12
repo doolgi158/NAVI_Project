@@ -6,7 +6,6 @@ import axios from "axios";
 const initState = {
   username: "",
   token: "",
-  role:"",
   ip: "",
 };
 
@@ -26,12 +25,11 @@ const loginSlice = createSlice({
   initialState: loadUserCookie() || initState,
   reducers: {
     setlogin: (state, action) => {
-      const { username, token, role, ip } = action.payload;
+      const payload = action.payload;
 
-      state.username = username;
-      state.token = token;
-      state.role = role;
-      state.ip = ip;
+      state.username = action.payload.username;
+      state.token = action.payload.token;
+      state.ip = action.payload.ip;
       
       // 에러가 없을 때만 쿠키 저장
       if(!action.payload.error){
@@ -56,6 +54,7 @@ const loginSlice = createSlice({
           },
         }
       ).catch((err) => {
+        console.error("❌ 로그아웃 기록 전송 실패:", err);
       });
 
       // 로컬 저장소 초기화
@@ -67,7 +66,6 @@ const loginSlice = createSlice({
       state.username = "";
       state.token = "";
       state.ip = "";
-      delete axios.defaults.headers.common["Authorization"];
     },
   },
 });

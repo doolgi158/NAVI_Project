@@ -16,7 +16,7 @@ const SignupForm = () => {
 
   const {
     resetIdState,
-    // 이메일 인증 관련 상태 & 함수
+    // ✅ 이메일 인증 관련 상태 & 함수
     emailVerified,
     emailStatus,
     emailMessage,
@@ -31,10 +31,10 @@ const SignupForm = () => {
     emailCodeMessage,
   } = useSignupForm(form);
 
-  // 아이디 중복 검사
+  // ✅ 아이디 중복 검사
   const handleCheckId = async () => {
     const idValue = form.getFieldValue("id");
-
+console.log(emailSent);
     if (!idValue) {
       message.warning("아이디를 입력하세요.");
       setIdStatus("error");
@@ -60,6 +60,7 @@ const SignupForm = () => {
         setIdChecked(false);
       }
     } catch (err) {
+      console.error("중복 검사 오류:", err);
       message.error("아이디 중복 검사 중 오류가 발생했습니다.");
       setIdStatus("error");
       setIdMessage("서버 오류로 중복 검사를 수행할 수 없습니다.");
@@ -67,7 +68,7 @@ const SignupForm = () => {
     }
   };
 
-  // 회원가입 처리
+  // ✅ 회원가입 처리
   const handleSubmit = async (values) => {
     if (!idChecked) {
       message.warning("아이디 중복 검사를 먼저 진행해주세요.");
@@ -91,6 +92,7 @@ const SignupForm = () => {
         setTimeout(() => showModal("login"), 600);
       }
     } catch (err) {
+      console.error("회원가입 오류:", err);
       message.error(err.message || "회원가입 중 오류가 발생했습니다.");
     }
   };
@@ -144,7 +146,7 @@ const SignupForm = () => {
         </Space.Compact>
       </Form.Item>
 
-      {/* 비밀번호 유효성 검사 */}
+      {/* ✅ 비밀번호 유효성 검사 */}
       <Form.Item
         label="비밀번호"
         name="pw"
@@ -206,8 +208,8 @@ const SignupForm = () => {
         <Col span={12}>
           <Form.Item label="내/외국인 구분" name="local">
             <Radio.Group>
-              <Radio value="L">내국인</Radio>
-              <Radio value="F">외국인</Radio>
+              <Radio value="local">내국인</Radio>
+              <Radio value="foreigner">외국인</Radio>
             </Radio.Group>
           </Form.Item>
         </Col>
@@ -221,7 +223,7 @@ const SignupForm = () => {
         </Col>
       </Row>
 
-      {/* 전화번호 유효성 검사 */}
+      {/* ✅ 전화번호 유효성 검사 */}
       <Form.Item
         label="전화번호"
         name="phone"
@@ -237,7 +239,7 @@ const SignupForm = () => {
         <Input placeholder="숫자만 입력 (예: 01012345678)" size="large" />
       </Form.Item>
 
-      {/* 이메일 + 인증코드 */}
+      {/* ✅ 이메일 + 인증코드 */}
       <Form.Item
         label="이메일"
         name="email"
@@ -267,7 +269,7 @@ const SignupForm = () => {
         </Space.Compact>
       </Form.Item>
 
-      {/* 인증 코드 입력란 */}
+      {/* ✅ 인증 코드 입력란 */}
       {emailSent && !emailVerified && (
         <Form.Item label="인증 코드"  validateStatus={emailCodeStatus} help={emailCodeMessage}>
           <Space.Compact className="w-full">

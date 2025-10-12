@@ -1,18 +1,10 @@
 import React, { useEffect, useState } from 'react';
-<<<<<<< HEAD
 import { useParams } from 'react-router-dom';
-=======
-import { useParams, useNavigate } from 'react-router-dom';
->>>>>>> 72d6a045916dd3028cf790a94dbb3c6b1a2b5036
 import MainLayout from '../../layout/MainLayout';
 import { Button } from 'antd'; 
 
 const AccDetailPage = () => {
     const { accNo } = useParams(); 
-<<<<<<< HEAD
-=======
-    const navigate = useNavigate(); 
->>>>>>> 72d6a045916dd3028cf790a94dbb3c6b1a2b5036
     const [accommodation, setAccommodation] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -32,10 +24,7 @@ const AccDetailPage = () => {
                             { id: 103, type: '스위트 룸 (4인 기준)', price: 350000, max: 4, image: 'https://images.unsplash.com/photo-1540541338287-c1518f7a77e5?fit=crop&w=400&q=80' },
                         ]
                     };
-<<<<<<< HEAD
                     
-=======
->>>>>>> 72d6a045916dd3028cf790a94dbb3c6b1a2b5036
                     setAccommodation(result);
                 } catch (error) {
                     console.error("숙소 상세 정보 로딩 오류:", error);
@@ -43,24 +32,11 @@ const AccDetailPage = () => {
                     setLoading(false);
                 }
             };
-<<<<<<< HEAD
 
-=======
->>>>>>> 72d6a045916dd3028cf790a94dbb3c6b1a2b5036
             fetchDetail();
         }
     }, [accNo]);
 
-<<<<<<< HEAD
-=======
-    // ✅ navigate 수정 — rooms 세그먼트 제거
-    const handleReserve = (room) => {
-        navigate(`/accommodations/${accNo}/${room.id}/reserve`, {
-            state: { room },
-        });
-    };
-
->>>>>>> 72d6a045916dd3028cf790a94dbb3c6b1a2b5036
     if (loading) {
         return <MainLayout><div className="text-center p-20">Loading...</div></MainLayout>;
     }
@@ -72,13 +48,9 @@ const AccDetailPage = () => {
     return (
         <MainLayout>
             <div className="min-h-screen bg-[#fffde8] flex flex-col items-center pt-10 px-4">
-<<<<<<< HEAD
                 
                 <div className="w-full max-w-7xl mb-10"> 
                     
-=======
-                <div className="w-full max-w-7xl mb-10"> 
->>>>>>> 72d6a045916dd3028cf790a94dbb3c6b1a2b5036
                     <div className="bg-white shadow-md rounded-2xl p-8">
                         <h1 className="text-4xl font-extrabold mb-8 text-gray-800">
                             {accommodation.name} 
@@ -86,12 +58,8 @@ const AccDetailPage = () => {
                                 (No. {accommodation.accNo})
                             </span>
                         </h1>
-<<<<<<< HEAD
                         
                         {/* ⭐ 사진 공간: h-96 -> h-72로 변경 */}
-=======
-
->>>>>>> 72d6a045916dd3028cf790a94dbb3c6b1a2b5036
                         <div className="grid grid-cols-2 gap-4 mb-8">
                             <div className="h-72 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500">
                                 사진 갤러리 1
@@ -100,26 +68,16 @@ const AccDetailPage = () => {
                                 사진 갤러리 2
                             </div>
                         </div>
-<<<<<<< HEAD
                         
-=======
-
->>>>>>> 72d6a045916dd3028cf790a94dbb3c6b1a2b5036
                         <div className="p-6 mb-8 border-b border-gray-200">
                             <h2 className="text-2xl font-bold mb-3 text-gray-700">숙소 소개</h2>
                             <p className="text-lg text-gray-600 leading-relaxed">
                                 {accommodation.description}
                             </p>
                         </div>
-<<<<<<< HEAD
                         
                         <h2 className="text-2xl font-bold mb-4 text-gray-700">객실 정보 및 예약</h2>
                         
-=======
-
-                        <h2 className="text-2xl font-bold mb-4 text-gray-700">객실 정보 및 예약</h2>
-
->>>>>>> 72d6a045916dd3028cf790a94dbb3c6b1a2b5036
                         <div className="space-y-4">
                             {accommodation.rooms.map((room) => (
                                 <div 
@@ -146,36 +104,20 @@ const AccDetailPage = () => {
                                         <p className="text-2xl font-extrabold text-blue-600 mb-2">
                                             {room.price.toLocaleString()}원
                                         </p>
-<<<<<<< HEAD
                                         <Button type="primary" size="large">
-=======
-                                        <Button 
-                                            type="primary" 
-                                            size="large"
-                                            onClick={() => handleReserve(room)}
-                                        >
->>>>>>> 72d6a045916dd3028cf790a94dbb3c6b1a2b5036
                                             예약하기
                                         </Button>
                                     </div>
                                 </div>
                             ))}
                         </div>
-<<<<<<< HEAD
 
                     </div>
                     
-=======
-                    </div>
->>>>>>> 72d6a045916dd3028cf790a94dbb3c6b1a2b5036
                 </div>
             </div>
         </MainLayout>
     );
 };
 
-<<<<<<< HEAD
 export default AccDetailPage;
-=======
-export default AccDetailPage;
->>>>>>> 72d6a045916dd3028cf790a94dbb3c6b1a2b5036

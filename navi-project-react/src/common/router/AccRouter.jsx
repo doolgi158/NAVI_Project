@@ -1,8 +1,8 @@
 import { Suspense, lazy } from "react";
 
-const Loading = <div>Loading....</div>
-const AccList = lazy(() => import("../../users/pages/accommodation/AccListPage.jsx"))
-const AccDetail = lazy(() => import("../../users/pages/accommodation/AccDetailPage.jsx"))
+const Loading = <div></div>
+const AccList = lazy(() => import("../../users/pages/acc/AccListPage.jsx"))
+const AccDetail = lazy(() => import("../../users/pages/acc/AccDetailPage.jsx"))
 
 const AccRouter = () => {
     return [

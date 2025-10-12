@@ -2,15 +2,15 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import { useTravelListFilter } from './useTravelListFilter.jsx'; // 지역 필터 훅 임포트
 
+// ✅ 카테고리 목록 정의
 const categories = ['전체', '관광지', '음식점', '쇼핑'];
 
-//여행지 목록 API 호출 함수 (생략)
+// ✅ 여행지 목록 API 호출 함수 (검색어 포함)
 const getTravelData = async (domain, pageParam, filterQuery) => {
     const apiUrl = `/api/${domain}`;
-    
-    const sortArray = pageParam.sort ? pageParam.sort.split(',') : []; 
+    const sortArray = pageParam.sort.split(',');
+
     const sortParams = [];
-    // API에 전달할 정렬 필드를 쌍(field, direction)으로 구성
     for (let i = 0; i < sortArray.length; i += 2) {
         if (i + 1 < sortArray.length) {
             sortParams.push(`${sortArray[i]},${sortArray[i+1]}`);
@@ -21,18 +21,22 @@ const getTravelData = async (domain, pageParam, filterQuery) => {
     queryString += sortParams.map(s => `&sort=${s}`).join('');
 
     if (filterQuery.region2Name && filterQuery.region2Name.length > 0) {
+        // 쉼표(CSV) 구분 방식으로 인코딩하여 전송
         const encodedRegions = filterQuery.region2Name.map(region => encodeURIComponent(region)).join(',');
         queryString += `&region2Name=${encodedRegions}`;
     }
     
+    // 카테고리 이름 파라미터 추가
     if (pageParam.categoryName && pageParam.categoryName !== '전체') {
         const encodedCategoryName = encodeURIComponent(pageParam.categoryName);
         queryString += `&categoryName=${encodedCategoryName}`;
     }
     
+    //  검색어 파라미터를 쿼리 스트링에 추가합니다.
+    // 서버에서 이 'search' 파라미터를 받아 제목(title) 필터링을 수행해야 합니다.
     if (pageParam.search) {
-        const encodedSearch = encodeURIComponent(pageParam.search);
-        queryString += `&search=${encodedSearch}`;
+    const encodedSearch = encodeURIComponent(pageParam.search);
+    queryString += `&search=${encodedSearch}`;
     }
 
 
@@ -47,20 +51,9 @@ const getTravelData = async (domain, pageParam, filterQuery) => {
 
 
 export const useTravelList = () => {
-    //  세션 스토리지에서 모든 pageParam 관련 상태를 복원하도록 수정
-    const getInitialParams = () => {
+    const getInitialPage = () => {
         const savedPage = sessionStorage.getItem('travelListPage');
-        const savedSort = sessionStorage.getItem('travelListSort'); 
-        const savedCategory = sessionStorage.getItem('travelListCategory'); // 카테고리 복원
-        const savedSearch = sessionStorage.getItem('travelListSearch'); // 검색어 복원
-        
-        return {
-            page: savedPage ? parseInt(savedPage, 10) : 1,
-            // ⭐️ 저장된 값이 없으면 'updatedAt,desc,contentsCd,asc'를 기본값으로 사용합니다.
-            sort: savedSort || 'updatedAt,desc,contentsCd,asc', 
-            categoryName: savedCategory || categories[0],
-            search: savedSearch || '',
-        };
+        return savedPage ? parseInt(savedPage, 10) : 1;
     };
 
     const [pageResult, setPageResult] = useState({
@@ -75,13 +68,12 @@ export const useTravelList = () => {
     });
     
     // pageParam 초기값 설정 (검색어 필드 포함)
-    const initialParams = getInitialParams();
     const [pageParam, setPageParam] = useState({ 
-        page: initialParams.page, 
+        page: getInitialPage(), 
         size: 10,
-        sort: initialParams.sort, 
-        categoryName: initialParams.categoryName, 
-        search: initialParams.search 
+        sort: 'contentsCd,asc,updatedAt,desc',
+        categoryName: categories[0], 
+        search: '' // 검색어 상태 초기화
     });
     
     const isLoadingRef = useRef(false);
@@ -93,15 +85,14 @@ export const useTravelList = () => {
     // 지역 필터 변경 시 pageParam 업데이트 로직
     const handleRegionFilterChange = useCallback((newRegions) => {
         setPageParam(prev => ({ ...prev, page: 1 }));
-        // 참고: 필터 변경 시 정렬은 유지됩니다.
     }, []);
 
     // 지역 필터 훅 사용
     const regionFilterProps = useTravelListFilter(handleRegionFilterChange);
     
 
-    // 여행지 목록 불러오기 (생략)
-    const fetchTravelList = useCallback((param, query) => {
+    // 여행지 목록 불러오기
+    const fetchTravelList = useCallback(() => {
         if (isLoadingRef.current) return; 
 
         isLoadingRef.current = true;
@@ -109,7 +100,7 @@ export const useTravelList = () => {
         setHasError(false);
 
         // API 호출 시 filterQuery를 사용합니다.
-        getTravelData('travel', param, query) 
+        getTravelData('travel', pageParam, regionFilterProps.filterQuery)
             .then((data) => {
                 let fetchedList = data.content || [];
                 
@@ -129,36 +120,34 @@ export const useTravelList = () => {
                     pageList,
                 });
 
-                // 선택된 항목(selectedItem)이 없거나 새 목록에 없을 경우에만 
-                // 새 목록의 첫 번째 항목을 지도 표시를 위해 선택
                 setSelectedItem((prev) => {
+                    const isFirstPage = pageParam.page === 1;
                     const existsInNewList = prev ? fetchedList.some((it) => it.travelId === prev.travelId) : false;
-                    
-                    if (!prev || !existsInNewList) { 
+                    // 기존 항목이 새 목록에 없으면, 새 목록의 첫 번째 항목을 선택합니다.
+                    if (!existsInNewList || isFirstPage) { 
                         return fetchedList[0] || null;
                     }
                     return prev;
                 });
-                
                 setHoveredItem(null); 
             })
             .catch(() => {
-                setHasError(true); 
+                setHasError(true);                
             })
             .finally(() => {
                 isLoadingRef.current = false;
-                setShowLoading(false); 
+                setShowLoading(false);               
             });
-    }, []); 
+    }, [pageParam, regionFilterProps.filterQuery]);
 
     useEffect(() => {
-        fetchTravelList(pageParam, regionFilterProps.filterQuery); 
-    }, [pageParam, regionFilterProps.filterQuery, fetchTravelList]); 
+        fetchTravelList();
+    }, [fetchTravelList]);
     
-    // 페이지 클릭 핸들러 (생략)
+    // 페이지 클릭 핸들러
     const handlePageClick = useCallback((pageNumber) => {
         if (!showLoading && pageNumber > 0 && pageNumber <= pageResult.totalPages) {
-            sessionStorage.setItem('travelListPage', pageNumber);
+            sessionStorage.removeItem('travelListPage');
             setPageParam((prev) => ({ ...prev, page: pageNumber }));
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -166,54 +155,31 @@ export const useTravelList = () => {
 
     // 정렬 변경 핸들러 함수
     const handleSortChange = useCallback((sortType) => {
-        // sortType이 항상 'updatedAt,desc', 'likes,desc', 'views,desc' 중 하나라고 가정합니다.
-        // sortType이 전달되지 않으면 (예: 필터 초기화 시) 기존 정렬을 유지합니다.
-        if (!sortType) return; // 정렬 유형이 명시되지 않으면 아무것도 하지 않고 종료
+        const secondarySort = sortType; 
+        const newSort = `contentsCd,asc,${secondarySort}`;
         
-        // ⭐️ 수정된 로직: sortType이 있을 때만 newSort를 구성하고 저장합니다.
-        const newSort = `${sortType},contentsCd,asc`;
-        
-        // 정렬 상태를 세션 스토리지에 저장
-        sessionStorage.setItem('travelListSort', newSort); 
-        // 정렬 변경 시, 페이지는 1로 초기화하고, 페이지 저장 값은 제거합니다.
         setPageParam((prev) => ({ ...prev, page: 1, sort: newSort }));
-        sessionStorage.removeItem('travelListPage'); 
+        sessionStorage.removeItem('travelListPage');
     }, []);
 
-    // 카테고리 변경 핸들러 (생략)
+    // 카테고리 변경 핸들러
     const handleCategoryChange = useCallback((categoryName) => {
-        // 카테고리 상태 저장
-        sessionStorage.setItem('travelListCategory', categoryName);
         setPageParam((prev) => ({ ...prev, page: 1, categoryName: categoryName }));
     }, []);
     
-    //  검색 실행 핸들러 (생략)
+    //  검색 실행 핸들러
     const handleSearch = useCallback((searchTerm) => {
-        // 검색어 상태 저장
-        sessionStorage.setItem('travelListSearch', searchTerm);
+        // 검색어가 변경되면 무조건 1페이지로 돌아가고 search 파라미터를 업데이트합니다.
         setPageParam(prev => ({ 
             ...prev, 
             page: 1,
-            search: searchTerm, 
+            search: searchTerm, // 이 값이 API 호출 시 쿼리 스트링에 포함됩니다.
         }));
     }, []);
     
-    // 정렬 속성 추출 (UI 표시용) (생략)
-    const getActiveSort = () => {
-        const currentSort = pageParam.sort || ''; 
-        
-        if (currentSort.includes('likesCount,desc')) return 'likesCount,desc';
-        if (currentSort.includes('views,desc')) return 'views,desc';
-        
-        if (currentSort.includes('updatedAt,desc')) return 'updatedAt,desc';
-        
-        return 'updatedAt,desc'; 
-    };
-    
-    const loadTravelList = useCallback(() => {
-        fetchTravelList(pageParam, regionFilterProps.filterQuery);
-    }, [fetchTravelList, pageParam, regionFilterProps.filterQuery]); 
-
+    // 정렬 속성 추출
+    const getActiveSort = pageParam.sort.includes('likes,desc') ? 'likes,desc' : 
+                          pageParam.sort.includes('views,desc') ? 'views,desc' : 'updatedAt,desc';
 
     return {
         // 데이터 및 상태
@@ -235,9 +201,8 @@ export const useTravelList = () => {
         handleSearch, 
         setSelectedItem,
         setHoveredItem,
-        getActiveSort: getActiveSort(), 
-        loadTravelList, 
-
+        getActiveSort,
+        
         // 지역 필터 props 통째로 전달
         ...regionFilterProps
     };

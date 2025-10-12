@@ -1,4 +1,4 @@
-package com.navi.user.security.filter;
+package com.navi.user.security.Filter;
 
 import com.google.gson.Gson;
 import com.navi.common.response.ApiResponse;

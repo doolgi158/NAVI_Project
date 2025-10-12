@@ -22,7 +22,6 @@ const SocialLoginButton = ({ provider }) => {
 
     // 버튼 클릭 시 해당 소셜 로그인 페이지로 리다이렉트
     const handleClick = () => {
-        localStorage.setItem("redirectAfterLogin", window.location.pathname);
         window.location.href = AUTH_URLS[provider];
   };
 

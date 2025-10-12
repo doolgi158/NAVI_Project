@@ -1,18 +1,12 @@
 import { Form, Input, Button, Card, message } from "antd";
 import { AnimatePresence, motion } from "framer-motion";
 import { useLogin } from "../../hooks/useLogin.jsx";
-import { Link } from "react-router-dom";
-import { useEffect, useRef, useState } from "react";
 import SocialLoginButton from "./SocialLogin";
+import { Link } from "react-router-dom";
 
 const LoginModal = ({ open = false, onClose = () => {} }) => {
   const [form] = Form.useForm();
   const { login } = useLogin();
-
-  const [clickedInside, setClickedInside] = useState(false);
-
-  // 다음 input 이동을 위한 ref
-  const passwordRef = useRef(null);
 
   const handleSubmit = async (values) => {
     const result = await login(values);
@@ -27,22 +21,7 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
     }
   };
 
-  // 배경 클릭 시 닫기
-  const handleBackgroundClick = (e) => {
-    // 모달 안 클릭한 적 없거나, 현재 클릭이 배경이라면 닫기
-    if (!clickedInside && e.target === e.currentTarget) {
-      onClose();
-    }
-    setClickedInside(false);
-  };
-  // 모달이 닫힐 때 입력값 초기화
-  useEffect(() => {
-    if (!open) {
-      form.resetFields();
-    }
-  }, [open, form]);
-
-  // 로그인 모달 안에서 소셜 로그인 시작
+  // ✅ 로그인 모달 안에서 소셜 로그인 시작
   const handleSocialLogin = (provider) => {
   const CLIENT_IDS = {
     google: import.meta.env.VITE_GOOGLE_CLIENT_ID,
@@ -69,27 +48,18 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onMouseDown={(e) => {
-            // 배경 클릭 시 모달 외부 클릭으로 인식
-            if (e.target === e.currentTarget) {
-              setClickedInside(false);
-            }
-          }}
-          onMouseUp={handleBackgroundClick}
+          onClick={onClose}
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
             transition={{ duration: 0.3 }}
-            onMouseDown={(e) => {
-              e.stopPropagation();
-              setClickedInside(true);
-            }}
+            onClick={(e) => e.stopPropagation()}
           >
             <Card
               className="w-full max-w-md p-6 rounded-2xl shadow-lg bg-white relative"
-              variant="borderless"
+              bordered={false}
             >
               <button
                 onClick={onClose}
@@ -100,22 +70,13 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
 
               <h2 className="text-center text-2xl font-bold mb-6">로그인</h2>
 
-              <Form form={form} layout="vertical" preserve={false} onFinish={handleSubmit} key={open ? "open" : "closed"}>
+              <Form form={form} layout="vertical" onFinish={handleSubmit}>
                 <Form.Item
                   label="아이디"
                   name="username"
                   rules={[{ required: true, message: "아이디를 입력하세요" }]}
                 >
-                  <Input
-                    placeholder="아이디 입력"
-                    size="large"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault(); // 폼 제출 방지
-                        passwordRef.current?.focus(); // 다음 input 포커스
-                      }
-                    }}
-                  />
+                  <Input placeholder="아이디 입력" size="large" />
                 </Form.Item>
 
                 <Form.Item
@@ -123,20 +84,10 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
                   name="password"
                   rules={[{ required: true, message: "비밀번호를 입력하세요" }]}
                 >
-                  <Input.Password
-                    ref={passwordRef}
-                    placeholder="비밀번호 입력"
-                    size="large"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        form.submit();
-                      }
-                    }}
-                  />
+                  <Input.Password placeholder="비밀번호 입력" size="large" />
                 </Form.Item>
 
-                {/* 소셜 로그인 영역 */}
+                {/* ✅ 소셜 로그인 영역 */}
                 <div className="flex flex-col gap-3 my-6">
                   <SocialLoginButton provider="google" onClick={handleSocialLogin} />
                   <SocialLoginButton provider="kakao" onClick={handleSocialLogin} />

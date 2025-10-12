@@ -69,7 +69,7 @@ public class FlightScheduler {
     private int deleteOldFlights() {
         LocalDateTime today = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
         List<Flight> oldFlights = flightRepository.findAll().stream()
-                .filter(f -> f.getId().getDepTime().isBefore(today))
+                .filter(f -> f.getFlightId().getDepTime().isBefore(today))
                 .toList();
 
         int count = oldFlights.size();
