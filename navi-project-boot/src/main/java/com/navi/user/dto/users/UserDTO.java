@@ -19,10 +19,10 @@ public class UserDTO extends org.springframework.security.core.userdetails.User 
     private String phone;           // 전화번호
     private String birth;           // 생년월일
     private String email;           // 이메일
-    private String gender;            // 성별
+    private String gender;          // 성별
     private String id;              // 아이디
     private String pw;              // 비밀번호
-    private String local;             // 내/외국인
+    private String local;           // 내/외국인
     private UserState userState;    // 유저 상태
     private String signUp;          // 가입일
 

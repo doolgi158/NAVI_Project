@@ -82,10 +82,14 @@ public class User {
         userRoleList.clear();
     }
 
-    // ✅ Builder로 비밀번호 변경 (임시 비밀번호용)
+    // Builder로 비밀번호 변경 (임시 비밀번호용)
     public User changePassword(String encodedPw) {
         return this.toBuilder()   // 현재 필드들을 복제한 Builder 시작
                 .pw(encodedPw)    // 비밀번호만 교체
                 .build();
+    }
+    // Spring Security나 DTO 변환 시 사용하기 위한 Getter
+    public List<UserRole> getRoleList() {
+        return this.userRoleList;
     }
 }

@@ -1,20 +1,17 @@
-import { useState } from "react";
-import { Layout, Menu, Button, Drawer, Image, Space } from "antd";
-import { MenuOutlined } from "@ant-design/icons";
+import { Layout, Menu, Button, Image, Space } from "antd";
 import naviLogo from "../images/navi_logo.png";
-import { useModal } from "../../common/components/Login/ModalProvider";
+import { useModal } from "../../common/components/login/ModalProvider";
 import { Link } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { setlogout } from "../../common/slice/loginSlice.js";
+import { useSelector } from "react-redux";
+import UserMenuDropdown from "../../common/components/UserMenuDropdown";
 
 const { Header } = Layout;
 
 const HeaderLayout = () => {
-  const [open, setOpen] = useState(false);
   const { showModal } = useModal();
   const loginstate = useSelector((state) => state.login);
-  const dispatch = useDispatch();
 
+  // 상단 네비게이션 메뉴
   const items = [
     { key: "1", label: <Link to="/travel">여행지</Link> },
     { key: "2", label: <Link to="/accommodations">숙소</Link> },
@@ -33,31 +30,32 @@ const HeaderLayout = () => {
         background: "#fff",
         padding: "0 24px",
         boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-         height: '64px',
+        height: "64px",
+        position: "relative",
+        zIndex: 1000,
       }}
     >
-      {/* 로고 섹션: 강제 중앙 정렬 및 line-height 0 적용  */}
-      <div 
-        style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          height: '100%', 
-          lineHeight: 0 // 글꼴 기반의 baseline 정렬 방지
+      {/* 로고 */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          height: "100%",
+          lineHeight: 0,
         }}
       >
         <Link to="/">
-          <Image 
-            src={naviLogo} 
-            alt="naviLogo" 
-            preview={false} 
-            width={130} 
-            style={{ 
-                display: 'block' // Image 컴포넌트를 block 레벨로 처리하여 정렬 명확히
-            }} 
+          <Image
+            src={naviLogo}
+            alt="naviLogo"
+            preview={false}
+            width={130}
+            style={{ display: "block" }}
           />
         </Link>
       </div>
 
+      {/* 메인 메뉴 */}
       <Menu
         mode="horizontal"
         items={items}
@@ -70,72 +68,24 @@ const HeaderLayout = () => {
         }}
         className="hidden md:flex"
       />
-      {
-        loginstate.token ?
-          <Space>
-            <Button
-              type="default"
-              onClick={() => dispatch(setlogout())}
-              className="text-red-500 hover:text-red-700"
-            >
-              로그아웃
-            </Button>
-          </Space>
-          :
-          <Space>
-            <Button
-              type="default"
-              onClick={() => showModal("login")}
-              className="text-sb-teal hover:text-sb-purple"
-            >
-              로그인
-            </Button>
-            <Button
-              type="primary"
-              href="users/signup"
-              className="bg-sb-teal hover:bg-sb-gold"
-            >
-              회원가입
-            </Button>
-          </Space>
-      }
-      <Button
-        type="text"
-        icon={<MenuOutlined />}
-        onClick={() => setOpen(true)}
-      />
-      <Drawer
-        title="메뉴"
-        placement="right"
-        onClose={() => setOpen(false)}
-        open={open}
-      >
-        <Menu mode="vertical" items={items} style={{ color: "#2F3E46" }} />
-        {
-          loginstate.token ?
-            <div className="mt-4 flex flex-col gap-2">
-              <Button
-                danger
-                block
-                onClick={() => {
-                dispatch(setlogout());   // Redux 상태 초기화
-                setOpen(false);       // Drawer 닫기
-                }}
-              >
-              로그아웃
-              </Button>
-            </div>
-          :
-            <div className="mt-4 flex flex-col gap-2">
-              <Button type="primary" block onClick={() => showModal("login")}>
-                로그인
-              </Button>
-              <Button block href="/users/signup">
-                회원가입
-              </Button>
-            </div>
-        }
-      </Drawer>
+
+      {/* 로그인 상태에 따라 */}
+      {loginstate.token ? (
+        <UserMenuDropdown />
+      ) : (
+        <Space>
+          <Button
+            type="default"
+            onClick={() => showModal("login")}
+            className="text-sb-teal hover:text-sb-purple"
+          >
+            로그인
+          </Button>
+          <Button type="primary" className="bg-sb-teal hover:bg-sb-gold">
+            <Link to="/users/signup">회원가입</Link>
+          </Button>
+        </Space>
+      )}
     </Header>
   );
 };
