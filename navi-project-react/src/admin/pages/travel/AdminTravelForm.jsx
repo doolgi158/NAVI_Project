@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { saveOrUpdateTravel, fetchTravelDetail } from '../../../Common/api/travelApi';
+import { saveAdminTravel, fetchAdminTravelDetail  } from '../../../common/api/adminTravelApi';
 // Ant Design 컴포넌트 import
 import { Form, Input, InputNumber, Checkbox, Button, Alert, Card, Row, Col, message, Radio } from 'antd'; 
 
@@ -96,7 +96,7 @@ const AdminTravelForm = () => {
     useEffect(() => {
         if (travelId) {
             setLoading(true);
-            fetchTravelDetail(travelId)
+            fetchAdminTravelDetail (travelId)
                 .then(response => {
                     const data = response.data;
                     
@@ -165,7 +165,7 @@ const AdminTravelForm = () => {
         };
 
         try {
-            await saveOrUpdateTravel(dataToSend);
+            await saveAdminTravel(dataToSend);
             message.success(isEditMode ? '여행지 정보가 성공적으로 수정되었습니다.' : '새 여행지가 성공적으로 등록되었습니다.');
             navigate('/adm/travel'); 
         } catch (err) {

@@ -3,6 +3,7 @@ package com.navi.travel.controller;
 import com.navi.travel.dto.TravelDetailResponseDTO;
 import com.navi.travel.dto.TravelListResponseDTO;
 import com.navi.travel.dto.TravelRequestDTO;
+import com.navi.travel.service.AdminTravelService;
 import com.navi.travel.service.TravelService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -14,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 @RestController
@@ -22,56 +25,64 @@ import java.util.NoSuchElementException;
 public class TravelAdminController {
 
     private final TravelService travelService;
+    private final AdminTravelService adminTravelService; // ✅ 서비스 주입
 
     // --------------------------------------------------------------------
-    //                 ✅ 관리자(Admin) API 영역 (CRUD 및 전체 목록 조회)
+    // ✅ 관리자(Admin) API (CRUD + 상태변경)
     // --------------------------------------------------------------------
 
-    // 1. 여행지 관리 목록 조회 (READ - 관리자용: 모든 state 항목 조회)
-    // 최종 경로: /adm/travel
+    // 1. 여행지 관리 목록 조회
     @GetMapping("/travel")
-    // @Secured("ROLE_ADMIN") // 보안 적용 시
     public Page<TravelListResponseDTO> getAdminList(
-            @PageableDefault(
-                    size = 10,
-                    sort = "travelId",
-                    direction = Sort.Direction.DESC
-            ) Pageable pageable,
+            @PageableDefault(size = 10, sort = "travelId", direction = Sort.Direction.DESC)
+            Pageable pageable,
             @RequestParam(value = "search", required = false) String search
     ) {
-        // 'publicOnly=false'를 전달하여 모든 상태 항목 조회 (TravelService 로직 재활용)
         return travelService.getTravelList(pageable, null, null, search, false);
     }
 
-    // 2. 여행지 상세 조회 (READ - 단일 항목)
-    // 최종 경로: /adm/travel/{travelId}
-    @GetMapping("/travel/detail/{travelId}")
-    // @Secured("ROLE_ADMIN")
-    public ResponseEntity<TravelDetailResponseDTO> getTravelDetail(@PathVariable Long travelId,String id) {
+    // ✅ 상태 일괄 변경 API
+    @PatchMapping("/travel/state")
+    public ResponseEntity<String> updateState(@RequestBody Map<String, Object> payload) {
         try {
-            TravelDetailResponseDTO detail = travelService.getTravelDetail(travelId,id);
+            List<Integer> ids = (List<Integer>) payload.get("ids");
+            Integer state = (Integer) payload.get("state");
+
+            if (ids == null || ids.isEmpty()) {
+                return ResponseEntity.badRequest().body("변경할 항목이 없습니다.");
+            }
+
+            adminTravelService.updateState(ids, state); // ✅ 주입된 Bean 사용
+            return ResponseEntity.ok("상태 변경 완료");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("상태 변경 중 오류: " + e.getMessage());
+        }
+    }
+
+    // 2. 상세 조회
+    @GetMapping("/travel/detail/{travelId}")
+    public ResponseEntity<TravelDetailResponseDTO> getTravelDetail(@PathVariable Long travelId, String id) {
+        try {
+            TravelDetailResponseDTO detail = travelService.getTravelDetail(travelId, id);
             return ResponseEntity.ok(detail);
         } catch (NoSuchElementException e) {
-            // ID에 해당하는 여행지가 없을 경우 404 Not Found 반환
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (Exception e) {
             System.err.println("여행지 상세 조회 중 서버 오류 발생: " + e.getMessage());
-            // 기타 예상치 못한 오류 발생 시 500 Internal Server Error 반환
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
-    // 2. 여행지 등록/수정 (CREATE/UPDATE)
-    // 최종 경로: /adm/travel
+    // 3. 등록 / 수정
     @PostMapping("/travel")
-     @Secured("ROLE_ADMIN")
+    @Secured("ROLE_ADMIN")
     public ResponseEntity<TravelListResponseDTO> saveOrUpdateTravel(@RequestBody TravelRequestDTO dto) {
         try {
             TravelListResponseDTO response = travelService.saveTravel(dto);
-
-            // 등록(travelId가 null)이면 201 Created, 수정(travelId가 not null)이면 200 OK
             HttpStatus status = (dto.getTravelId() == null) ? HttpStatus.CREATED : HttpStatus.OK;
-
             return ResponseEntity.status(status).body(response);
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -81,10 +92,8 @@ public class TravelAdminController {
         }
     }
 
-    // 3. 여행지 삭제 (DELETE)
-    // 최종 경로: /adm/travel/{travelId}
+    // 4. 삭제
     @DeleteMapping("/travel/{travelId}")
-    // @Secured("ROLE_ADMIN")
     public ResponseEntity<Void> deleteTravel(@PathVariable Long travelId) {
         try {
             travelService.deleteTravel(travelId);
@@ -97,8 +106,7 @@ public class TravelAdminController {
         }
     }
 
-    // 4. API 데이터 저장 (관리자 기능, 필요하다면 여기에 유지)
-    // 최종 경로: /adm/travel/load_save
+    // 5. 외부 API 데이터 저장
     @PostMapping("/travel/load_save")
     public String load_save() {
         try {

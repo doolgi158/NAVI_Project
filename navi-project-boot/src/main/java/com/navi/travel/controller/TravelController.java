@@ -47,27 +47,24 @@ public class TravelController {
      */
     @GetMapping
     public ResponseEntity<Page<TravelListResponseDTO>> getList(
-            @PageableDefault(size = 10, sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable,
+            Pageable pageable, // @PageableDefault 제거
             @RequestParam(value = "region2Name", required = false) String region2NameCsv,
             @RequestParam(value = "categoryName", required = false) String categoryName,
             @RequestParam(value = "search", required = false) String search
     ) {
-        try {
-            List<String> region2Names = null;
-            if (region2NameCsv != null && !region2NameCsv.isEmpty()) {
-                region2Names = Arrays.stream(region2NameCsv.split(","))
-                        .map(String::trim)
-                        .filter(s -> !s.isEmpty())
-                        .collect(Collectors.toList());
-            }
-
-            Page<TravelListResponseDTO> list = travelService.getTravelList(pageable, region2Names, categoryName, search, true);
-            return ResponseEntity.ok(list);
-
-        } catch (Exception e) {
-            log.error("❌ 여행지 목록 조회 오류: {}", e.getMessage(), e);
-            return ResponseEntity.internalServerError().build();
+        List<String> region2Names = null;
+        if (region2NameCsv != null && !region2NameCsv.isEmpty()) {
+            region2Names = Arrays.stream(region2NameCsv.split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .collect(Collectors.toList());
         }
+
+        Page<TravelListResponseDTO> list = travelService.getTravelList(
+                pageable, region2Names, categoryName, search, true
+        );
+
+        return ResponseEntity.ok(list);
     }
 
     /**

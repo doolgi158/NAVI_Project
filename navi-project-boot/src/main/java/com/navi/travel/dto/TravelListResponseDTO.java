@@ -1,16 +1,17 @@
 package com.navi.travel.dto;
 
 import com.navi.travel.domain.Travel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Setter
 @Getter
+@Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class TravelListResponseDTO {
+
     private Long travelId;
     private String contentId;
     private String title;
@@ -35,6 +36,9 @@ public class TravelListResponseDTO {
     private boolean likedByUser;
     private boolean bookmarkedByUser;
 
+    /**
+     * ✅ 일반 Entity → DTO 변환
+     */
     public static TravelListResponseDTO of(Travel travel) {
         return TravelListResponseDTO.builder()
                 .travelId(travel.getTravelId())
@@ -51,11 +55,31 @@ public class TravelListResponseDTO {
                 .imagePath(travel.getImagePath())
                 .thumbnailPath(travel.getThumbnailPath())
                 .views(travel.getViews() != null ? travel.getViews() : 0L)
+                .likesCount(travel.getLikesCount() != null ? travel.getLikesCount() : 0L)
+                .bookmarkCount(travel.getBookmarkCount() != null ? travel.getBookmarkCount() : 0L)
                 .state(travel.getState())
                 .updatedAt(travel.getUpdatedAt())
                 .createdAt(travel.getCreatedAt())
                 .likedByUser(false)
                 .bookmarkedByUser(false)
                 .build();
+    }
+
+    /**
+     * ✅ Native Query (인기순 정렬 결과) 전용 생성자
+     *    → Object[] 매핑용
+     */
+    public TravelListResponseDTO(Long travelId,
+                                 String title,
+                                 String region1Name,
+                                 String region2Name,
+                                 String thumbnailPath,
+                                 Long likesCount) {
+        this.travelId = travelId;
+        this.title = title;
+        this.region1Name = region1Name;
+        this.region2Name = region2Name;
+        this.thumbnailPath = thumbnailPath;
+        this.likesCount = likesCount;
     }
 }
