@@ -66,7 +66,7 @@ const AdminRouter = () => {
              {
                path: "flight", // 항공편 목록 페이지
                element: (
-                 <Suspense fallback={Loading}>
+                 <Suspense fallback={<div></div>}>
                    <AdminFlightList />
                  </Suspense>
                ),
@@ -74,7 +74,7 @@ const AdminRouter = () => {
              {
                path: "flight/new", // 항공편 등록 페이지
                element: (
-                 <Suspense fallback={Loading}>
+                 <Suspense fallback={<div></div>}>
                    <AdminFlightForm />
                  </Suspense>
                ),
@@ -82,7 +82,7 @@ const AdminRouter = () => {
              {
                path: "flight/edit/:flightId/:depTime", // 항공편 수정 페이지
                element: (
-                 <Suspense fallback={Loading}>
+                 <Suspense fallback={<div></div>}>
                    <AdminFlightForm />
                  </Suspense>
                ),

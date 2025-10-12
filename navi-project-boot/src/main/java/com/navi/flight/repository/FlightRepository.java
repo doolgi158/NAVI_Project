@@ -12,17 +12,18 @@ import java.util.Optional;
 public interface FlightRepository extends JpaRepository<Flight, FlightId> {
 
     /**
-     * ✅ flightId + depTime 기반 항공편 조회
-     *  EmbeddedId 필드명이 flightId 이므로 f.flightId.flightId / f.flightId.depTime 으로 접근
+     * ✅ flightId + depTime 기반 항공편 조회 (1초 오차 허용)
+     * - LocalDateTime의 초·밀리초 차이로 조회 실패 방지
      */
     @Query("""
         SELECT f 
         FROM Flight f 
-        WHERE f.flightId.flightId = :flightId 
-          AND f.flightId.depTime  = :depTime
+        WHERE f.flightId.flightId = :flightId
+          AND f.flightId.depTime BETWEEN :startTime AND :endTime
         """)
-    Optional<Flight> findByFlightIdAndDepTime(
+    Optional<Flight> findByFlightIdAndDepTimeRange(
             @Param("flightId") String flightId,
-            @Param("depTime") LocalDateTime depTime
+            @Param("startTime") LocalDateTime startTime,
+            @Param("endTime") LocalDateTime endTime
     );
 }

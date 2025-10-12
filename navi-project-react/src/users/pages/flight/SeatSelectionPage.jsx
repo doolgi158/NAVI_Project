@@ -105,8 +105,6 @@ const SeatSelectPage = () => {
           isReserved: !!seat.isReserved,
         }));
 
-        // --- 포폴용: sessionStorage에 저장된 랜덤 예약 인덱스가 있으면 사용,
-        //     없으면 20~30% 비율로 생성해 저장.
         let reservedIndexes = null;
         try {
           const stored = sessionStorage.getItem(sessionKey);

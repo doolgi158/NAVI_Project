@@ -1,5 +1,6 @@
 import { RouterProvider } from "react-router-dom";
 import { Provider } from "react-redux";
+import axios from "axios";
 import store from "./common/store/store";
 import root from "./common/router/root.jsx";
 

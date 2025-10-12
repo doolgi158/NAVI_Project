@@ -21,21 +21,31 @@ public class SeatServiceImpl implements SeatService {
     private final FlightRepository flightRepository;
     private final SeatRepository seatRepository;
 
-    /*
-     * 항공편 좌석 조회 (자동 생성 포함)
+    /**
+     * ✅ 항공편 좌석 조회 (자동 생성 포함)
+     * - depTime 오차 허용 (±1분)
      */
     @Override
     @Transactional
     public List<SeatResponseDTO> getSeatsByFlight(String flightId, LocalDateTime depTime) {
-        Flight flight = flightRepository.findByFlightIdAndDepTime(flightId, depTime)
-                .orElseThrow(() -> new RuntimeException("해당 운항편이 존재하지 않습니다."));
+
+        // depTime 오차 보정 (1분 범위)
+        LocalDateTime start = depTime.minusMinutes(1);
+        LocalDateTime end = depTime.plusMinutes(1);
+
+        Flight flight = flightRepository.findByFlightIdAndDepTimeRange(flightId, start, end)
+                .orElseThrow(() -> new RuntimeException("해당 운항편이 존재하지 않습니다. (flightId="
+                        + flightId + ", depTime=" + depTime + ")"));
 
         List<Seat> seats;
 
-        // 좌석 생성 여부 확인
+        // ✅ 좌석 생성 여부 확인
         boolean seatExists = seatRepository.existsByFlightId(flight.getFlightId());
         if (flight.isSeatInitialized() || seatExists) {
-            seats = seatRepository.findByFlightAndDepTime(flightId, depTime);
+            seats = seatRepository.findByFlightAndDepTime(
+                    flight.getFlightId().getFlightId(),
+                    flight.getFlightId().getDepTime()
+            );
         } else {
             synchronized (this) {
                 boolean recheck = seatRepository.existsByFlightId(flight.getFlightId());
@@ -43,16 +53,16 @@ public class SeatServiceImpl implements SeatService {
                     createSeatsForFlight(flight);
                 }
             }
-            seats = seatRepository.findByFlightAndDepTime(flightId, depTime);
+            seats = seatRepository.findByFlightAndDepTime(
+                    flight.getFlightId().getFlightId(),
+                    flight.getFlightId().getDepTime()
+            );
         }
 
         System.out.println("=== [DEBUG] 좌석 조회 완료 === " + flightId + " / " + depTime);
         return convertToDTOList(flight, seats);
     }
 
-    /*
-     * Seat → SeatResponseDTO 변환
-     */
     private List<SeatResponseDTO> convertToDTOList(Flight flight, List<Seat> seats) {
         return seats.stream()
                 .map(seat -> {
@@ -72,13 +82,6 @@ public class SeatServiceImpl implements SeatService {
                 .toList();
     }
 
-    /*
-     * 좌석 자동 생성 로직
-     *  - 1~4행: 프레스티지 (2-2)
-     *  - 5~10행: 일반 (3-3, +10,000)
-     *  - 11~12행: 비상구 (3-3, +20,000)
-     *  - 13~30행: 일반 (3-3)
-     */
     private void createSeatsForFlight(Flight flight) {
         List<Seat> newSeats = new ArrayList<>();
 
@@ -110,9 +113,6 @@ public class SeatServiceImpl implements SeatService {
         }
     }
 
-    /*
-     * 자동 좌석 배정 (예: 랜덤 or 연속 좌석)
-     */
     @Override
     @Transactional
     public List<Seat> autoAssignSeats(String flightId, LocalDateTime depTime, int passengerCount) {
