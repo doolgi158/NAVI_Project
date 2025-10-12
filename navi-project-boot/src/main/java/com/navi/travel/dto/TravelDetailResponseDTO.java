@@ -1,5 +1,6 @@
 package com.navi.travel.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.navi.travel.domain.Travel;
 import lombok.Builder;
 import lombok.Getter;
@@ -28,32 +29,42 @@ public class TravelDetailResponseDTO {
     private Long photoId;
     private String imagePath;
     private String thumbnailPath;
+
+    // ✅ 조회수/좋아요/북마크
     private Long views;
     private Long likesCount;
     private Long bookmarkCount;
+
     private int state;
     private String homepage;
     private String parking;
     private String fee;
     private String hours;
 
-    // ✅ 중요: 사용자 상태 값
+    // ✅ 사용자 상태 값
+    @JsonProperty("likedByUser")
     private boolean isLikedByUser;
+
+    @JsonProperty("bookmarkedByUser")
     private boolean isBookmarkedByUser;
 
     private LocalDate updatedAt;
     private LocalDate createdAt;
 
-    public static TravelDetailResponseDTO of(Travel travel, Long likesCount, Long bookmarkCount, boolean isLikedByUser, boolean isBookmarkedByUser) {
-        LocalDateTime createdAtLDT = null;
-        LocalDateTime updatedAtLDT = null;
-
-        try {
-            createdAtLDT = travel.getCreatedAt();
-            updatedAtLDT = travel.getUpdatedAt();
-        } catch (Exception e) {
-            // 필요 시 변환 로직 추가
-        }
+    /**
+     * ✅ Travel 엔티티를 기반으로 DTO 생성
+     *  - 조회수, 좋아요, 북마크, 사용자 상태 반영
+     *  - 조회수 null 방지 및 즉시 반영된 값 포함
+     */
+    public static TravelDetailResponseDTO of(
+            Travel travel,
+            Long likesCount,
+            Long bookmarkCount,
+            boolean isLikedByUser,
+            boolean isBookmarkedByUser
+    ) {
+        LocalDateTime createdAtLDT = travel.getCreatedAt();
+        LocalDateTime updatedAtLDT = travel.getUpdatedAt();
 
         return TravelDetailResponseDTO.builder()
                 .travelId(travel.getTravelId())
@@ -73,16 +84,19 @@ public class TravelDetailResponseDTO {
                 .photoId(travel.getPhotoId())
                 .imagePath(travel.getImagePath())
                 .thumbnailPath(travel.getThumbnailPath())
-                .views(travel.getViews())
-                .likesCount(likesCount)
-                .bookmarkCount(bookmarkCount)
+
+                // ✅ null-safe 처리 + 증가값 반영
+                .views(travel.getViews() != null ? travel.getViews() : 0L)
+                .likesCount(likesCount != null ? likesCount : 0L)
+                .bookmarkCount(bookmarkCount != null ? bookmarkCount : 0L)
+
                 .state(travel.getState())
                 .homepage(travel.getHomepage())
                 .parking(travel.getParking())
                 .fee(travel.getFee())
                 .hours(travel.getHours())
 
-                // ✅ 여기 반드시 추가해야 함 (사용자 상태값 반영)
+                // ✅ 사용자별 상태
                 .isLikedByUser(isLikedByUser)
                 .isBookmarkedByUser(isBookmarkedByUser)
 

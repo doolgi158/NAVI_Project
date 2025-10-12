@@ -48,17 +48,16 @@ public class TravelServiceImpl implements TravelService {
     }
 
     // ---------------------- 조회 및 검색 ----------------------
-//    @Override
-//    @Transactional(readOnly = true)
-//    public Page<TravelListResponseDTO> getTravelList(Pageable pageable, List<String> region2Names, String category, String search, boolean publicOnly) {
-//        return travelQueryService.getTravelList(pageable, region2Names, category, search, publicOnly);
-//    }
-//
-//    @Override
-//    @Transactional(readOnly = true)
-//    public TravelDetailResponseDTO getTravelDetail(Long travelId, String id) {
-//        return travelQueryService.getTravelDetail(travelId, id);
-//    }
+    @Override
+    @Transactional(readOnly = true)
+    public Page<TravelListResponseDTO> getTravelList(Pageable pageable, List<String> region2Names, String category, String search, boolean publicOnly) {
+        return travelQueryService.getTravelList(pageable, region2Names, category, search, publicOnly);
+    }
+
+    @Override
+    public TravelDetailResponseDTO getTravelDetail(Long travelId, String id) {
+        return travelQueryService.getTravelDetail(travelId, id);
+    }
 
     // ---------------------- Action (좋아요/북마크/조회수) ----------------------
     @Override
@@ -67,17 +66,17 @@ public class TravelServiceImpl implements TravelService {
         travelActionService.incrementViews(travelId);
     }
 
-//    @Override
-//    @Transactional
-//    public boolean toggleLike(Long travelId, String id) {
-//        return travelActionService.toggleLike(travelId, id);
-//    }
+    @Override
+    @Transactional
+    public boolean toggleLike(Long travelId, String id) {
+        return travelActionService.toggleLike(travelId, id);
+    }
 
-//    @Override
-//    @Transactional
-//    public boolean toggleBookmark(Long travelId, String id) {
-//        return travelActionService.toggleBookmark(travelId, id);
-//    }
+    @Override
+    @Transactional
+    public boolean toggleBookmark(Long travelId, String id) {
+        return travelActionService.toggleBookmark(travelId, id);
+    }
 
     // ---------------------- 관리 (CRUD) ----------------------
     @Override

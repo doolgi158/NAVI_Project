@@ -20,7 +20,7 @@ public interface TravelRepository extends JpaRepository<Travel, Long>, JpaSpecif
 
     @Modifying
     @Query("UPDATE Travel t SET t.views = t.views + 1 WHERE t.travelId = :travelId")
-    void incrementViews(@Param("travelId") Long travelId);
+    int incrementViews(@Param("travelId") Long travelId);
 
     @Query(value = """
         SELECT t.*, COUNT(l.like_id) AS likes_count
@@ -32,6 +32,7 @@ public interface TravelRepository extends JpaRepository<Travel, Long>, JpaSpecif
                 t.region1_name, t.region2_name, t.photo_id, t.image_path, 
                 t.thumbnail_path, t.views_count, t.state, t.homepage, 
                 t.parking, t.fee, t.hours
+        ORDER BY likes_count DESC
         """,
             countQuery = "SELECT COUNT(*) FROM navi_travel",
             nativeQuery = true)

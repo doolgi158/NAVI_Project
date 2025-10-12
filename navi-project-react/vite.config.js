@@ -11,7 +11,6 @@ export default defineConfig({
       '/api': { 
         target: 'http://localhost:8080', // Spring Boot 기본 포트
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '') 
       },
     }
   }

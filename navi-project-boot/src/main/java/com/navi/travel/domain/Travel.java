@@ -87,8 +87,6 @@ public class Travel extends BaseEntity { //등록일 수정일 자동생성 상�
     @Column(name = "VIEWS_COUNT", nullable = false,columnDefinition ="NUMBER default 0")
     private Long views = 0L; // 조회수 (초기값 0 설정)
 
-    // ⭐️ likes 카운트 필드 제거 (LikeRepository에서 실시간 카운트)
-    // ⭐️ bookmark 카운트 필드 제거 (BookmarkRepository에서 실시간 카운트)
 
     @Column(name = "STATE", nullable = false,columnDefinition = "NUMBER(1) default 1" )
     private int state;  // 개시상태(공개, 비공개)
