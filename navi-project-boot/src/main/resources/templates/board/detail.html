@@ -5,19 +5,19 @@
     <title>게시글 상세</title>
 </head>
 <body>
-    <h1>게시글 상세</h1>
-    <div>
-        <h2 th:text="${board.board_title}"></h2>
-        <p>게시글번호: <span th:text="${board.author_no}"></span></p>
-        <p>좋아요: <span th:text="${board.board_good}"></span></p>
-        <p>신고수: <span th:text="${board.report_count}"></span></p>
-    </div>
+<h1>게시글 상세</h1>
+<div>
+    <h2 th:text="${board.board_Title}"></h2>
+    <p>게시글번호: <span th:text="${board.board_no}"></span></p>
+    <p>좋아요: <span th:text="${board.board_good}"></span></p>
+    <p>신고수: <span th:text="${board.report_count}"></span></p>
+</div>
 
-    <div>
-        <h3>내용</h3>
-        <p th:text="${board.board_content}"></p>
-    </div>
+<div>
+    <h3>내용</h3>
+    <p th:text="${board.board_content}"></p>
+</div>
 
-    <a href="/board">목록으로</a>
+<a href="/board/list">목록으로</a>
 </body>
 </html>
