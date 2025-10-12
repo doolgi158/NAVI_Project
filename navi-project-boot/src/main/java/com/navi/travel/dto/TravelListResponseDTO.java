@@ -16,8 +16,8 @@ public class TravelListResponseDTO {
     private String contentId;
     private String title;
     private String categoryName;
-    private String region1Name;
-    private String region2Name;
+    private String region1;
+    private String region2;
     private Double longitude;
     private Double latitude;
     private String tag;
@@ -45,8 +45,8 @@ public class TravelListResponseDTO {
                 .contentId(travel.getContentId())
                 .title(travel.getTitle())
                 .categoryName(travel.getCategoryName())
-                .region1Name(travel.getRegion1Name())
-                .region2Name(travel.getRegion2Name())
+                .region1(travel.getRegion1Name())
+                .region2(travel.getRegion2Name())
                 .longitude(travel.getLongitude())
                 .latitude(travel.getLatitude())
                 .phoneNo(travel.getPhoneNo())
@@ -70,15 +70,15 @@ public class TravelListResponseDTO {
      *    → Object[] 매핑용
      */
     public TravelListResponseDTO(Long travelId,
-                                 String title,
-                                 String region1Name,
-                                 String region2Name,
-                                 String thumbnailPath,
-                                 Long likesCount) {
+         String title,
+         String region1,
+         String region2,
+         String thumbnailPath,
+         Long likesCount) {
         this.travelId = travelId;
         this.title = title;
-        this.region1Name = region1Name;
-        this.region2Name = region2Name;
+        this.region1 = region1;
+        this.region2 = region2;
         this.thumbnailPath = thumbnailPath;
         this.likesCount = likesCount;
     }

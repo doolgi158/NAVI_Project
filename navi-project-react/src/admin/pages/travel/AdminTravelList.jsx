@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchAdminTravelList, deleteAdminTravel, updateAdminTravelState } from '../../../Common/api/adminTravelApi';
+import { fetchAdminTravelList, deleteAdminTravel, updateAdminTravelState } from '../../../common/api/adminTravelApi';
 import { Table, Button, Space, Popconfirm, Tag, message, Typography, Input, Image, Layout, Tooltip, Select } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 import AdminSiderLayout from '../../layout/AdminSiderLayout';
@@ -117,7 +117,7 @@ const AdminTravelList = () => {
       dataIndex: 'title',
       key: 'title',
       width: 200,
-      align: 'left',
+      align: 'center',
       render: (text, record) => (
         <Link onClick={() => handleTitleClick(record.travelId)} style={{ cursor: 'pointer', color: '#1677ff' }}>
           {text}
@@ -125,7 +125,7 @@ const AdminTravelList = () => {
       ),
     },
     { title: '콘텐츠ID', dataIndex: 'contentId', key: 'contentId', align: 'center', width: 120 },
-    { title: '지역', dataIndex: 'region2Name', key: 'region2Name', align: 'center', width: 100 },
+    { title: '지역', dataIndex: 'region2', key: 'region2', align: 'center', width: 100 },
     {
       title: '공개상태',
       dataIndex: 'state',

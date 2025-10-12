@@ -15,7 +15,8 @@ public class AdminTravelListResponseDTO {
     private String contentId;
     private String title;
     private String categoryName;
-    private String region2Name;
+    private String region1;
+    private String region2;
     private String address;
     private String imagePath;
     private int state;
@@ -31,7 +32,8 @@ public class AdminTravelListResponseDTO {
                 .contentId(t.getContentId())
                 .title(t.getTitle())
                 .categoryName(t.getCategoryName())
-                .region2Name(t.getRegion2Name())
+                .region1(t.getRegion1Name())
+                .region2(t.getRegion2Name())
                 .address(t.getAddress())
                 .imagePath(t.getImagePath())
                 .state(t.getState())

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import 'bootstrap-icons/font/bootstrap-icons.css';
+import 'react-quill/dist/quill.snow.css'; // ✅ Quill 스타일 추가
 import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import api from '../../../common/api/naviApi.js';
@@ -51,6 +52,17 @@ const TravelDetailPage = () => {
     }).replace(/\./g, '. ').trim();
   };
 
+  
+
+useEffect(() => {
+  if (travelDetail) {
+    console.log("🧭 전체 travelDetail:", travelDetail);
+      console.log("🧭 description 내용:", travelDetail?.description);
+  }
+}, [travelDetail]);
+
+
+  
   /** ✅ 상세정보 + 조회수 증가 */
   useEffect(() => {
     const fetchTravelDetail = async () => {
@@ -61,15 +73,8 @@ const TravelDetailPage = () => {
       }
       try {
         setLoading(true);
-
-        const detailUrl = userId
-          ? `/travel/detail/${travelId}`
-          : `/travel/detail/${travelId}`;
-        const viewsUrl = `/travel/views/${travelId}`;
-
-        await api.post(viewsUrl); // 조회수 증가
-        const res = await api.get(detailUrl);
-
+        await api.post(`/travel/views/${travelId}`); // 조회수 증가
+        const res = await api.get(`/travel/detail/${travelId}`);
         const data = res.data;
         setTravelDetail(data);
         setLikeCount(data.likesCount || 0);
@@ -101,61 +106,60 @@ const TravelDetailPage = () => {
   }, [isMapLoaded, travelDetail]);
 
   /** ❤️ 좋아요 처리 */
-const handleLikeClick = async () => {
-  if (!userId || !token) return message.warning('로그인 후 이용 가능합니다.');
-  if (loadingLike) return;
-  setLoadingLike(true);
+  const handleLikeClick = async () => {
+    if (!userId || !token) return message.warning('로그인 후 이용 가능합니다.');
+    if (loadingLike) return;
+    setLoadingLike(true);
 
-  try {
-    const res = await api.post(`/travel/like/${travelId}`, null, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    try {
+      const res = await api.post(`/travel/like/${travelId}`, null, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    // ✅ JSON 응답 구조
-    const { success, liked, message: serverMessage } = res.data;
+      const { success, liked, message: serverMessage } = res.data;
 
-    if (success) {
-      setIsLiked(liked);
-      setLikeCount((prev) => (liked ? prev + 1 : Math.max(0, prev - 1)));
-      message.success(serverMessage || '좋아요 상태 변경');
-    } else {
-      message.warning(serverMessage || '좋아요 처리 실패');
+      if (success) {
+        setIsLiked(liked);
+        setLikeCount((prev) => (liked ? prev + 1 : Math.max(0, prev - 1)));
+        message.success(serverMessage || '좋아요 상태 변경');
+      } else {
+        message.warning(serverMessage || '좋아요 처리 실패');
+      }
+    } catch (err) {
+      console.error("❌ 좋아요 실패:", err);
+      message.error('좋아요 처리 중 오류가 발생했습니다.');
+    } finally {
+      setLoadingLike(false);
     }
-  } catch (err) {
-    console.error("❌ 좋아요 실패:", err);
-    message.error('좋아요 처리 중 오류가 발생했습니다.');
-  } finally {
-    setLoadingLike(false);
-  }
-};
+  };
 
-/** 📚 북마크 처리 */
-const handleBookmarkClick = async () => {
-  if (!userId || !token) return message.warning('로그인 후 이용 가능합니다.');
-  if (loadingBookmark) return;
-  setLoadingBookmark(true);
+  /** 📚 북마크 처리 */
+  const handleBookmarkClick = async () => {
+    if (!userId || !token) return message.warning('로그인 후 이용 가능합니다.');
+    if (loadingBookmark) return;
+    setLoadingBookmark(true);
 
-  try {
-    const res = await api.post(`/travel/bookmark/${travelId}`, null, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    try {
+      const res = await api.post(`/travel/bookmark/${travelId}`, null, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    const { success, bookmarked, message: serverMessage } = res.data;
+      const { success, bookmarked, message: serverMessage } = res.data;
 
-    if (success) {
-      setIsBookmarked(bookmarked);
-      setBookmarkCount((prev) => (bookmarked ? prev + 1 : Math.max(0, prev - 1)));
-      message.success(serverMessage || '북마크 상태 변경');
-    } else {
-      message.warning(serverMessage || '북마크 처리 실패');
+      if (success) {
+        setIsBookmarked(bookmarked);
+        setBookmarkCount((prev) => (bookmarked ? prev + 1 : Math.max(0, prev - 1)));
+        message.success(serverMessage || '북마크 상태 변경');
+      } else {
+        message.warning(serverMessage || '북마크 처리 실패');
+      }
+    } catch (err) {
+      console.error("❌ 북마크 실패:", err);
+      message.error('북마크 처리 중 오류가 발생했습니다.');
+    } finally {
+      setLoadingBookmark(false);
     }
-  } catch (err) {
-    console.error("❌ 북마크 실패:", err);
-    message.error('북마크 처리 중 오류가 발생했습니다.');
-  } finally {
-    setLoadingBookmark(false);
-  }
-};
+  };
 
   /** 🔗 공유하기 */
   const handleShareClick = async () => {
@@ -277,16 +281,26 @@ const handleBookmarkClick = async () => {
 
           {/* 소개 */}
           <Title level={4} style={{ borderLeft: '4px solid #1890ff', paddingLeft: 10 }}>소개</Title>
+           <Paragraph style={{ lineHeight: 1.8, whiteSpace: 'pre-line' }}>
+            {data.introduction || '제공된 소개 내용이 없습니다.'}
+          </Paragraph>
           {tags.map((tag, i) => (
             <Tag key={i} color="blue" style={{ marginBottom: 8 }}>#{tag}</Tag>
           ))}
-          <Paragraph style={{ lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>
-            {data.introduction || '제공된 소개 내용이 없습니다.'}
-          </Paragraph>
+         
 
+          {/* ✅ 본문(description) 추가 */}
+          {data.description && (
+            <div
+              className="travel-description"
+              style={{ marginTop: 30, lineHeight: 1.8, fontSize: 20,lineHeight:2}}
+              dangerouslySetInnerHTML={{ __html: data.description }}
+            />
+          )}
+          
           {/* 지도 */}
           <Title level={4} style={{ borderLeft: '4px solid #1890ff', paddingLeft: 10, marginTop: 40 }}>위치</Title>
-          <div style={{ margin: '10px 0 20px', border: '1px solid #ccc', borderRadius: 8, position: 'relative' }}>
+          <div style={{ margin: '10px 0 20px', border: '1px solid #ccc', borderRadius: 8, position: 'relative',marginTop: 20 }}>
             <div id={MAP_CONTAINER_ID} style={{ height: 350, width: '100%' }}>
               {!isMapLoaded && (
                 <div className="absolute inset-0 flex items-center justify-center bg-gray-100 z-10">
@@ -297,14 +311,16 @@ const handleBookmarkClick = async () => {
           </div>
 
           {/* 상세 정보 */}
-          <Title level={4} style={{ borderLeft: '4px solid #1890ff', paddingLeft: 10 }}>여행지 정보</Title>
-          <Descriptions column={2} bordered size="large" style={{ marginTop: 10 }}>
+          <Title level={4} style={{ borderLeft: '4px solid #1890ff', paddingLeft: 10,marginTop:30 }}>여행지 정보</Title>
+          <Descriptions column={2} bordered size="large" style={{ marginTop: 20, marginBottom:50}}>
             {infoData.map((item, i) => (
               <Descriptions.Item
                 key={i}
                 label={<Space>{item.icon}<Text strong>{item.label}</Text></Space>}
               >
-                {item.value}
+                <div style={{ whiteSpace: 'pre-line', lineHeight: 1.6 }}>
+                  {item.value || '-'}
+                </div>
               </Descriptions.Item>
             ))}
           </Descriptions>

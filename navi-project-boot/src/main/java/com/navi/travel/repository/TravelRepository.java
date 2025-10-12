@@ -13,7 +13,7 @@ import java.util.Optional;
 public interface TravelRepository extends JpaRepository<Travel, Long>, JpaSpecificationExecutor<Travel> {
 
     Optional<Travel> findByContentId(String contentId);
-    Page<Travel> findByTitleContaining(String title, Pageable pageable);
+//    Page<Travel> findByTitleContaining(String title, Pageable pageable);
     Page<Travel> findAll(Pageable pageable);
 
     @Modifying

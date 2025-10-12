@@ -1,6 +1,5 @@
 package com.navi.travel.domain;
 
-import com.navi.common.entity.BaseEntity;
 import com.navi.common.entity.BaseEntityNoAudit;
 import com.navi.travel.dto.TravelRequestDTO;
 import jakarta.persistence.*;
@@ -41,9 +40,15 @@ public class Travel extends BaseEntityNoAudit {
     @Column(name = "TITLE", nullable = false, length = 500)
     private String title;
 
+    /** ✅ 간단 소개 (요약) */
     @Lob
     @Column(name = "INTRODUCTION", columnDefinition = "CLOB")
     private String introduction;
+
+    /** ✅ 본문 (리치 텍스트 / react-quill HTML 저장용) */
+    @Lob
+    @Column(name = "DESCRIPTION", columnDefinition = "CLOB")
+    private String description;
 
     @Column(name = "ADDRESS", length = 500)
     private String address;
@@ -141,10 +146,11 @@ public class Travel extends BaseEntityNoAudit {
     }
 
 
-    /** ✅ 메서드 **/
+    /** ✅ API 기반 업데이트 **/
     public void updateFromApi(Travel newTravel) {
         this.title = newTravel.title;
         this.introduction = newTravel.introduction;
+        this.description = newTravel.description; // ✅ 본문 추가
         this.address = newTravel.address;
         this.roadAddress = newTravel.roadAddress;
         this.phoneNo = newTravel.phoneNo;
@@ -165,18 +171,12 @@ public class Travel extends BaseEntityNoAudit {
         this.hours = newTravel.hours;
     }
 
-    public void incrementViews() { this.views = (this.views == null) ? 1L : this.views + 1; }
-
-    public void incrementLikesCount() { this.likesCount = (this.likesCount == null) ? 1L : this.likesCount + 1; }
-    public void decrementLikesCount() {this.likesCount = (this.likesCount == null || this.likesCount == 0) ? 0L : this.likesCount - 1;}
-
-    public void incrementBookmarkCount() { this.bookmarkCount = (this.bookmarkCount == null) ? 1L : this.bookmarkCount + 1; }
-    public void decrementBookmarkCount() {this.bookmarkCount = (this.bookmarkCount == null || this.bookmarkCount == 0) ? 0L : this.bookmarkCount - 1;}
-
+    /** ✅ Request DTO 기반 업데이트 */
     public void updateFromRequest(TravelRequestDTO dto) {
         if (StringUtils.hasText(dto.getContentsCd())) this.contentsCd = dto.getContentsCd();
         if (StringUtils.hasText(dto.getTitle())) this.title = dto.getTitle();
         if (StringUtils.hasText(dto.getIntroduction())) this.introduction = dto.getIntroduction();
+        if (StringUtils.hasText(dto.getDescription())) this.description = dto.getDescription(); // ✅ 본문 추가
         if (StringUtils.hasText(dto.getAddress())) this.address = dto.getAddress();
         if (StringUtils.hasText(dto.getRoadAddress())) this.roadAddress = dto.getRoadAddress();
         if (StringUtils.hasText(dto.getPhoneNo())) this.phoneNo = dto.getPhoneNo();
@@ -196,6 +196,13 @@ public class Travel extends BaseEntityNoAudit {
         if (StringUtils.hasText(dto.getHours())) this.hours = dto.getHours();
     }
 
-    public void setUpdatedAt(LocalDateTime now) {
-    }
+    public void incrementViews() { this.views = (this.views == null) ? 1L : this.views + 1; }
+
+    public void incrementLikesCount() { this.likesCount = (this.likesCount == null) ? 1L : this.likesCount + 1; }
+    public void decrementLikesCount() {this.likesCount = (this.likesCount == null || this.likesCount == 0) ? 0L : this.likesCount - 1;}
+
+    public void incrementBookmarkCount() { this.bookmarkCount = (this.bookmarkCount == null) ? 1L : this.bookmarkCount + 1; }
+    public void decrementBookmarkCount() {this.bookmarkCount = (this.bookmarkCount == null || this.bookmarkCount == 0) ? 0L : this.bookmarkCount - 1;}
+
+    public void setUpdatedAt(LocalDateTime now) { }
 }

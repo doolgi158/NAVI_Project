@@ -109,7 +109,7 @@ const TravelCard = ({ item, onClick, isSelected, onMouseEnter, onMouseLeave }) =
           {item.title}
         </h3>
         <p className="text-xs sm:text-sm text-gray-500 mb-2">
-          {item.region1Name} {' > '} {item.region2Name}
+          {item.region1} {' > '} {item.region2}
         </p>
         <p className="text-xs sm:text-sm text-gray-400 mb-2 truncate">
           {item.tag?.split(',').map((tag) => `#${tag.trim()}`).join(' ') || ''}
