@@ -18,7 +18,6 @@ public class RsvController {
     /* 결제 전 예약 정보 임시 생성(재고 선점용) */
     @PostMapping("/pre")
     public RsvResponseDTO createPendingRsv(@RequestBody RsvPreRequestDTO dto) {
-        log.info("[RsvController] 예약 사전 생성 요청 - {}", dto);
         Rsv rsv = rsvService.createPendingReservation(dto);
         return RsvResponseDTO.fromEntity(rsv);
     }

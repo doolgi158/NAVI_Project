@@ -1,6 +1,7 @@
 package com.navi.accommodation.service;
 
 import com.navi.accommodation.domain.Acc;
+import com.navi.accommodation.dto.api.AccApiDTO;
 import com.navi.accommodation.dto.request.AccRequestDTO;
 import com.navi.accommodation.dto.request.AccSearchRequestDTO;
 import com.navi.accommodation.dto.response.AccDetailResponseDTO;

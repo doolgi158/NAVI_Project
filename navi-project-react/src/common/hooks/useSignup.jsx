@@ -8,7 +8,7 @@ import { useModal } from "../components/login/ModalProvider";
 export const useSignupForm = (form) => {
   const { showModal } = useModal();
 
-  // ✅ 상태값
+  // 상태값
   const [idChecked, setIdChecked] = useState(false);
   const [idStatus, setIdStatus] = useState("");
   const [idMessage, setIdMessage] = useState("");
@@ -22,7 +22,7 @@ export const useSignupForm = (form) => {
   const [emailCodeStatus, setEmailCodeStatus] = useState("");
   const [emailCodeMessage, setEmailCodeMessage] = useState("");
 
-  // ✅ 아이디 중복 검사
+  // 아이디 중복 검사
   const handleCheckId = async () => {
     const idValue = form.getFieldValue("id");
 
@@ -51,7 +51,6 @@ export const useSignupForm = (form) => {
         setIdChecked(false);
       }
     } catch (err) {
-      console.error("중복 검사 오류:", err);
       message.error("아이디 중복 검사 중 오류가 발생했습니다.");
       setIdStatus("error");
       setIdMessage("서버 오류로 중복 검사를 수행할 수 없습니다.");
@@ -59,7 +58,7 @@ export const useSignupForm = (form) => {
     }
   };
 
-  // ✅ 회원가입 처리
+  // 회원가입 처리
   const handleSubmit = async (values) => {
     if (!idChecked) {
       message.warning("아이디 중복 검사를 먼저 진행해주세요.");
@@ -89,12 +88,11 @@ export const useSignupForm = (form) => {
         }, 600);
       }
     } catch (err) {
-      console.error("회원가입 오류:", err);
       message.error(err.message || "회원가입 중 오류가 발생했습니다.");
     }
   };
 
-  // ✅ input 변경 시 상태 초기화
+  // input 변경 시 상태 초기화
   const resetIdState = () => {
     setIdChecked(false);
     setIdStatus("");
@@ -102,7 +100,7 @@ export const useSignupForm = (form) => {
   };
 
 
-// ✅ 이메일 인증 코드 발송
+// 이메일 인증 코드 발송
 const handleSendEmail = async () => {
   const emailValue = form.getFieldValue("email");
   if (!emailValue) {
@@ -125,7 +123,6 @@ const handleSendEmail = async () => {
       setEmailCodeMessage("");
     }
   } catch (err) {
-    console.error("이메일 전송 오류:", err);
     message.error("이메일 발송 중 오류가 발생했습니다.");
     setEmailStatus("error");
     setEmailMessage("메일 전송 실패");
@@ -134,7 +131,7 @@ const handleSendEmail = async () => {
   }
 };
 
-// ✅ 인증 코드 확인
+// 인증 코드 확인
 const handleVerifyCode = async () => {
   const emailValue = form.getFieldValue("email");
 
@@ -159,7 +156,6 @@ const handleVerifyCode = async () => {
       setEmailMessage("✅ 인증 완료");
     }
   } catch (err) {
-    console.error("인증 확인 오류:", err);
     message.error("서버 오류로 인증을 확인할 수 없습니다.");
     setEmailCodeStatus("error");
     setEmailCodeMessage("❌ 인증 코드가 올바르지 않습니다.");    

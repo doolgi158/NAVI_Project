@@ -6,6 +6,7 @@ import axios from "axios";
 const initState = {
   username: "",
   token: "",
+  role:"",
   ip: "",
 };
 
@@ -63,7 +64,6 @@ const loginSlice = createSlice({
           },
         }
       ).catch((err) => {
-        console.error("❌ 로그아웃 기록 전송 실패:", err);
       });
 
       // 로컬 저장소 초기화
@@ -75,6 +75,7 @@ const loginSlice = createSlice({
       state.username = "";
       state.token = "";
       state.ip = "";
+      delete axios.defaults.headers.common["Authorization"];
     },
   },
 });

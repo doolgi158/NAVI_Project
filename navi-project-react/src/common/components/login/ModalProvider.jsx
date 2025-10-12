@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import LoginModal from "./LoginModal.jsx";
 import { useNavigate } from "react-router-dom";
+import { message } from "antd";
 
 const ModalContext = createContext();
 export const useModal = () => useContext(ModalContext);
@@ -23,7 +24,7 @@ export const ModalProvider = ({ children }) => {
     else if (pathname.includes("kakao")) provider = "kakao";
     else if (pathname.includes("naver")) provider = "naver";
 
-    // ✅ 소셜 로그인 redirect 처리
+    // 소셜 로그인 redirect 처리
     if (code && provider) {
       (async () => {
         try {
@@ -35,15 +36,14 @@ export const ModalProvider = ({ children }) => {
           localStorage.setItem("accessToken", data.accessToken);
           localStorage.setItem("refreshToken", data.refreshToken);
 
-          alert(`${provider.toUpperCase()} 로그인 성공!`);
+          message.success(`${provider.toUpperCase()} 로그인 성공!`);
           setOpenModal(false); // 모달 닫기
           navigate("/"); // 홈 이동
 
           // 🔹 URL 정리 (주소창에서 code 파라미터 제거)
           window.history.replaceState({}, document.title, "/");
         } catch (err) {
-          console.error("❌ 소셜 로그인 실패:", err);
-          alert("로그인에 실패했습니다. 다시 시도해주세요.");
+          message.error("로그인에 실패했습니다. 다시 시도해주세요.");
         }
       })();
     }
