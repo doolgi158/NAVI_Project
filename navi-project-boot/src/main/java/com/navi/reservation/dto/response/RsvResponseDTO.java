@@ -1,12 +1,9 @@
 package com.navi.reservation.dto.response;
 
-/*
- * ==============================
- * [RsvResponseDTO]
- * : 예약 확정 후 클라이언트에 반환되는 응답 DTO
- * ==============================
- * ㄴ 결제 검증이 완료되어 DB에 저장된 예약 정보를 반환
- */
+/* =================[RsvResponseDTO]=================
+        예약 확정 후 클라이언트에 반환되는 응답 DTO
+      EX) 결제 검증이 완료되어 DB에 저장된 예약 정보를 반환
+   ================================================== */
 
 import com.navi.reservation.domain.enums.PaymentMethod;
 import com.navi.reservation.domain.Rsv;
