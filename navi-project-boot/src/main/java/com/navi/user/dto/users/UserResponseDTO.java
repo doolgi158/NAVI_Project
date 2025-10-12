@@ -34,7 +34,7 @@ public class UserResponseDTO {
                 .gender(user.getGender())
                 .local(user.getLocal())
                 .signUp(user.getSignUp())
-                .profileUrl(profile != null ? profile.getProfileUrl() : null)
+//                .profileUrl(profile != null ? profile.getProfileUrl() : null)
                 .build();
     }
 }

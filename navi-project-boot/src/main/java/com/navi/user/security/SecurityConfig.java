@@ -53,7 +53,8 @@ public class SecurityConfig {
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/api/adm/**").hasRole(UserRole.ADMIN.name())
-//                .requestMatchers("/api/users/**", "/api/seats/**", "/travel/**", "/api/flight/**", "/api/delivery/**")
+                .requestMatchers("/api/users/**", "/api/seats/**", "/travel/**", "/api/flight/**", "/api/delivery/**")
+                        .permitAll()
 //                .hasAnyRole(UserRole.USER.name(), UserRole.ADMIN.name())
                 .anyRequest().permitAll()
         );
