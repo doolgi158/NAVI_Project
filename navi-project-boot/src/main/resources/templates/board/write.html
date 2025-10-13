@@ -105,9 +105,13 @@
         .btn-submit:hover {
             background-color: #f8f8f8;
         }
+
+
     </style>
 </head>
 <body>
+<!--숨겨진 파일 input-->
+<input type="file" id="file-input" name="file" multiple style="display: none;">
 <div class="container">
     <div class="write-header">
         <div class="write-title">일반 게시판</div>
@@ -115,24 +119,46 @@
     </div>
 
     <form id="writeForm" method="POST" th:action="@{/board/write}">
-        <!-- CSRF 토큰 추가 (이 부분이 중요!) -->
-        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-
+        <!-- CSRF 토큰 (Spring Security 사용 시 필요) -->
+        <input type="hidden" th:name="${_csrf?.parameterName}" th:value="${_csrf?.token}" th:if="${_csrf != null}" />
         <input type="text" class="title-input" name="title" id="postTitle" placeholder="제목을 입력하세요" required>
+            <div class="write-content" id="drop-zone">
+                <!-- textarea 대신 contenteditable div 사용 -->
+                <div class="content-input"
+                     id="postContent"
+                     contenteditable="true"
+                     data-placeholder="내용을 입력하세요
+                     이미지를 여기에 드래그하여 첨부할 수 있습니다">
+                </div>
 
-        <div class="write-content">
-            <textarea class="content-input" name="content" id="postContent" placeholder="내용을 입력하세요" required></textarea>
-        </div>
+                <!-- 실제 폼 전송용 hidden input -->
+                <input type="hidden" name="content" id="hidden-content">
+
+                <div class="drop-overlay" id="drop-overlay">
+                    <div class="drop-message">
+                        📁 이미지를 놓으세요
+                    </div>
+                </div>
+            </div>
 
         <div class="write-footer">
-            <button type="submit" class="btn-submit">등록</button>
+        <!-- 파일첨부버튼 -->
+            <div class="file-upload-section">
+                <button type="button" class="btn-file-attach" onclick="document.getElementById('file-input').click()">
+                    파일 첨부
+                </button>
+                <div id="file-list" class="file-list">
+
+                    <button type="submit" class="btn-submit">등록</button>
+                </div>
+            </div>
         </div>
     </form>
 </div>
 
 <script>
     function goToList() {
-        window.location.href = '/board/list';
+        window.location.href = '/board';
     }
 </script>
 </body>
