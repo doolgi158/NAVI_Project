@@ -94,6 +94,7 @@ public class ApiSuccessHandler implements AuthenticationSuccessHandler {
                                 "status", 200,
                                 "message", message,
                                 "id", id,
+                                "roles", claim.getRole(),
                                 "accessToken", access,
                                 "refreshToken", refresh,
                                 "ip", ip

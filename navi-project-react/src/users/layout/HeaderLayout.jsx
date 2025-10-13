@@ -1,6 +1,6 @@
 import { Layout, Menu, Button, Image, Space } from "antd";
 import naviLogo from "../images/navi_logo.png";
-import { useModal } from "../../common/components/Login/ModalProvider";
+import { useModal } from "../../common/components/login/ModalProvider";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import UserMenuDropdown from "../../common/components/UserMenuDropdown";

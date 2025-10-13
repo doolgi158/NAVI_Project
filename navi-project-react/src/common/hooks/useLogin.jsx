@@ -11,14 +11,15 @@ export const useLogin = () => {
   const login = async (values) => {
     try {
       localStorage.setItem("redirectAfterLogin", window.location.pathname);
-
+console.log(values);
       // 로그인 요청
       const params = new URLSearchParams();
       params.append("username", values.username);
       params.append("password", values.password);
       params.append("ip", values.ip);
 
-      const response = await axios.post(`${API_SERVER_HOST}/api/users/login`, params, {
+      //const response = await axios.post(`${API_SERVER_HOST}/api/users/login`, params, {
+      const response = await axios.post("/api/users/login", params, {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         validateStatus: () => true,  // 에러 상태도 직접 처리
       });
@@ -26,7 +27,7 @@ export const useLogin = () => {
       // 상태 코드별 처리
       if (response.status === 200) {
         const data = response.data;
-
+console.log(data);
         // JWT 토큰 저장
         localStorage.setItem("accessToken", data.accessToken);
         localStorage.setItem("refreshToken", data.refreshToken);
@@ -34,7 +35,7 @@ export const useLogin = () => {
         axios.defaults.headers.common["Authorization"] = `Bearer ${data.accessToken}`;
 
         // Redux 상태 갱신
-        dispatch(setlogin({ username: values.username, token: data.accessToken , role: data.role, ip: data.ip }));
+        dispatch(setlogin({ username: values.username, token: data.accessToken , role: data.roles, ip: data.ip }));
         
         // 리디렉션 처리
         const redirectPath = localStorage.getItem("redirectAfterLogin") || "/";

@@ -1,6 +1,6 @@
 package com.navi.user.security.filter;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.navi.common.response.ApiResponse;
 import com.navi.user.dto.JWTClaimDTO;
 import com.navi.user.security.util.JWTUtil;
@@ -9,6 +9,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,11 +18,13 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
-import java.util.Map;
 
+@Slf4j
 @RequiredArgsConstructor
 public class JWTCheckFilter extends OncePerRequestFilter {
+
     private final JWTUtil jwtUtil;
+    private final ObjectMapper objectMapper = new ObjectMapper(); // ✅ Jackson 사용
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -52,27 +55,34 @@ public class JWTCheckFilter extends OncePerRequestFilter {
 
                 JWTClaimDTO claim = jwtUtil.validateAndParse(accessToken);
                 String role = claim.getPrimaryRole();
-                List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
+                List<SimpleGrantedAuthority> authorities = claim.getRole().stream()
+                        .map(r -> new SimpleGrantedAuthority("ROLE_" + r))
+                        .toList();
 
                 UsernamePasswordAuthenticationToken auth =
                         new UsernamePasswordAuthenticationToken(
-                                claim.getId(), null, List.of(new SimpleGrantedAuthority(role))
-                        );
+                                claim.getId(), null, authorities);
+
                 SecurityContextHolder.getContext().setAuthentication(auth);
 
             } catch (Exception e) {
-                // JWT 오류 응답
-                Gson gson = new Gson();
+                // ✅ JWT 오류 응답 - Jackson 사용
                 ApiResponse<Object> apiResponse = ApiResponse.error("잘못되거나 만료된 토큰입니다.", 401, null);
 
                 response.setContentType("application/json; charset=UTF-8");
-                PrintWriter printWriter = response.getWriter();
-                printWriter.println(gson.toJson(apiResponse));
-                printWriter.close();
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+
+                PrintWriter writer = response.getWriter();
+                objectMapper.findAndRegisterModules(); // ✅ LocalDateTime 직렬화 지원
+                objectMapper.writeValue(writer, apiResponse);
+                writer.flush();
+                writer.close();
                 return; // 필터 체인 중단
             }
         }
 
+        log.info("[JWT FILTER] Header: {}", request.getHeader("Authorization"));
+        log.info("[JWT FILTER] Auth set: {}", SecurityContextHolder.getContext().getAuthentication());
         filterChain.doFilter(request, response);
     }
 
@@ -88,7 +98,7 @@ public class JWTCheckFilter extends OncePerRequestFilter {
         // 로그인 없이 접근 가능한 페이지 건너뜀
         return path.startsWith("/api/users/signup")
                 || path.startsWith("/api/users/login")
-                || path.startsWith("/api/travel/")
+                || path.startsWith("/api/travel")
                 || path.startsWith("/api/transports")
                 || path.startsWith("/api/accommodations")
                 || path.startsWith("/api/posts")
@@ -96,6 +106,7 @@ public class JWTCheckFilter extends OncePerRequestFilter {
                 || path.startsWith("/api/login-try/")
                 || path.startsWith("/api/users/logout")
                 || path.startsWith("/api/flight")
-                || path.startsWith("/api/delivery");
+                || path.startsWith("/api/delivery")
+                || path.startsWith("/api/seats");
     }
 }

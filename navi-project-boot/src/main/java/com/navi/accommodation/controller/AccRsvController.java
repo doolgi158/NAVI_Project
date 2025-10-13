@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/accommodations/reserve")
+@RequestMapping("/api/accommodation/reserve")
 public class AccRsvController {
     private final AccRsvService accRsvService;
 

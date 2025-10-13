@@ -10,10 +10,10 @@ const AdminSiderLayout = () => {
 
   // 메뉴 이동용 핸들러
   const menuHandler = {
-    "1" : () => navigate("/adm/users"),
-    "2" : () => navigate("/adm/travel"),
+    "1" : () => navigate("/adm/Users"),
+    "2" : () => navigate("/adm/travels"),
     "3" : () => navigate("/adm/accommodations"),
-    "4" : () => navigate("/adm/transports"),
+    "4" : () => navigate("/adm/flight"),
     "5" : () => navigate("/adm/plans"),
     "6" : () => navigate("/adm/deliveries"),
     "7" : () => navigate("/adm/payments"),

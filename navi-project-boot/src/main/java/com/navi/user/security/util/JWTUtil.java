@@ -26,14 +26,12 @@ public class JWTUtil {
 
     // 생성 (DTO 기반)
     public String generateToken(JWTClaimDTO claim, int minutes) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("id", claim.getId());
-        claims.put("name", claim.getName());
-        claims.put("email", claim.getEmail());
-        claims.put("roles", claim.getRole());
-        claims.put("phone", claim.getPhone());
-        claims.put("birth", claim.getBirth());
-        claims.put("provider", claim.getProvider());
+        Map<String, Object> claims = Map.of(
+                "id", claim.getId(),
+                "name", claim.getName(),
+                "email", claim.getEmail(),
+                "role", claim.getRole()
+        );
 
         Date exp = Date.from(ZonedDateTime.now().plusMinutes(minutes).toInstant());
 
@@ -65,9 +63,19 @@ public class JWTUtil {
                 .parseClaimsJws(token)
                 .getBody();
 
-        List<UserRole> role = ((List<?>) claims.get("role")).stream()
-                .map(r -> UserRole.valueOf(r.toString()))
-                .toList();
+        // role 필드 안전하게 꺼내기 (List<String> 타입으로 변환)
+        Object roleObj = claims.get("role");
+        List<String> roles = null;
+
+        if (roleObj instanceof List<?>) {
+            roles = ((List<?>) roleObj).stream()
+                    .map(Object::toString) // Enum이든 문자열이든 안전하게 문자열로 변환
+                    .toList();
+        } else if (roleObj instanceof String singleRole) {
+            roles = List.of(singleRole);
+        } else {
+            roles = List.of("USER"); // 기본값
+        }
 
         return JWTClaimDTO.builder()
                 .id((String) claims.get("id"))
@@ -76,7 +84,7 @@ public class JWTUtil {
                 .phone((String) claims.get("phone"))
                 .birth((String) claims.get("birth"))
                 .provider((String) claims.get("provider"))
-                .role(role)
+                .role(roles)
                 .build();
     }
 

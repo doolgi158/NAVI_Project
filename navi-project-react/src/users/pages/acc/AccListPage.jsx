@@ -28,7 +28,7 @@ const AccListPage = () => {
   /* 읍면동 목록 조회 */
   useEffect(() => {
     axios
-      .get(`${import.meta.env.VITE_API_BASE_URL}/api/townships`)
+      .get("/api/townships")
       .then((res) => setTownshipList(res.data))
       .catch(() => message.error("읍면동 데이터를 불러오지 못했습니다."));
   }, []);
@@ -62,7 +62,7 @@ const AccListPage = () => {
         params.title = keyword;
       }
 
-      const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/accommodations`, { params });
+      const res = await axios.get("/api/accommodations", { params });
       setAccommodations(res.data);
       setIsSearched(true);
 

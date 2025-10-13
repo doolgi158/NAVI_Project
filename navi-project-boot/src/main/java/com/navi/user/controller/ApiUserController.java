@@ -31,10 +31,10 @@ public class ApiUserController {
         return ResponseEntity.ok(Map.of("available", !exists));
     }
 
-    @GetMapping("/me")
-    public ResponseEntity<ApiResponse<UserResponseDTO>> getMyInfo(@RequestHeader("Authorization") String token) {
-        return ResponseEntity.ok(ApiResponse.success(userService.getMyInfo(token)));
-    }
+//    @GetMapping("/me")
+//    public ResponseEntity<ApiResponse<UserResponseDTO>> getMyInfo(@RequestHeader("Authorization") String token) {
+//        return ResponseEntity.ok(ApiResponse.success(userService.getMyInfo(token)));
+//    }
 
     @PostMapping("/profile")
     public ResponseEntity<ApiResponse<String>> uploadProfile(

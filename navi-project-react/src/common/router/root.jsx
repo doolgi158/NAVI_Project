@@ -1,13 +1,14 @@
 import { lazy, Suspense } from "react";
 import { createBrowserRouter } from "react-router-dom";
 import TravelRouter from "./TravelRouter.jsx";
+import PlanRouter from "./PlanRouter.jsx";
 import FlightRouter from "./FlightRouter.jsx";
 import AdminRouter from "./AdminRouter.jsx";
 import AccRouter from "./AccRouter.jsx";
 import UserRouter from "./UserRouter.jsx";
-import DeliveryRouter from "./DeliveryRouter.jsx";
+import DeliveryRouter from "./DeliveryRouter.jsx"
 
-const Loding = <div></div>
+const Loading = <div></div>
 const Main = lazy(() => import("../../users/pages/UserMainPage.jsx"))
 const Appshell = lazy(() => import("../../Appshell.jsx"))
 
@@ -17,11 +18,15 @@ const root = createBrowserRouter([
         children: [
     {
         path: "/",
-        element: <Suspense fallback={Loding}><Main /></Suspense>
+        element: <Suspense fallback={Loading}><Main /></Suspense>
     },
     {
         path: "/travel",
         children: [...TravelRouter()]
+    },
+    {
+        path: "/plans",
+        children: [...PlanRouter()]
     },
     {
         path: "/flight",
@@ -34,14 +39,14 @@ const root = createBrowserRouter([
     {
         path:"/accommodations",
         children:[...AccRouter()]
-    },    
-    {
-        path: "/users",
-        children: [...UserRouter()]
     },
     {
         path:"/delivery",
         children:[...DeliveryRouter()]
+    },
+    {
+        path: "/users",
+        children: [...UserRouter()]
     },
 ]
 }

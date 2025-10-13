@@ -27,8 +27,8 @@ const AccDetailPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const accRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/accommodations/${accId}`);
-        const roomRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/rooms/${accId}`);
+        const accRes = await axios.get(`/api/accommodations/${accId}`);
+        const roomRes = await axios.get(`/api/rooms/${accId}`);
         setAccData(accRes.data);
         setRooms(roomRes.data);
       } catch (err) {
@@ -44,7 +44,7 @@ const AccDetailPage = () => {
   const handleReserve = async (room) => {
     try {
       // ✅ 예약 마스터 생성 (백엔드 호출)
-      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/reservation/pre`, {
+      const res = await axios.post(`/api/reservation/pre`, {
         userNo: 1,                 // 임시 회원번호 (로그인 연동 시 수정 예정)
         rsvType: "ACC",            // 숙소 예약
         targetId: room.roomId,     // 객실 ID

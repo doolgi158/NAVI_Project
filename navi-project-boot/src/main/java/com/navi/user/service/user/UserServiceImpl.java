@@ -1,7 +1,7 @@
 package com.navi.user.service.user;
 
 import com.navi.image.domain.Image;
-import com.navi.image.repository.ImageRepository;
+//import com.navi.image.repository.ImageRepository;
 import com.navi.user.domain.User;
 import com.navi.user.dto.users.UserRequestDTO;
 import com.navi.user.dto.users.UserResponseDTO;
@@ -28,17 +28,17 @@ public class UserServiceImpl implements UserService{
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
     private final JWTUtil jwtUtil;
-    private final ImageRepository imageRepository;
+//    private final ImageRepository imageRepository;
 
     private static final String PROFILE_DIR = "C:/NAVI_Project/serverImage";
 
-    @Override
-    public UserResponseDTO get(Long no) {
-        User user = userRepository.findById(no)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
-        Image profile = imageRepository.findByUser_No(no).orElse(null);
-        return UserResponseDTO.from(user, profile);
-    }
+//    @Override
+//    public UserResponseDTO get(Long no) {
+//        User user = userRepository.findById(no)
+//                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+//        Image profile = imageRepository.findByUser_No(no).orElse(null);
+//        return UserResponseDTO.from(user, profile);
+//    }
 
     @Override
     public String findUserId(String name, String email) {
@@ -48,17 +48,17 @@ public class UserServiceImpl implements UserService{
         ).map(User::getId).orElse(null);
     }
 
-    @Override
-    public UserResponseDTO getMyInfo(String token) {
-        var claims = jwtUtil.validateAndParse(token.replace("Bearer ", ""));
-        String id = claims.getId();
-
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
-
-        Image profile = imageRepository.findByUser_No(user.getNo()).orElse(null);
-        return UserResponseDTO.from(user, profile);
-    }
+//    @Override
+//    public UserResponseDTO getMyInfo(String token) {
+//        var claims = jwtUtil.validateAndParse(token.replace("Bearer ", ""));
+//        String id = claims.getId();
+//
+//        User user = userRepository.findById(id)
+//                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+//
+//        Image profile = imageRepository.findByUser_No(user.getNo()).orElse(null);
+//        return UserResponseDTO.from(user, profile);
+//    }
 
     @Override
     @Transactional
@@ -75,15 +75,15 @@ public class UserServiceImpl implements UserService{
             String url = "/uploads/profile/" + fileName;
 
             // 기존 이미지 삭제
-            imageRepository.findByUser_No(user.getNo()).ifPresent(imageRepository::delete);
+//            imageRepository.findByUser_No(user.getNo()).ifPresent(imageRepository::delete);
 
             // 새 이미지 저장
-            Image image = Image.builder()
-                    .user(user)
-                    .profileUrl(url)
-                    .build();
+//            Image image = Image.builder()
+//                    .user(user)
+//                    .profileUrl(url)
+//                    .build();
 
-            imageRepository.save(image);
+//            imageRepository.save(image);
             return url;
         } catch (Exception e) {
             throw new RuntimeException("파일 업로드 실패", e);
@@ -97,7 +97,7 @@ public class UserServiceImpl implements UserService{
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-        imageRepository.deleteByUser_No(user.getNo());
+//        imageRepository.deleteByUser_No(user.getNo());
     }
 
     @Override
