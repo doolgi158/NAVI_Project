@@ -34,7 +34,6 @@ const getTravelData = async (domain, pageParam, filterQuery, userId) => {
   }
 
   // ✅ 로그인 사용자가 있다면 쿼리 파라미터로 id 전달
-  if (userId) queryString += `&id=${userId}`;
 
   try {
     const response = await api.get(apiUrl + queryString);

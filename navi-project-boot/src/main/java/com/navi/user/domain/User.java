@@ -44,7 +44,7 @@ public class User {
     @Column(name = "user_gender")
     private String gender;        // 성별
 
-    @Column(name = "user_ID", nullable = false, unique = true)
+    @Column(name = "user_id", nullable = false, unique = true)
     private String id;          // 아이디
 
     @Column(name = "user_PW", nullable = false)

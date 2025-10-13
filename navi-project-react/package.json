@@ -12,6 +12,10 @@
   "dependencies": {
     "@ant-design/charts": "^2.6.5",
     "@reduxjs/toolkit": "^2.9.0",
+    "@tiptap/extension-code-block-lowlight": "^3.6.6",
+    "@tiptap/extension-image": "^3.6.6",
+    "@tiptap/react": "^3.6.6",
+    "@tiptap/starter-kit": "^3.6.6",
     "antd": "^5.27.4",
     "axios": "^1.12.2",
     "bootstrap": "^5.3.8",

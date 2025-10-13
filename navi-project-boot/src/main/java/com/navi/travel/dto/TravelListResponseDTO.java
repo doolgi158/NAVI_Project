@@ -1,22 +1,23 @@
 package com.navi.travel.dto;
 
 import com.navi.travel.domain.Travel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Setter
 @Getter
+@Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class TravelListResponseDTO {
+
     private Long travelId;
     private String contentId;
     private String title;
     private String categoryName;
-    private String region1Name;
-    private String region2Name;
+    private String region1;
+    private String region2;
     private Double longitude;
     private Double latitude;
     private String tag;
@@ -35,14 +36,17 @@ public class TravelListResponseDTO {
     private boolean likedByUser;
     private boolean bookmarkedByUser;
 
+    /**
+     * ✅ 일반 Entity → DTO 변환
+     */
     public static TravelListResponseDTO of(Travel travel) {
         return TravelListResponseDTO.builder()
                 .travelId(travel.getTravelId())
                 .contentId(travel.getContentId())
                 .title(travel.getTitle())
                 .categoryName(travel.getCategoryName())
-                .region1Name(travel.getRegion1Name())
-                .region2Name(travel.getRegion2Name())
+                .region1(travel.getRegion1Name())
+                .region2(travel.getRegion2Name())
                 .longitude(travel.getLongitude())
                 .latitude(travel.getLatitude())
                 .phoneNo(travel.getPhoneNo())
@@ -51,11 +55,31 @@ public class TravelListResponseDTO {
                 .imagePath(travel.getImagePath())
                 .thumbnailPath(travel.getThumbnailPath())
                 .views(travel.getViews() != null ? travel.getViews() : 0L)
+                .likesCount(travel.getLikesCount() != null ? travel.getLikesCount() : 0L)
+                .bookmarkCount(travel.getBookmarkCount() != null ? travel.getBookmarkCount() : 0L)
                 .state(travel.getState())
                 .updatedAt(travel.getUpdatedAt())
                 .createdAt(travel.getCreatedAt())
                 .likedByUser(false)
                 .bookmarkedByUser(false)
                 .build();
+    }
+
+    /**
+     * ✅ Native Query (인기순 정렬 결과) 전용 생성자
+     *    → Object[] 매핑용
+     */
+    public TravelListResponseDTO(Long travelId,
+         String title,
+         String region1,
+         String region2,
+         String thumbnailPath,
+         Long likesCount) {
+        this.travelId = travelId;
+        this.title = title;
+        this.region1 = region1;
+        this.region2 = region2;
+        this.thumbnailPath = thumbnailPath;
+        this.likesCount = likesCount;
     }
 }
