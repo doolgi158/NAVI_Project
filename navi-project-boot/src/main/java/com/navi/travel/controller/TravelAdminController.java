@@ -107,15 +107,15 @@ public class TravelAdminController {
     }
 
     /** ✅ 6. 외부 API 데이터 저장 */
-    @PostMapping("/travel/load_save")
-    public ResponseEntity<String> loadAndSave() {
-        try {
-            int count = travelService.saveApiData();
-            return ResponseEntity.ok("API 데이터 저장 완료 총 " + count + " 건 처리됨.");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("API 데이터 저장 중 오류 발생: " + e.getMessage());
-        }
-    }
+//    @PostMapping("/travel/load_save")
+//    public ResponseEntity<String> loadAndSave() {
+//        try {
+//            int count = travelService.saveApiData();
+//            return ResponseEntity.ok("API 데이터 저장 완료 총 " + count + " 건 처리됨.");
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body("API 데이터 저장 중 오류 발생: " + e.getMessage());
+//        }
+//    }
 }

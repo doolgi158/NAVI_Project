@@ -47,23 +47,23 @@ public class TravelServiceImpl implements TravelService {
     // =====================================================
 
     /** 외부 API 전체 동기화 */
-    @Override
-    @Transactional
-    public void syncTravelData() {
-        log.info("🔄 [Sync] 외부 여행지 API 동기화 시작");
-        travelSyncService.syncTravelData();
-        log.info("✅ [Sync] 여행지 API 동기화 완료");
-    }
+//    @Override
+//    @Transactional
+//    public void syncTravelData() {
+//        log.info("🔄 [Sync] 외부 여행지 API 동기화 시작");
+//        travelSyncService.syncTravelData();
+//        log.info("✅ [Sync] 여행지 API 동기화 완료");
+//    }
 
     /** 외부 API 데이터 저장 */
-    @Override
-    @Transactional
-    public int saveApiData() {
-        log.info("📥 [Sync] 여행지 API 데이터 수집 시작");
-        int count = travelSyncService.saveApiData();
-        log.info("✅ [Sync] 총 {}건의 여행지 데이터 저장 완료", count);
-        return count;
-    }
+//    @Override
+//    @Transactional
+//    public int saveApiData() {
+//        log.info("📥 [Sync] 여행지 API 데이터 수집 시작");
+//        int count = travelSyncService.saveApiData();
+//        log.info("✅ [Sync] 총 {}건의 여행지 데이터 저장 완료", count);
+//        return count;
+//    }
 
     // =====================================================
     // ✅ 2. 조회 및 검색 (Query)
