@@ -1,55 +1,117 @@
 package com.navi.flight.service;
 
+import com.navi.flight.domain.Airport;
 import com.navi.flight.domain.Flight;
-import com.navi.flight.domain.Seat;
-import com.navi.flight.domain.SeatClass;
-
+import com.navi.flight.domain.FlightId;
+import com.navi.flight.dto.ApiFlightDTO;
+import com.navi.flight.dto.FlightDetailResponseDTO;
+import com.navi.flight.dto.FlightSearchRequestDTO;
+import com.navi.flight.repository.AirportRepository;
 import com.navi.flight.repository.FlightRepository;
-import com.navi.flight.repository.SeatRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
+
+/*
+ *  FlightServiceImpl
+ * - 항공편 저장 및 조회 담당
+ * - 좌석 생성은 SeatService에서 지연 처리
+ */
 @Service
 @RequiredArgsConstructor
-public class FlightServiceImpl implements FlightService{
+public class FlightServiceImpl implements FlightService {
+
     private final FlightRepository flightRepository;
-    private final SeatRepository seatRepository;
+    private final AirportRepository airportRepository;
 
-    @Override
-    public void saveFlight(Flight flight) {
-        //항공편 저장
-        flightRepository.save(flight);
-
-        int totalRows = 30; // 총 30줄
-        int seatsPerRow = 6; // A~F 표출 위해 필요
-        int prestigeRows = (int) Math.ceil(totalRows * 0.1); // 전체의 10프로 프레스티지 석 설정
-
-        for (int i = 1; i <= totalRows; i++){
-            for (char col = 'A'; col <= 'F'; col++){
-                SeatClass seatClass = (i <= prestigeRows && flight.getPrestigeCharge() != null && flight.getPrestigeCharge() > 0)
-                    ? SeatClass.PRESTIGE : SeatClass.ECONOMY;
-
-                Seat seat = Seat.builder()
-                        .flight(flight)
-                        .seatNo(i + String.valueOf(col))
-                        .isReserved(false)
-                        .seatClass(seatClass)
-                        .build();
-                seatRepository.save(seat);
-            }
+    /*
+     * API 공항명 → DB 공항엔티티 매핑
+     */
+    private Airport resolveAirportByApiName(String apiName) {
+        if ("부산".equals(apiName) || "김해".equals(apiName)) {
+            return airportRepository.findByAirportName("김해(부산)")
+                    .orElseThrow(() -> new RuntimeException("공항 정보 없음: " + apiName));
         }
+        return airportRepository.findByAirportName(apiName)
+                .or(() -> airportRepository.findByAirportNameContaining(apiName))
+                .orElseThrow(() -> new RuntimeException("공항 정보 없음: " + apiName));
+    }
+
+    /*
+     * 항공편 저장 (좌석은 생성하지 않음)
+     */
+    @Override
+    public void saveFlight(ApiFlightDTO dto) {
+        Airport depAirport = resolveAirportByApiName(dto.getDepAirportNm());
+        Airport arrAirport = resolveAirportByApiName(dto.getArrAirportNm());
+
+        Flight flight = Flight.builder()
+                .id(new FlightId(
+                        dto.getVihicleId(),
+                        LocalDateTime.parse(dto.getDepPlandTime().toString(),
+                                DateTimeFormatter.ofPattern("yyyyMMddHHmm"))
+                ))
+                .airlineNm(dto.getAirlineNm())
+                .depAirport(depAirport)
+                .arrAirport(arrAirport)
+                .arrTime(LocalDateTime.parse(dto.getArrPlandTime().toString(),
+                        DateTimeFormatter.ofPattern("yyyyMMddHHmm")))
+                .economyCharge(dto.getEconomyCharge())
+                .prestigeCharge(dto.getPrestigeCharge())
+                .seatInitialized(false)
+                .build();
+
+        flightRepository.save(flight);
+    }
+
+    /*
+     * 항공편 조회
+     */
+    @Override
+    public List<FlightDetailResponseDTO> searchFlights(FlightSearchRequestDTO requestDTO) {
+
+        System.out.println("검색 요청 DTO = " + requestDTO);
+
+        return flightRepository.findAll().stream()
+                // 출발 공항 코드 일치
+                .filter(f -> f.getDepAirport().getAirportCode()
+                        .equals(requestDTO.getDepAirportCode()))
+                // 도착 공항 코드 일치
+                .filter(f -> f.getArrAirport().getAirportCode()
+                        .equals(requestDTO.getArrAirportCode()))
+                // 출발 날짜 일치 (LocalDate로 비교)
+                .filter(f -> f.getId().getDepTime().toLocalDate()
+                        .equals(LocalDate.parse(requestDTO.getDepDate())))
+                // DTO 변환
+                .map(f -> {
+                    int price = requestDTO.getSeatClass().equalsIgnoreCase("ECONOMY")
+                            ? f.getEconomyCharge()
+                            : (f.getPrestigeCharge() != null ? f.getPrestigeCharge() : 0);
+                    System.out.println("검색 요청 DTO => " + requestDTO);
+
+                    return FlightDetailResponseDTO.builder()
+                            .flightNo(f.getId().getFlightId())
+                            .airlineNm(f.getAirlineNm())
+                            .depAirportCode(f.getDepAirport().getAirportCode())
+                            .depAirportName(f.getDepAirport().getAirportName())
+                            .arrAirportCode(f.getArrAirport().getAirportCode())
+                            .arrAirportName(f.getArrAirport().getAirportName())
+                            .depTime(f.getId().getDepTime())
+                            .arrTime(f.getArrTime())
+                            .price(price)
+                            .seatClass(requestDTO.getSeatClass().toUpperCase())
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 
     @Override
-    public void reserveSeat(Long seatId, String userName) { //예약 완료시 저장로직 추가 예정
-        Seat seat = seatRepository.findById(seatId)
-                .orElseThrow(() -> new RuntimeException("좌석 없음"));
-
-        if (seat.isReserved()){
-            throw new RuntimeException("이미 예약된 좌석입니다.");
-        }
-
-        seat.setReserved(true);
+    public long countFlights() {
+        return flightRepository.count();
     }
 }

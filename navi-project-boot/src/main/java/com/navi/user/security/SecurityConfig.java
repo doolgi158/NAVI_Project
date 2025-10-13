@@ -1,62 +1,111 @@
 package com.navi.user.security;
 
+import com.navi.user.enums.UserRole;
+import com.navi.user.repository.HistoryRepository;
+import com.navi.user.repository.TryLoginRepository;
+import com.navi.user.repository.UserRepository;
+import com.navi.user.security.filter.JWTCheckFilter;
+import com.navi.user.security.filter.TryLoginFilter;
 import com.navi.user.security.handler.ApiFailHandler;
+import com.navi.user.security.handler.ApiLogoutSuccessHandler;
 import com.navi.user.security.handler.ApiSuccessHandler;
+import com.navi.user.security.util.JWTUtil;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final TryLoginRepository tryLoginRepository;
+    private final JWTUtil jwtUtil;
+    private final ApiLogoutSuccessHandler apiLogoutSuccessHandler;
+    private final UserRepository userRepository;
+    private final HistoryRepository historyRepository;
+
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity security) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
         // CORS 설정
-        security.cors(httpSecurityCorsConfigurer -> {
-            httpSecurityCorsConfigurer.configurationSource(corsConfigurationSource());
-        });
-        // CSRF 설정
-        security.sessionManagement(sessionConfig -> sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-        security.csrf(config -> config.disable());
+        http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
 
-        // 로그인 설정
-        security.formLogin(config -> {
-            config.loginPage("/api/users/login");
-            config.successHandler(new ApiSuccessHandler());
-            config.failureHandler(new ApiFailHandler());
-        });
+        // 세션 비활성화 (JWT 사용)
+        http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-        return security.build();
+        // CSRF 비활성화
+        http.csrf(csrf -> csrf.disable());
+
+        // 요청별 권한 설정 (anyRequest는 반드시 마지막!)
+        http.authorizeHttpRequests(auth -> auth
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers("api/adm/**").hasRole(UserRole.ADMIN.name())
+                .requestMatchers("/api/users/**", "/api/seats/**", "/travel/**", "/api/flight/**", "/api/delivery/**",
+                "/api/auth/**", "/api/accommodations/**", "/api/townships/**", "/api/rooms/**", "/api/reservation/**")
+                        .permitAll()
+//                .hasAnyRole(UserRole.USER.name(), UserRole.ADMIN.name())
+                .anyRequest().permitAll()
+        );
+
+        // 폼 로그인
+        http.formLogin(login -> login
+                .loginProcessingUrl("/api/users/login")
+                .usernameParameter("username")
+                .passwordParameter("password")
+                .successHandler(new ApiSuccessHandler(tryLoginRepository, jwtUtil, userRepository, historyRepository))
+                .failureHandler(new ApiFailHandler(tryLoginRepository))
+        );
+
+        // 예외 처리
+        http.exceptionHandling(exception -> exception
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.getWriter().write("{\"error\": \"Unauthorized or token expired\"}");
+                })
+        );
+
+        // JWT 필터 추가
+        http.addFilterBefore(new JWTCheckFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterAfter(new TryLoginFilter(tryLoginRepository), JWTCheckFilter.class);
+
+        return http.build();
     }
 
-    // Password 암호화
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // CORS 세부 설정
     @Bean
-    CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
-        configuration.setAllowedMethods(Arrays.asList("POST", "GET", "DELETE", "PUT", "PATCH"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
-        configuration.setAllowCredentials(true);
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+
+        config.setAllowedOrigins(List.of("http://localhost:5173"));
+        config.setAllowedOriginPatterns(List.of("http://localhost:5173"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH"));
+        config.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
+        config.setExposedHeaders(List.of("Authorization", "Content-Type"));
+        config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-
+        source.registerCorsConfiguration("/**", config);
         return source;
     }
 }

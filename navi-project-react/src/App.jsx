@@ -1,11 +1,20 @@
-import { RouterProvider } from 'react-router-dom';
-import root from "./router/root.jsx";
-import React from 'react';
+import { RouterProvider } from "react-router-dom";
+import { Provider } from "react-redux";
+import store from "./common/store/store";
+import root from "./common/router/root.jsx";
+import axios from "axios";
 
+function App() {
+  const token = localStorage.getItem("accessToken");
+  if (token) {
+    axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+  }
 
-export default function App() {
   return (
-    <RouterProvider router={root}/>
+    <Provider store={store}>
+      <RouterProvider router={root} />
+    </Provider>
   );
-};
+}
 
+export default App;
