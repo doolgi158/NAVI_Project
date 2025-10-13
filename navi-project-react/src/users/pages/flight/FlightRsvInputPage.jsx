@@ -12,7 +12,7 @@ const FlightRsvInputPage = () => {
 
   const [passengers, setPassengers] = useState([]);
 
-  // ✅ 탑승객 수만큼 폼 초기화
+  // 탑승객 수만큼 폼 초기화
   useEffect(() => {
     setPassengers(
       Array.from({ length: passengerCount }, () => ({
@@ -23,7 +23,7 @@ const FlightRsvInputPage = () => {
     );
   }, [passengerCount]);
 
-  // ✅ 날짜 포맷 함수
+  // 날짜 포맷 함수
   const formatDateTime = (dateStr) => {
     if (!dateStr) return "";
     const date = new Date(dateStr);
@@ -37,14 +37,14 @@ const FlightRsvInputPage = () => {
     return `${year}.${month}.${day} (${dayOfWeek}) ${hours}:${minutes}`;
   };
 
-  // ✅ 입력 변경 처리
+  // 입력 변경 처리
   const handleChange = (index, field, value) => {
     const updated = [...passengers];
     updated[index][field] = value;
     setPassengers(updated);
   };
 
-  // ✅ 좌석 선택으로 이동
+  // 좌석 선택으로 이동
   const handleSeatSelection = () => {
     const incomplete = passengers.some((p) => !p.name || !p.phone || !p.email);
     if (incomplete) {
@@ -64,7 +64,7 @@ const FlightRsvInputPage = () => {
     });
   };
 
-  // ✅ 자동 배정
+  // 자동 배정
   const handleAutoAssign = () => {
     const incomplete = passengers.some((p) => !p.name || !p.phone || !p.email);
     if (incomplete) {
@@ -111,10 +111,10 @@ const FlightRsvInputPage = () => {
           </div>
         )}
 
-        {/* 귀국편 (왕복 시만) */}
+        {/* 복귀편 (왕복 시만) */}
         {selectedInbound && (
           <div className="mb-6 border border-green-300 p-6 rounded-lg bg-green-50">
-            <h3 className="font-semibold text-green-700 mb-2">귀국편</h3>
+            <h3 className="font-semibold text-green-700 mb-2">복귀편</h3>
             <p className="font-medium">
               {selectedInbound.airlineNm} {selectedInbound.flightNo}
             </p>
