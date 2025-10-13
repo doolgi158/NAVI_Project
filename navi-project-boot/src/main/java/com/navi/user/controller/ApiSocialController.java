@@ -22,7 +22,6 @@ import java.util.*;
 @RestController
 @RequiredArgsConstructor
 public class ApiSocialController {
-
     private final SocialLoginService socialLoginService;
     private final JWTUtil jwtUtil;
     private final UserRepository userRepository;
@@ -45,6 +44,7 @@ public class ApiSocialController {
             return ApiResponse.error("지원하지 않는 소셜 로그인 타입입니다: " + providerStr, 400, null);
         }
 
+        // 소셜 인증 후 사용자 정보 획득
         SocialDTO oauth = socialLoginService.socialLogin(provider, code);
 
         // 앱용 JWT (간단 클레임)
@@ -98,7 +98,7 @@ public class ApiSocialController {
             }
 
             History latest = list.get(0);
-            String now = LocalDateTime.now().format(DT);
+            LocalDateTime now = LocalDateTime.now();
 
             // DTO 경유해서 업데이트하는 현재 방식 유지 (ID 유지 필수)
             HistoryDTO dto = HistoryDTO.fromEntity(latest);

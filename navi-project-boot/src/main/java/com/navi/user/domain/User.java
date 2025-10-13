@@ -8,6 +8,7 @@ import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,7 +58,7 @@ public class User {
     @ColumnDefault(value = "sysdate")
     @CreationTimestamp
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private String signUp;      // 가입일
+    private LocalDateTime signUp;      // 가입일
 
     @Column(name = "user_state", nullable = false)
     @ColumnDefault(value = "0")
