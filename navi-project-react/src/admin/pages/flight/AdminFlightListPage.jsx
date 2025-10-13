@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Table, Button, Popconfirm, Space, message } from "antd";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import AdminSiderLayout from "../../layout/AdminSiderLayout";
 
 const API = "http://localhost:8080/api/admin/flights";
 
@@ -14,7 +15,8 @@ const AdminFlightListPage = () => {
   const fetchFlights = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("ACCESS_TOKEN"); // ✅ JWT 가져오기
+      const token = localStorage.getItem("accessToken"); // ✅ JWT 가져오기
+      
       if (!token) {
         message.warning("로그인이 필요합니다.");
         setLoading(false);
@@ -140,21 +142,35 @@ const AdminFlightListPage = () => {
   ];
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between mb-4">
-        <h2 className="text-xl font-semibold">항공편 목록</h2>
-        <Button type="primary" onClick={() => navigate("/adm/flight/new")}>
-          항공편 등록
-        </Button>
+    <div className="flex min-h-screen bg-gray-50">
+      {/* 왼쪽 사이드바 */}
+      <div className="w-64 bg-white shadow-md border-r border-gray-100">
+        <AdminSiderLayout />
       </div>
 
-      <Table
-        columns={columns}
-        dataSource={Array.isArray(flights) ? flights : []}
-        rowKey={(record) => `${record.flightId}_${record.depTime}`}
-        loading={loading}
-        bordered
-      />
+      {/* 오른쪽 콘텐츠 영역 */}
+      <div className="flex-1 p-8">
+        <div className="flex justify-between mb-6">
+          <h2 className="text-2xl font-semibold text-gray-800">항공편 목록</h2>
+          <Button
+            type="primary"
+            onClick={() => navigate("/adm/flight/new")}
+            className="bg-indigo-500 hover:bg-indigo-600"
+          >
+            항공편 등록
+          </Button>
+        </div>
+
+        <Table
+          columns={columns}
+          dataSource={Array.isArray(flights) ? flights : []}
+          rowKey={(record) => `${record.flightId}_${record.depTime}`}
+          loading={loading}
+          bordered
+          pagination={{ pageSize: 10 }}
+          className="bg-white shadow-sm rounded-lg"
+        />
+      </div>
     </div>
   );
 };

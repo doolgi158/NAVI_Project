@@ -11,7 +11,7 @@ const AdminSiderLayout = () => {
   // 메뉴 이동용 핸들러
   const menuHandler = {
     "1" : () => navigate("/adm/Users"),
-    "2" : () => navigate("/adm/travels"),
+    "2" : () => navigate("/adm/travel"),
     "3" : () => navigate("/adm/accommodations"),
     "4" : () => navigate("/adm/flight"),
     "5" : () => navigate("/adm/plans"),
