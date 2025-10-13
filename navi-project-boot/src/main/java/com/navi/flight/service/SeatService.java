@@ -8,5 +8,6 @@ import java.util.List;
 public interface SeatService {
     List<SeatResponseDTO> getSeatsByFlight(String flightId, LocalDateTime depTime);
     List<Seat> autoAssignSeats(String flightId, LocalDateTime depTime, int passengerCount);
+    boolean ensureSeatsInitialized(String flightId, LocalDateTime depTime);
 }
 

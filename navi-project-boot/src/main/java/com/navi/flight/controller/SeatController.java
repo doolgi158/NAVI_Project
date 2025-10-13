@@ -2,6 +2,7 @@ package com.navi.flight.controller;
 
 import com.navi.flight.dto.SeatResponseDTO;
 import com.navi.flight.domain.Seat;
+import com.navi.flight.dto.SeatStatusResponse;
 import com.navi.flight.service.SeatService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -35,4 +36,14 @@ public class SeatController {
         List<Seat> assignedSeats = seatService.autoAssignSeats(flightId, depTime, passengerCount);
         return ResponseEntity.ok(assignedSeats);
     }
+
+    @GetMapping("/{flightId}/status")
+    public ResponseEntity<SeatStatusResponse> checkSeatStatus(
+            @PathVariable String flightId,
+            @RequestParam("depTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime depTime
+    ) {
+        boolean initialized = seatService.ensureSeatsInitialized(flightId, depTime);
+        return ResponseEntity.ok(new SeatStatusResponse(initialized));
+    }
+
 }

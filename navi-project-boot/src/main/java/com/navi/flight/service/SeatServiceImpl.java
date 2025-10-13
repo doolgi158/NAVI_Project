@@ -1,6 +1,7 @@
 package com.navi.flight.service;
 
 import com.navi.flight.domain.Flight;
+import com.navi.flight.domain.FlightId;
 import com.navi.flight.domain.Seat;
 import com.navi.flight.domain.SeatClass;
 import com.navi.flight.dto.SeatResponseDTO;
@@ -164,4 +165,33 @@ public class SeatServiceImpl implements SeatService {
     private int extractRowNumber(Seat seat) {
         return Integer.parseInt(seat.getSeatNo().replaceAll("[^0-9]", ""));
     }
+
+    @Override
+    public boolean ensureSeatsInitialized(String flightId, LocalDateTime depTime) {
+        FlightId id = new FlightId(flightId, depTime);
+        Optional<Flight> flightOpt = flightRepository.findById(id);
+
+        if(flightOpt.isEmpty()){
+            System.out.println("[WARN] Flight not found: " + flightId + " / " + depTime);
+            return false;
+        }
+        Flight flight = flightOpt.get();
+
+        //이미 초기화되어 있으면 true 반환
+        if(flight.isSeatInitialized()) {
+            return true;
+        }
+
+        //좌석 존재 여부 확인
+        boolean seatExits = seatRepository.existsByFlightId(flight.getFlightId());
+        if(!seatExits){
+            System.out.println("[INFO] Lazy 생성 요청 감지 -> 좌석 자동 생성 시작");
+            createSeatsForFlight(flight);
+            flight.setSeatInitialized(true);
+            flightRepository.save(flight);
+            System.out.println("[INFO] Lazy 생성 완료 -> seat_initialized = true");
+        }
+        return true;
+    }
+
 }
