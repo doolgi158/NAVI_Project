@@ -13,8 +13,12 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
 
   // 다음 input 이동을 위한 ref
   const passwordRef = useRef(null);
+  const usernameRef = useRef(null);
 
   const handleSubmit = async (values) => {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+
     const result = await login(values);
 
     if (result.success) {
@@ -37,8 +41,10 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
   };
   // 모달이 닫힐 때 입력값 초기화
   useEffect(() => {
-    if (!open) {
-      form.resetFields();
+    if (open) {
+      setTimeout(() => usernameRef.current?.focus(), 100);
+    }else {
+      form.resetFields(); 
     }
   }, [open, form]);
 
@@ -108,7 +114,9 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
                 >
                   <Input
                     placeholder="아이디 입력"
+                    ref={usernameRef}
                     size="large"
+                    style={{ imeMode: "disabled" }}
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         e.preventDefault(); // 폼 제출 방지
