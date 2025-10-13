@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import api from '../../common/api/naviApi.js';
 import { useTravelListFilter } from './useTravelListFilter.jsx';
 
+// ✅ 카테고리 목록 정의
 const categories = ['전체', '관광지', '음식점', '쇼핑'];
 
 // ✅ 여행지 목록 API 호출 함수

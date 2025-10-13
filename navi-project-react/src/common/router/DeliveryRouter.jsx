@@ -1,5 +1,6 @@
+// src/Common/router/DeliveryRouter.jsx
 import { lazy, Suspense } from "react";
-import ProtectedRoute from "./ProtectedRoute.jsx";
+import { ModalProvider } from "../components/Login/ModalProvider.jsx";
 
 const Loading = <div></div>;
 
@@ -12,7 +13,9 @@ const DeliveryRouter = () => [
     path: "",
     element: (
       <Suspense fallback={Loading}>
-        <DeliveryPage />
+        <ModalProvider>
+          <DeliveryPage />
+        </ModalProvider>
       </Suspense>
     ),
   },
@@ -20,7 +23,9 @@ const DeliveryRouter = () => [
     path: "list",
     element: (
       <Suspense fallback={Loading}>
-        <DeliveryListPage />
+        <ModalProvider>
+          <DeliveryListPage />
+        </ModalProvider>
       </Suspense>
     ),
   },
@@ -28,9 +33,9 @@ const DeliveryRouter = () => [
     path: "detail/:id",
     element: (
       <Suspense fallback={Loading}>
-        <ProtectedRoute requiredRole="USER">
+        <ModalProvider>
           <DeliveryDetailPage />
-        </ProtectedRoute>
+        </ModalProvider>
       </Suspense>
     ),
   },

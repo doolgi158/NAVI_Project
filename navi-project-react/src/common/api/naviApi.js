@@ -5,7 +5,7 @@ const BASE_PREFIX = `${API_SERVER_HOST}/api`;
 
 // ✅ 공통 axios 인스턴스
 const api = axios.create({
-  baseURL: BASE_PREFIX,
+  baseURL: "/api",
 });
 
 // ✅ JWT 자동 첨부 + 로깅

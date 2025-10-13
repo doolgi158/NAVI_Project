@@ -9,6 +9,8 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -26,6 +28,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "NAVI_RESERVATION")   // Todo: indexes 추후 추가 예정
 public class Rsv {
     /** === COLUMN 정의 === */
@@ -53,7 +56,7 @@ public class Rsv {
     @Column(name = "created_time", nullable = false, updatable = false)
     private LocalDateTime createdTime;
 
-    // 결제 상태 (예: WAITING_PAYMENT, PAID, FAILED, CANCELLED)
+    // 결제 상태 (예: WAITING_PAYMENT, PAID, FAILED, CANCELLED, READY, TIMEOUT)
     @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_status", length = 20, nullable = false)
@@ -64,13 +67,14 @@ public class Rsv {
     private String paymentId;
 
     // 결제 완료/실패 일시 (예: 2025-10-07T13:47:03)
+    @LastModifiedDate
     @Column(name = "payment_time")
     private LocalDateTime paymentTime;
 
     // 결제 수단 (예: CARD, KAKAO_PAY, NAVER_PAY)
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_method", length = 10)
-    private PaymentMethod paymentMethod;    // Todo: Enum 없앨수도...
+    private PaymentMethod paymentMethod;
 
     // 총 결제 금액 (예: 128000)
     @Builder.Default
@@ -92,18 +96,20 @@ public class Rsv {
     public void markAsPaid(String paymentId, PaymentMethod method) {
         this.rsvStatus = RsvStatus.PAID;
         this.paymentId = paymentId;
-        this.paymentTime = LocalDateTime.now();
         this.paymentMethod = method;
     }
-
     public void markAsFailed(String reason) {
         this.rsvStatus = RsvStatus.FAILED;
         this.paymentFailReason = reason;
-        this.paymentTime = LocalDateTime.now();
     }
-
-    public void markAsCancelled() {
+    public void markAsCancelled(String reason) {
         this.rsvStatus = RsvStatus.CANCELLED;
-        this.paymentTime = LocalDateTime.now();     // 취소 시점 기록
+        this.paymentFailReason = reason;
+    }
+    public void markReady() {
+        this.rsvStatus = RsvStatus.READY;
+        this.paymentId = null;               // 결제 승인번호 없음
+        this.paymentMethod = null;           // 아직 결제수단 확정 전
+        this.paymentFailReason = null;       // 실패 사유 초기화
     }
 }

@@ -45,7 +45,7 @@ const DeliveryPage = () => {
     }
   }, [form.bagSize, form.bagCount]);
 
-  /** 지도 SDK 완전 로드 후 초기화 */
+  /** ✅ 지도 SDK 완전 로드 후 초기화 */
   useEffect(() => {
     const loadKakaoMap = () => {
       if (window.kakao && window.kakao.maps) {
@@ -82,7 +82,7 @@ const DeliveryPage = () => {
     loadKakaoMap();
   }, []);
 
-  /** 카카오 주소 검색 */
+  /** ✅ 카카오 주소 검색 */
   const handleSearchAddress = (targetKey) => {
     // 주소 검색 SDK가 안 불러와졌다면 로드
     if (!window.daum || !window.daum.Postcode) {
@@ -131,7 +131,7 @@ const DeliveryPage = () => {
             });
             markersRef.current[targetKey] = marker;
 
-            // 출발지-도착지 연결선
+            // ✅ 출발지-도착지 연결선
             const fromMarker = markersRef.current.fromAddress;
             const toMarker = markersRef.current.toAddress;
 
@@ -164,7 +164,7 @@ const DeliveryPage = () => {
     }).open();
   };
 
-  /** 예약 요청 */
+  /** ✅ 예약 요청 */
   const handleSubmit = () => {
     const required = [
       "senderName",
@@ -210,7 +210,7 @@ const DeliveryPage = () => {
             className="mb-3"
           />
 
-          {/* 배송 방향 */}
+          {/* ✅ 배송 방향 */}
           <h3 className="font-semibold mb-2">배송 방향</h3>
           <div className="flex gap-4 mb-4">
             <label>
@@ -296,7 +296,7 @@ const DeliveryPage = () => {
             onChange={(e) => handleChange("memo", e.target.value)}
           />
 
-          {/* 예상 요금 표시 */}
+          {/* ✅ 예상 요금 표시 */}
           {estimatedFare && (
             <div className="text-center text-lg font-semibold text-blue-600 mb-4">
               예상 요금: {estimatedFare.toLocaleString()}원
