@@ -24,8 +24,8 @@ public class BagServiceImpl implements BagService {
     }
 
     @Override
-    public Optional<Bag> getBagBySize(String size) {
-        return bagRepository.findById(size);
+    public Optional<Bag> getBag(Long bagId) {
+        return bagRepository.findById(bagId);
     }
 
     @Override
@@ -34,7 +34,7 @@ public class BagServiceImpl implements BagService {
     }
 
     @Override
-    public void deleteBag(String size) {
-        bagRepository.deleteById(size);
+    public void deleteBag(Long bagId) {
+        bagRepository.deleteById(bagId);
     }
 }

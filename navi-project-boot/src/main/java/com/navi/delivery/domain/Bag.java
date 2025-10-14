@@ -1,3 +1,4 @@
+// src/main/java/com/navi/delivery/domain/Bag.java
 package com.navi.delivery.domain;
 
 import com.navi.common.entity.BaseEntity;
@@ -5,25 +6,24 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "NAVI_BAG")
+@Table(name = "NAVI_DLV_BAG")
 @Getter
-@Setter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-@ToString
 public class Bag extends BaseEntity {
 
-    // 가방 크기 (PK)
     @Id
-    @Column(name = "BAG_SIZE", length = 10, nullable = false)
-    private String bagSize;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "BAG_ID")
+    private Long bagId;
 
-    // 최대 무게 (kg)
-    @Column(name = "MAX_WEIGHT", nullable = false)
-    private Integer maxWeight;
+    @Column(name = "BAG_CODE", nullable = false, unique = true)
+    private String bagCode;
 
-    // 기본 요금
-    @Column(name = "BASE_PRICE", nullable = false)
-    private Integer basePrice;
+    @Column(name = "BAG_NAME", nullable = false)
+    private String bagName;
+
+    @Column(name = "PRICE", nullable = false)
+    private int price;
 }

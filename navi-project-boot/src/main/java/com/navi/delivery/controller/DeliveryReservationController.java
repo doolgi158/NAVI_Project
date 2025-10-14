@@ -1,6 +1,8 @@
 package com.navi.delivery.controller;
 
+import com.navi.common.response.ApiResponse;
 import com.navi.delivery.domain.DeliveryReservation;
+import com.navi.delivery.dto.DeliveryReservationDTO;
 import com.navi.delivery.service.DeliveryReservationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -8,49 +10,54 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * 짐배송 예약 상세 관리 컨트롤러
- * - 예약 등록, 조회, 삭제 기능 제공
- */
 @RestController
-@RequestMapping("/api/delivery/rsv")
 @RequiredArgsConstructor
+@RequestMapping("/api/delivery")
 public class DeliveryReservationController {
 
     private final DeliveryReservationService deliveryReservationService;
 
     /**
-     * 전체 예약 조회
+     * ✅ 1. 짐배송 예약 등록
+     * - groupId는 서버에서 자동 생성 또는 연결
+     * - status 기본값은 PENDING
      */
-    @GetMapping
-    public ResponseEntity<List<DeliveryReservation>> getAllReservations() {
-        return ResponseEntity.ok(deliveryReservationService.getAllReservations());
+    @PostMapping("/rsv")
+    public ResponseEntity<ApiResponse<DeliveryReservation>> createReservation(@RequestBody DeliveryReservationDTO dto) {
+        DeliveryReservation reservation = deliveryReservationService.createReservation(dto);
+        return ResponseEntity.ok(ApiResponse.success(reservation));
     }
 
     /**
-     * 단일 예약 조회
+     * ✅ 2. 특정 사용자 예약 목록 조회
+     * - /api/delivery/user/{userNo}
      */
-    @GetMapping("/{id}")
-    public ResponseEntity<DeliveryReservation> getReservation(@PathVariable Long id) {
-        return deliveryReservationService.getReservation(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    @GetMapping("/user/{userNo}")
+    public ResponseEntity<ApiResponse<List<DeliveryReservation>>> getReservationsByUser(@PathVariable Long userNo) {
+        List<DeliveryReservation> reservations = deliveryReservationService.getReservationsByUser(userNo);
+        return ResponseEntity.ok(ApiResponse.success(reservations));
     }
 
     /**
-     * 예약 등록 또는 수정
+     * ✅ 3. 단일 예약 상세 조회
+     * - /api/delivery/rsv/{drsvId}
      */
-    @PostMapping
-    public ResponseEntity<DeliveryReservation> createOrUpdateReservation(@RequestBody DeliveryReservation reservation) {
-        return ResponseEntity.ok(deliveryReservationService.saveReservation(reservation));
+    @GetMapping("/rsv/{drsvId}")
+    public ResponseEntity<ApiResponse<DeliveryReservation>> getReservationById(@PathVariable String drsvId) {
+        DeliveryReservation reservation = deliveryReservationService.getReservationById(drsvId);
+        return ResponseEntity.ok(ApiResponse.success(reservation));
     }
 
     /**
-     * 예약 삭제
+     * ✅ 4. 예약 상태 변경 (결제 완료 등)
+     * - 예시: /api/delivery/rsv/{drsvId}/status?value=PAID
      */
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
-        deliveryReservationService.deleteReservation(id);
-        return ResponseEntity.noContent().build();
+    @PatchMapping("/rsv/{drsvId}/status")
+    public ResponseEntity<ApiResponse<DeliveryReservation>> updateStatus(
+            @PathVariable String drsvId,
+            @RequestParam("value") String status
+    ) {
+        DeliveryReservation updated = deliveryReservationService.updateStatus(drsvId, status);
+        return ResponseEntity.ok(ApiResponse.success(updated));
     }
 }

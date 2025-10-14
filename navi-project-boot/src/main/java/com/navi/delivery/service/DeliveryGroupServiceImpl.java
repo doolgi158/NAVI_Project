@@ -24,7 +24,7 @@ public class DeliveryGroupServiceImpl implements DeliveryGroupService {
     }
 
     @Override
-    public Optional<DeliveryGroup> getGroup(Long id) {
+    public Optional<DeliveryGroup> getGroup(String id) {
         return deliveryGroupRepository.findById(id);
     }
 
@@ -34,7 +34,7 @@ public class DeliveryGroupServiceImpl implements DeliveryGroupService {
     }
 
     @Override
-    public void deleteGroup(Long id) {
+    public void deleteGroup(String id) {
         deliveryGroupRepository.deleteById(id);
     }
 }

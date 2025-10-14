@@ -10,17 +10,17 @@ import java.util.List;
 
 /**
  * 가방 요금 관리 컨트롤러
- * - CRUD 기능 제공
+ * - 요금 조회 / 추가 / 수정 / 삭제
  */
 @RestController
-@RequestMapping("/api/bag")
+@RequestMapping("/api/delivery/bag")
 @RequiredArgsConstructor
 public class BagController {
 
     private final BagService bagService;
 
     /**
-     * 전체 가방 요금 조회
+     * 모든 가방 요금 조회
      */
     @GetMapping
     public ResponseEntity<List<Bag>> getAllBags() {
@@ -28,29 +28,29 @@ public class BagController {
     }
 
     /**
-     * 가방 크기로 단일 요금 조회
+     * 특정 가방 조회
      */
-    @GetMapping("/{size}")
-    public ResponseEntity<Bag> getBag(@PathVariable String size) {
-        return bagService.getBagBySize(size)
+    @GetMapping("/{bagId}")
+    public ResponseEntity<Bag> getBag(@PathVariable Long bagId) {
+        return bagService.getBag(bagId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     /**
-     * 가방 요금 등록 또는 수정
+     * 가방 요금 추가/수정
      */
     @PostMapping
-    public ResponseEntity<Bag> createOrUpdateBag(@RequestBody Bag bag) {
+    public ResponseEntity<Bag> saveBag(@RequestBody Bag bag) {
         return ResponseEntity.ok(bagService.saveBag(bag));
     }
 
     /**
      * 가방 요금 삭제
      */
-    @DeleteMapping("/{size}")
-    public ResponseEntity<Void> deleteBag(@PathVariable String size) {
-        bagService.deleteBag(size);
+    @DeleteMapping("/{bagId}")
+    public ResponseEntity<Void> deleteBag(@PathVariable Long bagId) {
+        bagService.deleteBag(bagId);
         return ResponseEntity.noContent().build();
     }
 }
