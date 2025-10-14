@@ -2,7 +2,6 @@ import axios from "axios";
 import { useDispatch } from "react-redux";
 import { setlogin } from "../slice/loginSlice";
 import { useNavigate } from "react-router-dom";
-import { API_SERVER_HOST } from "../api/naviApi.js";
 
 export const useLogin = () => {
   const dispatch = useDispatch();
@@ -26,7 +25,7 @@ export const useLogin = () => {
       // 상태 코드별 처리
       if (response.status === 200) {
         const { accessToken, refreshToken, username, roles, ip } = response.data;
-        
+
         // JWT 토큰 저장
         localStorage.setItem("accessToken", accessToken);
         localStorage.setItem("refreshToken", refreshToken);
