@@ -1,8 +1,11 @@
 package com.navi.user.controller;
 
 import com.navi.common.response.ApiResponse;
+import com.navi.image.domain.Image;
+import com.navi.image.service.ImageService;
 import com.navi.user.dto.users.UserRequestDTO;
 import com.navi.user.dto.users.UserResponseDTO;
+import com.navi.user.dto.users.UserSecurityDTO;
 import com.navi.user.repository.UserRepository;
 import com.navi.user.service.user.UserService;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +14,13 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -19,6 +28,7 @@ import java.util.Map;
 public class ApiUserController {
     private final UserService userService;
     private final UserRepository userRepository;
+    private final ImageService imageService;
 
     @PostMapping("/signup")
     public ResponseEntity<ApiResponse<UserResponseDTO>> signup(@RequestBody UserRequestDTO request) {
@@ -47,13 +57,18 @@ public class ApiUserController {
         return ApiResponse.success(updated);
     }
 
-
     @PostMapping("/profile")
-    public ResponseEntity<ApiResponse<String>> uploadProfile(
-            @RequestHeader("Authorization") String token,
-            @RequestParam("file") MultipartFile file) {
-        String url = userService.uploadProfile(token, file);
-        return ResponseEntity.ok(ApiResponse.success(url));
+    public ResponseEntity<Map<String, Object>> uploadProfile(
+            @RequestParam("file") MultipartFile file,
+            @AuthenticationPrincipal UserSecurityDTO user) throws IOException {
+
+        Image image = imageService.uploadUserProfile(file, user.getNo());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("url", image.getPath());
+        response.put("message", "프로필 업로드 성공");
+
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/profile")

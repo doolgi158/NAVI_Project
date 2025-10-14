@@ -137,6 +137,15 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
+    public void updateProfileImage(String username, String imageUrl) {
+        User user = userRepository.findById(username)
+                .orElseThrow(() -> new IllegalArgumentException("사용자 없음: " + username));
+
+        user.setProfile(imageUrl);
+        userRepository.save(user);
+    }
+
+    @Override
     public UserResponseDTO signup(UserRequestDTO dto) {
         // 아이디 중복검사
         if (userRepository.existsById(dto.getId())) {
