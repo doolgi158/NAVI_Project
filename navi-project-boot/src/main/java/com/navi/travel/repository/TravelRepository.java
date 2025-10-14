@@ -25,7 +25,7 @@ public interface TravelRepository extends JpaRepository<Travel, Long>, JpaSpecif
      */
     @Query(
             value = """
-        SELECT 
+        SELECT
             t.travel_id AS travel_id,
             t.title AS title,
             t.region1_name AS region1_name,
@@ -34,12 +34,12 @@ public interface TravelRepository extends JpaRepository<Travel, Long>, JpaSpecif
             COUNT(l.like_id) AS likes_count
         FROM navi_travel t
         LEFT JOIN navi_like l ON t.travel_id = l.travel_id
-        GROUP BY 
+        GROUP BY
             t.travel_id, t.title, t.region1_name, t.region2_name, t.thumbnail_path, t.CONTENTS_CD
         ORDER BY likes_count DESC, t.CONTENTS_CD ASC
         """,
             countQuery = """
-        SELECT COUNT(*) 
+        SELECT COUNT(*)
         FROM navi_travel
         """,
             nativeQuery = true

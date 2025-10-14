@@ -45,8 +45,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Page<User> findByPhoneContainingIgnoreCase(String phone, Pageable pageable);
 
     // 가입일 문자열 검색 (TO_CHAR)
-    @Query("SELECT u FROM User u WHERE FUNCTION('TO_CHAR', u.signUp, 'YYYY-MM-DD') LIKE %:signUp%")
-    Page<User> findBySignUpContaining(@Param("signUp") String signUp, Pageable pageable);
+//    @Query("SELECT u FROM User u WHERE FUNCTION('TO_CHAR', u.signUp, 'YYYY-MM-DD') LIKE CONCAT('%', :signUp, '%')")
+//    Page<User> findBySignUpContaining(@Param("signUp") String signUp, Pageable pageable);
 
     // 내/외국인 (String 타입)
     Page<User> findByLocal(String local, Pageable pageable);
