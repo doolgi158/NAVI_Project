@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import 'react-quill/dist/quill.snow.css'; // ✅ Quill 스타일 추가
 import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import api from '../../../common/api/naviApi.js';
