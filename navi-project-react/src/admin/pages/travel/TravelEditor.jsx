@@ -17,7 +17,7 @@ if (typeof Quill !== "undefined" && !Quill.imports["modules/imageResize"]) {
 //   Quill.register("modules/imageDrop", ImageDrop);
 // }
 
-const TravelEditor = ({ value = "", onChange }) => {
+export default function TravelEditor({ value = "", onChange }){
   const quillRef = useRef(null);
   const [height, setHeight] = useState(500);
   useEffect(() => {
@@ -202,5 +202,3 @@ const TravelEditor = ({ value = "", onChange }) => {
     </div>
   );
 };
-
-export default TravelEditor;

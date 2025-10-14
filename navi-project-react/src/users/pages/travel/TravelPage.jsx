@@ -10,7 +10,7 @@ import TravelCard from '../../../common/components/travel/TravelCard.jsx';
 import Pagination from '../../../common/components/travel/Pagination.jsx';
 import TravelControls from '../../../common/components/travel/TravelControls.jsx';
 
-const TravelPage = ({ user }) => {
+export default function TravelPage ({ user }){
   const navigate = useNavigate();
 
   /** ✅ Redux store에서 로그인 정보 가져오기 */
@@ -258,4 +258,3 @@ const TravelPage = ({ user }) => {
   );
 };
 
-export default TravelPage;

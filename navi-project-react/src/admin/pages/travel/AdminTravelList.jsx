@@ -9,7 +9,7 @@ import { Content, Header } from 'antd/es/layout/layout';
 const { Title, Link } = Typography;
 const { Option } = Select;
 
-const AdminTravelList = () => {
+export default function AdminTravelList() {
   const navigate = useNavigate();
   const [travelData, setTravelData] = useState({ content: [], totalPages: 0, totalElements: 0, number: 0 });
   const [page, setPage] = useState(0);
@@ -292,4 +292,3 @@ const AdminTravelList = () => {
   );
 };
 
-export default AdminTravelList;
