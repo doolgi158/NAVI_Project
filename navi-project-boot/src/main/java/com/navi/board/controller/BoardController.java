@@ -3,16 +3,11 @@ package com.navi.board.controller;
 import com.navi.board.domain.Board;
 import com.navi.board.service.BoardService;
 import com.navi.board.service.CommentService;
-import jakarta.persistence.Column;
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Controller
@@ -23,7 +18,20 @@ public class BoardController {
     private final BoardService boardService;
     private final CommentService commentService;
 
-    // /board 접속 시 자동으로 /board/list로 리다이렉트
+    // ========== 디버깅용 테스트 메서드 ==========
+    @GetMapping("/debug")
+    @ResponseBody
+    public String debug() {
+        try {
+            List<Board> boards = boardService.getAllBoards();
+            return "성공! 게시글 개수: " + boards.size();
+        } catch (Exception e) {
+            return "에러 발생: " + e.getMessage();
+        }
+    }
+
+    // ========== 기본 메서드들 ==========
+
     @GetMapping
     public String index() {
         return "redirect:/board/list";
@@ -31,28 +39,41 @@ public class BoardController {
 
     @GetMapping("/list")
     public String list(Model model) {
-        List<Board> boards = boardService.getAllBoards();
-        System.out.println("게시글 개수: " + boards.size());
-        model.addAttribute("boards", boards);
-        return "board/list";
+        try {
+            System.out.println("========== /board/list 호출됨 ==========");
+
+            List<Board> boards = boardService.getAllBoards();
+            System.out.println("게시글 개수: " + boards.size());
+
+            // 첫 번째 게시글 정보 출력 (있다면)
+            if (!boards.isEmpty()) {
+                Board firstBoard = boards.get(0);
+                System.out.println("첫 번째 게시글: " + firstBoard);
+            }
+
+            model.addAttribute("boards", boards);
+            System.out.println("========== 모델에 boards 추가 완료 ==========");
+
+            return "board/list";
+        } catch (Exception e) {
+            System.err.println("========== 에러 발생! ==========");
+            e.printStackTrace();
+            throw e;
+        }
     }
 
-    // 글쓰기 페이지 - http://localhost:8080/board/write
     @GetMapping("/write")
     public String boardWrite() {
-        return "board/write";  // write.html을 보여줌
+        return "board/write";
     }
 
-    // 게시글 등록 처리
     @PostMapping("/write")
     public String submitPost(@RequestParam(required = false) String title,
-                             @RequestParam(required = false) String content,
-                             HttpServletRequest request) {
+                             @RequestParam(required = false) String content) {
         System.out.println("=====================================");
         System.out.println("POST /board/write 요청 받음!");
-        System.out.println("제목 파라미터: " + title);
-        System.out.println("내용 파라미터: " + content);
-        System.out.println("모든 파라미터: " + request.getParameterMap().keySet());
+        System.out.println("제목: " + title);
+        System.out.println("내용: " + content);
         System.out.println("=====================================");
 
         if (title == null || title.trim().isEmpty()) {
@@ -77,16 +98,26 @@ public class BoardController {
         return "redirect:/board/list";
     }
 
-    // 게시글 상세 페이지 (댓글 포함)
     @GetMapping("/{id}")
     public String detail(@PathVariable Integer id, Model model) {
-        model.addAttribute("board", boardService.getBoard(id));
-        model.addAttribute("comments", commentService.getCommentsByBoardNo(id));
-        model.addAttribute("commentCount", commentService.getCommentCount(id));
-        return "board/detail";
+        try {
+            System.out.println("========== 게시글 상세 조회: " + id + " ==========");
+
+            Board board = boardService.getBoard(id);
+            System.out.println("게시글 정보: " + board);
+
+            model.addAttribute("board", board);
+            model.addAttribute("comments", commentService.getCommentsByBoardNo(id));
+            model.addAttribute("commentCount", commentService.getCommentCount(id));
+
+            return "board/detail";
+        } catch (Exception e) {
+            System.err.println("========== 에러 발생! ==========");
+            e.printStackTrace();
+            throw e;
+        }
     }
 
-    // 댓글 작성
     @PostMapping("/{id}/comment")
     public String addComment(@PathVariable Integer id,
                              @RequestParam String comment) {
@@ -94,7 +125,6 @@ public class BoardController {
         return "redirect:/board/" + id;
     }
 
-    // 댓글 삭제
     @PostMapping("/comment/{commentId}/delete")
     public String deleteComment(@PathVariable Integer commentId,
                                 @RequestParam Integer boardId) {
@@ -102,7 +132,6 @@ public class BoardController {
         return "redirect:/board/" + boardId;
     }
 
-    // 신고 기능
     @PostMapping("/{id}/report")
     @ResponseBody
     public String reportBoard(@PathVariable Integer id) {
@@ -110,19 +139,14 @@ public class BoardController {
             boardService.reportBoard(id);
             return "success";
         } catch (Exception e) {
+            e.printStackTrace();
             return "error";
         }
     }
-    //테스트
+
     @GetMapping("/test")
     @ResponseBody
     public String test() {
         return "서버 작동 중!";
     }
 }
-
-
-
-
-
-
