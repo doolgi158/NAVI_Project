@@ -25,8 +25,7 @@ public class Image {
     private String targetId;    // ACC, ROM, ...
 
     @Column(name = "path", length = 255, nullable = false)
-    //private String path;
-    private String profileUrl;
+    private String path;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_no", nullable = false)

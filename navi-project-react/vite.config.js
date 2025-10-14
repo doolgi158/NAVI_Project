@@ -1,18 +1,25 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import path from "path";
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"), // ✅ '@/...' → 'src/...'
+    },
+  },
+  css: {
+    // ✅ PostCSS 설정 파일을 명시적으로 연결
+    postcss: path.resolve(__dirname, "./postcss.config.js"),
+  },
   server: {
-    port: 5173, // React 개발 서버 포트
+    port: 5173,
     proxy: {
-      // ✅ API 요청 경로를 Spring Boot 서버로 전달합니다.
-      '/api': { 
-        target: 'http://localhost:8080', // Spring Boot 기본 포트
+      "/api": {
+        target: "http://localhost:8080",
         changeOrigin: true,
-        //rewrite: (path) => path.replace(/^\/api/, '') 
       },
-    }
-  }
+    },
+  },
 });

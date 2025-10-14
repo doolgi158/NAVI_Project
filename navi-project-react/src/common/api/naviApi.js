@@ -5,7 +5,6 @@ export const API_SERVER_HOST = "http://localhost:8080";
 
 // ✅ 공통 axios 인스턴스
 const api = axios.create({
-  //baseURL: "BASE_PREFIX",
   baseURL: "/api",
 });
 
@@ -14,7 +13,6 @@ api.interceptors.request.use((config) => {
   const token = localStorage.getItem("accessToken");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
-  } else {
   }
   return config;
 });

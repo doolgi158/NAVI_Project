@@ -6,6 +6,7 @@ const Redirect = lazy(() => import("../../users/pages/user/RedirectPage"));
 const FindID = lazy(() => import("../../users/pages/user/FindUserIdPage"));
 const FindPw = lazy(() => import("../../users/pages/user/FindUserPwPage"));
 const Mypage = lazy(() => import("../../users/pages/user/UserMyPage"));
+const Detail = lazy(() => import("../../users/pages/user/UserDetailPage"));
 
 const UserRouter = () => {
   return [
@@ -46,6 +47,14 @@ const UserRouter = () => {
         element: (
             <Suspense fallback={Loading}>
                 <Mypage />
+            </Suspense>
+        )
+    },
+    {
+        path: "detail",
+        element: (
+            <Suspense fallback={Loading}>
+                <Detail />
             </Suspense>
         )
     }

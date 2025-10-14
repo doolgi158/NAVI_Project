@@ -1,27 +1,27 @@
-//package com.navi.travel.service.internal;
-//
-//import com.navi.travel.domain.Travel;
-//import com.navi.travel.dto.TravelApiResponseBody;
-//import com.navi.travel.repository.TravelRepository;
-//import lombok.extern.slf4j.Slf4j;
-//import org.springframework.beans.factory.annotation.Value;
-//import org.springframework.http.*;
-//import org.springframework.stereotype.Service;
-//import org.springframework.transaction.annotation.Transactional;
-//import org.springframework.web.client.HttpStatusCodeException;
-//import org.springframework.web.client.RestTemplate;
-//import org.springframework.web.util.UriComponentsBuilder;
-//
-//import java.net.URI;
-//import java.nio.charset.StandardCharsets;
-//import java.util.List;
-//import java.util.Optional;
-//
-//// (API 동기화)
-//@Slf4j
-//@Service
-//@Transactional
-////public class TravelSyncServiceImpl implements TravelSyncService{
+package com.navi.travel.service.internal;
+
+import com.navi.travel.domain.Travel;
+import com.navi.travel.dto.TravelApiResponseBody;
+import com.navi.travel.repository.TravelRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Optional;
+
+// (API 동기화)
+@Slf4j
+@Service
+@Transactional
+public class TravelSyncServiceImpl implements TravelSyncService{
 //    private final TravelRepository travelRepository;
 //    private final RestTemplate restTemplate;
 //
@@ -139,4 +139,4 @@
 //            return null;
 //        }
 //    }
-//}
+}

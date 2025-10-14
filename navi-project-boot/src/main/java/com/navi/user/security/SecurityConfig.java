@@ -12,14 +12,17 @@ import com.navi.user.security.handler.ApiSuccessHandler;
 import com.navi.user.security.util.JWTUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -52,15 +55,12 @@ public class SecurityConfig {
         // 요청별 권한 설정 (anyRequest는 반드시 마지막!)
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers( "/api/users/login", "/api/users/logout", "/api/auth/oauth/**",
-                        "/api/users/find-id", "/api/users/find-pw", "/api/users/signup", "/api/users/check-id",
-                        "/api/users/send-email", "/api/users/verify-code", "/api/users/find-password", "/api/seats/**",
-                        "/travel/**", "/api/flight/**", "/api/delivery/**", "/api/accommodations/**", "/api/townships/**",
-                        "/api/rooms/**", "/api/reservation/**", "/api/payment/*"
-                ).permitAll()
-                .requestMatchers("/api/adm/**").hasAuthority(UserRole.ADMIN.name())
-                .requestMatchers("/api/auth/me").hasAuthority(UserRole.USER.name())
-                .anyRequest().authenticated()
+                .requestMatchers("api/adm/**", "api/admin/**").hasRole(UserRole.ADMIN.name())
+                .requestMatchers("/api/users/**", "/api/seats/**", "/travel/**", "/api/flight/**", "/api/delivery/**",
+                "/api/auth/**", "/api/accommodations/**", "/api/townships/**", "/api/rooms/**", "/api/reservation/**")
+                        .permitAll()
+//                .hasAnyRole(UserRole.USER.name(), UserRole.ADMIN.name())
+                .anyRequest().permitAll()
         );
 
         // 폼 로그인
@@ -82,7 +82,7 @@ public class SecurityConfig {
         );
 
         // JWT 필터 추가
-        http.addFilterAfter(new JWTCheckFilter(jwtUtil), LogoutFilter.class);
+        http.addFilterBefore(new JWTCheckFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
         http.addFilterAfter(new TryLoginFilter(tryLoginRepository), JWTCheckFilter.class);
 
         return http.build();
@@ -97,7 +97,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of("http://localhost:5173", "http://127.0.0.1:5173"));
+        config.setAllowedOrigins(List.of("http://localhost:5173"));
         config.setAllowedOriginPatterns(List.of("http://localhost:5173"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH"));
         config.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));

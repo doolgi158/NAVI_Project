@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>글쓰기</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .write-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #333;
+        }
+
+        .write-title {
+            padding: 8px 20px;
+            background-color: white;
+            border: 2px solid #007bff;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .btn-list {
+            padding: 8px 20px;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-list:hover {
+            background-color: #f8f8f8;
+        }
+
+        .title-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .write-content {
+            border: 1px solid #ddd;
+            min-height: 400px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background-color: #fafafa;
+        }
+
+        .content-input {
+            width: 100%;
+            min-height: 360px;
+            border: none;
+            background-color: transparent;
+            font-size: 14px;
+            resize: vertical;
+            font-family: 'Malgun Gothic', sans-serif;
+        }
+
+        .content-input:focus {
+            outline: none;
+        }
+
+        .write-footer {
+            text-align: right;
+        }
+
+        .btn-submit {
+            padding: 10px 30px;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-submit:hover {
+            background-color: #f8f8f8;
+        }
+
+
+    </style>
+</head>
+<body>
+<!--숨겨진 파일 input-->
+<input type="file" id="file-input" name="file" multiple style="display: none;">
+<div class="container">
+    <div class="write-header">
+        <div class="write-title">일반 게시판</div>
+        <button class="btn-list" onclick="goToList()">목록보기</button>
+    </div>
+
+    <form id="writeForm" method="POST" th:action="@{/board/write}">
+        <!-- CSRF 토큰 (Spring Security 사용 시 필요) -->
+        <input type="hidden" th:name="${_csrf?.parameterName}" th:value="${_csrf?.token}" th:if="${_csrf != null}" />
+        <input type="text" class="title-input" name="title" id="postTitle" placeholder="제목을 입력하세요" required>
+            <div class="write-content" id="drop-zone">
+                <!-- textarea 대신 contenteditable div 사용 -->
+                <div class="content-input"
+                     id="postContent"
+                     contenteditable="true"
+                     data-placeholder="내용을 입력하세요
+                     이미지를 여기에 드래그하여 첨부할 수 있습니다">
+                </div>
+
+                <!-- 실제 폼 전송용 hidden input -->
+                <input type="hidden" name="content" id="hidden-content">
+
+                <div class="drop-overlay" id="drop-overlay">
+                    <div class="drop-message">
+                        📁 이미지를 놓으세요
+                    </div>
+                </div>
+            </div>
+
+        <div class="write-footer">
+        <!-- 파일첨부버튼 -->
+            <div class="file-upload-section">
+                <button type="button" class="btn-file-attach" onclick="document.getElementById('file-input').click()">
+                    파일 첨부
+                </button>
+                <div id="file-list" class="file-list">
+
+                    <button type="submit" class="btn-submit">등록</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    function goToList() {
+        window.location.href = '/board';
+    }
+</script>
+</body>
+</html>

@@ -105,7 +105,7 @@ const FlightDetailPage = () => {
         return;
       }
 
-      // ✅ 편도 → 예약정보 페이지
+      // 편도 → 예약정보 페이지
       if (!arrDate) {
         navigate(`/flight/rsv/${selectedOutbound.flightNo}`, {
           state: {
@@ -114,7 +114,7 @@ const FlightDetailPage = () => {
           },
         });
       }
-      // ✅ 왕복 → 귀국편 단계로 이동
+      // 왕복 → 귀국편 단계로 이동
       else {
         setStep("inbound");
       }
@@ -178,7 +178,7 @@ const FlightDetailPage = () => {
       <div className="max-w-4xl mx-auto mt-10 bg-white p-8 shadow-lg rounded-xl">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold text-blue-800">
-            {step === "outbound" ? "출발편 선택" : "귀국편 선택"}
+            {step === "outbound" ? "출발편 선택" : "복귀편 선택"}
           </h2>
 
           <select

@@ -11,9 +11,11 @@ function App() {
   }
 
   return (
-    <Provider store={store}>
-      <RouterProvider router={root} />
-    </Provider>
+    <>
+      <Provider store={store}>
+        <RouterProvider router={root} />
+      </Provider>
+    </>
   );
 }
 

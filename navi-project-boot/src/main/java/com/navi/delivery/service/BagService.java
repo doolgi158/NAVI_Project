@@ -4,17 +4,17 @@ import com.navi.delivery.domain.Bag;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * 가방 요금 관리 서비스 인터페이스
- * - 요금 조회, 등록, 삭제 기능 정의
- */
 public interface BagService {
 
-    List<Bag> getAllBags();         // 전체 가방 요금 조회
+    // 모든 가방 요금 조회
+    List<Bag> getAllBags();
 
-    Optional<Bag> getBagBySize(String size);   // 가방 크기로 단일 조회
+    // 특정 가방 조회
+    Optional<Bag> getBag(Long bagId);
 
-    Bag saveBag(Bag bag);           // 가방 요금 등록 또는 수정
+    // 가방 요금 추가/수정
+    Bag saveBag(Bag bag);
 
-    void deleteBag(String size);    // 가방 요금 삭제
+    // 가방 삭제
+    void deleteBag(Long bagId);
 }

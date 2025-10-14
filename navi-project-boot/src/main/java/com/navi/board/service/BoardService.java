@@ -9,20 +9,30 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class BoardService { //비즈니스 로직
+public class BoardService {
 
     private final BoardRepository boardRepository;
 
-    // 게시글 목록 조회
     public List<Board> getAllBoards() {
         return boardRepository.findAll();
     }
-    // 게시글 작성
-    public Board createBoard(Board board) {
-        return boardRepository.save(board);
+
+    public void createBoard(String title, String content) {
+        Board board = new Board();
+        board.setBoard_Title(title);
+        board.setBoard_content(content);
+        board.setBoard_good(0);
+        board.setReport_count(0);
+        board.setUser_no(1);
+
+        System.out.println("저장 전 Board: " + board);
+        boardRepository.save(board);
+        System.out.println("저장 완료!");
     }
-    // 게시글 삭제
-    public void deleteBoard(Long id) {
-        boardRepository.deleteById(id);
+
+    public Board getBoard(Integer id) {
+        return boardRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
     }
+
 }
