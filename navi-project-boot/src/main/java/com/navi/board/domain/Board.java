@@ -1,10 +1,7 @@
 package com.navi.board.domain;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -16,39 +13,44 @@ import java.time.LocalDateTime;
 @Setter
 @ToString
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @SequenceGenerator(
         name = "boot_board_generator",
         sequenceName = "boot_board_seq",
         initialValue = 1,
-        allocationSize = 1) //게시글번호를 시퀀스로 생성
+        allocationSize = 1
+)
 public class Board {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "boot_board_generator")
     @Column(name = "board_no")
-    private Integer board_no;   //게시글 번호
+    private Integer boardNo;   // 게시글 번호 (카멜케이스로 변경)
 
     @Column(name = "board_title", nullable = false, length = 30)
-    private String board_title; //게시글 제목
+    private String boardTitle; // 게시글 제목
 
     @Column(name = "board_good", nullable = false)
-    private Integer board_good = 0; //좋아요
+    @Builder.Default
+    private Integer boardGood = 0; // 좋아요
 
     @Column(name = "report_count")
-    private Integer report_count = 0;  //신고
+    @Builder.Default
+    private Integer reportCount = 0;  // 신고
 
     @Lob
     @Column(name = "board_content", nullable = false)
-    private String board_content;   //게시글내용
+    private String boardContent;   // 게시글 내용
 
-    @Column(nullable = false)
-    private int user_no;    //사용자번호
+    @Column(name = "user_no", nullable = false)
+    private Integer userNo;    // 사용자 번호
 
     @CreationTimestamp
     @Column(name = "create_date", nullable = false, updatable = false)
-    private LocalDateTime create_date;  //등록
+    private LocalDateTime createDate;  // 등록일 (자동 설정됨)
 
     @UpdateTimestamp
     @Column(name = "update_date")
-    private LocalDateTime update_date;  //수정
+    private LocalDateTime updateDate;  // 수정일 (자동 설정됨)
 }

@@ -10,11 +10,15 @@ import java.util.List;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Integer> {
 
+    // 메서드명 규칙으로 자동 생성
+    List<Comment> findByBoardNoOrderByCreateDateDesc(Integer boardNo);
+
+    int countByBoardNo(Integer boardNo);
+
     // 게시글 번호로 댓글 조회
-    @Query("SELECT c FROM Comment c WHERE c.board_no = :boardNo ORDER BY c.createdAt DESC")
+    @Query("SELECT c FROM Comment c WHERE c.boardNo = :boardNo ORDER BY c.createDate DESC")
     List<Comment> findByBoardNo(@Param("boardNo") Integer boardNo);
 
     // 게시글의 댓글 개수
-    @Query("SELECT COUNT(c) FROM Comment c WHERE c.board_no = :boardNo")
-    int countByBoardNo(@Param("boardNo") Integer boardNo);
+
 }

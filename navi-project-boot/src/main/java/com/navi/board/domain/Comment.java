@@ -1,44 +1,45 @@
 package com.navi.board.domain;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-//import org.hibernate.annotations.CreationTimestamp;
-//import org.hibernate.annotations.UpdateTimestamp;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "comment")
+@Table(name = "board_comment")
 @Getter
 @Setter
 @ToString
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Comment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "comment_seq")
     @SequenceGenerator(name = "comment_seq", sequenceName = "NAVI_COMMENT_SEQ", allocationSize = 1)
-    @Column(name = "COMMENT_NO")
-    private Integer commentNo; //댓글번호
+    @Column(name = "comment_no")
+    private Integer commentNo; // 댓글 번호
 
-    @Column(name = "COMMENT_CONTENT", nullable = false, length = 100)
-    private String commentContent; //댓글내용
+    @Column(name = "comment_content", nullable = false, length = 100)
+    private String commentContent; // 댓글 내용
 
-    @Column(name = "BOARD_NO", nullable = false)
+    @Column(name = "board_no", nullable = false)
     private Integer boardNo;  // 게시글 번호
 
-    @Column(name = "USER_NO", nullable = false)
+    @Column(name = "user_no", nullable = false)
     private Integer userNo;  // 작성자 번호
 
-    @Column(name = "CREATE_DATE", nullable = false, updatable = false)
-    private LocalDateTime createDate;   //등록
+    @CreationTimestamp
+    @Column(name = "create_date", nullable = false, updatable = false)
+    private LocalDateTime createDate;   // 등록일 (자동 설정됨)
 
-    @Column(name = "UPDATE_DATE")
-    private LocalDateTime updateDate;   //수정
+    @UpdateTimestamp
+    @Column(name = "update_date")
+    private LocalDateTime updateDate;   // 수정일 (자동 설정됨)
 
-    @Column(name = "PARENT_COMMENT")
-    private Integer parentComment;  // 대댓글용
+    @Column(name = "parent_comment")
+    private Integer parentComment;  // 대댓글용 (부모 댓글 번호)
 }
