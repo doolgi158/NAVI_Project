@@ -18,7 +18,7 @@ import { useKakaoMap } from '../../../common/hooks/useKakaoMap.jsx';
 
 const { Title, Text, Paragraph } = Typography;
 
-const TravelDetailPage = () => {
+export default function TravelDetailPage(){
   const { travelId } = useParams();
   const reduxUser = useSelector((state) => state.login);
   const userId = reduxUser?.username || null;
@@ -293,7 +293,7 @@ useEffect(() => {
           {data.description && (
             <div
               className="travel-description"
-              style={{ marginTop: 30, lineHeight: 1.8, fontSize: 20,lineHeight:2}}
+              style={{ marginTop: 30, lineHeight: 1.8, fontSize: 20}}
               dangerouslySetInnerHTML={{ __html: data.description }}
             />
           )}
@@ -330,4 +330,3 @@ useEffect(() => {
   );
 };
 
-export default TravelDetailPage;

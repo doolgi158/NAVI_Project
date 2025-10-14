@@ -9,6 +9,10 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"), // ✅ '@/...' → 'src/...'
     },
   },
+  css: {
+    // ✅ PostCSS 설정 파일을 명시적으로 연결
+    postcss: path.resolve(__dirname, "./postcss.config.js"),
+  },
   server: {
     port: 5173,
     proxy: {

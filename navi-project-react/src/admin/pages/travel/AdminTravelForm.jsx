@@ -77,7 +77,7 @@ function trimEupMyeonDong(name) {
   return m ? m[1] : name;
 }
 
-const AdminTravelForm = () => {
+export default function AdminTravelForm(){
   const { travelId } = useParams();
   const navigate = useNavigate();
   const [formData, setFormData] = useState(initialForm);
@@ -527,5 +527,3 @@ const AdminTravelForm = () => {
     </Layout>
   );
 };
-
-export default AdminTravelForm;
