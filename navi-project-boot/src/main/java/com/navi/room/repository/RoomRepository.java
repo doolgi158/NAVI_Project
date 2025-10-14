@@ -10,15 +10,15 @@ import java.util.Optional;
 
 @Repository
 public interface RoomRepository extends JpaRepository<Room, Long> {
-    /** === 숙소별 객실 전체 조회 === */
+    /* 공통 기능 */
+    // 1. 숙소별 객실 전체 조회
     List<Room> findByAcc(Acc acc);
-
-    /** === 숙소ID(accId)로 객실 목록 조회 === */
+    // 2. 숙소 ID(accId)로 객실 목록 조회
     List<Room> findByAcc_AccId(String accId);
 
-    /** === contentId 기준으로 객실 목록 조회 === */
+    /* 관리자 기능 */
+    // 1. contentId 기준으로 객실 목록 조회
     List<Room> findAllByContentId(Long contentId);
-
-    /** ✅ 객실ID(roomId)로 단일 조회 (AccRsvServiceImpl에서 사용) */
+    // 2. 객실 ID(roomId)로 단일 조회 (AccRsvServiceImpl 에서 사용)
     Optional<Room> findByRoomId(String roomId);
 }

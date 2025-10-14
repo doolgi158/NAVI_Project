@@ -10,10 +10,10 @@ import java.util.List;
 
 public interface TravelService {
     // ---------------------- API 동기화 ----------------------
-    void syncTravelData();
-
-    // API 데이터 저장 및 동기화
-    int saveApiData();
+//    void syncTravelData();
+//
+//    // API 데이터 저장 및 동기화
+//    int saveApiData();
 
     // 여행지 리스트 조회 (필터링, 검색, 페이징 포함)
     Page<TravelListResponseDTO> getTravelList(Pageable pageable, List<String> region2Names, String category,String search, boolean publicOnly);

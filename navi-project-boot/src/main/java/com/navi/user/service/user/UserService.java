@@ -8,12 +8,12 @@ import java.util.List;
 
 public interface UserService {
     // DB에서 직접 조회
-//    UserResponseDTO get(Long no);
+    UserResponseDTO get(Long no);
     UserResponseDTO signup(UserRequestDTO dto);
     String findUserId(String name, String email);
 
     // 리액트에서 JWT토큰으로 검색
-//    UserResponseDTO getMyInfo(String token);
+    UserResponseDTO getMyInfo(String token);
     String uploadProfile(String token, MultipartFile file);
     void deleteProfile(String token);
     void changePassword(String token, String oldPw, String newPw);
