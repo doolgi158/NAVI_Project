@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Typography,
   Divider,
@@ -13,49 +13,71 @@ import {
 } from "antd";
 import MainLayout from "../../layout/MainLayout";
 import axios from "axios";
+import { useSelector } from "react-redux"; // ✅ Redux 불러오기
 
 const { Title, Text, Paragraph } = Typography;
 
 const AccDetailPage = () => {
-  const { accId } = useParams();
   const navigate = useNavigate();
+  const { accId } = useParams();
 
-  const [accData, setAccData] = useState(null);
+  /* ✅ Redux에서 선택된 숙소 가져오기 */
+  const selectedAcc = useSelector((state) => state.acc.selectedAcc);
+
+  const [accData, setAccData] = useState(selectedAcc || null); // ✅ Redux 값이 있으면 바로 사용
   const [rooms, setRooms] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!selectedAcc); // Redux에 없을 때만 로딩 표시
 
   useEffect(() => {
+    // ✅ Redux에 데이터가 있으면 API 호출 생략
+    if (selectedAcc) {
+      setAccData(selectedAcc);
+      return;
+    }
+
+    // ✅ 새로고침 등으로 Redux가 초기화된 경우, API로 다시 불러오기
     const fetchData = async () => {
       try {
+        setLoading(true);
         const accRes = await axios.get(`/api/accommodations/${accId}`);
-        const roomRes = await axios.get(`/api/rooms/${accId}`);
         setAccData(accRes.data);
-        setRooms(roomRes.data);
       } catch (err) {
-        console.error("숙소 상세/객실 조회 실패:", err);
+        console.error("숙소 상세 조회 실패:", err);
         message.error("숙소 정보를 불러오지 못했습니다.");
       } finally {
         setLoading(false);
       }
     };
     fetchData();
+  }, [accId, selectedAcc]);
+
+  /* ✅ 객실 정보 로드 */
+  useEffect(() => {
+    if (!accId) return;
+    const fetchRooms = async () => {
+      try {
+        const roomRes = await axios.get(`/api/rooms/${accId}`);
+        setRooms(roomRes.data);
+      } catch (err) {
+        console.error("객실 조회 실패:", err);
+      }
+    };
+    fetchRooms();
   }, [accId]);
 
+  /* ✅ 예약 버튼 클릭 시 */
   const handleReserve = async (room) => {
     try {
-      // ✅ 예약 마스터 생성 (백엔드 호출)
       const res = await axios.post(`/api/reservation/pre`, {
-        userNo: 1,                 // 임시 회원번호 (로그인 연동 시 수정 예정)
-        rsvType: "ACC",            // 숙소 예약
-        targetId: room.roomId,     // 객실 ID
+        userNo: 1, // 임시
+        rsvType: "ACC",
+        targetId: room.roomId,
         totalAmount: room.weekdayFee || 100000,
-        paymentMethod: "KAKAOPAY", // 임시 결제수단
+        paymentMethod: "KAKAOPAY",
       });
 
       const reserveId = res.data.reserveId;
-      console.log("✅ 예약 마스터 생성 완료:", reserveId);
 
-      // ✅ 예약 정보 입력 페이지로 이동 (예약ID 함께 전달)
       navigate(`/accommodations/${accId}/${room.roomId}/reservation`, {
         state: {
           accName: accData?.title || accData?.name,
@@ -66,7 +88,7 @@ const AccDetailPage = () => {
             weekdayFee: room.weekdayFee,
             weekendFee: room.weekendFee,
           },
-          reserveId, // ✅ 예약ID 전달
+          reserveId,
         },
       });
     } catch (err) {
@@ -75,7 +97,7 @@ const AccDetailPage = () => {
     }
   };
 
-
+  /* ✅ 로딩 또는 데이터 없을 때 처리 */
   if (loading) {
     return (
       <MainLayout>
@@ -100,9 +122,7 @@ const AccDetailPage = () => {
     <MainLayout>
       <div className="min-h-screen bg-[#fffde8] flex justify-center pt-8 pb-10 px-6">
         <div className="w-full max-w-6xl">
-          {/* ✅ 흰색 컨테이너 */}
           <div className="bg-white shadow-md rounded-2xl p-6">
-            
             {/* 숙소 이름 + 주소 */}
             <div className="mb-5">
               <Title
@@ -197,7 +217,7 @@ const AccDetailPage = () => {
               </Col>
             </Row>
 
-            {/* 객실 정보 (리스트형) */}
+            {/* 객실 정보 */}
             <Divider className="my-6" />
             <Title level={5} className="text-gray-800 mb-4 font-semibold">
               객실 정보
@@ -210,7 +230,6 @@ const AccDetailPage = () => {
                     key={room.roomId}
                     className="flex flex-col md:flex-row border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200"
                   >
-                    {/* 썸네일 */}
                     {room.thumbnailImage ? (
                       <img
                         src={room.thumbnailImage}
@@ -223,7 +242,6 @@ const AccDetailPage = () => {
                       </div>
                     )}
 
-                    {/* 내용 */}
                     <div className="flex flex-col justify-between p-4 flex-1 bg-white">
                       <div>
                         <Title level={5} className="text-gray-900 mb-1">

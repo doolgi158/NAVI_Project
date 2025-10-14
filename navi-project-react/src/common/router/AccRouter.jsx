@@ -1,4 +1,4 @@
-// src/routes/AccRouter.jsx
+// // src/routes/AccRouter.jsx
 import { Suspense, lazy } from "react";
 
 const Loading = <div>Loading....</div>;
@@ -20,6 +20,7 @@ const AccRouter = () => {
     },
     {
       path: ":accId",
+      // path: "/detail",
       element: (
         <Suspense fallback={Loading}>
           <AccDetail />
@@ -28,6 +29,7 @@ const AccRouter = () => {
     },
     {
       path: ":accId/:roomId/reservation",
+      // path: "/detail/reservation",
       element: (
         <Suspense fallback={Loading}>
           <AccReserve />
@@ -49,7 +51,7 @@ const AccRouter = () => {
           <AccResult />
         </Suspense>
       ),
-    }
+    },
   ];
 };
 
