@@ -2,13 +2,17 @@ package com.navi.board.controller;
 
 import com.navi.board.domain.Board;
 import com.navi.board.service.BoardService;
+import com.navi.board.service.CommentService;
+import jakarta.persistence.Column;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Controller
@@ -17,6 +21,7 @@ import java.util.List;
 public class BoardController {
 
     private final BoardService boardService;
+    private final CommentService commentService;
 
     // /board 접속 시 자동으로 /board/list로 리다이렉트
     @GetMapping
@@ -72,14 +77,48 @@ public class BoardController {
         return "redirect:/board/list";
     }
 
-    // 게시글 상세 페이지 - 맨 마지막에 배치
+    // 게시글 상세 페이지 (댓글 포함)
     @GetMapping("/{id}")
     public String detail(@PathVariable Integer id, Model model) {
         model.addAttribute("board", boardService.getBoard(id));
+        model.addAttribute("comments", commentService.getCommentsByBoardNo(id));
+        model.addAttribute("commentCount", commentService.getCommentCount(id));
         return "board/detail";
     }
 
+    // 댓글 작성
+    @PostMapping("/{id}/comment")
+    public String addComment(@PathVariable Integer id,
+                             @RequestParam String comment) {
+        commentService.createComment(id, comment);
+        return "redirect:/board/" + id;
+    }
 
+    // 댓글 삭제
+    @PostMapping("/comment/{commentId}/delete")
+    public String deleteComment(@PathVariable Integer commentId,
+                                @RequestParam Integer boardId) {
+        commentService.deleteComment(commentId);
+        return "redirect:/board/" + boardId;
+    }
+
+    // 신고 기능
+    @PostMapping("/{id}/report")
+    @ResponseBody
+    public String reportBoard(@PathVariable Integer id) {
+        try {
+            boardService.reportBoard(id);
+            return "success";
+        } catch (Exception e) {
+            return "error";
+        }
+    }
+    //테스트
+    @GetMapping("/test")
+    @ResponseBody
+    public String test() {
+        return "서버 작동 중!";
+    }
 }
 
 

@@ -155,11 +155,18 @@
         <div th:if="${boards != null and !boards.isEmpty()}">
             <div class="board-item" th:each="board : ${boards}"
                  th:onclick="|viewPost(${board.board_no})|">
-                <span th:text="${board.board_Title}">게시글 제목</span>
+                <span th:text="${board.board_Title}"></span>
+            </div>
+        <!--등록일-->
+            <div class="board-meta">
+                <span th:if="${board.create_date != null}"
+                      th:text="${#temporals.format(board.create_date, 'yyyy-MM-dd')}"></span>
+                <span>좋아요: <span th:text="${board.board_good}">0</span></span>
             </div>
         </div>
 
-        <!-- 게시글이 없을 때 -->
+
+        <!-- //게시글이 없을 때 -->
         <div th:if="${boards == null or boards.isEmpty()}" class="empty-message">
             등록된 게시글이 없습니다.
         </div>
@@ -178,12 +185,12 @@
 <script>
     let currentPage = 1;
 
-    // 글쓰기 페이지로 이동
+<!--     //글쓰기 페이지로 이동-->
     function goToWrite() {
         window.location.href = '/board/write';
     }
 
-    // 검색 기능
+<!--     //검색 기능-->
     function search() {
         const keyword = document.getElementById('searchInput').value.trim();
         if (keyword === '') {
@@ -191,7 +198,7 @@
             return;
         }
         alert('검색어: ' + keyword);
-        // TODO: 실제 검색 기능 구현
+<!--        // TODO: 실제 검색 기능 구현-->
     }
 
     function viewPost(postId) {
@@ -202,14 +209,14 @@
         if (currentPage > 1) {
             currentPage--;
             document.getElementById('pageInput').value = currentPage;
-            // TODO: 실제 페이지 이동 구현
+<!--            // TODO: 실제 페이지 이동 구현-->
         }
     }
 
     function nextPage() {
         currentPage++;
         document.getElementById('pageInput').value = currentPage;
-        // TODO: 실제 페이지 이동 구현
+<!--        // TODO: 실제 페이지 이동 구현-->
     }
 </script>
 </body>

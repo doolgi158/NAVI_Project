@@ -5,8 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+//import org.hibernate.annotations.CreationTimestamp;
+//import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -19,27 +19,26 @@ import java.time.LocalDateTime;
 public class Comment {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "comment_no")
-    private Integer comment_no; //댓글번호
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "comment_seq")
+    @SequenceGenerator(name = "comment_seq", sequenceName = "NAVI_COMMENT_SEQ", allocationSize = 1)
+    @Column(name = "COMMENT_NO")
+    private Integer commentNo; //댓글번호
 
-    @Column(name = "comment_content", nullable = false, length = 100)
-    private String comment_content; //댓글내용
+    @Column(name = "COMMENT_CONTENT", nullable = false, length = 100)
+    private String commentContent; //댓글내용
 
-    @Column(name = "board_no", nullable = false)
-    private Integer board_no;  // 게시글 번호
+    @Column(name = "BOARD_NO", nullable = false)
+    private Integer boardNo;  // 게시글 번호
 
-    @Column(name = "user_no", nullable = false)
-    private Integer user_no;  // 작성자 번호
+    @Column(name = "USER_NO", nullable = false)
+    private Integer userNo;  // 작성자 번호
 
-    @CreationTimestamp
-    @Column(name = "create_date", nullable = false, updatable = false)
-    private LocalDateTime create_date;
+    @Column(name = "CREATE_DATE", nullable = false, updatable = false)
+    private LocalDateTime createDate;   //등록
 
-    @UpdateTimestamp
-    @Column(name = "update_date")
-    private LocalDateTime update_date;
+    @Column(name = "UPDATE_DATE")
+    private LocalDateTime updateDate;   //수정
 
-    @Column(name = "parent_comment")
-    private Integer parent_comment;  // 대댓글용
+    @Column(name = "PARENT_COMMENT")
+    private Integer parentComment;  // 대댓글용
 }
