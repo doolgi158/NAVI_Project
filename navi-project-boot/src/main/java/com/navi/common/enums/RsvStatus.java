@@ -1,4 +1,4 @@
-package com.navi.reservation.domain.enums;
+package com.navi.common.enums;
 
 public enum RsvStatus {
     PENDING,            // 결제 대기
@@ -7,5 +7,5 @@ public enum RsvStatus {
     CANCELLED,          // 결제 취소
     TIMEOUT,            // Todo: 결제 시간초과
     FAILED,             // 결제 실패
-    REFUNDED;             // 결제 환불
+    REFUNDED;           // 결제 환불
 }
