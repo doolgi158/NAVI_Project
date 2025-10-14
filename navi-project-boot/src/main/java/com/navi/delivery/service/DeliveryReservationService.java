@@ -1,24 +1,20 @@
 package com.navi.delivery.service;
 
+import com.navi.delivery.dto.DeliveryReservationDTO;
 import com.navi.delivery.domain.DeliveryReservation;
 import java.util.List;
-import java.util.Optional;
 
-/**
- * 짐배송 예약 상세 관리 서비스 인터페이스
- * - 예약 등록, 조회, 삭제 기능 정의
- */
 public interface DeliveryReservationService {
 
-    // 전체 예약 조회
-    List<DeliveryReservation> getAllReservations();
+    /** 배송 예약 등록 */
+    DeliveryReservation createReservation(DeliveryReservationDTO dto);
 
-    // 단일 예약 조회
-    Optional<DeliveryReservation> getReservation(Long id);
+    /** 특정 사용자 예약 목록 조회 */
+    List<DeliveryReservation> getReservationsByUser(Long userNo);
 
-    // 예약 등록 또는 수정
-    DeliveryReservation saveReservation(DeliveryReservation reservation);
+    /** 단일 예약 상세 조회 */
+    DeliveryReservation getReservationById(String drsvId);
 
-    // 예약 삭제
-    void deleteReservation(Long id);
+    /** 예약 상태 업데이트 (결제 완료 등) */
+    DeliveryReservation updateStatus(String drsvId, String status);
 }
