@@ -1,6 +1,6 @@
 package com.navi.user.security.filter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import com.navi.common.response.ApiResponse;
 import com.navi.user.dto.JWTClaimDTO;
 import com.navi.user.security.util.JWTUtil;
@@ -18,13 +18,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
-
+import java.util.Map;
 @Slf4j
 @RequiredArgsConstructor
 public class JWTCheckFilter extends OncePerRequestFilter {
-
     private final JWTUtil jwtUtil;
-    private final ObjectMapper objectMapper = new ObjectMapper(); // ✅ Jackson 사용
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -66,17 +64,14 @@ public class JWTCheckFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(auth);
 
             } catch (Exception e) {
-                // ✅ JWT 오류 응답 - Jackson 사용
+                // JWT 오류 응답
+                Gson gson = new Gson();
                 ApiResponse<Object> apiResponse = ApiResponse.error("잘못되거나 만료된 토큰입니다.", 401, null);
 
                 response.setContentType("application/json; charset=UTF-8");
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-
-                PrintWriter writer = response.getWriter();
-                objectMapper.findAndRegisterModules(); // ✅ LocalDateTime 직렬화 지원
-                objectMapper.writeValue(writer, apiResponse);
-                writer.flush();
-                writer.close();
+                PrintWriter printWriter = response.getWriter();
+                printWriter.println(gson.toJson(apiResponse));
+                printWriter.close();
                 return; // 필터 체인 중단
             }
         }
@@ -106,7 +101,6 @@ public class JWTCheckFilter extends OncePerRequestFilter {
                 || path.startsWith("/api/login-try/")
                 || path.startsWith("/api/users/logout")
                 || path.startsWith("/api/flight")
-                || path.startsWith("/api/delivery")
-                || path.startsWith("/api/seats");
+                || path.startsWith("/api/delivery");
     }
 }

@@ -3,9 +3,7 @@ package com.navi.accommodation.controller;
 import com.navi.accommodation.dto.request.AccSearchRequestDTO;
 import com.navi.accommodation.dto.response.AccDetailResponseDTO;
 import com.navi.accommodation.dto.response.AccListResponseDTO;
-import com.navi.accommodation.repository.AccRepository;
 import com.navi.accommodation.service.AccService;
-import com.navi.room.service.RoomService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +16,6 @@ import java.util.List;
 @RequestMapping("/api")
 public class AccUserController {
     private final AccService accService;
-    private final RoomService roomService;
 
     /* === 숙소 리스트 조회 === */
     @GetMapping("/accommodations")

@@ -11,6 +11,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Nationalized;
 
+/* [Column]
+ * 0. no(roomNo)
+ * 1. 객실 ID(roomId)      6. 기준인원(baseCnt)
+ * 2. 숙소 ID(accId)       7. 최대인원(maxCnt)
+ * 3. 객실명(roomName)      8. 주중가격(weekdayFee)
+ * 4. 객실크기(roomSize)    9. 주말가격(weekendFee)
+ * 5. 객실수(roomCnt)      10. 운영여부(isActive)
+ */
+
 @Getter
 @Builder
 @NoArgsConstructor
@@ -31,6 +40,7 @@ public class Room {
     @Column(name = "room_id", length = 20, unique = true, updatable = false)
     private String roomId;
 
+    // 임시 설정 - json 파일 O, API X
     @Column(name = "content_id")
     private Long contentId;
 

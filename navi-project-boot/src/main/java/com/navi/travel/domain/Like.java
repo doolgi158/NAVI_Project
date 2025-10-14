@@ -10,42 +10,33 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(
-        name = "NAVI_LIKE",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"USER_NO", "TRAVEL_ID"})
-)
-@SequenceGenerator(name = "like_seq", sequenceName = "LIKE_SEQ", allocationSize = 1)
+@Table(name = "NAVI_LIKE")
 public class Like {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "like_seq")
-    @Column(name = "LIKE_ID")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "like_id")
     private Long likeId;
 
-    /** ✅ 여행지 (N:1) */
+    /** 여행지 참조 **/
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "TRAVEL_ID", nullable = false)
+    @JoinColumn(name = "travel_id", nullable = false)
     private Travel travel;
 
-    /** ✅ 사용자 (N:1) */
+    /** 사용자 참조 (FK: user_no) **/
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "USER_NO", nullable = false)
+    @JoinColumn(name = "user_no", nullable = false)
     private User user;
 
-    /** ✅ 사용자 ID (백업용) */
-    @Column(name = "USER_ID", length = 50, nullable = true)
+    /** 편의용 컬럼 (로그인 ID 문자열 저장) **/
+    @Column(name = "user_id", nullable = false, length = 50)
     private String userId;
 
-    /** ✅ 생성자 (관계 자동 설정) */
+    // 편의 생성자
     public Like(Travel travel, User user) {
         this.travel = travel;
         this.user = user;
-        this.userId = user.getId();
-
-        // 연관관계 편의 메서드
-        if (travel != null) {
-            travel.addLike(this);
-        }
+        this.userId = user.getId(); // user_id 컬럼 자동 채움
     }
 
     public Long getTravelId() {

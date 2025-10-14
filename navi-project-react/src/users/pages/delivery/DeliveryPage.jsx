@@ -1,12 +1,7 @@
-// src/users/pages/delivery/DeliveryPage.jsx
 import MainLayout from "../../layout/MainLayout";
 import { useState, useEffect, useRef } from "react";
-import { Input, DatePicker, Button, message, Radio } from "antd";
+import { Input, DatePicker, Button, message } from "antd";
 import dayjs from "dayjs";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
-
-const API_SERVER_HOST = "http://localhost:8080";
 
 // ✅ bagSize별 요금표
 const BAG_PRICE_TABLE = {
@@ -15,16 +10,11 @@ const BAG_PRICE_TABLE = {
   L: 20000,
 };
 
-// ✅ 제주공항 좌표
-const JEJU_AIRPORT = { lat: 33.5055, lng: 126.495 };
-
 const DeliveryPage = () => {
-  const navigate = useNavigate();
-
   const [form, setForm] = useState({
     senderName: "",
     phone: "",
-    deliveryType: "AIRPORT_TO_HOTEL", // ✅ 기본값 공항 → 숙소
+    deliveryType: "AIRPORT_TO_HOTEL",
     fromAddress: "",
     toAddress: "",
     deliveryDate: null,
@@ -55,18 +45,24 @@ const DeliveryPage = () => {
     }
   }, [form.bagSize, form.bagCount]);
 
-  /** ✅ 지도 초기화 */
+  /** 지도 SDK 완전 로드 후 초기화 */
   useEffect(() => {
     const loadKakaoMap = () => {
       if (window.kakao && window.kakao.maps) {
-        window.kakao.maps.load(() => initMap());
+        // SDK가 이미 로드되어 있다면
+        window.kakao.maps.load(() => {
+          initMap();
+        });
       } else {
+        // SDK 동적 로드
         const script = document.createElement("script");
         script.src =
           "//dapi.kakao.com/v2/maps/sdk.js?appkey=YOUR_APP_KEY&autoload=false&libraries=services";
         script.async = true;
         script.onload = () => {
-          window.kakao.maps.load(() => initMap());
+          window.kakao.maps.load(() => {
+            initMap();
+          });
         };
         document.head.appendChild(script);
       }
@@ -75,76 +71,23 @@ const DeliveryPage = () => {
     const initMap = () => {
       const container = document.getElementById(MAP_CONTAINER_ID);
       if (!container) return;
-      const kakao = window.kakao;
 
+      const kakao = window.kakao;
       mapRef.current = new kakao.maps.Map(container, {
-        center: new kakao.maps.LatLng(JEJU_AIRPORT.lat, JEJU_AIRPORT.lng),
-        level: 5, // ✅ 초기 확대값
+        center: new kakao.maps.LatLng(33.5055, 126.495),
+        level: 6,
       });
     };
 
     loadKakaoMap();
   }, []);
 
-  /** ✅ 공항 마커 생성 + 실제 도로명 주소 자동 입력 */
-  const setAirportMarker = (targetKey) => {
-    const { kakao } = window;
-    if (!kakao || !mapRef.current) return;
-
-    if (markersRef.current.fromAddress)
-      markersRef.current.fromAddress.setMap(null);
-    if (markersRef.current.toAddress)
-      markersRef.current.toAddress.setMap(null);
-
-    const position = new kakao.maps.LatLng(JEJU_AIRPORT.lat, JEJU_AIRPORT.lng);
-    const marker = new kakao.maps.Marker({
-      position,
-      map: mapRef.current,
-    });
-
-    mapRef.current.setCenter(position);
-    mapRef.current.setLevel(5);
-
-    const geocoder = new kakao.maps.services.Geocoder();
-    geocoder.coord2Address(JEJU_AIRPORT.lng, JEJU_AIRPORT.lat, (result, status) => {
-      if (status === kakao.maps.services.Status.OK) {
-        const roadAddr = result[0].road_address
-          ? result[0].road_address.address_name
-          : result[0].address.address_name;
-
-        setForm((prev) => ({
-          ...prev,
-          [targetKey]: `${roadAddr} (제주국제공항)`,
-        }));
-      }
-    });
-
-    return marker;
-  };
-
-  /** ✅ 페이지 진입 시 공항 → 숙소 자동 세팅 */
-  useEffect(() => {
-    setForm((prev) => ({
-      ...prev,
-      deliveryType: "AIRPORT_TO_HOTEL",
-    }));
-
-    const timer = setTimeout(() => {
-      if (window.kakao && window.kakao.maps && mapRef.current) {
-        const marker = setAirportMarker("fromAddress");
-        markersRef.current.fromAddress = marker;
-      }
-    }, 600);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  /** ✅ 주소 검색 */
+  /** 카카오 주소 검색 */
   const handleSearchAddress = (targetKey) => {
+    // 주소 검색 SDK가 안 불러와졌다면 로드
     if (!window.daum || !window.daum.Postcode) {
       const script = document.createElement("script");
-      script.src =
-        "//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+      script.src = "//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
       script.async = true;
       script.onload = () => handleSearchAddress(targetKey);
       document.head.appendChild(script);
@@ -163,14 +106,22 @@ const DeliveryPage = () => {
         }
 
         const geocoder = new kakao.maps.services.Geocoder();
+
         geocoder.addressSearch(addr, (result, status) => {
           if (status === kakao.maps.services.Status.OK) {
             const lat = parseFloat(result[0].y);
             const lng = parseFloat(result[0].x);
             const position = new kakao.maps.LatLng(lat, lng);
 
-            if (!mapRef.current) return;
+            if (!mapRef.current) {
+              const container = document.getElementById(MAP_CONTAINER_ID);
+              mapRef.current = new kakao.maps.Map(container, {
+                center: position,
+                level: 6,
+              });
+            }
 
+            // 기존 마커 제거
             if (markersRef.current[targetKey])
               markersRef.current[targetKey].setMap(null);
 
@@ -180,6 +131,7 @@ const DeliveryPage = () => {
             });
             markersRef.current[targetKey] = marker;
 
+            // 출발지-도착지 연결선
             const fromMarker = markersRef.current.fromAddress;
             const toMarker = markersRef.current.toAddress;
 
@@ -198,11 +150,11 @@ const DeliveryPage = () => {
               polyline.setMap(mapRef.current);
               lineRef.current = polyline;
 
+              // 지도 범위 자동 맞춤
               const bounds = new kakao.maps.LatLngBounds();
               bounds.extend(linePath[0]);
               bounds.extend(linePath[1]);
-              mapRef.current.setBounds(bounds, 50);
-  
+              mapRef.current.setBounds(bounds);
             } else {
               mapRef.current.setCenter(position);
             }
@@ -212,8 +164,8 @@ const DeliveryPage = () => {
     }).open();
   };
 
-  /** ✅ 예약 요청 (결과 페이지 이동 포함) */
-  const handleSubmit = async () => {
+  /** 예약 요청 */
+  const handleSubmit = () => {
     const required = [
       "senderName",
       "phone",
@@ -229,24 +181,13 @@ const DeliveryPage = () => {
       return;
     }
 
-    const dto = {
-      startAddr: form.fromAddress,
-      endAddr: form.toAddress,
-      deliveryDate: form.deliveryDate.format("YYYY-MM-DD"),
-      totalPrice: estimatedFare,
-      userNo: 1, // TODO: 로그인 세션에서 추출 예정
-      bagId: form.bagSize === "S" ? 1 : form.bagSize === "M" ? 2 : 3,
-      groupId: "G20251015_JEJU_AM_1",
+    const payload = {
+      ...form,
+      estimatedFare,
     };
 
-    try {
-      const res = await axios.post(`${API_SERVER_HOST}/api/delivery/rsv`, dto);
-      message.success("짐배송 예약이 완료되었습니다!");
-      navigate("/delivery/result", { state: res.data }); // ✅ 결과 페이지로 이동
-    } catch (error) {
-      console.error("❌ 예약 요청 실패:", error);
-      message.error("예약 중 오류가 발생했습니다.");
-    }
+    console.log("📦 예약 요청 데이터:", payload);
+    message.success("예약 요청이 완료되었습니다!");
   };
 
   return (
@@ -269,49 +210,32 @@ const DeliveryPage = () => {
             className="mb-3"
           />
 
-          {/* ✅ 배송 방향 선택 */}
+          {/* 배송 방향 */}
           <h3 className="font-semibold mb-2">배송 방향</h3>
-          <Radio.Group
-            value={form.deliveryType}
-            onChange={(e) => {
-              const value = e.target.value;
-              handleChange("deliveryType", value);
-              setForm((prev) => ({ ...prev, fromAddress: "", toAddress: "" }));
-
-              if (value === "AIRPORT_TO_HOTEL") {
-                const marker = setAirportMarker("fromAddress");
-                markersRef.current.fromAddress = marker;
-              } else if (value === "HOTEL_TO_AIRPORT") {
-                const marker = setAirportMarker("toAddress");
-                markersRef.current.toAddress = marker;
-              } else {
-                if (markersRef.current.fromAddress)
-                  markersRef.current.fromAddress.setMap(null);
-                if (markersRef.current.toAddress)
-                  markersRef.current.toAddress.setMap(null);
-                markersRef.current = { fromAddress: null, toAddress: null };
-                mapRef.current.setCenter(
-                  new window.kakao.maps.LatLng(JEJU_AIRPORT.lat, JEJU_AIRPORT.lng)
-                );
-                mapRef.current.setLevel(5);
-              }
-            }}
-            optionType="button"
-            buttonStyle="solid"
-            className="w-full mb-4 flex justify-between"
-          >
-            <Radio.Button value="AIRPORT_TO_HOTEL" className="flex-1 text-center">
+          <div className="flex gap-4 mb-4">
+            <label>
+              <input
+                type="radio"
+                name="deliveryType"
+                value="AIRPORT_TO_HOTEL"
+                checked={form.deliveryType === "AIRPORT_TO_HOTEL"}
+                onChange={(e) => handleChange("deliveryType", e.target.value)}
+              />{" "}
               공항 → 숙소
-            </Radio.Button>
-            <Radio.Button value="HOTEL_TO_AIRPORT" className="flex-1 text-center">
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="deliveryType"
+                value="HOTEL_TO_AIRPORT"
+                checked={form.deliveryType === "HOTEL_TO_AIRPORT"}
+                onChange={(e) => handleChange("deliveryType", e.target.value)}
+              />{" "}
               숙소 → 공항
-            </Radio.Button>
-            <Radio.Button value="HOTEL_TO_HOTEL" className="flex-1 text-center">
-              숙소 ↔ 숙소
-            </Radio.Button>
-          </Radio.Group>
+            </label>
+          </div>
 
-          {/* 주소 입력 */}
+          {/* 출발지 / 도착지 */}
           <div className="flex gap-2 mb-3">
             <Input
               placeholder="출발지 주소"
@@ -372,6 +296,7 @@ const DeliveryPage = () => {
             onChange={(e) => handleChange("memo", e.target.value)}
           />
 
+          {/* 예상 요금 표시 */}
           {estimatedFare && (
             <div className="text-center text-lg font-semibold text-blue-600 mb-4">
               예상 요금: {estimatedFare.toLocaleString()}원

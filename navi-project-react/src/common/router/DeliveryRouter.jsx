@@ -1,36 +1,36 @@
-// src/Common/router/DeliveryRouter.jsx
 import { lazy, Suspense } from "react";
-import { ModalProvider } from "../components/login/ModalProvider.jsx";
+import ProtectedRoute from "./ProtectedRoute.jsx";
 
 const Loading = <div></div>;
 
-// ✅ 사용자 짐배송 페이지
 const DeliveryPage = lazy(() => import("../../users/pages/delivery/DeliveryPage.jsx"));
-const DeliveryResultPage = lazy(() => import("../../users/pages/delivery/DeliveryResultPage.jsx"));
+const DeliveryListPage = lazy(() => import("../../users/pages/delivery/DeliveryListPage.jsx"));
+const DeliveryDetailPage = lazy(() => import("../../users/pages/delivery/DeliveryDetailPage.jsx"));
 
-/**
- * DeliveryRouter
- * /delivery  → 예약 입력 페이지
- * /delivery/result → 예약 완료 결과 페이지
- */
 const DeliveryRouter = () => [
   {
     path: "",
     element: (
       <Suspense fallback={Loading}>
-        <ModalProvider>
-          <DeliveryPage />
-        </ModalProvider>
+        <DeliveryPage />
       </Suspense>
     ),
   },
   {
-    path: "result",
+    path: "list",
     element: (
       <Suspense fallback={Loading}>
-        <ModalProvider>
-          <DeliveryResultPage />
-        </ModalProvider>
+        <DeliveryListPage />
+      </Suspense>
+    ),
+  },
+  {
+    path: "detail/:id",
+    element: (
+      <Suspense fallback={Loading}>
+        <ProtectedRoute requiredRole="USER">
+          <DeliveryDetailPage />
+        </ProtectedRoute>
       </Suspense>
     ),
   },

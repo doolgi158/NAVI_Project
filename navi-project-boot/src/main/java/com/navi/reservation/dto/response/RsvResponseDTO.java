@@ -1,11 +1,15 @@
 package com.navi.reservation.dto.response;
 
-/* =================[RsvResponseDTO]=================
-        예약 확정 후 클라이언트에 반환되는 응답 DTO
-      EX) 결제 검증이 완료되어 DB에 저장된 예약 정보를 반환
-   ================================================== */
+/*
+ * ==============================
+ * [RsvResponseDTO]
+ * : 예약 확정 후 클라이언트에 반환되는 응답 DTO
+ * ==============================
+ * ㄴ 결제 검증이 완료되어 DB에 저장된 예약 정보를 반환
+ */
 
 import com.navi.reservation.domain.enums.PaymentMethod;
+import com.navi.reservation.domain.Rsv;
 import com.navi.reservation.domain.enums.RsvStatus;
 import com.navi.reservation.domain.enums.RsvType;
 import lombok.*;
@@ -29,20 +33,20 @@ public class RsvResponseDTO {
     private LocalDateTime paymentTime;      // 결제 완료 일시 (예: 2025-10-07T13:47:03)
     private String paymentFailReason;       // 결제 실패 사유 (예: "카카오페이 승인 실패: 한도 초과")
 
-//    // DTO 변환 (Entity → DTO)
-//    public static RsvResponseDTO fromEntity(Rsv entity) {
-//        return RsvResponseDTO.builder()
-//                .reserveId(entity.getReserveId())
-//                .userNo(entity.getUser().getNo())
-//                .rsvType(entity.getRsvType())
-//                .targetId(entity.getTargetId())
-//                .paymentId(entity.getPaymentId())
-//                .paymentMethod(entity.getPaymentMethod())
-//                .totalAmount(entity.getTotalAmount() != null ? entity.getTotalAmount().intValue() : 0)
-//                .rsvStatus(entity.getRsvStatus())
-//                .createdTime(entity.getCreatedTime())
-//                .paymentTime(entity.getPaymentTime())
-//                .paymentFailReason(entity.getPaymentFailReason())
-//                .build();
-//    }
+    // DTO 변환 (Entity → DTO)
+    public static RsvResponseDTO fromEntity(Rsv entity) {
+        return RsvResponseDTO.builder()
+                .reserveId(entity.getReserveId())
+                .userNo(entity.getUser().getNo())
+                .rsvType(entity.getRsvType())
+                .targetId(entity.getTargetId())
+                .paymentId(entity.getPaymentId())
+                .paymentMethod(entity.getPaymentMethod())
+                .totalAmount(entity.getTotalAmount() != null ? entity.getTotalAmount().intValue() : 0)
+                .rsvStatus(entity.getRsvStatus())
+                .createdTime(entity.getCreatedTime())
+                .paymentTime(entity.getPaymentTime())
+                .paymentFailReason(entity.getPaymentFailReason())
+                .build();
+    }
 }

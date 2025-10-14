@@ -1,49 +1,33 @@
 package com.navi.flight.controller;
 
-import com.navi.flight.dto.SeatResponseDTO;
-import com.navi.flight.domain.Seat;
-import com.navi.flight.dto.SeatStatusResponse;
+import com.navi.flight.dto.SeatStatusDTO;
 import com.navi.flight.service.SeatService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.time.LocalDateTime;
+
 import java.util.List;
 
+/**
+ * ✈️ SeatController
+ * - /api/seats/status        : 전체 항공편별 좌석 현황 조회
+ * - /api/seats/status/{id}   : 특정 항공편 좌석 현황 조회
+ */
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/api/seats")
+@RequiredArgsConstructor
 public class SeatController {
 
     private final SeatService seatService;
 
-    @GetMapping("/{flightId}")
-    public ResponseEntity<List<SeatResponseDTO>> getSeatsByFlight(
-            @PathVariable String flightId,
-            @RequestParam("depTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime depTime
-    ) {
-        List<SeatResponseDTO> seats = seatService.getSeatsByFlight(flightId, depTime);
-        return ResponseEntity.ok(seats);
+    /* 전체 항공편별 좌석 현황 조회 */
+    @GetMapping("/status")
+    public List<SeatStatusDTO> getAllSeatStatus() {
+        return seatService.getSeatStatusByFlight();
     }
 
-    @PostMapping("/auto/{flightId}")
-    public ResponseEntity<List<Seat>> autoAssignSeats(
-            @PathVariable String flightId,
-            @RequestParam("depTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime depTime,
-            @RequestParam(name = "count", defaultValue = "1") int passengerCount
-    ) {
-        List<Seat> assignedSeats = seatService.autoAssignSeats(flightId, depTime, passengerCount);
-        return ResponseEntity.ok(assignedSeats);
+    /* 특정 항공편 좌석 현황 조회 */
+    @GetMapping("/status/{flightId}")
+    public SeatStatusDTO getSeatStatusByFlightId(@PathVariable("flightId") String flightId) {
+        return seatService.getSeatStatusByFlightId(flightId);
     }
-
-    @GetMapping("/{flightId}/status")
-    public ResponseEntity<SeatStatusResponse> checkSeatStatus(
-            @PathVariable String flightId,
-            @RequestParam("depTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime depTime
-    ) {
-        boolean initialized = seatService.ensureSeatsInitialized(flightId, depTime);
-        return ResponseEntity.ok(new SeatStatusResponse(initialized));
-    }
-
 }

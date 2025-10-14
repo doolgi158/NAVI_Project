@@ -5,9 +5,6 @@ import com.navi.user.domain.User;
 import com.navi.user.enums.UserState;
 import lombok.*;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,9 +19,9 @@ public class UserResponseDTO {
     private String id;              // 아이디
     private String local;           // 내/외국인
     private UserState userState;    // 유저 상태
-    private LocalDateTime signUp;   // 가입일
+    private String signUp;          // 가입일
     private String token;           // 토큰
-    private String path;            // 프로필 URL
+    private String profileUrl;      // 프로필 URL
 
     public static UserResponseDTO from(User user, Image profile) {
         return UserResponseDTO.builder()
@@ -36,8 +33,8 @@ public class UserResponseDTO {
                 .birth(user.getBirth())
                 .gender(user.getGender())
                 .local(user.getLocal())
-                .signUp(user.getSignUp() != null ? user.getSignUp() : null)
-                .path(profile != null ? profile.getPath() : null)
+                .signUp(user.getSignUp())
+//                .profileUrl(profile != null ? profile.getProfileUrl() : null)
                 .build();
     }
 }

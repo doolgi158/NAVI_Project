@@ -6,7 +6,6 @@ import lombok.*;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -23,7 +22,7 @@ public class UserSecurityDTO extends User {
     private String id;              // 아이디
     private String local;           // 내/외국인
     private UserState userState;    // 유저 상태
-    private LocalDateTime signUp;   // 가입일
+    private String signUp;          // 가입일
 
     // 권한
     private List<String> role = new ArrayList<>();

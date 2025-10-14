@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import api from '../../common/api/naviApi.js';
 import { useTravelListFilter } from './useTravelListFilter.jsx';
 
-// ✅ 카테고리 목록 정의
 const categories = ['전체', '관광지', '음식점', '쇼핑'];
 
 // ✅ 여행지 목록 API 호출 함수
@@ -34,6 +33,7 @@ const getTravelData = async (domain, pageParam, filterQuery, userId) => {
   }
 
   // ✅ 로그인 사용자가 있다면 쿼리 파라미터로 id 전달
+  if (userId) queryString += `&id=${userId}`;
 
   try {
     const response = await api.get(apiUrl + queryString);

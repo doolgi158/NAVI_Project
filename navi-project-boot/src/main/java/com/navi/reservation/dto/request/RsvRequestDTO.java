@@ -7,6 +7,7 @@ package com.navi.reservation.dto.request;
  * =============================================
  */
 
+import com.navi.reservation.domain.Rsv;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

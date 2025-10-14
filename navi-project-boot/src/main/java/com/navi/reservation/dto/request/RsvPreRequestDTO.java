@@ -4,9 +4,13 @@ import com.navi.reservation.domain.enums.PaymentMethod;
 import com.navi.reservation.domain.enums.RsvType;
 import lombok.*;
 
-/* =================[RsvPreRequestDTO]=================
-      결제 전, 예약 초기 생성 단계에서 사용하는 요청 DTO
-   ==================================================== */
+/**
+ * ==============================
+ * [RsvPreRequestDTO]
+ * : 결제 전 예약 정보 입력 단계 DTO
+ * ==============================
+ * ㄴ 사용자가 결제창을 띄우기 전에 입력한 예약 데이터를 전달
+ */
 
 @Data
 @NoArgsConstructor

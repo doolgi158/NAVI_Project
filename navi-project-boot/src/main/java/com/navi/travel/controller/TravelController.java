@@ -16,7 +16,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -27,32 +29,25 @@ public class TravelController {
 
     private final TravelService travelService;
 
-    /**
-     * ✅ SecurityContext에서 로그인 사용자 ID 추출
-     */
+    // ✅ SecurityContext에서 사용자 ID 추출 메서드
     private String getUserIdFromSecurityContext() {
-        try {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof JWTClaimDTO claim) {
-                return claim.getId();
-            }
-        } catch (Exception e) {
-            log.warn("⚠️ 사용자 인증 정보 추출 실패: {}", e.getMessage());
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof JWTClaimDTO claim) {
+            return claim.getId();
         }
         return null;
     }
 
-    /**
-     * ✅ 1. 여행지 목록 조회
-     */
+    /** ✅ 1. 여행지 목록 조회 */
     @GetMapping
-    public ResponseEntity<Page<TravelListResponseDTO>> getList(
-            Pageable pageable, // @PageableDefault 제거
+    public Page<TravelListResponseDTO> getList(
+            @PageableDefault(size = 10, sort = "contentsCd", direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(value = "region2Name", required = false) String region2NameCsv,
             @RequestParam(value = "categoryName", required = false) String categoryName,
             @RequestParam(value = "search", required = false) String search
     ) {
         List<String> region2Names = null;
+
         if (region2NameCsv != null && !region2NameCsv.isEmpty()) {
             region2Names = Arrays.stream(region2NameCsv.split(","))
                     .map(String::trim)
@@ -60,101 +55,69 @@ public class TravelController {
                     .collect(Collectors.toList());
         }
 
-        Page<TravelListResponseDTO> list = travelService.getTravelList(
-                pageable, region2Names, categoryName, search, true
-        );
-
-        return ResponseEntity.ok(list);
+        return travelService.getTravelList(pageable, region2Names, categoryName, search, true);
     }
 
-    /**
-     * ✅ 2. 여행지 상세 조회
-     */
+    /** ✅ 2. 여행지 상세 조회 */
     @GetMapping("/detail/{travelId}")
-    public ResponseEntity<TravelDetailResponseDTO> getTravelDetail(@PathVariable("travelId") Long travelId) {
+    public ResponseEntity<TravelDetailResponseDTO> getTravelDetail(
+            @PathVariable("travelId") Long travelId
+    ) {
         try {
-            String userId = getUserIdFromSecurityContext();
-            log.info("🟦 [Controller] 여행지 상세조회 요청 - travelId={}, userId={}", travelId, userId);
+            String userId = getUserIdFromSecurityContext(); // ✅ 로그인 유저 확인
+            log.info("🟦 [Controller] travelId={}, userId={}", travelId, userId);
 
             TravelDetailResponseDTO detailDTO = travelService.getTravelDetail(travelId, userId);
             return ResponseEntity.ok(detailDTO);
-
         } catch (NoSuchElementException e) {
-            log.warn("⚠️ 여행지 없음: {}", e.getMessage());
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
-            log.error("❌ 여행지 상세 조회 중 오류: {}", e.getMessage(), e);
+            log.error("❌ 상세 정보 조회 중 서버 오류: {}", e.getMessage());
             return ResponseEntity.internalServerError().build();
         }
     }
 
-    /**
-     * ✅ 3. 조회수 증가
-     */
+    /** ✅ 3. 조회수 증가 */
     @PostMapping("/views/{travelId}")
     public ResponseEntity<Void> incrementViews(@PathVariable("travelId") Long travelId) {
         try {
             travelService.incrementViews(travelId);
-            log.debug("👁 조회수 증가 완료 - travelId={}", travelId);
             return ResponseEntity.noContent().build();
-
         } catch (Exception e) {
-            log.error("❌ 조회수 증가 중 오류 (travelId={}): {}", travelId, e.getMessage(), e);
+            log.error("❌ 조회수 증가 중 오류: {}", e.getMessage());
             return ResponseEntity.internalServerError().build();
         }
     }
 
-    /**
-     * ✅ 4. 좋아요 토글
-     */
+    /** ✅ 4. 좋아요 토글 */
     @PostMapping("/like/{travelId}")
-    public ResponseEntity<Map<String, Object>> toggleLike(@PathVariable Long travelId) {
+    public ResponseEntity<String> toggleLike(@PathVariable Long travelId) {
         String userId = getUserIdFromSecurityContext();
-        log.info("❤️ [좋아요 요청] travelId={}, userId={}", travelId, userId);
+        log.info("❤️ [Like] travelId={}, userId={}", travelId, userId);
 
         try {
-            boolean added = travelService.toggleLike(travelId, userId);
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            response.put("liked", added);
-            response.put("message", added ? "좋아요 추가" : "좋아요 취소");
-            return ResponseEntity.ok(response);
-
+            boolean isAdded = travelService.toggleLike(travelId, userId);
+            return ResponseEntity.ok(isAdded ? "좋아요 추가" : "좋아요 취소");
         } catch (IllegalArgumentException e) {
-            log.warn("⚠️ 잘못된 요청: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("success", false, "message", e.getMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
-            log.error("❌ 좋아요 처리 중 오류: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("success", false, "message", "서버 오류가 발생했습니다."));
+            return ResponseEntity.internalServerError().body("서버 오류: " + e.getMessage());
         }
     }
 
-    /**
-     * ✅ 5. 북마크 토글
-     */
+    /** ✅ 5. 북마크 토글 */
     @PostMapping("/bookmark/{travelId}")
-    public ResponseEntity<Map<String, Object>> toggleBookmark(@PathVariable Long travelId) {
+    public ResponseEntity<String> toggleBookmark(@PathVariable Long travelId) {
         String userId = getUserIdFromSecurityContext();
-        log.info("📚 [북마크 요청] travelId={}, userId={}", travelId, userId);
+        log.info("📚 [Bookmark] travelId={}, userId={}", travelId, userId);
 
         try {
-            boolean added = travelService.toggleBookmark(travelId, userId);
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            response.put("bookmarked", added);
-            response.put("message", added ? "북마크 추가" : "북마크 취소");
-            return ResponseEntity.ok(response);
-
+            boolean isAdded = travelService.toggleBookmark(travelId, userId);
+            return ResponseEntity.ok(isAdded ? "북마크 추가" : "북마크 취소");
         } catch (IllegalArgumentException e) {
-            log.warn("⚠️ 잘못된 요청: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("success", false, "message", e.getMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
-            log.error("❌ 북마크 처리 중 오류: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("success", false, "message", "서버 오류가 발생했습니다."));
+            return ResponseEntity.internalServerError().body("서버 오류: " + e.getMessage());
         }
     }
 }

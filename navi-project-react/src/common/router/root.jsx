@@ -6,20 +6,19 @@ import FlightRouter from "./FlightRouter.jsx";
 import AdminRouter from "./AdminRouter.jsx";
 import AccRouter from "./AccRouter.jsx";
 import UserRouter from "./UserRouter.jsx";
-import DeliveryRouter from "./DeliveryRouter.jsx"
-import PaymentRouter from "./PaymentRouter.jsx";
+import DeliveryRouter from "./DeliveryRouter.jsx";
 
-const Loading = <div></div>
+const Loding = <div></div>
 const Main = lazy(() => import("../../users/pages/UserMainPage.jsx"))
 const Appshell = lazy(() => import("../../Appshell.jsx"))
 
 const root = createBrowserRouter([
     { 
-        element: <Suspense fallback={Loading}> <Appshell /> </Suspense>,
+        element: <Appshell />,
         children: [
     {
         path: "/",
-        element: <Suspense fallback={Loading}><Main /></Suspense>
+        element: <Suspense fallback={Loding}><Main /></Suspense>
     },
     {
         path: "/travel",
@@ -40,18 +39,14 @@ const root = createBrowserRouter([
     {
         path:"/accommodations",
         children:[...AccRouter()]
-    },
-    {
-        path:"/delivery",
-        children:[...DeliveryRouter()]
-    },
+    },    
     {
         path: "/users",
         children: [...UserRouter()]
     },
     {
-        path: "/payments",
-        children: [...PaymentRouter()]
+        path:"/delivery",
+        children:[...DeliveryRouter()]
     },
 ]
 }

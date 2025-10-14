@@ -25,7 +25,6 @@ public class TravelRequestDTO {
     private String contentsCd;      // 카테고리 코드 (필수)
     private String title;           // 제목 (필수)
     private String introduction;    // 소개
-    private String description;     // 본문 내용
     private String address;         // 주소
     private String roadAddress;     // 도로명 주소
     private String phoneNo;         // 전화번호
@@ -61,7 +60,6 @@ public class TravelRequestDTO {
                 .categoryName(this.categoryName)
                 .title(this.title)
                 .introduction(this.introduction)
-                .description(this.description)
                 .address(this.address)
                 .roadAddress(this.roadAddress)
                 .phoneNo(this.phoneNo)
@@ -82,5 +80,4 @@ public class TravelRequestDTO {
                 .views(0L)
                 .build();
     }
-
 }

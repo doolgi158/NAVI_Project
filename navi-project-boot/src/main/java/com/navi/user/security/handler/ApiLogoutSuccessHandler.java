@@ -30,6 +30,8 @@ public class ApiLogoutSuccessHandler implements LogoutSuccessHandler {
     private final UserRepository userRepository;
     private final HistoryRepository historyRepository;
 
+    private static final DateTimeFormatter DT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
     @Override
     @Transactional
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
@@ -76,15 +78,15 @@ public class ApiLogoutSuccessHandler implements LogoutSuccessHandler {
 
         // 최신 로그인 이력 조회
         List<History> list = historyRepository.findLatestHistory(user, PageRequest.of(0, 1));
+
         if (!list.isEmpty()) {
             History latest = list.get(0);
-
-            // 기존 이력에 로그아웃 시간 세팅
+            // 🔹 기존 이력에 로그아웃 시간 세팅
             latest = History.builder()
                     .no(latest.getNo())
                     .ip(latest.getIp())
                     .login(latest.getLogin())
-                    .logout(LocalDateTime.now())
+                    .logout(LocalDateTime.now().format(DT))
                     .user(user)
                     .build();
 

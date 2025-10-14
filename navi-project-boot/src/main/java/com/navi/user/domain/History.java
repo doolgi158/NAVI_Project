@@ -8,8 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 
-import java.time.LocalDateTime;
-
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
@@ -34,17 +32,17 @@ public class History {
     @Column(name = "history_login", nullable = false)
     @ColumnDefault(value = "Sysdate")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime login;   // 로그인 시간
+    private String login;   // 로그인 시간
 
     @Column(name = "history_logout")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime logout;  // 로그아웃 시간
+    private String logout;  // 로그아웃 시간
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_no")
     private User user;      // User 정보
 
-    public History(String ip, LocalDateTime login, LocalDateTime logout, User user) {
+    public History(String ip, String login, String logout, User user) {
         this.ip = ip;
         this.login = login;
         this.logout = logout;

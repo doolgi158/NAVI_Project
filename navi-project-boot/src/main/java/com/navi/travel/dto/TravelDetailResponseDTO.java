@@ -18,7 +18,6 @@ public class TravelDetailResponseDTO {
     private String categoryName;
     private String title;
     private String introduction;
-    private String description;
     private String address;
     private String roadAddress;
     private String phoneNo;
@@ -74,7 +73,6 @@ public class TravelDetailResponseDTO {
                 .categoryName(travel.getCategoryName())
                 .title(travel.getTitle())
                 .introduction(travel.getIntroduction())
-                .description(travel.getDescription())
                 .address(travel.getAddress())
                 .roadAddress(travel.getRoadAddress())
                 .phoneNo(travel.getPhoneNo())

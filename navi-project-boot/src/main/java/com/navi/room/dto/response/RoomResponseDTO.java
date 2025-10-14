@@ -20,7 +20,7 @@ public class RoomResponseDTO {
     private Integer weekdayFee;         // 평일 요금
     private Integer weekendFee;         // 주말 요금
     private Boolean hasWifi;            // 와이파이
-    private Integer remainingRooms;     // Todo: 잔여 객실 수
+    private Integer remainingRooms;     // Todo: 잔여 객실 수 (NAVI_ROOM_AVAIL 기반)
     private List<String> roomImages;    // Todo: 객실 이미지 리스트
 
     /* Entity → DTO 변환 메서드 */

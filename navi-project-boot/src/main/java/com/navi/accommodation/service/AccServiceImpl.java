@@ -11,8 +11,6 @@ import com.navi.accommodation.dto.response.AccListResponseDTO;
 import com.navi.accommodation.repository.AccRepository;
 import com.navi.location.domain.Township;
 import com.navi.location.repository.TownshipRepository;
-import com.navi.room.domain.Room;
-import com.navi.room.repository.RoomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,7 +27,6 @@ import java.util.List;
 @Transactional
 public class AccServiceImpl implements AccService{
     private final AccRepository accRepository;
-    private final RoomRepository roomRepository;
     private final TownshipRepository townshipRepository;
 
     /* === 관리자 전용 CRUD === */
@@ -92,32 +89,10 @@ public class AccServiceImpl implements AccService{
             accList = accRepository.findByTitle(dto.getTitle());
         }
         else {
-            // Todo: 임시방편 (이거 말고 관광지 기반 만들어야 함)
+            // Todo: 임시방편
             accList = accRepository.findAll();
         }
 
-        // 숙소별 DTO 변환 + 객실 최저가 정보 계산
-//        List<AccListResponseDTO> resultList = accList.stream().map(acc -> {
-//            // 예약 가능한 객실 조회
-//            List<Room> rooms = roomRepository.findByAccAndIsAvailable(acc, true);
-//
-//            // 예약 가능한 객실 중 최저가
-//            Integer minPrice = rooms.isEmpty()
-//                    ? null
-//                    : rooms.stream().map(Room::getWeekdayFee),min(Integer::compareTo).orElse(null);
-//            // 🔸 예약 가능한 객실 수
-//            Integer remainingRooms = rooms.size();
-//
-//            // 🔸 DTO 생성
-//            return AccListResponseDTO.builder()
-//                    .accId(acc.getAccId())
-//                    .title(acc.getTitle())
-//                    .address(acc.getAddress())
-//                    .accImages(null) // TODO: 이미지 연동 시 수정
-//                    .minPrice(minPrice)
-//                    .remainingRooms(remainingRooms)
-//                    .build();
-//        }).toList();
         return accList.stream().map(AccListResponseDTO::fromEntity).toList();
     }
 

@@ -55,7 +55,7 @@ public class SecurityConfig {
         // 요청별 권한 설정 (anyRequest는 반드시 마지막!)
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers("api/adm/**", "api/admin/**").hasRole(UserRole.ADMIN.name())
+                .requestMatchers("api/adm/**").hasRole(UserRole.ADMIN.name())
                 .requestMatchers("/api/users/**", "/api/seats/**", "/travel/**", "/api/flight/**", "/api/delivery/**",
                 "/api/auth/**", "/api/accommodations/**", "/api/townships/**", "/api/rooms/**", "/api/reservation/**")
                         .permitAll()

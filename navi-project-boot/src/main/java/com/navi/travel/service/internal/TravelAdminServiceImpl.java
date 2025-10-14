@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
@@ -37,8 +36,6 @@ public class TravelAdminServiceImpl implements TravelAdminService{
                     .orElseThrow(() -> new NoSuchElementException("Travel not found with ID: " + dto.getTravelId()));
 
             travel.updateFromRequest(dto);
-
-            travel.setUpdatedAt(LocalDateTime.now());
 
         } else {
             if (dto.getContentId() == null || dto.getContentId().trim().isEmpty()) {

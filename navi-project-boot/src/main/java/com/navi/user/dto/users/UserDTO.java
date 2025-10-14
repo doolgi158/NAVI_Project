@@ -7,7 +7,6 @@ import com.navi.user.enums.UserState;
 import lombok.*;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -25,7 +24,7 @@ public class UserDTO extends org.springframework.security.core.userdetails.User 
     private String pw;              // 비밀번호
     private String local;           // 내/외국인
     private UserState userState;    // 유저 상태
-    private LocalDateTime signUp;   // 가입일
+    private String signUp;          // 가입일
 
     // 권한
     private List<String> role = new ArrayList<>();

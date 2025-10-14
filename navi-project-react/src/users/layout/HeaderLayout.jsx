@@ -1,49 +1,15 @@
 import { Layout, Menu, Button, Image, Space } from "antd";
 import naviLogo from "../images/navi_logo.png";
 import { useModal } from "../../common/components/login/ModalProvider";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import UserMenuDropdown from "../../common/components/UserMenuDropdown";
-import { useEffect, useState } from "react";
 
 const { Header } = Layout;
 
 const HeaderLayout = () => {
   const { showModal } = useModal();
-  const navigate = useNavigate();
-
-  // Redux 로그인 상태 가져오기
   const loginstate = useSelector((state) => state.login);
-  
-  // 로컬 스토리지 기반 로그인 상태 체크
-  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("accessToken"));
-  
-  useEffect(() => {
-    // Redux 상태가 변하면 다시 동기화
-    const token = loginstate.token || localStorage.getItem("accessToken");
-    setIsLoggedIn(!!token);
-  }, [loginstate]);
-
-  // 로그인 상태에서만 프로필 드롭다운, 없으면 로그인/회원가입 버튼
-  const renderAuthButtons = () => {
-    if (isLoggedIn) {
-      return <UserMenuDropdown />;
-    }
-    return (
-      <Space>
-        <Button
-          type="default"
-          onClick={() => showModal("login")}
-          className="text-sb-teal hover:text-sb-purple"
-        >
-          로그인
-        </Button>
-        <Button type="primary" className="bg-sb-teal hover:bg-sb-gold">
-          <Link to="/users/signup">회원가입</Link>
-        </Button>
-      </Space>
-    );
-  };
 
   // 상단 네비게이션 메뉴
   const items = [
@@ -89,7 +55,7 @@ const HeaderLayout = () => {
         </Link>
       </div>
 
-      {/* 메뉴 */}
+      {/* 메인 메뉴 */}
       <Menu
         mode="horizontal"
         items={items}
@@ -103,8 +69,23 @@ const HeaderLayout = () => {
         className="hidden md:flex"
       />
 
-      {/* 로그인 or 프로필 */}
-      {renderAuthButtons()}
+      {/* 로그인 상태에 따라 */}
+      {loginstate.token ? (
+        <UserMenuDropdown />
+      ) : (
+        <Space>
+          <Button
+            type="default"
+            onClick={() => showModal("login")}
+            className="text-sb-teal hover:text-sb-purple"
+          >
+            로그인
+          </Button>
+          <Button type="primary" className="bg-sb-teal hover:bg-sb-gold">
+            <Link to="/users/signup">회원가입</Link>
+          </Button>
+        </Space>
+      )}
     </Header>
   );
 };

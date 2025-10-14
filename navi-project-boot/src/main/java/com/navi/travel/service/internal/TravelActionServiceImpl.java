@@ -57,12 +57,10 @@ public class TravelActionServiceImpl implements TravelActionService {
 
         if (likedBefore) {
             likeRepository.deleteByTravelIdAndId(travelId, userId);
-            travel.decrementLikesCount(); // ✅ 감소
         } else {
             Like like = new Like(travel, user);
-            like.setUserId(userId);
+            like.setUserId(userId); // user_id 문자열 컬럼 값 세팅
             likeRepository.save(like);
-            travel.incrementLikesCount(); // ✅ 증가
         }
 
         return !likedBefore;
@@ -88,12 +86,10 @@ public class TravelActionServiceImpl implements TravelActionService {
 
         if (bookmarkedBefore) {
             bookmarkRepository.deleteByTravelIdAndId(travelId, userId);
-            travel.decrementBookmarkCount(); // ✅ 감소
         } else {
             Bookmark bookmark = new Bookmark(travel, user);
             bookmark.setUserId(userId);
             bookmarkRepository.save(bookmark);
-            travel.incrementBookmarkCount(); // ✅ 증가
         }
 
         return !bookmarkedBefore;

@@ -89,7 +89,7 @@ export const useKakaoMap = (containerId) => {
   // updateMap: create map if needed and set marker/overlay
   const updateMap = useCallback(
     (item) => {
-      const { title, latitude, longitude, thumbnailPath } = item || {};
+      const { title, latitude, longitude, thumbnailPath,imagePath } = item || {};
 
       if (!isMapLoaded) {
         console.log("[KakaoMap] SDK not ready. Skipping updateMap.");
@@ -133,18 +133,18 @@ export const useKakaoMap = (containerId) => {
       // 현재 페이지가 상세 페이지(HIDE_OVERLAY_ID)인지 확인
       const shouldShowOverlay = containerId !== HIDE_OVERLAY_ID;
       if (shouldShowOverlay) {
-        const imageSrc = thumbnailPath || 'https://placehold.co/100x100/cccccc/333333?text=No';
+        const imageSrc = imagePath || thumbnailPath || 'https://placehold.co/100x100/cccccc/333333?text=No';
         const content = `
             <div style="
               width: 220px;
               background: white;
               border-radius: 12px;
-              overflow: hidden;
+              overflow: hidden;              
               box-shadow: 0px 5px 10px 0px rgba(0,0,0,0.1);
               font-family: sans-serif;
             ">
               <div style="width:100%; height:140px; overflow:hidden;  ">
-                <img src="${imageSrc}" style="width:100%; height:100%; object-fit:cover;  border-radius: 12px;" 
+                <img src="${imageSrc}" style="width:100%; height:100%; object-fit:cover; object-position: center; border-radius: 12px;" 
                   onerror="this.onerror=null;this.src='https://placehold.co/220x140/cccccc/333333?text=No'"/>
               </div>
                 <div style="padding:8px 12px; font-size:16px; font-weight:bold; color:#111; background: white;border-radius:0px 0px 12px 12px;">

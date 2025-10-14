@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /*
- * ApiFlightService
+ * ✈️ ApiFlightService
  * - 공공데이터포털 국내선 항공편 조회 API 호출 전용 서비스
  * - 실제 API 연동 or JSON Mock 데이터 로드 가능
  */

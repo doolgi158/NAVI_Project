@@ -1,4 +1,4 @@
-// // src/routes/AccRouter.jsx
+// src/routes/AccRouter.jsx
 import { Suspense, lazy } from "react";
 
 const Loading = <div>Loading....</div>;
@@ -6,7 +6,6 @@ const AccList = lazy(() => import("../../users/pages/acc/AccListPage.jsx"));
 const AccDetail = lazy(() => import("../../users/pages/acc/AccDetailPage.jsx"));
 const AccReserve = lazy(() => import("../../users/pages/acc/AccReservationPage.jsx"));
 const AccPayment = lazy(() => import("../../users/pages/acc/AccPaymentPage.jsx"));
-const AccResult = lazy(() => import("../../users/pages/acc/AccResultPage.jsx"));
 
 const AccRouter = () => {
   return [
@@ -20,7 +19,6 @@ const AccRouter = () => {
     },
     {
       path: ":accId",
-      // path: "/detail",
       element: (
         <Suspense fallback={Loading}>
           <AccDetail />
@@ -29,7 +27,6 @@ const AccRouter = () => {
     },
     {
       path: ":accId/:roomId/reservation",
-      // path: "/detail/reservation",
       element: (
         <Suspense fallback={Loading}>
           <AccReserve />
@@ -41,14 +38,6 @@ const AccRouter = () => {
       element: (
         <Suspense fallback={Loading}>
           <AccPayment />
-        </Suspense>
-      ),
-    },
-    {
-      path: ":accId/:roomId/result",
-      element: (
-        <Suspense fallback={Loading}>
-          <AccResult />
         </Suspense>
       ),
     },

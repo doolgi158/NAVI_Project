@@ -1,13 +1,15 @@
 package com.navi.flight.service;
 
-import com.navi.flight.domain.Seat;
-import com.navi.flight.dto.SeatResponseDTO;
-import java.time.LocalDateTime;
+import com.navi.flight.domain.Flight;
+import com.navi.flight.dto.SeatStatusDTO;
+
 import java.util.List;
 
 public interface SeatService {
-    List<SeatResponseDTO> getSeatsByFlight(String flightId, LocalDateTime depTime);
-    List<Seat> autoAssignSeats(String flightId, LocalDateTime depTime, int passengerCount);
-    boolean ensureSeatsInitialized(String flightId, LocalDateTime depTime);
+
+    void createSeatsIfNotExists(Flight flight);
+
+    List<SeatStatusDTO> getSeatStatusByFlight();          // 전체 항공편 좌석 현황
+    SeatStatusDTO getSeatStatusByFlightId(String flightId); // 특정 항공편 좌석 현황
 }
 
