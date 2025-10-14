@@ -5,10 +5,12 @@ import { Button, Avatar, Card, message, Skeleton } from "antd";
 import { UserOutlined } from "@ant-design/icons";
 import { motion } from "framer-motion";
 import MainLayout from "../../layout/MainLayout";
+import { useNavigate } from "react-router-dom";
 
 const UserMyPage = () => {
   const [user, setUser] = useState({});
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     axios
@@ -55,7 +57,10 @@ const UserMyPage = () => {
                   className="shadow-lg ring-2 ring-indigo-200"
                 />
                 <div>
-                  <h2 className="text-2xl font-semibold text-gray-800">
+                  <h2 
+                    className="text-2xl font-semibold text-gray-800"
+                    onClick={() => navigate("/users/detail")}
+                  >
                     {user?.name || "사용자"} 님
                   </h2>
                   <p className="text-gray-500">{user?.email}</p>
