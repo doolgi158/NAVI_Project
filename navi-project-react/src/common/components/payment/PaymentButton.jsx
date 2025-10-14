@@ -2,41 +2,68 @@ import React from "react";
 
 /**
  * ✅ PaymentButton
- * 결제 요청을 수행하는 공통 컴포넌트 (현재는 숙소 전용 테스트용)
+ * 결제 요청 공통 컴포넌트
+ * - props:
+ *    - amount: 결제 금액
+ *    - buyer: { name, email, phone }
+ *    - pgType: "kakaopay" | "tosspay" | "inipay"
+ *    - onSuccess: 결제 성공 콜백
  */
-const PaymentButton = ({ amount, buyer, onSuccess }) => {
+const PaymentButton = ({ amount, buyer, pgType = "kakaopay", onSuccess }) => {
   const handlePayment = () => {
-    const { IMP } = window; // 아임포트 객체 불러오기
+    const { IMP } = window;
     if (!IMP) {
-      alert("결제 모듈이 로드되지 않았습니다. index.html 스크립트 확인하세요.");
+      alert("아임포트 SDK가 로드되지 않았습니다. index.html을 확인하세요.");
       return;
     }
 
-    // ✅ 테스트용 아임포트 가맹점 식별코드
-    IMP.init("imp76209123");
+    // ✅ 아임포트 상점 코드 (환경변수에서)
+    const iamportCode = import.meta.env.VITE_IAMPORT_CODE;
+    IMP.init(iamportCode);
 
-    // ✅ 결제 요청 정보
+    // ✅ PG사별 코드 및 채널키 분기
+    let pg, channelKey;
+    switch (pgType) {
+      case "kakaopay":
+        pg = "kakaopay.TC0ONETIME";
+        channelKey = import.meta.env.VITE_KAKAOPAY_CHANNEL_KEY;
+        break;
+      case "tosspay":
+        pg = "tosspay.tosstest";
+        channelKey = import.meta.env.VITE_TOSSPAY_CHANNEL_KEY;
+        break;
+      case "inipay":
+        pg = "html5_inicis.INIpayTest";
+        channelKey = import.meta.env.VITE_INIPAY_CHANNEL_KEY;
+        break;
+      default:
+        pg = "kakaopay.TC0ONETIME";
+        channelKey = import.meta.env.VITE_KAKAOPAY_CHANNEL_KEY;
+    }
+
+    // ✅ 결제 요청 데이터
     const data = {
-      pg: "channel-key-554c1c37-6075-43e7-a698-ef5a10d268f0", // 카카오페이 테스트 채널
+      pg,
       pay_method: "card",
-      merchant_uid: `order_${Date.now()}`, // 고유 주문번호
+      merchant_uid: `order_${Date.now()}`,
       name: "숙소 예약 결제 테스트",
-      amount: amount, // 금액
-      buyer_name: buyer.name,
-      buyer_email: buyer.email,
-      buyer_tel: buyer.phone,
+      amount: amount || 10000,
+      buyer_name: buyer?.name || "홍길동",
+      buyer_email: buyer?.email || "example@email.com",
+      buyer_tel: buyer?.phone || "010-0000-0000",
+      custom_data: { channelKey }, // 필요 시 백엔드 전달
     };
+
+    console.log("💳 결제 요청 데이터:", data);
 
     // ✅ 결제창 호출
     IMP.request_pay(data, async (rsp) => {
       if (rsp.success) {
         console.log("✅ 결제 성공:", rsp);
-
-        // 백엔드 검증 (지금은 콘솔만 확인)
-        alert("결제 성공! imp_uid: " + rsp.imp_uid);
-        onSuccess(rsp); // 부모 컴포넌트로 성공 결과 전달
+        alert(`결제 성공! imp_uid: ${rsp.imp_uid}`);
+        onSuccess?.(rsp);
       } else {
-        alert("❌ 결제 실패: " + rsp.error_msg);
+        alert(`❌ 결제 실패: ${rsp.error_msg}`);
       }
     });
   };

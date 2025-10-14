@@ -7,6 +7,7 @@ import AdminRouter from "./AdminRouter.jsx";
 import AccRouter from "./AccRouter.jsx";
 import UserRouter from "./UserRouter.jsx";
 import DeliveryRouter from "./DeliveryRouter.jsx"
+import PaymentRouter from "./PaymentRouter.jsx";
 
 const Loading = <div></div>
 const Main = lazy(() => import("../../users/pages/UserMainPage.jsx"))
@@ -47,6 +48,10 @@ const root = createBrowserRouter([
     {
         path: "/users",
         children: [...UserRouter()]
+    },
+    {
+        path: "/payments",
+        children: [...PaymentRouter()]
     },
 ]
 }

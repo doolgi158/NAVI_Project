@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const API_SERVER_HOST = "http://localhost:8080";
-const BASE_PREFIX = `${API_SERVER_HOST}/api`;
+//const BASE_PREFIX = `${API_SERVER_HOST}/api`;
 
 // ✅ 공통 axios 인스턴스
 const api = axios.create({
@@ -13,7 +13,6 @@ api.interceptors.request.use((config) => {
   const token = localStorage.getItem("accessToken");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
-  } else {
   }
   return config;
 });

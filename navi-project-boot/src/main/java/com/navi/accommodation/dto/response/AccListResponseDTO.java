@@ -19,7 +19,7 @@ public class AccListResponseDTO {
     private String address;             // 숙소 주소
 
     private List<String> accImages;     // Todo: 숙소 이미지
-    private Integer minPrice;           // Todo: 예약 가능 객실 중 최저가
+    private Integer minPrice;           // 예약 가능 객실 중 최저가
     private Integer remainingRooms;     // Todo: 예약 가능 잔여 객실 수
 
     /* Entity → DTO 변환 */
@@ -28,7 +28,7 @@ public class AccListResponseDTO {
                 .accId(acc.getAccId())           // 숙소 ID
                 .title(acc.getTitle())           // 숙소명
                 .address(acc.getAddress())       // 주소
-                // Todo: minPrice, remainingRooms, images는 추후 예약 연동 시 계산 예정
                 .build();
     }
+    // Todo: minPrice, remainingRooms, images는 추후 예약 연동 시 계산 예정
 }

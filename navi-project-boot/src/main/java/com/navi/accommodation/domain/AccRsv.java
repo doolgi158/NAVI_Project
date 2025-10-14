@@ -1,13 +1,10 @@
 package com.navi.accommodation.domain;
 
-/*
- * ==============================
- * [NAVI_RSV_DETAIL] - RsvDetail
- * : 예약 상세 정보 테이블
- * ==============================
- */
+/* =======[NAVI_RSV_DETAIL]=======
+         예약 상세 정보 테이블
+   =============================== */
 
-import com.navi.reservation.domain.Rsv;
+//import com.navi.reservation.domain.Rsv;
 import com.navi.room.domain.Room;
 import jakarta.persistence.*;
 import lombok.*;
@@ -34,9 +31,9 @@ public class AccRsv {
     private Long detailId;
 
     // 예약 ID (예: 20250423ACC011)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reserve_id", nullable = false)
-    private Rsv rsv;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "reserve_id", nullable = false)
+//    private Rsv rsv;
 
     // 객실 ID (예: ROM003)
     @ManyToOne(fetch = FetchType.LAZY)
