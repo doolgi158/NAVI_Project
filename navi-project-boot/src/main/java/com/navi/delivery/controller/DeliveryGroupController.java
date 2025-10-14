@@ -19,7 +19,7 @@ public class DeliveryGroupController {
 
     private final DeliveryGroupService deliveryGroupService;
 
-    /**
+    /*
      * 모든 배차 그룹 조회
      */
     @GetMapping
@@ -27,7 +27,7 @@ public class DeliveryGroupController {
         return ResponseEntity.ok(deliveryGroupService.getAllGroups());
     }
 
-    /**
+    /*
      * 특정 그룹 조회
      */
     @GetMapping("/{groupId}")
@@ -37,7 +37,7 @@ public class DeliveryGroupController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    /**
+    /*
      * 그룹 생성/수정
      */
     @PostMapping
@@ -45,7 +45,7 @@ public class DeliveryGroupController {
         return ResponseEntity.ok(deliveryGroupService.saveGroup(group));
     }
 
-    /**
+    /*
      * 그룹 삭제
      */
     @DeleteMapping("/{groupId}")

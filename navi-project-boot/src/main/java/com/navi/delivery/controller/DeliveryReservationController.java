@@ -28,8 +28,8 @@ public class DeliveryReservationController {
         return ResponseEntity.ok(ApiResponse.success(reservation));
     }
 
-    /**
-     * ✅ 2. 특정 사용자 예약 목록 조회
+    /*
+     * 2. 특정 사용자 예약 목록 조회
      * - /api/delivery/user/{userNo}
      */
     @GetMapping("/user/{userNo}")
@@ -38,8 +38,8 @@ public class DeliveryReservationController {
         return ResponseEntity.ok(ApiResponse.success(reservations));
     }
 
-    /**
-     * ✅ 3. 단일 예약 상세 조회
+    /*
+     * 3. 단일 예약 상세 조회
      * - /api/delivery/rsv/{drsvId}
      */
     @GetMapping("/rsv/{drsvId}")
@@ -48,8 +48,8 @@ public class DeliveryReservationController {
         return ResponseEntity.ok(ApiResponse.success(reservation));
     }
 
-    /**
-     * ✅ 4. 예약 상태 변경 (결제 완료 등)
+    /*
+     * 4. 예약 상태 변경 (결제 완료 등)
      * - 예시: /api/delivery/rsv/{drsvId}/status?value=PAID
      */
     @PatchMapping("/rsv/{drsvId}/status")

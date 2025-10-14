@@ -28,24 +28,24 @@ public class DeliveryReservationServiceImpl implements DeliveryReservationServic
     private final BagRepository bagRepository;
     private final DeliveryGroupRepository groupRepository;
 
-    /**
+    /*
      * 짐배송 예약 등록 (그룹 자동 생성)
      */
     @Override
     @Transactional
     public DeliveryReservation createReservation(DeliveryReservationDTO dto) {
-        // 1️⃣ 사용자 조회
+        // 1.사용자 조회
         User user = userRepository.findById(dto.getUserNo())
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
-        // 2️⃣ 가방 정보 조회
+        // 2.가방 정보 조회
         Bag bag = bagRepository.findById(dto.getBagId())
                 .orElseThrow(() -> new IllegalArgumentException("가방 정보를 찾을 수 없습니다."));
 
-        // 3️⃣ 주소 기반 지역 추출
+        // 3.주소 기반 지역 추출
         String region = dto.getEndAddr().contains("서귀포") ? "서귀포시" : "제주시";
 
-        // 4️⃣ 그룹 자동 생성 or 조회
+        // 4.그룹 자동 생성 or 조회
         LocalDate deliveryDate = dto.getDeliveryDate();
         String timeSlot = "오전"; // 기본값
 
@@ -67,12 +67,12 @@ public class DeliveryReservationServiceImpl implements DeliveryReservationServic
                     return groupRepository.save(newGroup);
                 });
 
-        // 5️⃣ 예약 ID 생성 (예: 20251014DVL0001)
+        // 5.예약 ID 생성 (예: 20251014DVL0001)
         String datePart = LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE);
         long count = reservationRepository.count();
         String drsvId = String.format("%sDVL%04d", datePart, count + 1);
 
-        // 6️⃣ 예약 생성
+        // 6.예약 생성
         DeliveryReservation reservation = DeliveryReservation.builder()
                 .drsvId(drsvId)
                 .user(user)
@@ -85,11 +85,11 @@ public class DeliveryReservationServiceImpl implements DeliveryReservationServic
                 .status("PENDING")
                 .build();
 
-        // 7️⃣ 저장 및 반환
+        // 7.저장 및 반환
         return reservationRepository.save(reservation);
     }
 
-    /**
+    /*
      * 특정 사용자 예약 목록 조회
      */
     @Override
@@ -97,7 +97,7 @@ public class DeliveryReservationServiceImpl implements DeliveryReservationServic
         return reservationRepository.findByUser_No(userNo);
     }
 
-    /**
+    /*
      * 단일 예약 상세 조회
      */
     @Override
@@ -106,7 +106,7 @@ public class DeliveryReservationServiceImpl implements DeliveryReservationServic
                 .orElseThrow(() -> new IllegalArgumentException("해당 예약을 찾을 수 없습니다."));
     }
 
-    /**
+    /*
      * 예약 상태 업데이트 (결제 완료 등)
      */
     @Override
