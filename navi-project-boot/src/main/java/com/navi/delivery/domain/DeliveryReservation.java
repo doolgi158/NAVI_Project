@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "NAVI_DELIVERY_RESERVATION")
+@Table(name = "NAVI_dRsv")
 @Getter
 @Setter
 @NoArgsConstructor
