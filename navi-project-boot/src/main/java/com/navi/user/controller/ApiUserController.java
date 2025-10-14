@@ -7,6 +7,7 @@ import com.navi.user.repository.UserRepository;
 import com.navi.user.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,6 +36,17 @@ public class ApiUserController {
     public ResponseEntity<ApiResponse<UserResponseDTO>> getMyInfo(@RequestHeader("Authorization") String token) {
         return ResponseEntity.ok(ApiResponse.success(userService.getMyInfo(token)));
     }
+
+    // 회원 정보 수정
+    @PutMapping("/me")
+    public ApiResponse<UserResponseDTO> updateUserInfo(
+            @AuthenticationPrincipal com.navi.user.dto.users.UserSecurityDTO loginUser,
+            @RequestBody UserRequestDTO dto
+    ) {
+        UserResponseDTO updated = userService.updateUserInfo(loginUser.getUsername(), dto);
+        return ApiResponse.success(updated);
+    }
+
 
     @PostMapping("/profile")
     public ResponseEntity<ApiResponse<String>> uploadProfile(

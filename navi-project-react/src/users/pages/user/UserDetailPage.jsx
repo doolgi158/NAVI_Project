@@ -18,7 +18,7 @@ const UserDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
 
-  // ✅ 사용자 정보 불러오기
+  // 사용자 정보 불러오기
   useEffect(() => {
     axios
       .get(`${API_SERVER_HOST}/api/users/me`, {
@@ -41,7 +41,7 @@ const UserDetailPage = () => {
       .finally(() => setLoading(false));
   }, [form]);
 
-  // ✅ 회원 정보 수정 저장
+  // 회원 정보 수정 저장
   const handleSave = async () => {
     try {
       const values = await form.validateFields();
@@ -65,7 +65,7 @@ const UserDetailPage = () => {
     }
   };
 
-  // ✅ 프로필 이미지 업로드
+  // 프로필 이미지 업로드
   const handleUpload = async ({ file }) => {
     const formData = new FormData();
     formData.append("file", file);
@@ -87,7 +87,7 @@ const UserDetailPage = () => {
     }
   };
 
-  // ✅ 회원탈퇴
+  // 회원탈퇴
   const handleDeleteAccount = () => {
     confirm({
       title: "정말 탈퇴하시겠습니까?",
@@ -130,7 +130,7 @@ const UserDetailPage = () => {
           >
             {user && (
               <>
-                {/* 🖼️ 프로필 이미지 섹션 */}
+                {/* 프로필 이미지 섹션 */}
                 <div className="flex flex-col items-center mb-8">
                   <Avatar
                     size={120}
@@ -150,96 +150,122 @@ const UserDetailPage = () => {
                   </Upload>
                 </div>
 
-                {/* ✏️ 사용자 정보 폼 */}
+                {/* 사용자 정보 폼 */}
                 <Form
-                  form={form}
-                  layout="vertical"
-                  disabled={!editing}
-                  className="space-y-4"
+                form={form}
+                layout="vertical"
+                className="space-y-4"
                 >
-                  <Form.Item
-                    label="이름"
-                    name="name"
-                    rules={[{ required: true, message: "이름을 입력하세요." }]}
-                  >
+                {/* 이름 */}
+                <Form.Item label="이름" name="name">
+                    {editing ? (
                     <Input placeholder="이름 입력" />
-                  </Form.Item>
+                    ) : (
+                    <div className="py-2 px-3 border border-gray-200 rounded-md bg-gray-50">
+                        {user?.name || "-"}
+                    </div>
+                    )}
+                </Form.Item>
 
-                  <Form.Item
-                    label="전화번호"
-                    name="phone"
-                    rules={[
-                      { required: true, message: "전화번호를 입력하세요." },
-                      { pattern: /^[0-9]{10,11}$/, message: "숫자만 입력하세요." },
-                    ]}
-                  >
+                {/* 전화번호 */}
+                <Form.Item label="전화번호" name="phone">
+                    {editing ? (
                     <Input placeholder="01012345678" />
-                  </Form.Item>
+                    ) : (
+                    <div className="py-2 px-3 border border-gray-200 rounded-md bg-gray-50">
+                        {user?.phone || "-"}
+                    </div>
+                    )}
+                </Form.Item>
 
-                  <Form.Item label="생년월일" name="birth">
+                {/* 생년월일 */}
+                <Form.Item label="생년월일" name="birth">
+                    {editing ? (
                     <DatePicker
-                      className="w-full"
-                      format="YYYY-MM-DD"
-                      disabledDate={(date) => date.isAfter(dayjs())}
+                        className="w-full"
+                        format="YYYY-MM-DD"
+                        disabledDate={(date) => date.isAfter(dayjs())}
                     />
+                    ) : (
+                    <div className="py-2 px-3 border border-gray-200 rounded-md bg-gray-50">
+                        {user?.birth || "-"}
+                    </div>
+                    )}
                   </Form.Item>
 
-                  <Form.Item
-                    label="이메일"
-                    name="email"
-                    rules={[{ type: "email", message: "올바른 이메일 형식이 아닙니다." }]}
-                  >
+                {/* 이메일 */}
+                <Form.Item label="이메일" name="email">
+                    {editing ? (
                     <Input placeholder="example@email.com" />
-                  </Form.Item>
+                    ) : (
+                    <div className="py-2 px-3 border border-gray-200 rounded-md bg-gray-50">
+                        {user?.email || "-"}
+                    </div>
+                    )}
+                </Form.Item>
 
-                  <Form.Item label="성별" name="gender">
+                {/* 성별 */}
+                <Form.Item label="성별" name="gender">
+                    {editing ? (
                     <Select placeholder="성별 선택">
-                      <Option value="M">남성</Option>
-                      <Option value="F">여성</Option>
+                        <Option value="M">남성</Option>
+                        <Option value="F">여성</Option>
                     </Select>
-                  </Form.Item>
+                    ) : (
+                    <div className="py-2 px-3 border border-gray-200 rounded-md bg-gray-50">
+                        {user?.gender === "M" ? "남성" : user?.gender === "F" ? "여성" : "-"}
+                    </div>
+                    )}  
+                </Form.Item>
 
-                  <Form.Item label="내/외국인" name="local">
+                {/* 내/외국인 */}
+                <Form.Item label="내/외국인" name="local">
+                    {editing ? (
                     <Select placeholder="국적 선택">
-                      <Option value="내국인">내국인</Option>
-                      <Option value="외국인">외국인</Option>
+                        <Option value="L">내국인</Option>
+                        <Option value="F">외국인</Option>
                     </Select>
-                  </Form.Item>
+                    ) : (
+                    <div className="py-2 px-3 border border-gray-200 rounded-md bg-gray-50">
+                        {user?.local || "-"}
+                    </div>
+                    )}
+                </Form.Item>
+                </Form>
 
-                  {/* 버튼 영역 */}
-                  <div className="flex justify-between items-center mt-8">
+                {/* 버튼 영역 */}
+                <div className="flex justify-between items-center mt-8">
                     <Button
-                      danger
-                      onClick={handleDeleteAccount}
-                      className="hover:bg-red-50"
+                        danger
+                        onClick={handleDeleteAccount}
+                        className="hover:bg-red-50"
                     >
-                      회원 탈퇴
+                        회원 탈퇴
                     </Button>
 
                     <div className="flex gap-3">
-                      {!editing ? (
+                        {!editing ? (
                         <Button
-                          type="primary"
-                          onClick={() => setEditing(true)}
-                          className="bg-indigo-500 hover:bg-indigo-600"
-                        >
-                          수정하기
-                        </Button>
-                      ) : (
-                        <>
-                          <Button onClick={() => setEditing(false)}>취소</Button>
-                          <Button
                             type="primary"
-                            onClick={handleSave}
+                            onClick={() => setEditing(true)}
                             className="bg-indigo-500 hover:bg-indigo-600"
-                          >
-                            저장
-                          </Button>
+                        >
+                            수정하기
+                        </Button>
+                        ) : (
+                        <>
+                            <Button onClick={() => setEditing(false)}>취소</Button>
+                            <Button
+                                type="primary"
+                                onClick={handleSave}
+                                className="bg-indigo-500 hover:bg-indigo-600"
+                            >
+                                저장
+                            </Button>
                         </>
-                      )}
+                        )}
                     </div>
-                  </div>
-                </Form>
+                </div>
               </>
             )}
           </Card>
