@@ -14,7 +14,7 @@ const Appshell = lazy(() => import("../../Appshell.jsx"))
 
 const root = createBrowserRouter([
     { 
-        element: <Appshell />,
+        element: <Suspense fallback={Loding}> <Appshell /> </Suspense>,
         children: [
     {
         path: "/",

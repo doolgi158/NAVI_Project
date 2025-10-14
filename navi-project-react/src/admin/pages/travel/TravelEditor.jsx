@@ -1,9 +1,7 @@
 import React, { useRef, useState, useMemo } from "react";
-import ReactQuill, { Quill } from "react-quill";
-import "react-quill/dist/quill.snow.css";
 import hljs from "highlight.js";
 import "highlight.js/styles/github.css";
-import ImageResize from "quill-image-resize-module-react";
+
 // ✅ 드래그 앤 드롭 기능을 위해 quill-image-drop-module을 설치했다고 가정
 // import ImageDrop from "quill-image-drop-module"; 
 
@@ -22,6 +20,9 @@ if (typeof Quill !== "undefined" && !Quill.imports["modules/imageResize"]) {
 const TravelEditor = ({ value = "", onChange }) => {
   const quillRef = useRef(null);
   const [height, setHeight] = useState(500);
+  useEffect(() => {
+    hljs.highlightAll(); // ✅ 이제 안전하게 실행됨
+  }, []);
 
   // ✅ 툴바, 하이라이트, 이미지리사이즈 등 모듈 설정
   const modules = useMemo(
