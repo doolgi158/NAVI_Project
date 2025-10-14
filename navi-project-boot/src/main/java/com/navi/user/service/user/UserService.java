@@ -14,10 +14,7 @@ public interface UserService {
 
     // 리액트에서 JWT토큰으로 검색
     UserResponseDTO getMyInfo(String token);
-    String uploadProfile(String token, MultipartFile file);
-    void deleteProfile(String token);
     void changePassword(String token, String oldPw, String newPw);
 
     UserResponseDTO updateUserInfo(String username, UserRequestDTO dto);
-    void updateProfileImage(String username, String imageUrl);
 }

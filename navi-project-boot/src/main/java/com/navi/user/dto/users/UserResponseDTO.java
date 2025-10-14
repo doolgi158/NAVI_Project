@@ -24,9 +24,8 @@ public class UserResponseDTO {
     private UserState userState;    // 유저 상태
     private String signUp;          // 가입일
     private String token;           // 토큰
-    private String path;            // 프로필 URL
 
-    public static UserResponseDTO from(User user, Image profile) {
+    public static UserResponseDTO from(User user) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
         return UserResponseDTO.builder()
@@ -39,7 +38,6 @@ public class UserResponseDTO {
                 .gender(user.getGender())
                 .local(user.getLocal())
                 .signUp(user.getSignUp() != null ? user.getSignUp().format(formatter) : null)
-                .path(profile != null ? profile.getPath() : null)
                 .build();
     }
 }

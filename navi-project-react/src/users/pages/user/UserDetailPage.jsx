@@ -72,7 +72,7 @@ const UserDetailPage = () => {
 
     setUploading(true);
     try {
-      const res = await axios.post(`${API_SERVER_HOST}/api/users/me/profile`, formData, {
+      const res = await axios.post(`${API_SERVER_HOST}/api/images/upload`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,

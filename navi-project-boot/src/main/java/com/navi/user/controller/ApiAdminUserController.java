@@ -106,7 +106,13 @@ public class ApiAdminUserController {
                     .userBirth(user.getBirth())
                     .userEmail(user.getEmail())
                     .userPhone(user.getPhone())
-                    .userLocal(user.getLocal().equals("L") ? "내국인" : "외국인")
+                    .userLocal(
+                            user.getLocal() == null
+                                    ? "미상"
+                                    : user.getLocal().equals("L")
+                                    ? "내국인"
+                                    : "외국인"
+                    )
                     .userSignup(formattedSignUp)
                     .userState(user.getUserState().toString())
                     .historyIp(recent != null ? recent.getIp() : "-")

@@ -2,6 +2,7 @@ package com.navi.user.controller;
 
 import com.navi.common.response.ApiResponse;
 import com.navi.image.domain.Image;
+import com.navi.image.dto.ImageDTO;
 import com.navi.image.service.ImageService;
 import com.navi.user.dto.users.UserRequestDTO;
 import com.navi.user.dto.users.UserResponseDTO;
@@ -55,26 +56,6 @@ public class ApiUserController {
     ) {
         UserResponseDTO updated = userService.updateUserInfo(loginUser.getUsername(), dto);
         return ApiResponse.success(updated);
-    }
-
-    @PostMapping("/profile")
-    public ResponseEntity<Map<String, Object>> uploadProfile(
-            @RequestParam("file") MultipartFile file,
-            @AuthenticationPrincipal UserSecurityDTO user) throws IOException {
-
-        Image image = imageService.uploadUserProfile(file, user.getNo());
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("url", image.getPath());
-        response.put("message", "프로필 업로드 성공");
-
-        return ResponseEntity.ok(response);
-    }
-
-    @DeleteMapping("/profile")
-    public ResponseEntity<ApiResponse<Void>> deleteProfile(@RequestHeader("Authorization") String token) {
-        userService.deleteProfile(token);
-        return ResponseEntity.ok(ApiResponse.success(null));
     }
 
     @PutMapping("/password")
