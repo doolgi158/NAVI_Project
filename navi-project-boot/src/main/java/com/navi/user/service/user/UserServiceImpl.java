@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 @Service
@@ -115,6 +116,27 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
+    public UserResponseDTO updateUserInfo(String username, UserRequestDTO dto) {
+        User user = userRepository.findById(username)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        // 수정 가능한 필드 업데이트
+        user = user.toBuilder()
+                .name(dto.getName())
+                .phone(dto.getPhone())
+                .birth(dto.getBirth())
+                .email(dto.getEmail())
+                .gender(dto.getGender())
+                .local(dto.getLocal())
+                .build();
+
+        User saved = userRepository.save(user);
+
+        // DTO 반환
+        return UserResponseDTO.from(saved, (Image) null);
+    }
+
+    @Override
     public UserResponseDTO signup(UserRequestDTO dto) {
         // 아이디 중복검사
         if (userRepository.existsById(dto.getId())) {
@@ -141,6 +163,7 @@ public class UserServiceImpl implements UserService{
 
         // 저장
         User saved = userRepository.save(user);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
         // 반환 DTO
         return UserResponseDTO.builder()
@@ -153,7 +176,7 @@ public class UserServiceImpl implements UserService{
                 .id(saved.getId())
                 .local(saved.getLocal())
                 .userState(saved.getUserState())
-                .signUp(saved.getSignUp())
+                .signUp(saved.getSignUp() != null ? saved.getSignUp().format(formatter) : null)
                 .build();
     }
 }

@@ -58,13 +58,13 @@ const UserMyPage = () => {
                 />
                 <div>
                   <h2 
-                    className="text-2xl font-semibold text-gray-800"
+                    className="text-2xl font-semibold text-gray-800 cursor-pointer hover:text-indigo-500 transition-colors"
                     onClick={() => navigate("/users/detail")}
                   >
                     {user?.name || "사용자"} 님
                   </h2>
                   <p className="text-gray-500">{user?.email}</p>
-                  <p className="text-sm text-gray-400 mt-1">
+                  <p className="text-sm text-gray-400 mt-1 cursor-pointer">
                     가입일: {user?.signUp || "-"}
                   </p>
                 </div>

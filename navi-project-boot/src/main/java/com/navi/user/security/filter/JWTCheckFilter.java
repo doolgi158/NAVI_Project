@@ -3,6 +3,8 @@ package com.navi.user.security.filter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.navi.common.response.ApiResponse;
 import com.navi.user.dto.JWTClaimDTO;
+import com.navi.user.dto.users.UserSecurityDTO;
+import com.navi.user.enums.UserState;
 import com.navi.user.security.util.JWTUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -20,15 +22,20 @@ import java.io.PrintWriter;
 import java.util.List;
 
 @Slf4j
-@RequiredArgsConstructor
 public class JWTCheckFilter extends OncePerRequestFilter {
-
     private final JWTUtil jwtUtil;
-    private final ObjectMapper objectMapper = new ObjectMapper(); // ✅ Jackson 사용
+    private final ObjectMapper objectMapper = new ObjectMapper(); // Jackson 사용
+
+    public JWTCheckFilter(JWTUtil jwtUtil) {
+        this.jwtUtil = jwtUtil;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+
+        log.info("[JWT FILTER] Start filtering request: {}", request.getRequestURI());
+        log.info("[JWT FILTER] Header: {}", request.getHeader("Authorization"));
 
         String header = request.getHeader("Authorization");
 
@@ -52,37 +59,45 @@ public class JWTCheckFilter extends OncePerRequestFilter {
             try {
                 // JWT 검증
                 String accessToken = authHeader.substring(7);
-
                 JWTClaimDTO claim = jwtUtil.validateAndParse(accessToken);
-                String role = claim.getPrimaryRole();
+
                 List<SimpleGrantedAuthority> authorities = claim.getRole().stream()
                         .map(r -> new SimpleGrantedAuthority("ROLE_" + r))
                         .toList();
 
+                // principal을 UserSecurityDTO로 생성
+                UserSecurityDTO userSecurityDTO = new UserSecurityDTO(
+                        claim.getName(),
+                        claim.getPhone(),
+                        claim.getBirth(),
+                        claim.getEmail(),
+                        claim.getId(),
+                        "N/A", // 비밀번호는 JWT 기반 인증이므로 불필요
+                        UserState.NORMAL, // JWT 안에 상태값이 있으면 claim에서 꺼내서 넣어도 됨
+                        claim.getRole()
+                );
+
                 UsernamePasswordAuthenticationToken auth =
-                        new UsernamePasswordAuthenticationToken(
-                                claim.getId(), null, authorities);
+                        new UsernamePasswordAuthenticationToken(userSecurityDTO, null, authorities);
 
                 SecurityContextHolder.getContext().setAuthentication(auth);
+                log.info("[JWT FILTER] Authenticated principal: {}", userSecurityDTO.getId());
 
             } catch (Exception e) {
-                // ✅ JWT 오류 응답 - Jackson 사용
+                // JWT 오류 응답 - Jackson 사용
                 ApiResponse<Object> apiResponse = ApiResponse.error("잘못되거나 만료된 토큰입니다.", 401, null);
 
                 response.setContentType("application/json; charset=UTF-8");
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
                 PrintWriter writer = response.getWriter();
-                objectMapper.findAndRegisterModules(); // ✅ LocalDateTime 직렬화 지원
+                objectMapper.findAndRegisterModules(); // LocalDateTime 직렬화 지원
                 objectMapper.writeValue(writer, apiResponse);
                 writer.flush();
                 writer.close();
                 return; // 필터 체인 중단
             }
         }
-
-        log.info("[JWT FILTER] Header: {}", request.getHeader("Authorization"));
-        log.info("[JWT FILTER] Auth set: {}", SecurityContextHolder.getContext().getAuthentication());
         filterChain.doFilter(request, response);
     }
 

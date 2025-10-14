@@ -17,4 +17,6 @@ public interface UserService {
     String uploadProfile(String token, MultipartFile file);
     void deleteProfile(String token);
     void changePassword(String token, String oldPw, String newPw);
+
+    UserResponseDTO updateUserInfo(String username, UserRequestDTO dto);
 }
