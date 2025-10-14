@@ -21,7 +21,7 @@ const FlightDetailPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const { depAirport, arrAirport, depDate, arrDate, seatClass } = state || {};
+  const { depAirport, arrAirport, depDate, arrDate, seatClass, passengerCount } = state || {};
 
   const formatDateTime = (dateStr) => {
     if (!dateStr) return "";
@@ -35,8 +35,7 @@ const FlightDetailPage = () => {
     return `${month}월 ${day}일 (${dayName}) ${hours}:${minutes}`;
   };
 
-  const formatPrice = (price) =>
-    `${Number(price || 0).toLocaleString("ko-KR")}원`;
+  const formatPrice = (price) => `${Number(price || 0).toLocaleString("ko-KR")}원`;
 
   const getDuration = (dep, arr) => {
     if (!dep || !arr) return "";
@@ -105,39 +104,45 @@ const FlightDetailPage = () => {
         alert("출발편을 먼저 선택해주세요.");
         return;
       }
-      if (arrDate) setStep("inbound");
-      else
+
+      // 편도 → 예약정보 페이지
+      if (!arrDate) {
         navigate(`/flight/rsv/${selectedOutbound.flightNo}`, {
-          state: { selectedOutbound },
+          state: {
+            selectedOutbound,
+            passengerCount: passengerCount || 1,
+          },
         });
+      }
+      // 왕복 → 귀국편 단계로 이동
+      else {
+        setStep("inbound");
+      }
     } else if (step === "inbound") {
-      if (loading || !inboundLoaded || flights.length === 0 || !selectedInbound)
-        return;
+      if (loading || !inboundLoaded || flights.length === 0 || !selectedInbound) return;
       navigate(`/flight/rsv/${selectedOutbound.flightNo}`, {
-        state: { selectedOutbound, selectedInbound },
+        state: {
+          selectedOutbound,
+          selectedInbound,
+          passengerCount: passengerCount || 1,
+        },
       });
     }
   };
 
   const isButtonDisabled =
     (step === "outbound" && !selectedOutbound) ||
-    (step === "inbound" &&
-      (loading || !inboundLoaded || noInbound || flights.length === 0));
+    (step === "inbound" && (loading || !inboundLoaded || noInbound || flights.length === 0));
 
-  // 정렬
   const sortedFlights = [...flights].sort((a, b) => {
     if (sortOption === "priceAsc") return a.price - b.price;
     if (sortOption === "priceDesc") return b.price - a.price;
     return new Date(a.depTime) - new Date(b.depTime);
   });
 
-  // 페이징
   const totalPages = Math.ceil(sortedFlights.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedFlights = sortedFlights.slice(
-    startIndex,
-    startIndex + itemsPerPage
-  );
+  const paginatedFlights = sortedFlights.slice(startIndex, startIndex + itemsPerPage);
 
   const goToPage = (page) => {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
@@ -148,8 +153,7 @@ const FlightDetailPage = () => {
     const maxButtons = 5;
     let start = Math.max(currentPage - Math.floor(maxButtons / 2), 1);
     let end = Math.min(start + maxButtons - 1, totalPages);
-    if (end - start < maxButtons - 1)
-      start = Math.max(end - maxButtons + 1, 1);
+    if (end - start < maxButtons - 1) start = Math.max(end - maxButtons + 1, 1);
 
     for (let i = start; i <= end; i++) {
       pages.push(
@@ -172,10 +176,9 @@ const FlightDetailPage = () => {
   return (
     <MainLayout>
       <div className="max-w-4xl mx-auto mt-10 bg-white p-8 shadow-lg rounded-xl">
-        {/* 상단 타이틀 + 정렬 */}
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold text-blue-800">
-            {step === "outbound" ? "출발편 선택" : "귀국편 선택"}
+            {step === "outbound" ? "출발편 선택" : "복귀편 선택"}
           </h2>
 
           <select
@@ -189,7 +192,6 @@ const FlightDetailPage = () => {
           </select>
         </div>
 
-        {/* 로딩/결과 */}
         {loading && <p>데이터를 불러오는 중...</p>}
         {!loading && paginatedFlights.length === 0 && !noInbound && (
           <p className="text-gray-500 text-center">항공편이 없습니다.</p>
@@ -213,9 +215,7 @@ const FlightDetailPage = () => {
                   <div className="flex justify-between items-center">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <p className="font-bold text-lg text-gray-800">
-                          {f.airlineNm}
-                        </p>
+                        <p className="font-bold text-lg text-gray-800">{f.airlineNm}</p>
                         <span className="text-xs bg-blue-50 text-blue-700 font-semibold px-2 py-1 rounded-md border border-blue-200">
                           {f.flightNo}
                         </span>
@@ -230,12 +230,10 @@ const FlightDetailPage = () => {
 
                     <div className="text-right text-gray-600">
                       <p className="text-sm flex items-center justify-end gap-1">
-                        <PlaneTakeoff size={14} /> 출발:{" "}
-                        {formatDateTime(f.depTime)}
+                        <PlaneTakeoff size={14} /> 출발: {formatDateTime(f.depTime)}
                       </p>
                       <p className="text-sm flex items-center justify-end gap-1 mb-1">
-                        <PlaneLanding size={14} /> 도착:{" "}
-                        {formatDateTime(f.arrTime)}
+                        <PlaneLanding size={14} /> 도착: {formatDateTime(f.arrTime)}
                       </p>
                       <p className="font-semibold text-blue-700 text-lg">
                         {formatPrice(f.price)}
@@ -270,9 +268,7 @@ const FlightDetailPage = () => {
               >
                 이전
               </button>
-
               {renderPageNumbers()}
-
               <button
                 onClick={() => goToPage(currentPage + 1)}
                 disabled={currentPage === totalPages}
