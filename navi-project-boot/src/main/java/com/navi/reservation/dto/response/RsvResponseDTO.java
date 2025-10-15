@@ -6,7 +6,7 @@ package com.navi.reservation.dto.response;
    ================================================== */
 
 import com.navi.reservation.domain.enums.PaymentMethod;
-import com.navi.reservation.domain.enums.RsvStatus;
+import com.navi.common.enums.RsvStatus;
 import com.navi.reservation.domain.enums.RsvType;
 import lombok.*;
 

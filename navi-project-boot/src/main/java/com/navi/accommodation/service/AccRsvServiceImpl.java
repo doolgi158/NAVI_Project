@@ -5,7 +5,6 @@
 //import com.navi.reservation.repository.RsvRepository;
 //import com.navi.room.domain.Room;
 //import com.navi.accommodation.dto.response.AccRsvResponseDTO;
-//import com.navi.accommodation.repository.AccRsvRepository;
 //import com.navi.room.repository.RoomRepository;
 //import com.navi.reservation.domain.Rsv;
 //import lombok.RequiredArgsConstructor;
@@ -13,7 +12,6 @@
 //import org.springframework.stereotype.Service;
 //import org.springframework.transaction.annotation.Transactional;
 //
-//import java.time.DayOfWeek;
 //import java.time.LocalDate;
 //import java.util.List;
 //import java.util.stream.Collectors;

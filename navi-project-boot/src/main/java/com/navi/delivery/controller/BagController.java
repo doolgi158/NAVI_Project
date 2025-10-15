@@ -19,7 +19,7 @@ public class BagController {
 
     private final BagService bagService;
 
-    /**
+    /*
      * 모든 가방 요금 조회
      */
     @GetMapping
@@ -27,7 +27,7 @@ public class BagController {
         return ResponseEntity.ok(bagService.getAllBags());
     }
 
-    /**
+    /*
      * 특정 가방 조회
      */
     @GetMapping("/{bagId}")
@@ -37,7 +37,7 @@ public class BagController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    /**
+    /*
      * 가방 요금 추가/수정
      */
     @PostMapping
@@ -45,7 +45,7 @@ public class BagController {
         return ResponseEntity.ok(bagService.saveBag(bag));
     }
 
-    /**
+    /*
      * 가방 요금 삭제
      */
     @DeleteMapping("/{bagId}")

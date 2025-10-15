@@ -1,7 +1,7 @@
 //package com.navi.reservation.repository;
 //
 //import com.navi.reservation.domain.Rsv;
-//import com.navi.reservation.domain.enums.RsvStatus;
+//import com.navi.common.enums.RsvStatus;
 //import org.springframework.data.jpa.repository.JpaRepository;
 //import org.springframework.data.jpa.repository.Query;
 //import org.springframework.data.repository.query.Param;

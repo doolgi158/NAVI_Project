@@ -1,7 +1,7 @@
 //package com.navi.reservation.domain;
 //
 //import com.navi.reservation.domain.enums.PaymentMethod;
-//import com.navi.reservation.domain.enums.RsvStatus;
+//import com.navi.common.enums.RsvStatus;
 //import com.navi.reservation.domain.enums.RsvType;
 //import com.navi.user.domain.User;
 //import jakarta.persistence.*;
