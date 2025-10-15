@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import MainLayout from "../../layout/MainLayout";
 import CustomCard from "@/common/components/CustomCard";
-import CustomButton from "@/common/components/CustomButton";
 import { getMyPlans } from "@/common/api/planApi";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
@@ -48,7 +47,7 @@ export default function TravelPlanMain() {
   };
 
   const handleCreatePlan = () => {
-    navigate("/plans/step1");
+    navigate("/plans/planner");
   };
 
   return (
@@ -63,10 +62,10 @@ export default function TravelPlanMain() {
           <div className="absolute inset-0 flex flex-col justify-center items-center z-10">
  
           {/*여행배너 텍스트 */}
-          <h2 className="text-3xl font-semibold text-[#1D4E89] drop-shadow-sm">
-            다음 여행을 계획해보세요 ✈️
+          <h2 className="text-3xl font-semibold text-[#1D4E89] drop-shadow-sm planTitle-text">
+            나를 위한 여행 준비
           </h2>
-          <p className="text-gray-700 mt-2 text-sm">
+          <p className="text-gray-700 mt-2 text-sm planSubTitle-text">
             설렘 가득한 순간이 기다리고 있어요
           </p>
         </div>
@@ -75,10 +74,12 @@ export default function TravelPlanMain() {
           <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px]" />
 
           {/* 버튼 */}
-          <div className="absolute bottom-8 right-16 z-10">
-            <Button type="primary" size="large" onClick={handleCreatePlan}>
+          <div className="absolute bottom-8 right-16 z-10 ">
+            <Button  type="default" size="large"  
+                    className="plan-btn plan-btn:hover"
+                    onClick={handleCreatePlan} >
                
-               여행 계획하기 ✈️
+               여행 계획하기<i class="bi bi-plus-circle"></i>
             </Button>
           </div>
         </div>
