@@ -30,9 +30,11 @@ public class DeliveryGroup extends BaseEntity {
     @Column(name = "DELIVERY_DATE", nullable = false)
     private LocalDate deliveryDate; // 그룹 배송 예정일
 
+    @Builder.Default
     @Column(name = "TIME_SLOT", length = 20, nullable = false)
     private String timeSlot = "오전"; // 오전 / 오후 (기본값 오전)
 
+    @Builder.Default
     @Column(name = "STATUS", length = 20, nullable = false)
     private String status = "READY"; // READY / IN_PROGRESS / COMPLETED
 }

@@ -37,9 +37,9 @@ public class DeliveryDataInitializer implements ApplicationRunner {
                     .price(20000)
                     .build());
 
-            System.out.println("✅ [DeliveryDataInitializer] 기본 BAG 데이터 3건 자동 삽입 완료");
+            System.out.println("[DeliveryDataInitializer] 기본 BAG 데이터 3건 자동 삽입 완료");
         } else {
-            System.out.println("✅ [DeliveryDataInitializer] BAG 테이블에 이미 데이터 존재 (" + count + "건)");
+            System.out.println("[DeliveryDataInitializer] BAG 테이블에 이미 데이터 존재 (" + count + "건)");
         }
     }
 }
