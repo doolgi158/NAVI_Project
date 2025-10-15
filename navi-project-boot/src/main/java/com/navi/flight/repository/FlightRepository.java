@@ -11,8 +11,8 @@ import java.util.Optional;
 
 public interface FlightRepository extends JpaRepository<Flight, FlightId> {
 
-    /**
-     * ✅ flightId + depTime 기반 항공편 조회 (1초 오차 허용)
+    /*
+     * flightId + depTime 기반 항공편 조회 (1초 오차 허용)
      * - LocalDateTime의 초·밀리초 차이로 조회 실패 방지
      */
     @Query("""
