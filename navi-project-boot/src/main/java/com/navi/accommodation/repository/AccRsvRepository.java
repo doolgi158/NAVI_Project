@@ -24,10 +24,10 @@ public interface AccRsvRepository extends JpaRepository<AccRsv, Long> {
 
     /* == 사용자용 == */
     // 1. 사용자 ID별 숙소 예약 목록 조회
-    @Query("""
-            SELECT ar FROM AccRsv
-            WHERE ar.user.userId = :userId""")
-    List<AccRsv> findAllByUserNo(@Param("userId") Long userId);
+//    @Query("""
+//            SELECT ar FROM AccRsv
+//            WHERE ar.user.userId = :userId""")
+//    List<AccRsv> findAllByUserNo(@Param("userId") Long userId);
     // 2. 예약 ID별 숙소 예약 상세 목록 조회
     @Query("""
            select distinct ar
