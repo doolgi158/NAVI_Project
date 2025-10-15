@@ -1,10 +1,9 @@
 package com.navi.user.service.social;
 
 import com.navi.user.domain.History;
-import com.navi.user.domain.Social;
 import com.navi.user.domain.User;
 import com.navi.user.dto.SocialDTO;
-import com.navi.user.dto.UserDTO;
+import com.navi.user.dto.users.UserDTO;
 import com.navi.user.enums.SocialState;
 import com.navi.user.enums.UserRole;
 import com.navi.user.enums.UserState;
@@ -77,7 +76,7 @@ public class SocialLoginServiceImpl implements SocialLoginService {
         // 로그인 이력은 항상 insert
         History history = History.builder()
                 .ip(clientIp)
-                .login(LocalDateTime.now().format(DT))
+                .login(LocalDateTime.now())
                 .user(user)
                 .build();
 
@@ -87,7 +86,7 @@ public class SocialLoginServiceImpl implements SocialLoginService {
         var existing = socialRepository.findByUser(user);
 
         if (existing.isPresent()) {
-            // ✅ 기존 social → DTO 갱신 후 Entity 변환
+            // 기존 social → DTO 갱신 후 Entity 변환
             SocialDTO updatedDto = SocialDTO.builder()
                     .no(existing.get().getNo())
                     .token(dto.getToken())
@@ -100,7 +99,7 @@ public class SocialLoginServiceImpl implements SocialLoginService {
 
             socialRepository.save(updatedDto.toEntity(user)); // UPDATE
         } else {
-            // ✅ 신규 사용자 → DTO → Entity 변환 후 저장
+            // 신규 사용자 → DTO → Entity 변환 후 저장
             socialRepository.save(dto.toEntity(user)); // INSERT
         }
         // 저장 후 DTO로 변환해 반환 (no 포함)

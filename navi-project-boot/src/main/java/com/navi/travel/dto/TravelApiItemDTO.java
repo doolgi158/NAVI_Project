@@ -27,8 +27,12 @@ public class TravelApiItemDTO {
     @JsonProperty("title")
     private String title;
 
-    @JsonProperty("introduction")
-    private String introduction;
+    // ✅ region1cd, region2cd를 객체로 변경
+    @JsonProperty("region1cd")
+    private RegionDTO region1cd;
+
+    @JsonProperty("region2cd")
+    private RegionDTO region2cd;
 
     @JsonProperty("address")
     private String address;
@@ -39,6 +43,9 @@ public class TravelApiItemDTO {
     @JsonProperty("tag")
     private String tag;
 
+    @JsonProperty("introduction")
+    private String introduction;
+
     @JsonProperty("latitude")
     private Double latitude;
 
@@ -48,17 +55,40 @@ public class TravelApiItemDTO {
     @JsonProperty("phoneno")
     private String phoneNo;
 
-    @JsonProperty("region1cd")
-    private NestedCodeDTO region1cd;
-
-    @JsonProperty("region2cd")
-    private NestedCodeDTO region2cd;
-
     @JsonProperty("repPhoto")
     private PhotoInfoDTO repPhoto;
 
+    @JsonProperty("homepage")
+    private String homepage;
+
+    @JsonProperty("parking")
+    private String parking;
+
+    @JsonProperty("fee")
+    private String fee;
+
+    @JsonProperty("hours")
+    private String hours; // API 필드명이 'hours'일 경우
+
+
+    // ✅ region DTO 정의 (label만 사용)
+    @Getter
+    @Setter
+    @ToString
+    @NoArgsConstructor
+    public static class RegionDTO {
+        @JsonProperty("value")
+        private String value;
+        @JsonProperty("label")
+        private String label;
+        @JsonProperty("refId")
+        private String refId;
+    }
+
+
     /**
-     * API DTO → Travel 엔티티 변환
+     * ✅ API DTO → Travel 엔티티 변환
+     * label만 DB에 저장되도록 수정됨
      */
     public Travel toEntity() {
         return Travel.builder()
@@ -69,25 +99,16 @@ public class TravelApiItemDTO {
                 .roadAddress(this.roadAddress)
                 .phoneNo(this.phoneNo)
                 .tag(this.tag)
-                .latitude(this.latitude)  // Double 변환 제거
+                .latitude(this.latitude)
                 .longitude(this.longitude)
-
-                // contentscd 매핑
                 .contentsCd(this.contentscd != null ? this.contentscd.getValue() : null)
                 .categoryName(this.contentscd != null ? this.contentscd.getLabel() : null)
-                .categoryRefId(this.contentscd != null ? this.contentscd.getRefId() : null)
 
-                // region1cd 매핑
-                .region1Cd(this.region1cd != null ? this.region1cd.getValue() : null)
+                // ✅ region1cd.label, region2cd.label만 DB에 저장
                 .region1Name(this.region1cd != null ? this.region1cd.getLabel() : null)
-                .region1RefId(this.region1cd != null ? this.region1cd.getRefId() : null)
-
-                // region2cd 매핑
-                .region2Cd(this.region2cd != null ? this.region2cd.getValue() : null)
                 .region2Name(this.region2cd != null ? this.region2cd.getLabel() : null)
-                .region2RefId(this.region2cd != null ? this.region2cd.getRefId() : null)
 
-                // repPhoto 매핑
+                // ✅ repPhoto 매핑
                 .photoId(
                         this.repPhoto != null && this.repPhoto.getPhotoId() != null
                                 ? this.repPhoto.getPhotoId().getPhotoId() : null
@@ -100,12 +121,16 @@ public class TravelApiItemDTO {
                         this.repPhoto != null && this.repPhoto.getPhotoId() != null
                                 ? this.repPhoto.getPhotoId().getThumbnailPath() : null
                 )
-
-                // 초기값 설정
+                .homepage(this.homepage)
+                .parking(this.parking)
+                .fee(this.fee)
+                .hours(this.hours)
                 .state(1) // 기본 공개 상태
                 .build();
     }
 
+
+    // ✅ 내부 코드 및 사진 DTO들
     @Getter
     @Setter
     @ToString

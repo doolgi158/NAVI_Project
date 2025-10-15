@@ -28,6 +28,13 @@ public class TravelApiResponseBody {
         if (travelItems == null) return List.of();
 
         return travelItems.stream()
+                .filter(item -> item.getContentscd() != null &&
+                        (
+                                "c1".equalsIgnoreCase(item.getContentscd().getValue()) ||
+                                        "c2".equalsIgnoreCase(item.getContentscd().getValue()) ||
+                                        "c4".equalsIgnoreCase(item.getContentscd().getValue())
+                        )
+                )
                 .map(TravelApiItemDTO::toEntity)
                 .collect(Collectors.toList());
     }

@@ -1,0 +1,1342 @@
+{
+  "response": {
+    "header": {
+      "resultCode": "0000",
+      "resultMsg": "OK"
+    },
+    "body": {
+      "items": [
+        {
+          "item": {
+            "contentid": "1",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "2",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "3",
+            "checkintime": "16:00",
+            "checkouttime": "익일 11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "4",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "5",
+            "checkintime": "14:00",
+            "checkouttime": "익일 11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "6",
+            "checkintime": "15:00",
+            "checkouttime": "익일 11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "7",
+            "checkintime": "17:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "8",
+            "checkintime": "16:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "9",
+            "checkintime": "16:00",
+            "checkouttime": "익일 11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "10",
+            "checkintime": "15:00",
+            "checkouttime": "12:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "11",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "12",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "13",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "14",
+            "checkintime": "13:00",
+            "checkouttime": "익일 12:00",
+            "chkcooking": "1",
+            "parkinglodging": "0",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "15",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "16",
+            "checkintime": "15:00",
+            "checkouttime": "익일11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "17",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "18",
+            "checkintime": "15:00",
+            "checkouttime": "12:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "19",
+            "checkintime": "16:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "20",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "21",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "22",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "23",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "24",
+            "checkintime": "15:00",
+            "checkouttime": "12:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "25",
+            "checkintime": "15:00",
+            "checkouttime": "12:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "26",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "27",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "28",
+            "checkintime": "14:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "29",
+            "checkintime": "14:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "30",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "31",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "32",
+            "checkintime": "14:00",
+            "checkouttime": "익일 12:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "33",
+            "checkintime": "14:00",
+            "checkouttime": "12:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "34",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "35",
+            "checkintime": "16:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "36",
+            "checkintime": "16:00~23:00",
+            "checkouttime": "10:30",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "37",
+            "checkintime": "14:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "38",
+            "checkintime": "16:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "39",
+            "checkintime": "15:00",
+            "checkouttime": "익일 11:00",
+            "chkcooking": "1",
+            "parkinglodging": "0",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "40",
+            "checkintime": "13:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "41",
+            "checkintime": "15:00",
+            "checkouttime": "12:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "42",
+            "checkintime": "15:00~22:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "43",
+            "checkintime": "16:00",
+            "checkouttime": "익일 11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "44",
+            "checkintime": "15:00",
+            "checkouttime": "익일 11:00",
+            "chkcooking": "1",
+            "parkinglodging": "0",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "45",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "46",
+            "checkintime": "16:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "47",
+            "checkintime": "15:00",
+            "checkouttime": "12:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "48",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "49",
+            "checkintime": "15:00",
+            "checkouttime": "12:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "50",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "51",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "52",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "53",
+            "checkintime": "16:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "54",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "55",
+            "checkintime": "16:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "0",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "56",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "57",
+            "checkintime": "15:00",
+            "checkouttime": "익일 11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "58",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "59",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "60",
+            "checkintime": "16:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "61",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "62",
+            "checkintime": "16:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "63",
+            "checkintime": "16:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "64",
+            "checkintime": "15:00",
+            "checkouttime": "12:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "65",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "0",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "66",
+            "checkintime": "15:00",
+            "checkouttime": "10:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "67",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "68",
+            "checkintime": "16:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "69",
+            "checkintime": "16:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "70",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "71",
+            "checkintime": "14:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "72",
+            "checkintime": "15:00",
+            "checkouttime": "익일 11:00",
+            "chkcooking": "0",
+            "parkinglodging": "0",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "73",
+            "checkintime": "16:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "0",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "74",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "75",
+            "checkintime": "15:00",
+            "checkouttime": "익일 11:00",
+            "chkcooking": "0",
+            "parkinglodging": "0",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "76",
+            "checkintime": "15:00",
+            "checkouttime": "익일 11:00",
+            "chkcooking": "0",
+            "parkinglodging": "0",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "77",
+            "checkintime": "15:00",
+            "checkouttime": "익일 11:00",
+            "chkcooking": "1",
+            "parkinglodging": "0",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "78",
+            "checkintime": "16:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "79",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "80",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "81",
+            "checkintime": "16:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "82",
+            "checkintime": "15:00",
+            "checkouttime": "익일 11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "83",
+            "checkintime": "14:00",
+            "checkouttime": "익일 12:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "84",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "85",
+            "checkintime": "16:00",
+            "checkouttime": "11:30",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "86",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "87",
+            "checkintime": "16:00~22:00",
+            "checkouttime": "11:30",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "88",
+            "checkintime": "15:00",
+            "checkouttime": "익일 11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "89",
+            "checkintime": "15:00",
+            "checkouttime": "익일 11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "90",
+            "checkintime": "15:00",
+            "checkouttime": "익일 11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "91",
+            "checkintime": "15:00",
+            "checkouttime": "익일 11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "92",
+            "checkintime": "14:00",
+            "checkouttime": "익일 11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "93",
+            "checkintime": "15:00",
+            "checkouttime": "익일 11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "94",
+            "checkintime": "15:00",
+            "checkouttime": "익일 11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "95",
+            "checkintime": "15:00",
+            "checkouttime": "익일 11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "96",
+            "checkintime": "15:00",
+            "checkouttime": "익일 11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "97",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "98",
+            "checkintime": "16:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "99",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "100",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "101",
+            "checkintime": "16:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "102",
+            "checkintime": "14:30",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "103",
+            "checkintime": "14:00",
+            "checkouttime": "익일 11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "104",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "105",
+            "checkintime": "15:00",
+            "checkouttime": "익일 11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "106",
+            "checkintime": "15:00",
+            "checkouttime": "익일 11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "107",
+            "checkintime": "14:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "108",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "109",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "110",
+            "checkintime": "14:00",
+            "checkouttime": "12:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "111",
+            "checkintime": "15:00",
+            "checkouttime": "익일 11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "112",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "113",
+            "checkintime": "16:00",
+            "checkouttime": "익일 11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "114",
+            "checkintime": "15:00",
+            "checkouttime": "익일11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "115",
+            "checkintime": "15:00",
+            "checkouttime": "익일 11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "116",
+            "checkintime": "15:00",
+            "checkouttime": "익일 11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "117",
+            "checkintime": "15:00",
+            "checkouttime": "익일 11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "118",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "119",
+            "checkintime": "16:00",
+            "checkouttime": "익일 11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "120",
+            "checkintime": "14:00",
+            "checkouttime": "12:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "121",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "122",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "123",
+            "checkintime": "16:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "124",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "125",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "126",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "127",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "128",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "129",
+            "checkintime": "16:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "130",
+            "checkintime": "13:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "131",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "0",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "132",
+            "checkintime": "14:00",
+            "checkouttime": "익일 12:00",
+            "chkcooking": "1",
+            "parkinglodging": "1",
+            "cat3": ""
+          }
+        },
+        {
+          "item": {
+            "contentid": "133",
+            "checkintime": "15:00",
+            "checkouttime": "11:00",
+            "chkcooking": "1",
+            "parkinglodging": "0",
+            "cat3": ""
+          }
+        }
+      ]
+    }
+  }
+}

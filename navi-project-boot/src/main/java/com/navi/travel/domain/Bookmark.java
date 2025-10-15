@@ -1,35 +1,58 @@
 package com.navi.travel.domain;
 
+import com.navi.user.domain.User;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor; // ✅ 모든 필드를 포함하는 생성자 추가
+import lombok.*;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor // ✅ 모든 필드를 포함하는 생성자 추가
-@Table(name = "user_bookmarks")
-// 사용자와 여행지 ID를 복합키 대신 단순 키와 인덱스로 관리합니다.
+@AllArgsConstructor
+@Builder
+@Table(
+        name = "NAVI_BOOKMARK",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"USER_NO", "TRAVEL_ID"})
+)
+@SequenceGenerator(name = "bookmark_seq", sequenceName = "BOOKMARK_SEQ", allocationSize = 1)
 public class Bookmark {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "bookmark_seq")
+    @Column(name = "BOOKMARK_ID")
     private Long bookmarkId;
 
-    // ✅ 필수 값(nullable = false) 명시
-    @Column(name = "travel_id", nullable = false)
-    private Long travelId;
+    /** ✅ 여행지 (N:1) */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "TRAVEL_ID", nullable = false)
+    private Travel travel;
 
-    // ✅ 필수 값(nullable = false) 명시, 타입 String으로 변경 완료
-    @Column(name = "user_id", nullable = false)
-    private String id;
+    /** ✅ 사용자 (N:1) */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "USER_NO", nullable = false)
+    private User user;
 
-    // 편의를 위한 생성자
-    public Bookmark(Long travelId, String id) {
-        this.travelId = travelId;
-        this.id = id;
+    /** ✅ 사용자 ID (백업용) */
+    @Column(name = "USER_ID", length = 50, nullable = true)
+    private String userId;
+
+    /** ✅ 생성자 (관계 자동 설정) */
+    public Bookmark(Travel travel, User user) {
+        this.travel = travel;
+        this.user = user;
+        this.userId = user.getId();
+
+        // 연관관계 편의 메서드
+        if (travel != null) {
+            travel.addBookmark(this);
+        }
+    }
+
+    public Long getTravelId() {
+        return this.travel != null ? this.travel.getTravelId() : null;
+    }
+
+    public String getUserLoginId() {
+        return this.user != null ? this.user.getId() : this.userId;
     }
 }

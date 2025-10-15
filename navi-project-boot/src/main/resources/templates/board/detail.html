@@ -3,21 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <title>게시글 상세</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #333;
+        }
+
+        .board-header {
+            margin-bottom: 20px;
+        }
+
+        .board-header h2 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .board-info {
+            display: flex;
+            gap: 20px;
+            color: #666;
+            font-size: 14px;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .board-info p {
+            margin: 0;
+        }
+
+        .board-content {
+            margin-top: 30px;
+        }
+
+        .board-content h3 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .board-content p {
+            line-height: 1.8;
+            color: #444;
+            white-space: pre-wrap;
+        }
+
+        .btn-list {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 10px 20px;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .btn-list:hover {
+            background-color: #f8f8f8;
+        }
+    </style>
 </head>
 <body>
-<h1>게시글 상세</h1>
-<div>
-    <h2 th:text="${board.board_Title}"></h2>
-    <p>게시글번호: <span th:text="${board.board_no}"></span></p>
-    <p>좋아요: <span th:text="${board.board_good}"></span></p>
-    <p>신고수: <span th:text="${board.report_count}"></span></p>
-</div>
+<div class="container">
+    <h1>게시글 상세</h1>
+    
+    <div class="board-header">
+        <h2 th:text="${board.board_Title}">게시글 제목</h2>
+        
+        <div class="board-info">
+            <p>게시글번호: <span th:text="${board.board_no}">1</span></p>
+            <p>좋아요: <span th:text="${board.board_good}">0</span></p>
+            <p>신고수: <span th:text="${board.report_count}">0</span></p>
+        </div>
+    </div>
 
-<div>
-    <h3>내용</h3>
-    <p th:text="${board.board_content}"></p>
-</div>
+    <div class="board-content">
+        <h3>내용</h3>
+        <p th:text="${board.board_content}">게시글 내용이 여기에 표시됩니다.</p>
+    </div>
 
-<a href="/board/list">목록으로</a>
+    <a href="/board" class="btn-list">목록으로</a>
+</div>
 </body>
 </html>

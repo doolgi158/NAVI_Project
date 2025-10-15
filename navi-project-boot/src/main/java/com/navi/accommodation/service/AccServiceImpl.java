@@ -5,12 +5,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.navi.accommodation.domain.Acc;
 import com.navi.accommodation.dto.api.AccApiDTO;
 import com.navi.accommodation.dto.request.AccRequestDTO;
+import com.navi.accommodation.dto.request.AccSearchRequestDTO;
+import com.navi.accommodation.dto.response.AccDetailResponseDTO;
+import com.navi.accommodation.dto.response.AccListResponseDTO;
 import com.navi.accommodation.repository.AccRepository;
+import com.navi.location.domain.Township;
+import com.navi.location.repository.TownshipRepository;
+import com.navi.room.domain.Room;
+import com.navi.room.repository.RoomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.List;
@@ -18,83 +26,11 @@ import java.util.List;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Transactional
 public class AccServiceImpl implements AccService{
-    public final AccRepository accRepository;
-    public final ObjectMapper objectMapper;
-
-    /* === 관리자 전용 API 적재 === */
-    @Value("classpath:accMockData/acc_list.json")   // 숙소 전체 리스트(최초 적재)
-    private Resource listFile;
-    @Value("classpath:accMockData/acc_basic.json")  // 특정 숙소 정보(보강 업데이트)
-    private Resource basicFile;
-    @Value("classpath:accMockData/acc_extra.json")  // 특정 숙소 추가 정보(보강 업데이트)
-    private Resource extraFile;
-
-    @Override
-    // insert 전용 (insertOnly = true)
-    public void loadFromJsonFile() throws IOException {
-        processJson(listFile, true);
-    }
-
-    @Override
-    // update 전용 (insertOnly = false)
-    public void updateFromJsonFile() throws IOException {
-        processJson(basicFile, false);
-        processJson(extraFile, false);
-    }
-
-    // JSON 파일을 읽어서 DB에 적재하는 메서드
-    public void processJson(Resource file, boolean insertOnly) throws IOException {
-        // JSON 전체를 트리 형태의 구조로 파싱하여 JsonNode 타입으로 반환
-        // JsonNode는 Map 처럼 계층 구조를 탐색할 수 있게 해줌
-        JsonNode root = objectMapper.readTree(file.getInputStream());
-        // JSON의 깊은 계층까지 순차 접근
-        JsonNode items = root.path("response").path("body").path("items");
-        // items는 배열(ArrayNode)이므로, for문으로 반복 탐색 가능
-        for(JsonNode wrapper : items){
-            JsonNode item = wrapper.path("item");
-            // JSON의 item 내용을 AccApiDTO에 매핑(내부적으로 각 필드에 @JsonProperty 매핑 자동 적용)
-            AccApiDTO dto = objectMapper.treeToValue(item, AccApiDTO.class);
-
-            if(dto.getContentId().isBlank()) {
-                log.warn("contentId 없음 -> SKIP: {}", dto);
-                continue;
-            }
-
-            Long contentId = Long.parseLong(dto.getContentId());
-
-            if(insertOnly) {
-                accRepository.findByContentId(contentId)
-                        .ifPresentOrElse(
-                                acc -> log.info("이미 존재 -> SKIP: {}", contentId),
-                                () -> insertInitialFromApi(dto)
-                        );
-            } else {
-                accRepository.findByContentId(contentId)
-                        .ifPresentOrElse(
-                                acc -> updateInitialFromApi(acc, dto),
-                                () -> log.warn("업데이트 대상 없음 (contentId = {})", contentId)
-                        );
-            }
-        }
-    }
-
-    @Override
-    public void insertInitialFromApi(AccApiDTO dto) {
-        Acc acc = Acc.builder().build();
-        acc.changeFromApiDTO(dto, 1); // townshipId 임시값
-
-        accRepository.save(acc);
-        log.info("INSERT 성공 (contentId = {})", acc.getContentId());
-    }
-
-    @Override
-    public void updateInitialFromApi(Acc acc, AccApiDTO dto) {
-        acc.changeFromApiDTO(dto, 1); // townshipId 임시값
-
-        accRepository.save(acc);
-        log.info("UPDATE 성공 (contentId = {})", dto.getContentId());
-    }
+    private final AccRepository accRepository;
+    private final RoomRepository roomRepository;
+    private final TownshipRepository townshipRepository;
 
     /* === 관리자 전용 CRUD === */
     @Override
@@ -134,9 +70,63 @@ public class AccServiceImpl implements AccService{
         accRepository.delete(acc);
     }
 
-    /* === 조회 (공통) === */
+    /* === 공통 조회 === */
     @Override
+    @Transactional(readOnly = true)
     public List<Acc> getAllAcc() {
         return accRepository.findAll();
+    }
+
+    /* === 사용자 전용 조회 === */
+    @Override
+    @Transactional(readOnly = true)
+    public List<AccListResponseDTO> searchAccommodations(AccSearchRequestDTO dto) {
+        List<Acc> accList;
+
+        // 지역 기반 검색
+        if(dto.getTownshipName() != null && !dto.getTownshipName().isEmpty()) {
+            accList = accRepository.findByTownshipName(dto.getTownshipName());
+        }
+        // 숙소명 기반 검색
+        else if(dto.getTitle() != null && !dto.getTitle().isEmpty()) {
+            accList = accRepository.findByTitle(dto.getTitle());
+        }
+        else {
+            // Todo: 임시방편 (이거 말고 관광지 기반 만들어야 함)
+            accList = accRepository.findAll();
+        }
+
+        // 숙소별 DTO 변환 + 객실 최저가 정보 계산
+//        List<AccListResponseDTO> resultList = accList.stream().map(acc -> {
+//            // 예약 가능한 객실 조회
+//            List<Room> rooms = roomRepository.findByAccAndIsAvailable(acc, true);
+//
+//            // 예약 가능한 객실 중 최저가
+//            Integer minPrice = rooms.isEmpty()
+//                    ? null
+//                    : rooms.stream().map(Room::getWeekdayFee),min(Integer::compareTo).orElse(null);
+//            // 🔸 예약 가능한 객실 수
+//            Integer remainingRooms = rooms.size();
+//
+//            // 🔸 DTO 생성
+//            return AccListResponseDTO.builder()
+//                    .accId(acc.getAccId())
+//                    .title(acc.getTitle())
+//                    .address(acc.getAddress())
+//                    .accImages(null) // TODO: 이미지 연동 시 수정
+//                    .minPrice(minPrice)
+//                    .remainingRooms(remainingRooms)
+//                    .build();
+//        }).toList();
+        return accList.stream().map(AccListResponseDTO::fromEntity).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public AccDetailResponseDTO getAccDetail(String accId) {
+        // TODO: 숙소 + 객실 + 이미지 조합 응답
+        Acc acc = accRepository.findByAccId(accId)
+                .orElseThrow(() -> new IllegalArgumentException("숙소를 찾을 수 없습니다."));
+        return AccDetailResponseDTO.fromEntity(acc);
     }
 }

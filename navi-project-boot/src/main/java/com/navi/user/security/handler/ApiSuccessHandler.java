@@ -3,6 +3,7 @@ package com.navi.user.security.handler;
 import com.google.gson.Gson;
 import com.navi.user.domain.History;
 import com.navi.user.domain.User;
+import com.navi.user.dto.JWTClaimDTO;
 import com.navi.user.dto.users.UserSecurityDTO;
 import com.navi.user.repository.HistoryRepository;
 import com.navi.user.repository.TryLoginRepository;
@@ -31,56 +32,86 @@ public class ApiSuccessHandler implements AuthenticationSuccessHandler {
     private final UserRepository userRepository;
     private final HistoryRepository historyRepository;
 
-    private static final DateTimeFormatter DT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
     // 로그인 성공하면 토큰값 추가하여 json방식으로 알려주기
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+        // 인증된 사용자 정보
         UserSecurityDTO userSecurityDTO = (UserSecurityDTO) authentication.getPrincipal();
-        Map<String, Object> claims = userSecurityDTO.getClaims();
-
-        String accessToken = jwtUtil.generateToken(claims, 10);
-        String refreshToken = jwtUtil.generateToken(claims, 60 * 24);
-
-        claims.put("accessToken", accessToken);
-        claims.put("refreshToken", refreshToken);
-
-        // 로그인 성공 시 IP 시도 초기화
-        String ip = getClientIp(request);
         String username = getUserName(request);
+        String ip = getClientIp(request);
 
+        // DB에서 사용자 조회
         User user = userRepository.getUser(username);
 
-        // 관리자(또는 DB에 없는 사용자)는 히스토리 생략
+        // JWTClaimDTO 생성
+        JWTClaimDTO claim = JWTClaimDTO.fromUser(user);
+
+        // JWT 토큰 생성
+        String accessToken = jwtUtil.generateToken(claim, 10);
+        String refreshToken = jwtUtil.generateToken(claim, 60 * 24);
+
+        // 응답 데이터 구성
+        claim.setAccessToken(accessToken);
+        claim.setRefreshToken(refreshToken);
+
+        // 로그인 히스토리 저장 (관리자 제외)
         if (user == null || user.getNo() == 0) {
             tryLoginRepository.recordLoginAttempt(ip, username, true);
-            writeResponse(response, claims, "관리자 로그인 성공 (히스토리 제외)");
+            writeResponse(response, claim, "관리자 로그인 성공 (히스토리 제외)");
             return;
         }
 
-        // 일반 사용자 로그인 기록 저장
         History history = History.builder()
                 .user(user)
                 .ip(ip)
-                .login(LocalDateTime.now().format(DT))
+                .login(LocalDateTime.now())
                 .build();
         historyRepository.save(history);
 
         tryLoginRepository.recordLoginAttempt(ip, username, true);
-        writeResponse(response, claims, "로그인 성공");
+        writeResponse(response, claim, "로그인 성공");
     }
 
-    // 응답 공통화
-    private void writeResponse(HttpServletResponse response, Map<String, Object> claims, String message)
-            throws IOException {
+    // 공통 응답 메서드
+    private void writeResponse(HttpServletResponse response, Object body, String message) throws IOException {
         Gson gson = new Gson();
-        claims.put("message", message);
-        String jsonStr = gson.toJson(claims);
 
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType("application/json; charset=UTF-8");
-        try (PrintWriter printWriter = response.getWriter()) {
-            printWriter.println(jsonStr);
+
+        if (body instanceof JWTClaimDTO claim) {
+            // null-safe 처리
+            String id = claim.getId() != null ? claim.getId() : "unknown";
+            String access = claim.getAccessToken() != null ? claim.getAccessToken() : "";
+            String refresh = claim.getRefreshToken() != null ? claim.getRefreshToken() : "";
+            String ip = claim.getIp() != null ? claim.getIp() : "0.0.0.0";
+
+            try (PrintWriter out = response.getWriter()) {
+                out.println(gson.toJson(
+                        Map.of(
+                                "status", 200,
+                                "message", message,
+                                "id", id,
+                                "username", id,
+                                "roles", claim.getRole(),
+                                "accessToken", access,
+                                "refreshToken", refresh,
+                                "ip", ip
+                        )
+                ));
+                out.flush();
+            }
+        } else {
+            try (PrintWriter out = response.getWriter()) {
+                out.println(gson.toJson(
+                        Map.of(
+                                "status", 200,
+                                "message", message,
+                                "data", body != null ? body : "null"
+                        )
+                ));
+                out.flush();
+            }
         }
     }
 }

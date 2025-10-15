@@ -8,13 +8,14 @@ import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 @Entity
 @Table(name = "navi_users")
 @SequenceGenerator(
@@ -42,22 +43,22 @@ public class User {
     private String email;       // 이메일
 
     @Column(name = "user_gender")
-    private char gender;        // 성별
+    private String gender;        // 성별
 
-    @Column(name = "user_ID", nullable = false, unique = true)
+    @Column(name = "user_id", nullable = false, unique = true)
     private String id;          // 아이디
 
     @Column(name = "user_PW", nullable = false)
     private String pw;          // 비밀번호
 
     @Column(name = "user_local")
-    private char local;         // 내/외국인
+    private String local;         // 내/외국인
 
     @Column(name = "user_signup", updatable = false)
     @ColumnDefault(value = "sysdate")
     @CreationTimestamp
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private String signUp;      // 가입일
+    private LocalDateTime signUp;      // 가입일
 
     @Column(name = "user_state", nullable = false)
     @ColumnDefault(value = "0")
@@ -80,5 +81,16 @@ public class User {
     }
     public void clearRole(UserRole userRole) {
         userRoleList.clear();
+    }
+
+    // Builder로 비밀번호 변경 (임시 비밀번호용)
+    public User changePassword(String encodedPw) {
+        return this.toBuilder()   // 현재 필드들을 복제한 Builder 시작
+                .pw(encodedPw)    // 비밀번호만 교체
+                .build();
+    }
+    // Spring Security나 DTO 변환 시 사용하기 위한 Getter
+    public List<UserRole> getRoleList() {
+        return this.userRoleList;
     }
 }

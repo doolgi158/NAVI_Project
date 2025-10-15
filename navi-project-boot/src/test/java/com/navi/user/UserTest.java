@@ -42,12 +42,16 @@ public class UserTest {
         Random random = new Random();
         SecureRandom secureRandom = new SecureRandom();
         StringBuilder phone = new StringBuilder();
+        StringBuilder personal = new StringBuilder();
         StringBuilder password = new StringBuilder();
         UserState[] values = UserState.values();
 
-        for(int i = 1; i <= 1000; i++) {
+        for(int i = 0; i <= 100; i++) {
             for (int j = 0; j < 8; j++) {
                 phone.append(random.nextInt(10));
+            }
+            for (int j = 0; j < 13; j++) {
+                personal.append(random.nextInt(10));
             }
             password.append("user").append(i).append("!");
 
@@ -66,6 +70,7 @@ public class UserTest {
             user.addRole(UserRole.USER);
             userRepository.save(user);
             phone.setLength(0);
+            personal.setLength(0);
             password.setLength(0);
         }
     }

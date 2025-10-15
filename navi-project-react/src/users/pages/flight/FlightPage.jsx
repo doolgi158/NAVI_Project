@@ -9,7 +9,7 @@ const { Option } = Select;
 const { RangePicker } = DatePicker;
 
 const FlightPage = () => {
-  // ✈️ 상태 관리
+  //  상태 관리
   const [tripType, setTripType] = useState("round"); // 왕복 / 편도
   const [dates, setDates] = useState({});
   const [from, setFrom] = useState("");
@@ -19,7 +19,7 @@ const FlightPage = () => {
 
   const navigate = useNavigate();
 
-  // ✅ 공항 목록
+  // 공항 목록
   const airportList = [
     { airportCode: "GMP", airportName: "김포" },
     { airportCode: "CJU", airportName: "제주" },
@@ -37,9 +37,23 @@ const FlightPage = () => {
     { airportCode: "JDG", airportName: "정석(훈련)" },
   ];
 
-  // 🔍 검색 버튼 클릭 시
+  // 출발지 변경 시 로직
+  const handleFromChange = (value) => {
+    setFrom(value);
+
+    // 출발지가 제주가 아니면 → 도착지를 제주로 자동 설정
+    if (value !== "CJU") {
+      setTo("CJU");
+    }
+    // 출발지가 제주라면 → 도착지는 비워두기 (직접 선택)
+    else {
+      setTo("");
+    }
+  };
+
+  // 검색 버튼 클릭 시
   const handleSearch = () => {
-    // 1️⃣ 유효성 검사
+    //  유효성 검사
     if (tripType === "round" && !dates.range) {
       alert("왕복은 가는 날과 오는 날을 선택해야 합니다.");
       return;
@@ -57,33 +71,35 @@ const FlightPage = () => {
       return;
     }
 
-    // 2️⃣ 날짜를 문자열(YYYY-MM-DD)로 변환
+    //  날짜를 문자열(YYYY-MM-DD)로 변환
     let formattedDates = {};
     if (tripType === "round" && dates.range) {
       formattedDates = {
         depDate: dates.range[0]?.format("YYYY-MM-DD"),
-        arrDate: dates.range[1]?.format("YYYY-MM-DD"), // ✅ 귀국일 이름 통일
+        arrDate: dates.range[1]?.format("YYYY-MM-DD"),
       };
     } else {
       if (dates.dep) formattedDates.depDate = dates.dep.format("YYYY-MM-DD");
     }
 
-    // 3️⃣ 검색 조건을 객체로 묶기
+    //  검색 조건 객체
     const searchData = {
       tripType,
       depAirport: from,
       arrAirport: to,
       depDate: formattedDates.depDate,
-      arrDate: formattedDates.arrDate || null, // ✅ 추가 (왕복일만 존재)
+      arrDate: formattedDates.arrDate || null,
       passengerCount: passengers,
       seatClass,
     };
-
-    console.log("📤 검색 조건:", searchData);
-
-    // 4️⃣ 다음 페이지로 이동 (state로 검색조건 전달)
     navigate("/flight/detail", { state: searchData });
   };
+
+  // 도착지 필터링 로직
+  const filteredArrivalList =
+    from === "CJU"
+      ? airportList.filter((a) => a.airportCode !== "CJU") // 제주 출발 → 제주 제외
+      : airportList.filter((a) => a.airportCode === "CJU"); // 제주 도착만 가능
 
   return (
     <MainLayout>
@@ -120,7 +136,7 @@ const FlightPage = () => {
               <label className="block text-sm text-gray-600 mb-2">출발지</label>
               <Select
                 value={from || undefined}
-                onChange={setFrom}
+                onChange={handleFromChange}
                 placeholder="출발 공항 선택"
                 className="w-full"
               >
@@ -140,8 +156,9 @@ const FlightPage = () => {
                 onChange={setTo}
                 placeholder="도착 공항 선택"
                 className="w-full"
+                disabled={from !== "CJU"} // ✈️ 제주 출발일 때만 활성화
               >
-                {airportList.map((a) => (
+                {filteredArrivalList.map((a) => (
                   <Option key={a.airportCode} value={a.airportCode}>
                     {a.airportName}
                   </Option>
@@ -154,7 +171,6 @@ const FlightPage = () => {
               <label className="block text-sm text-gray-600 mb-2">
                 {tripType === "round" ? "여행 기간" : "출발일"}
               </label>
-
               {tripType === "round" ? (
                 <RangePicker
                   className="w-full"

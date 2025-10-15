@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 //@EnableScheduling //스케줄러 기능 켜기
 @EnableJpaAuditing // 등록일/수정일 자동 생성
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "com.navi")
 public class NaviProjectApplication {
 
 	public static void main(String[] args) {
