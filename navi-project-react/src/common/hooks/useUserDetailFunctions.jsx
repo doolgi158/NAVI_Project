@@ -160,8 +160,59 @@ export const useUserDetailFunctions = (form) => {
     });
   };
 
+  // 비밀번호 확인
+  const checkPassword = async (currentPw) => {
+      try {
+        const res = await axios.post(
+          `${API_SERVER_HOST}/api/users/check-password`,
+          { currentPw },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+          }
+        );  
+        return res?.data?.data?.valid === true;
+      } catch (err) {
+        message.error("비밀번호 확인 중 오류가 발생했습니다.");
+        return false;
+      }
+  };
+
+  // 비밀번호 변경
+  const handlePasswordChange = async (currentPw, newPassword, confirmPw) => {
+  if (newPassword !== confirmPw) {
+    message.error("새 비밀번호와 확인 비밀번호가 일치하지 않습니다.");
+    return false;
+  }
+
+  try {
+    await axios.put(
+      `${API_SERVER_HOST}/api/users/change-password`,
+      { currentPw, newPassword },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      }
+    );
+    message.success("비밀번호가 변경되었습니다!");
+    return true;
+  } catch (err) {
+    if (err.response?.status === 400)
+      message.error("현재 비밀번호가 일치하지 않습니다.");
+    else if (err.response?.status === 401) {
+      message.error("세션이 만료되었습니다. 다시 로그인해주세요.");
+      localStorage.removeItem("accessToken");
+      window.location.href = "/login";
+    } else message.error("비밀번호 변경 중 오류가 발생했습니다.");
+    return false;
+  }
+};
+
   return {
-    user, setUser, editing, setEditing, loading, uploading,
+    user, setUser, editing, setEditing, loading, uploading, checkPassword,
     handleSave, handleProfileUpload, handleDeleteAccount, handleProfileDelete,
+    handlePasswordChange
   };
 };

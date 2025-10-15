@@ -61,6 +61,21 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public boolean checkPassword(String token, String currentPw) {
+        // JWT에서 사용자 ID 추출
+        String userId = jwtUtil.getUserIdFromToken(token.replace("Bearer ", ""));
+        System.out.println("🔹 [checkPassword] userId = " + userId);
+        // DB에서 사용자 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        System.out.println("🔹 [checkPassword] userPw = " + user.getPw());
+        System.out.println("🔹 [checkPassword] matches? " + passwordEncoder.matches(currentPw, user.getPw()));
+        // 비밀번호 검증
+        return passwordEncoder.matches(currentPw, user.getPw());
+    }
+
+    @Override
     @Transactional
     public void changePassword(String token, String oldPw, String newPw) {
         String userId = jwtUtil.getUserIdFromToken(token.replace("Bearer ", ""));

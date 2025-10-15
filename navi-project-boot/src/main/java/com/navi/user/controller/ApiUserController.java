@@ -10,6 +10,7 @@ import com.navi.user.dto.users.UserSecurityDTO;
 import com.navi.user.repository.UserRepository;
 import com.navi.user.service.user.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -58,11 +59,29 @@ public class ApiUserController {
         return ApiResponse.success(updated);
     }
 
-    @PutMapping("/password")
+    @PostMapping("/check-password")
+    public ResponseEntity<ApiResponse<Map<String, Boolean>>> checkPassword(
+            @RequestHeader("Authorization") String token,
+            @RequestBody Map<String, String> payload) {
+
+        boolean isMatch = userService.checkPassword(token, payload.get("currentPw"));
+        Map<String, Boolean> result = new HashMap<>();
+        result.put("valid", isMatch);
+
+        if (!isMatch) {
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("비밀번호가 일치하지 않습니다.", 401, result));
+        }
+
+        return ResponseEntity.ok(ApiResponse.success(result));
+    }
+
+    @PutMapping("/change-password")
     public ResponseEntity<ApiResponse<Void>> changePassword(
             @RequestHeader("Authorization") String token,
             @RequestBody Map<String, String> payload) {
-        userService.changePassword(token, payload.get("oldPassword"), payload.get("newPassword"));
+        userService.changePassword(token, payload.get("currentPw"), payload.get("newPassword"));
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 }
