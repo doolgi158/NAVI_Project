@@ -1,6 +1,7 @@
 package com.navi.user.dto.users;
 
 import com.navi.image.domain.Image;
+import com.navi.image.repository.ImageRepository;
 import com.navi.user.domain.User;
 import com.navi.user.enums.UserState;
 import lombok.*;
@@ -13,6 +14,7 @@ import java.time.format.DateTimeFormatter;
 @NoArgsConstructor
 @Builder
 public class UserResponseDTO {
+
     private long no;                // 사용자 번호
     private String name;            // 이름
     private String phone;           // 전화번호
@@ -24,9 +26,9 @@ public class UserResponseDTO {
     private UserState userState;    // 유저 상태
     private String signUp;          // 가입일
     private String token;           // 토큰
-    private String path;            // 프로필 URL
+    private String profile;         // 프로필 경로
 
-    public static UserResponseDTO from(User user, Image profile) {
+    public static UserResponseDTO from(User user) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
         return UserResponseDTO.builder()
@@ -39,7 +41,6 @@ public class UserResponseDTO {
                 .gender(user.getGender())
                 .local(user.getLocal())
                 .signUp(user.getSignUp() != null ? user.getSignUp().format(formatter) : null)
-                .path(profile != null ? profile.getPath() : null)
                 .build();
     }
 }

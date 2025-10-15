@@ -74,7 +74,7 @@ public class User {
 
     @ElementCollection(fetch = FetchType.LAZY)
     @Builder.Default
-    private List<UserRole> userRoleList = new ArrayList<>();
+    private List<UserRole> userRoleList = new ArrayList<>();    // 권한
 
     public void addRole(UserRole userRole) {
         userRoleList.add(userRole);

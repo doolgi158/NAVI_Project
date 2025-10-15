@@ -2,10 +2,12 @@ import { createSlice } from "@reduxjs/toolkit";
 import { getCookie, removeCookie, setCookie } from "../util/cookie";
 import { API_SERVER_HOST } from "../api/naviApi";
 import axios from "axios";
+import { setAuthTokens } from "../api/axiosInstance";
 
 const initState = {
   username: "",
-  token: "",
+  accessToken: "",
+  refreshToken: "",
   role:"",
   ip: "",
 };
@@ -27,7 +29,7 @@ const loginSlice = createSlice({
   reducers: {
     setlogin: (state, action) => {
       
-      const { username, token, role, ip } = action.payload;
+      const { username, accessToken, refreshToken, role, ip } = action.payload;
       // roles 배열이면 첫 번째만 사용
       let roleValue = "";
       if (Array.isArray(role)) {
@@ -37,14 +39,24 @@ const loginSlice = createSlice({
       }   
       
       state.username = username;
-      state.token = token;
+      state.accessToken = accessToken;
+      state.refreshToken = refreshToken;
       state.role = roleValue;
       state.ip = ip;
+
+      // axiosInstance에도 등록
+      setAuthTokens(accessToken, refreshToken);
+
+      // 쿠키/로컬 저장
+      setCookie("userCookie", JSON.stringify(action.payload), 1);
 
       // 에러가 없을 때만 쿠키 저장
       if(!action.payload.error){
         setCookie("userCookie", JSON.stringify(action.payload), 1);
       }
+      
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
     },
     setlogout: (state) => {
       const accessToken = localStorage.getItem("accessToken");
@@ -60,6 +72,7 @@ const loginSlice = createSlice({
         {  
           headers: {
             Authorization: `Bearer ${accessToken}`,
+            "X-Refresh-Token": refreshToken,
             "Content-Type": "application/json",
           },
         }
@@ -73,6 +86,8 @@ const loginSlice = createSlice({
 
       // Redux 상태 초기화
       state.username = "";
+      state.accessToken = "";
+      state.refreshToken = "";
       state.token = "";
       state.ip = "";
       delete axios.defaults.headers.common["Authorization"];

@@ -117,4 +117,31 @@ public class JWTUtil {
             throw new RuntimeException("유효하지 않은 토큰입니다.");
         }
     }
+
+    // 토큰을 Claims 형태로 파싱 (만료 포함)
+    public Claims parseClaims(String token) {
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(secretKey)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (ExpiredJwtException e) {
+            // 만료되어도 Claims는 얻을 수 있음
+            return e.getClaims();
+        }
+    }
+
+    // 만료 여부 검사
+    public boolean isExpired(String token) {
+        try {
+            Claims claims = parseClaims(token);
+            Date exp = claims.getExpiration();
+            return exp.before(new Date());
+        } catch (ExpiredJwtException e) {
+            return true;
+        } catch (Exception e) {
+            return true;
+        }
+    }
 }
