@@ -17,7 +17,6 @@ import lombok.*;
         allocationSize = 1
 )
 public class Image extends BaseEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "image_generator")
     private Long no; // 이미지 고유 번호

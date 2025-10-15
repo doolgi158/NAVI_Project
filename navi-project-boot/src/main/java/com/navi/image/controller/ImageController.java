@@ -3,8 +3,10 @@ package com.navi.image.controller;
 import com.navi.common.response.ApiResponse;
 import com.navi.image.dto.ImageDTO;
 import com.navi.image.service.ImageService;
+import com.navi.user.dto.users.UserSecurityDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -38,7 +40,7 @@ public class ImageController {
     }
 
     // 특정 대상의 이미지 삭제
-    @DeleteMapping
+    @DeleteMapping("/delete")
     public ResponseEntity<ApiResponse<Void>> deleteImage(
             @RequestParam("targetType") String targetType,
             @RequestParam("targetId") String targetId

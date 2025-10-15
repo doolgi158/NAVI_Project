@@ -51,7 +51,13 @@ public class UserServiceImpl implements UserService{
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-        return UserResponseDTO.from(user);
+        UserResponseDTO dto = UserResponseDTO.from(user);
+
+        // 프로필 이미지 조회
+        imageRepository.findByTargetTypeAndTargetId("USER", user.getId())
+                .ifPresent(image -> dto.setProfile(image.getPath()));
+
+        return dto;
     }
 
     @Override

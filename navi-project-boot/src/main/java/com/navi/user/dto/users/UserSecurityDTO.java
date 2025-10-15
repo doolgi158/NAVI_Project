@@ -24,6 +24,7 @@ public class UserSecurityDTO extends User {
     private String local;           // 내/외국인
     private UserState userState;    // 유저 상태
     private LocalDateTime signUp;   // 가입일
+    private String profile;         // 프로필 주소
 
     // 권한
     private List<String> role = new ArrayList<>();

@@ -1,117 +1,21 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
-import { API_SERVER_HOST } from "../../../common/api/naviApi";
-import { Form, Input, Button, Card, message, DatePicker, Select, Avatar,
-  Upload, Modal } from "antd";
-import { UploadOutlined, UserOutlined, ExclamationCircleFilled } from "@ant-design/icons";
+import { Form, Input, Button, Card, DatePicker, Select, Avatar } from "antd";
+import { UserOutlined } from "@ant-design/icons";
 import { motion } from "framer-motion";
 import dayjs from "dayjs";
 import MainLayout from "../../layout/MainLayout";
+import { useUserDetailFunctions } from "@/common/hooks/useUserDetailFunctions";
+import { useNavigate } from "react-router-dom";
+
 
 const { Option } = Select;
-const { confirm } = Modal;
 
 const UserDetailPage = () => {
+  const navigate = useNavigate();
   const [form] = Form.useForm();
-  const [user, setUser] = useState(null);
-  const [editing, setEditing] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
-
-  // 사용자 정보 불러오기
-  useEffect(() => {
-    axios
-      .get(`${API_SERVER_HOST}/api/users/me`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-      })
-      .then((res) => {
-        setUser(res.data.data);
-        form.setFieldsValue({
-          name: res.data.data.name,
-          phone: res.data.data.phone,
-          birth: dayjs(res.data.data.birth),
-          email: res.data.data.email,
-          gender: res.data.data.gender,
-          local: res.data.data.local,
-        });
-      })
-      .catch(() => message.error("사용자 정보를 불러오지 못했습니다."))
-      .finally(() => setLoading(false));
-  }, [form]);
-
-  // 회원 정보 수정 저장
-  const handleSave = async () => {
-    try {
-      const values = await form.validateFields();
-      const payload = {
-        ...values,
-        birth: values.birth ? values.birth.format("YYYY-MM-DD") : "",
-      };
-
-      await axios.put(`${API_SERVER_HOST}/api/users/me`, payload, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-      });
-
-      message.success("회원 정보가 수정되었습니다!");
-      setEditing(false);
-      setUser(payload);
-    } catch (err) {
-      console.error(err);
-      message.error("수정 중 오류가 발생했습니다.");
-    }
-  };
-
-  // 프로필 이미지 업로드
-  const handleUpload = async ({ file }) => {
-    const formData = new FormData();
-    formData.append("file", file);
-
-    setUploading(true);
-    try {
-      const res = await axios.post(`${API_SERVER_HOST}/api/images/upload`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-      });
-      setUser((prev) => ({ ...prev, profile: res.data.url }));
-      message.success("프로필 이미지가 변경되었습니다!");
-    } catch (err) {
-      message.error("이미지 업로드에 실패했습니다.");
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  // 회원탈퇴
-  const handleDeleteAccount = () => {
-    confirm({
-      title: "정말 탈퇴하시겠습니까?",
-      icon: <ExclamationCircleFilled />,
-      content: "탈퇴 시 계정 정보 및 데이터가 모두 삭제됩니다.",
-      okText: "탈퇴하기",
-      okType: "danger",
-      cancelText: "취소",
-      onOk: async () => {
-        try {
-          await axios.delete(`${API_SERVER_HOST}/api/users/me`, {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            },
-          });
-          localStorage.removeItem("accessToken");
-          message.success("회원 탈퇴가 완료되었습니다.");
-          window.location.href = "/"; // 홈으로 이동
-        } catch (err) {
-          message.error("회원 탈퇴 중 오류가 발생했습니다.");
-        }
-      },
-    });
-  };
+  const {
+    user, editing, setEditing, loading, handleSave,
+    handleDeleteAccount, handleProfileUpload, handleProfileDelete
+  } = useUserDetailFunctions(form);
 
   return (
     <MainLayout>
@@ -132,166 +36,161 @@ const UserDetailPage = () => {
               <>
                 {/* 프로필 이미지 섹션 */}
                 <div className="flex flex-col items-center">
-                <Avatar
+                  <Avatar
                     size={96}
-                    src={user?.profile}
-                    icon={<UserOutlined />}
+                    src={user?.profile || null}
+                    icon={!user?.profile && <UserOutlined />}
                     className="shadow-lg ring-2 ring-indigo-200"
-                    />
-  
-                {/* 프로필 변경 버튼 */}
-                <input
-                    type="file"
-                    accept="image/*"
-                    id="profileUpload"
-                    className="hidden"
-                    onChange={async (e) => {
-                    const file = e.target.files[0];
-                    if (!file) return;
+                  />
 
-                    const formData = new FormData();
-                    formData.append("file", file);
+                  {/* 프로필 변경 & 편집 버튼 */}
+                  <div className="flex gap-3 mt-3">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      id="profileUpload"
+                      className="hidden"
+                      onChange={(e) => handleProfileUpload(e.target.files[0])}
+                      />
 
-                    try {
-                        const res = await axios.post(`${API_SERVER_HOST}/api/users/profile`, formData, {
-                        headers: {
-                            "Content-Type": "multipart/form-data",
-                            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-                        },
-                        });
-                        message.success("프로필이 변경되었습니다!");
-                        setUser((prev) => ({ ...prev, profile: res.data.url })); // 응답으로 새 URL 받는 경우
-                    } catch (err) {
-                        console.error(err);
-                        message.error("프로필 업로드 실패");
-                    }
-                    }}
-                />
+                    <Button
+                      type="default"
+                      className="text-sm border-gray-300 hover:border-indigo-400 hover:text-indigo-500 transition"
+                      onClick={() => document.getElementById("profileUpload").click()}
+                    >
+                      프로필 변경
+                    </Button>
 
-                <Button
-                    type="default"
-                    className="mt-3 text-sm border-gray-300 hover:border-indigo-400 hover:text-indigo-500 transition"
-                    onClick={() => document.getElementById("profileUpload").click()}
-                >
-                    프로필 변경
-                </Button>
+                    {/* 사용자가 직접 프로필 이미지를 설정한 경우에만 보임 */}
+                    {user?.profile && (
+                      <>
+                        <Button
+                          type="default"
+                          className="text-sm border-gray-300 hover:border-indigo-400 hover:text-indigo-500 transition"
+                          onClick={() =>
+                            navigate("/users/profile/edit", {
+                            state: { profileUrl: user.profile },
+                          })}
+                        >
+                          프로필 편집
+                        </Button>
+                        <Button
+                          danger
+                          className="text-sm border-gray-300 hover:border-red-400 hover:text-red-500 transition"
+                          onClick={handleProfileDelete}
+                        >
+                          프로필 삭제
+                        </Button>
+                      </>
+                    )}
+                  </div>
                 </div>
 
                 {/* 사용자 정보 폼 */}
-                <Form
-                form={form}
-                layout="vertical"
-                className="space-y-4"
-                >
-                {/* 이름 */}
-                <Form.Item label="이름" name="name">
+                <Form form={form} layout="vertical" className="space-y-4 mt-6">
+                  <Form.Item label="이름" name="name">
                     {editing ? (
-                    <Input placeholder="이름 입력" />
+                      <Input placeholder="이름 입력" />
                     ) : (
-                    <div className="py-2 px-3 border border-gray-200 rounded-md bg-gray-50">
+                      <div className="py-2 px-3 border border-gray-200 rounded-md bg-gray-50">
                         {user?.name || "-"}
-                    </div>
-                    )}
-                </Form.Item>
-
-                {/* 전화번호 */}
-                <Form.Item label="전화번호" name="phone">
-                    {editing ? (
-                    <Input placeholder="01012345678" />
-                    ) : (
-                    <div className="py-2 px-3 border border-gray-200 rounded-md bg-gray-50">
-                        {user?.phone || "-"}
-                    </div>
-                    )}
-                </Form.Item>
-
-                {/* 생년월일 */}
-                <Form.Item label="생년월일" name="birth">
-                    {editing ? (
-                    <DatePicker
-                        className="w-full"
-                        format="YYYY-MM-DD"
-                        disabledDate={(date) => date.isAfter(dayjs())}
-                    />
-                    ) : (
-                    <div className="py-2 px-3 border border-gray-200 rounded-md bg-gray-50">
-                        {user?.birth || "-"}
-                    </div>
+                      </div>
                     )}
                   </Form.Item>
 
-                {/* 이메일 */}
-                <Form.Item label="이메일" name="email">
+                  <Form.Item label="전화번호" name="phone">
                     {editing ? (
-                    <Input placeholder="example@email.com" />
+                      <Input placeholder="01012345678" />
                     ) : (
-                    <div className="py-2 px-3 border border-gray-200 rounded-md bg-gray-50">
-                        {user?.email || "-"}
-                    </div>
+                      <div className="py-2 px-3 border border-gray-200 rounded-md bg-gray-50">
+                        {user?.phone || "-"}
+                      </div>
                     )}
-                </Form.Item>
+                  </Form.Item>
 
-                {/* 성별 */}
-                <Form.Item label="성별" name="gender">
+                  <Form.Item label="생년월일" name="birth">
                     {editing ? (
-                    <Select placeholder="성별 선택">
+                      <DatePicker
+                        className="w-full"
+                        format="YYYY-MM-DD"
+                        disabledDate={(date) => date.isAfter(dayjs())}
+                      />
+                    ) : (
+                      <div className="py-2 px-3 border border-gray-200 rounded-md bg-gray-50">
+                        {user?.birth || "-"}
+                      </div>
+                    )}
+                  </Form.Item>
+
+                  <Form.Item label="이메일" name="email">
+                    {editing ? (
+                      <Input placeholder="example@email.com" />
+                    ) : (
+                      <div className="py-2 px-3 border border-gray-200 rounded-md bg-gray-50">
+                        {user?.email || "-"}
+                      </div>
+                    )}
+                  </Form.Item>
+
+                  <Form.Item label="성별" name="gender">
+                    {editing ? (
+                      <Select placeholder="성별 선택">
                         <Option value="M">남성</Option>
                         <Option value="F">여성</Option>
-                    </Select>
+                      </Select>
                     ) : (
-                    <div className="py-2 px-3 border border-gray-200 rounded-md bg-gray-50">
-                        {user?.gender === "M" ? "남성" : user?.gender === "F" ? "여성" : "-"}
-                    </div>
-                    )}  
-                </Form.Item>
+                      <div className="py-2 px-3 border border-gray-200 rounded-md bg-gray-50">
+                        {user?.gender === "M"
+                          ? "남성"
+                          : user?.gender === "F"
+                          ? "여성"
+                          : "-"}
+                      </div>
+                    )}
+                  </Form.Item>
 
-                {/* 내/외국인 */}
-                <Form.Item label="내/외국인" name="local">
+                  <Form.Item label="내/외국인" name="local">
                     {editing ? (
-                    <Select placeholder="국적 선택">
+                      <Select placeholder="국적 선택">
                         <Option value="L">내국인</Option>
                         <Option value="F">외국인</Option>
-                    </Select>
+                      </Select>
                     ) : (
-                    <div className="py-2 px-3 border border-gray-200 rounded-md bg-gray-50">
+                      <div className="py-2 px-3 border border-gray-200 rounded-md bg-gray-50">
                         {user?.local || "-"}
-                    </div>
+                      </div>
                     )}
-                </Form.Item>
+                  </Form.Item>
                 </Form>
 
                 {/* 버튼 영역 */}
                 <div className="flex justify-between items-center mt-8">
-                    <Button
-                        danger
-                        onClick={handleDeleteAccount}
-                        className="hover:bg-red-50"
-                    >
-                        회원 탈퇴
-                    </Button>
+                  <Button danger onClick={handleDeleteAccount} className="hover:bg-red-50">
+                    회원 탈퇴
+                  </Button>
 
-                    <div className="flex gap-3">
-                        {!editing ? (
+                  <div className="flex gap-3">
+                    {!editing ? (
+                      <Button
+                        type="primary"
+                        onClick={() => setEditing(true)}
+                        className="bg-indigo-500 hover:bg-indigo-600"
+                      >
+                        수정하기
+                      </Button>
+                    ) : (
+                      <>
+                        <Button onClick={() => setEditing(false)}>취소</Button>
                         <Button
-                            type="primary"
-                            onClick={() => setEditing(true)}
-                            className="bg-indigo-500 hover:bg-indigo-600"
+                          type="primary"
+                          onClick={handleSave}
+                          className="bg-indigo-500 hover:bg-indigo-600"
                         >
-                            수정하기
+                          저장
                         </Button>
-                        ) : (
-                        <>
-                            <Button onClick={() => setEditing(false)}>취소</Button>
-                            <Button
-                                type="primary"
-                                onClick={handleSave}
-                                className="bg-indigo-500 hover:bg-indigo-600"
-                            >
-                                저장
-                            </Button>
-                        </>
-                        )}
-                    </div>
+                      </>
+                    )}
+                  </div>
                 </div>
               </>
             )}

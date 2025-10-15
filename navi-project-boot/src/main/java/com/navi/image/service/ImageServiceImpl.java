@@ -106,7 +106,7 @@ public class ImageServiceImpl implements ImageService{
     private String getFolderName(String targetType) {
         switch (targetType.toUpperCase()) {
             case "USER":
-                return "profile";
+                return "user";
             case "ROOM":
                 return "room";
             case "ACC":

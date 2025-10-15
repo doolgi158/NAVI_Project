@@ -46,6 +46,10 @@ public class JWTCheckFilter extends OncePerRequestFilter {
         }
 
         String path = request.getRequestURI();
+        if (path.equals("/api/users/refresh")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         // 로그인 및 OAuth 요청은 JWT 검사 건너뛰기
         if (path.startsWith("/api/auth/oauth/") || path.equals("/api/users/login")) {
