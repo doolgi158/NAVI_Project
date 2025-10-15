@@ -59,6 +59,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Page<User> findByUserState(UserState state, Pageable pageable);
 
     // 프로필 이미지 조회용
-    Optional<Image> findByNo(Long userNo);
+    Optional<User> findByNo(Long userNo);
     void deleteByNo(Long userNo);
 }

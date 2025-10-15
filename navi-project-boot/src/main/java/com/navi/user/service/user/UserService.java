@@ -19,4 +19,5 @@ public interface UserService {
     void changePassword(String token, String oldPw, String newPw);
 
     UserResponseDTO updateUserInfo(String username, UserRequestDTO dto);
+    void updateProfileImage(String username, String imageUrl);
 }

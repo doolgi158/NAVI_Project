@@ -31,51 +31,67 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #333;
+        }
+
+        .board-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
         }
 
         .btn-write {
-            padding: 8px 20px;
-            background-color: white;
-            border: 1px solid #ccc;
+            padding: 10px 25px;
+            background-color: #007bff;
+            color: white;
+            border: none;
             border-radius: 4px;
             font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-write:hover {
+            background-color: #0056b3;
         }
 
         .search-box {
             display: flex;
             gap: 5px;
             align-items: center;
+            margin-bottom: 20px;
         }
 
         .search-box input {
-            padding: 6px 10px;
-            border: 1px solid #ccc;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
             border-radius: 4px;
-            width: 250px;
+            width: 300px;
             font-size: 14px;
         }
 
         .search-box button {
-            padding: 6px 12px;
+            padding: 8px 15px;
             background-color: white;
-            border: 1px solid #ccc;
+            border: 1px solid #ddd;
             border-radius: 4px;
             cursor: pointer;
+            font-size: 14px;
         }
 
         .search-box button:hover {
-            background-color: #f0f0f0;
+            background-color: #f8f8f8;
         }
 
         .board-list {
-            border: 1px solid #ddd;
-            margin-bottom: 20px;
-            min-height: 200px;
+            border-top: 2px solid #333;
+            min-height: 300px;
         }
 
         .board-item {
-            padding: 15px;
-            border-bottom: 1px solid #ddd;
+            padding: 20px;
+            border-bottom: 1px solid #eee;
             cursor: pointer;
             transition: background-color 0.2s;
         }
@@ -84,21 +100,40 @@
             background-color: #f9f9f9;
         }
 
-        .board-item:last-child {
-            border-bottom: none;
+        .board-item-title {
+            font-size: 16px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .board-meta {
+            display: flex;
+            gap: 20px;
+            font-size: 13px;
+            color: #999;
+        }
+
+        .board-meta span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
 
         .empty-message {
-            padding: 50px;
+            padding: 80px 20px;
             text-align: center;
             color: #999;
+            font-size: 15px;
         }
 
         .board-footer {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
-            margin-top: 20px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
         }
 
         .pagination {
@@ -108,89 +143,95 @@
         }
 
         .page-btn {
-            padding: 5px 10px;
+            padding: 8px 12px;
             border: 1px solid #ddd;
             background-color: white;
             cursor: pointer;
-            border-radius: 3px;
+            border-radius: 4px;
+            font-size: 14px;
         }
 
         .page-btn:hover {
             background-color: #f0f0f0;
         }
 
+        .page-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
         .page-input {
-            width: 80px;
-            padding: 5px;
+            width: 60px;
+            padding: 8px;
             text-align: center;
             border: 1px solid #ddd;
-            border-radius: 3px;
-        }
-
-        .btn-go {
-            padding: 5px 15px;
-            background-color: white;
-            border: 1px solid #ccc;
             border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .btn-go:hover {
-            background-color: #f0f0f0;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="header">
-        <button class="btn-write">일반 게시판</button>
-        <div class="search-box">
-            <input type="text" id="searchInput" placeholder="Search">
-            <button onclick="search()">🔍</button>
-        </div>
+        <div class="board-title">일반 게시판</div>
+        <button class="btn-write" onclick="goToWrite()">✏️ 글쓰기</button>
+    </div>
+
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="검색어를 입력하세요">
+        <button onclick="search()">🔍 검색</button>
     </div>
 
     <div class="board-list">
-        <!-- Thymeleaf로 게시글 목록 출력 -->
+        <!-- 게시글 목록 -->
         <div th:if="${boards != null and !boards.isEmpty()}">
             <div class="board-item" th:each="board : ${boards}"
-                 th:onclick="|viewPost(${board.board_no})|">
-                <span th:text="${board.board_Title}">게시글 제목</span>
+                 th:onclick="|viewPost(${board.boardNo})|">
+                <div class="board-item-title" th:text="${board.boardTitle}">게시글 제목</div>
+                <div class="board-meta">
+                    <span>
+                        <span th:text="${#temporals.format(board.createDate, 'yyyy-MM-dd HH:mm')}">2025-01-01</span>
+                    </span>
+                    <span>
+                        사용자 <span th:text="${board.userNo}">1</span>
+                    </span>
+                    <span>
+                        <span th:text="${board.boardGood}">0</span>
+                    </span>
+                </div>
             </div>
         </div>
 
         <!-- 게시글이 없을 때 -->
         <div th:if="${boards == null or boards.isEmpty()}" class="empty-message">
-            등록된 게시글이 없습니다.
+            등록된 게시글이 없습니다.<br>
+            첫 게시글을 작성해보세요!
         </div>
     </div>
 
     <div class="board-footer">
         <div class="pagination">
-            <button class="page-btn" onclick="prevPage()">◀</button>
+            <button class="page-btn" onclick="prevPage()" id="prevBtn">◀ 이전</button>
             <input type="text" class="page-input" id="pageInput" value="1" readonly>
-            <button class="page-btn" onclick="nextPage()">▶</button>
+            <button class="page-btn" onclick="nextPage()" id="nextBtn">다음 ▶</button>
         </div>
-        <button class="btn-go" onclick="goToWrite()">글쓰기</button>
     </div>
 </div>
 
 <script>
     let currentPage = 1;
 
-    // 글쓰기 페이지로 이동
     function goToWrite() {
         window.location.href = '/board/write';
     }
 
-    // 검색 기능
     function search() {
         const keyword = document.getElementById('searchInput').value.trim();
         if (keyword === '') {
             alert('검색어를 입력해주세요.');
             return;
         }
-        alert('검색어: ' + keyword);
+        alert('검색 기능은 준비중입니다.\n검색어: ' + keyword);
         // TODO: 실제 검색 기능 구현
     }
 
@@ -202,6 +243,7 @@
         if (currentPage > 1) {
             currentPage--;
             document.getElementById('pageInput').value = currentPage;
+            updateButtons();
             // TODO: 실제 페이지 이동 구현
         }
     }
@@ -209,8 +251,18 @@
     function nextPage() {
         currentPage++;
         document.getElementById('pageInput').value = currentPage;
+        updateButtons();
         // TODO: 실제 페이지 이동 구현
     }
+
+    function updateButtons() {
+        document.getElementById('prevBtn').disabled = (currentPage === 1);
+    }
+
+    // 페이지 로드 시 버튼 상태 업데이트
+    window.onload = function() {
+        updateButtons();
+    };
 </script>
 </body>
 </html>

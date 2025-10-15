@@ -131,23 +131,50 @@ const UserDetailPage = () => {
             {user && (
               <>
                 {/* 프로필 이미지 섹션 */}
-                <div className="flex flex-col items-center mb-8">
-                  <Avatar
-                    size={120}
+                <div className="flex flex-col items-center">
+                <Avatar
+                    size={96}
                     src={user?.profile}
                     icon={<UserOutlined />}
-                    className="shadow-md ring-2 ring-indigo-200 mb-4"
-                  />
-                  <Upload
-                    showUploadList={false}
-                    customRequest={handleUpload}
+                    className="shadow-lg ring-2 ring-indigo-200"
+                    />
+  
+                {/* 프로필 변경 버튼 */}
+                <input
+                    type="file"
                     accept="image/*"
-                    disabled={uploading}
-                  >
-                    <Button icon={<UploadOutlined />} loading={uploading}>
-                      {uploading ? "업로드 중..." : "프로필 변경"}
-                    </Button>
-                  </Upload>
+                    id="profileUpload"
+                    className="hidden"
+                    onChange={async (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+
+                    const formData = new FormData();
+                    formData.append("file", file);
+
+                    try {
+                        const res = await axios.post(`${API_SERVER_HOST}/api/users/profile`, formData, {
+                        headers: {
+                            "Content-Type": "multipart/form-data",
+                            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+                        },
+                        });
+                        message.success("프로필이 변경되었습니다!");
+                        setUser((prev) => ({ ...prev, profile: res.data.url })); // 응답으로 새 URL 받는 경우
+                    } catch (err) {
+                        console.error(err);
+                        message.error("프로필 업로드 실패");
+                    }
+                    }}
+                />
+
+                <Button
+                    type="default"
+                    className="mt-3 text-sm border-gray-300 hover:border-indigo-400 hover:text-indigo-500 transition"
+                    onClick={() => document.getElementById("profileUpload").click()}
+                >
+                    프로필 변경
+                </Button>
                 </div>
 
                 {/* 사용자 정보 폼 */}

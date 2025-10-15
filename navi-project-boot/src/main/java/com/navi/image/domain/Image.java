@@ -17,7 +17,7 @@ import lombok.*;
         allocationSize = 1)
 public class Image {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "acc_generator")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "image_generator")
     //private Long imageId;
     private Long no;
 

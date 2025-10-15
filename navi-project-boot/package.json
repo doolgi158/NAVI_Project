@@ -2,15 +2,23 @@
   "dependencies": {
     "@ant-design/charts": "^2.6.5",
     "@reduxjs/toolkit": "^2.9.0",
-    "antd": "^5.27.4",
+    "antd": "^5.27.5",
     "axios": "^1.12.2",
     "bootstrap": "^5.3.8",
     "bootstrap-icons": "^1.13.1",
-    "framer-motion": "^12.23.22",
+    "framer-motion": "^12.23.24",
+    "lucide-react": "^0.545.0",
+    "quill-image-resize": "^3.0.9",
+    "quill-image-resize-module-react": "^3.0.0",
     "react-bootstrap": "^2.10.10",
     "react-cookie": "^8.0.1",
+    "react-daum-postcode": "^3.2.0",
+    "react-easy-crop": "^5.5.3",
+    "react-quill": "^2.0.0",
+    "react-quill-image-uploader": "^0.1.1",
     "react-redux": "^9.2.0",
-    "react-router-dom": "^7.9.3"
+    "react-resizable": "^3.0.5",
+    "react-router-dom": "^7.9.4"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^5.0.4",
