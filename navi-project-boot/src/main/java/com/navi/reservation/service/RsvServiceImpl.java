@@ -4,7 +4,7 @@
 //import com.navi.accommodation.service.AccRsvService;
 //import com.navi.reservation.domain.Rsv;
 //import com.navi.reservation.domain.enums.PaymentMethod;
-//import com.navi.reservation.domain.enums.RsvStatus;
+//import com.navi.common.enums.RsvStatus;
 //import com.navi.reservation.domain.enums.RsvType;
 //import com.navi.reservation.dto.request.RsvPreRequestDTO;
 //import com.navi.reservation.dto.response.RsvResponseDTO;
