@@ -3,6 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <title>게시글 상세</title>
+    <script>
+        function reportPost() {
+            if (confirm('이 게시글을 신고하시겠습니까?')) {
+                const boardId = [[${board.boardNo}]];
+
+                fetch(`/board/${boardId}/report`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.text())
+                .then(result => {
+                    if (result === 'success') {
+                        alert('신고가 접수되었습니다.');
+                        location.reload();
+                    } else {
+                        alert('신고 처리 중 오류가 발생했습니다.');
+                    }
+                })
+                .catch(error => {
+                    alert('오류가 발생했습니다.');
+                    console.error('Error:', error);
+                });
+            }
+        }
+    </script>
     <style>
         * {
             margin: 0;
@@ -25,19 +52,14 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        h1 {
-            font-size: 24px;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #333;
-        }
-
         .board-header {
+            border-bottom: 2px solid #333;
+            padding-bottom: 20px;
             margin-bottom: 20px;
         }
 
         .board-header h2 {
-            font-size: 20px;
+            font-size: 24px;
             margin-bottom: 15px;
             color: #333;
         }
@@ -47,8 +69,6 @@
             gap: 20px;
             color: #666;
             font-size: 14px;
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
         }
 
         .board-info p {
@@ -56,24 +76,27 @@
         }
 
         .board-content {
-            margin-top: 30px;
-        }
-
-        .board-content h3 {
-            font-size: 16px;
-            margin-bottom: 15px;
-            color: #333;
+            min-height: 300px;
+            padding: 30px 0;
+            border-bottom: 1px solid #eee;
         }
 
         .board-content p {
             line-height: 1.8;
             color: #444;
             white-space: pre-wrap;
+            font-size: 15px;
+        }
+
+        .board-actions {
+            margin-top: 20px;
+            padding-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .btn-list {
-            display: inline-block;
-            margin-top: 30px;
             padding: 10px 20px;
             background-color: white;
             border: 1px solid #ccc;
@@ -81,33 +104,193 @@
             text-decoration: none;
             color: #333;
             font-size: 14px;
+            transition: background-color 0.2s;
         }
 
         .btn-list:hover {
             background-color: #f8f8f8;
         }
+
+        .btn-report {
+            padding: 8px 16px;
+            background-color: white;
+            border: 1px solid #dc3545;
+            border-radius: 4px;
+            color: #dc3545;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .btn-report:hover {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .comment-section {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #333;
+        }
+
+        .comment-section h3 {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .comment-form {
+            margin-bottom: 30px;
+        }
+
+        .comment-form textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: 'Malgun Gothic', sans-serif;
+            font-size: 14px;
+            resize: vertical;
+            margin-bottom: 10px;
+        }
+
+        .comment-form textarea:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        .btn-comment-submit {
+            padding: 10px 25px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .btn-comment-submit:hover {
+            background-color: #0056b3;
+        }
+
+        .comment-list {
+            margin-top: 20px;
+        }
+
+        .comment-item {
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            background-color: #fafafa;
+        }
+
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .comment-author {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .comment-content {
+            margin-bottom: 12px;
+            line-height: 1.6;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .btn-comment-delete {
+            padding: 5px 12px;
+            background-color: white;
+            border: 1px solid #dc3545;
+            border-radius: 4px;
+            color: #dc3545;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .btn-comment-delete:hover {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .no-comments {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+            font-size: 15px;
+        }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>게시글 상세</h1>
-    
     <div class="board-header">
-        <h2 th:text="${board.board_Title}">게시글 제목</h2>
-        
+        <h2 th:text="${board.boardTitle}">제목</h2>
         <div class="board-info">
-            <p>게시글번호: <span th:text="${board.board_no}">1</span></p>
-            <p>좋아요: <span th:text="${board.board_good}">0</span></p>
-            <p>신고수: <span th:text="${board.report_count}">0</span></p>
+            <p>📌 번호: <span th:text="${board.boardNo}">1</span></p>
+            <p>📅 작성일: <span th:text="${#temporals.format(board.createDate, 'yyyy-MM-dd HH:mm')}">날짜</span></p>
+            <p>👤 작성자: <span th:text="${board.userNo}">1</span></p>
+            <p>❤️ 좋아요: <span th:text="${board.boardGood}">0</span></p>
+            <p>🚨 신고: <span th:text="${board.reportCount}">0</span></p>
         </div>
     </div>
 
     <div class="board-content">
-        <h3>내용</h3>
-        <p th:text="${board.board_content}">게시글 내용이 여기에 표시됩니다.</p>
+        <p th:text="${board.boardContent}">내용</p>
     </div>
 
-    <a href="/board" class="btn-list">목록으로</a>
+    <div class="board-actions">
+        <a href="/board/list" class="btn-list">📋 목록으로</a>
+        <button class="btn-report" onclick="reportPost()">🚨 신고하기</button>
+    </div>
+
+    <!-- 댓글 섹션 -->
+    <div class="comment-section">
+        <h3>💬 댓글 <span th:text="${commentCount}">0</span>개</h3>
+
+        <!-- 댓글 작성 폼 -->
+        <form th:action="@{/board/{id}/comment(id=${board.boardNo})}" method="post" class="comment-form">
+            <textarea name="comment"
+                      placeholder="댓글을 입력하세요 (최대 500자)"
+                      required
+                      maxlength="500"></textarea>
+            <button type="submit" class="btn-comment-submit">댓글 작성</button>
+        </form>
+
+        <!-- 댓글 목록 -->
+        <div class="comment-list">
+            <div class="comment-item" th:each="comment : ${comments}">
+                <div class="comment-header">
+                    <span class="comment-author">👤 사용자 <span th:text="${comment.userNo}">1</span></span>
+                    <span class="comment-date" th:text="${#temporals.format(comment.createDate, 'yyyy-MM-dd HH:mm')}">2025-01-01</span>
+                </div>
+                <div class="comment-content" th:text="${comment.commentContent}">
+                    댓글 내용
+                </div>
+                <form th:action="@{/board/comment/{commentId}/delete(commentId=${comment.commentNo})}"
+                      method="post"
+                      style="display: inline;"
+                      onsubmit="return confirm('댓글을 삭제하시겠습니까?');">
+                    <input type="hidden" name="boardId" th:value="${board.boardNo}">
+                    <button type="submit" class="btn-comment-delete">삭제</button>
+                </form>
+            </div>
+
+            <!-- 댓글이 없을 때 -->
+            <div th:if="${comments.isEmpty()}" class="no-comments">
+                💭 아직 댓글이 없습니다.<br>
+                첫 댓글을 작성해보세요!
+            </div>
+        </div>
+    </div>
 </div>
 </body>
 </html>
