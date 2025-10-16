@@ -126,7 +126,7 @@ const PaymentPage = ({keyword}) => {
 
   return (
     <MainLayout>
-      <div className="min-h-screen bg-[#FFFBEA] flex justify-center pt-10 pb-12 px-8">
+      <div className="min-h-screen flex justify-center pt-10 pb-12 px-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full max-w-7xl">
           {/* === 좌측 결제 영역 === */}
           <Card className="lg:col-span-2" style={{ borderRadius: 16, backgroundColor: "#FFFFFF" }}>
@@ -170,7 +170,7 @@ const PaymentPage = ({keyword}) => {
               style={{
                 borderRadius: 16,
                 boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
-                backgroundColor: "#FDF6D8",
+                backgroundColor: "#FFFBEA",
               }}
               styles={{
                 body: { padding: "24px" },
