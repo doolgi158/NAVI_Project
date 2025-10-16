@@ -15,7 +15,8 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PaymentVerifyResponseDTO {
-    private boolean success;    // 결제 검증 결과 (true: 성공, false: 실패)
-    private String message;     // 사용자에게 보여줄 메시지
-    //private String merchantId;  // 결제 고유번호 (예: PAY20251017-0001)
+    private boolean success;     // 결제 검증 결과 (true: 성공, false: 실패)
+    private String message;      // 사용자에게 보여줄 메시지
+    private String impUid;       // PG 승인번호 (예: IMP_67283051)
+    private String merchantId;   // 결제 고유번호 (예: PAY20251017-0001)
 }
