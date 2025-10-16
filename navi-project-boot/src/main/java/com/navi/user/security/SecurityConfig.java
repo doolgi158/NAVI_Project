@@ -56,10 +56,10 @@ public class SecurityConfig {
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("api/adm/**", "api/admin/**").hasRole(UserRole.ADMIN.name())
-                .requestMatchers("/api/users/**", "/api/seats/**", "/travel/**", "/api/flight/**", "/api/delivery/**",
-                "/api/auth/**", "/api/accommodations/**", "/api/townships/**", "/api/rooms/**", "/api/reservation/**")
+                .requestMatchers("/api/users/**", "/api/seats/**", "api/travel/**", "/api/flight/**", "/api/delivery/**",
+                "/api/auth/**", "/api/accommodations/**", "/api/townships/**", "/api/rooms/**", "/api/reservation/**", "/api/users/refresh")
                         .permitAll()
-//                .hasAnyRole(UserRole.USER.name(), UserRole.ADMIN.name())
+                .requestMatchers("/api/users/detail/**").hasAnyRole(UserRole.USER.name())
                 .anyRequest().permitAll()
         );
 
@@ -83,7 +83,7 @@ public class SecurityConfig {
 
         // JWT 필터 추가
         http.addFilterBefore(new JWTCheckFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
-        http.addFilterAfter(new TryLoginFilter(tryLoginRepository), JWTCheckFilter.class);
+        http.addFilterAfter(new TryLoginFilter(tryLoginRepository, userRepository), JWTCheckFilter.class);
 
         return http.build();
     }

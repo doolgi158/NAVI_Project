@@ -23,5 +23,5 @@ public interface PaymentRepository extends JpaRepository<PaymentMaster, Long> {
 
     /* == [사용자용] == */
     // 3. 사용자 번호(user_no)로 결제 내역 전체 조회 (마이페이지용)
-    List<PaymentMaster> findAllByUser_UserNo(Long userNo);
+//    List<PaymentMaster> findAllByUser_UserNo(Long userNo);
 }

@@ -33,19 +33,22 @@ export const useLogin = () => {
         axios.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
 
         // Redux 상태 갱신
-        dispatch(setlogin({ username: username, token: accessToken , role: roles, ip: ip }));
+        dispatch(setlogin({ username: username, accessToken: accessToken , refreshToken: refreshToken, role: roles, ip: ip }));
+
+        await new Promise((resolve) => setTimeout(resolve, 100));
 
         // 리디렉션 처리
         const redirectPath = localStorage.getItem("redirectAfterLogin") || "/";
         localStorage.removeItem("redirectAfterLogin");
 
         // 관리자 전용 페이지 분기
-        if (username === "naviadmin") {
+        if (Array.isArray(roles) && roles.includes("ADMIN")) {
+          console.log("관리자 로그인");
           navigate("/adm/dashboard");
         } else {
           navigate(redirectPath);
         }
-
+console.log(response);
         return { success: true, message: "로그인 성공" };
       }
 

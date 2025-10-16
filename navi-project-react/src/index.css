@@ -1,3 +1,62 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@font-face {
+    font-family: 'Sacheonhanggong';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2506-1@1.0/SacheonHangGong-Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-display: swap;
+}
+
+
+@font-face {
+    font-family: 'IncheonEducation';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2307-2@1.0/iceJaram-Rg.woff2') format('woff2');
+    font-weight: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'FlightSansTitle';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2410-1@1.0/FlightSans-Title.woff2') format('woff2');
+    font-weight: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'PayboocFont';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-07@1.0/paybooc-Light.woff') format('woff');
+    font-weight: 300;
+    font-display: swap;
+}
+
+.planTitle-text{
+    font-family: 'sacheonhanggong';
+    font-size:40px;
+    color:#00134ebf;
+}
+
+.planSubTitle-text{
+    font-family:"IncheonEducation";
+    font-size:23px;
+    color:#00134ebf;
+}
+
+.button-text{
+    font-family:"PayboocFont";
+    color:aliceblue;
+}
+
+.plan-btn {
+  background-color: transparent !important;
+  color: #0d0d7ca4 !important;
+  border: 1px solid #00134ebf !important;
+  transition: all 0.4s ease; /* 부드러운 전환 효과 */
+}
+
+.plan-btn:hover {
+  background-color: #00134ebf !important; /* hover 시 배경색 */
+  color: #ffffff !important; /* hover 시 글자색 */
+  border-color: #00134ebf !important;
+}

@@ -24,8 +24,6 @@ public class SecurityUserDetailsService implements UserDetailsService {
         User user = userRepository.getUser(username);
         if(user == null) {
             throw new UsernameNotFoundException(username + "번의 유저를 찾을 수 없습니다.");
-        } else if(user.getUserState() == UserState.DELETE) {
-            throw new CustomException("탈퇴한 계정입니다.", 403, null);
         } else if(user.getUserState() == UserState.SLEEP) {
             throw new LockedException("휴면 계정입니다.");
         }

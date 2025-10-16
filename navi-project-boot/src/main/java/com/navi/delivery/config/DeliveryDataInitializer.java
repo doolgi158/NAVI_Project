@@ -4,10 +4,12 @@ package com.navi.delivery.config;
 import com.navi.delivery.domain.Bag;
 import com.navi.delivery.repository.BagRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class DeliveryDataInitializer implements ApplicationRunner {
@@ -37,9 +39,9 @@ public class DeliveryDataInitializer implements ApplicationRunner {
                     .price(20000)
                     .build());
 
-            System.out.println("✅ [DeliveryDataInitializer] 기본 BAG 데이터 3건 자동 삽입 완료");
+            log.info("[DeliveryDataInitializer] 기본 BAG 데이터 3건 자동 삽입 완료");
         } else {
-            System.out.println("✅ [DeliveryDataInitializer] BAG 테이블에 이미 데이터 존재 (" + count + "건)");
+            log.info("[DeliveryDataInitializer] BAG 테이블에 이미 데이터 존재 (" + count + "건)");
         }
     }
 }

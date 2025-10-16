@@ -19,7 +19,14 @@ const UserMyPage = () => {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
       })
-      .then((res) => setUser(res.data.data))
+      .then((res) => {
+        const data = res.data.data;
+        setUser({
+        ...data,
+        // 프로필 경로를 절대경로로 변환
+        profile: data.profile ? `${API_SERVER_HOST}${data.profile}` : null,
+        });
+      })
       .catch(() => message.error("사용자 정보를 불러오지 못했습니다."))
       .finally(() => setLoading(false));
   }, []);
@@ -52,8 +59,8 @@ const UserMyPage = () => {
               <div className="flex items-center gap-6">
                 <Avatar
                   size={96}
-                  src={user?.profile}
-                  icon={<UserOutlined />}
+                  src={user?.profile || null}
+                  icon={!user?.profile && <UserOutlined />}
                   className="shadow-lg ring-2 ring-indigo-200"
                 />
                 <div>
