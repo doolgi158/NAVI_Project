@@ -4,6 +4,8 @@ import { UserOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
 import { setlogout } from "../slice/loginSlice";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { API_SERVER_HOST } from "../api/naviApi";
 
 const UserMenuDropdown = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -11,22 +13,57 @@ const UserMenuDropdown = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const loginstate = useSelector((state) => state.login);
+  const [profileUrl, setProfileUrl] = useState(null);
 
   // 메뉴 외부 클릭 시 닫기
   useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      axios
+        .get(`${API_SERVER_HOST}/api/users/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((res) => {
+          const data = res.data.data;
+          if (data?.profile) {
+            setProfileUrl(`${API_SERVER_HOST}${data.profile}`);
+          }
+        })
+        .catch(() => {
+          console.warn("프로필 이미지 불러오기 실패");
+        });
+    }
+
+    // 프로필 변경 이벤트 감지
+    const handleProfileUpdate = (e) => {
+      if (e.detail?.newProfile) {
+        setProfileUrl(`${API_SERVER_HOST}${e.detail.newProfile}?t=${Date.now()}`);
+      }
+    };
+    window.addEventListener("profile-updated", handleProfileUpdate);
+    
+    // 외부 클릭 닫기
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
         setMenuOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+  
+    // cleanup
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("profile-updated", handleProfileUpdate);
+    };
   }, []);
 
   const handleMenuClick = (path) => {
     setMenuOpen(false);
     if (path === "logout") {
       dispatch(setlogout());
+      setProfileUrl(null);
       navigate("/");
     } else {
       navigate(path);
@@ -36,13 +73,13 @@ const UserMenuDropdown = () => {
   return (
     <div
       ref={menuRef}
-      className="relative inline-block" // ✅ 핵심: Space 대신 inline-block으로 고정
+      className="relative inline-block" // 핵심: Space 대신 inline-block으로 고정
       style={{ lineHeight: 0 }}
     >
       {/* 프로필 버튼 */}
       <Avatar
-        src={loginstate.user?.profileImage || null}
-        icon={!loginstate.user?.profileImage && <UserOutlined />}
+        src={profileUrl || loginstate.user?.profileImage || null}
+        icon={!profileUrl && !loginstate.user?.profileImage && <UserOutlined />}
         size={38}
         className="cursor-pointer border border-gray-200 shadow-sm hover:shadow-md transition-transform hover:scale-105"
         onClick={() => setMenuOpen((prev) => !prev)}

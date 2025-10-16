@@ -46,7 +46,7 @@ public class UserTest {
         StringBuilder password = new StringBuilder();
         UserState[] values = UserState.values();
 
-        for(int i = 0; i <= 100; i++) {
+        for(int i = 0; i <= 1000; i++) {
             for (int j = 0; j < 8; j++) {
                 phone.append(random.nextInt(10));
             }

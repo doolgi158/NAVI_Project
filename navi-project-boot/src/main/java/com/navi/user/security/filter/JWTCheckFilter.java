@@ -34,9 +34,6 @@ public class JWTCheckFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        log.info("[JWT FILTER] Start filtering request: {}", request.getRequestURI());
-        log.info("[JWT FILTER] Header: {}", request.getHeader("Authorization"));
-
         String header = request.getHeader("Authorization");
 
         // 토큰이 없거나 Bearer 형식이 아닌 경우
@@ -46,6 +43,10 @@ public class JWTCheckFilter extends OncePerRequestFilter {
         }
 
         String path = request.getRequestURI();
+        if (path.equals("/api/users/refresh")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         // 로그인 및 OAuth 요청은 JWT 검사 건너뛰기
         if (path.startsWith("/api/auth/oauth/") || path.equals("/api/users/login")) {
@@ -61,6 +62,42 @@ public class JWTCheckFilter extends OncePerRequestFilter {
                 String accessToken = authHeader.substring(7);
                 JWTClaimDTO claim = jwtUtil.validateAndParse(accessToken);
 
+                // UserState 체크 (JWTClaimDTO에 state 필드가 있다면 사용)
+                UserState state = claim.getState() != null ? claim.getState() : UserState.NORMAL;
+
+                // 휴면 상태면 차단
+                if (state == UserState.SLEEP || state == UserState.DELETE) {
+                    ApiResponse<Object> blockedResponse;
+                    int status;
+
+                    if (state == UserState.SLEEP) {
+                        blockedResponse = ApiResponse.error(
+                                "휴면계정입니다. 정상 계정으로 전환하시겠습니까?",
+                                403,
+                                "sleep"
+                        );
+                        status = HttpServletResponse.SC_FORBIDDEN;
+                    } else {
+                        blockedResponse = ApiResponse.error(
+                                "탈퇴한 계정입니다. 로그인할 수 없습니다.",
+                                403,
+                                "delete"
+                        );
+                        status = HttpServletResponse.SC_FORBIDDEN;
+                    }
+
+                    response.setContentType("application/json; charset=UTF-8");
+                    response.setStatus(status);
+
+                    PrintWriter writer = response.getWriter();
+                    objectMapper.findAndRegisterModules();
+                    objectMapper.writeValue(writer, blockedResponse);
+                    writer.flush();
+                    writer.close();
+                    return;
+                }
+
+                // 권한 변환
                 List<SimpleGrantedAuthority> authorities = claim.getRole().stream()
                         .map(r -> new SimpleGrantedAuthority("ROLE_" + r))
                         .toList();
@@ -113,13 +150,14 @@ public class JWTCheckFilter extends OncePerRequestFilter {
         // 로그인 없이 접근 가능한 페이지 건너뜀
         return path.startsWith("/api/users/signup")
                 || path.startsWith("/api/users/login")
+                || path.startsWith("/api/users/logout")
                 || path.startsWith("/api/travel")
                 || path.startsWith("/api/transports")
+                || path.startsWith("/api/townships")
                 || path.startsWith("/api/accommodations")
                 || path.startsWith("/api/posts")
                 || path.startsWith("/api/notices")
                 || path.startsWith("/api/login-try/")
-                || path.startsWith("/api/users/logout")
                 || path.startsWith("/api/flight")
                 || path.startsWith("/api/delivery")
                 || path.startsWith("/api/seats");
