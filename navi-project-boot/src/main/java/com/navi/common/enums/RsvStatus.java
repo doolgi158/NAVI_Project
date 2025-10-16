@@ -1,11 +1,10 @@
 package com.navi.common.enums;
 
 public enum RsvStatus {
-    PENDING,            // 결제 대기
-    READY,              // 가상계좌 발급 완료(입금 대기)
-    PAID,               // 결제
-    CANCELLED,          // 결제 취소
-    TIMEOUT,            // Todo: 결제 시간초과
-    FAILED,             // 결제 실패
-    REFUNDED;           // 결제 환불
+    PENDING,        // 예약 생성 중 (결제 미확정)
+    PAID,           // 결제 완료 (예약 확정)
+    CANCELLED,      // 예약 취소
+    REFUNDED,       // 환불 완료
+    FAILED,         // 예약 또는 결제 실패
+    COMPLETED,      // 이용 완료
 }

@@ -141,7 +141,7 @@ public class Acc {
             modifiedTime = LocalDateTime.now();
         }
 
-        // acc_id 자동 생성
+        // accId 자동 생성
         if(accId == null && accNo != null){
             this.accId = String.format("ACC%03d", accNo);
         }

@@ -14,11 +14,12 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class AccRsvRequestDTO {
+    @NonNull private String arsvId;         // 예약 ID
     @NonNull private String userId;         // 사용자 계정 ID (예: user1)
     @NonNull private String roomId;         // 객실 ID (예: ROM003)
     @NonNull private Integer quantity;      // 객실 수 (예: 2)
     @NonNull private Integer roomPrice;     // 객실 단가 (예: 74000)
     @NonNull private LocalDate startDate;   // 숙박 시작일 (예: 2025-08-31)
     @NonNull private LocalDate endDate;     // 숙박 종료일 (예: 2025-09-02)
-    private RsvStatus rsvStatus;   // 예약 상태 (예: PENDING)
+    private RsvStatus rsvStatus;            // 예약 상태 (예: PENDING)
 }

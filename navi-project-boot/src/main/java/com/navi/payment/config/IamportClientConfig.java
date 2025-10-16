@@ -1,4 +1,4 @@
-package com.navi.reservation.config;
+package com.navi.payment.config;
 
 import com.siot.IamportRestClient.IamportClient;
 import lombok.extern.slf4j.Slf4j;
@@ -6,18 +6,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/**
- * ====================================
- * [IamportClientConfig]
- * : PortOne(아임포트) REST API 연동 설정
- * ====================================
- * ㄴ 아임포트 API 인증키를 이용해 PortOne 서버와 통신 가능한
- *    IamportClient 객체를 스프링 Bean으로 등록한다.
- *    (결제 검증, 결제 취소 등에서 재사용)
- */
+/* ========[IamportClientConfig]=======
+    PortOne(아임포트) REST API 연동 설정
+   ==================================== */
 
 @Slf4j
 @Configuration
+// 아임포트 API 인증키를 이용해 PortOne 서버와 통신 가능한 IamportClient 객체를 스프링 Bean 으로 등록한다.
 public class IamportClientConfig {
     @Value("${iamport.api.key}")
     private String apiKey;
