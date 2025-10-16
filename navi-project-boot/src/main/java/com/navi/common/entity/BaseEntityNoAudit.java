@@ -3,11 +3,13 @@ package com.navi.common.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 //좋아요/북마크/조회수용 업데이트방지
 @Getter
+@Setter
 @MappedSuperclass
 public abstract class BaseEntityNoAudit {
 
