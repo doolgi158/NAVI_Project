@@ -20,12 +20,22 @@ public class PaymentConfirmRequestDTO {
     /* 결제 완료 시 */
     private String merchantId;                  // 결제 고유번호 (예: PAY20251012-0001)
     private RsvType reserveType;                // 예약 유형 (ACC, AIR, DLV)
-    private List<String> reserveIds;            // 결제 대상 예약 ID 리스트 (예: ["20251012ACC001", "20251012ACC002"])
     private String impUid;                      // 결제 승인번호 (예: IMP_67283051)
     private PaymentMethod paymentMethod;        // 결제 수단 (예: KGINIPAY, KAKAOPAY, TOSSPAY)
-    private BigDecimal totalAmount;             // 총 결제 금액 (예: 128000)
 
     /* 환불 발생 시 */
     private String refundReason;                // 환불사유 (예: "고객 요청에 따른 취소")
     private BigDecimal refundAmount;            // 실환불금액 (예: 120000)
+
+    /* 예약별 금액 구조 */
+    private List<ReservePaymentItem> items;     // 예약 ID + 금액 묶음 리스트
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class ReservePaymentItem {
+        private String reserveId;               // 예약 ID (예: 20251012ACC001)
+        private BigDecimal amount;              // 결제 금액 (예: 85000)
+    }
 }
