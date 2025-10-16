@@ -1,4 +1,4 @@
-package com.navi.reservation.domain.enums;
+package com.navi.common.enums;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

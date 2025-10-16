@@ -1,9 +1,9 @@
-package com.navi.reservation.domain.enums;
+package com.navi.payment.domain.enums;
 
 public enum PaymentMethod {
+    KGINIPAY,
     KAKAOPAY,
-    TOSSPAYMENTS,
-    CARD,
+    TOSSPAY,
     ETC; // 기타
 
     public static PaymentMethod from(String value) {
