@@ -14,7 +14,7 @@ export default function TravelSelectDrawer({
       {/* 왼쪽: 여행지 리스트 */}
       <div className="w-1/2 bg-[#FDFCF9] border-r border-gray-200 flex flex-col">
         <TitleDateDisplay title={title} dateRange={dateRange} />
-        <h3 className="font-semibold text-[#2F3E46] mb-3 text-lg pl-4">
+        <h3 className="font-semibold text-[#2F3E46] mb-3 text-lg pl-4 mt-4">
           📍 여행지 선택
         </h3>
 

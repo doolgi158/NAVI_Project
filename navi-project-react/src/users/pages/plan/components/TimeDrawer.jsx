@@ -26,7 +26,7 @@ export default function TimeDrawer({ days, times, setTimes, title, dateRange }) 
   return (
     <div className="flex flex-col h-full bg-white shadow-md w-full">
       <TitleDateDisplay title={title} dateRange={dateRange} />
-      <h2 className="text-[#2F3E46] font-semibold text-lg mb-4 pl-4">⏰ 일자별 시간 설정</h2>
+      <h2 className="text-[#2F3E46] font-semibold text-lg mb-4 pl-4 mt-4">⏰ 일자별 시간 설정</h2>
       <div className="flex-1 overflow-y-auto custom-scroll pr-4 pl-4">
         {days.length === 0 ? (
           <Empty description="여행 날짜를 먼저 선택해주세요" />
@@ -36,8 +36,8 @@ export default function TimeDrawer({ days, times, setTimes, title, dateRange }) 
             renderItem={(d) => (
               <List.Item key={d.format("YYYY-MM-DD")} className="hover:bg-[#F7F8F7] rounded-md px-2 py-1">
                 <div className="flex gap-3 items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-24 font-medium text-[#2F3E46]">
+                  <div className="flex items-center gap-2">
+                    <div className="w-20 font-medium text-[#2F3E46]">
                       {d.format("MM/DD (ddd)")}
                     </div>
                     <TimePicker

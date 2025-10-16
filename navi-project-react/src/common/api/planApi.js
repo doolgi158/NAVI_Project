@@ -1,6 +1,8 @@
+import api from "@/common/api/naviApi"; 
+
 /** 내 여행 목록 조회 */
 export const getMyPlans = async () => {
-  const res = await api.get(`/plans/my`);
+  const res = await api.get(`/plans/myplans`);
   return res.data;
 };
 

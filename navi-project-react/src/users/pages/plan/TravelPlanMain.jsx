@@ -79,7 +79,7 @@ export default function TravelPlanMain() {
                     className="plan-btn plan-btn:hover"
                     onClick={handleCreatePlan} >
                
-               여행 계획하기<i class="bi bi-plus-circle"></i>
+               여행 계획하기<i className="bi bi-plus-circle"></i>
             </Button>
           </div>
         </div>

@@ -61,3 +61,40 @@
   color: #ffffff !important; /* hover 시 글자색 */
   border-color: #00134ebf !important;
 }
+
+
+/* ------------------------------------------- */
+/* 🎨 스크롤바 사용자 정의 스타일 (전역 CSS에 추가) */
+/* ------------------------------------------- */
+/* 🌫️ Modern Transparent Scroll (MacOS Style) */
+.custom-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(67, 124, 194, 0.352) transparent;
+}
+
+/* Chrome, Edge, Safari */
+.custom-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 10px;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: #7878784d;
+  backdrop-filter: blur(4px);
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb:hover {
+  background: #474d5573;
+  backdrop-filter: blur(6px);
+}
+
+.custom-scroll::-webkit-scrollbar-corner {
+  background: transparent;
+}

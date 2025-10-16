@@ -21,7 +21,7 @@ export default function StaySelectDrawer({
       {/* 왼쪽: 숙소 리스트 */}
       <div className="w-1/2 bg-[#FDFCF9] border-r border-gray-200 flex flex-col">
         <TitleDateDisplay title={title} dateRange={dateRange} />
-        <h3 className="font-semibold text-[#2F3E46] mb-3 text-lg pl-4">🏨 숙소 선택</h3>
+        <h3 className="font-semibold text-[#2F3E46] mb-3 text-lg pl-4 mt-4">🏨 숙소 선택</h3>
         <div className="flex-1 overflow-y-auto custom-scroll pb-4 pr-4 pl-4">
           <List
             dataSource={stays}
