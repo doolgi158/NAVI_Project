@@ -87,6 +87,7 @@ public class PaymentMaster extends BaseEntity {
     }
 
     /* === 연관관계 정의 === */
+    @Builder.Default
     @OneToMany(mappedBy = "paymentMaster",
             cascade = CascadeType.ALL,
             fetch = FetchType.LAZY,
@@ -95,10 +96,11 @@ public class PaymentMaster extends BaseEntity {
     private List<PaymentDetail> paymentDetails = new ArrayList<>();
 
     // 결제 상세 추가 헬퍼
-    /*public void addPaymentDetail(PaymentDetail detail) {
-        detail.setPaymentMaster(this);
+    public void addPaymentDetail(PaymentDetail detail) {
+        if (detail == null) return;
+        detail.setPaymentMaster(this);      // 내부 제어용 setter 호출
         this.paymentDetails.add(detail);
-    }*/
+    }
 
     /* === 상태 변경 메서드 === */
     // 1. 결제 요청 준비 상태로 전환
@@ -127,5 +129,13 @@ public class PaymentMaster extends BaseEntity {
     public void markAsRefunded(BigDecimal totalFeeAmount) {
         this.paymentStatus = PaymentStatus.REFUNDED;
         this.totalFeeAmount = totalFeeAmount != null ? totalFeeAmount : BigDecimal.ZERO;
+    }
+
+    /* 결제 금액 변경 */
+    public void updateTotalAmount(BigDecimal totalAmount) {
+        if (totalAmount == null || totalAmount.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("총 결제 금액은 0 이상이어야 합니다.");
+        }
+        this.totalAmount = totalAmount;
     }
 }

@@ -43,12 +43,11 @@ export const useLogin = () => {
 
         // 관리자 전용 페이지 분기
         if (Array.isArray(roles) && roles.includes("ADMIN")) {
-          console.log("관리자 로그인");
           navigate("/adm/dashboard");
         } else {
           navigate(redirectPath);
         }
-console.log(response);
+
         return { success: true, message: "로그인 성공" };
       }
 
