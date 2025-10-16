@@ -32,9 +32,9 @@ public class PaymentDetail extends BaseEntity {
     private Long no;
 
     // 2. 결제 마스터 FK (결제 고유번호: PAY20251007-0001)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "merchant_id", referencedColumnName = "merchant_id", nullable = false)
-    private PaymentMaster paymentMaster;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "merchant_id", referencedColumnName = "merchant_id", nullable = false)
+//    private PaymentMaster paymentMaster;
 
     // 3. 예약 항목 구분 (예: ACC, AIR, DLV)
     @Enumerated(EnumType.STRING)
