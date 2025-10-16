@@ -9,12 +9,14 @@ import com.navi.flight.repository.FlightRepository;
 import com.navi.flight.repository.SeatRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SeatServiceImpl implements SeatService {
@@ -96,7 +98,7 @@ public class SeatServiceImpl implements SeatService {
         flight.setSeatInitialized(true);
         flightRepository.save(flight);
 
-        System.out.println("=== [INFO] 좌석 자동 생성 완료 === " + newSeats.size() + "석");
+        log.info("=== [INFO] 좌석 자동 생성 완료 === " + newSeats.size() + "석");
     }
 
     private void generateSeats(List<Seat> seats, Flight flight, int startRow, int endRow,
@@ -172,7 +174,7 @@ public class SeatServiceImpl implements SeatService {
         Optional<Flight> flightOpt = flightRepository.findById(id);
 
         if(flightOpt.isEmpty()){
-            System.out.println("[WARN] Flight not found: " + flightId + " / " + depTime);
+            log.info("[WARN] Flight not found: " + flightId + " / " + depTime);
             return false;
         }
         Flight flight = flightOpt.get();
@@ -185,11 +187,11 @@ public class SeatServiceImpl implements SeatService {
         //좌석 존재 여부 확인
         boolean seatExits = seatRepository.existsByFlightId(flight.getFlightId());
         if(!seatExits){
-            System.out.println("[INFO] Lazy 생성 요청 감지 -> 좌석 자동 생성 시작");
+            log.info("[INFO] Lazy 생성 요청 감지 -> 좌석 자동 생성 시작");
             createSeatsForFlight(flight);
             flight.setSeatInitialized(true);
             flightRepository.save(flight);
-            System.out.println("[INFO] Lazy 생성 완료 -> seat_initialized = true");
+            log.info("[INFO] Lazy 생성 완료 -> seat_initialized = true");
         }
         return true;
     }
