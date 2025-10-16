@@ -45,6 +45,19 @@ public class BoardApiController {
         return ResponseEntity.ok("success");
     }
 
+    //좋아요
+    @PostMapping("/{id}/like")
+    public ResponseEntity<String> likeBoard(@PathVariable Integer id) {
+        boardService.likeBoard(id);
+        return ResponseEntity.ok("success");
+    }
+    // 좋아요 취소
+    @PostMapping("/{id}/unlike")
+    public ResponseEntity<String> unlikeBoard(@PathVariable Integer id) {
+        boardService.unlikeBoard(id);
+        return ResponseEntity.ok("success");
+    }
+
     // 댓글 목록 조회
     @GetMapping("/{id}/comments")
     public ResponseEntity<List<Comment>> getComments(@PathVariable Integer id) {
