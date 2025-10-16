@@ -20,10 +20,12 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter; // BasicAuthenticationFilter.class 사용을 위해 추가
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter; // Import 추가
 
 import java.util.List;
 
@@ -55,9 +57,12 @@ public class SecurityConfig {
                 .requestMatchers( "/api/users/login", "/api/users/logout", "/api/auth/oauth/**",
                         "/api/users/find-id", "/api/users/find-pw", "/api/users/signup", "/api/users/check-id",
                         "/api/users/send-email", "/api/users/verify-code", "/api/users/find-password", "/api/seats/**",
-                        "/api/travel/**", "/api/flight/**", "/api/delivery/**"
+                        "/api/flight/**", "/api/delivery/**"
                 ).permitAll()
-                .requestMatchers("/api/adm/**").hasAuthority(UserRole.ADMIN.name())
+                .requestMatchers("/api/travel/like/**", "/api/travel/bookmark/**").authenticated() //  좋아요, 북마크는 인증필요
+                .requestMatchers("/api/travel/**").permitAll() // ✅ 목록/상세는 공개
+                .requestMatchers("/api/adm/**").hasRole("ADMIN")    //권한일치 필요 수정) Security는 “ADMIN”을 요구하지만, 토큰에는 “ROLE_ADMIN”이 등록되어 있음 → 불일치로 접근 차단
+//                .requestMatchers("/api/adm/**").hasAuthority(UserRole.ADMIN.name())
                 .anyRequest().authenticated()
         );
 
@@ -79,9 +84,10 @@ public class SecurityConfig {
                 })
         );
 
-        // JWT 필터 추가
-        http.addFilterAfter(new JWTCheckFilter(jwtUtil), LogoutFilter.class);
-        http.addFilterAfter(new TryLoginFilter(tryLoginRepository), JWTCheckFilter.class);
+        // JWT 필터 순서 변경: BasicAuthenticationFilter 앞에 두어, 요청 초기에 JWT를 검사하고 Security Context에 인증 정보를 넣도록 합니다.
+        // TryLoginFilter는 JWTCheckFilter 앞에 둡니다.
+        http.addFilterBefore(new TryLoginFilter(tryLoginRepository), BasicAuthenticationFilter.class);
+        http.addFilterBefore(new JWTCheckFilter(jwtUtil), TryLoginFilter.class);
 
         return http.build();
     }

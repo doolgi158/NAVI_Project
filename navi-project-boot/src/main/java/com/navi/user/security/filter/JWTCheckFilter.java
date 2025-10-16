@@ -17,10 +17,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
-import java.util.Map;
 
 @RequiredArgsConstructor
 public class JWTCheckFilter extends OncePerRequestFilter {
+
     private final JWTUtil jwtUtil;
 
     @Override
@@ -47,17 +47,30 @@ public class JWTCheckFilter extends OncePerRequestFilter {
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             try {
-                // JWT 검증
+                // ✅ [수정1] JWT 문자열 추출 로직 유지
                 String accessToken = authHeader.substring(7);
 
+                // ✅ [수정2] JWT 유효성 검증 및 Claim 파싱
                 JWTClaimDTO claim = jwtUtil.validateAndParse(accessToken);
-                String role = claim.getPrimaryRole();
-                List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
 
+                // ✅ [수정3] claim 검증 추가 (null 방지)
+                if (claim == null || claim.getId() == null) {
+                    throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
+                }
+
+                // ✅ [수정4] JWT에서 사용자 ID 추출
+                String userId = claim.getId();
+
+                // ✅ [수정5] 권한값 추출 시 ROLE_ prefix 추가
+                String role = claim.getPrimaryRole();
+                if (role == null) role = "USER"; // 기본값 지정
+                List<SimpleGrantedAuthority> authorities =
+                        List.of(new SimpleGrantedAuthority("ROLE_" + role));
+
+                // ✅ [수정6] SecurityContext에 인증 객체 등록 시 권한 포함
                 UsernamePasswordAuthenticationToken auth =
-                        new UsernamePasswordAuthenticationToken(
-                                claim.getId(), null, List.of(new SimpleGrantedAuthority(role))
-                        );
+                        new UsernamePasswordAuthenticationToken(claim, null, authorities);
+
                 SecurityContextHolder.getContext().setAuthentication(auth);
 
             } catch (Exception e) {
@@ -65,7 +78,9 @@ public class JWTCheckFilter extends OncePerRequestFilter {
                 Gson gson = new Gson();
                 ApiResponse<Object> apiResponse = ApiResponse.error("잘못되거나 만료된 토큰입니다.", 401, null);
 
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // ✅ [수정7] HTTP 상태 명시적으로 설정
                 response.setContentType("application/json; charset=UTF-8");
+
                 PrintWriter printWriter = response.getWriter();
                 printWriter.println(gson.toJson(apiResponse));
                 printWriter.close();
@@ -88,7 +103,7 @@ public class JWTCheckFilter extends OncePerRequestFilter {
         // 로그인 없이 접근 가능한 페이지 건너뜀
         return path.startsWith("/api/users/signup")
                 || path.startsWith("/api/users/login")
-                || path.startsWith("/api/travel")
+                || path.startsWith("/api/auth/oauth") // ✅ [수정8] 슬래시 중복 및 패턴 통합
                 || path.startsWith("/api/transports")
                 || path.startsWith("/api/accommodations")
                 || path.startsWith("/api/posts")
