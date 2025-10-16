@@ -1,21 +1,29 @@
-import { Form, Input, Button, Card, DatePicker, Select, Avatar } from "antd";
+import { Form, Input, Button, Card, DatePicker, Select,
+  Avatar, Modal, message } from "antd";
 import { UserOutlined } from "@ant-design/icons";
 import { motion } from "framer-motion";
 import dayjs from "dayjs";
 import MainLayout from "../../layout/MainLayout";
 import { useUserDetailFunctions } from "@/common/hooks/useUserDetailFunctions";
 import { useNavigate } from "react-router-dom";
-
+import { useState } from "react";
+import axios from "axios";
+import { API_SERVER_HOST } from "@/common/api/naviApi";
 
 const { Option } = Select;
 
 const UserDetailPage = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
-  const {
-    user, editing, setEditing, loading, handleSave,
-    handleDeleteAccount, handleProfileUpload, handleProfileDelete
-  } = useUserDetailFunctions(form);
+  const [passwordForm] = Form.useForm();
+
+  const [isPasswordModalOpen, setPasswordModalOpen] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [passwordStep, setPasswordStep] = useState("verify"); // "verify" → "change"
+  const [verifiedPw, setVerifiedPw] = useState(null); // 검증된 현재 비밀번호 저장
+
+  const { user, editing, setEditing, loading, handleSave, handleDeleteAccount, handleProfileUpload,
+    handleProfileDelete, checkPassword, handlePasswordChange } = useUserDetailFunctions(form);
 
   return (
     <MainLayout>
@@ -43,7 +51,6 @@ const UserDetailPage = () => {
                     className="shadow-lg ring-2 ring-indigo-200"
                   />
 
-                  {/* 프로필 변경 & 편집 버튼 */}
                   <div className="flex gap-3 mt-3">
                     <input
                       type="file"
@@ -51,17 +58,17 @@ const UserDetailPage = () => {
                       id="profileUpload"
                       className="hidden"
                       onChange={(e) => handleProfileUpload(e.target.files[0])}
-                      />
-
+                    />
                     <Button
                       type="default"
                       className="text-sm border-gray-300 hover:border-indigo-400 hover:text-indigo-500 transition"
-                      onClick={() => document.getElementById("profileUpload").click()}
+                      onClick={() =>
+                        document.getElementById("profileUpload").click()
+                      }
                     >
                       프로필 변경
                     </Button>
 
-                    {/* 사용자가 직접 프로필 이미지를 설정한 경우에만 보임 */}
                     {user?.profile && (
                       <>
                         <Button
@@ -69,8 +76,9 @@ const UserDetailPage = () => {
                           className="text-sm border-gray-300 hover:border-indigo-400 hover:text-indigo-500 transition"
                           onClick={() =>
                             navigate("/users/profile/edit", {
-                            state: { profileUrl: user.profile },
-                          })}
+                              state: { profileUrl: user.profile },
+                            })
+                          }
                         >
                           프로필 편집
                         </Button>
@@ -165,9 +173,21 @@ const UserDetailPage = () => {
 
                 {/* 버튼 영역 */}
                 <div className="flex justify-between items-center mt-8">
-                  <Button danger onClick={handleDeleteAccount} className="hover:bg-red-50">
-                    회원 탈퇴
-                  </Button>
+                  <div className="flex gap-3">
+                    <Button
+                      danger
+                      onClick={handleDeleteAccount}
+                      className="hover:bg-red-50"
+                    >
+                      회원 탈퇴
+                    </Button>
+                    <Button
+                      onClick={() => setPasswordModalOpen(true)}
+                      className="border-gray-300 hover:border-indigo-400 hover:text-indigo-500 transition"
+                    >
+                      비밀번호 변경
+                    </Button>
+                  </div>
 
                   <div className="flex gap-3">
                     {!editing ? (
@@ -197,8 +217,144 @@ const UserDetailPage = () => {
           </Card>
         </motion.div>
       </div>
+
+      {/* 비밀번호 변경 모달 */}
+      <Modal
+        title="비밀번호 변경"
+        open={isPasswordModalOpen}
+        onCancel={() => {
+          setPasswordModalOpen(false);
+          setPasswordStep("verify");  
+          setVerifiedPw(null);
+          passwordForm.resetFields();
+        }}
+        footer={null}
+        destroyOnClose
+      >
+        <Form
+          form={passwordForm}
+          layout="vertical"
+          onFinish={async (values) => {
+            if (passwordStep === "verify") {
+              // 현재 비밀번호 확인 단계
+              setPasswordLoading(true);
+              const valid = await checkPassword(values.currentPw);
+              setPasswordLoading(false);
+
+            if (valid) {
+                message.success("비밀번호 확인이 완료되었습니다.");
+                setVerifiedPw(values.currentPw);
+                setPasswordStep("change"); // 다음 단계로 전환
+                passwordForm.resetFields();
+              } else {
+                message.error("비밀번호가 일치하지 않습니다.");
+              }
+            } else {
+              // 새 비밀번호 변경 단계
+              setPasswordLoading(true);
+              const success = await handlePasswordChange(
+                verifiedPw,
+                values.newPw,
+                values.confirmPw
+              );
+              setPasswordLoading(false);
+
+              if (success) {
+                setPasswordModalOpen(false);
+                setPasswordStep("verify");
+                setVerifiedPw(null);
+                passwordForm.resetFields();
+              }
+            }
+          }}
+        >
+          {passwordStep === "verify" ? (
+            // STEP 1: 현재 비밀번호 입력
+            <>
+              <Form.Item
+                label="현재 비밀번호"
+                name="currentPw"
+                rules={[{ message: "현재 비밀번호를 입력하세요." }]}
+              >
+                <Input.Password placeholder="현재 비밀번호" />
+              </Form.Item>
+
+              <div className="flex justify-end gap-3 mt-4">
+                <Button onClick={() => setPasswordModalOpen(false)}>취소</Button>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={passwordLoading}
+                  className="bg-indigo-500 hover:bg-indigo-600"
+                >
+                  다음
+                </Button>
+              </div>
+            </>
+          ) : (
+            // STEP 2: 새 비밀번호 입력
+            <>
+              <Form.Item
+                label="새 비밀번호"
+                name="newPw"
+                rules={[
+                  { message: "새 비밀번호를 입력하세요." },
+                  { min: 8, message: "비밀번호는 8자 이상이어야 합니다." },
+                  {
+                    pattern: /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&]).+$/,
+                    message: "영문, 숫자, 특수문자를 모두 포함해야 합니다.",
+                  },
+                ]}
+              >
+                <Input.Password placeholder="새 비밀번호" />
+              </Form.Item>
+
+              <Form.Item
+                label="비밀번호 확인"
+                name="confirmPw"
+                dependencies={["newPw"]}
+                rules={[
+                  { message: "비밀번호 확인을 입력하세요." },
+                  ({ getFieldValue }) => ({
+                    validator(_, value) {
+                      if (!value || getFieldValue("newPw") === value) {
+                        return Promise.resolve();
+                      }
+                      return Promise.reject(
+                        new Error("비밀번호가 일치하지 않습니다.")
+                      );
+                    },
+                  }),
+                ]}
+              >
+                <Input.Password placeholder="비밀번호 확인" />
+              </Form.Item>
+
+              <div className="flex justify-end gap-3 mt-4">
+                <Button
+                  onClick={() => {
+                    setPasswordStep("verify");
+                    setVerifiedPw(null);
+                    passwordForm.resetFields();
+                  }}
+                >
+                  이전
+                </Button>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={passwordLoading}
+                  className="bg-indigo-500 hover:bg-indigo-600"
+                >
+                  변경하기
+                </Button>
+              </div>
+            </>
+          )}
+        </Form>
+      </Modal>
     </MainLayout>
-  );
+   )
 };
 
 export default UserDetailPage;

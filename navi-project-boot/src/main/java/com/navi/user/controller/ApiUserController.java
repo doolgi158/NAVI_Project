@@ -1,27 +1,19 @@
 package com.navi.user.controller;
 
 import com.navi.common.response.ApiResponse;
-import com.navi.image.domain.Image;
-import com.navi.image.dto.ImageDTO;
 import com.navi.image.service.ImageService;
 import com.navi.user.dto.users.UserRequestDTO;
 import com.navi.user.dto.users.UserResponseDTO;
-import com.navi.user.dto.users.UserSecurityDTO;
 import com.navi.user.repository.UserRepository;
 import com.navi.user.service.user.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -58,11 +50,48 @@ public class ApiUserController {
         return ApiResponse.success(updated);
     }
 
-    @PutMapping("/password")
+    @PostMapping("/check-password")
+    public ResponseEntity<ApiResponse<Map<String, Boolean>>> checkPassword(
+            @RequestHeader("Authorization") String token,
+            @RequestBody Map<String, String> payload) {
+
+        boolean isMatch = userService.checkPassword(token, payload.get("currentPw"));
+        Map<String, Boolean> result = new HashMap<>();
+        result.put("valid", isMatch);
+
+        if (!isMatch) {
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("비밀번호가 일치하지 않습니다.", 401, result));
+        }
+
+        return ResponseEntity.ok(ApiResponse.success(result));
+    }
+
+    @PutMapping("/change-password")
     public ResponseEntity<ApiResponse<Void>> changePassword(
             @RequestHeader("Authorization") String token,
             @RequestBody Map<String, String> payload) {
-        userService.changePassword(token, payload.get("oldPassword"), payload.get("newPassword"));
+        userService.changePassword(token, payload.get("currentPw"), payload.get("newPassword"));
         return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    @PostMapping("/delete")
+    public ResponseEntity<ApiResponse<Void>> withdrawUser(
+            @RequestHeader("Authorization") String token,
+            @RequestBody Map<String, String> payload
+    ) {
+        String reason = payload.get("reason");
+        userService.withdrawUser(token, reason);
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    // 휴면계정 복구 (NORMAL 전환)
+    @PostMapping("/reactivate")
+    public ResponseEntity<ApiResponse<String>> reactivateUser(@RequestBody Map<String, String> body) {
+        String username = body.get("username");
+        userService.reactivateUser(username);
+
+        return ResponseEntity.ok(ApiResponse.success("계정이 정상 상태로 전환되었습니다."));
     }
 }

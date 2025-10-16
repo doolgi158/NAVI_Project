@@ -30,7 +30,8 @@ public class JWTUtil {
                 "id", claim.getId(),
                 "name", claim.getName(),
                 "email", claim.getEmail(),
-                "role", claim.getRole()
+                "role", claim.getRole(),
+                "state", claim.getState()
         );
 
         Date exp = Date.from(ZonedDateTime.now().plusMinutes(minutes).toInstant());

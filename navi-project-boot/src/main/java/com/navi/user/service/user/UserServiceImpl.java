@@ -2,11 +2,13 @@ package com.navi.user.service.user;
 
 import com.navi.image.repository.ImageRepository;
 import com.navi.user.domain.User;
+import com.navi.user.domain.Withdraw;
 import com.navi.user.dto.users.UserRequestDTO;
 import com.navi.user.dto.users.UserResponseDTO;
 import com.navi.user.enums.UserRole;
 import com.navi.user.enums.UserState;
 import com.navi.user.repository.UserRepository;
+import com.navi.user.repository.WithdrawRepository;
 import com.navi.user.security.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -21,10 +23,11 @@ import java.time.format.DateTimeFormatter;
 @Transactional
 public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
-    private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
-    private final JWTUtil jwtUtil;
     private final ImageRepository imageRepository;
+    private final WithdrawRepository withdrawRepository;
+    private final ModelMapper modelMapper;
+    private final JWTUtil jwtUtil;
 
     private static final String PROFILE_DIR = "C:/NAVI_Project/serverImage";
 
@@ -61,6 +64,21 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public boolean checkPassword(String token, String currentPw) {
+        // JWT에서 사용자 ID 추출
+        String userId = jwtUtil.getUserIdFromToken(token.replace("Bearer ", ""));
+        System.out.println("🔹 [checkPassword] userId = " + userId);
+        // DB에서 사용자 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        System.out.println("🔹 [checkPassword] userPw = " + user.getPw());
+        System.out.println("🔹 [checkPassword] matches? " + passwordEncoder.matches(currentPw, user.getPw()));
+        // 비밀번호 검증
+        return passwordEncoder.matches(currentPw, user.getPw());
+    }
+
+    @Override
     @Transactional
     public void changePassword(String token, String oldPw, String newPw) {
         String userId = jwtUtil.getUserIdFromToken(token.replace("Bearer ", ""));
@@ -93,6 +111,47 @@ public class UserServiceImpl implements UserService{
 
         // DTO 반환
         return UserResponseDTO.from(saved);
+    }
+
+    @Override
+    @Transactional
+    public void withdrawUser(String token, String reason) {
+        String userId = jwtUtil.getUserIdFromToken(token.replace("Bearer ", "")); // JWTUtil 활용
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        // 이미 탈퇴 신청한 유저인지 체크
+        if (user.getUserState() == UserState.DELETE) {
+            throw new IllegalStateException("이미 탈퇴 처리된 사용자입니다.");
+        }
+
+        // 탈퇴 처리
+        user.withdraw();
+        userRepository.save(user);
+
+        // 탈퇴 이력 기록
+        Withdraw withdraw = Withdraw.create(user, reason);
+        withdrawRepository.save(withdraw);
+    }
+
+    @Override
+    @Transactional
+    public void reactivateUser(String username) {
+        User user = userRepository.findByUserId(username)
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 사용자입니다."));
+
+        if (user.getUserState() == UserState.DELETE) {
+            throw new RuntimeException("탈퇴한 계정은 복구할 수 없습니다.");
+        }
+
+        if (user.getUserState() == UserState.NORMAL) {
+            return; // 이미 정상 계정이면 그대로 둠
+        }
+
+        User updatedUser = user.toBuilder()
+                .userState(UserState.NORMAL)
+                .build();
+        userRepository.save(updatedUser);
     }
 
     @Override

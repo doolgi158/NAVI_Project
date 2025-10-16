@@ -2,6 +2,7 @@ package com.navi.user.repository;
 
 import com.navi.image.domain.Image;
 import com.navi.user.domain.User;
+import com.navi.user.domain.Withdraw;
 import com.navi.user.enums.UserState;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

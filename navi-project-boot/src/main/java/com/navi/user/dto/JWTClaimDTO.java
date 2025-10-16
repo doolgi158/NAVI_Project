@@ -2,6 +2,7 @@ package com.navi.user.dto;
 
 import com.navi.user.domain.User;
 import com.navi.user.enums.UserRole;
+import com.navi.user.enums.UserState;
 import lombok.Builder;
 import lombok.Data;
 
@@ -21,6 +22,7 @@ public class JWTClaimDTO {
     private String ip;
     private String accessToken;
     private String refreshToken;
+    private UserState state;
 
     // 사용자 계정 기반 Claim
     public static JWTClaimDTO fromUser(User user) {
@@ -35,6 +37,7 @@ public class JWTClaimDTO {
                                 .map(UserRole::name)
                                 .collect(Collectors.toList())
                 )
+                .state(user.getUserState())
                 .build();
     }
 
