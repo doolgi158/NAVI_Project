@@ -1,8 +1,8 @@
 import { RouterProvider } from "react-router-dom";
 import { Provider } from "react-redux";
+import axios from "axios";
 import store from "./common/store/store";
 import root from "./common/router/root.jsx";
-import axios from "axios";
 
 
 function App() {
@@ -12,9 +12,11 @@ function App() {
   }
 
   return (
-    <Provider store={store}>
-      <RouterProvider router={root} />
-    </Provider>
+    <>
+      <Provider store={store}>
+        <RouterProvider router={root} />
+      </Provider>
+    </>
   );
 }
 

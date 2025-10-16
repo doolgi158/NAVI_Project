@@ -3,7 +3,7 @@ import { message } from "antd";
 import dayjs from "dayjs";
 import axios from "axios";
 import { signup } from "../api/naviApi";
-import { useModal } from "../components/Login/ModalProvider";
+import { useModal } from "../components/login/ModalProvider";
 
 export const useSignupForm = (form) => {
   const { showModal } = useModal();

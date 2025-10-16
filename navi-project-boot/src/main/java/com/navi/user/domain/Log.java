@@ -39,7 +39,7 @@ public class Log {
 
     @Column(name = "log_board", nullable = false)
     @ColumnDefault(value = "0")
-    private int board;      // 게시글 작숭 수
+    private int board;      // 게시글 작성 수
 
     @Column(name = "log_comment", nullable = false)
     @ColumnDefault(value = "0")

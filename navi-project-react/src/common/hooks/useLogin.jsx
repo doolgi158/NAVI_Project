@@ -2,7 +2,6 @@ import axios from "axios";
 import { useDispatch } from "react-redux";
 import { setlogin } from "../slice/loginSlice";
 import { useNavigate } from "react-router-dom";
-import { API_SERVER_HOST } from "../api/naviApi.js";
 
 export const useLogin = () => {
   const dispatch = useDispatch();
@@ -10,37 +9,46 @@ export const useLogin = () => {
 
   const login = async (values) => {
     try {
+      localStorage.setItem("redirectAfterLogin", window.location.pathname);
       // 로그인 요청
       const params = new URLSearchParams();
       params.append("username", values.username);
       params.append("password", values.password);
       params.append("ip", values.ip);
 
-      const response = await axios.post(`${API_SERVER_HOST}/api/users/login`, params, {
+      const response = await axios.post("/api/users/login", params, {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         validateStatus: () => true,  // 에러 상태도 직접 처리
       });
 
       // 상태 코드별 처리
       if (response.status === 200) {
-        const data = response.data;
+        const { accessToken, refreshToken, username, roles, ip } = response.data;
 
         // JWT 토큰 저장
-        localStorage.setItem("accessToken", data.accessToken);
-        localStorage.setItem("refreshToken", data.refreshToken);
+        localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("refreshToken", refreshToken);
+        localStorage.setItem("username", username);
 
-        axios.defaults.headers.common["Authorization"] = `Bearer ${data.accessToken}`;
+        axios.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
 
         // Redux 상태 갱신
-        dispatch(setlogin({ username: values.username, token: data.accessToken }));
+        dispatch(setlogin({ username: username, accessToken: accessToken , refreshToken: refreshToken, role: roles, ip: ip }));
+
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        // 리디렉션 처리
+        const redirectPath = localStorage.getItem("redirectAfterLogin") || "/";
+        localStorage.removeItem("redirectAfterLogin");
 
         // 관리자 전용 페이지 분기
-        if (data.id === "naviadmin") {
+        if (Array.isArray(roles) && roles.includes("ADMIN")) {
+          console.log("관리자 로그인");
           navigate("/adm/dashboard");
         } else {
-          navigate("/"); // 일반 사용자 메인으로 이동
+          navigate(redirectPath);
         }
-
+console.log(response);
         return { success: true, message: "로그인 성공" };
       }
 

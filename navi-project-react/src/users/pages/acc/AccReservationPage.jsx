@@ -1,30 +1,48 @@
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
-import MainLayout from '../../layout/MainLayout';
 import { Card, Typography, Form, Input, DatePicker, Select, Button, Steps } from 'antd';
+import MainLayout from '../../layout/MainLayout';
 
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 
 const AccReservationPage = () => {
-  const { accNo, roomId } = useParams();
+  const { accId, roomId } = useParams();
+  const location = useLocation();
+
   const { room, accName } = location.state || {}; // 숙소명 + 객실 정보
 
-  const location = useLocation();
   const navigate = useNavigate(); // ✅ 페이지 이동용
-
   const [form] = Form.useForm();
 
   /** ✅ 폼 제출 시 결제 페이지로 이동 */
   const onFinish = (values) => {
-    console.log("예약 정보:", values);
-    navigate(`/accommodations/${accNo}/${roomId}/payment`, {
-      state: { accName, room, formData: values }, // ✅ 다음 페이지로 데이터 전달
-    });
+  console.log("예약 정보:", values);
+
+  // ✅ 모든 예약 정보 한 객체로 정리
+  const reservationData = {
+    accId,
+    roomId,
+    accName,
+    room,
+    formData: {
+      name: values.name,
+      phone: values.phone,
+      email: values.email,
+      guestCount: values.guestCount,
+      checkIn: values.dateRange?.[0]?.format("YYYY-MM-DD"),
+      checkOut: values.dateRange?.[1]?.format("YYYY-MM-DD"),
+    },
   };
+
+  // ✅ 결제 페이지로 이동하면서 전체 데이터 전달
+  navigate(`/accommodations/${accId}/${roomId}/payment`, {
+    state: reservationData,
+  });
+};
 
   return (
     <MainLayout>
-      <div className="min-h-screen bg-[#FFFBEA] flex justify-center items-center py-12 px-8">
+      <div className="min-h-screen bg-[#FFFBEA] flex justify-center pt-10 pb-12 px-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full max-w-7xl">
 
           {/* === 왼쪽: 예약 입력 폼 === */}
@@ -140,15 +158,13 @@ const AccReservationPage = () => {
                   {room?.type || "객실 정보 없음"}
                 </Title>
 
-                <Text className="block text-gray-500 mb-1">숙소번호: {accNo}</Text>
+                <Text className="block text-gray-500 mb-1">숙소번호: {accId}</Text>
                 <Text className="block text-gray-500 mb-1">객실번호: {roomId}</Text>
                 <Text className="text-lg text-gray-600 mb-1">
                   최대 인원 {room?.max || "-"}명
                 </Text>
                 <Text className="text-2xl font-bold text-[#006D77] mb-2">
-                  {room?.price
-                    ? `${room.price.toLocaleString()}원 / 1박`
-                    : "-"}
+                  {`${room.weekdayFee.toLocaleString()}원 / 1박`}
                 </Text>
               </div>
             </Card>

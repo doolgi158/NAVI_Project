@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.navi.accommodation.dto.api.AccApiDTO;
 import com.navi.accommodation.dto.request.AccRequestDTO;
 import com.navi.location.domain.Township;
+import com.navi.room.domain.Room;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Nationalized;
@@ -14,12 +15,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * ============================================
- * [NAVI_ACCOMMODATION]
- * : 숙소 정보 관리 테이블
- * ============================================
- */
+/* =====[NAVI_ACCOMMODATION]=====
+        숙소 정보 관리 테이블
+   ============================== */
 
 @Getter
 @Builder
@@ -33,7 +31,7 @@ import java.util.List;
         initialValue = 1,
         allocationSize = 1)
 public class Acc {
-    /** === COLUMN 정의 === */
+    /* === COLUMN 정의 === */
     // 내부 식별번호 (예: 1)
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "acc_generator")
@@ -119,7 +117,7 @@ public class Acc {
     @Column(name = "modified_time", nullable = false)
     private LocalDateTime modifiedTime;
 
-    /** === 연관관계 정의 === */
+    /* === 연관관계 정의 === */
     @Builder.Default
     @OneToMany(mappedBy = "acc",
             cascade = CascadeType.ALL,
@@ -128,7 +126,7 @@ public class Acc {
     @JsonManagedReference   // 양방향 순환참조 방지
     private List<Room> rooms = new ArrayList<>();
 
-    /** === 기본값 보정 === */
+    /* === 기본값 보정 === */
     // API 에서 null이 들어오면 기본값이 무력화되고 Hibernate는 null을 그대로 INSERT
     // 따라서, INSERT 직전에 null을 기본값으로 보정하는 작업 (for not null column)
     @PrePersist
@@ -143,13 +141,13 @@ public class Acc {
             modifiedTime = LocalDateTime.now();
         }
 
-        // acc_id 자동 생성
+        // accId 자동 생성
         if(accId == null && accNo != null){
             this.accId = String.format("ACC%03d", accNo);
         }
     }
 
-    /** === 수정일 자동 갱신 === */
+    /* === 수정일 자동 갱신 === */
     @PreUpdate
     public void preUpdate() {
         // API 데이터의 modifiedTime은 자동 갱신 안함
@@ -158,7 +156,7 @@ public class Acc {
         }
     }
 
-    /** === 데이터 갱신 메서드 === */
+    /* === 데이터 갱신 메서드 === */
     // API 적재 전용(AccApiDTO)
     public void changeFromApiDTO(AccApiDTO dto, Township township) {
         if (nonEmptyOrNull(dto.getContentId()) != null)
@@ -212,7 +210,16 @@ public class Acc {
         this.isActive = dto.isActive();
     }
 
-    /** === 문자열 유효성 검증용 유틸 메서드 === */
+    public void changeTownship(Township township) {
+        if (township != null) { this.township = township; }
+    }
+
+    public void changeLocation(BigDecimal mapx, BigDecimal mapy) {
+        if (mapx != null) { this.mapx = mapx; }
+        if (mapy != null) { this.mapy = mapy; }
+    }
+
+    /* === 문자열 유효성 검증용 유틸 메서드 === */
     private String nonEmptyOrNull(String value) {
         return (value != null && !value.isBlank()) ? value : null;
     }

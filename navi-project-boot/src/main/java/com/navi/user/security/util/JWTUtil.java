@@ -23,16 +23,16 @@ public class JWTUtil {
         this.secretKey = Keys.hmacShaKeyFor(Base64.getEncoder().encode(secret.getBytes(StandardCharsets.UTF_8)));
     }
 
-    // ✅ [1] 토큰 생성 시 claim 이름 통일 (roles → role)
+
+    // 생성 (DTO 기반)
     public String generateToken(JWTClaimDTO claim, int minutes) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("id", claim.getId());
-        claims.put("name", claim.getName());
-        claims.put("email", claim.getEmail());
-        claims.put("role", claim.getRole()); // ✅ 통일된 key 사용
-        claims.put("phone", claim.getPhone());
-        claims.put("birth", claim.getBirth());
-        claims.put("provider", claim.getProvider());
+        Map<String, Object> claims = Map.of(
+                "id", claim.getId(),
+                "name", claim.getName(),
+                "email", claim.getEmail(),
+                "role", claim.getRole(),
+                "state", claim.getState()
+        );
 
         Date exp = Date.from(ZonedDateTime.now().plusMinutes(minutes).toInstant());
 
@@ -44,8 +44,10 @@ public class JWTUtil {
                 .compact();
     }
 
+    // Map 기반 generateToken
     public String generateToken(Map<String, Object> claims, int minutes) {
         Date exp = Date.from(ZonedDateTime.now().plusMinutes(minutes).toInstant());
+
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(new Date())
@@ -54,7 +56,7 @@ public class JWTUtil {
                 .compact();
     }
 
-    // ✅ [2] 토큰 검증 시 'roles' 또는 'role' 어느 쪽이든 허용 (호환성)
+    // 토큰 검증 및 Claim 복원
     public JWTClaimDTO validateAndParse(String token) {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(secretKey)
@@ -62,21 +64,18 @@ public class JWTUtil {
                 .parseClaimsJws(token)
                 .getBody();
 
-        Object roleClaim = claims.get("role");
-        if (roleClaim == null) {
-            roleClaim = claims.get("roles"); // ✅ 과거 토큰 호환 처리
-        }
+        // role 필드 안전하게 꺼내기 (List<String> 타입으로 변환)
+        Object roleObj = claims.get("role");
+        List<String> roles = null;
 
-        // ✅ [3] roleClaim이 List가 아닐 경우 안전하게 처리
-        List<UserRole> roleList;
-        if (roleClaim instanceof List<?>) {
-            roleList = ((List<?>) roleClaim).stream()
-                    .map(r -> UserRole.valueOf(r.toString()))
+        if (roleObj instanceof List<?>) {
+            roles = ((List<?>) roleObj).stream()
+                    .map(Object::toString) // Enum이든 문자열이든 안전하게 문자열로 변환
                     .toList();
-        } else if (roleClaim instanceof String) {
-            roleList = List.of(UserRole.valueOf(roleClaim.toString()));
+        } else if (roleObj instanceof String singleRole) {
+            roles = List.of(singleRole);
         } else {
-            roleList = List.of(UserRole.USER); // 기본 USER 권한
+            roles = List.of("USER"); // 기본값
         }
 
         return JWTClaimDTO.builder()
@@ -86,26 +85,64 @@ public class JWTUtil {
                 .phone((String) claims.get("phone"))
                 .birth((String) claims.get("birth"))
                 .provider((String) claims.get("provider"))
-                .role(roleList)
+                .role(roles)
                 .build();
     }
 
     // JWT 토큰 체크해서 유저 정보 반환
     public Map<String, Object> validateToken(String token) {
+        try{
+            return Jwts.parserBuilder()
+                    .setSigningKey(secretKey).build()
+                    .parseClaimsJws(token).getBody();
+        } catch(MalformedJwtException malformedJwtException) {
+            throw new MalformedJwtException(malformedJwtException.getMessage());
+        } catch(ExpiredJwtException | InvalidClaimException ex) {
+            throw new CustomException(ex.getMessage(), 401, null);
+        } catch(JwtException jwtException) {
+            throw new JwtException(jwtException.getMessage());
+        } catch(Exception e) {
+            throw new CustomException(e.getMessage(), 500, null);
+        }
+    }
+
+    public String getUserIdFromToken(String token) {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(secretKey)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+            return (String) claims.get("id");
+        } catch (JwtException e) {
+            throw new RuntimeException("유효하지 않은 토큰입니다.");
+        }
+    }
+
+    // 토큰을 Claims 형태로 파싱 (만료 포함)
+    public Claims parseClaims(String token) {
         try {
             return Jwts.parserBuilder()
                     .setSigningKey(secretKey)
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
-        } catch (MalformedJwtException malformedJwtException) {
-            throw new MalformedJwtException(malformedJwtException.getMessage());
-        } catch (ExpiredJwtException | InvalidClaimException ex) {
-            throw new CustomException(ex.getMessage(), 401, null);
-        } catch (JwtException jwtException) {
-            throw new JwtException(jwtException.getMessage());
+        } catch (ExpiredJwtException e) {
+            // 만료되어도 Claims는 얻을 수 있음
+            return e.getClaims();
+        }
+    }
+
+    // 만료 여부 검사
+    public boolean isExpired(String token) {
+        try {
+            Claims claims = parseClaims(token);
+            Date exp = claims.getExpiration();
+            return exp.before(new Date());
+        } catch (ExpiredJwtException e) {
+            return true;
         } catch (Exception e) {
-            throw new CustomException(e.getMessage(), 500, null);
+            return true;
         }
     }
 }

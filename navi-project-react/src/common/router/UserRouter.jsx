@@ -2,9 +2,12 @@ import { lazy, Suspense } from "react";
 
 const Loading = <div></div>
 const Signup = lazy(() => import("../../users/pages/user/UserSignupPage"));
-const Redirect = lazy(() => import("../../users/pages/user/RedirectPage"));
+const Redirect = lazy(() => import("../../users/pages/user/SocialRedirectPage"));
 const FindID = lazy(() => import("../../users/pages/user/FindUserIdPage"));
-const FindPw = lazy(() => import("../../users/pages/user/FindUserPwPage"))
+const FindPw = lazy(() => import("../../users/pages/user/FindUserPwPage"));
+const Mypage = lazy(() => import("../../users/pages/user/UserMyPage"));
+const Detail = lazy(() => import("../../users/pages/user/UserDetailPage"));
+const EditProfile = lazy(() => import("../../users/pages/user/UserProfileEditPage"))
 
 const UserRouter = () => {
   return [
@@ -37,6 +40,30 @@ const UserRouter = () => {
         element: (
             <Suspense fallback={Loading}>
                 <FindPw />
+            </Suspense>
+        )
+    },
+    {
+        path: "mypage",
+        element: (
+            <Suspense fallback={Loading}>
+                <Mypage />
+            </Suspense>
+        )
+    },
+    {
+        path: "detail",
+        element: (
+            <Suspense fallback={Loading}>
+                <Detail />
+            </Suspense>
+        )
+    },
+    {
+        path: "profile/edit",
+        element: (
+            <Suspense fallback={Loading}>
+                <EditProfile />
             </Suspense>
         )
     }

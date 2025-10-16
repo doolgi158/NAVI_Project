@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /*
- *  FlightServiceImpl
+ * FlightServiceImpl
  * - 항공편 저장 및 조회 담당
  * - 좌석 생성은 SeatService에서 지연 처리
  */
@@ -30,7 +30,7 @@ public class FlightServiceImpl implements FlightService {
     private final AirportRepository airportRepository;
 
     /*
-     * API 공항명 → DB 공항엔티티 매핑
+     * API 공항명 → DB 공항 엔티티 매핑
      */
     private Airport resolveAirportByApiName(String apiName) {
         if ("부산".equals(apiName) || "김해".equals(apiName)) {
@@ -50,8 +50,9 @@ public class FlightServiceImpl implements FlightService {
         Airport depAirport = resolveAirportByApiName(dto.getDepAirportNm());
         Airport arrAirport = resolveAirportByApiName(dto.getArrAirportNm());
 
+        // 2025.10 구조 기준: @EmbeddedId 필드명이 flightId
         Flight flight = Flight.builder()
-                .id(new FlightId(
+                .flightId(new FlightId(
                         dto.getVihicleId(),
                         LocalDateTime.parse(dto.getDepPlandTime().toString(),
                                 DateTimeFormatter.ofPattern("yyyyMMddHHmm"))
@@ -84,24 +85,23 @@ public class FlightServiceImpl implements FlightService {
                 // 도착 공항 코드 일치
                 .filter(f -> f.getArrAirport().getAirportCode()
                         .equals(requestDTO.getArrAirportCode()))
-                // 출발 날짜 일치 (LocalDate로 비교)
-                .filter(f -> f.getId().getDepTime().toLocalDate()
+                // 출발 날짜 일치 (LocalDate 비교)
+                .filter(f -> f.getFlightId().getDepTime().toLocalDate()
                         .equals(LocalDate.parse(requestDTO.getDepDate())))
                 // DTO 변환
                 .map(f -> {
                     int price = requestDTO.getSeatClass().equalsIgnoreCase("ECONOMY")
                             ? f.getEconomyCharge()
                             : (f.getPrestigeCharge() != null ? f.getPrestigeCharge() : 0);
-                    System.out.println("검색 요청 DTO => " + requestDTO);
 
                     return FlightDetailResponseDTO.builder()
-                            .flightNo(f.getId().getFlightId())
+                            .flightNo(f.getFlightId().getFlightId())
                             .airlineNm(f.getAirlineNm())
                             .depAirportCode(f.getDepAirport().getAirportCode())
                             .depAirportName(f.getDepAirport().getAirportName())
                             .arrAirportCode(f.getArrAirport().getAirportCode())
                             .arrAirportName(f.getArrAirport().getAirportName())
-                            .depTime(f.getId().getDepTime())
+                            .depTime(f.getFlightId().getDepTime())
                             .arrTime(f.getArrTime())
                             .price(price)
                             .seatClass(requestDTO.getSeatClass().toUpperCase())

@@ -1,0 +1,123 @@
+/* BoardWrite.css */
+
+/* 전체 컨테이너 */
+.board-write-container {
+  font-family: 'Malgun Gothic', sans-serif;
+  padding: 20px;
+  background-color: #f5f5f5;
+}
+
+.board-write-wrapper {
+  max-width: 800px;
+  margin: 0 auto;
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* 헤더 */
+.board-write-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #333;
+}
+
+.board-write-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #007bff;
+}
+
+.btn-list {
+  padding: 8px 20px;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  text-decoration: none;
+  color: #333;
+  transition: background-color 0.2s;
+}
+
+.btn-list:hover {
+  background-color: #f8f8f8;
+}
+
+/* 폼 */
+.write-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.title-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-bottom: 15px;
+  box-sizing: border-box;
+}
+
+.title-input:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.content-input {
+  width: 100%;
+  min-height: 400px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  resize: vertical;
+  font-family: 'Malgun Gothic', sans-serif;
+  margin-bottom: 20px;
+  box-sizing: border-box;
+}
+
+.content-input:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+/* 하단 버튼 영역 */
+.write-footer {
+  text-align: right;
+}
+
+.btn-cancel {
+  padding: 10px 30px;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-right: 10px;
+  transition: background-color 0.2s;
+}
+
+.btn-cancel:hover {
+  background-color: #f8f8f8;
+}
+
+.btn-submit {
+  padding: 10px 30px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.btn-submit:hover {
+  background-color: #0056b3;
+}

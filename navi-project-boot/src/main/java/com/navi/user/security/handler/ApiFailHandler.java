@@ -11,7 +11,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 
 import static com.navi.user.security.util.LoginRequestUtil.getClientIp;
 import static com.navi.user.security.util.LoginRequestUtil.getUserName;
@@ -35,13 +34,8 @@ public class ApiFailHandler implements AuthenticationFailureHandler {
                 "id: " + username
         );
 
-        Gson gson = new Gson();
-        String str = gson.toJson(apiResponse);
-
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setContentType("application/json; charset=UTF-8");
-        try (PrintWriter writer = response.getWriter()) {
-            writer.println(str);
-        }
+        response.setStatus(401);
+        response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().println(new Gson().toJson(apiResponse));
     }
 }

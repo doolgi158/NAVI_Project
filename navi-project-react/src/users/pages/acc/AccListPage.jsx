@@ -1,144 +1,292 @@
 import MainLayout from "../../layout/MainLayout";
-import { useState } from "react";
-import { Radio, Input, DatePicker, Select, Button, Card } from "antd"; 
-import { useNavigate } from 'react-router-dom';
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { Radio, Input, DatePicker, Select, Button, Card, message, InputNumber } from "antd";
+import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux"; // ✅ Redux 추가
+import { setSearchState, setSelectedAcc } from "../../../common/slice/accSlice"; // ✅ 새 액션 불러오기 (검색 상태 저장용)
 
 const { Meta } = Card;
-
-// ⭐ 1. id 대신 accNo 사용
-const mockAccommodations = [
-    {
-        accNo: 1, // ⭐ accNo (숙소 번호)
-        name: "오션뷰 풀빌라",
-        imageUrl: "https://images.unsplash.com/photo-1563299796-03f39a7522d1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-    },
-    {
-        accNo: 2, // ⭐ accNo (숙소 번호)
-        name: "감성 한옥 스테이",
-        imageUrl: "https://images.unsplash.com/photo-1558249821-b3edb015b635?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-    },
-    {
-        accNo: 3, // ⭐ accNo (숙소 번호)
-        name: "모던 시티 호텔",
-        imageUrl: "https://images.unsplash.com/photo-1549294413-26f195200c82?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80",
-    },
-];
+const { RangePicker } = DatePicker;
 
 const AccListPage = () => {
-    const navigate = useNavigate();
-    const [searchType, setSearchType] = useState("region");
-    const [isSearched, setIsSearched] = useState(false); 
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-    const handleSearch = () => {
-        setIsSearched(true); 
-    };
-    
-    // ⭐ 2. accNo를 파라미터로 받고 경로를 /accommodations/accNo로 설정
-    const handleCardClick = (accNo) => {
-        // /accommodations/1, /accommodations/2 등의 경로로 이동
-        navigate(`/accommodations/${accNo}`); 
-    };
-    
-    // Antd Select 컴포넌트의 옵션 목록 (임시)
-    const options = [
-        { value: '1', label: '1명' },
-        { value: '2', label: '2명' },
-        { value: '3', label: '3명' },
-    ];
+  /* ✅ Redux 전역 상태 불러오기 (뒤로가기 시 검색 조건 유지용) */
+  const savedSearch = useSelector((state) => state.acc.searchState) || {};
 
-    return (
-        <MainLayout>
-            <div className="min-h-screen bg-[#fffde8] flex flex-col items-center pt-10 px-4">
-                
-                {/* 메인 컨테이너 */}
-                <div className="w-full max-w-7xl"> 
-                    
-                    {/* 검색 폼 영역 */}
-                    <div className="bg-white/70 shadow-md rounded-2xl p-8 mb-8">
-                        <h1 className="text-2xl font-bold mb-2">숙소를 찾아보세요 🏖️</h1>
-                        <p className="text-gray-600 mb-6">여행 스타일에 맞게 검색해보세요!</p>
+  /* == 검색 조건 상태 관리 == */
+  const [searchType, setSearchType] = useState(savedSearch.searchType || "region");     // searchType : region, spot, keyword
+  const [city, setCity] = useState(savedSearch.city);
+  const [township, setTownship] = useState(savedSearch.township);
+  const [keyword, setKeyword] = useState(savedSearch.keyword);
+  const [spot, setSpot] = useState(savedSearch.spot);
+  const [guestCount, setGuestCount] = useState(savedSearch.guestCount);
+  const [roomCount, setRoomCount] = useState(savedSearch.roomCount);
 
-                        {/* 검색 타입 */}
-                        <Radio.Group
-                            value={searchType}
-                            onChange={(e) => setSearchType(e.target.value)}
-                            className="mb-6"
-                        >
-                            <Radio.Button value="region">지역별 찾기</Radio.Button>
-                            <Radio.Button value="spot">명소 주변 찾기</Radio.Button>
-                            <Radio.Button value="name">숙소명 검색</Radio.Button>
-                        </Radio.Group>
+  const [isSearched, setIsSearched] = useState(savedSearch.isSearched || false);
 
-                        {/* 검색 폼 (크기 조정) */}
-                        <div className="flex flex-wrap gap-2 items-center justify-start">
-                            {searchType === "region" && (
-                                <>
-                                    <Select placeholder="행정시 선택" className="w-[120px]" /> 
-                                    <Select placeholder="읍면 선택" className="w-[120px]" />
-                                </>
-                            )}
-                            {searchType === "spot" && (
-                                <Input placeholder="관광명소 입력" className="w-[250px]" />
-                            )}
-                            {searchType === "name" && (
-                                <Input placeholder="숙소명 입력" className="w-[250px]" />
-                            )}
-                            <DatePicker placeholder="Check-in" className="w-[120px]" />
-                            <DatePicker placeholder="Check-out" className="w-[120px]" />
-                            <Select placeholder="인원수" className="w-[80px]" options={options} /> 
-                            <Select placeholder="객실수" className="w-[80px]" options={options} />
-                            <Button type="primary" className="h-10 px-6 text-base" onClick={handleSearch}>검색</Button>
-                        </div>
-                    </div>
-                    
-                    {/* 검색 결과 섹션 (새로운 컨테이너 적용) */}
-                    <div className="bg-white shadow-md rounded-2xl p-8 mb-10"> 
-                        <h2 className="text-2xl font-bold mb-6">검색 결과</h2>
+  /* == API 데이터 저장하는 상태 변수 == */
+  const [accommodations, setAccommodations] = useState(savedSearch.accommodations || []);
+  const [townshipList, setTownshipList] = useState([]);
 
-                        {/* 조건부 렌더링: 검색 전/후 */}
-                        {!isSearched ? (
-                            <div className="text-center text-gray-500 min-h-[300px] flex items-center justify-center border border-dashed border-gray-300 rounded-lg p-4">
-                                <p className="text-lg">
-                                    원하는 숙소를 찾아보세요! 🚀<br/>
-                                    상단의 검색 조건을 입력하고 '검색' 버튼을 눌러주세요.
-                                </p>
-                            </div>
-                        ) : (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                                {mockAccommodations.map((acc) => (
-                                    <Card
-                                        // ⭐ 3. key에 accNo 사용
-                                        key={acc.accNo}
-                                        hoverable
-                                        className="rounded-xl shadow-sm cursor-pointer" 
-                                        // ⭐ 4. 클릭 이벤트에 acc.accNo 전달
-                                        onClick={() => handleCardClick(acc.accNo)} 
-                                        cover={
-                                            <img 
-                                                alt={acc.name} 
-                                                src={acc.imageUrl} 
-                                                className="h-60 object-cover w-full rounded-t-xl" 
-                                            />
-                                        }
-                                    >
-                                        <Meta
-                                            title={<span className="text-lg font-bold">{acc.name}</span>}
-                                            description={
-                                                <div className="text-gray-600 mt-2">
-                                                    <p>제주도 | 평점 4.5</p>
-                                                    <p className="font-semibold text-base mt-1">120,000원 / 1박</p>
-                                                </div>
-                                            }
-                                        />
-                                    </Card>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                </div>
+  /* == 읍면동 데이터 sessionStorage 캐싱 == */
+  useEffect(() => {
+    const cachedTownships = sessionStorage.getItem("townshipList");
+    const parsedCache = cachedTownships ? JSON.parse(cachedTownships) : null;
+
+    // ✅ 캐시가 존재하지만 비어 있으면 서버 재요청
+    if (Array.isArray(parsedCache) && parsedCache.length > 0) {
+      setTownshipList(parsedCache);
+    } else {
+      fetchTownships(); // 비어있거나 캐시 없으면 fetch
+    }
+  }, []);
+
+  const fetchTownships = async () => {
+    try {
+      const res = await axios.get("/api/townships");
+
+      // ✅ 데이터가 비었으면 1초 후 자동 재시도
+      if (!Array.isArray(res.data) || res.data.length === 0) {
+        console.warn("⚠️ 빈 응답 감지 → 1초 후 자동 재요청");
+        setTimeout(fetchTownships, 1000);
+        return;
+      }
+
+      // ✅ 데이터가 정상일 때만 캐시 저장 + 렌더링 갱신
+      setTownshipList(res.data);
+      sessionStorage.setItem("townshipList", JSON.stringify(res.data));
+
+    } catch (err) {
+      console.error("읍면동 로드 실패:", err);
+      setTimeout(fetchTownships, 2000); // 서버 일시적 오류 시 재시도
+    }
+  };
+
+  /* == 행정시/읍면동 옵션 설정 == */
+  const cityOptions = [...new Set(townshipList.map((t) => t.sigunguName))].map((city) => (
+    {value: city, label: city}
+  ));
+
+  const townshipOptions = city
+    ? townshipList
+        .filter((t) => t.sigunguName === city)
+        .map((t) => ({ value: t.townshipName, label: t.townshipName }))
+    : [];
+
+  /* == 숙소 검색 함수 == */
+  const handleSearch = async () => {
+    try {
+      const params = {};
+
+      if (searchType === "region") {
+        if (!city || !township) {
+          message.warning("행정시와 읍면을 모두 선택해주세요.");
+          return;
+        }
+        params.townshipName = township;
+      } else if (searchType === "keyword") {
+        if (keyword && keyword.trim() !== "") {
+          params.title = keyword.trim();
+        } else {
+          message.info("숙소를 입력해주세요.");
+        }
+      } else {
+        if (spot && spot.trim() !== ""){
+          params.spot = spot.trim();    // [ TODO ]: AccSerchRequestDTO에 spot column 적용시켜야함
+        }else {
+          message.info("관광명소를 입력해주세요.")
+        }
+      }
+
+      const res = await axios.get("/api/accommodations", { params });
+
+      setAccommodations(res.data);
+      setIsSearched(true);
+
+      // Redux에 검색 상태 전체 저장 (뒤로 가기 복원용)
+      dispatch(
+        setSearchState({
+          searchType,
+          city,
+          township,
+          keyword,
+          guestCount,
+          roomCount,
+          isSearched: true,
+          accommodations: res.data,
+          // page,    // [ TODO ]: 페이징 처리 필수 
+        })
+      );
+
+      if (res.data.length === 0) { message.info("검색 결과가 없습니다 😢"); }
+    } catch (err) {
+      console.error("숙소 검색 실패:", err);
+      message.error("숙소 목록을 불러오지 못했습니다.");
+    }
+  };
+
+  /* == 숙소 클릭 시 상세 페이지 이동 == */
+  const handleCardClick = (accId) => {
+    dispatch(setSelectedAcc(accId));
+    navigate("/accommodations/detail");
+  };
+
+  return (
+    <MainLayout>
+      <div className="min-h-screen flex flex-col items-center pt-10 pb-12 px-8">
+        <div className="w-full max-w-7xl">
+          {/* ========================= 검색 폼 ========================= */}
+          <div className="bg-white/70 shadow-md rounded-2xl p-8 mb-8">
+            <h1 className="text-2xl font-bold mb-2">숙소를 찾아보세요 🏖️</h1>
+            <p className="text-gray-600 mb-6">여행 스타일에 맞게 검색해보세요!</p>
+
+            <Radio.Group
+              value={searchType}
+              onChange={(e) => setSearchType(e.target.value)}
+              className="mb-6"
+              size="large"
+            >
+              <Radio.Button value="region">지역별 찾기</Radio.Button>   // [ TODO ] : #FF8866 색 적용
+              <Radio.Button value="spot">명소 주변 찾기</Radio.Button>
+              <Radio.Button value="keyword">숙소명 검색</Radio.Button>
+            </Radio.Group>
+
+            <div className="flex flex-wrap gap-2 items-center justify-start">
+              {searchType === "region" && (
+              <>
+                <Select
+                  placeholder="행정시 선택"
+                  className="min-w-[150px]"
+                  value={city || undefined}
+                  onChange={(c) => {
+                    setCity(c);
+                    setTownship("");
+                  }}
+                  options={cityOptions}
+                  size="large"
+                />
+                <Select
+                  placeholder="읍면 선택"
+                  className="min-w-[150px]"
+                  value={township || undefined}
+                  onChange={setTownship}
+                  options={townshipOptions}
+                  disabled={!city}
+                  size="large"
+                />
+              </>
+            )}
+
+            {searchType === "spot" && (
+              <Input placeholder="관광명소 입력" className="min-w-[250px] flex-grow" />
+            )}
+
+            {searchType === "keyword" && (
+              <Input
+                placeholder="숙소명을 입력하세요"
+                className="min-w-[300px] flex-grow"
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+              />
+            )}
+
+            <RangePicker
+              style={{ minWidth: 200}}
+              format="YYYY-MM-DD"
+              placeholder={["체크인 날짜", "체크아웃 날짜"]}
+              size="large"
+              
+            />
+
+            <InputNumber
+              min={1}
+              max={30}
+              value={guestCount}
+              onChange={(v) => setGuestCount(v)}
+              className="min-w-[80px]"
+              placeholder="인원수"
+              size="large"
+            />
+
+            <InputNumber
+              min={1}
+              max={30}
+              value={roomCount}
+              onChange={(v) => setRoomCount(v)}
+              className="min-w-[80px]"
+              placeholder="객실수"
+              size="large"
+            />
+
+            {/* ✅ 버튼: 항상 오른쪽 끝 고정 */}
+            <div className="ml-auto flex-shrink-0">
+              <Button
+                type="primary"
+                className="h-10 px-8 text-base font-semibold"
+                onClick={handleSearch}
+                size="large"
+              >
+                검색
+              </Button>
             </div>
-        </MainLayout>
-    );
-}
+          </div>
+          </div>
+
+          {/* ===================== 검색 결과 ===================== */}
+          <div className="bg-white shadow-md rounded-2xl p-8 mb-10">
+            <h2 className="text-2xl font-bold mb-6">검색 결과</h2>
+
+            {!isSearched ? (
+              <div className="text-center text-gray-500 min-h-[300px] flex items-center justify-center border border-dashed border-gray-300 rounded-lg p-4">
+                <p className="text-lg">
+                  원하는 숙소를 찾아보세요! 🚀
+                  <br />
+                  상단의 검색 조건을 입력하고 '검색' 버튼을 눌러주세요.
+                </p>
+              </div>
+            ) : accommodations.length === 0 ? (
+              <div className="text-center text-gray-400 py-20">검색 결과가 없습니다 😢</div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                {accommodations.map((acc) => (
+                  <Card
+                    key={acc.accId}
+                    hoverable
+                    className="rounded-xl shadow-sm cursor-pointer"
+                    onClick={() => handleCardClick(acc.accId)}
+                    cover={
+                      acc.imageUrl ? (
+                        <img
+                          alt={acc.title}
+                          src={acc.imageUrl}
+                          className="h-60 object-cover w-full rounded-t-xl"
+                        />
+                      ) : (
+                        <div className="h-60 w-full bg-slate-500 flex items-center justify-center rounded-t-xl text-gray-500 text-sm"></div>
+                      )
+                    }
+                  >
+                    <Meta
+                      title={<span className="text-lg font-bold">{acc.title}</span>}
+                      description={
+                        <div className="text-gray-600 mt-2">
+                          <p className="font-semibold text-base mt-1">{acc.minPrice}원 / 1박</p>
+                          <p>{acc.address}</p>
+                        </div>
+                      }
+                    />
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </MainLayout>
+  );
+};
 
 export default AccListPage;

@@ -1,27 +1,32 @@
 import { Suspense, lazy } from "react";
-import AdminTravelForm from "../../admin/pages/travel/AdminTravelForm.jsx";
-import AdminTravelList from "../../admin/pages/travel/AdminTravelList.jsx"; 
 
-const Loading = <div></div>
 const AdminUsers = lazy(() => import("../../admin/pages/user/AdminUsersPage.jsx"))
 const AdminDashboard = lazy(() => import("../../admin/pages/AdminDashboardPage.jsx"))
+const AdminTravelList = lazy(() => import("../../admin/pages/travel/AdminTravelList.jsx"))
+const AdminTravelForm = lazy(() => import("../../admin/pages/travel/AdminTravelForm.jsx"))
+const AdminFlightList = lazy(() => import("../../admin/pages/flight/AdminFlightListPage.jsx"));
+const AdminFlightForm = lazy(() => import("../../admin/pages/flight/AdminFlightFormPage.jsx"));
+const ProtectedRoute = lazy(() => import("./ProtectedRoute.jsx"))
 
 const AdminRouter = () => {
-    return [     
-    
+    return [      
          {
              path: "dashboard",
              element: (
-                 <Suspense fallback={Loading}>
-                    <AdminDashboard />
-                 </Suspense>
+                <Suspense fallback={<div></div>}>
+                    <ProtectedRoute requiredRole="ADMIN">
+                        <AdminDashboard />
+                    </ProtectedRoute> 
+                </Suspense>
              )
          },
          {
              path: "users",
              element: (
-                 <Suspense fallback={Loading}>
-                    <AdminUsers />
+                 <Suspense fallback={<div></div>}>
+                    <ProtectedRoute requiredRole="ADMIN">
+                        <AdminUsers />
+                    </ProtectedRoute>                    
                  </Suspense>
              )
          },
@@ -29,8 +34,10 @@ const AdminRouter = () => {
          {
              path: "travel",
              element: (
-                 <Suspense fallback={Loading}>
-                    <AdminTravelList  />
+                 <Suspense fallback={<div></div>}>
+                    <ProtectedRoute requiredRole="ADMIN">
+                        <AdminTravelList  />
+                    </ProtectedRoute>
                  </Suspense>
              )
          },
@@ -38,8 +45,10 @@ const AdminRouter = () => {
          {
              path: "travel/register",
              element: (
-                 <Suspense fallback={Loading}>
-                    <AdminTravelForm />
+                 <Suspense fallback={<div></div>}>
+                    <ProtectedRoute requiredRole="ADMIN">
+                        <AdminTravelForm />
+                    </ProtectedRoute>
                  </Suspense>
              )
          },
@@ -47,11 +56,37 @@ const AdminRouter = () => {
          {
              path: "travel/edit/:travelId",
              element: (
-                 <Suspense fallback={Loading}>
-                    <AdminTravelForm  />
+                 <Suspense fallback={<div></div>}>
+                    <ProtectedRoute requiredRole="ADMIN">
+                        <AdminTravelForm  />
+                    </ProtectedRoute>
                  </Suspense>
              )
          },
+             {
+               path: "flight", // 항공편 목록 페이지
+               element: (
+                 <Suspense fallback={<div></div>}>
+                   <AdminFlightList />
+                 </Suspense>
+               ),
+             },
+             {
+               path: "flight/new", // 항공편 등록 페이지
+               element: (
+                 <Suspense fallback={<div></div>}>
+                   <AdminFlightForm />
+                 </Suspense>
+               ),
+             },
+             {
+               path: "flight/edit/:flightId/:depTime", // 항공편 수정 페이지
+               element: (
+                 <Suspense fallback={<div></div>}>
+                   <AdminFlightForm />
+                 </Suspense>
+               ),
+             },
     ]
 }
 

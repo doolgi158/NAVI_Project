@@ -3,6 +3,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import api from '../../../common/api/naviApi.js';
+import axios from 'axios';
 import {
   Row, Col, Typography, Divider, Button, Space,
   Descriptions, Spin, Result, Tag, message, Carousel

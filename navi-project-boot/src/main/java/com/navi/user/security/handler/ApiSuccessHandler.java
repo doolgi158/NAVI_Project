@@ -13,6 +13,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
@@ -26,13 +27,12 @@ import static com.navi.user.security.util.LoginRequestUtil.getClientIp;
 import static com.navi.user.security.util.LoginRequestUtil.getUserName;
 
 @RequiredArgsConstructor
+@Slf4j
 public class ApiSuccessHandler implements AuthenticationSuccessHandler {
     private final TryLoginRepository tryLoginRepository;
     private final JWTUtil jwtUtil;
     private final UserRepository userRepository;
     private final HistoryRepository historyRepository;
-
-    private static final DateTimeFormatter DT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     // 로그인 성공하면 토큰값 추가하여 json방식으로 알려주기
     @Override
@@ -66,7 +66,7 @@ public class ApiSuccessHandler implements AuthenticationSuccessHandler {
         History history = History.builder()
                 .user(user)
                 .ip(ip)
-                .login(LocalDateTime.now().format(DT))
+                .login(LocalDateTime.now())
                 .build();
         historyRepository.save(history);
 
@@ -94,6 +94,8 @@ public class ApiSuccessHandler implements AuthenticationSuccessHandler {
                                 "status", 200,
                                 "message", message,
                                 "id", id,
+                                "username", id,
+                                "roles", claim.getRole(),
                                 "accessToken", access,
                                 "refreshToken", refresh,
                                 "ip", ip

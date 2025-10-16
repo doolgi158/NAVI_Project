@@ -9,28 +9,19 @@ import com.navi.accommodation.dto.response.AccListResponseDTO;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 public interface AccService {
-    /** === 관리자 전용 API 적재 === */
-    // 최초 적재(acc_list.json)
-    public void loadFromJsonFile() throws IOException;
-    // 신규 데이터 삽입(acc_list.json)
-    public void insertInitialFromApi(AccApiDTO dto);
-    // 최초 적재(acc_basic.json & acc_extra.json)
-    public void updateFromJsonFile() throws IOException;
-    // 기존 데이터 갱신(acc_basic.json & acc_extra.json)
-    public void updateInitialFromApi(Acc acc, AccApiDTO dto);
-
-    /** === 관리자 전용 CRUD === */
+    /* === 관리자 전용 CRUD (View) === */
+    // Todo: 메서드 반환값 확인해보고 수정필수
     Acc createAcc(AccRequestDTO dto);
     Acc updateAcc(Long accNo, AccRequestDTO dto);
     void deleteAcc(Long accNo);
-    // 숙소 전체 리스트 조회
     List<Acc> getAllAcc();
 
-    /** === 사용자 전용 조회 === */
+    /* === 사용자 전용 조회 (View) === */
     // 숙소 리스트 조회 (검색 조건 필터링)
     List<AccListResponseDTO> searchAccommodations(AccSearchRequestDTO dto);
-    // 숙소 상세 조회(객실 목록 + 이미지 포함)
+    // 숙소 상세 조회
     AccDetailResponseDTO getAccDetail(String accId);
 }

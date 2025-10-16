@@ -4,12 +4,14 @@ import com.navi.common.response.ApiResponse;
 import com.navi.user.domain.History;
 import com.navi.user.domain.User;
 import com.navi.user.dto.admin.AdminUserDTO;
+import com.navi.user.enums.UserState;
 import com.navi.user.repository.HistoryRepository;
 import com.navi.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,6 +22,9 @@ public class ApiAdminUserController {
     private final UserRepository userRepository;
     private final HistoryRepository historyRepository;
 
+    private final DateTimeFormatter SIGNUP_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+    private final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+
     // 사용자 + 최근 로그인 이력 조회 (페이징)
     @GetMapping
     public ApiResponse<?> getUserList(
@@ -29,7 +34,6 @@ public class ApiAdminUserController {
             @RequestParam(defaultValue = "all") String field
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "no"));
-
         Page<User> userPage;
 
         // 검색 조건 분기
@@ -48,10 +52,15 @@ public class ApiAdminUserController {
                     userPage = userRepository.findByPhoneContainingIgnoreCase(keyword, pageable);
                     break;
                 case "userLocal":
-                    userPage = userRepository.findByLocal(keyword.equals("내국인") ? 'L' : 'F', pageable);
+                    userPage = userRepository.findByLocal(keyword.equals("내국인") ? "L" : "F", pageable);
                     break;
                 case "userState":
-                    userPage = userRepository.findByUserStateIgnoreCase(keyword, pageable);
+                    try {
+                        UserState state = UserState.valueOf(keyword.toUpperCase());
+                        userPage = userRepository.findByUserState(state, pageable);
+                    } catch (IllegalArgumentException e) {
+                        userPage = Page.empty(pageable);
+                    }
                     break;
                 case "userSignup":
                     userPage = userRepository.findBySignUpContaining(keyword, pageable);
@@ -75,7 +84,20 @@ public class ApiAdminUserController {
 
         // DTO 매핑
         List<AdminUserDTO> list = userPage.getContent().stream().map(user -> {
-            History recentHistory = historyRepository.findTopByUserOrderByLoginDesc(user).orElse(null);
+            History recent = historyRepository.findTopByUserOrderByLoginDesc(user).orElse(null);
+
+            String formattedSignUp = user.getSignUp() != null
+                    ? user.getSignUp().format(SIGNUP_FORMATTER)
+                    : "-";
+
+            String formattedLogin = (recent != null && recent.getLogin() != null)
+                    ? recent.getLogin().format(DATE_TIME_FORMATTER)
+                    : "-";
+
+            String formattedLogout = (recent != null && recent.getLogout() != null)
+                    ? recent.getLogout().format(DATE_TIME_FORMATTER)
+                    : "-";
+
             return AdminUserDTO.builder()
                     .userNo(user.getNo())
                     .userId(user.getId())
@@ -84,17 +106,22 @@ public class ApiAdminUserController {
                     .userBirth(user.getBirth())
                     .userEmail(user.getEmail())
                     .userPhone(user.getPhone())
-                    .userLocal(user.getLocal().equals("L") ? "내국인" : "외국인")
-                    .userSignup(user.getSignUp())
+                    .userLocal(
+                            user.getLocal() == null
+                                    ? "미상"
+                                    : user.getLocal().equals("L")
+                                    ? "내국인"
+                                    : "외국인"
+                    )
+                    .userSignup(formattedSignUp)
                     .userState(user.getUserState().toString())
-                    .historyIp(recentHistory != null ? recentHistory.getIp() : "-")
-                    .historyLogin(recentHistory != null ? recentHistory.getLogin() : null)
-                    .historyLogout(recentHistory != null ? recentHistory.getLogout() : null)
+                    .historyIp(recent != null ? recent.getIp() : "-")
+                    .historyLogin(formattedLogin)
+                    .historyLogout(formattedLogout)
                     .build();
         }).collect(Collectors.toList());
 
-        Page<AdminUserDTO> dtoPage = new PageImpl<>(list, pageable, userPage.getTotalElements());
-        return ApiResponse.success(dtoPage);
+        return ApiResponse.success(new PageImpl<>(list, pageable, userPage.getTotalElements()));
     }
 
     // 사용자 삭제 (관리자용)

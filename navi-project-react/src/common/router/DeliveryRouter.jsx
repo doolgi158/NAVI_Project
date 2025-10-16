@@ -1,33 +1,36 @@
+// src/Common/router/DeliveryRouter.jsx
 import { lazy, Suspense } from "react";
+import { ModalProvider } from "../components/login/ModalProvider.jsx";
 
 const Loading = <div></div>;
 
+// ✅ 사용자 짐배송 페이지
 const DeliveryPage = lazy(() => import("../../users/pages/delivery/DeliveryPage.jsx"));
-const DeliveryListPage = lazy(() => import("../../users/pages/delivery/DeliveryListPage.jsx"));
-const DeliveryDetailPage = lazy(() => import("../../users/pages/delivery/DeliveryDetailPage.jsx"));
+const DeliveryResultPage = lazy(() => import("../../users/pages/delivery/DeliveryResultPage.jsx"));
 
+/**
+ * DeliveryRouter
+ * /delivery  → 예약 입력 페이지
+ * /delivery/result → 예약 완료 결과 페이지
+ */
 const DeliveryRouter = () => [
   {
     path: "",
     element: (
       <Suspense fallback={Loading}>
-        <DeliveryPage />
+        <ModalProvider>
+          <DeliveryPage />
+        </ModalProvider>
       </Suspense>
     ),
   },
   {
-    path: "list",
+    path: "result",
     element: (
       <Suspense fallback={Loading}>
-        <DeliveryListPage />
-      </Suspense>
-    ),
-  },
-  {
-    path: "detail/:id",
-    element: (
-      <Suspense fallback={Loading}>
-        <DeliveryDetailPage />
+        <ModalProvider>
+          <DeliveryResultPage />
+        </ModalProvider>
       </Suspense>
     ),
   },

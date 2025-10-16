@@ -8,6 +8,7 @@ import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,20 +48,19 @@ public class User {
     @Column(name = "user_id", nullable = false, unique = true)
     private String id;          // 아이디
 
-    @Column(name = "user_PW", nullable = false)
+    @Column(name = "user_pw", nullable = false)
     private String pw;          // 비밀번호
 
     @Column(name = "user_local")
     private String local;         // 내/외국인
 
     @Column(name = "user_signup", updatable = false)
-    @ColumnDefault(value = "sysdate")
     @CreationTimestamp
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private String signUp;      // 가입일
+    private LocalDateTime signUp;      // 가입일
 
     @Column(name = "user_state", nullable = false)
-    @ColumnDefault(value = "0")
+    @ColumnDefault(value = "'NORMAL'")
     @Enumerated(EnumType.STRING)
     private UserState userState; // 유저 상태
 
@@ -71,9 +71,12 @@ public class User {
     @Builder.Default
     private List<History> histories = new ArrayList<>();    // 로그인 이력
 
-    @ElementCollection(fetch = FetchType.LAZY)
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "navi_user_roles", joinColumns = @JoinColumn(name = "user_no"))
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role")
     @Builder.Default
-    private List<UserRole> userRoleList = new ArrayList<>();
+    private List<UserRole> userRoleList = new ArrayList<>();    // 권한
 
     public void addRole(UserRole userRole) {
         userRoleList.add(userRole);
@@ -88,6 +91,7 @@ public class User {
                 .pw(encodedPw)    // 비밀번호만 교체
                 .build();
     }
+
     // Spring Security나 DTO 변환 시 사용하기 위한 Getter
     public List<UserRole> getRoleList() {
         return this.userRoleList;

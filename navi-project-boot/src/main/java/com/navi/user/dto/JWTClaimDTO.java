@@ -2,13 +2,17 @@ package com.navi.user.dto;
 
 import com.navi.user.domain.User;
 import com.navi.user.enums.UserRole;
+import com.navi.user.enums.UserState;
 import lombok.Builder;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @Builder
+@Slf4j
 public class JWTClaimDTO {
     private String id;        // 사용자 아이디
     private String name;      // 이름
@@ -16,10 +20,11 @@ public class JWTClaimDTO {
     private String phone;     // 전화번호
     private String birth;     // 생년월일
     private String provider;  // 소셜 로그인 제공자 (google, kakao 등)
-    private List<UserRole> role;    // 권한
+    private List<String> role;    // 권한
     private String ip;
     private String accessToken;
     private String refreshToken;
+    private UserState state;
 
     // 사용자 계정 기반 Claim
     public static JWTClaimDTO fromUser(User user) {
@@ -29,7 +34,12 @@ public class JWTClaimDTO {
                 .email(user.getEmail())
                 .phone(user.getPhone())
                 .birth(user.getBirth())
-                .role(user.getUserRoleList())
+                .role(
+                        user.getUserRoleList().stream()
+                                .map(UserRole::name)
+                                .collect(Collectors.toList())
+                )
+                .state(user.getUserState())
                 .build();
     }
 
@@ -39,12 +49,12 @@ public class JWTClaimDTO {
                 .provider(provider)
                 .email(email)
                 .name(name)
-                .role(List.of(UserRole.USER))
+                .role(List.of(UserRole.USER.name())) // Enum.name() → String
                 .build();
     }
 
     // 가장 첫 번째 권한 반환 (편의 메서드)
     public String getPrimaryRole() {
-        return role != null && !role.isEmpty() ? role.get(0).name() : UserRole.USER.name();
+        return role != null && !role.isEmpty() ? role.get(0) : UserRole.USER.name();
     }
 }

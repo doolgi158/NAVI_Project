@@ -1,39 +1,56 @@
 package com.navi.board.domain;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "board")
 @Getter
 @Setter
+@ToString
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @SequenceGenerator(
         name = "boot_board_generator",
         sequenceName = "boot_board_seq",
         initialValue = 1,
-        allocationSize = 1) //게시글번호를 시퀀스로 생성
+        allocationSize = 1
+)
 public class Board {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "boot_board_generator")
-    @Column(nullable = false, length = 10)
-    private int board_no;   //게시글번호
+    @Column(name = "board_no")
+    private Integer boardNo;   // 게시글 번호 (카멜케이스로 변경)
 
-    @Column(nullable = false, length = 10)
-    private String board_Title; //게시글제목
+    @Column(name = "board_title", nullable = false, length = 30)
+    private String boardTitle; // 게시글 제목
 
-    @Column(nullable = false, length = 99)
-    private int board_good;  //좋아요수
+    @Column(name = "board_good", nullable = false)
+    @Builder.Default
+    private Integer boardGood = 0; // 좋아요
 
-    @Column(nullable = true, length = 10)
-    private int report_count;   //신고수
+    @Column(name = "report_count")
+    @Builder.Default
+    private Integer reportCount = 0;  // 신고
 
     @Lob
-    @Column(nullable = false, length = 500)
-    private String board_content;   //게시글내용
+    @Column(name = "board_content", nullable = false)
+    private String boardContent;   // 게시글 내용
 
+    @Column(name = "user_no", nullable = false)
+    private Integer userNo;    // 사용자 번호
+
+    @CreationTimestamp
+    @Column(name = "create_date", nullable = false, updatable = false)
+    private LocalDateTime createDate;  // 등록일 (자동 설정됨)
+
+    @UpdateTimestamp
+    @Column(name = "update_date")
+    private LocalDateTime updateDate;  // 수정일 (자동 설정됨)
 }

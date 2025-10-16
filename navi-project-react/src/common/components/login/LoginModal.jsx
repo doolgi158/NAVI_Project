@@ -1,9 +1,11 @@
-import { Form, Input, Button, Card, message } from "antd";
+import { Form, Input, Button, Card, message, Modal } from "antd";
 import { AnimatePresence, motion } from "framer-motion";
 import { useLogin } from "../../hooks/useLogin.jsx";
 import { Link } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import SocialLoginButton from "./SocialLogin";
+import axios from "axios";
+import { API_SERVER_HOST } from "@/common/api/naviApi.js";
 
 const LoginModal = ({ open = false, onClose = () => {} }) => {
   const [form] = Form.useForm();
@@ -13,18 +15,51 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
 
   // 다음 input 이동을 위한 ref
   const passwordRef = useRef(null);
+  const usernameRef = useRef(null);
 
   const handleSubmit = async (values) => {
-    const result = await login(values);
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
 
+    const result = await login(values);
+console.log(result);
+    // 정상 로그인
     if (result.success) {
       message.success(result.message);
       form.resetFields();
       onClose();
-    } else {
-      message.error(result.message);
-      form.resetFields(["password"]);
+      return;
     }
+
+    // 휴면 계정
+    if (result.sleep) {
+      Modal.confirm({
+        title: "휴면 계정 안내",
+        content: "이 계정은 휴면 상태입니다. 지금 바로 정상 계정으로 전환하시겠습니까?",
+        okText: "예, 전환합니다",
+        cancelText: "아니오",
+        centered: true,
+        onOk: async () => {
+          try {
+            await axios.post(`${API_SERVER_HOST}/api/users/reactivate`, { username: values.username });
+            message.success("계정이 정상 상태로 전환되었습니다. 다시 로그인해주세요.");
+          } catch (err) {
+            message.error("계정 전환 중 오류가 발생했습니다.");
+          }
+        },
+      });
+      return;
+    }
+
+    // 탈퇴 계정
+    if (result.delete) {
+      message.error("탈퇴한 계정은 로그인할 수 없습니다.");
+      return;
+    }
+
+    // 기타 오류
+    message.error(result.message);
+    form.resetFields(["password"]);
   };
 
   // 배경 클릭 시 닫기
@@ -35,10 +70,13 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
     }
     setClickedInside(false);
   };
+
   // 모달이 닫힐 때 입력값 초기화
   useEffect(() => {
-    if (!open) {
-      form.resetFields();
+    if (open) {
+      setTimeout(() => usernameRef.current?.focus(), 100);
+    }else {
+      form.resetFields(); 
     }
   }, [open, form]);
 
@@ -108,7 +146,9 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
                 >
                   <Input
                     placeholder="아이디 입력"
+                    ref={usernameRef}
                     size="large"
+                    style={{ imeMode: "disabled" }}
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         e.preventDefault(); // 폼 제출 방지
