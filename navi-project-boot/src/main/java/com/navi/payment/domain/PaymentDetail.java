@@ -38,7 +38,12 @@ public class PaymentDetail extends BaseEntity {
     /* === 연관관계 정의 === */
     // 결제 마스터 FK (결제 고유번호: PAY20251007-0001)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "merchant_id", referencedColumnName = "merchant_id", nullable = false)
+    @JoinColumn(
+            name = "merchant_id",
+            referencedColumnName = "merchant_id",
+            nullable = false,
+            foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT)
+    )
     @JsonBackReference
     private PaymentMaster paymentMaster;
 
@@ -62,9 +67,9 @@ public class PaymentDetail extends BaseEntity {
     private BigDecimal feeAmount = BigDecimal.ZERO;
 
     // 결제 상태 (예: PAID, FAILED, REFUNDED)
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_status", length = 20, nullable = false)
-    @Builder.Default
     private PaymentStatus paymentStatus = PaymentStatus.PAID;
 
     // 환불 사유

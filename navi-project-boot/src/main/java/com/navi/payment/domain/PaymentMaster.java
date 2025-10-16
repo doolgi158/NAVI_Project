@@ -87,6 +87,7 @@ public class PaymentMaster extends BaseEntity {
     }
 
     /* === 연관관계 정의 === */
+    @Builder.Default
     @OneToMany(mappedBy = "paymentMaster",
             cascade = CascadeType.ALL,
             fetch = FetchType.LAZY,
