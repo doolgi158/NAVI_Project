@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import "../css/BoardList.css";
+import MainLayout from '@/users/layout/MainLayout';
 
 function BoardList() {
   const [boards, setBoards] = useState([]);
@@ -24,6 +25,7 @@ function BoardList() {
   }
 
   return (
+    <MainLayout>
     <div className="board-list-container">
       <div className="board-list-wrapper">
         {/* 헤더 */}
@@ -94,6 +96,7 @@ function BoardList() {
         </div>
       </div>
     </div>
+    </MainLayout>
   );
 }
 
