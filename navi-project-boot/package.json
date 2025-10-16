@@ -2,7 +2,7 @@
   "dependencies": {
     "@ant-design/charts": "^2.6.5",
     "@reduxjs/toolkit": "^2.9.0",
-    "antd": "^5.27.5",
+    "antd": "^5.27.4",
     "axios": "^1.12.2",
     "bootstrap": "^5.3.8",
     "bootstrap-icons": "^1.13.1",
@@ -13,7 +13,6 @@
     "react-bootstrap": "^2.10.10",
     "react-cookie": "^8.0.1",
     "react-daum-postcode": "^3.2.0",
-    "react-easy-crop": "^5.5.3",
     "react-quill": "^2.0.0",
     "react-quill-image-uploader": "^0.1.1",
     "react-redux": "^9.2.0",
