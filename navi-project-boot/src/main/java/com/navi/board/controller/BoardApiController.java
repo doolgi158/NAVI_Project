@@ -25,6 +25,12 @@ public class BoardApiController {
         return ResponseEntity.ok(boardService.getAllBoards());
     }
 
+    // 게시글 검색
+    @GetMapping("/search")
+    public ResponseEntity<List<Board>> searchBoards(@RequestParam String keyword) {
+        return ResponseEntity.ok(boardService.searchBoards(keyword));
+    }
+
     // 게시글 상세 조회
     @GetMapping("/{id}")
     public ResponseEntity<Board> getBoard(@PathVariable Integer id) {

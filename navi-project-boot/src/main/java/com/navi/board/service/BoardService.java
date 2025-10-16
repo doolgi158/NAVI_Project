@@ -22,6 +22,11 @@ public class BoardService {
         return boardRepository.findAll();
     }
 
+    //게시글 검색 (제목 + 내용)
+    @Transactional(readOnly = true)
+    public List<Board> searchBoards(String keyword) {
+        return boardRepository.searchByKeyword(keyword);
+    }
 
     // 게시글 작성
     public void createBoard(String title, String content) {

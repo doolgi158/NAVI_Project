@@ -5,6 +5,31 @@ import "../css/BoardList.css";
 function BoardList() {
   const [boards, setBoards] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchKeyword, setSearchKeyword] = useState('');
+
+  const handleSearch = () => {
+  if (!searchKeyword.trim()) {
+    // 검색어가 없으면 전체 목록
+    fetch('http://localhost:8080/api/board')
+      .then(response => response.json())
+      .then(data => setBoards(data))
+      .catch(error => console.error('에러:', error));
+    return;
+  }
+
+  // 검색 API 호출
+  fetch(`http://localhost:8080/api/board/search?keyword=${encodeURIComponent(searchKeyword)}`)
+    .then(response => response.json())
+    .then(data => setBoards(data))
+    .catch(error => console.error('검색 에러:', error));
+};
+
+// 엔터키로도 검색 가능하게
+const handleKeyPress = (e) => {
+  if (e.key === 'Enter') {
+    handleSearch();
+  }
+};
 
   useEffect(() => {
     fetch('http://localhost:8080/api/board')
@@ -29,21 +54,18 @@ function BoardList() {
         {/* 헤더 */}
         <div className="board-list-header">
           <div className="board-list-title">일반 게시판</div>
-          <Link to="/board/write" className="btn-write">
-            ✏️ 글쓰기
-          </Link>
-        </div>
-
-        {/* 검색 박스 */}
-        <div className="search-box">
-          <input
-            type="text"
-            placeholder="검색어를 입력하세요"
-            className="search-input"
-          />
-          <button className="btn-search">
-            🔍 검색
-          </button>
+          <div className="search-box">
+            <input
+              type="text"
+              placeholder="검색어를 입력하세요"
+              className="search-input"
+              value={searchKeyword}
+              onChange={(e) => setSearchKeyword(e.target.value)}
+            />
+            <button className="btn-search" onClick={handleSearch}>
+              🔍 검색
+            </button>
+          </div>
         </div>
 
         {/* 게시글 목록 */}
@@ -91,6 +113,9 @@ function BoardList() {
               다음 ▶
             </button>
           </div>
+          <Link to="/board/write" className="btn-write">
+            글쓰기
+          </Link>
         </div>
       </div>
     </div>
