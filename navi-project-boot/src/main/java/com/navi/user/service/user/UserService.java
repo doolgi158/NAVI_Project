@@ -19,7 +19,7 @@ public interface UserService {
 
     UserResponseDTO updateUserInfo(String username, UserRequestDTO dto);
 
-    void withdrawUser(String token, String reason);
+    void withdrawUser(String username, String reason, String ip);
 
     void reactivateUser(String username);
 }

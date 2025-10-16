@@ -1,5 +1,6 @@
 package com.navi.user.service.user;
 
+import com.navi.common.util.CustomException;
 import com.navi.image.repository.ImageRepository;
 import com.navi.user.domain.User;
 import com.navi.user.domain.Withdraw;
@@ -16,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Service
@@ -115,23 +117,23 @@ public class UserServiceImpl implements UserService{
 
     @Override
     @Transactional
-    public void withdrawUser(String token, String reason) {
-        String userId = jwtUtil.getUserIdFromToken(token.replace("Bearer ", "")); // JWTUtil 활용
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+    public void withdrawUser(String username, String reason, String ip) {
+        User user = userRepository.findByUserId(username)
+                .orElseThrow(() -> new CustomException("존재하지 않는 사용자입니다.", 403, null));
 
-        // 이미 탈퇴 신청한 유저인지 체크
-        if (user.getUserState() == UserState.DELETE) {
-            throw new IllegalStateException("이미 탈퇴 처리된 사용자입니다.");
-        }
-
-        // 탈퇴 처리
-        user.withdraw();
-        userRepository.save(user);
-
-        // 탈퇴 이력 기록
-        Withdraw withdraw = Withdraw.create(user, reason);
+        // 탈퇴 이력 저장
+        Withdraw withdraw = Withdraw.builder()
+                .userId(user.getId())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .reason(reason)
+                .ip(ip)
+                .deletedAt(LocalDateTime.now())
+                .build();
         withdrawRepository.save(withdraw);
+
+        // 실제 계정 삭제
+        userRepository.delete(user);
     }
 
     @Override
@@ -139,10 +141,6 @@ public class UserServiceImpl implements UserService{
     public void reactivateUser(String username) {
         User user = userRepository.findByUserId(username)
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 사용자입니다."));
-
-        if (user.getUserState() == UserState.DELETE) {
-            throw new RuntimeException("탈퇴한 계정은 복구할 수 없습니다.");
-        }
 
         if (user.getUserState() == UserState.NORMAL) {
             return; // 이미 정상 계정이면 그대로 둠

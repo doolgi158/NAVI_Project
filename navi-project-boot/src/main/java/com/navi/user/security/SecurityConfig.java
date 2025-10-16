@@ -83,7 +83,7 @@ public class SecurityConfig {
 
         // JWT 필터 추가
         http.addFilterBefore(new JWTCheckFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
-        http.addFilterAfter(new TryLoginFilter(tryLoginRepository), JWTCheckFilter.class);
+        http.addFilterAfter(new TryLoginFilter(tryLoginRepository, userRepository), JWTCheckFilter.class);
 
         return http.build();
     }

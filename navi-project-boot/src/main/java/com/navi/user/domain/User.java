@@ -96,11 +96,4 @@ public class User {
     public List<UserRole> getRoleList() {
         return this.userRoleList;
     }
-
-    // 탈퇴 시 상태 및 권한 변경
-    public void  withdraw() {
-        this.userState = UserState.DELETE;
-        this.userRoleList.clear();
-        this.userRoleList.add(UserRole.GUEST);
-    }
 }
