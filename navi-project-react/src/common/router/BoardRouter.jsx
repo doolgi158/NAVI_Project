@@ -2,9 +2,9 @@ import { lazy, Suspense } from "react";
 
 const Loading = <div>로딩 중...</div>;
 
-const BoardList = lazy(() => import("../../boards/pages/BoardList.jsx"));     // ⭐ .jsx 추가
-const BoardDetail = lazy(() => import("../../boards/pages/BoardDetail.jsx")); // ⭐ .jsx 추가
-const BoardWrite = lazy(() => import("../../boards/pages/BoardWrite.jsx"));   // ⭐ .jsx 추가
+const BoardList = lazy(() => import("../../boards/pages/BoardList.jsx"));
+const BoardDetail = lazy(() => import("../../boards/pages/BoardDetail.jsx"));
+const BoardWrite = lazy(() => import("../../boards/pages/BoardWrite.jsx"));
 
 const BoardRouter = () => {
     return [

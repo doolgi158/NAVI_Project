@@ -10,10 +10,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController  
-@RequestMapping("/api/board")  // api 경로
+@RestController
+@RequestMapping("/api/board")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173")  // CORS 설정
+@CrossOrigin(origins = "http://localhost:5173")
 public class BoardApiController {
 
     private final BoardService boardService;
@@ -44,23 +44,24 @@ public class BoardApiController {
         return ResponseEntity.ok("success");
     }
 
-    // 게시글 신고
-    @PostMapping("/{id}/report")
-    public ResponseEntity<String> reportBoard(@PathVariable Integer id) {
-        boardService.reportBoard(id);
-        return ResponseEntity.ok("success");
-    }
-
-    //좋아요
+    // 좋아요 추가
     @PostMapping("/{id}/like")
     public ResponseEntity<String> likeBoard(@PathVariable Integer id) {
         boardService.likeBoard(id);
         return ResponseEntity.ok("success");
     }
+
     // 좋아요 취소
     @PostMapping("/{id}/unlike")
     public ResponseEntity<String> unlikeBoard(@PathVariable Integer id) {
         boardService.unlikeBoard(id);
+        return ResponseEntity.ok("success");
+    }
+
+    // 게시글 신고
+    @PostMapping("/{id}/report")
+    public ResponseEntity<String> reportBoard(@PathVariable Integer id) {
+        boardService.reportBoard(id);
         return ResponseEntity.ok("success");
     }
 

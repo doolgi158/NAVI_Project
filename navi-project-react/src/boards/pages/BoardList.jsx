@@ -1,35 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import "../css/BoardList.css";
+import '../css/BoardList.css';
 
 function BoardList() {
   const [boards, setBoards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchKeyword, setSearchKeyword] = useState('');
-
-  const handleSearch = () => {
-  if (!searchKeyword.trim()) {
-    // 검색어가 없으면 전체 목록
-    fetch('http://localhost:8080/api/board')
-      .then(response => response.json())
-      .then(data => setBoards(data))
-      .catch(error => console.error('에러:', error));
-    return;
-  }
-
-  // 검색 API 호출
-  fetch(`http://localhost:8080/api/board/search?keyword=${encodeURIComponent(searchKeyword)}`)
-    .then(response => response.json())
-    .then(data => setBoards(data))
-    .catch(error => console.error('검색 에러:', error));
-};
-
-// 엔터키로도 검색 가능하게
-const handleKeyPress = (e) => {
-  if (e.key === 'Enter') {
-    handleSearch();
-  }
-};
 
   useEffect(() => {
     fetch('http://localhost:8080/api/board')
@@ -44,6 +20,31 @@ const handleKeyPress = (e) => {
       });
   }, []);
 
+  // 검색 함수
+  const handleSearch = () => {
+    if (!searchKeyword.trim()) {
+      // 검색어가 없으면 전체 목록
+      fetch('http://localhost:8080/api/board')
+        .then(response => response.json())
+        .then(data => setBoards(data))
+        .catch(error => console.error('에러:', error));
+      return;
+    }
+
+    // 검색 API 호출
+    fetch(`http://localhost:8080/api/board/search?keyword=${encodeURIComponent(searchKeyword)}`)
+      .then(response => response.json())
+      .then(data => setBoards(data))
+      .catch(error => console.error('검색 에러:', error));
+  };
+
+  // 엔터키로 검색
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
   if (loading) {
     return <div className="loading-message">로딩 중...</div>;
   }
@@ -54,18 +55,24 @@ const handleKeyPress = (e) => {
         {/* 헤더 */}
         <div className="board-list-header">
           <div className="board-list-title">일반 게시판</div>
-          <div className="search-box">
-            <input
-              type="text"
-              placeholder="검색어를 입력하세요"
-              className="search-input"
-              value={searchKeyword}
-              onChange={(e) => setSearchKeyword(e.target.value)}
-            />
-            <button className="btn-search" onClick={handleSearch}>
-              🔍 검색
-            </button>
-          </div>
+          <Link to="/board/write" className="btn-write">
+            ✏️ 글쓰기
+          </Link>
+        </div>
+
+        {/* 검색 박스 */}
+        <div className="search-box">
+          <input
+            type="text"
+            placeholder="검색어를 입력하세요"
+            className="search-input"
+            value={searchKeyword}
+            onChange={(e) => setSearchKeyword(e.target.value)}
+            onKeyPress={handleKeyPress}
+          />
+          <button className="btn-search" onClick={handleSearch}>
+            🔍 검색
+          </button>
         </div>
 
         {/* 게시글 목록 */}
@@ -90,7 +97,7 @@ const handleKeyPress = (e) => {
                     {new Date(board.createDate).toLocaleDateString('ko-KR')} {new Date(board.createDate).toLocaleTimeString('ko-KR', {hour: '2-digit', minute: '2-digit'})}
                   </span>
                   <span>사용자 {board.userNo}</span>
-                  <span>❤️ {board.boardGood}</span>
+                  <span>❤️{board.boardGood}</span>
                 </div>
               </Link>
             ))
@@ -113,9 +120,6 @@ const handleKeyPress = (e) => {
               다음 ▶
             </button>
           </div>
-          <Link to="/board/write" className="btn-write">
-            글쓰기
-          </Link>
         </div>
       </div>
     </div>
