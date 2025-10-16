@@ -6,9 +6,9 @@ import { useSelector } from 'react-redux'; // ✅ Redux에서 로그인 사용�
 import api from '../../../common/api/naviApi.js';
 import { useKakaoMap } from '../../../common/hooks/useKakaoMap.jsx';
 import { useTravelList } from '../../../common/hooks/useTravelList.jsx';
-import TravelCard from '../../../common/components/travel/TravelCard.jsx';
-import Pagination from '../../../common/components/travel/Pagination.jsx';
-import TravelControls from '../../../common/components/travel/TravelControls.jsx';
+import TravelCard from './travel/TravelCard.jsx';
+import Pagination from './travel/Pagination.jsx';
+import TravelControls from './travel/TravelControls.jsx';
 
 export default function TravelPage ({ user }){
   const navigate = useNavigate();

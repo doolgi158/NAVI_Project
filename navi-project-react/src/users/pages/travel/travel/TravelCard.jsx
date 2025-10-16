@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import api from '../../../common/api/naviApi.js';
+import api from '../../../../common/api/naviApi.js';
 import { message } from 'antd';
 import { useSelector } from 'react-redux'; // ✅ Redux 로그인 정보 가져오기
 
