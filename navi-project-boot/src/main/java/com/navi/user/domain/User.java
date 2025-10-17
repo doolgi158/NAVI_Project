@@ -88,6 +88,9 @@ public class User {
     @Builder.Default
     private List<Like> likes = new ArrayList<>();   // 좋아요
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Withdraw withdraw;
+
     public void addRole(UserRole userRole) {
         userRoleList.add(userRole);
     }
