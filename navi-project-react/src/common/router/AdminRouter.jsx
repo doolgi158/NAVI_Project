@@ -1,12 +1,11 @@
 import { Suspense, lazy } from "react";
+import ProtectedRoute from "./ProtectedRoute.jsx";
+import AdminFlightRouter from "./AdminFlightRouter.jsx"; // ✅ 경로 동일 폴더라 그대로
 
-const AdminUsers = lazy(() => import("../../admin/pages/user/AdminUsersPage.jsx"))
-const AdminDashboard = lazy(() => import("../../admin/pages/AdminDashboardPage.jsx"))
-const AdminTravelList = lazy(() => import("../../admin/pages/travel/AdminTravelList.jsx"))
-const AdminTravelForm = lazy(() => import("../../admin/pages/travel/AdminTravelForm.jsx"))
-const AdminFlightList = lazy(() => import("../../admin/pages/flight/AdminFlightListPage.jsx"));
-const AdminFlightForm = lazy(() => import("../../admin/pages/flight/AdminFlightFormPage.jsx"));
-const ProtectedRoute = lazy(() => import("./ProtectedRoute.jsx"))
+const AdminUsers = lazy(() => import("../../admin/pages/user/AdminUsersPage.jsx"));
+const AdminDashboard = lazy(() => import("../../admin/pages/AdminDashboardPage.jsx"));
+const AdminTravelList = lazy(() => import("../../admin/pages/travel/AdminTravelList.jsx"));
+const AdminTravelForm = lazy(() => import("../../admin/pages/travel/AdminTravelForm.jsx"));
 
 const AdminRouter = () => {
   return [
@@ -18,7 +17,7 @@ const AdminRouter = () => {
             <AdminDashboard />
           </ProtectedRoute>
         </Suspense>
-      )
+      ),
     },
     {
       path: "users",
@@ -28,9 +27,8 @@ const AdminRouter = () => {
             <AdminUsers />
           </ProtectedRoute>
         </Suspense>
-      )
+      ),
     },
-    //travel 관리자 페이지 라우팅
     {
       path: "travel",
       element: (
@@ -39,9 +37,8 @@ const AdminRouter = () => {
             <AdminTravelList />
           </ProtectedRoute>
         </Suspense>
-      )
+      ),
     },
-    //travel 등록 페이지 라우팅
     {
       path: "travel/register",
       element: (
@@ -50,9 +47,8 @@ const AdminRouter = () => {
             <AdminTravelForm />
           </ProtectedRoute>
         </Suspense>
-      )
+      ),
     },
-    //travel 수정 페이지 라우팅
     {
       path: "travel/edit/:travelId",
       element: (
@@ -61,33 +57,11 @@ const AdminRouter = () => {
             <AdminTravelForm />
           </ProtectedRoute>
         </Suspense>
-      )
-    },
-    {
-      path: "flight", // 항공편 목록 페이지
-      element: (
-        <Suspense fallback={<div></div>}>
-          <AdminFlightList />
-        </Suspense>
       ),
     },
-    {
-      path: "flight/new", // 항공편 등록 페이지
-      element: (
-        <Suspense fallback={<div></div>}>
-          <AdminFlightForm />
-        </Suspense>
-      ),
-    },
-    {
-      path: "flight/edit/:flightId/:depTime", // 항공편 수정 페이지
-      element: (
-        <Suspense fallback={<div></div>}>
-          <AdminFlightForm />
-        </Suspense>
-      ),
-    },
-  ]
-}
+    // 항공 관리자 라우터 통합
+    ...AdminFlightRouter(),
+  ];
+};
 
 export default AdminRouter;
