@@ -52,6 +52,7 @@ export const useKakaoMap = (containerId) => {
 
   // relayoutMap: 안정적으로 relayout + resize + setCenter 수행
   const relayoutMap = useCallback(async () => {
+
     if (!mapRef.current) {
       console.warn("[KakaoMap] relayoutMap called but mapRef is null");
       return;

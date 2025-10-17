@@ -233,7 +233,7 @@ const resetAll = () => {
                 : step >= 4
                 ? "10% 50% 40%" // StepDrawer + ListDrawer + SelectedDrawer + Map
                 : "10% 90% 0%", // Step1~2
-              transition: "grid-template-columns 0.6s ease-in-out", // 부드럽게 전환
+              transition: "all 0.8s ease",
                     }}
                     
         >
@@ -302,8 +302,16 @@ const resetAll = () => {
       </div>
 
       {/* 3️⃣ Map 영역 */}
-      <div className="bg-[#FAF9F6] transition-all duration-500">
-        <TravelMap markers={markers} step={step} />
+      <div style={{ position: "relative" }}>
+        <div style={{
+          position: "absolute",
+          right: 0,
+          top: 0,
+          bottom: 0,
+          width: "100%",
+        }}>
+          <TravelMap markers={markers} step={step} />
+        </div>
       </div>
     </div>
   </Content>
