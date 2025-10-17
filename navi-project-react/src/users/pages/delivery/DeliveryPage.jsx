@@ -239,12 +239,38 @@ const DeliveryPage = () => {
       groupId: "G20251015_JEJU_AM_1",
     };
 
-    try {
+    /*try {
       const res = await axios.post(`${API_SERVER_HOST}/api/delivery/rsv`, dto);
       message.success("짐배송 예약이 완료되었습니다!");
       navigate("/delivery/result", { state: res.data }); // ✅ 결과 페이지로 이동
     } catch (error) {
       console.error("❌ 예약 요청 실패:", error);
+      message.error("예약 중 오류가 발생했습니다.");
+    }*/
+
+    // 🚀 예약 + 결제 준비 요청 (DlvPaymentController 연결)
+    try {
+      const res = await axios.post(`${API_SERVER_HOST}/api/payment/delivery/prepare`, dto);
+
+      console.log("✅ [DeliveryPage] 결제 준비 응답:", res.data);
+      console.log("✅ [DeliveryPage] navigate state:", {
+        rsvType: "DLV",
+        itemData: res.data,
+        formData: dto,
+      });
+
+      message.success("짐배송 예약이 완료되었습니다!");
+
+      // ✅ 결제 페이지로 이동
+      navigate("/payment", {
+        state: {
+          rsvType: "DLV",
+          itemData: res.data, // PaymentPrepareResponseDTO
+          formData: dto,      // 사용자가 입력한 예약 정보
+        },
+      });
+    } catch (error) {
+      console.error("❌ [DeliveryPage] 예약 요청 실패:", error);
       message.error("예약 중 오류가 발생했습니다.");
     }
   };

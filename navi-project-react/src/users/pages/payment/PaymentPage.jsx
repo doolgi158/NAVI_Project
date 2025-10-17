@@ -4,6 +4,8 @@ import MainLayout from "../../layout/MainLayout";
 import { Card, Typography, Steps, Button, Radio, Divider, Space, message } from "antd";
 import axios from "axios";
 
+
+
 // ✅ 항목별 Info 컴포넌트만 import
 import AccRsvInfo from "../../../common/components/reservation/AccRsvInfo";
 import FlyRsvInfo from "../../../common/components/reservation/FlyRsvInfo";
@@ -15,6 +17,14 @@ const PaymentPage = ({keyword}) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { rsvType, itemId, itemData, formData } = location.state || {};
+
+
+  console.log("🧭 [PaymentPage] 전달된 state:", {
+    rsvType,
+    itemId,
+    itemData,
+    formData,
+  });
 
   const [paymentMethod, setPaymentMethod] = React.useState("kakaopay");
 

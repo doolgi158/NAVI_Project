@@ -1,139 +1,152 @@
-import MainLayout from "../../layout/MainLayout";
 import axios from "axios";
-import { useEffect, useState } from "react";
-import { Radio, Input, DatePicker, Select, Button, Card, message, InputNumber, Pagination } from "antd";
+import { useState, useMemo, useCallback } from "react";
+import { Radio, Input, DatePicker, Select, Button, Card, message, InputNumber, Pagination, Spin, Alert } from "antd"; 
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setSearchState, setSelectedAcc } from "../../../common/slice/accSlice";
-
+import dayjs from "dayjs";
+import useTownshipData from "../../../common/hooks/useTownshipData";
+import MainLayout from "@/users/layout/MainLayout";
 const { Meta } = Card;
 const { RangePicker } = DatePicker;
 
 const AccListPage = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+    const navigate = useNavigate();
 
-  const savedSearch = useSelector((state) => state.acc.searchState) || {};
+    // ✅ 커스텀 훅 사용: 읍면동 목록, 로딩 상태, 에러 상태를 가져옴
+    const { townshipList, isLoading: isTownshipLoading, error: townshipError } = useTownshipData();
 
-  const [searchType, setSearchType] = useState(savedSearch.searchType || "region");
-  const [city, setCity] = useState(savedSearch.city);
-  const [township, setTownship] = useState(savedSearch.township);
-  const [keyword, setKeyword] = useState(savedSearch.keyword);
-  const [spot, setSpot] = useState(savedSearch.spot);
-  const [guestCount, setGuestCount] = useState(savedSearch.guestCount);
-  const [roomCount, setRoomCount] = useState(savedSearch.roomCount);
-  const [isSearched, setIsSearched] = useState(savedSearch.isSearched || false);
-  const [accommodations, setAccommodations] = useState(savedSearch.accommodations || []);
-  const [townshipList, setTownshipList] = useState([]);
+    const savedSearch = useSelector((state) => state.acc.searchState) || {};
 
-  /* ✅ 페이지네이션 상태 추가 */
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(6);
+    const [searchType, setSearchType] = useState(savedSearch.searchType || "region");
+    const [city, setCity] = useState(savedSearch.city);
+    const [township, setTownship] = useState(savedSearch.township);
+    const [keyword, setKeyword] = useState(savedSearch.keyword);
+    const [spot, setSpot] = useState(savedSearch.spot);
+    const [guestCount, setGuestCount] = useState(savedSearch.guestCount);
+    const [roomCount, setRoomCount] = useState(savedSearch.roomCount);
+    const [isSearched, setIsSearched] = useState(savedSearch.isSearched || false);
+    const [accommodations, setAccommodations] = useState(savedSearch.accommodations || []);
+    
+    const [dateRange, setDateRange] = useState(
+        savedSearch.dateRange && savedSearch.dateRange.length === 2
+            ? [dayjs(savedSearch.dateRange[0]), dayjs(savedSearch.dateRange[1])]
+            : null
+    );
 
-  useEffect(() => {
-    const cachedTownships = sessionStorage.getItem("townshipList");
-    const parsedCache = cachedTownships ? JSON.parse(cachedTownships) : null;
+    /* 페이지네이션 상태 */
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(6);
 
-    if (Array.isArray(parsedCache) && parsedCache.length > 0) {
-      setTownshipList(parsedCache);
-    } else {
-      fetchTownships();
-    }
-  }, []);
+    // ✅ useMemo 적용: townshipList가 변경될 때만 재계산 (비동기 로드 시 필요)
+    const cityOptions = useMemo(() => {
+        return [...new Set(townshipList.map((t) => t.sigunguName))].map((city) => ({
+            value: city,
+            label: city,
+        }));
+    }, [townshipList]);
 
-  const fetchTownships = async () => {
-    try {
-      const res = await axios.get("/api/townships");
+    // ✅ useMemo 적용: city 또는 townshipList가 변경될 때만 재계산
+    const townshipOptions = useMemo(() => {
+        return city
+            ? townshipList
+                .filter((t) => t.sigunguName === city)
+                .map((t) => ({ value: t.townshipName, label: t.townshipName }))
+            : [];
+    }, [city, townshipList]);
 
-      if (!Array.isArray(res.data) || res.data.length === 0) {
-        console.warn("⚠️ 빈 응답 감지 → 1초 후 자동 재요청");
-        setTimeout(fetchTownships, 3000);
-        return;
-      }
-
-      setTownshipList(res.data);
-      sessionStorage.setItem("townshipList", JSON.stringify(res.data));
-    } catch (err) {
-      console.error("읍면동 로드 실패:", err);
-      setTimeout(fetchTownships, 2000);
-    }
-  };
-
-  const cityOptions = [...new Set(townshipList.map((t) => t.sigunguName))].map((city) => ({
-    value: city,
-    label: city,
-  }));
-
-  const townshipOptions = city
-    ? townshipList
-        .filter((t) => t.sigunguName === city)
-        .map((t) => ({ value: t.townshipName, label: t.townshipName }))
-    : [];
-
-  const handleSearch = async () => {
-    try {
-      const params = {};
-
-      if (searchType === "region") {
-        if (!city || !township) {
-          message.warning("행정시와 읍면을 모두 선택해주세요.");
-          return;
+    // ✅ useCallback 적용
+    const handleSearch = useCallback(async () => {
+        // ✅ 읍면동 데이터 로딩 또는 에러 상태 체크
+        if (isTownshipLoading) {
+             message.warning("읍면동 데이터를 로딩 중입니다. 잠시만 기다려주세요.");
+             return;
         }
-        params.townshipName = township;
-      } else if (searchType === "keyword") {
-        if (keyword && keyword.trim() !== "") {
-          params.title = keyword.trim();
-        } else {
-          message.info("숙소를 입력해주세요.");
+        if (townshipError) {
+             message.error("읍면동 데이터 로드에 실패했습니다. 페이지를 새로고침하거나 나중에 다시 시도해 주세요.");
+             return;
         }
-      } else {
-        if (spot && spot.trim() !== "") {
-          params.spot = spot.trim();
-        } else {
-          message.info("관광명소를 입력해주세요.");
+
+        try {
+            const params = {};
+
+            if (searchType === "region") {
+                if (!city || !township) {
+                    message.warning("행정시와 읍면을 모두 선택해주세요.");
+                    return;
+                }
+                params.townshipName = township;
+            } else if (searchType === "keyword") {
+                if (keyword && keyword.trim() !== "") {
+                    params.title = keyword.trim();
+                } else {
+                    message.info("숙소명을 입력해주세요.");
+                    return; 
+                }
+            } else { // searchType === "spot"
+                if (spot && spot.trim() !== "") {
+                    params.spot = spot.trim();
+                } else {
+                    message.info("관광명소를 입력해주세요.");
+                    return; 
+                }
+            }
+
+            // 날짜 검색 조건 추가
+            const dateRangeArray = dateRange ? dateRange.map(d => d.format("YYYY-MM-DD")) : null;
+            if (dateRangeArray) {
+                params.checkIn = dateRangeArray[0];
+                params.checkOut = dateRangeArray[1];
+            }
+
+            // 인원수 및 객실수 추가 (API가 지원한다면)
+            if (guestCount) params.guestCount = guestCount;
+            if (roomCount) params.roomCount = roomCount;
+
+            const res = await axios.get("/api/accommodations", { params });
+            setAccommodations(res.data);
+            setIsSearched(true);
+            setCurrentPage(1); 
+
+            dispatch(
+                setSearchState({
+                    searchType,
+                    city,
+                    township,
+                    keyword,
+                    spot,
+                    guestCount,
+                    roomCount,
+                    dateRange: dateRangeArray, 
+                    isSearched: true,
+                    accommodations: res.data,
+                })
+            );
+
+            if (res.data.length === 0) message.info("검색 결과가 없습니다 😢");
+        } catch (err) {
+            console.error("숙소 검색 실패:", err);
+            message.error("숙소 목록을 불러오지 못했습니다.");
         }
-      }
+    }, [searchType, city, township, keyword, spot, dateRange, guestCount, roomCount, isTownshipLoading, townshipError, dispatch]); 
 
-      const res = await axios.get("/api/accommodations", { params });
-      setAccommodations(res.data);
-      setIsSearched(true);
-      setCurrentPage(1); // 검색 시 첫 페이지로 초기화
+    // ✅ useCallback 적용
+    const handleCardClick = useCallback((accId) => {
+        dispatch(setSelectedAcc(accId));
+        navigate("/accommodations/detail");
+    }, [dispatch, navigate]);
 
-      dispatch(
-        setSearchState({
-          searchType,
-          city,
-          township,
-          keyword,
-          guestCount,
-          roomCount,
-          isSearched: true,
-          accommodations: res.data,
-        })
-      );
+    /* 현재 페이지 데이터 계산 */
+    const startIndex = (currentPage - 1) * pageSize;
+    const currentData = accommodations.slice(startIndex, startIndex + pageSize);
 
-      if (res.data.length === 0) message.info("검색 결과가 없습니다 😢");
-    } catch (err) {
-      console.error("숙소 검색 실패:", err);
-      message.error("숙소 목록을 불러오지 못했습니다.");
-    }
-  };
-
-  const handleCardClick = (accId) => {
-    dispatch(setSelectedAcc(accId));
-    navigate("/accommodations/detail");
-  };
-
-  /* ✅ 현재 페이지 데이터 계산 */
-  const startIndex = (currentPage - 1) * pageSize;
-  const currentData = accommodations.slice(startIndex, startIndex + pageSize);
-
-  /* ✅ 페이지 변경 핸들러 */
-  const handlePageChange = (page, size) => {
-    setCurrentPage(page);
-    setPageSize(size);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+    /* 페이지 변경 핸들러 */
+    const handlePageChange = (page, size) => {
+        setCurrentPage(page);
+        setPageSize(size);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    };
 
   return (
     <MainLayout>
