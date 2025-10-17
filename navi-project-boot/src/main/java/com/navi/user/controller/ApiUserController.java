@@ -91,9 +91,8 @@ public class ApiUserController {
 
         String username = principal.getId();
         String reason = body.get("reason");
-        String ip = LoginRequestUtil.getClientIp(request);
 
-        userService.withdrawUser(username, reason, ip);
+        userService.withdrawUser(username, reason);
 
         return ResponseEntity.ok(ApiResponse.success("회원 탈퇴가 완료되었습니다."));
     }

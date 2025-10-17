@@ -117,23 +117,19 @@ public class UserServiceImpl implements UserService{
 
     @Override
     @Transactional
-    public void withdrawUser(String username, String reason, String ip) {
-        User user = userRepository.findByUserId(username)
-                .orElseThrow(() -> new CustomException("존재하지 않는 사용자입니다.", 403, null));
+    public void withdrawUser(String userId, String reason) {
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new CustomException("사용자를 찾을 수 없습니다.", 404, null));
 
-        // 탈퇴 이력 저장
-        Withdraw withdraw = Withdraw.builder()
-                .userId(user.getId())
-                .email(user.getEmail())
-                .phone(user.getPhone())
-                .reason(reason)
-                .ip(ip)
-                .deletedAt(LocalDateTime.now())
+        // 유저 상태를 DELETE로 변경 (탈퇴 대기)
+        user = user.toBuilder()
+                .userState(UserState.DELETE)
                 .build();
-        withdrawRepository.save(withdraw);
+        userRepository.save(user);
 
-        // 실제 계정 삭제
-        userRepository.delete(user);
+        // Withdraw 엔티티 생성 및 저장
+        Withdraw withdraw = Withdraw.create(user, reason);
+        withdrawRepository.save(withdraw);
     }
 
     @Override
@@ -155,8 +151,8 @@ public class UserServiceImpl implements UserService{
     @Override
     public UserResponseDTO signup(UserRequestDTO dto) {
         // 아이디 중복검사
-        if (userRepository.existsById(dto.getId())) {
-            throw new IllegalArgumentException("이미 존재하는 아이디입니다.");
+        if (userRepository.existsByIdAndUserState(dto.getId(), UserState.NORMAL)) {
+            throw new CustomException("이미 사용 중인 아이디입니다.", 409, dto);
         }
 
         // 비밀번호 암호화

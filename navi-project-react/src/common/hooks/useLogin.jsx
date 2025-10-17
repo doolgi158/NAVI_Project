@@ -33,7 +33,7 @@ export const useLogin = () => {
         axios.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
 
         // Redux 상태 갱신
-        dispatch(setlogin({ username: username, accessToken: accessToken , refreshToken: refreshToken, role: roles, ip: ip }));
+        dispatch(setlogin({ username: username, accessToken: accessToken, refreshToken: refreshToken, role: roles, ip: ip }));
 
         await new Promise((resolve) => setTimeout(resolve, 100));
 
@@ -43,16 +43,16 @@ export const useLogin = () => {
 
         // 관리자 전용 페이지 분기
         if (Array.isArray(roles) && roles.includes("ADMIN")) {
-          console.log("관리자 로그인");
           navigate("/adm/dashboard");
         } else {
           navigate(redirectPath);
         }
-console.log(response);
+        console.log(response);
         return { success: true, message: "로그인 성공" };
       }
 
       if (response.status === 403) {
+        console.log(response);
         return { success: false, message: "5회 이상 실패로 10분간 로그인 차단되었습니다." };
       }
 
