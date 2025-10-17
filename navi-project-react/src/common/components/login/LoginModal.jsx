@@ -29,10 +29,6 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
       onClose();
       return;
     }
-
-    // // 기타 오류
-    // message.error(result.message);
-    // form.resetFields(["password"]);
   };
 
   // 배경 클릭 시 닫기

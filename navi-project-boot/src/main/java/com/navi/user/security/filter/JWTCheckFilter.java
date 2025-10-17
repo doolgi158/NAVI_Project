@@ -106,8 +106,20 @@ public class JWTCheckFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(auth);
                 log.info("[JWT FILTER] Authenticated principal: {}", userSecurityDTO.getId());
 
+            } catch (io.jsonwebtoken.ExpiredJwtException ex) {
+                // 액세스 토큰 만료 (refresh 트리거)
+                log.warn("[JWT FILTER] Access token expired");
+                ApiResponse<Object> expiredResponse =
+                        ApiResponse.error("ACCESS_TOKEN_EXPIRED", HttpServletResponse.SC_UNAUTHORIZED, null);
+
+                response.setContentType("application/json; charset=UTF-8");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                objectMapper.findAndRegisterModules();
+                objectMapper.writeValue(response.getWriter(), expiredResponse);
+                return;
             } catch (Exception e) {
                 // JWT 오류 응답 - Jackson 사용
+                log.warn("[JWT FILTER] Invalid token: {}", e.getMessage());
                 ApiResponse<Object> apiResponse = ApiResponse.error("잘못되거나 만료된 토큰입니다.", 401, null);
 
                 response.setContentType("application/json; charset=UTF-8");
