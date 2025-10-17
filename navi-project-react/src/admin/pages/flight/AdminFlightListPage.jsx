@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Table, Button, Popconfirm, Space, message } from "antd";
+import { Table, Button, Popconfirm, Space, message, Layout } from "antd";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import AdminSiderLayout from "../../layout/AdminSiderLayout";
+import { Content } from "antd/es/layout/layout";
 
 const API = "http://localhost:8080/api/admin/flights";
 
@@ -142,36 +143,36 @@ const AdminFlightListPage = () => {
   ];
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      {/* 왼쪽 사이드바 */}
-      <div className="w-64 bg-white shadow-md border-r border-gray-100">
-        <AdminSiderLayout />
-      </div>
+    <Layout className="min-h-screen bg-gray-50">
+      {/* ✅ 왼쪽 사이드바 */}
+      <AdminSiderLayout />
 
-      {/* 오른쪽 콘텐츠 영역 */}
-      <div className="flex-1 p-8">
-        <div className="flex justify-between mb-6">
-          <h2 className="text-2xl font-semibold text-gray-800">항공편 목록</h2>
-          <Button
-            type="primary"
-            onClick={() => navigate("/adm/flight/new")}
-            className="bg-indigo-500 hover:bg-indigo-600"
-          >
-            항공편 등록
-          </Button>
-        </div>
+      {/* ✅ 오른쪽 콘텐츠 영역 */}
+      <Layout className="bg-gray-50">
+        <Content className="p-8">
+          <div className="flex justify-between mb-6">
+            <h2 className="text-2xl font-semibold text-gray-800">항공편 목록</h2>
+            <Button
+              type="primary"
+              onClick={() => navigate("/adm/flight/new")}
+              className="bg-indigo-500 hover:bg-indigo-600"
+            >
+              항공편 등록
+            </Button>
+          </div>
 
-        <Table
-          columns={columns}
-          dataSource={Array.isArray(flights) ? flights : []}
-          rowKey={(record) => `${record.flightId}_${record.depTime}`}
-          loading={loading}
-          bordered
-          pagination={{ pageSize: 10 }}
-          className="bg-white shadow-sm rounded-lg"
-        />
-      </div>
-    </div>
+          <Table
+            columns={columns}
+            dataSource={flights}
+            rowKey={(r) => `${r.flightId}_${r.depTime}`}
+            loading={loading}
+            bordered
+            pagination={{ pageSize: 10 }}
+            className="bg-white shadow-sm rounded-lg"
+          />
+        </Content>
+      </Layout>
+    </Layout>
   );
 };
 

@@ -27,7 +27,7 @@ const AdminUsersPage = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("accessToken");
-      console.log("데이터 들어옴");
+      
       const res = await axios.get(`${API_SERVER_HOST}/api/adm/users`, {
         params: { page: pageNum - 1, size, keyword, field },
           headers: {
