@@ -32,6 +32,7 @@ api.interceptors.request.use(
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
+    console.log("인터셉트");
     return config;
   },
   (error) => Promise.reject(error)
@@ -55,8 +56,11 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
     const status = error.response?.status;
+    console.log("🧩 401 발생 시점 accessToken:", localStorage.getItem("accessToken"));
+    console.log("🧩 401 발생 시점 refreshToken:", localStorage.getItem("refreshToken"));
     const isRefreshCall = originalRequest?.url?.includes("/api/users/refresh");
 
+    console.log("리프레시 시작");
     // refresh 자체 요청 실패는 무시
     if (isRefreshCall) return Promise.reject(error);
 

@@ -45,7 +45,7 @@ public class TokenController {
                     "role", claims.get("role")
             );
 
-            String newAccessToken = jwtUtil.generateToken(newClaims, 10);
+            String newAccessToken = jwtUtil.generateToken(newClaims, 20);
 
             return ResponseEntity.ok(Map.of(
                     "accessToken", newAccessToken,

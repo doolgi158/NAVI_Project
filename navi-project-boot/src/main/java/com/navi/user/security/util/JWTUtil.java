@@ -34,7 +34,7 @@ public class JWTUtil {
                 "state", claim.getState()
         );
 
-        Date exp = Date.from(ZonedDateTime.now().plusMinutes(minutes).toInstant());
+        Date exp = Date.from(ZonedDateTime.now().plusSeconds(minutes).toInstant());
 
         return Jwts.builder()
                 .setClaims(claims)
