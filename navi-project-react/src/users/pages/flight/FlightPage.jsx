@@ -79,9 +79,9 @@ const FlightPage = () => {
     const formatted =
       tripType === "round"
         ? {
-            depDate: dates.range?.[0]?.format("YYYY-MM-DD"),
-            arrDate: dates.range?.[1]?.format("YYYY-MM-DD"),
-          }
+          depDate: dates.range?.[0]?.format("YYYY-MM-DD"),
+          arrDate: dates.range?.[1]?.format("YYYY-MM-DD"),
+        }
         : { depDate: dates.dep?.format("YYYY-MM-DD") };
 
     navigate("/flight/detail", {
@@ -139,14 +139,29 @@ const FlightPage = () => {
             <div style={{ textAlign: "center" }}>
               <Tag
                 color={tripType === "round" ? "blue" : "default"}
-                style={{ cursor: "pointer", marginRight: 8 }}
+                style={{
+                  cursor: "pointer",
+                  marginRight: 8,
+                  fontSize: 16,
+                  padding: "8px 20px",
+                  borderRadius: 30,
+                  height: 40,
+                  lineHeight: "24px",
+                }}
                 onClick={() => setTripType("round")}
               >
                 왕복
               </Tag>
               <Tag
                 color={tripType === "one" ? "blue" : "default"}
-                style={{ cursor: "pointer" }}
+                style={{
+                  cursor: "pointer",
+                  fontSize: 16,
+                  padding: "8px 20px",
+                  borderRadius: 30,
+                  height: 40,
+                  lineHeight: "24px",
+                }}
                 onClick={() => setTripType("one")}
               >
                 편도
