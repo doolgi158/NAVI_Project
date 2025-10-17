@@ -52,7 +52,7 @@ const root = createBrowserRouter([
         children: [...UserRouter()]
     },
     {
-        path: "/payments",
+        path: "/payment",
         children: [...PaymentRouter()]
     },
     {

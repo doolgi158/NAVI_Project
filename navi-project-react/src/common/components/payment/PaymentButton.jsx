@@ -24,21 +24,21 @@ const PaymentButton = ({ amount, buyer, pgType = "kakaopay", onSuccess }) => {
     // ✅ PG사별 코드 및 채널키 분기
     let pg, channelKey;
     switch (pgType) {
-      case "kakaopay":
+      case "KAKAOPAY":
         pg = "kakaopay.TC0ONETIME";
-        channelKey = import.meta.env.VITE_KAKAOPAY_CHANNEL_KEY;
+        // channelKey = import.meta.env.VITE_KAKAOPAY_CHANNEL_KEY;
         break;
-      case "tosspay":
+      case "TOSSPAY":
         pg = "tosspay.tosstest";
-        channelKey = import.meta.env.VITE_TOSSPAY_CHANNEL_KEY;
+        // channelKey = import.meta.env.VITE_TOSSPAY_CHANNEL_KEY;
         break;
-      case "inipay":
+      case "KGINIPAY":
         pg = "html5_inicis.INIpayTest";
-        channelKey = import.meta.env.VITE_INIPAY_CHANNEL_KEY;
+        // channelKey = import.meta.env.VITE_INIPAY_CHANNEL_KEY;
         break;
       default:
         pg = "kakaopay.TC0ONETIME";
-        channelKey = import.meta.env.VITE_KAKAOPAY_CHANNEL_KEY;
+        // channelKey = import.meta.env.VITE_KAKAOPAY_CHANNEL_KEY;
     }
 
     // ✅ 결제 요청 데이터

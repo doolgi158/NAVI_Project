@@ -233,7 +233,7 @@ const DeliveryPage = () => {
       startAddr: form.fromAddress,
       endAddr: form.toAddress,
       deliveryDate: form.deliveryDate.format("YYYY-MM-DD"),
-      totalPrice: estimatedFare,
+      totalAmount: estimatedFare,
       userNo: 1, // TODO: 로그인 세션에서 추출 예정
       bagId: form.bagSize === "S" ? 1 : form.bagSize === "M" ? 2 : 3,
       groupId: "G20251015_JEJU_AM_1",
@@ -250,7 +250,17 @@ const DeliveryPage = () => {
 
     // 🚀 예약 + 결제 준비 요청 (DlvPaymentController 연결)
     try {
-      const res = await axios.post(`${API_SERVER_HOST}/api/payment/delivery/prepare`, dto);
+      const token = localStorage.getItem("accessToken");
+      const res = await axios.post(
+        `${API_SERVER_HOST}/api/payment/delivery/prepare`,
+        dto,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       console.log("✅ [DeliveryPage] 결제 준비 응답:", res.data);
       console.log("✅ [DeliveryPage] navigate state:", {
@@ -265,7 +275,7 @@ const DeliveryPage = () => {
       navigate("/payment", {
         state: {
           rsvType: "DLV",
-          itemData: res.data, // PaymentPrepareResponseDTO
+          items: res.data,    // PaymentPrepareResponseDTO
           formData: dto,      // 사용자가 입력한 예약 정보
         },
       });

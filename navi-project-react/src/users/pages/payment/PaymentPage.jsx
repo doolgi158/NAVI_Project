@@ -1,40 +1,36 @@
-import React, { useMemo } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
 import MainLayout from "../../layout/MainLayout";
+import React, { useMemo } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import { Card, Typography, Steps, Button, Radio, Divider, Space, message } from "antd";
-import axios from "axios";
+import { setPaymentData } from "../../../common/slice/paymentSlice";
+import { usePayment } from "../../../common/hooks/usePayment";
 
-
-
-// ✅ 항목별 Info 컴포넌트만 import
 import AccRsvInfo from "../../../common/components/reservation/AccRsvInfo";
 import FlyRsvInfo from "../../../common/components/reservation/FlyRsvInfo";
 import DlvRsvInfo from "../../../common/components/reservation/DlvRsvInfo";
 
 const { Title, Text } = Typography;
 
-const PaymentPage = ({keyword}) => {
-  const location = useLocation();
+const PaymentPage = () => {
   const navigate = useNavigate();
-  const { rsvType, itemId, itemData, formData } = location.state || {};
+  const location = useLocation();
+  const dispatch = useDispatch();
 
+  /** ✅ location.state에서 전달된 데이터 */
+  const { rsvType, items, formData } = location.state || {};
+  const [paymentMethod, setPaymentMethod] = React.useState("KAKAOPAY");
 
-  console.log("🧭 [PaymentPage] 전달된 state:", {
-    rsvType,
-    itemId,
-    itemData,
-    formData,
-  });
+  const totalAmount = formData?.totalPrice || formData?.totalAmount || 0;
+  const { executePayment } = usePayment();
 
-  const [paymentMethod, setPaymentMethod] = React.useState("kakaopay");
-
-  // ✅ 타입별 Info 컴포넌트 분기
+  /** ✅ 예약 유형별 Info 컴포넌트 선택 */
   const InfoComponent = useMemo(() => {
     switch (rsvType) {
       case "ACC":
         return AccRsvInfo;
       case "FLY":
-        return FlyRsvInfo;         
+        return FlyRsvInfo;
       case "DLV":
         return DlvRsvInfo;
       default:
@@ -42,97 +38,25 @@ const PaymentPage = ({keyword}) => {
     }
   }, [rsvType]);
 
-  const totalAmount = formData?.totalAmount || itemData?.price || 0;
-
-  /** ✅ 결제 요청 함수 */
+  /** ✅ 결제 버튼 클릭 시 실행 */
   const handlePayment = async () => {
-    const { IMP } = window;
-    if (!IMP) {
-      alert("아임포트 SDK가 로드되지 않았습니다.");
-      return;
-    }
+  try {
+    // Redux 상태 저장
+    dispatch(setPaymentData({ totalAmount, paymentMethod }));
 
-    let reserveId = null;
-    try {
-      const preRes = await axios.post(`/api/${rsvType.toLowerCase()}/pre`, {
-        userNo: 1,
-        rsvType,
-        targetId: itemId,
-        totalAmount,
-        ...formData,
-      });
-      reserveId = preRes.data.reserveId;
-      console.log(`🆔 [${rsvType}] 예약번호 발급:`, reserveId);
-    } catch (err) {
-      console.error("❌ 예약번호 생성 실패:", err);
-      message.error("예약정보 생성 실패");
-      return;
-    }
+    // Redux 반영 대기
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
-    const iamportCode = import.meta.env.VITE_IAMPORT_CODE;
-    IMP.init(iamportCode);
+    // 실행 (navigate는 usePayment 내부에서)
+    await executePayment({ rsvType, formData, totalAmount, paymentMethod });
+  } catch (error) {
+    console.error("❌ [PaymentPage] 결제 처리 실패:", error);
+    message.error("결제 처리 중 오류가 발생했습니다.");
+  }
+};
 
-    let pg, channelKey;
-    switch (paymentMethod) {
-      case "kakaopay":
-        pg = "kakaopay.TC0ONETIME";
-        channelKey = import.meta.env.VITE_KAKAOPAY_CHANNEL_KEY;
-        break;
-      case "tosspay":
-        pg = "tosspay.tosstest";
-        channelKey = import.meta.env.VITE_TOSSPAY_CHANNEL_KEY;
-        break;
-      default:
-        pg = "html5_inicis.INIpayTest";
-        channelKey = import.meta.env.VITE_INIPAY_CHANNEL_KEY;
-    }
-
-    const paymentData = {
-      pg,
-      pay_method: "card",
-      merchant_uid: reserveId,
-      name: `${rsvType} 예약 결제`,
-      amount: totalAmount,
-      buyer_name: formData?.name,
-      buyer_tel: formData?.phone,
-      buyer_email: formData?.email,
-      custom_data: { reserveId, rsvType, itemId, channelKey },
-    };
-
-    IMP.request_pay(paymentData, async (rsp) => {
-      if (!rsp.success) {
-        message.error(`결제 실패: ${rsp.error_msg}`);
-        return;
-      }
-
-      try {
-        const verifyRes = await axios.post(`/api/payment/verify`, {
-          reserveId,
-          impUid: rsp.imp_uid,
-          merchantUid: rsp.merchant_uid,
-          payMethod: paymentMethod,
-          channelKey,
-        });
-
-        const confirmRes = await axios.post(`/api/${rsvType.toLowerCase()}/reserve/detail`, {
-          reserveId,
-          totalAmount,
-          ...formData,
-        });
-
-        navigate(`/reservation/${rsvType.toLowerCase()}/result`, {
-          state: {
-            success: true,
-            reservation: confirmRes.data,
-            payment: verifyRes.data,
-          },
-        });
-      } catch (err) {
-        console.error("❌ 검증/확정 실패:", err);
-        message.error("결제 검증 또는 예약 확정 실패");
-      }
-    });
-  };
+  /** ✅ 데이터 로그 (디버그용) */
+  console.log("[PaymentPage] location.state:", { rsvType, items, formData });
 
   return (
     <MainLayout>
@@ -142,7 +66,11 @@ const PaymentPage = ({keyword}) => {
           <Card className="lg:col-span-2" style={{ borderRadius: 16, backgroundColor: "#FFFFFF" }}>
             <Steps
               current={1}
-              items={[{ title: "정보 입력" }, { title: "결제 진행" }, { title: "완료" }]}
+              items={[
+                { title: "정보 입력" },
+                { title: "결제 진행" },
+                { title: "완료" },
+              ]}
               style={{ marginBottom: 40 }}
             />
 
@@ -151,30 +79,43 @@ const PaymentPage = ({keyword}) => {
             {/* ✅ 결제 수단 선택 */}
             <div className="mb-8">
               <Title level={5}>결제 수단 선택</Title>
-              <Radio.Group onChange={(e) => setPaymentMethod(e.target.value)} value={paymentMethod}>
+              <Radio.Group
+                onChange={(e) => setPaymentMethod(e.target.value)}
+                value={paymentMethod}
+              >
                 <Space direction="vertical">
-                  <Radio value="kakaopay">카카오페이</Radio>
-                  <Radio value="tosspay">토스페이</Radio>
-                  <Radio value="inipay">KG이니시스</Radio>
+                  <Radio value="KAKAOPAY">카카오페이</Radio>
+                  <Radio value="TOSSPAY">토스페이</Radio>
+                  <Radio value="KGINIPAY">KG이니시스</Radio>
                 </Space>
               </Radio.Group>
             </div>
 
             <Divider />
 
-            {/* ✅ 예약자 공통 정보 */}
+            {/* ✅ 예약자 정보 */}
             <div className="space-y-2 mb-6">
               <Title level={5}>예약자 정보</Title>
-              <Text>이름: {formData?.name}</Text><br />
-              <Text>연락처: {formData?.phone}</Text><br />
-              <Text>이메일: {formData?.email}</Text>
+              <Text>이름: {formData?.name || formData?.senderName || "정보 없음"}</Text>
+              <br />
+              <Text>연락처: {formData?.phone || "정보 없음"}</Text>
+              <br />
+              <Text>이메일: {formData?.email || "정보 없음"}</Text>
             </div>
 
             {/* ✅ 타입별 예약 상세 정보 */}
-            {InfoComponent && <InfoComponent data={itemData} formData={formData} />}
+            {InfoComponent && items && formData ? (
+  <InfoComponent
+    data={typeof items === "object" ? items : {}}
+    formData={typeof formData === "object" ? formData : {}}
+  />
+) : (
+  <Text type="secondary">결제 정보가 없습니다.</Text>
+)}
+
           </Card>
 
-          {/* === 우측 요약 div (버터옐로우) === */}
+          {/* === 우측 요약 === */}
           <div className="flex flex-col justify-between h-full">
             <Card
               style={{
@@ -182,21 +123,11 @@ const PaymentPage = ({keyword}) => {
                 boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
                 backgroundColor: "#FFFBEA",
               }}
-              styles={{
-                body: { padding: "24px" },
-              }}
+              styles={{ body: { padding: "24px" } }}
             >
               <Title level={4} className="text-gray-800 mb-3 text-center">
-                {itemData?.title || itemData?.accName || "예약 요약"}
+                {typeof items?.title === "string" ? items.title : "예약 요약"}
               </Title>
-
-              {itemData?.image && (
-                <img
-                  src={itemData.image}
-                  alt="예약 이미지"
-                  className="w-full h-48 object-cover rounded-lg mb-4"
-                />
-              )}
 
               <Text className="block text-gray-600 mb-2 text-center">
                 총 결제 금액:
@@ -206,7 +137,7 @@ const PaymentPage = ({keyword}) => {
               </Text>
             </Card>
 
-            {/* 결제 버튼 */}
+            {/* ✅ 결제 버튼 */}
             <Button
               type="primary"
               size="large"
