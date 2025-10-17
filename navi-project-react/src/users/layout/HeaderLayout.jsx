@@ -19,7 +19,7 @@ const HeaderLayout = () => {
   const loginstate = useSelector((state) => state.login);
   
   // 로컬 스토리지 기반 로그인 상태 체크
-  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("accessToken"));
+  const [isLoggedIn, setIsLoggedIn] = useState(!!loginstate.accessToken || !!localStorage.getItem("accessToken"));
   
   useEffect(() => {
     // Redux 상태가 변하면 다시 동기화

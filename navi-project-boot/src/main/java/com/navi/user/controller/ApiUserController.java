@@ -4,12 +4,17 @@ import com.navi.common.response.ApiResponse;
 import com.navi.image.service.ImageService;
 import com.navi.user.dto.users.UserRequestDTO;
 import com.navi.user.dto.users.UserResponseDTO;
+import com.navi.user.dto.users.UserSecurityDTO;
 import com.navi.user.repository.UserRepository;
+import com.navi.user.security.util.LoginRequestUtil;
 import com.navi.user.service.user.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -77,13 +82,19 @@ public class ApiUserController {
     }
 
     @PostMapping("/delete")
-    public ResponseEntity<ApiResponse<Void>> withdrawUser(
-            @RequestHeader("Authorization") String token,
-            @RequestBody Map<String, String> payload
-    ) {
-        String reason = payload.get("reason");
-        userService.withdrawUser(token, reason);
-        return ResponseEntity.ok(ApiResponse.success(null));
+    public ResponseEntity<ApiResponse<String>> withdrawUser( @RequestBody Map<String, String> body,
+            HttpServletRequest request) {
+
+        // JWT에서 id 추출
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserSecurityDTO principal = (UserSecurityDTO) auth.getPrincipal();
+
+        String username = principal.getId();
+        String reason = body.get("reason");
+
+        userService.withdrawUser(username, reason);
+
+        return ResponseEntity.ok(ApiResponse.success("회원 탈퇴가 완료되었습니다."));
     }
 
     // 휴면계정 복구 (NORMAL 전환)

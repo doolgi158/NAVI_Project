@@ -1,6 +1,8 @@
 package com.navi.user.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.navi.travel.domain.Bookmark;
+import com.navi.travel.domain.Like;
 import com.navi.user.enums.UserRole;
 import com.navi.user.enums.UserState;
 import jakarta.persistence.*;
@@ -78,6 +80,17 @@ public class User {
     @Builder.Default
     private List<UserRole> userRoleList = new ArrayList<>();    // 권한
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Bookmark> bookmarks = new ArrayList<>();   // 북마크
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Like> likes = new ArrayList<>();   // 좋아요
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Withdraw withdraw;
+
     public void addRole(UserRole userRole) {
         userRoleList.add(userRole);
     }
@@ -95,12 +108,5 @@ public class User {
     // Spring Security나 DTO 변환 시 사용하기 위한 Getter
     public List<UserRole> getRoleList() {
         return this.userRoleList;
-    }
-
-    // 탈퇴 시 상태 및 권한 변경
-    public void  withdraw() {
-        this.userState = UserState.DELETE;
-        this.userRoleList.clear();
-        this.userRoleList.add(UserRole.GUEST);
     }
 }

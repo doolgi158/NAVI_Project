@@ -1,5 +1,6 @@
 package com.navi.user.service.user;
 
+import com.navi.common.util.CustomException;
 import com.navi.image.repository.ImageRepository;
 import com.navi.user.domain.User;
 import com.navi.user.domain.Withdraw;
@@ -16,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Service
@@ -115,21 +117,17 @@ public class UserServiceImpl implements UserService{
 
     @Override
     @Transactional
-    public void withdrawUser(String token, String reason) {
-        String userId = jwtUtil.getUserIdFromToken(token.replace("Bearer ", "")); // JWTUtil 활용
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+    public void withdrawUser(String userId, String reason) {
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new CustomException("사용자를 찾을 수 없습니다.", 404, null));
 
-        // 이미 탈퇴 신청한 유저인지 체크
-        if (user.getUserState() == UserState.DELETE) {
-            throw new IllegalStateException("이미 탈퇴 처리된 사용자입니다.");
-        }
-
-        // 탈퇴 처리
-        user.withdraw();
+        // 유저 상태를 DELETE로 변경 (탈퇴 대기)
+        user = user.toBuilder()
+                .userState(UserState.DELETE)
+                .build();
         userRepository.save(user);
 
-        // 탈퇴 이력 기록
+        // Withdraw 엔티티 생성 및 저장
         Withdraw withdraw = Withdraw.create(user, reason);
         withdrawRepository.save(withdraw);
     }
@@ -139,10 +137,6 @@ public class UserServiceImpl implements UserService{
     public void reactivateUser(String username) {
         User user = userRepository.findByUserId(username)
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 사용자입니다."));
-
-        if (user.getUserState() == UserState.DELETE) {
-            throw new RuntimeException("탈퇴한 계정은 복구할 수 없습니다.");
-        }
 
         if (user.getUserState() == UserState.NORMAL) {
             return; // 이미 정상 계정이면 그대로 둠
@@ -157,8 +151,8 @@ public class UserServiceImpl implements UserService{
     @Override
     public UserResponseDTO signup(UserRequestDTO dto) {
         // 아이디 중복검사
-        if (userRepository.existsById(dto.getId())) {
-            throw new IllegalArgumentException("이미 존재하는 아이디입니다.");
+        if (userRepository.existsByIdAndUserState(dto.getId(), UserState.NORMAL)) {
+            throw new CustomException("이미 사용 중인 아이디입니다.", 409, dto);
         }
 
         // 비밀번호 암호화

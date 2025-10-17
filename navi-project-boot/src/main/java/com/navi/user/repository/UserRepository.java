@@ -62,4 +62,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // 프로필 이미지 조회용
     Optional<User> findByNo(Long userNo);
     void deleteByNo(Long userNo);
+
+    Optional<User> findByIdAndUserState(String id, UserState userState);
+    boolean existsByIdAndUserState(String id, UserState userState);
 }

@@ -58,7 +58,7 @@ export const useUserDetailFunctions = (form) => {
 
       message.success("회원 정보가 수정되었습니다!");
       setEditing(false);
-      setUser(payload);
+      setUser((prev) => ({ ...prev, ...payload, profile: prev.profile, }));
     } catch (err) {
       console.error(err);
       message.error("수정 중 오류가 발생했습니다.");

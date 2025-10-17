@@ -22,38 +22,39 @@ import java.time.temporal.ChronoUnit;
 public class Withdraw {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "navi_withdraw_generator")
-    @Column(name = "withdraw_id")
-    private long id;                // 이력 ID
+    @Column(name = "withdraw_no")
+    private long no;                    // 이력 ID
 
-    @Column(name = "withdraw_request", nullable = false, columnDefinition = "TIMESTAMP(0)")
+    @Column(name = "withdraw_request_at", updatable = false)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime request;  // 탈퇴 요청일
+    private LocalDateTime requestAt;    // 탈퇴 요청일
 
-    @Column(name = "withdraw_due", columnDefinition = "TIMESTAMP(0)")
+    @Column(name = "withdraw_due_at")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime  due;     // 탈퇴 예정일
+    private LocalDateTime dueAt;        // 탈퇴 예정일
 
-    @Column(name = "withdraw_end", updatable = false, columnDefinition = "TIMESTAMP(0)")
+    @Column(name = "withdraw_deleted_at")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime  end;     //  탈퇴 처리일
+    private LocalDateTime deletedAt;    // 탈퇴 처리일
 
     @Column(name = "withdraw_reason", length = 500)
-    private String reason;          // 탈퇴 사유
+    private String reason;              // 탈퇴 사유
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_no", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_no", nullable = false, unique = true)
     private User user;
 
-    public static Withdraw create(User user, String reason) {
-        return Withdraw.builder()
-                .user(user)
-                .reason(reason)
-                .request(LocalDateTime.now())
-                .end(LocalDateTime.now())
-                .build();
+    public void markProcessed() {
+        this.deletedAt = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
     }
 
-    public void markProcessed() {
-        this.end = LocalDateTime.now();
+    public static Withdraw create(User user, String reason) {
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+        return Withdraw.builder()
+                .user(user)
+                .requestAt(now)
+                .dueAt(now.plusDays(7))
+                .reason(reason)
+                .build();
     }
 }

@@ -35,12 +35,14 @@ export const useLogin = () => {
         // Redux 상태 갱신
         dispatch(setlogin({ username: username, accessToken: accessToken , refreshToken: refreshToken, role: roles, ip: ip }));
 
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
         // 리디렉션 처리
         const redirectPath = localStorage.getItem("redirectAfterLogin") || "/";
         localStorage.removeItem("redirectAfterLogin");
 
         // 관리자 전용 페이지 분기
-        if (username === "naviadmin") {
+        if (Array.isArray(roles) && roles.includes("ADMIN")) {
           navigate("/adm/dashboard");
         } else {
           navigate(redirectPath);
@@ -50,6 +52,7 @@ export const useLogin = () => {
       }
 
       if (response.status === 403) {
+        console.log(response);
         return { success: false, message: "5회 이상 실패로 10분간 로그인 차단되었습니다." };
       }
 
