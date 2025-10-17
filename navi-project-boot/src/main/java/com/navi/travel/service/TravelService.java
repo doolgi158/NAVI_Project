@@ -2,6 +2,7 @@ package com.navi.travel.service;
 
 import com.navi.travel.dto.TravelDetailResponseDTO;
 import com.navi.travel.dto.TravelListResponseDTO;
+import com.navi.travel.dto.TravelRankDTO;
 import com.navi.travel.dto.TravelRequestDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,6 +37,7 @@ public interface TravelService {
     // 북마크 상태 토글 (✅ userId 타입: String으로 변경)
     boolean  toggleBookmark(Long travelId, String userId);
 
-
+    // 메인 대표 여행지 10개
+    List<TravelRankDTO> getTop10FeaturedTravels();
 
 }

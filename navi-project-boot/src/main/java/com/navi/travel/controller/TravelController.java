@@ -2,6 +2,7 @@ package com.navi.travel.controller;
 
 import com.navi.travel.dto.TravelDetailResponseDTO;
 import com.navi.travel.dto.TravelListResponseDTO;
+import com.navi.travel.dto.TravelRankDTO;
 import com.navi.travel.service.TravelService;
 import com.navi.user.dto.JWTClaimDTO;
 import lombok.RequiredArgsConstructor;
@@ -156,5 +157,11 @@ public class TravelController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("success", false, "message", "서버 오류가 발생했습니다."));
         }
+    }
+
+    // 메인 대표 여행지 TOP 10
+    @GetMapping("/rank")
+    public List<TravelRankDTO> getFeaturedTravels() {
+        return travelService.getTop10FeaturedTravels();
     }
 }
