@@ -13,6 +13,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
@@ -26,6 +27,7 @@ import static com.navi.user.security.util.LoginRequestUtil.getClientIp;
 import static com.navi.user.security.util.LoginRequestUtil.getUserName;
 
 @RequiredArgsConstructor
+@Slf4j
 public class ApiSuccessHandler implements AuthenticationSuccessHandler {
     private final TryLoginRepository tryLoginRepository;
     private final JWTUtil jwtUtil;

@@ -4,10 +4,13 @@ import com.navi.user.enums.UserRole;
 import com.navi.user.enums.UserState;
 import com.navi.user.domain.User;
 import com.navi.user.repository.UserRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.util.Random;
@@ -19,6 +22,9 @@ public class UserTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @PersistenceContext
+    private EntityManager em;
 
     // 관리자 만들기
     @Test
@@ -72,6 +78,18 @@ public class UserTest {
             phone.setLength(0);
             personal.setLength(0);
             password.setLength(0);
+        }
+    }
+
+    @Test
+    @Transactional
+    public void insertRolesOnly() {
+        for (int i = 0; i <= 1000; i++) {
+            String role = (i == 0) ? "ADMIN" : "USER";
+            em.createNativeQuery("INSERT INTO navi_user_roles (user_no, role) VALUES (?, ?)")
+                    .setParameter(1, i)
+                    .setParameter(2, role)
+                    .executeUpdate();
         }
     }
 }

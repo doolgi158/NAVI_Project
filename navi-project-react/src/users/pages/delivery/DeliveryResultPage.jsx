@@ -5,7 +5,7 @@ import MainLayout from "../../layout/MainLayout";
 const DeliveryResultPage = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
-  const data = state?.data || {}; // ✅ 핵심 수정: 실제 예약정보 추출
+  const data = state || {}; // ✅ 핵심 수정: 실제 예약정보 추출
 
   return (
     <MainLayout>

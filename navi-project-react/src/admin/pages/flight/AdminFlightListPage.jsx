@@ -1,8 +1,21 @@
 import { useEffect, useState } from "react";
-import { Table, Button, Popconfirm, Space, message } from "antd";
+import {
+  Layout,
+  Table,
+  Button,
+  Popconfirm,
+  Space,
+  message,
+  Typography,
+  Card,
+  Tag,
+} from "antd";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import AdminSiderLayout from "../../layout/AdminSiderLayout";
+
+const { Content, Sider, Header } = Layout;
+const { Title, Text } = Typography;
 
 const API = "http://localhost:8080/api/admin/flights";
 
@@ -11,12 +24,11 @@ const AdminFlightListPage = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // ✅ 항공편 목록 불러오기 (JWT 인증 포함)
   const fetchFlights = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("accessToken"); // ✅ JWT 가져오기
-      
+      const token =
+        localStorage.getItem("ACCESS_TOKEN") || localStorage.getItem("accessToken");
       if (!token) {
         message.warning("로그인이 필요합니다.");
         setLoading(false);
@@ -25,13 +37,10 @@ const AdminFlightListPage = () => {
 
       const res = await axios.get(API, {
         headers: {
-          Authorization: `Bearer ${token}`, // ✅ JWT 헤더 추가
+          Authorization: `Bearer ${token}`,
         },
       });
 
-      console.log("🛫 API 응답:", res.data);
-
-      // ✅ 안전한 배열 처리 (data 또는 data.data 지원)
       const list = Array.isArray(res.data) ? res.data : res.data.data || [];
       setFlights(list);
     } catch (err) {
@@ -46,7 +55,6 @@ const AdminFlightListPage = () => {
     fetchFlights();
   }, []);
 
-  // ✅ 항공편 삭제 (JWT 포함)
   const handleDelete = async (record) => {
     try {
       const token = localStorage.getItem("ACCESS_TOKEN");
@@ -57,9 +65,7 @@ const AdminFlightListPage = () => {
 
       const { flightId, depTime } = record;
       await axios.delete(`${API}/${flightId}/${depTime}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       message.success("항공편이 삭제되었습니다.");
@@ -71,26 +77,10 @@ const AdminFlightListPage = () => {
   };
 
   const columns = [
-    {
-      title: "항공편명",
-      dataIndex: "flightId",
-      key: "flightId",
-    },
-    {
-      title: "항공사",
-      dataIndex: "airlineNm",
-      key: "airlineNm",
-    },
-    {
-      title: "출발공항",
-      dataIndex: "depAirportNm",
-      key: "depAirportNm",
-    },
-    {
-      title: "도착공항",
-      dataIndex: "arrAirportNm",
-      key: "arrAirportNm",
-    },
+    { title: "항공편명", dataIndex: "flightId", key: "flightId" },
+    { title: "항공사", dataIndex: "airlineNm", key: "airlineNm" },
+    { title: "출발공항", dataIndex: "depAirportNm", key: "depAirportNm" },
+    { title: "도착공항", dataIndex: "arrAirportNm", key: "arrAirportNm" },
     {
       title: "출발시간",
       dataIndex: "depTime",
@@ -107,21 +97,31 @@ const AdminFlightListPage = () => {
       title: "일반석 요금",
       dataIndex: "economyCharge",
       key: "economyCharge",
-      render: (val) => val?.toLocaleString() + "원",
+      render: (val) => (
+        <Tag color="green" style={{ fontWeight: 500 }}>
+          {val?.toLocaleString()}원
+        </Tag>
+      ),
     },
     {
       title: "비즈니스 요금",
       dataIndex: "prestigeCharge",
       key: "prestigeCharge",
-      render: (val) => val?.toLocaleString() + "원",
+      render: (val) => (
+        <Tag color="blue" style={{ fontWeight: 500 }}>
+          {val?.toLocaleString()}원
+        </Tag>
+      ),
     },
     {
       title: "관리",
       key: "action",
+      align: "center",
       render: (_, record) => (
         <Space>
           <Button
             type="link"
+            style={{ color: "#1d4ed8", fontWeight: 500 }}
             onClick={() =>
               navigate(`/adm/flight/edit/${record.flightId}/${record.depTime}`)
             }
@@ -130,6 +130,8 @@ const AdminFlightListPage = () => {
           </Button>
           <Popconfirm
             title="정말 삭제하시겠습니까?"
+            okText="삭제"
+            cancelText="취소"
             onConfirm={() => handleDelete(record)}
           >
             <Button type="link" danger>
@@ -142,36 +144,92 @@ const AdminFlightListPage = () => {
   ];
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      {/* 왼쪽 사이드바 */}
-      <div className="w-64 bg-white shadow-md border-r border-gray-100">
+    <Layout style={{ minHeight: "100vh", background: "#f8f9fc" }}>
+      {/* ✅ 사이드바 */}
+      <Sider
+        width={240}
+        style={{
+          background: "#fff",
+          borderRight: "1px solid #eee",
+          boxShadow: "2px 0 8px rgba(0,0,0,0.05)",
+        }}
+      >
         <AdminSiderLayout />
-      </div>
+      </Sider>
 
-      {/* 오른쪽 콘텐츠 영역 */}
-      <div className="flex-1 p-8">
-        <div className="flex justify-between mb-6">
-          <h2 className="text-2xl font-semibold text-gray-800">항공편 목록</h2>
+      <Layout>
+        {/* ✅ 상단 헤더 */}
+        <Header
+          style={{
+            background: "#001F54",
+            color: "#fff",
+            padding: "0 40px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            height: 64,
+            boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+          }}
+        >
+          <Title level={4} style={{ color: "#fff", margin: 0 }}>
+            ✈️ NAVI 관리자 시스템
+          </Title>
           <Button
             type="primary"
+            style={{
+              background: "#FFCC00",
+              color: "#001F54",
+              border: "none",
+              fontWeight: 600,
+            }}
             onClick={() => navigate("/adm/flight/new")}
-            className="bg-indigo-500 hover:bg-indigo-600"
           >
-            항공편 등록
+            + 항공편 등록
           </Button>
-        </div>
+        </Header>
 
-        <Table
-          columns={columns}
-          dataSource={Array.isArray(flights) ? flights : []}
-          rowKey={(record) => `${record.flightId}_${record.depTime}`}
-          loading={loading}
-          bordered
-          pagination={{ pageSize: 10 }}
-          className="bg-white shadow-sm rounded-lg"
-        />
-      </div>
-    </div>
+        {/* ✅ 콘텐츠 */}
+        <Content style={{ padding: "40px 60px" }}>
+          <Card
+            bordered={false}
+            style={{
+              borderRadius: 16,
+              boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
+              background: "#fff",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 20,
+              }}
+            >
+              <Title level={4} style={{ margin: 0, color: "#001F54" }}>
+                항공편 목록
+              </Title>
+              <Text type="secondary">
+                총 {flights.length.toLocaleString()}건의 항공편이 등록됨
+              </Text>
+            </div>
+
+            <Table
+              columns={columns}
+              dataSource={Array.isArray(flights) ? flights : []}
+              rowKey={(record) => `${record.flightId}_${record.depTime}`}
+              loading={loading}
+              bordered
+              pagination={{ pageSize: 10 }}
+              style={{
+                borderRadius: 8,
+                overflow: "hidden",
+              }}
+            />
+          </Card>
+        </Content>
+      </Layout>
+    </Layout>
   );
 };
 
