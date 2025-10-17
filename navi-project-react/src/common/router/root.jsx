@@ -9,6 +9,7 @@ import UserRouter from "./UserRouter.jsx";
 import DeliveryRouter from "./DeliveryRouter.jsx"
 import PaymentRouter from "./PaymentRouter.jsx";
 import BoardRouter from "./BoardRouter.jsx";
+import NoticeRoutes from "./NoticeRouter.jsx";
 
 
 const Loading = <div></div>
@@ -59,6 +60,10 @@ const root = createBrowserRouter([
         path: "/board",
         children: [...BoardRouter()]
     },
+    {
+        path: "/notice",
+        children: [...BoardRouter()]
+    }
 ]
 }
 ]);

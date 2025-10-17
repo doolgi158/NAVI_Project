@@ -10,10 +10,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/notice")
+@RequestMapping("/api/notice")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:5173") // 리액트 개발 서버 주소
-public class NoticeController {
+public class NoticeApiController {
 
     //HTTP 요청을 받아서 Service 호출, 결과를 JSON으로 리액트에 전달, REST API 엔드포인트 제공
 

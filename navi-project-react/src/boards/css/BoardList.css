@@ -5,10 +5,11 @@
   font-family: 'Malgun Gothic', sans-serif;
   padding: 20px;
   background-color: #f5f5f5;
+  padding-left: 100px;
+  padding-right: 100px;
 }
 
 .board-list-wrapper {
-  max-width: 800px;
   margin: 0 auto;
   background-color: white;
   padding: 20px;
