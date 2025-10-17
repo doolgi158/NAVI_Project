@@ -120,6 +120,7 @@ const AdminFlightListPage = () => {
       title: "항공편명",
       dataIndex: "flightId",
       key: "flightId",
+      align: "center",
       width: 120,
       render: (t) => <b>{t}</b>,
       ...getColumnSearchProps("flightId", "항공편명"),
@@ -128,6 +129,7 @@ const AdminFlightListPage = () => {
       title: "항공사명",
       dataIndex: "airlineNm",
       key: "airlineNm",
+      align: "center",
       width: 150,
       ...getColumnSearchProps("airlineNm", "항공사명"),
     },
@@ -135,6 +137,7 @@ const AdminFlightListPage = () => {
       title: "출발공항",
       dataIndex: "depAirportNm",
       key: "depAirportNm",
+      align: "center",
       width: 120,
       ...getColumnSearchProps("depAirportNm", "출발공항"),
     },
@@ -142,6 +145,7 @@ const AdminFlightListPage = () => {
       title: "도착공항",
       dataIndex: "arrAirportNm",
       key: "arrAirportNm",
+      align: "center",
       width: 120,
       ...getColumnSearchProps("arrAirportNm", "도착공항"),
     },
@@ -149,6 +153,7 @@ const AdminFlightListPage = () => {
       title: "출발시간",
       dataIndex: "depTime",
       key: "depTime",
+      align: "center",
       width: 180,
       render: (t) => dayjs(t).format("YYYY-MM-DD HH:mm"),
       sorter: (a, b) => new Date(a.depTime) - new Date(b.depTime),
@@ -157,6 +162,7 @@ const AdminFlightListPage = () => {
       title: "도착시간",
       dataIndex: "arrTime",
       key: "arrTime",
+      align: "center",
       width: 180,
       render: (t) => dayjs(t).format("YYYY-MM-DD HH:mm"),
       sorter: (a, b) => new Date(a.arrTime) - new Date(b.arrTime),
@@ -165,7 +171,8 @@ const AdminFlightListPage = () => {
       title: "일반석 요금",
       dataIndex: "economyCharge",
       key: "economyCharge",
-      align: "right",
+      align: "center",
+      width: 140,
       render: (v) => <Tag color="green">{v.toLocaleString()}원</Tag>,
       sorter: (a, b) => a.economyCharge - b.economyCharge,
     },
@@ -173,7 +180,8 @@ const AdminFlightListPage = () => {
       title: "비즈니스 요금",
       dataIndex: "prestigeCharge",
       key: "prestigeCharge",
-      align: "right",
+      align: "center",
+      width: 140,
       render: (v) => <Tag color="blue">{v.toLocaleString()}원</Tag>,
       sorter: (a, b) => a.prestigeCharge - b.prestigeCharge,
     },
@@ -181,6 +189,7 @@ const AdminFlightListPage = () => {
       title: "등록일",
       dataIndex: "createdAt",
       key: "createdAt",
+      align: "center",
       width: 180,
       render: (t) => (t ? dayjs(t).format("YYYY-MM-DD HH:mm") : "-"),
       sorter: (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
@@ -189,6 +198,7 @@ const AdminFlightListPage = () => {
       title: "수정일",
       dataIndex: "updatedAt",
       key: "updatedAt",
+      align: "center",
       width: 180,
       render: (t) => (t ? dayjs(t).format("YYYY-MM-DD HH:mm") : "-"),
       sorter: (a, b) => new Date(a.updatedAt) - new Date(b.updatedAt),
@@ -240,7 +250,7 @@ const AdminFlightListPage = () => {
     <Layout style={{ minHeight: "100vh" }}>
       <AdminSiderLayout />
       <div className="p-8 bg-gray-50 min-h-screen">
-        <div className="max-w-7xl mx-auto bg-white shadow-lg rounded-xl p-6">
+        <div className="max-w-8xl mx-auto bg-white shadow-lg rounded-xl p-6">
           {/* 상단 헤더 */}
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-3">
