@@ -55,10 +55,11 @@ public class JWTClaimDTO {
                 .build();
     }
 
+
     // 가장 첫 번째 권한 반환 (편의 메서드)
-//    public String getPrimaryRole() {
-//        return role != null && !role.isEmpty() ? role.get(0) : UserRole.USER.name();
-//    }
+    public String getPrimaryRole() {
+        return role != null && !role.isEmpty() ? role.get(0) : UserRole.USER.name();
+    }
 //
 //    public JWTClaimDTO validateAndParse(String token) {
 //        try {

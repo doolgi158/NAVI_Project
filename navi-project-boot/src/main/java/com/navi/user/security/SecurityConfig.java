@@ -53,17 +53,16 @@ public class SecurityConfig {
 
         // 요청별 권한 설정 (anyRequest는 반드시 마지막!)
         http.authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers( "/api/users/login", "/api/users/logout", "/api/auth/oauth/**",
-                                "/api/users/find-id", "/api/users/find-pw", "/api/users/signup", "/api/users/check-id",
-                                "/api/users/send-email", "/api/users/verify-code", "/api/users/find-password", "/api/seats/**",
-                                "/api/flight/**", "/api/delivery/**"
-                        ).permitAll()
-                        .requestMatchers("/api/travel/like/**", "/api/travel/bookmark/**").authenticated() //  좋아요, 북마크는 인증필요
-                        .requestMatchers("/api/travel/**").permitAll() // ✅ 목록/상세는 공개
-                        .requestMatchers("/api/adm/**").hasRole("ADMIN")    //권한일치 필요 수정) Security는 “ADMIN”을 요구하지만, 토큰에는 “ROLE_ADMIN”이 등록되어 있음 → 불일치로 접근 차단
-//                .requestMatchers("/api/adm/**").hasAuthority(UserRole.ADMIN.name())
-                        .anyRequest().authenticated()
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers( "/api/users/login", "/api/users/logout", "/api/auth/oauth/**",
+                        "/api/users/find-id", "/api/users/find-pw", "/api/users/signup", "/api/users/check-id",
+                        "/api/users/send-email", "/api/users/verify-code", "/api/users/find-password", "/api/seats/**",
+                        "/api/flight/**", "/api/delivery/**"
+                ).permitAll()
+                .requestMatchers("/api/travel/like/**", "/api/travel/bookmark/**").authenticated() //  좋아요, 북마크는 인증필요
+                .requestMatchers("/api/travel/**").permitAll() // ✅ 목록/상세는 공개
+                .requestMatchers("/api/adm/**").hasAuthority(UserRole.ADMIN.name())
+                .anyRequest().authenticated()
         );
 
         // 폼 로그인

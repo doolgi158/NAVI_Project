@@ -1,16 +1,16 @@
 import React, { useEffect, useCallback, useRef, useState } from 'react';
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import MainLayout from '../../layout/MainLayout.jsx';
+import MainLayout from '../../layout/MainLayout';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux'; // ✅ Redux에서 로그인 사용자 정보 불러옴
 import api from '../../../common/api/naviApi.js';
 import { useKakaoMap } from '../../../common/hooks/useKakaoMap.jsx';
 import { useTravelList } from '../../../common/hooks/useTravelList.jsx';
-import TravelCard from './travel/TravelCard.jsx';
-import Pagination from './travel/Pagination.jsx';
-import TravelControls from './travel/TravelControls.jsx';
+import TravelCard from '../../../common/components/travel/TravelCard.jsx';
+import Pagination from '../../../common/components/travel/Pagination.jsx';
+import TravelControls from '../../../common/components/travel/TravelControls.jsx';
 
-export default function TravelPage ({ user }){
+export default function TravelPage({ user }) {
   const navigate = useNavigate();
 
   /** ✅ Redux store에서 로그인 정보 가져오기 */
@@ -148,7 +148,7 @@ export default function TravelPage ({ user }){
   return (
     <MainLayout>
       <div className="py-8 min-h-[calc(100vh-140px)] space-y-8">
-       
+
 
         {/* ✅ 검색창 */}
         <div className="flex justify-center">

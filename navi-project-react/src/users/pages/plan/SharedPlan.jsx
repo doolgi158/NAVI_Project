@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from "react";
 import MainLayout from "../../layout/MainLayout";
-import CustomCard from "@/common/components/CustomCard";
-import CustomButton from "@/common/components/CustomButton";
 import { useParams, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
-import { sharePlan } from "@/common/api/planApi"; 
+import { sharePlan } from "../../../common/api/planApi";
 
 export default function SharedPlan() {
   const { planId } = useParams();

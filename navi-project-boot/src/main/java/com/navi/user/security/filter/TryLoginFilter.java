@@ -48,16 +48,6 @@ public class TryLoginFilter extends OncePerRequestFilter {
                     }
                     return;
                 }
-
-                if (user.getUserState() == UserState.DELETE) {
-                    ApiResponse<Object> apiResponse = ApiResponse.error(
-                            "탈퇴한 계정입니다.",
-                            403,
-                            "delete"
-                    );
-                    writeJsonResponse(response, apiResponse, HttpServletResponse.SC_FORBIDDEN);
-                    return;
-                }
             }
         }
 

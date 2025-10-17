@@ -1,35 +1,76 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { fetchAdminTravelList, deleteAdminTravel, updateAdminTravelState } from '../../../common/api/adminTravelApi';
-import { Table, Button, Space, Popconfirm, Tag, message, Typography, Input, Image, Layout, Select } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
-import AdminSiderLayout from '../../layout/AdminSiderLayout';
-import { Content, Header } from 'antd/es/layout/layout';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  fetchAdminTravelList,
+  deleteAdminTravel,
+  updateAdminTravelState,
+} from "../../../common/api/adminTravelApi";
+import {
+  Table,
+  Button,
+  Space,
+  Popconfirm,
+  Tag,
+  message,
+  Typography,
+  Input,
+  Image,
+  Layout,
+  Select,
+} from "antd";
+import {
+  PlusOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  EyeOutlined,
+  EyeInvisibleOutlined,
+} from "@ant-design/icons";
+import AdminSiderLayout from "../../layout/AdminSiderLayout";
+import { Content, Header } from "antd/es/layout/layout";
 
 const { Title, Link } = Typography;
 const { Option } = Select;
 
 export default function AdminTravelList() {
   const navigate = useNavigate();
-  const [travelData, setTravelData] = useState({ content: [], totalPages: 0, totalElements: 0, number: 0 });
+  const [travelData, setTravelData] = useState({
+    content: [],
+    totalPages: 0,
+    totalElements: 0,
+    number: 0,
+  });
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [searchKeyword, setSearchKeyword] = useState('');
-  const [inputKeyword, setInputKeyword] = useState('');
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]); // ✅ 선택된 여행지 ID들
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [inputKeyword, setInputKeyword] = useState("");
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [sortField, setSortField] = useState("createdAt");
+  const [sortOrder, setSortOrder] = useState("descend");
   const sizeOptions = [10, 20, 50, 100];
 
-  // ✅ 목록 로드
-  const loadTravels = async (pageToLoad, keyword = searchKeyword, size = pageSize) => {
+  /** ✅ 목록 로드 */
+  const loadTravels = async (
+    pageToLoad,
+    keyword = searchKeyword,
+    size = pageSize,
+    sort = sortField,
+    order = sortOrder
+  ) => {
     setLoading(true);
     setError(null);
-
     try {
-      const response = await fetchAdminTravelList(pageToLoad, size, keyword || '');
+      const response = await fetchAdminTravelList(
+        pageToLoad,
+        size,
+        keyword || "",
+        sort,
+        order
+      );
       const data = response.data;
-      if (!data || !Array.isArray(data.content)) throw new Error('유효하지 않은 데이터 형식입니다.');
+      if (!data || !Array.isArray(data.content))
+        throw new Error("유효하지 않은 데이터 형식입니다.");
       setTravelData({
         content: data.content,
         totalPages: data.totalPages,
@@ -37,12 +78,12 @@ export default function AdminTravelList() {
         number: data.number,
       });
       setPage(pageToLoad);
-      setSearchKeyword(keyword || '');
-      setInputKeyword(keyword || '');
+      setSearchKeyword(keyword || "");
+      setInputKeyword(keyword || "");
     } catch (err) {
-      console.error('관리자 여행지 목록 로딩 실패:', err);
-      message.error('목록 로딩 실패: ' + (err.message || '서버 오류'));
-      setError('목록 로딩 실패');
+      console.error("관리자 여행지 목록 로딩 실패:", err);
+      message.error("목록 로딩 실패: " + (err.message || "서버 오류"));
+      setError("목록 로딩 실패");
       setTravelData({ content: [], totalPages: 0, totalElements: 0, number: 0 });
     } finally {
       setLoading(false);
@@ -50,129 +91,150 @@ export default function AdminTravelList() {
   };
 
   useEffect(() => {
-    loadTravels(0, '', pageSize);
+    loadTravels(0, "", pageSize);
   }, [pageSize]);
 
   const handleSearch = (value) => loadTravels(0, value);
-  const handlePageChange = (pageNumber, newSize) => loadTravels(pageNumber - 1, searchKeyword, newSize || pageSize);
-  const handleTitleClick = (travelId) => navigate(`/adm/travel/detail/${travelId}`);
+  const handlePageChange = (pageNumber, newSize) =>
+    loadTravels(pageNumber - 1, searchKeyword, newSize || pageSize);
+  const handleTitleClick = (travelId) =>
+    navigate(`/adm/travel/detail/${travelId}`);
 
   const handleDelete = async (travelId) => {
     try {
       await deleteAdminTravel(travelId);
       message.success(`ID ${travelId} 삭제 완료`);
-      const newPage = (travelData.content.length === 1 && page > 0) ? page - 1 : page;
+      const newPage =
+        travelData.content.length === 1 && page > 0 ? page - 1 : page;
       loadTravels(newPage, searchKeyword);
     } catch (err) {
-      console.error('삭제 실패:', err);
+      console.error("삭제 실패:", err);
       message.error(`삭제 실패: ${err.response?.data?.message || err.message}`);
     }
   };
 
-  // ✅ 날짜 포맷 함수
+  /** ✅ 날짜 포맷 함수 */
   const formatDateTime = (value) => {
-    if (!value) return '-';
+    if (!value) return "-";
     const date = new Date(value);
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} `
-      + `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+    return (
+      `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+        2,
+        "0"
+      )}-${String(date.getDate()).padStart(2, "0")} ` +
+      `${String(date.getHours()).padStart(2, "0")}:${String(
+        date.getMinutes()
+      ).padStart(2, "0")}`
+    );
   };
 
-  const formatNumber = (num) => (num ?? 0).toLocaleString('ko-KR');
+  const formatNumber = (num) => (num ?? 0).toLocaleString("ko-KR");
 
-  // ✅ 다중 상태 변경 함수
+  /** ✅ 다중 상태 변경 */
   const handleBatchStateChange = async (newState) => {
     if (selectedRowKeys.length === 0) {
-      message.warning('먼저 항목을 선택하세요.');
+      message.warning("먼저 항목을 선택하세요.");
       return;
     }
     try {
       await updateAdminTravelState(selectedRowKeys, newState);
-      message.success(`선택한 ${selectedRowKeys.length}개 항목을 ${newState === 1 ? '공개' : '비공개'}로 변경했습니다.`);
+      message.success(
+        `선택한 ${selectedRowKeys.length}개 항목을 ${newState === 1 ? "공개" : "비공개"
+        }로 변경했습니다.`
+      );
       setSelectedRowKeys([]);
       loadTravels(page, searchKeyword);
     } catch (err) {
-      console.error('상태 변경 실패:', err);
-      message.error('상태 변경 중 오류가 발생했습니다.');
+      console.error("상태 변경 실패:", err);
+      message.error("상태 변경 중 오류가 발생했습니다.");
     }
   };
 
-  // ✅ 테이블 컬럼
+  /** ✅ 테이블 정렬 핸들러 */
+  const handleTableChange = (pagination, filters, sorter) => {
+    if (sorter && sorter.field) {
+      setSortField(sorter.field);
+      setSortOrder(sorter.order || "ascend");
+      loadTravels(page, searchKeyword, pageSize, sorter.field, sorter.order);
+    }
+  };
+
+  /** ✅ 컬럼 정의 (정렬 추가됨) */
   const columns = [
-    { title: 'ID', dataIndex: 'travelId', key: 'travelId', width: 70, align: 'center' },
+    { title: "ID", dataIndex: "travelId", key: "travelId", align: "center", sorter: true },
     {
-      title: '썸네일',
-      dataIndex: 'imagePath',
-      key: 'imagePath',
-      align: 'center',
-      width: 90,
-      render: (imagePath) =>
-        imagePath ? (
-          <Image src={imagePath} alt="thumbnail" style={{ width: 80, height: 60, objectFit: 'cover' }} />
-        ) : (
-          <Image  width={200} height={200} src="error"
-                  fallback="data:image/png;base64,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"
-  />
-        ),
-    },
-    {
-      title: '제목',
-      dataIndex: 'title',
-      key: 'title',
-      width: 200,
-      align: 'center',
+      title: "제목",
+      dataIndex: "title",
+      key: "title",
+      align: "center",
+      sorter: true,
       render: (text, record) => (
-        <Link onClick={() => handleTitleClick(record.travelId)} style={{ cursor: 'pointer', color: '#1677ff' }}>
+        <Link
+          onClick={() => handleTitleClick(record.travelId)}
+          style={{ cursor: "pointer", color: "#1677ff" }}
+        >
           {text}
         </Link>
       ),
     },
-    { title: '콘텐츠ID', dataIndex: 'contentId', key: 'contentId', align: 'center', width: 120 },
-    { title: '지역', dataIndex: 'region2', key: 'region2', align: 'center', width: 100 },
+    { title: "콘텐츠ID", dataIndex: "contentId", key: "contentId", align: "center", sorter: true },
+    { title: "지역", dataIndex: "region2", key: "region2", align: "center", sorter: true },
     {
-      title: '공개상태',
-      dataIndex: 'state',
-      key: 'state',
-      align: 'center',
-      width: 100,
+      title: "공개상태",
+      dataIndex: "state",
+      key: "state",
+      align: "center",
+      sorter: true,
       render: (state) => (
-        <Tag color={state === 1 ? 'green' : 'volcano'}>
-          {state === 1 ? '공개' : '비공개'}
+        <Tag color={state === 1 ? "green" : "volcano"}>
+          {state === 1 ? "공개" : "비공개"}
         </Tag>
       ),
     },
     {
-      title: '조회수',
-      dataIndex: 'views',
-      key: 'views',
-      align: 'center',
-      width: 90,
+      title: "조회수",
+      dataIndex: "views",
+      key: "views",
+      align: "center",
+      sorter: true,
       render: (views) => formatNumber(views),
     },
     {
-      title: '좋아요',
-      dataIndex: 'likeCount',
-      key: 'likeCount',
-      align: 'center',
-      width: 90,
+      title: "좋아요",
+      dataIndex: "likeCount",
+      key: "likeCount",
+      align: "center",
+      sorter: true,
       render: (likes) => formatNumber(likes),
     },
     {
-      title: '등록일',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
-      align: 'center',
-      width: 140,
+      title: "등록일",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      align: "center",
+      sorter: true,
       render: formatDateTime,
     },
     {
-      title: '관리',
-      key: 'action',
-      align: 'center',
-      fixed: 'right',
+      title: "수정일",
+      dataIndex: "updatedAt",
+      key: "updatedAt",
+      align: "center",
+      sorter: true,
+      render: formatDateTime,
+    },
+    {
+      title: "관리",
+      key: "action",
+      align: "center",
+      fixed: "right",
       width: 180,
       render: (_, record) => (
         <Space size="small">
-          <Button icon={<EditOutlined />} onClick={() => navigate(`/adm/travel/edit/${record.travelId}`)}>
+          <Button
+            icon={<EditOutlined />}
+            onClick={() => navigate(`/adm/travel/edit/${record.travelId}`)}
+          >
             수정
           </Button>
           <Popconfirm
@@ -190,7 +252,6 @@ export default function AdminTravelList() {
     },
   ];
 
-  // ✅ 행 선택 설정
   const rowSelection = {
     selectedRowKeys,
     onChange: (newSelectedKeys) => setSelectedRowKeys(newSelectedKeys),
@@ -200,23 +261,29 @@ export default function AdminTravelList() {
     <Layout className="min-h-screen">
       <AdminSiderLayout />
       <Layout>
-        <Header className="px-6 shadow flex items-center text-xl font-bold" style={{ background: '#fefce8' }}>
+        <Header
+          className="px-6 shadow flex items-center text-xl font-bold"
+          style={{ background: "#fefce8" }}
+        >
           NAVI 관리자 페이지
         </Header>
-        <Content className="p-1" style={{ minHeight: '100vh', padding: '24px', background: '#fefce843' }}>
-          <div style={{ padding: '24px' }}>
-            <Title level={3} style={{ marginBottom: '24px' }}>
+        <Content
+          className="p-1"
+          style={{ minHeight: "100vh", padding: "24px", background: "#fefce843" }}
+        >
+          <div style={{ padding: "24px" }}>
+            <Title level={3} style={{ marginBottom: "24px" }}>
               여행지 관리 목록
             </Title>
 
             {/* 🔍 검색 & 등록 버튼 */}
             <div
               style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '16px',
-                gap: '16px',
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "16px",
+                gap: "16px",
               }}
             >
               <Input.Search
@@ -231,13 +298,13 @@ export default function AdminTravelList() {
               <Button
                 type="primary"
                 icon={<PlusOutlined />}
-                onClick={() => navigate('/adm/travel/register')}
+                onClick={() => navigate("/adm/travel/register")}
               >
                 새 여행지 등록
               </Button>
             </div>
 
-            {/* ✅ 일괄 상태 변경 버튼 */}
+            {/* ✅ 일괄 상태 변경 */}
             <Space style={{ marginBottom: 16 }}>
               <Button
                 icon={<EyeOutlined />}
@@ -268,21 +335,26 @@ export default function AdminTravelList() {
               </Select>
             </Space>
 
-            {error && <div style={{ color: 'red', marginBottom: '16px' }}>{error}</div>}
+            {error && <div style={{ color: "red", marginBottom: "16px" }}>{error}</div>}
 
             <Table
               rowSelection={rowSelection}
               columns={columns}
-              dataSource={(travelData.content || []).map((item) => ({ ...item, key: item.travelId }))}
-              scroll={{ x: 1500 }}
+              dataSource={(travelData.content || []).map((item) => ({
+                ...item,
+                key: item.travelId,
+              }))}
+              scroll={{ x: 1600 }}
               loading={loading}
+              onChange={handleTableChange}
               pagination={{
                 current: page + 1,
                 pageSize: pageSize,
                 total: travelData.totalElements,
                 onChange: handlePageChange,
                 showSizeChanger: false,
-                showTotal: (total, range) => `${range[0]}-${range[1]} / 총 ${total}개`,
+                showTotal: (total, range) =>
+                  `${range[0]}-${range[1]} / 총 ${total}개`,
               }}
               rowKey="travelId"
               bordered
@@ -292,5 +364,4 @@ export default function AdminTravelList() {
       </Layout>
     </Layout>
   );
-};
-
+}

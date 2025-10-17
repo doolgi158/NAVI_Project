@@ -101,8 +101,4 @@ public class PaymentDetail extends BaseEntity {
     protected void setPaymentMaster(PaymentMaster paymentMaster) {
         this.paymentMaster = paymentMaster;
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 59308c7b6f093722c755508a5b491a49c6009554
