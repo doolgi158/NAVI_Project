@@ -22,6 +22,7 @@ export default function TravelPage ({ user }){
   /** ✅ 정렬 초기 복원 */
   useEffect(() => {
     const savedSort = sessionStorage.getItem('travelListSort');
+
     if (savedSort && savedSort !== pageParam?.sort) {
       handleSortChange(savedSort);
     }

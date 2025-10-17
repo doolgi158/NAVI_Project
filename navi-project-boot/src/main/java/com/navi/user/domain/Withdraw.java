@@ -25,26 +25,36 @@ public class Withdraw {
     @Column(name = "withdraw_no")
     private long no;                    // 이력 ID
 
-    @Column(name = "withdraw_id", nullable = false)
-    private String userId;              // 유저의 id
-
-    @Column(name = "withdraw_email", nullable = false)
-    private String email;               // 유저의 이메일
-
-    @Column(name = "withdraw_phone", nullable = false)
-    private String phone;               // 유저의 연락처
-
-    @Column(name = "withdraw_ip", nullable = false)
-    private String ip;                  // 유저의 ip
-
-    @Column(name = "withdraw_deleted_at", updatable = false, columnDefinition = "TIMESTAMP(0)")
+    @Column(name = "withdraw_request_at", updatable = false)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime  deletedAt;   //  탈퇴일
+    private LocalDateTime requestAt;    // 탈퇴 요청일
+
+    @Column(name = "withdraw_due_at")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime dueAt;        // 탈퇴 예정일
+
+    @Column(name = "withdraw_deleted_at")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime deletedAt;    // 탈퇴 처리일
 
     @Column(name = "withdraw_reason", length = 500)
-    private String reason;             // 탈퇴 사유
+    private String reason;              // 탈퇴 사유
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_no", nullable = false, unique = true)
+    private User user;
 
     public void markProcessed() {
-        this.deletedAt = LocalDateTime.now();
+        this.deletedAt = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+    }
+
+    public static Withdraw create(User user, String reason) {
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+        return Withdraw.builder()
+                .user(user)
+                .requestAt(now)
+                .dueAt(now.plusDays(7))
+                .reason(reason)
+                .build();
     }
 }

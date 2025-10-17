@@ -3,6 +3,7 @@ import { Provider } from "react-redux";
 import axios from "axios";
 import store from "./common/store/store";
 import root from "./common/router/root.jsx";
+import useAutoRefresh from "./common/hooks/useAutoRefresh";
 
 
 function App() {
@@ -10,6 +11,7 @@ function App() {
   if (token) {
     axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
   }
+  useAutoRefresh();
 
   return (
     <>

@@ -1,8 +1,11 @@
 package com.navi.travel.service;
 
+import com.navi.travel.domain.Travel;
 import com.navi.travel.dto.TravelDetailResponseDTO;
 import com.navi.travel.dto.TravelListResponseDTO;
+import com.navi.travel.dto.TravelRankDTO;
 import com.navi.travel.dto.TravelRequestDTO;
+import com.navi.travel.repository.TravelRepository;
 import com.navi.travel.service.internal.TravelActionService;
 import com.navi.travel.service.internal.TravelAdminService;
 import com.navi.travel.service.internal.TravelQueryService;
@@ -13,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -29,17 +33,19 @@ public class TravelServiceImpl implements TravelService {
     private final TravelActionService travelActionService;
     private final TravelQueryService travelQueryService;
     private final TravelAdminService travelAdminService;
+    private final TravelRepository travelRepository;
 
     public TravelServiceImpl(
             TravelSyncService travelSyncService,
             TravelActionService travelActionService,
             TravelQueryService travelQueryService,
-            TravelAdminService travelAdminService
+            TravelAdminService travelAdminService, TravelRepository travelRepository
     ) {
         this.travelSyncService = travelSyncService;
         this.travelActionService = travelActionService;
         this.travelQueryService = travelQueryService;
         this.travelAdminService = travelAdminService;
+        this.travelRepository = travelRepository;
     }
 
     // =====================================================
@@ -110,6 +116,17 @@ public class TravelServiceImpl implements TravelService {
     public boolean toggleBookmark(Long travelId, String id) {
         log.debug("📚 [Action] 북마크 토글 요청 - travelId={}, userId={}", travelId, id);
         return travelActionService.toggleBookmark(travelId, id);
+    }
+
+    @Override
+    public List<TravelRankDTO> getTop10FeaturedTravels() {
+        return travelRepository.findAll().stream()
+                .map(TravelRankDTO::fromEntity)
+                .sorted(Comparator
+                        .comparingLong(TravelRankDTO::getScore).reversed()
+                        .thenComparing(TravelRankDTO::getTitle))
+                .limit(10)
+                .toList();
     }
 
     // =====================================================
