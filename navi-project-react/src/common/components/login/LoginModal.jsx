@@ -22,7 +22,6 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
     localStorage.removeItem("refreshToken");
 
     const result = await login(values);
-console.log(result);
     // 정상 로그인
     if (result.success) {
       message.success(result.message);
@@ -31,35 +30,9 @@ console.log(result);
       return;
     }
 
-    // 휴면 계정
-    if (result.sleep) {
-      Modal.confirm({
-        title: "휴면 계정 안내",
-        content: "이 계정은 휴면 상태입니다. 지금 바로 정상 계정으로 전환하시겠습니까?",
-        okText: "예, 전환합니다",
-        cancelText: "아니오",
-        centered: true,
-        onOk: async () => {
-          try {
-            await axios.post(`${API_SERVER_HOST}/api/users/reactivate`, { username: values.username });
-            message.success("계정이 정상 상태로 전환되었습니다. 다시 로그인해주세요.");
-          } catch (err) {
-            message.error("계정 전환 중 오류가 발생했습니다.");
-          }
-        },
-      });
-      return;
-    }
-
-    // 탈퇴 계정
-    if (result.delete) {
-      message.error("탈퇴한 계정은 로그인할 수 없습니다.");
-      return;
-    }
-
-    // 기타 오류
-    message.error(result.message);
-    form.resetFields(["password"]);
+    // // 기타 오류
+    // message.error(result.message);
+    // form.resetFields(["password"]);
   };
 
   // 배경 클릭 시 닫기

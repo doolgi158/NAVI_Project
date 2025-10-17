@@ -66,23 +66,20 @@ public class JWTCheckFilter extends OncePerRequestFilter {
                 UserState state = claim.getState() != null ? claim.getState() : UserState.NORMAL;
 
                 // 휴면 상태면 차단
+                ApiResponse<Object> blockedResponse = null;
+
                 if (state == UserState.SLEEP) {
-                    ApiResponse<Object> blockedResponse = ApiResponse.error (
-                            "휴면계정입니다. 정상 계정으로 전환하시겠습니까?",
-                            403,
-                            "sleep"
-                    );
+                    blockedResponse = ApiResponse.error("휴면계정입니다. 정상 계정으로 전환하시겠습니까?", 403, "sleep");
+                }
+                if (state == UserState.DELETE) {
+                    blockedResponse = ApiResponse.error("탈퇴한 계정입니다.", 403, "delete");
+                }
 
-                    int status = HttpServletResponse.SC_FORBIDDEN;
-
+                if (blockedResponse != null) {
                     response.setContentType("application/json; charset=UTF-8");
-                    response.setStatus(status);
-
-                    PrintWriter writer = response.getWriter();
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                     objectMapper.findAndRegisterModules();
-                    objectMapper.writeValue(writer, blockedResponse);
-                    writer.flush();
-                    writer.close();
+                    objectMapper.writeValue(response.getWriter(), blockedResponse);
                     return;
                 }
 
