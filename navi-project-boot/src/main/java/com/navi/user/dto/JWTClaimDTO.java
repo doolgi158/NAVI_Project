@@ -5,12 +5,14 @@ import com.navi.user.enums.UserRole;
 import com.navi.user.enums.UserState;
 import lombok.Builder;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Data
 @Builder
+@Slf4j
 public class JWTClaimDTO {
     private String id;        // 사용자 아이디
     private String name;      // 이름

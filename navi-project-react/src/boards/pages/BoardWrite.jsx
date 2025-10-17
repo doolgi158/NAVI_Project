@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import "../css/BoardWrite.css";
 
 function BoardWrite() {
   const [title, setTitle] = useState('');
@@ -39,92 +40,35 @@ function BoardWrite() {
   };
 
   return (
-    <div style={{
-      fontFamily: "'Malgun Gothic', sans-serif",
-      padding: '20px',
-      backgroundColor: '#f5f5f5'
-    }}>
-      <div style={{
-        maxWidth: '800px',
-        margin: '0 auto',
-        backgroundColor: 'white',
-        padding: '20px',
-        borderRadius: '8px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-      }}>
+    <div className="board-write-container">
+      <div className="board-write-wrapper">
         {/* 헤더 */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '20px',
-          paddingBottom: '10px',
-          borderBottom: '2px solid #333'
-        }}>
-          <div style={{
-            fontSize: '20px',
-            fontWeight: 'bold',
-            color: '#007bff'
-          }}>일반 게시판</div>
-          <Link
-            to="/board"
-            style={{
-              padding: '8px 20px',
-              backgroundColor: 'white',
-              border: '1px solid #ccc',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '14px',
-              textDecoration: 'none',
-              color: '#333'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8f8f8'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
-          >
+        <div className="board-write-header">
+          <div className="board-write-title">일반 게시판</div>
+          <Link to="/board" className="btn-list">
             목록보기
           </Link>
         </div>
 
         {/* 폼 */}
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="write-form">
           <input
             type="text"
             placeholder="제목을 입력하세요"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             maxLength="30"
-            style={{
-              width: '100%',
-              padding: '10px',
-              border: '1px solid #ddd',
-              borderRadius: '4px',
-              fontSize: '14px',
-              marginBottom: '15px'
-            }}
-            onFocus={(e) => e.currentTarget.style.borderColor = '#007bff'}
-            onBlur={(e) => e.currentTarget.style.borderColor = '#ddd'}
+            className="title-input"
           />
 
           <textarea
             placeholder="내용을 입력하세요"
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            style={{
-              width: '100%',
-              minHeight: '400px',
-              padding: '15px',
-              border: '1px solid #ddd',
-              borderRadius: '4px',
-              fontSize: '14px',
-              resize: 'vertical',
-              fontFamily: "'Malgun Gothic', sans-serif",
-              marginBottom: '20px'
-            }}
-            onFocus={(e) => e.currentTarget.style.borderColor = '#007bff'}
-            onBlur={(e) => e.currentTarget.style.borderColor = '#ddd'}
+            className="content-input"
           />
 
-          <div style={{ textAlign: 'right' }}>
+          <div className="write-footer">
             <button
               type="button"
               onClick={() => {
@@ -132,34 +76,11 @@ function BoardWrite() {
                   navigate('/board');
                 }
               }}
-              style={{
-                padding: '10px 30px',
-                backgroundColor: 'white',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '14px',
-                marginRight: '10px'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8f8f8'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+              className="btn-cancel"
             >
               취소
             </button>
-            <button
-              type="submit"
-              style={{
-                padding: '10px 30px',
-                backgroundColor: '#007bff',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '14px'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#0056b3'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#007bff'}
-            >
+            <button type="submit" className="btn-submit">
               등록
             </button>
           </div>

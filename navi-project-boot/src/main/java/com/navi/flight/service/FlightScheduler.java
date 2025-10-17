@@ -29,11 +29,11 @@ public class FlightScheduler {
     private final FlightRepository flightRepository;
     private final ApiFlightService apiFlightService; // 공공데이터 API 호출 전용 서비스
 
-    /**
+    /*
      * 매일 새벽 3시마다 실행
      * cron = "초 분 시 일 월 요일"
      */
-    @Scheduled(cron = "0 0 3 * * *", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 0 3 * * * ", zone = "Asia/Seoul")
     public void updateFlightsNightly() {
         log.info(" [Scheduler] 항공편 데이터 갱신 시작");
 
@@ -50,7 +50,7 @@ public class FlightScheduler {
                 try {
                     flightService.saveFlight(dto);
                 } catch (Exception e) {
-                    log.warn("⚠️ [Scheduler] 항공편 저장 실패 — 편명: {}, 사유: {}",
+                    log.warn("[Scheduler] 항공편 저장 실패 — 편명: {}, 사유: {}",
                             dto.getVihicleId(), e.getMessage());
                 }
             }
@@ -62,7 +62,7 @@ public class FlightScheduler {
         }
     }
 
-    /**
+    /*
      * 어제 이전 항공편 삭제
      * - 오늘 이후 데이터만 유지
      */

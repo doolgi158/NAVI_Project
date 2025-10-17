@@ -44,7 +44,7 @@ const AdminSiderLayout = () => {
   /* 메뉴 이동 */
   const menuHandler = {
     "1": () => navigate("/adm/users"),
-    "2": () => navigate("/adm/travels"),
+    "2": () => navigate("/adm/travel"),
     "3": () => navigate("/adm/accommodations"),
     "4": () => navigate("/adm/flight"),
     "5": () => navigate("/adm/plans"),

@@ -34,22 +34,36 @@ const AccListPage = () => {
   /* == 읍면동 데이터 sessionStorage 캐싱 == */
   useEffect(() => {
     const cachedTownships = sessionStorage.getItem("townshipList");
+    const parsedCache = cachedTownships ? JSON.parse(cachedTownships) : null;
 
-    if (cachedTownships) {
-      // 세션 캐시에 있는 경우 즉시 복원
-      setTownshipList(JSON.parse(cachedTownships));
-      return;
+    // ✅ 캐시가 존재하지만 비어 있으면 서버 재요청
+    if (Array.isArray(parsedCache) && parsedCache.length > 0) {
+      setTownshipList(parsedCache);
+    } else {
+      fetchTownships(); // 비어있거나 캐시 없으면 fetch
     }
-
-    // 캐시에 없을 경우 서버 요청
-    axios
-      .get("/api/townships")
-      .then((res) => {
-        setTownshipList(res.data);
-        sessionStorage.setItem("townshipList", JSON.stringify(res.data));
-      })
-      .catch(() => message.error("읍면동 데이터를 불러오지 못했습니다."));
   }, []);
+
+  const fetchTownships = async () => {
+    try {
+      const res = await axios.get("/api/townships");
+
+      // ✅ 데이터가 비었으면 1초 후 자동 재시도
+      if (!Array.isArray(res.data) || res.data.length === 0) {
+        console.warn("⚠️ 빈 응답 감지 → 1초 후 자동 재요청");
+        setTimeout(fetchTownships, 1000);
+        return;
+      }
+
+      // ✅ 데이터가 정상일 때만 캐시 저장 + 렌더링 갱신
+      setTownshipList(res.data);
+      sessionStorage.setItem("townshipList", JSON.stringify(res.data));
+
+    } catch (err) {
+      console.error("읍면동 로드 실패:", err);
+      setTimeout(fetchTownships, 2000); // 서버 일시적 오류 시 재시도
+    }
+  };
 
   /* == 행정시/읍면동 옵션 설정 == */
   const cityOptions = [...new Set(townshipList.map((t) => t.sigunguName))].map((city) => (
@@ -122,7 +136,7 @@ const AccListPage = () => {
 
   return (
     <MainLayout>
-      <div className="min-h-screen bg-[#fffde8] flex flex-col items-center pt-10 pb-12 px-8">
+      <div className="min-h-screen flex flex-col items-center pt-10 pb-12 px-8">
         <div className="w-full max-w-7xl">
           {/* ========================= 검색 폼 ========================= */}
           <div className="bg-white/70 shadow-md rounded-2xl p-8 mb-8">

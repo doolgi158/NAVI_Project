@@ -1,5 +1,6 @@
 package com.navi.payment.domain;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.navi.payment.domain.enums.PaymentMethod;
 import com.navi.common.entity.BaseEntity;
 import com.navi.payment.domain.enums.PaymentStatus;
@@ -10,6 +11,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 /* ===========[NAVI_PAYMENT]===========
              결제 마스터 테이블
@@ -42,7 +45,7 @@ public class PaymentMaster extends BaseEntity {
     @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_status", length = 20, nullable = false)
-    private PaymentStatus paymentStatus = PaymentStatus.PAID;
+    private PaymentStatus paymentStatus = PaymentStatus.READY;
 
     // PG 승인번호 (예: IMP_67283051)
     @Column(name = "imp_uid", length = 30)
@@ -58,17 +61,12 @@ public class PaymentMaster extends BaseEntity {
     @Column(name = "total_amount", precision = 12, scale = 2, nullable = false)
     private BigDecimal totalAmount = BigDecimal.ZERO;
 
-    // 수수료금액 (예: 8000)
-    @Builder.Default
-    @Column(name = "fee_amount", precision = 12, scale = 2)
-    private BigDecimal feeAmount = BigDecimal.ZERO;
-
     // 실환불금액 (예: 120000)
     @Builder.Default
-    @Column(name = "refund_amount", precision = 12, scale = 2)
-    private BigDecimal refundAmount = BigDecimal.ZERO;
+    @Column(name = "total_fee_amount", precision = 12, scale = 2)
+    private BigDecimal totalFeeAmount = BigDecimal.ZERO;
 
-    // 사유 (예: "고객 요청에 따른 취소") - 결제 실패, 취소, 환불 등 모든 사유를 통합 관리
+    // 결제 취소/실패 사유
     @Column(name = "reason", length = 200)
     private String reason;
 
@@ -77,10 +75,9 @@ public class PaymentMaster extends BaseEntity {
     /** === 기본값 보정 === */
     @PrePersist
     public void prePersist() {
-        if (paymentStatus == null) paymentStatus = PaymentStatus.PAID;
+        if (paymentStatus == null) paymentStatus = PaymentStatus.READY;
         if (totalAmount == null) totalAmount = BigDecimal.ZERO;
-        if (feeAmount == null) feeAmount = BigDecimal.ZERO;
-        if (refundAmount == null) refundAmount = BigDecimal.ZERO;
+        if (totalFeeAmount == null) totalFeeAmount = BigDecimal.ZERO;
 
         // merchantId 자동 생성
         if(merchantId == null && no != null){
@@ -89,13 +86,28 @@ public class PaymentMaster extends BaseEntity {
         }
     }
 
+    /* === 연관관계 정의 === */
+    @Builder.Default
+    @OneToMany(mappedBy = "paymentMaster",
+            cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY,
+            orphanRemoval = true)
+    @JsonManagedReference
+    private List<PaymentDetail> paymentDetails = new ArrayList<>();
+
+    // 결제 상세 추가 헬퍼
+    public void addPaymentDetail(PaymentDetail detail) {
+        if (detail == null) return;
+        detail.setPaymentMaster(this);      // 내부 제어용 setter 호출
+        this.paymentDetails.add(detail);
+    }
+
     /* === 상태 변경 메서드 === */
     // 1. 결제 요청 준비 상태로 전환
     public void markAsReady() {
         this.paymentStatus = PaymentStatus.READY;
         this.reason = null;
     }
-
     // 2. 결제 완료 처리
     public void markAsPaid(String impUid, PaymentMethod method) {
         this.paymentStatus = PaymentStatus.PAID;
@@ -103,30 +115,27 @@ public class PaymentMaster extends BaseEntity {
         this.paymentMethod = method;
         this.reason = null;
     }
-
     // 3. 결제 취소 처리
     public void markAsCancelled(String reason) {
         this.paymentStatus = PaymentStatus.CANCELLED;
         this.reason = reason;
     }
-
     // 4. 결제 실패 처리
     public void markAsFailed(String reason) {
         this.paymentStatus = PaymentStatus.FAILED;
         this.reason = reason;
     }
-
     // 5. 환불 완료 처리
-    public void markAsRefunded(String reason, BigDecimal refundAmount) {
+    public void markAsRefunded(BigDecimal totalFeeAmount) {
         this.paymentStatus = PaymentStatus.REFUNDED;
-        this.refundAmount = refundAmount != null ? refundAmount : BigDecimal.ZERO;
-        this.reason = reason;
+        this.totalFeeAmount = totalFeeAmount != null ? totalFeeAmount : BigDecimal.ZERO;
     }
 
-    // 6. 부분 환불 처리
-    public void markAsPartialRefunded(String reason, BigDecimal refundAmount) {
-        this.paymentStatus = PaymentStatus.PARTIAL_REFUNDED;
-        this.refundAmount = refundAmount != null ? refundAmount : BigDecimal.ZERO;
-        this.reason = reason;
+    /* 결제 금액 변경 */
+    public void updateTotalAmount(BigDecimal totalAmount) {
+        if (totalAmount == null || totalAmount.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("총 결제 금액은 0 이상이어야 합니다.");
+        }
+        this.totalAmount = totalAmount;
     }
 }

@@ -1,6 +1,8 @@
 package com.navi.user.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.navi.travel.domain.Bookmark;
+import com.navi.travel.domain.Like;
 import com.navi.user.enums.UserRole;
 import com.navi.user.enums.UserState;
 import jakarta.persistence.*;
@@ -77,6 +79,14 @@ public class User {
     @Column(name = "role")
     @Builder.Default
     private List<UserRole> userRoleList = new ArrayList<>();    // 권한
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Bookmark> bookmarks = new ArrayList<>();   // 북마크
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Like> likes = new ArrayList<>();   // 좋아요
 
     public void addRole(UserRole userRole) {
         userRoleList.add(userRole);

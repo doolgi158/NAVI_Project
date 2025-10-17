@@ -15,19 +15,15 @@ public class BoardService {
 
     private final BoardRepository boardRepository;
 
-    /**
-     * 전체 게시글 조회
-     */
+
+    // 전체 게시글 조회
     @Transactional(readOnly = true)
     public List<Board> getAllBoards() {
         return boardRepository.findAll();
     }
 
-    /**
-     * 게시글 작성
-     * @param title 제목
-     * @param content 내용
-     */
+
+    // 게시글 작성
     public void createBoard(String title, String content) {
         // Builder 패턴 사용 (더 깔끔한 코드)
         Board board = Board.builder()
@@ -44,25 +40,39 @@ public class BoardService {
         System.out.println("저장 완료!");
     }
 
-    /**
-     * 게시글 상세 조회
-     * @param id 게시글 번호
-     * @return Board 엔티티
-     */
+
+    // 게시글 상세 조회
     @Transactional(readOnly = true)
     public Board getBoard(Integer id) {
         return boardRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다. ID: " + id));
     }
 
-    /**
-     * 게시글 신고
-     * @param id 게시글 번호
-     */
+
+     // 게시글 신고
     public void reportBoard(Integer id) {
         Board board = getBoard(id);
         board.setReportCount(board.getReportCount() + 1);
         boardRepository.save(board);
         System.out.println("게시글 신고 완료. 현재 신고 횟수: " + board.getReportCount());
+    }
+
+    // 게시글 좋아요
+    public void likeBoard(Integer id) {
+        Board board = getBoard(id);
+        board.setBoardGood(board.getBoardGood() + 1);
+        boardRepository.save(board);
+        System.out.println("좋아요 완료! 현재 좋아요 수: " + board.getBoardGood());
+    }
+
+    // 게시글 좋아요 취소
+    public void unlikeBoard(Integer id) {
+        Board board = getBoard(id);
+        // 좋아요 수가 0보다 클 때만 감소
+        if (board.getBoardGood() > 0) {
+            board.setBoardGood(board.getBoardGood() - 1);
+            boardRepository.save(board);
+            System.out.println("좋아요 취소 완료! 현재 좋아요 수: " + board.getBoardGood());
+        }
     }
 }
