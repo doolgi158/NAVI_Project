@@ -20,7 +20,6 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 import static com.navi.user.security.util.LoginRequestUtil.getClientIp;
@@ -49,8 +48,8 @@ public class ApiSuccessHandler implements AuthenticationSuccessHandler {
         JWTClaimDTO claim = JWTClaimDTO.fromUser(user);
 
         // JWT 토큰 생성
-        String accessToken = jwtUtil.generateToken(claim, 10);
-        String refreshToken = jwtUtil.generateToken(claim, 60 * 24);
+        String accessToken = jwtUtil.generateToken(claim, 60);
+        String refreshToken = jwtUtil.generateToken(claim, 60);
 
         // 응답 데이터 구성
         claim.setAccessToken(accessToken);

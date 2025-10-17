@@ -2,7 +2,6 @@ package com.navi.user.security.util;
 
 import com.navi.common.util.CustomException;
 import com.navi.user.dto.JWTClaimDTO;
-import com.navi.user.enums.UserRole;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,7 +10,9 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class JWTUtil {
@@ -20,9 +21,8 @@ public class JWTUtil {
     // application.properties에서 secret 읽기
     public JWTUtil(@Value("${jwt.secret}") String secret) {
         // Base64 인코딩 필수 (JJWT 0.11.x 이상)
-        this.secretKey = Keys.hmacShaKeyFor(Base64.getEncoder().encode(secret.getBytes(StandardCharsets.UTF_8)));
+        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
-
 
     // 생성 (DTO 기반)
     public String generateToken(JWTClaimDTO claim, int minutes) {
@@ -34,7 +34,7 @@ public class JWTUtil {
                 "state", claim.getState()
         );
 
-        Date exp = Date.from(ZonedDateTime.now().plusSeconds(minutes).toInstant());
+        Date exp = Date.from(ZonedDateTime.now().plusMinutes(minutes).toInstant());
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -98,17 +98,17 @@ public class JWTUtil {
 
     // JWT 토큰 체크해서 유저 정보 반환
     public Map<String, Object> validateToken(String token) {
-        try{
+        try {
             return Jwts.parserBuilder()
                     .setSigningKey(secretKey).build()
                     .parseClaimsJws(token).getBody();
-        } catch(MalformedJwtException malformedJwtException) {
+        } catch (MalformedJwtException malformedJwtException) {
             throw new MalformedJwtException(malformedJwtException.getMessage());
-        } catch(ExpiredJwtException | InvalidClaimException ex) {
+        } catch (ExpiredJwtException | InvalidClaimException ex) {
             throw new CustomException(ex.getMessage(), 401, null);
-        } catch(JwtException jwtException) {
+        } catch (JwtException jwtException) {
             throw new JwtException(jwtException.getMessage());
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new CustomException(e.getMessage(), 500, null);
         }
     }
@@ -134,9 +134,8 @@ public class JWTUtil {
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
-        } catch (ExpiredJwtException e) {
-            // 만료되어도 Claims는 얻을 수 있음
-            return e.getClaims();
+        } catch (Exception e) {
+            throw new RuntimeException("Invalid JWT Token: " + e.getMessage(), e);
         }
     }
 

@@ -52,24 +52,42 @@ function addSubscriber(cb) {
 }
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log("✅ 응답 인터셉터 정상 응답 통과");
+    return response;
+  },
   async (error) => {
+    // response 자체가 없으면 네트워크/CORS 문제
+    if (!error.response) {
+      console.error("🚫 응답 없음 (CORS 또는 네트워크 에러):", error);
+      return Promise.reject(error);
+    }
+
     const originalRequest = error.config;
     const status = error.response?.status;
-    console.log("🧩 401 발생 시점 accessToken:", localStorage.getItem("accessToken"));
-    console.log("🧩 401 발생 시점 refreshToken:", localStorage.getItem("refreshToken"));
     const isRefreshCall = originalRequest?.url?.includes("/api/users/refresh");
 
+    console.log("🔍 요청 URL:", error.config?.url);
+    console.log("🔍 상태 코드:", status);
+    console.log("🧩 현재 accessToken:", localStorage.getItem("accessToken"));
+    console.log("🧩 현재 refreshToken:", localStorage.getItem("refreshToken"));
     console.log("리프레시 시작");
+
+    console.log("리프레시 시작 전 체크");
     // refresh 자체 요청 실패는 무시
-    if (isRefreshCall) return Promise.reject(error);
+    if (isRefreshCall) {
+      console.log("⚠️ refresh 자체 요청에서 오류 → 패스");
+      return Promise.reject(error);
+    }
 
     if (status === 401 && !originalRequest._retry) {
       console.log("🚨 AccessToken 만료 감지, refresh 시도 중...");
       if (isRefreshing) {
         // 이미 refresh 중이면 큐에 추가
+        console.log("⏳ 이미 리프레시 중 → 큐에 등록");
         return new Promise((resolve) => {
           addSubscriber((newToken) => {
+            console.log("✅ 새 토큰으로 재요청 실행");
             originalRequest.headers.Authorization = `Bearer ${newToken}`;
             resolve(api(originalRequest));
           });
@@ -81,8 +99,10 @@ api.interceptors.response.use(
 
       try {
         const rt = localStorage.getItem("refreshToken");
+        console.log("🔑 현재 refreshToken:", rt);
         if (!rt) throw new Error("RefreshToken이 없습니다.");
 
+        console.log("🔄 refresh API 호출 시작...");
         const res = await axios.post(
           `${API_SERVER_HOST}/api/users/refresh`,
           {},
@@ -93,6 +113,8 @@ api.interceptors.response.use(
         );
 
         const newAccessToken = res.data.accessToken;
+        console.log("✅ refresh 응답 수신, newAccessToken:", newAccessToken);
+
         if (!newAccessToken) throw new Error("새 AccessToken이 없습니다.");
 
         // 토큰 갱신 및 재시도
@@ -100,6 +122,7 @@ api.interceptors.response.use(
         isRefreshing = false;
         onAccessTokenFetched(newAccessToken);
 
+        console.log("🔁 원래 요청 재시도:", originalRequest.url);
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         return api(originalRequest);
       } catch (refreshError) {
@@ -108,11 +131,12 @@ api.interceptors.response.use(
         refreshSubscribers = [];
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
+        console.log("🚪 토큰 삭제 후 홈으로 이동");
         history.push("/");
         return Promise.reject(refreshError);
       }
     }
-
+    console.log("⚠️ 401 아님 또는 _retry true, 일반 오류:", status);
     return Promise.reject(error);
   }
 );

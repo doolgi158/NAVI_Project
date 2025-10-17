@@ -9,85 +9,85 @@ const AdminFlightForm = lazy(() => import("../../admin/pages/flight/AdminFlightF
 const ProtectedRoute = lazy(() => import("./ProtectedRoute.jsx"))
 
 const AdminRouter = () => {
-    return [      
-         {
-             path: "dashboard",
-             element: (
-                <Suspense fallback={<div></div>}>
-                    <ProtectedRoute requiredRole="ADMIN">
-                        <AdminDashboard />
-                    </ProtectedRoute> 
-                </Suspense>
-             )
-         },
-         {
-             path: "users",
-             element: (
-                 <Suspense fallback={<div></div>}>
-                    <ProtectedRoute requiredRole="ADMIN">
-                        <AdminUsers />
-                    </ProtectedRoute>                    
-                 </Suspense>
-             )
-         },
-          //travel 관리자 페이지 라우팅
-         {
-             path: "travel",
-             element: (
-                 <Suspense fallback={<div></div>}>
-                    <ProtectedRoute requiredRole="ADMIN">
-                        <AdminTravelList  />
-                    </ProtectedRoute>
-                 </Suspense>
-             )
-         },
-         //travel 등록 페이지 라우팅
-         {
-             path: "travel/register",
-             element: (
-                 <Suspense fallback={<div></div>}>
-                    <ProtectedRoute requiredRole="ADMIN">
-                        <AdminTravelForm />
-                    </ProtectedRoute>
-                 </Suspense>
-             )
-         },
-         //travel 수정 페이지 라우팅
-         {
-             path: "travel/edit/:travelId",
-             element: (
-                 <Suspense fallback={<div></div>}>
-                    <ProtectedRoute requiredRole="ADMIN">
-                        <AdminTravelForm  />
-                    </ProtectedRoute>
-                 </Suspense>
-             )
-         },
-             {
-               path: "flight", // 항공편 목록 페이지
-               element: (
-                 <Suspense fallback={<div></div>}>
-                   <AdminFlightList />
-                 </Suspense>
-               ),
-             },
-             {
-               path: "flight/new", // 항공편 등록 페이지
-               element: (
-                 <Suspense fallback={<div></div>}>
-                   <AdminFlightForm />
-                 </Suspense>
-               ),
-             },
-             {
-               path: "flight/edit/:flightId/:depTime", // 항공편 수정 페이지
-               element: (
-                 <Suspense fallback={<div></div>}>
-                   <AdminFlightForm />
-                 </Suspense>
-               ),
-             },
-    ]
+  return [
+    {
+      path: "dashboard",
+      element: (
+        <Suspense fallback={<div></div>}>
+          <ProtectedRoute requiredRole="ADMIN">
+            <AdminDashboard />
+          </ProtectedRoute>
+        </Suspense>
+      )
+    },
+    {
+      path: "users",
+      element: (
+        <Suspense fallback={<div></div>}>
+          <ProtectedRoute requiredRole="ADMIN">
+            <AdminUsers />
+          </ProtectedRoute>
+        </Suspense>
+      )
+    },
+    //travel 관리자 페이지 라우팅
+    {
+      path: "travel",
+      element: (
+        <Suspense fallback={<div></div>}>
+          <ProtectedRoute requiredRole="ADMIN">
+            <AdminTravelList />
+          </ProtectedRoute>
+        </Suspense>
+      )
+    },
+    //travel 등록 페이지 라우팅
+    {
+      path: "travel/register",
+      element: (
+        <Suspense fallback={<div></div>}>
+          <ProtectedRoute requiredRole="ADMIN">
+            <AdminTravelForm />
+          </ProtectedRoute>
+        </Suspense>
+      )
+    },
+    //travel 수정 페이지 라우팅
+    {
+      path: "travel/edit/:travelId",
+      element: (
+        <Suspense fallback={<div></div>}>
+          <ProtectedRoute requiredRole="ADMIN">
+            <AdminTravelForm />
+          </ProtectedRoute>
+        </Suspense>
+      )
+    },
+    {
+      path: "flight", // 항공편 목록 페이지
+      element: (
+        <Suspense fallback={<div></div>}>
+          <AdminFlightList />
+        </Suspense>
+      ),
+    },
+    {
+      path: "flight/new", // 항공편 등록 페이지
+      element: (
+        <Suspense fallback={<div></div>}>
+          <AdminFlightForm />
+        </Suspense>
+      ),
+    },
+    {
+      path: "flight/edit/:flightId/:depTime", // 항공편 수정 페이지
+      element: (
+        <Suspense fallback={<div></div>}>
+          <AdminFlightForm />
+        </Suspense>
+      ),
+    },
+  ]
 }
 
 export default AdminRouter;

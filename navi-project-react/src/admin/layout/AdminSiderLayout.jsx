@@ -1,5 +1,6 @@
 import { Avatar, Button, Layout, Menu, message } from "antd";
-import { UserOutlined, HomeOutlined, ApartmentOutlined, RocketOutlined, CalendarOutlined,
+import {
+  UserOutlined, HomeOutlined, ApartmentOutlined, RocketOutlined, CalendarOutlined,
   DropboxOutlined, DollarOutlined, UndoOutlined, FileTextOutlined, LogoutOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
@@ -16,24 +17,12 @@ const AdminSiderLayout = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("accessToken"));
   const [adminName, setAdminName] = useState(localStorage.getItem("username") || "관리자");
 
-  /* 관리자 접근 권한 검사 */
-  useEffect(() => {
-    const username = localStorage.getItem("username");
-    const token = localStorage.getItem("accessToken");
-
-    // 로그인 안 했거나 관리자가 아닐 경우 접근 차단
-    if (!token || username !== "naviadmin") {
-      message.warning("관리자만 접근할 수 있습니다.");
-      navigate("/");
-    }
-  }, [navigate]);
-
   /* 로그아웃 처리 */
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("username");
-    
+
     dispatch(setlogout());
 
     message.success("로그아웃되었습니다.");
