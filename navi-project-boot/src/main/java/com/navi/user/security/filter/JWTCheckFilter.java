@@ -66,23 +66,20 @@ public class JWTCheckFilter extends OncePerRequestFilter {
                 UserState state = claim.getState() != null ? claim.getState() : UserState.NORMAL;
 
                 // 휴면 상태면 차단
+                ApiResponse<Object> blockedResponse = null;
+
                 if (state == UserState.SLEEP) {
-                    ApiResponse<Object> blockedResponse = ApiResponse.error (
-                            "휴면계정입니다. 정상 계정으로 전환하시겠습니까?",
-                            403,
-                            "sleep"
-                    );
+                    blockedResponse = ApiResponse.error("휴면계정입니다. 정상 계정으로 전환하시겠습니까?", 403, "sleep");
+                }
+                if (state == UserState.DELETE) {
+                    blockedResponse = ApiResponse.error("탈퇴한 계정입니다.", 403, "delete");
+                }
 
-                    int status = HttpServletResponse.SC_FORBIDDEN;
-
+                if (blockedResponse != null) {
                     response.setContentType("application/json; charset=UTF-8");
-                    response.setStatus(status);
-
-                    PrintWriter writer = response.getWriter();
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                     objectMapper.findAndRegisterModules();
-                    objectMapper.writeValue(writer, blockedResponse);
-                    writer.flush();
-                    writer.close();
+                    objectMapper.writeValue(response.getWriter(), blockedResponse);
                     return;
                 }
 
@@ -109,8 +106,20 @@ public class JWTCheckFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(auth);
                 log.info("[JWT FILTER] Authenticated principal: {}", userSecurityDTO.getId());
 
+            } catch (io.jsonwebtoken.ExpiredJwtException ex) {
+                // 액세스 토큰 만료 (refresh 트리거)
+                log.warn("[JWT FILTER] Access token expired");
+                ApiResponse<Object> expiredResponse =
+                        ApiResponse.error("ACCESS_TOKEN_EXPIRED", HttpServletResponse.SC_UNAUTHORIZED, null);
+
+                response.setContentType("application/json; charset=UTF-8");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                objectMapper.findAndRegisterModules();
+                objectMapper.writeValue(response.getWriter(), expiredResponse);
+                return;
             } catch (Exception e) {
                 // JWT 오류 응답 - Jackson 사용
+                log.warn("[JWT FILTER] Invalid token: {}", e.getMessage());
                 ApiResponse<Object> apiResponse = ApiResponse.error("잘못되거나 만료된 토큰입니다.", 401, null);
 
                 response.setContentType("application/json; charset=UTF-8");

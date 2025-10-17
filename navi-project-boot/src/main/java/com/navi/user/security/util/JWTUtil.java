@@ -58,35 +58,42 @@ public class JWTUtil {
 
     // 토큰 검증 및 Claim 복원
     public JWTClaimDTO validateAndParse(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(secretKey)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(secretKey)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
 
-        // role 필드 안전하게 꺼내기 (List<String> 타입으로 변환)
-        Object roleObj = claims.get("role");
-        List<String> roles = null;
+            // role 필드 안전하게 꺼내기
+            Object roleObj = claims.get("role");
+            List<String> roles;
 
-        if (roleObj instanceof List<?>) {
-            roles = ((List<?>) roleObj).stream()
-                    .map(Object::toString) // Enum이든 문자열이든 안전하게 문자열로 변환
-                    .toList();
-        } else if (roleObj instanceof String singleRole) {
-            roles = List.of(singleRole);
-        } else {
-            roles = List.of("USER"); // 기본값
+            if (roleObj instanceof List<?>) {
+                roles = ((List<?>) roleObj).stream()
+                        .map(Object::toString)
+                        .toList();
+            } else if (roleObj instanceof String singleRole) {
+                roles = List.of(singleRole);
+            } else {
+                roles = List.of("USER");
+            }
+
+            return JWTClaimDTO.builder()
+                    .id((String) claims.get("id"))
+                    .name((String) claims.get("name"))
+                    .email((String) claims.get("email"))
+                    .role(roles)
+                    .state(null) // 필요 시 state 필드도 추출
+                    .build();
+
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            // accessToken 만료 시 필터가 감지하도록 그대로 던짐
+            throw e;
+        } catch (Exception e) {
+            // 기타 토큰 오류 처리
+            throw new RuntimeException("Invalid JWT Token", e);
         }
-
-        return JWTClaimDTO.builder()
-                .id((String) claims.get("id"))
-                .name((String) claims.get("name"))
-                .email((String) claims.get("email"))
-                .phone((String) claims.get("phone"))
-                .birth((String) claims.get("birth"))
-                .provider((String) claims.get("provider"))
-                .role(roles)
-                .build();
     }
 
     // JWT 토큰 체크해서 유저 정보 반환
