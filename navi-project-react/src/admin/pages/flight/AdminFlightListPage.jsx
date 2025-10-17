@@ -8,6 +8,7 @@ import {
   message,
   Typography,
   Select,
+  Layout,
 } from "antd";
 import { SearchOutlined, ArrowLeftOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
@@ -16,6 +17,7 @@ import dayjs from "dayjs";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import customParseFormat from "dayjs/plugin/customParseFormat";
+import AdminSiderLayout from "@/admin/layout/AdminSiderLayout";
 
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
@@ -235,54 +237,57 @@ const AdminFlightListPage = () => {
   ];
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen">
-      <div className="max-w-7xl mx-auto bg-white shadow-lg rounded-xl p-6">
-        {/* 상단 헤더 */}
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center gap-3">
+    <Layout style={{ minHeight: "100vh" }}>
+      <AdminSiderLayout />
+      <div className="p-8 bg-gray-50 min-h-screen">
+        <div className="max-w-7xl mx-auto bg-white shadow-lg rounded-xl p-6">
+          {/* 상단 헤더 */}
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex items-center gap-3">
+              <Button
+                icon={<ArrowLeftOutlined />}
+                onClick={() => navigate(-1)}
+                style={{ borderRadius: 8 }}
+              >
+                뒤로가기
+              </Button>
+              <Title level={4} style={{ margin: 0 }}>
+                항공편 목록
+              </Title>
+            </div>
             <Button
-              icon={<ArrowLeftOutlined />}
-              onClick={() => navigate(-1)}
-              style={{ borderRadius: 8 }}
+              type="primary"
+              style={{
+                background: "#2563eb",
+                border: "none",
+                fontWeight: "600",
+                borderRadius: 8,
+              }}
+              onClick={() => navigate("/adm/flight/new")}
             >
-              뒤로가기
+              + 항공편 등록
             </Button>
-            <Title level={4} style={{ margin: 0 }}>
-              항공편 목록
-            </Title>
           </div>
-          <Button
-            type="primary"
-            style={{
-              background: "#2563eb",
-              border: "none",
-              fontWeight: "600",
-              borderRadius: 8,
-            }}
-            onClick={() => navigate("/adm/flight/new")}
-          >
-            + 항공편 등록
-          </Button>
-        </div>
 
-        {/* 📋 테이블 */}
-        <Table
-          columns={columns}
-          dataSource={flights}
-          loading={loading}
-          rowKey={(r) => `${r.flightId}_${r.depTime}`}
-          bordered
-          pagination={{
-            current: pagination.current,
-            pageSize: pagination.pageSize,
-            total: flights.length,
-            onChange: (page, pageSize) =>
-              setPagination({ current: page, pageSize }),
-            showTotal: (total) => `총 ${total.toLocaleString()}건 등록됨`,
-          }}
-        />
+          {/* 📋 테이블 */}
+          <Table
+            columns={columns}
+            dataSource={flights}
+            loading={loading}
+            rowKey={(r) => `${r.flightId}_${r.depTime}`}
+            bordered
+            pagination={{
+              current: pagination.current,
+              pageSize: pagination.pageSize,
+              total: flights.length,
+              onChange: (page, pageSize) =>
+                setPagination({ current: page, pageSize }),
+              showTotal: (total) => `총 ${total.toLocaleString()}건 등록됨`,
+            }}
+          />
+        </div>
       </div>
-    </div>
+    </Layout>
   );
 };
 
