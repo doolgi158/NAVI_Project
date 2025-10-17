@@ -9,7 +9,7 @@ import {
   Typography,
   Select,
 } from "antd";
-import { SearchOutlined, ArrowLeftOutlined } from "@ant-design/icons";
+import { SearchOutlined, ArrowLeftOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import dayjs from "dayjs";
@@ -195,21 +195,37 @@ const AdminFlightListPage = () => {
       title: "관리",
       key: "actions",
       align: "center",
-      width: 140,
+      width: 160,
       render: (_, record) => (
         <Space>
           <Button
-            type="link"
+            type="primary"
+            icon={<EditOutlined />}
             onClick={() =>
               navigate(`/adm/flight/edit/${record.flightId}/${record.depTime}`)
             }
+            style={{
+              borderRadius: 8,
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+              background: "#1677ff",
+              boxShadow: "0 2px 6px rgba(22, 119, 255, 0.3)",
+            }}
           >
             수정
           </Button>
           <Button
-            type="link"
             danger
+            icon={<DeleteOutlined />}
             onClick={() => handleDelete(record.flightId, record.depTime)}
+            style={{
+              borderRadius: 8,
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+              boxShadow: "0 2px 6px rgba(255, 77, 79, 0.25)",
+            }}
           >
             삭제
           </Button>
