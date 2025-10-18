@@ -1,4 +1,4 @@
-package com.navi.user.controller;
+package com.navi.user.controller.user;
 
 import com.navi.common.response.ApiResponse;
 import com.navi.user.dto.FindUserIdDTO;

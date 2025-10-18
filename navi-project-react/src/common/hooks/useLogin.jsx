@@ -49,7 +49,7 @@ export const useLogin = () => {
         } else {
           navigate(redirectPath);
         }
-        console.log(response);
+
         return { success: true, message: "로그인 성공" };
       }
 

@@ -7,7 +7,7 @@ import SocialLoginButton from "./SocialLogin";
 import axios from "axios";
 import { API_SERVER_HOST } from "@/common/api/naviApi.js";
 
-const LoginModal = ({ open = false, onClose = () => {} }) => {
+const LoginModal = ({ open = false, onClose = () => { } }) => {
   const [form] = Form.useForm();
   const { login } = useLogin();
 
@@ -44,29 +44,29 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
   useEffect(() => {
     if (open) {
       setTimeout(() => usernameRef.current?.focus(), 100);
-    }else {
-      form.resetFields(); 
+    } else {
+      form.resetFields();
     }
   }, [open, form]);
 
   // 로그인 모달 안에서 소셜 로그인 시작
   const handleSocialLogin = (provider) => {
-  const CLIENT_IDS = {
-    google: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-    kakao: import.meta.env.VITE_KAKAO_CLIENT_ID,
-    naver: import.meta.env.VITE_NAVER_CLIENT_ID,
+    const CLIENT_IDS = {
+      google: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+      kakao: import.meta.env.VITE_KAKAO_CLIENT_ID,
+      naver: import.meta.env.VITE_NAVER_CLIENT_ID,
+    };
+
+    const REDIRECT_URI = "http://localhost:3000/login/oauth2/redirect";
+
+    const AUTH_URLS = {
+      google: `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_IDS.google}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=openid%20email%20profile`,
+      kakao: `https://kauth.kakao.com/oauth/authorize?client_id=${CLIENT_IDS.kakao}&redirect_uri=${REDIRECT_URI}&response_type=code`,
+      naver: `https://nid.naver.com/oauth2.0/authorize?client_id=${CLIENT_IDS.naver}&redirect_uri=${REDIRECT_URI}&response_type=code&state=naviState`,
+    };
+
+    window.location.href = AUTH_URLS[provider];
   };
-
-  const REDIRECT_URI = "http://localhost:3000/login/oauth2/redirect";
-
-  const AUTH_URLS = {
-    google: `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_IDS.google}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=openid%20email%20profile`,
-    kakao: `https://kauth.kakao.com/oauth/authorize?client_id=${CLIENT_IDS.kakao}&redirect_uri=${REDIRECT_URI}&response_type=code`,
-    naver: `https://nid.naver.com/oauth2.0/authorize?client_id=${CLIENT_IDS.naver}&redirect_uri=${REDIRECT_URI}&response_type=code&state=naviState`,
-  };
-
-  window.location.href = AUTH_URLS[provider];
-};
 
   return (
     <AnimatePresence>
@@ -128,6 +128,7 @@ const LoginModal = ({ open = false, onClose = () => {} }) => {
                 </Form.Item>
 
                 <Form.Item
+                  form={form}
                   label="비밀번호"
                   name="password"
                   rules={[{ required: true, message: "비밀번호를 입력하세요" }]}
