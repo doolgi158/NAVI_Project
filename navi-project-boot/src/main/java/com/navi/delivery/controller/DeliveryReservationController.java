@@ -17,8 +17,8 @@ public class DeliveryReservationController {
 
     private final DeliveryReservationService deliveryReservationService;
 
-    /**
-     * ✅ 1. 짐배송 예약 등록
+    /*
+     *  1. 짐배송 예약 등록
      * - groupId는 서버에서 자동 생성 또는 연결
      * - status 기본값은 PENDING
      */
