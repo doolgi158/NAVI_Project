@@ -3,7 +3,7 @@ import MainLayout from "../../layout/MainLayout";
 import { useNavigate } from "react-router-dom";
 import { getMyPlans, deletePlan, sharePlan } from "../../../common/api/planApi/";
 import { format } from "date-fns";
-
+import { Card, Button } from "antd";
 export default function MyPlanPage() {
   const navigate = useNavigate();
   const [plans, setPlans] = useState([]);
@@ -80,7 +80,7 @@ export default function MyPlanPage() {
         </div>
 
         {/* 목록 영역 */}
-        <CustomCard className="w-[900px]">
+        <Card className="w-[900px]">
           {loading ? (
             <p className="text-gray-500 text-center py-8">
               여행 정보를 불러오는 중입니다...
@@ -88,9 +88,9 @@ export default function MyPlanPage() {
           ) : plans.length === 0 ? (
             <div className="text-center py-10">
               <p className="text-gray-500 mb-4">등록된 여행이 없습니다.</p>
-              <CustomButton onClick={handleCreatePlan}>
+              <Button onClick={handleCreatePlan}>
                 새로운 여행 만들기
-              </CustomButton>
+              </Button>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -117,31 +117,31 @@ export default function MyPlanPage() {
 
                   {/* 하단 버튼 */}
                   <div className="mt-3 flex justify-between items-center">
-                    <CustomButton
+                    <Button
                       onClick={() => handleShare(plan.id)}
                       className="bg-[#0A3D91]/80 text-white text-sm px-3 py-2 rounded-md"
                     >
                       공유
-                    </CustomButton>
-                    <CustomButton
+                    </Button>
+                    <Button
                       onClick={() => handleDelete(plan.id)}
                       className="bg-red-500 hover:bg-red-600 text-sm px-3 py-2 rounded-md"
                     >
                       삭제
-                    </CustomButton>
+                    </Button>
                   </div>
                 </div>
               ))}
             </div>
           )}
-        </CustomCard>
+        </Card>
 
         {/* 새 여행 만들기 버튼 */}
         {plans.length > 0 && (
           <div className="mt-8">
-            <CustomButton onClick={handleCreatePlan}>
+            <Button onClick={handleCreatePlan}>
               새 여행 계획 만들기
-            </CustomButton>
+            </Button>
           </div>
         )}
       </div>

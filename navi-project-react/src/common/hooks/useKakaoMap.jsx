@@ -1,8 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 
-/**
- * Kakao Map Hook
- */
 export const useKakaoMap = (containerId) => {
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   const mapRef = useRef(null);
@@ -11,6 +8,7 @@ export const useKakaoMap = (containerId) => {
   const infoWindowRef = useRef(null);
 
   const HIDE_OVERLAY_ID = 'kakao-detail-map-container';
+  const KAKAO_MAP_KEY = import.meta.env.VITE_KAKAO_MAP_KEY;
 
   useEffect(() => {
     const loadKakaoSDK = () => {
@@ -25,12 +23,12 @@ export const useKakaoMap = (containerId) => {
       loadKakaoSDK();
     } else {
       const script = document.createElement("script");
-      script.src = "//dapi.kakao.com/v2/maps/sdk.js?appkey=64f77515cbf4b9bf257e664e44b1ab9b&libraries=services&autoload=false";
+      script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_MAP_KEY}&libraries=services&autoload=false`;
       script.async = true;
       script.onload = loadKakaoSDK;
       document.head.appendChild(script);
     }
-  }, []);
+  }, [KAKAO_MAP_KEY]);
 
   // wait until container has non-zero size (up to timeout)
   const _waitForContainerVisible = async (timeout = 1200) => {
@@ -116,23 +114,23 @@ export const useKakaoMap = (containerId) => {
         coords = new kakao.maps.LatLng(33.3926876, 126.4948419);
       }
 
-      // 지도 인스턴스가 없으면 새로 생성 (최초 1회)
-      if (!map) {
+      // 지도 인스턴스가 없으면 새로 생성 (최초 1회)
+      if (!map) {
         const mapOption = { center: coords, level: 9 };
         map = new kakao.maps.Map(mapContainer, mapOption);
         mapRef.current = map;
       }
-      
-      // 2. 기존 마커 및 오버레이 제거
-      if (markerRef.current) markerRef.current.setMap(null);
+
+      // 2. 기존 마커 및 오버레이 제거
+      if (markerRef.current) markerRef.current.setMap(null);
       if (customOverlayRef.current) customOverlayRef.current.setMap(null);
 
-      // 3. 마커 생성 및 지도에 표시 (모든 페이지에서 마커는 표시)
-      const marker = new kakao.maps.Marker({ map, position: coords });
+      // 3. 마커 생성 및 지도에 표시 (모든 페이지에서 마커는 표시)
+      const marker = new kakao.maps.Marker({ map, position: coords });
       markerRef.current = marker;
 
-      // 현재 페이지가 상세 페이지(HIDE_OVERLAY_ID)인지 확인
-      const shouldShowOverlay = containerId !== HIDE_OVERLAY_ID;
+      // 현재 페이지가 상세 페이지(HIDE_OVERLAY_ID)인지 확인
+      const shouldShowOverlay = containerId !== HIDE_OVERLAY_ID;
       if (shouldShowOverlay) {
         const imageSrc = thumbnailPath || 'https://placehold.co/100x100/cccccc/333333?text=No';
         const content = `
@@ -154,8 +152,8 @@ export const useKakaoMap = (containerId) => {
             </div>
           `;
 
-          // 5. 커스텀 오버레이 생성 및 지도에 표시
-          const customOverlay = new kakao.maps.CustomOverlay({
+        // 5. 커스텀 오버레이 생성 및 지도에 표시
+        const customOverlay = new kakao.maps.CustomOverlay({
           map,
           position: coords,
           content,
@@ -176,8 +174,8 @@ export const useKakaoMap = (containerId) => {
     [isMapLoaded, containerId]
   );
 
-  // 3️⃣ 지도 초기화 해제 
-  const resetMap = useCallback(() => {
+  // 3️⃣ 지도 초기화 해제 
+  const resetMap = useCallback(() => {
     mapRef.current = null;
     if (markerRef.current) markerRef.current.setMap(null);
     if (customOverlayRef.current) customOverlayRef.current.setMap(null);
@@ -186,5 +184,5 @@ export const useKakaoMap = (containerId) => {
     infoWindowRef.current = null;
   }, []);
 
-   return { isMapLoaded, updateMap, relayoutMap, resetMap };
+  return { isMapLoaded, updateMap, relayoutMap, resetMap };
 };

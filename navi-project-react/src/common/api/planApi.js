@@ -1,4 +1,4 @@
-import api from "@/common/api/naviApi"; 
+import api from "../../common/api/naviApi";
 
 /** 내 여행 목록 조회 */
 export const getMyPlans = async () => {

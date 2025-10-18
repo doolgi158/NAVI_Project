@@ -54,7 +54,7 @@ export default function SharedPlan() {
         </div>
 
         {/* 본문 카드 */}
-        <CustomCard className="w-[800px] text-left">
+        <Card className="w-[800px] text-left">
           {loading ? (
             <p className="text-gray-500 text-center">일정 정보를 불러오는 중...</p>
           ) : plan ? (
@@ -116,17 +116,17 @@ export default function SharedPlan() {
           ) : (
             <p className="text-gray-400 text-center">공유된 일정을 찾을 수 없습니다.</p>
           )}
-        </CustomCard>
+        </Card>
 
         {/* 버튼 영역 */}
         {!loading && plan && (
           <div className="mt-8 flex gap-4">
-            <CustomButton onClick={() => navigate(-1)} className="bg-gray-400 hover:bg-gray-500">
+            <Button onClick={() => navigate(-1)} className="bg-gray-400 hover:bg-gray-500">
               돌아가기
-            </CustomButton>
-            <CustomButton onClick={handleCopyPlan}>
+            </Button>
+            <Button onClick={handleCopyPlan}>
               내 여행으로 복사
-            </CustomButton>
+            </Button>
           </div>
         )}
       </div>

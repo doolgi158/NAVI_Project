@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Layout, message } from "antd";
-import HeaderLayout from "@/users/layout/HeaderLayout";
-import FooterLayout from "@/users/layout/FooterLayout";
+import HeaderLayout from "../../layout/HeaderLayout";
+import FooterLayout from "../../layout/FooterLayout";
 import "bootstrap-icons/font/bootstrap-icons.css";
-import { savePlan } from "@/common/api/planApi";
+import { savePlan } from "../../../common/api/planApi";
 
 // ✅ 분리된 컴포넌트 import
 import TravelMap from "./components/TravelMap";
@@ -34,23 +34,23 @@ export default function TravelPlanner() {
   }, [step]);
 
   // ✅ 모든 상태 초기화 함수
-const resetAll = () => {
-  // 시간 설정 초기화
-  setTimes({});
-  // 여행지 선택 초기화
-  setSelectedTravels([]);
-  // 숙소 선택 및 계획 초기화
-  setSelectedStays([]);
-  setStayPlans({});
-  // 숙소 모달 관련 상태 리셋
-  setShowStayModal(false);
-  setSelectedStayTarget(null);
-  setModalResetTrigger((prev) => prev + 1);
-  // 제목 초기화
-  setTitle("");
-  // 다음 단계로 이동 (날짜 완료 후 제목 입력)
-  setStep(2);
-};
+  const resetAll = () => {
+    // 시간 설정 초기화
+    setTimes({});
+    // 여행지 선택 초기화
+    setSelectedTravels([]);
+    // 숙소 선택 및 계획 초기화
+    setSelectedStays([]);
+    setStayPlans({});
+    // 숙소 모달 관련 상태 리셋
+    setShowStayModal(false);
+    setSelectedStayTarget(null);
+    setModalResetTrigger((prev) => prev + 1);
+    // 제목 초기화
+    setTitle("");
+    // 다음 단계로 이동 (날짜 완료 후 제목 입력)
+    setStep(2);
+  };
 
 
 
@@ -199,7 +199,7 @@ const resetAll = () => {
     },
   ];
 
-  
+
 
   const handleStaySelect = (stay, dates) => {
     setStayPlans((prev) => {
@@ -227,96 +227,96 @@ const resetAll = () => {
           className="shadow-xl bg-white rounded-lg transition-all duration-500"
           style={{
             display: "grid",
-            gridTemplateColumns: 
-                step === 3
+            gridTemplateColumns:
+              step === 3
                 ? "10% 25% 0%" // StepDrawer + TimeDrawer + Map
                 : step >= 4
-                ? "10% 50% 40%" // StepDrawer + ListDrawer + SelectedDrawer + Map
-                : "10% 90% 0%", // Step1~2
-              transition: "all 0.8s ease",
-                    }}
-                    
+                  ? "10% 50% 40%" // StepDrawer + ListDrawer + SelectedDrawer + Map
+                  : "10% 90% 0%", // Step1~2
+            transition: "all 0.8s ease",
+          }}
+
         >
           <StepDrawer
-        step={step}
-        setStep={setStep}
-        title={title}
-        selectedTravels={selectedTravels}
-        dateRange={dateRange}
-        stayPlans={stayPlans}
-        stays={stays}
-        savePlan={savePlan}
-      />
+            step={step}
+            setStep={setStep}
+            title={title}
+            selectedTravels={selectedTravels}
+            dateRange={dateRange}
+            stayPlans={stayPlans}
+            stays={stays}
+            savePlan={savePlan}
+          />
 
           <div className="flex h-[calc(100vh-100px)] border-l border-[#eee] transition-all duration-500">
-        {step === 3 && (
-          <TimeDrawer
-            days={days}
-            times={times}
-            setTimes={setTimes}
-            title={title}
-            dateRange={dateRange}
-          />
-        )}
+            {step === 3 && (
+              <TimeDrawer
+                days={days}
+                times={times}
+                setTimes={setTimes}
+                title={title}
+                dateRange={dateRange}
+              />
+            )}
 
-        {step === 4 && (
-          <>
-            {/* 여행지 리스트 (좌) */}
-            <TravelSelectDrawer
-              travels={travels}
-              title={title}
-              dateRange={dateRange}
-              selectedTravels={selectedTravels}
-              setSelectedTravels={setSelectedTravels}
-            />
-            {/* 선택 목록 (우) */}
-            <div className="border-l border-gray-200 bg-white ">
-              {/* 👉 선택된 여행지 표시 / 요약 등 */}
+            {step === 4 && (
+              <>
+                {/* 여행지 리스트 (좌) */}
+                <TravelSelectDrawer
+                  travels={travels}
+                  title={title}
+                  dateRange={dateRange}
+                  selectedTravels={selectedTravels}
+                  setSelectedTravels={setSelectedTravels}
+                />
+                {/* 선택 목록 (우) */}
+                <div className="border-l border-gray-200 bg-white ">
+                  {/* 👉 선택된 여행지 표시 / 요약 등 */}
+                </div>
+              </>
+            )}
+
+            {step === 5 && (
+              <>
+                {/* 숙소 리스트 (좌) */}
+                <StaySelectDrawer
+                  stays={stays}
+                  title={title}
+                  dateRange={dateRange}
+                  days={days}
+                  hasNights={hasNights}
+                  stayPlans={stayPlans}
+                  setStayPlans={setStayPlans}
+                  selectedStays={selectedStays}
+                  setSelectedStays={setSelectedStays}
+                  setSelectedStayTarget={setSelectedStayTarget}
+                  setShowStayModal={setShowStayModal}
+                  setModalResetTrigger={setModalResetTrigger}
+                />
+                {/* 선택된 숙소 요약 (우) */}
+                <div className="border-l border-gray-200 bg-white p-5">
+                  {/* 👉 선택된 숙소 일정 요약 */}
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* 3️⃣ Map 영역 */}
+          <div style={{ position: "relative" }}>
+            <div style={{
+              position: "absolute",
+              right: 0,
+              top: 0,
+              bottom: 0,
+              width: "100%",
+            }}>
+              <TravelMap markers={markers} step={step} />
             </div>
-          </>
-        )}
-
-        {step === 5 && (
-          <>
-            {/* 숙소 리스트 (좌) */}
-            <StaySelectDrawer
-              stays={stays}
-              title={title}
-              dateRange={dateRange}
-              days={days}
-              hasNights={hasNights}
-              stayPlans={stayPlans}
-              setStayPlans={setStayPlans}
-              selectedStays={selectedStays}
-              setSelectedStays={setSelectedStays}
-              setSelectedStayTarget={setSelectedStayTarget}
-              setShowStayModal={setShowStayModal}
-              setModalResetTrigger={setModalResetTrigger}
-            />
-            {/* 선택된 숙소 요약 (우) */}
-            <div className="border-l border-gray-200 bg-white p-5">
-              {/* 👉 선택된 숙소 일정 요약 */}
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* 3️⃣ Map 영역 */}
-      <div style={{ position: "relative" }}>
-        <div style={{
-          position: "absolute",
-          right: 0,
-          top: 0,
-          bottom: 0,
-          width: "100%",
-        }}>
-          <TravelMap markers={markers} step={step} />
+          </div>
         </div>
-      </div>
-    </div>
-  </Content>
-  <FooterLayout />
-        {/* 모달들 */}
+      </Content>
+      <FooterLayout />
+      {/* 모달들 */}
       <DateModal open={step === 1} setStep={setStep} setDateRange={setDateRange} resetAll={resetAll} />
       <TitleModal open={step === 2} title={title} setTitle={setTitle} setStep={setStep} />
       <StaySelectModal
@@ -330,8 +330,8 @@ const resetAll = () => {
         onSelectDates={handleStaySelect}
       />
 
-</Layout>
- 
+    </Layout>
+
   );
 }
 

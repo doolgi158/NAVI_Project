@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from "react";
 import MainLayout from "../../layout/MainLayout";
-import CustomCard from "@/common/components/CustomCard";
-import { getMyPlans } from "@/common/api/planApi";
+import { getMyPlans } from "../../../common/api/planApi";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
-import { Button } from "antd/es";
-
+import { Card, Button } from "antd";
 export default function TravelPlanMain() {
   const [plans, setPlans] = useState([]);
   const [activeTab, setActiveTab] = useState("upcoming"); // upcoming | completed
@@ -53,14 +51,14 @@ export default function TravelPlanMain() {
   return (
     <MainLayout>
       {/* ✅ 배너: 전체폭 + 흰색 반투명 오버레이 */}
-        <div className="relative -mx-[calc((100vw-100%)/2)] w-screen h-[320px] overflow-hidden mb-12">
-          <img
-            src="src\users\images\planbanner.jpg"
-            alt="여행 배너"
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 flex flex-col justify-center items-center z-10">
- 
+      <div className="relative -mx-[calc((100vw-100%)/2)] w-screen h-[320px] overflow-hidden mb-12">
+        <img
+          src="src\users\images\planbanner.jpg"
+          alt="여행 배너"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 flex flex-col justify-center items-center z-10">
+
           {/*여행배너 텍스트 */}
           <h2 className="text-3xl font-semibold text-[#1D4E89] drop-shadow-sm planTitle-text">
             나를 위한 여행 준비
@@ -70,19 +68,19 @@ export default function TravelPlanMain() {
           </p>
         </div>
 
-          {/* 오버레이: 흰색+블러 */}
-          <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px]" />
+        {/* 오버레이: 흰색+블러 */}
+        <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px]" />
 
-          {/* 버튼 */}
-          <div className="absolute bottom-8 right-16 z-10 ">
-            <Button  type="default" size="large"  
-                    className="plan-btn plan-btn:hover"
-                    onClick={handleCreatePlan} >
-               
-               여행 계획하기<i className="bi bi-plus-circle"></i>
-            </Button>
-          </div>
+        {/* 버튼 */}
+        <div className="absolute bottom-8 right-16 z-10 ">
+          <Button type="default" size="large"
+            className="plan-btn plan-btn:hover"
+            onClick={handleCreatePlan} >
+
+            여행 계획하기<i className="bi bi-plus-circle"></i>
+          </Button>
         </div>
+      </div>
 
 
       {/* ✅ 나머지 콘텐츠는 MainLayout 컨테이너 영역 내에서 */}
@@ -91,28 +89,26 @@ export default function TravelPlanMain() {
         <div className="w-full max-w-[900px] flex justify-center mb-8">
           <button
             onClick={() => setActiveTab('upcoming')}
-            className={`px-6 py-2 text-sm font-semibold border-b-2 transition ${
-              activeTab === 'upcoming'
-                ? 'border-[#3A6EA5] text-[#3A6EA5]'
-                : 'border-transparent text-gray-400 hover:text-[#3A6EA5]'
-            }`}
+            className={`px-6 py-2 text-sm font-semibold border-b-2 transition ${activeTab === 'upcoming'
+              ? 'border-[#3A6EA5] text-[#3A6EA5]'
+              : 'border-transparent text-gray-400 hover:text-[#3A6EA5]'
+              }`}
           >
             여행 예정 계획
           </button>
           <button
             onClick={() => setActiveTab('completed')}
-            className={`px-6 py-2 text-sm font-semibold border-b-2 transition ${
-              activeTab === 'completed'
-                ? 'border-[#3A6EA5] text-[#3A6EA5]'
-                : 'border-transparent text-gray-400 hover:text-[#3A6EA5]'
-            }`}
+            className={`px-6 py-2 text-sm font-semibold border-b-2 transition ${activeTab === 'completed'
+              ? 'border-[#3A6EA5] text-[#3A6EA5]'
+              : 'border-transparent text-gray-400 hover:text-[#3A6EA5]'
+              }`}
           >
             여행 완료 계획
           </button>
         </div>
 
         {/* 리스트 */}
-        <CustomCard className="w-[900px]">
+        <Card className="w-[900px]">
           {loading ? (
             <p className="text-center text-gray-500 py-10">
               여행 데이터를 불러오는 중입니다...
@@ -158,7 +154,7 @@ export default function TravelPlanMain() {
               ))}
             </div>
           )}
-        </CustomCard>
+        </Card>
       </div>
     </MainLayout>
   );

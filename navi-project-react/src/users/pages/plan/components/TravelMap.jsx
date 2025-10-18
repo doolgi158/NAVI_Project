@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { useKakaoMap } from "@/common/hooks/useKakaoMap";
+import { useKakaoMap } from "../../../../common/hooks/useKakaoMap";
 
 export default function TravelMap({ markers = [], step }) {
   const { isMapLoaded } = useKakaoMap("kakao-map-container");
