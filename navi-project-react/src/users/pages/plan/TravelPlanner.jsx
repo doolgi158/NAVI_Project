@@ -33,6 +33,15 @@ export default function TravelPlanner() {
     if (step !== 5) setShowStayModal(false);
   }, [step]);
 
+  const resetAllStays = () => {
+    setStayPlans({});
+    setSelectedStays([]);
+    setShowStayModal(false);
+    setSelectedStayTarget(null);
+    setModalResetTrigger((prev) => prev + 1);
+  };
+
+
   // ✅ 모든 상태 초기화 함수
   const resetAll = () => {
     // 시간 설정 초기화
@@ -292,6 +301,7 @@ export default function TravelPlanner() {
                   setSelectedStayTarget={setSelectedStayTarget}
                   setShowStayModal={setShowStayModal}
                   setModalResetTrigger={setModalResetTrigger}
+                  resetAllStays={resetAllStays}
                 />
                 {/* 선택된 숙소 요약 (우) */}
                 <div className="border-l border-gray-200 bg-white p-5">
@@ -328,6 +338,9 @@ export default function TravelPlanner() {
         stays={stays}
         resetTrigger={modalResetTrigger}
         onSelectDates={handleStaySelect}
+        setStayPlans={setStayPlans}
+        setSelectedStays={setSelectedStays}
+        resetAllStays={resetAllStays}
       />
 
     </Layout>

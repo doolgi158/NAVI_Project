@@ -9,12 +9,12 @@ export default function StaySelectDrawer({
   days = [],
   hasNights = false,
   stayPlans = {},
-  setStayPlans = () => {},
+  setStayPlans = () => { },
   selectedStays = [],
-  setSelectedStays = () => {},
-  setSelectedStayTarget = () => {},
-  setShowStayModal = () => {},
-  setModalResetTrigger = () => {},
+  setSelectedStays = () => { },
+  setSelectedStayTarget = () => { },
+  setShowStayModal = () => { },
+  setModalResetTrigger = () => { },
 }) {
   return (
     <div className="flex h-full w-full">
@@ -108,6 +108,35 @@ export default function StaySelectDrawer({
                           message.info("좌측 목록에서 숙소를 선택해주세요.");
                           return;
                         }
+
+                        // ✅ 이미 선택된 숙소를 다시 클릭하면 해제
+                        const dateStr = d.format("MM/DD");
+                        const assignedStayName = Object.entries(stayPlans).find(([_, dates]) => dates.includes(dateStr))?.[0];
+
+                        if (assignedStayName) {
+                          Modal.confirm({
+                            title: "숙소 선택 해제",
+                            content: `${assignedStayName}의 숙박 일정을 취소하시겠습니까?`,
+                            okText: "해제",
+                            cancelText: "취소",
+                            centered: true,
+                            onOk: () => {
+                              const updated = { ...stayPlans };
+                              // 해당 숙소에서 날짜 제거
+                              updated[assignedStayName] = updated[assignedStayName].filter((d) => d !== dateStr);
+                              // 빈 배열이면 숙소 자체 삭제
+                              if (updated[assignedStayName].length === 0) delete updated[assignedStayName];
+                              setStayPlans(updated);
+
+                              // selectedStays 동기화
+                              const active = Object.keys(updated).filter((k) => updated[k].length);
+                              setSelectedStays(stays.filter((s) => active.includes(s.name)));
+                              message.success(`${assignedStayName} 숙박이 해제되었습니다.`);
+                            },
+                          });
+                          return;
+                        }
+
                         setSelectedStayTarget(stayData);
                         setShowStayModal(true);
                       }}

@@ -7,7 +7,7 @@ import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import { API_SERVER_HOST } from "@/common/api/naviApi";
+import { API_SERVER_HOST } from "../../common/api/naviApi";
 
 const UserMainPage = () => {
   const navigate = useNavigate();
@@ -188,9 +188,8 @@ const SectionSwiper = ({ title, data, type, navigate, loading }) => {
                     <div
                       className="h-40 w-full bg-gray-100"
                       style={{
-                        backgroundImage: `url('${
-                          d.thumbnailPath || d.imagePath || d.image || "/img/placeholder.jpg"
-                        }')`,
+                        backgroundImage: `url('${d.thumbnailPath || d.imagePath || d.image || "/img/placeholder.jpg"
+                          }')`,
                         backgroundSize: "cover",
                         backgroundPosition: "center",
                       }}
