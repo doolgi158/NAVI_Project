@@ -1,5 +1,6 @@
 import { Avatar, Button, Layout, Menu, message } from "antd";
-import { UserOutlined, HomeOutlined, ApartmentOutlined, RocketOutlined, CalendarOutlined,
+import {
+  UserOutlined, HomeOutlined, ApartmentOutlined, RocketOutlined, CalendarOutlined,
   DropboxOutlined, DollarOutlined, UndoOutlined, FileTextOutlined, LogoutOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
@@ -33,7 +34,7 @@ const AdminSiderLayout = () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("username");
-    
+
     dispatch(setlogout());
 
     message.success("로그아웃되었습니다.");

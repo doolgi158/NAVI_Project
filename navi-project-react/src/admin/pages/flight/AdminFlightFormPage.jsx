@@ -1,162 +1,272 @@
 import { useEffect, useState } from "react";
-import { Table, Button, Popconfirm, Space, message } from "antd";
+import {
+  Form, Input, DatePicker, InputNumber, Button,
+  Card, message, Space, Select, AutoComplete
+} from "antd";
+import { useNavigate, useParams } from "react-router-dom";
+import { ArrowLeftOutlined } from "@ant-design/icons";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import dayjs from "dayjs";
 
 const API = "http://localhost:8080/api/admin/flights";
 
-const AdminFlightListPage = () => {
-  const [flights, setFlights] = useState([]);
-  const [loading, setLoading] = useState(false);
+const AdminFlightFormPage = () => {
+  const [form] = Form.useForm();
   const navigate = useNavigate();
+  const { flightId, depTime } = useParams();
+  const [loading, setLoading] = useState(false);
+  const isEdit = !!flightId && !!depTime;
 
-  // ✅ 항공편 목록 불러오기 (JWT 인증 포함)
-  const fetchFlights = async () => {
+  const [airlines, setAirlines] = useState([
+    "대한항공", "아시아나항공", "제주항공", "진에어", "에어부산", "티웨이항공", "에어서울",
+  ]);
+
+  const [airports] = useState([
+    { airportCode: "GMP", airportName: "김포" },
+    { airportCode: "CJU", airportName: "제주" },
+    { airportCode: "PUS", airportName: "김해(부산)" },
+    { airportCode: "TAE", airportName: "대구" },
+    { airportCode: "CJJ", airportName: "청주" },
+    { airportCode: "KWJ", airportName: "광주" },
+    { airportCode: "MWX", airportName: "무안" },
+    { airportCode: "RSU", airportName: "여수" },
+    { airportCode: "USN", airportName: "울산" },
+    { airportCode: "KUV", airportName: "군산" },
+    { airportCode: "YNY", airportName: "양양" },
+    { airportCode: "HIN", airportName: "사천" },
+    { airportCode: "WJU", airportName: "원주" },
+    { airportCode: "JDG", airportName: "정석(훈련)" },
+  ]);
+
+  /** ✅ 단건 항공편 조회 */
+  useEffect(() => {
+    const fetchFlight = async () => {
+      if (!isEdit) return;
+      setLoading(true);
+      try {
+        const token = localStorage.getItem("accessToken");
+        const encodedTime = encodeURIComponent(depTime);
+        const res = await axios.get(`${API}/${flightId}/${encodedTime}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = res.data;
+        form.setFieldsValue({
+          flightId: data.flightId,
+          airlineNm: data.airlineNm,
+          depAirportNm: data.depAirportNm,
+          arrAirportNm: data.arrAirportNm,
+          depTime: dayjs(data.depTime),
+          arrTime: dayjs(data.arrTime),
+          economyCharge: data.economyCharge,
+          prestigeCharge: data.prestigeCharge,
+        });
+      } catch (err) {
+        console.error(err);
+        message.error("항공편 정보를 불러올 수 없습니다.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchFlight();
+  }, [isEdit, flightId, depTime, form]);
+
+  /** ✅ 등록 / 수정 */
+  const onFinish = async (values) => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("ACCESS_TOKEN"); // ✅ JWT 가져오기
-      if (!token) {
-        message.warning("로그인이 필요합니다.");
+      const token = localStorage.getItem("accessToken");
+
+      if (values.depAirportNm === values.arrAirportNm) {
+        message.warning("출발공항과 도착공항이 동일합니다.");
+        setLoading(false);
+        return;
+      }
+      if (values.depTime.isAfter(values.arrTime)) {
+        message.warning("도착시간은 출발시간보다 늦어야 합니다.");
         setLoading(false);
         return;
       }
 
-      const res = await axios.get(API, {
-        headers: {
-          Authorization: `Bearer ${token}`, // ✅ JWT 헤더 추가
-        },
-      });
+      const payload = {
+        ...values,
+        depTime: values.depTime.toISOString(),
+        arrTime: values.arrTime.toISOString(),
+      };
 
-      console.log("🛫 API 응답:", res.data);
+      if (isEdit) {
+        const encodedTime = encodeURIComponent(depTime);
+        await axios.put(`${API}/${flightId}/${encodedTime}`, payload, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        message.success("항공편이 수정되었습니다.");
+      } else {
+        await axios.post(API, payload, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        message.success("항공편이 등록되었습니다.");
+      }
 
-      // ✅ 안전한 배열 처리 (data 또는 data.data 지원)
-      const list = Array.isArray(res.data) ? res.data : res.data.data || [];
-      setFlights(list);
+      setTimeout(() => navigate("/adm/flight/list"), 800);
     } catch (err) {
-      console.error("❌ 항공편 목록 오류:", err);
-      message.error("항공편 목록을 불러오지 못했습니다.");
+      console.error(err);
+      message.error("저장 중 오류가 발생했습니다.");
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchFlights();
-  }, []);
+  /** ✅ 공항 자동완성 데이터 */
+  const airportOptions = airports.map((a) => ({
+    value: a.airportName,
+    label: `${a.airportName} (${a.airportCode})`,
+    code: a.airportCode,
+  }));
 
-  // ✅ 항공편 삭제 (JWT 포함)
-  const handleDelete = async (record) => {
-    try {
-      const token = localStorage.getItem("ACCESS_TOKEN");
-      if (!token) {
-        message.warning("로그인이 필요합니다.");
-        return;
-      }
-
-      const { flightId, depTime } = record;
-      await axios.delete(`${API}/${flightId}/${depTime}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      message.success("항공편이 삭제되었습니다.");
-      fetchFlights();
-    } catch (err) {
-      console.error("❌ 삭제 오류:", err);
-      message.error("삭제 중 오류가 발생했습니다.");
-    }
+  const handleAirportSelect = (value, option, field) => {
+    form.setFieldValue(field, value);
+    console.log(`[선택됨] ${field}:`, option.code);
   };
 
-  const columns = [
-    {
-      title: "항공편명",
-      dataIndex: "flightId",
-      key: "flightId",
-    },
-    {
-      title: "항공사",
-      dataIndex: "airlineNm",
-      key: "airlineNm",
-    },
-    {
-      title: "출발공항",
-      dataIndex: "depAirportNm",
-      key: "depAirportNm",
-    },
-    {
-      title: "도착공항",
-      dataIndex: "arrAirportNm",
-      key: "arrAirportNm",
-    },
-    {
-      title: "출발시간",
-      dataIndex: "depTime",
-      key: "depTime",
-      render: (text) => new Date(text).toLocaleString(),
-    },
-    {
-      title: "도착시간",
-      dataIndex: "arrTime",
-      key: "arrTime",
-      render: (text) => new Date(text).toLocaleString(),
-    },
-    {
-      title: "일반석 요금",
-      dataIndex: "economyCharge",
-      key: "economyCharge",
-      render: (val) => val?.toLocaleString() + "원",
-    },
-    {
-      title: "비즈니스 요금",
-      dataIndex: "prestigeCharge",
-      key: "prestigeCharge",
-      render: (val) => val?.toLocaleString() + "원",
-    },
-    {
-      title: "관리",
-      key: "action",
-      render: (_, record) => (
-        <Space>
-          <Button
-            type="link"
-            onClick={() =>
-              navigate(`/adm/flight/edit/${record.flightId}/${record.depTime}`)
-            }
-          >
-            수정
-          </Button>
-          <Popconfirm
-            title="정말 삭제하시겠습니까?"
-            onConfirm={() => handleDelete(record)}
-          >
-            <Button type="link" danger>
-              삭제
-            </Button>
-          </Popconfirm>
-        </Space>
-      ),
-    },
-  ];
-
   return (
-    <div className="p-6">
-      <div className="flex justify-between mb-4">
-        <h2 className="text-xl font-semibold">항공편 목록</h2>
-        <Button type="primary" onClick={() => navigate("/adm/flight/new")}>
-          항공편 등록
-        </Button>
-      </div>
+    <div style={{ background: "#f8f9fc", minHeight: "100vh", padding: "50px 0" }}>
+      <Card
+        title={
+          <Space>
+            <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)} style={{ borderRadius: 8 }}>
+              뒤로가기
+            </Button>
+            <span>{isEdit ? "✈️ 항공편 수정" : "🆕 항공편 등록"}</span>
+          </Space>
+        }
+        bordered={false}
+        style={{
+          maxWidth: 800,
+          margin: "0 auto",
+          borderRadius: 16,
+          boxShadow: "0 8px 20px rgba(0,0,0,0.06)",
+          background: "#fff",
+        }}
+      >
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={onFinish}
+          autoComplete="off"
+          initialValues={{ economyCharge: 0, prestigeCharge: 0 }}
+        >
+          {/* ✈️ 항공편명 */}
+          <Form.Item label="항공편명 (예: LJ305)" name="flightId" rules={[{ required: true, message: "항공편명을 입력하세요." }]}>
+            <Input placeholder="항공편명 입력" disabled={isEdit} />
+          </Form.Item>
 
-      <Table
-        columns={columns}
-        dataSource={Array.isArray(flights) ? flights : []}
-        rowKey={(record) => `${record.flightId}_${record.depTime}`}
-        loading={loading}
-        bordered
-      />
+          {/* 항공사 */}
+          <Form.Item label="항공사명" name="airlineNm" rules={[{ required: true, message: "항공사를 입력하세요." }]}>
+            <Select
+              showSearch
+              placeholder="항공사 선택 또는 직접 입력"
+              optionFilterProp="children"
+              dropdownRender={(menu) => (
+                <>
+                  {menu}
+                  <div style={{ padding: 8 }}>
+                    <Input
+                      placeholder="직접 추가"
+                      onPressEnter={(e) => {
+                        const newAirline = e.target.value.trim();
+                        if (newAirline && !airlines.includes(newAirline)) {
+                          setAirlines([...airlines, newAirline]);
+                          form.setFieldValue("airlineNm", newAirline);
+                          message.success(`항공사 '${newAirline}' 추가됨`);
+                        }
+                        e.target.value = "";
+                      }}
+                    />
+                  </div>
+                </>
+              )}
+            >
+              {airlines.map((a) => (
+                <Select.Option key={a} value={a}>
+                  {a}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+
+          {/* 공항 */}
+          <Space size="large" style={{ display: "flex" }}>
+            <Form.Item label="출발공항" name="depAirportNm" rules={[{ required: true }]} style={{ flex: 1 }}>
+              <AutoComplete
+                options={airportOptions}
+                placeholder="출발공항 입력 (예: 김포)"
+                onSelect={(value, option) => handleAirportSelect(value, option, "depAirportNm")}
+                filterOption={(input, option) => option.label.toLowerCase().includes(input.toLowerCase())}
+              />
+            </Form.Item>
+            <Form.Item label="도착공항" name="arrAirportNm" rules={[{ required: true }]} style={{ flex: 1 }}>
+              <AutoComplete
+                options={airportOptions}
+                placeholder="도착공항 입력 (예: 제주)"
+                onSelect={(value, option) => handleAirportSelect(value, option, "arrAirportNm")}
+                filterOption={(input, option) => option.label.toLowerCase().includes(input.toLowerCase())}
+              />
+            </Form.Item>
+          </Space>
+
+          {/* 시간 */}
+          <Space size="large" style={{ display: "flex" }}>
+            <Form.Item label="출발시간" name="depTime" rules={[{ required: true }]} style={{ flex: 1 }}>
+              <DatePicker showTime format="YYYY-MM-DD HH:mm" style={{ width: "100%" }} />
+            </Form.Item>
+            <Form.Item label="도착시간" name="arrTime" rules={[{ required: true }]} style={{ flex: 1 }}>
+              <DatePicker showTime format="YYYY-MM-DD HH:mm" style={{ width: "100%" }} />
+            </Form.Item>
+          </Space>
+
+          {/* 요금 */}
+          <Space size="large" style={{ display: "flex" }}>
+            <Form.Item label="일반석 요금" name="economyCharge" rules={[{ required: true }]} style={{ flex: 1 }}>
+              <InputNumber
+                min={0}
+                style={{ width: "100%" }}
+                formatter={(v) => `${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                parser={(v) => v.replace(/,/g, "")}
+                placeholder="예: 45000"
+              />
+            </Form.Item>
+            <Form.Item label="비즈니스 요금" name="prestigeCharge" rules={[{ required: true }]} style={{ flex: 1 }}>
+              <InputNumber
+                min={0}
+                style={{ width: "100%" }}
+                formatter={(v) => `${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                parser={(v) => v.replace(/,/g, "")}
+                placeholder="예: 120000"
+              />
+            </Form.Item>
+          </Space>
+
+          {/* 버튼 */}
+          <Form.Item style={{ marginTop: 32 }}>
+            <Space style={{ width: "100%", justifyContent: "flex-end" }}>
+              <Button onClick={() => navigate("/adm/flight/list")}>취소</Button>
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={loading}
+                style={{
+                  background: "linear-gradient(90deg,#2563eb,#1d4ed8)",
+                  border: "none",
+                  boxShadow: "0 4px 10px rgba(37,99,235,0.3)",
+                }}
+              >
+                {isEdit ? "수정하기" : "등록하기"}
+              </Button>
+            </Space>
+          </Form.Item>
+        </Form>
+      </Card>
     </div>
   );
 };
 
-export default AdminFlightListPage;
+export default AdminFlightFormPage;

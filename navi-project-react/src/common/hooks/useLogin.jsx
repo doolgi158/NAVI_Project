@@ -35,7 +35,7 @@ export const useLogin = () => {
         axios.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
 
         // Redux 상태 갱신
-        dispatch(setlogin({ username: username, accessToken: accessToken , refreshToken: refreshToken, role: roles, ip: ip }));
+        dispatch(setlogin({ username: username, accessToken: accessToken, refreshToken: refreshToken, role: roles, ip: ip }));
 
         await new Promise((resolve) => setTimeout(resolve, 100));
 
@@ -49,7 +49,7 @@ export const useLogin = () => {
         } else {
           navigate(redirectPath);
         }
-
+        console.log(response);
         return { success: true, message: "로그인 성공" };
       }
 
