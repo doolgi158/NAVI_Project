@@ -120,14 +120,14 @@ public class DeliveryReservationServiceImpl implements DeliveryReservationServic
         return reservationRepository.save(reservation);
     }
 
-    /** 예약번호 생성 (예: D202510170001) */
+    /** 예약번호 생성 (예: 20251017DVL0001) */
     private String generateDrsvId() {
         LocalDate today = LocalDate.now();
         long countToday = reservationRepository.countByCreatedAtBetween(
                 today.atStartOfDay(),
                 today.plusDays(1).atStartOfDay()
         );
-        return String.format("D%s%04d",
+        return String.format("%sDVL%04d",
                 today.format(DateTimeFormatter.BASIC_ISO_DATE),
                 countToday + 1
         );
