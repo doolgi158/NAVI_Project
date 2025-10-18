@@ -4,14 +4,19 @@ import com.navi.common.entity.BaseEntity;
 import com.navi.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "travel_plan")
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor @Builder
+@Table(name = "TRAVEL_PLAN", schema = "NAVI")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class TravelPlan extends BaseEntity {
 
     @Id
@@ -19,12 +24,17 @@ public class TravelPlan extends BaseEntity {
     @SequenceGenerator(name = "travel_plan_seq", sequenceName = "TRAVEL_PLAN_SEQ", allocationSize = 1)
     private Long id;
 
+    /**
+     * NOTE:
+     *  - 컬럼명은 user_id 지만, 실제로는 User의 PK(user_no)를 참조한다.
+     *  - 혼동 방지를 위해 referencedColumnName 명시
+     */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_no", nullable = false)
+    @JoinColumn(name = "user_id", referencedColumnName = "user_no", nullable = false)
     private User user;
 
     @Column(nullable = false, length = 255)
-    private String title; // 여행 제목
+    private String title;
 
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
@@ -33,12 +43,25 @@ public class TravelPlan extends BaseEntity {
     private LocalDate endDate;
 
     @Column(length = 500)
-    private String thumbnailPath; // 대표 사진
+    private String thumbnailPath;
 
-    @Column(length = 2000)
-    private String summary; // 대표 여행지나 요약 정보
+    @Column(name = "start_time")
+    private LocalTime startTime;
 
-    @OneToMany(mappedBy = "travelPlan", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Column(name = "end_time")
+    private LocalTime endTime;
+
+    @OneToMany(mappedBy = "travelPlan", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OrderBy("orderNo ASC, id ASC")
     @Builder.Default
     private List<TravelPlanDay> days = new ArrayList<>();
+
+    public void setDays(List<TravelPlanDay> days) {
+        this.days = days;
+        if (days != null) {
+            for (TravelPlanDay d : days) {
+                d.setTravelPlan(this);
+            }
+        }
+    }
 }

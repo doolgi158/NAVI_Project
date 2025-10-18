@@ -2,13 +2,17 @@ package com.navi.planner.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Entity
 @Table(name = "travel_plan_day")
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class TravelPlanDay {
 
     @Id
@@ -24,13 +28,13 @@ public class TravelPlanDay {
     private LocalDate dayDate;
 
     @Column(name = "order_no", nullable = false)
-    private Integer orderNo; // 순서 (1,2,3...)
+    private Integer orderNo;
 
     @Column(name = "plan_title", nullable = false)
-    private String planTitle; // 여행지명 또는 일정 타이틀
+    private String planTitle;
 
-    @Column(name = "travel_content_id")
-    private Long travelContentId; // 여행지 ID (Travel.contentId)
+    @Column(name = "travel_id")
+    private Long travelId; // TRAVEL.TRAVEL_ID 참조 값 (숫자)
 
     @Column(name = "start_time")
     private LocalTime startTime;
@@ -39,5 +43,5 @@ public class TravelPlanDay {
     private LocalTime endTime;
 
     @Column(name = "stay_name")
-    private String stayName; // 숙소명 (선택)
+    private String stayName;
 }

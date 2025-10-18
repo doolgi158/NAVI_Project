@@ -1,10 +1,12 @@
 package com.navi.planner.dto;
 
+import com.navi.planner.domain.TravelPlan;
 import lombok.*;
-import java.time.LocalDate;
 
-@Getter
-@Setter
+import java.time.LocalDate;
+import java.time.LocalTime;
+
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -12,20 +14,23 @@ public class TravelPlanListResponseDTO {
 
     private Long id;
     private String title;
-    private String thumbnailPath;
+    private String userId;
     private LocalDate startDate;
     private LocalDate endDate;
-    private String summary;
+    private String thumbnailPath;
+    private LocalTime startTime;
+    private LocalTime endTime;
 
-    // ✅ 엔티티 -> DTO 변환 헬퍼
-    public static TravelPlanListResponseDTO fromEntity(com.navi.planner.domain.TravelPlan plan) {
+    public static TravelPlanListResponseDTO fromEntity(TravelPlan plan) {
         return TravelPlanListResponseDTO.builder()
                 .id(plan.getId())
                 .title(plan.getTitle())
-                .thumbnailPath(plan.getThumbnailPath())
+                .userId(plan.getUser().getId())
                 .startDate(plan.getStartDate())
                 .endDate(plan.getEndDate())
-                .summary(plan.getSummary())
+                .thumbnailPath(plan.getThumbnailPath())
+                .startTime(plan.getStartTime())
+                .endTime(plan.getEndTime())
                 .build();
     }
 }

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import MainLayout from "../../layout/MainLayout";
 import { useNavigate } from "react-router-dom";
-import { getMyPlans, deletePlan, sharePlan } from "../../../common/api/planApi/";
+import { getMyPlans, deletePlan } from "../../../common/api/planApi";
 import { format } from "date-fns";
-import { Card, Button } from "antd";
+import { Card, Button, Spin } from "antd";
+
 export default function MyPlanPage() {
   const navigate = useNavigate();
   const [plans, setPlans] = useState([]);
@@ -16,7 +17,7 @@ export default function MyPlanPage() {
         const data = await getMyPlans();
         setPlans(data || []);
       } catch (err) {
-        console.error("내 여행 불러오기 실패:", err);
+        console.error("🚨 내 여행 불러오기 실패:", err);
       } finally {
         setLoading(false);
       }
@@ -45,25 +46,14 @@ export default function MyPlanPage() {
     }
   };
 
-  // ✅ 여행 공유
-  const handleShare = async (id) => {
-    try {
-      const shareLink = await sharePlan(id);
-      await navigator.clipboard.writeText(shareLink);
-      alert("공유 링크가 복사되었습니다!\n" + shareLink);
-    } catch (err) {
-      console.error("공유 실패:", err);
-    }
-  };
-
   // ✅ 여행 상세보기
   const handleDetail = (plan) => {
-    navigate(`/plans/shared/${plan.id}`, { state: plan });
+    navigate(`/plans/${plan.id}`);
   };
 
   // ✅ 새 여행 만들기
   const handleCreatePlan = () => {
-    navigate("/plans/step1");
+    navigate("/plans/planner");
   };
 
   return (
@@ -82,13 +72,13 @@ export default function MyPlanPage() {
         {/* 목록 영역 */}
         <Card className="w-[900px]">
           {loading ? (
-            <p className="text-gray-500 text-center py-8">
-              여행 정보를 불러오는 중입니다...
-            </p>
+            <div className="text-center py-8">
+              <Spin tip="여행 정보를 불러오는 중입니다..." />
+            </div>
           ) : plans.length === 0 ? (
             <div className="text-center py-10">
               <p className="text-gray-500 mb-4">등록된 여행이 없습니다.</p>
-              <Button onClick={handleCreatePlan}>
+              <Button onClick={handleCreatePlan} type="primary">
                 새로운 여행 만들기
               </Button>
             </div>
@@ -104,13 +94,13 @@ export default function MyPlanPage() {
                     onClick={() => handleDetail(plan)}
                   >
                     <h2 className="text-lg font-semibold text-[#0A3D91]">
-                      {plan.travelName}
+                      {plan.title}
                     </h2>
                     <p className="text-sm text-gray-600 mt-1">
                       {formatDate(plan.startDate)} ~ {formatDate(plan.endDate)}
                     </p>
                     <p className="text-gray-500 mt-2 text-sm line-clamp-2">
-                      {plan.planItems?.slice(0, 2).join(", ") ||
+                      {plan.days?.map((d) => d.planTitle).slice(0, 3).join(", ") ||
                         "세부 일정이 없습니다."}
                     </p>
                   </div>
@@ -118,14 +108,14 @@ export default function MyPlanPage() {
                   {/* 하단 버튼 */}
                   <div className="mt-3 flex justify-between items-center">
                     <Button
-                      onClick={() => handleShare(plan.id)}
+                      onClick={() => handleDetail(plan)}
                       className="bg-[#0A3D91]/80 text-white text-sm px-3 py-2 rounded-md"
                     >
-                      공유
+                      보기
                     </Button>
                     <Button
                       onClick={() => handleDelete(plan.id)}
-                      className="bg-red-500 hover:bg-red-600 text-sm px-3 py-2 rounded-md"
+                      className="bg-red-500 hover:bg-red-600 text-white text-sm px-3 py-2 rounded-md"
                     >
                       삭제
                     </Button>
@@ -139,7 +129,7 @@ export default function MyPlanPage() {
         {/* 새 여행 만들기 버튼 */}
         {plans.length > 0 && (
           <div className="mt-8">
-            <Button onClick={handleCreatePlan}>
+            <Button onClick={handleCreatePlan} type="primary">
               새 여행 계획 만들기
             </Button>
           </div>

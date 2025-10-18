@@ -13,15 +13,18 @@ export default function TimeDrawer({ days, times, setTimes, title, dateRange }) 
   };
 
   const getDisabledEndTime = (date) => {
-    const startTime = times[date.format("YYYY-MM-DD")]?.start;
-    if (!startTime) return {};
-    const [startHour, startMinute] = startTime.split(":").map(Number);
     return {
-      disabledHours: () => Array.from({ length: startHour }, (_, i) => i),
-      disabledMinutes: (selectedHour) =>
-        selectedHour === startHour ? Array.from({ length: startMinute }, (_, i) => i) : [],
+      disabledHours: () => {
+        // 예: 시작 시각 이후만 선택 가능하게
+        const start = times[date.format("YYYY-MM-DD")]?.start;
+        if (!start) return [];
+        const startHour = dayjs(start, "HH:mm").hour();
+        return Array.from({ length: startHour }, (_, i) => i);
+      },
+      disabledMinutes: () => [],
     };
   };
+
 
   return (
     <div className="flex flex-col h-full bg-white shadow-md w-full">
@@ -55,6 +58,7 @@ export default function TimeDrawer({ days, times, setTimes, title, dateRange }) 
                       {...getDisabledEndTime(d)}
                       value={times[d.format("YYYY-MM-DD")]?.end ? dayjs(times[d.format("YYYY-MM-DD")].end, "HH:mm") : null}
                       onChange={(v) => handleChange(d, "end", v)}
+                      disabledTime={() => getDisabledEndTime(d)}
                     />
                   </div>
                 </div>

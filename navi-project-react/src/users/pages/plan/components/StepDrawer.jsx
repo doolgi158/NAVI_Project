@@ -10,7 +10,7 @@ export default function StepDrawer({
   dateRange,
   stayPlans,
   stays,
-  savePlan,
+  handleConfirm,
 }) {
   const navigate = useNavigate();
 
@@ -74,11 +74,10 @@ export default function StepDrawer({
             <li
               key={i}
               onClick={() => setStep(i + 1)}
-              className={`cursor-pointer px-3 py-2 rounded-md transition ${
-                step === i + 1
-                  ? "bg-[#FFF5B7] text-[#2F3E46] font-semibold text-sm"
-                  : "hover:bg-[#FAF9F6] text-gray-700"
-              }`}
+              className={`cursor-pointer px-3 py-2 rounded-md transition ${step === i + 1
+                ? "bg-[#FFF5B7] text-[#2F3E46] font-semibold text-sm"
+                : "hover:bg-[#FAF9F6] text-gray-700"
+                }`}
             >
               Step {i + 1}
               <br />
@@ -101,15 +100,18 @@ export default function StepDrawer({
           </Button>
         )}
         {step === 5 && (
+
           <Button
             type="primary"
             className="w-full"
             style={{ background: "#2F3E46", border: "none" }}
-            onClick={handleComplete}
+            onClick={handleConfirm}
           >
             완료
           </Button>
+
         )}
+
       </div>
     </div>
   );
