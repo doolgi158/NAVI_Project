@@ -9,6 +9,7 @@ import {
   Select,
   AutoComplete,
   message,
+  Alert,
 } from "antd";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeftOutlined } from "@ant-design/icons";
@@ -23,6 +24,7 @@ const AdminFlightFormPage = () => {
   const navigate = useNavigate();
   const { flightId, depTime } = useParams();
   const [loading, setLoading] = useState(false);
+  const [alert, setAlert] = useState(null); // ✅ 상단 알림 상태
   const isEdit = !!flightId && !!depTime;
 
   const [airlines, setAirlines] = useState([
@@ -110,16 +112,23 @@ const AdminFlightFormPage = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         message.success("항공편이 수정되었습니다.");
+        setAlert({ type: "success", message: "항공편 정보가 수정되었습니다." });
       } else {
         await axios.post(API, payload, {
           headers: { Authorization: `Bearer ${token}` },
         });
         message.success("항공편이 등록되었습니다.");
+        setAlert({ type: "success", message: "새 항공편이 등록되었습니다." });
       }
+
+      // ✅ 상단 알림 3초 후 자동 제거
+      setTimeout(() => setAlert(null), 3000);
 
       setTimeout(() => navigate("/adm/flight/list"), 800);
     } catch {
       message.error("저장 중 오류가 발생했습니다.");
+      setAlert({ type: "error", message: "저장 중 오류가 발생했습니다." });
+      setTimeout(() => setAlert(null), 3000);
     } finally {
       setLoading(false);
     }
@@ -138,22 +147,21 @@ const AdminFlightFormPage = () => {
 
   return (
     <div style={{ padding: 24 }}>
-      <AdminSectionCard
-        title={isEdit ? "✈️ 항공편 수정" : "✈️ 항공편 등록"}
-        extra={
-          <Button
-            icon={<ArrowLeftOutlined />}
-            onClick={() => navigate(-1)}
+      <AdminSectionCard title={isEdit ? "✈️ 항공편 수정" : "✈️ 항공편 등록"}>
+        {/* ✅ 상단 Alert 표시 */}
+        {alert && (
+          <Alert
+            message={alert.message}
+            type={alert.type}
+            showIcon
             style={{
-              borderRadius: 6,
-              background: "#f0f2f5",
-              border: "1px solid #d9d9d9",
+              marginBottom: 24,
+              borderRadius: 8,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
             }}
-          >
-            뒤로가기
-          </Button>
-        }
-      >
+          />
+        )}
+
         <Form
           form={form}
           layout="vertical"
@@ -280,15 +288,12 @@ const AdminFlightFormPage = () => {
             <Form.Item
               label="일반석 요금"
               name="economyCharge"
-              rules={[{ required: true }]}
               style={{ flex: 1 }}
             >
               <InputNumber
                 min={0}
                 style={{ width: "100%" }}
-                formatter={(v) =>
-                  `${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                }
+                formatter={(v) => `${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                 parser={(v) => v.replace(/,/g, "")}
                 placeholder="예: 45000"
               />
@@ -296,38 +301,72 @@ const AdminFlightFormPage = () => {
             <Form.Item
               label="비즈니스 요금"
               name="prestigeCharge"
-              rules={[{ required: true }]}
               style={{ flex: 1 }}
             >
               <InputNumber
                 min={0}
                 style={{ width: "100%" }}
-                formatter={(v) =>
-                  `${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                }
+                formatter={(v) => `${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
                 parser={(v) => v.replace(/,/g, "")}
                 placeholder="예: 120000"
               />
             </Form.Item>
           </Space>
 
-          {/* 버튼 */}
+          {/* ✅ 하단 버튼 */}
           <Form.Item style={{ marginTop: 32 }}>
-            <Space style={{ width: "100%", justifyContent: "flex-end" }}>
-              <Button onClick={() => navigate("/adm/flight/list")}>취소</Button>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                width: "100%",
+              }}
+            >
+              {/* 뒤로가기 */}
               <Button
-                type="primary"
-                htmlType="submit"
-                loading={loading}
+                icon={<ArrowLeftOutlined />}
+                onClick={() => navigate(-1)}
                 style={{
-                  background: "linear-gradient(90deg,#2563eb,#1d4ed8)",
-                  border: "none",
-                  boxShadow: "0 4px 10px rgba(37,99,235,0.3)",
+                  borderRadius: 8,
+                  background: "#f3f4f6",
+                  border: "1px solid #d1d5db",
+                  color: "#374151",
+                  fontWeight: 500,
                 }}
               >
-                {isEdit ? "수정하기" : "등록하기"}
+                뒤로가기
               </Button>
-            </Space>
+
+              {/* 오른쪽 버튼 */}
+              <Space>
+                <Button
+                  style={{
+                    borderRadius: 8,
+                    border: "1px solid #d1d5db",
+                    color: "#374151",
+                    background: "#fff",
+                  }}
+                  onClick={() => navigate("/adm/flight/list")}
+                >
+                  취소
+                </Button>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={loading}
+                  style={{
+                    borderRadius: 8,
+                    background: "linear-gradient(90deg,#2563eb,#1d4ed8)",
+                    border: "none",
+                    boxShadow: "0 4px 10px rgba(37,99,235,0.3)",
+                    fontWeight: 600,
+                  }}
+                >
+                  {isEdit ? "수정하기" : "등록하기"}
+                </Button>
+              </Space>
+            </div>
           </Form.Item>
         </Form>
       </AdminSectionCard>
