@@ -32,8 +32,6 @@ public class TravelPlanServiceImpl implements TravelPlanService {
     public Long savePlan(String userId, TravelPlanRequestDTO dto) {
         log.info("✅ 여행계획 저장 요청: userId={}, dto={}", userId, dto);
 
-        // 🔴 기존: findById(userId) -> PK(Long)로 찾으려다 실패
-        // ✅ 수정: user_id(문자열)로 조회
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다. userId=" + userId));
 
@@ -121,5 +119,20 @@ public class TravelPlanServiceImpl implements TravelPlanService {
     @Transactional(readOnly = true)
     public TravelPlan getPlanDetail(Long id) {
         return travelPlanRepository.findWithDaysById(id);
+    }
+
+    /**여행계획 삭제*/
+    @Override
+    @Transactional
+    public void deletePlan(Long planId) {
+        TravelPlan plan = travelPlanRepository.findById(planId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 계획입니다."));
+
+        // ✅ 연관 엔티티 명시적 제거 (보강)
+        if (plan.getDays() != null) {
+            plan.getDays().clear();
+        }
+
+        travelPlanRepository.delete(plan);
     }
 }

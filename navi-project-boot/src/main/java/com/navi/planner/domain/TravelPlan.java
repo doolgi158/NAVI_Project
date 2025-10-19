@@ -47,13 +47,7 @@ public class TravelPlan extends BaseEntity {
     @Column(name = "end_time")
     private LocalTime endTime;
 
-    @OneToMany(
-            mappedBy = "travelPlan",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true,
-            fetch = FetchType.LAZY
-    )
-    @OrderBy("orderNo ASC, id ASC")
+    @OneToMany(mappedBy = "travelPlan", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<TravelPlanDay> days = new ArrayList<>();
 

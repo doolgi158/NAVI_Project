@@ -1,10 +1,13 @@
 package com.navi.planner.dto;
 
 import com.navi.planner.domain.TravelPlan;
+import com.navi.planner.domain.TravelPlanDay;
 import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor
@@ -20,8 +23,19 @@ public class TravelPlanListResponseDTO {
     private String thumbnailPath;
     private LocalTime startTime;
     private LocalTime endTime;
+    private List<String> travels;
 
     public static TravelPlanListResponseDTO fromEntity(TravelPlan plan) {
+
+
+        List<String> travelTitles = plan.getDays() != null
+                ? plan.getDays().stream()
+                .map(TravelPlanDay::getPlanTitle)
+                .filter(title -> title != null && !title.isBlank())
+                .limit(5) // 최대 5개만 요약으로
+                .collect(Collectors.toList())
+                : List.of();
+
         return TravelPlanListResponseDTO.builder()
                 .id(plan.getId())
                 .title(plan.getTitle())
@@ -31,6 +45,7 @@ public class TravelPlanListResponseDTO {
                 .thumbnailPath(plan.getThumbnailPath())
                 .startTime(plan.getStartTime())
                 .endTime(plan.getEndTime())
+                .travels(travelTitles)
                 .build();
     }
 }

@@ -84,4 +84,13 @@ public class TravelPlanController {
                 .toList();
         return ResponseEntity.ok(stays);
     }
+
+    /**여행 계획 삭제*/
+    @DeleteMapping("/{planId}")
+    public ResponseEntity<?> deletePlan(@PathVariable Long planId) {
+        travelPlanService.deletePlan(planId);
+        return ResponseEntity.ok("삭제 완료");
+    }
 }
+
+

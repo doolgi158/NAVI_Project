@@ -198,9 +198,9 @@ public class Travel extends BaseEntityNoAudit {
         if (StringUtils.hasText(dto.getCategoryName())) this.categoryName = dto.getCategoryName();
         if (StringUtils.hasText(dto.getRegion1Name())) this.region1Name = dto.getRegion1Name();
         if (StringUtils.hasText(dto.getRegion2Name())) this.region2Name = dto.getRegion2Name();
-        if (dto.getPhotoId() != null) this.photoId = dto.getPhotoId();
-        if (StringUtils.hasText(dto.getImagePath())) this.imagePath = dto.getImagePath();
-        if (StringUtils.hasText(dto.getThumbnailPath())) this.thumbnailPath = dto.getThumbnailPath();
+        this.imagePath = dto.getImagePath();
+        this.thumbnailPath = dto.getThumbnailPath();
+        if (dto.getThumbnailPath() != null) { this.thumbnailPath = dto.getThumbnailPath(); }
         this.state = dto.getState();
         if (StringUtils.hasText(dto.getHomepage())) this.homepage = dto.getHomepage();
         if (StringUtils.hasText(dto.getParking())) this.parking = dto.getParking();
