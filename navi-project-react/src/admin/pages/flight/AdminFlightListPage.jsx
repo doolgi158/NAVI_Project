@@ -1,7 +1,7 @@
 // src/admin/pages/flight/AdminFlightListPage.jsx
 import { useEffect, useState } from "react";
 import { Table, Button, Input, Space, Tag, message, Typography } from "antd";
-import { SearchOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { SearchOutlined, EditOutlined, DeleteOutlined, SettingOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import dayjs from "dayjs";
@@ -178,6 +178,15 @@ const AdminFlightListPage = () => {
       render: (_, record) => (
         <Space>
           <Button
+            type="default"
+            icon={<SettingOutlined />}
+            onClick={() =>
+              navigate(`/adm/seat/${record.flightId}/${encodeURIComponent(record.depTime)}`)
+            }
+          >
+            좌석
+          </Button>
+          <Button
             type="primary"
             icon={<EditOutlined />}
             onClick={() =>
@@ -232,6 +241,7 @@ const AdminFlightListPage = () => {
               setPagination({ current: page, pageSize }),
             showTotal: (total) => `총 ${total.toLocaleString()}건 등록됨`,
           }}
+          style={{ whiteSpace: "nowrap" }}
         />
       </AdminSectionCard>
     </div>
