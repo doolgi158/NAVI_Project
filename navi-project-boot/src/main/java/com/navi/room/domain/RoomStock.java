@@ -51,7 +51,6 @@ public class RoomStock extends BaseEntity {
     @OneToMany(mappedBy = "roomStock", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RoomRsv> roomReservations = new ArrayList<>();
 
-
     // 재고 일자
     @Column(name = "stock_date", nullable = false)
     private LocalDate stockDate;
