@@ -4,6 +4,7 @@ import SharedPlan from "../../users/pages/plan/SharedPlan.jsx";
 
 const TravelPlanMain = lazy(() => import("../../users/pages/plan/TravelPlanMain.jsx"))
 const TravelPlanner = lazy(() => import("../../users/pages/plan/TravelPlanner.jsx"))
+const PlanScheduler = lazy(() => import("../../users/pages/plan/PlanScheduler.jsx"))
 
 const TravelRouter = () => {
     return [
@@ -13,6 +14,9 @@ const TravelRouter = () => {
 
         /* 여행계획 생성 단계*/
         { path: "planner", element: <TravelPlanner /> },
+
+        /*나의 여행계획 스케줄링 */
+        { path: "schedule", element: <PlanScheduler /> },
 
         /*나의 여행계획 목록 */
         { path: "myplans", element: <MyPlanPage /> },

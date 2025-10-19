@@ -65,7 +65,8 @@ export default function TravelMap({ markers = [], step }) {
     const map = mapRef.current;
     const fix = () => {
       map.relayout();
-      const c = map.getCenter() || new window.kakao.maps.LatLng(33.36167, 126.52917);
+      const c =
+        map.getCenter() || new window.kakao.maps.LatLng(33.36167, 126.52917);
       map.setCenter(c);
     };
     const t = setTimeout(fix, 800);
@@ -78,6 +79,7 @@ export default function TravelMap({ markers = [], step }) {
     const { kakao } = window;
     const map = mapRef.current;
 
+    // 이전 마커/오버레이/라인 제거
     markerRefs.current.forEach((m) => m.setMap(null));
     overlayRefs.current.forEach((o) => o.setMap(null));
     lineRefs.current.forEach((l) => l.setMap(null));
@@ -87,100 +89,114 @@ export default function TravelMap({ markers = [], step }) {
 
     if (!markers.length) return;
 
+    // ✅ 타입별 구분
     const travels = markers.filter((m) => m.type === "travel");
-    const stays = processedStays;
+    const stays = markers.filter((m) => m.type === "stay");
+    const pois = markers.filter((m) => m.type === "poi");
 
-    /** 🟣 여행지 마커 */
-    travels.forEach((m, idx) => {
+    /** ✅ 마커 생성 함수 (타입별 스타일 적용) */
+    const createMarker = (m, idx, color, label) => {
       const lat = parseFloat(m.latitude);
       const lng = parseFloat(m.longitude);
-      if (isNaN(lat) || isNaN(lng)) return;
+      if (isNaN(lat) || isNaN(lng)) return null;
+
       const pos = new kakao.maps.LatLng(lat, lng);
 
       const markerHtml = `
         <div style="
-          background:#6846FF;color:white;font-weight:bold;
-          border-radius:50%;width:32px;height:32px;
-          display:flex;align-items:center;justify-content:center;
-          box-shadow:0 2px 6px rgba(0,0,0,0.25);border:2px solid white;">
+          background:${color};
+          color:white;
+          font-weight:bold;
+          border-radius:50%;
+          width:30px;
+          height:30px;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          font-size:13px;
+          box-shadow:0 2px 6px rgba(0,0,0,0.25);
+          border:2px solid white;">
           ${idx + 1}
         </div>`;
-      const marker = new kakao.maps.CustomOverlay({ position: pos, content: markerHtml, yAnchor: 1 });
-      marker.setMap(map);
-      markerRefs.current.push(marker);
 
+      const marker = new kakao.maps.CustomOverlay({
+        position: pos,
+        content: markerHtml,
+        yAnchor: 1,
+      });
+      marker.setMap(map);
+
+      // Tooltip Overlay
       const tooltip = new kakao.maps.CustomOverlay({
         position: pos,
         content: `
           <div style="
-            background:white;border-radius:8px;padding:4px 8px;
-            font-size:13px;font-weight:600;color:#333;
-            box-shadow:0 2px 6px rgba(0,0,0,0.15);
-            border:1px solid #ddd;">📍 ${m.title}</div>`,
+            background:white;
+            border-radius:8px;
+            padding:4px 8px;
+            font-size:12px;
+            font-weight:600;
+            color:#333;
+            border:1px solid #ccc;
+            box-shadow:0 1px 4px rgba(0,0,0,0.2);">
+            ${label} ${m.title}
+          </div>`,
         yAnchor: 1.8,
       });
+
       const el = marker.a || marker.content;
       if (el) {
         el.addEventListener("mouseenter", () => tooltip.setMap(map));
         el.addEventListener("mouseleave", () => tooltip.setMap(null));
       }
-      overlayRefs.current.push(tooltip);
-    });
 
-    /** 🔴 숙소 마커 + Day 라벨 */
-    stays.forEach((s) => {
-      const lat = parseFloat(s.latitude);
-      const lng = parseFloat(s.longitude);
-      if (isNaN(lat) || isNaN(lng)) {
-        console.warn("[StayMarker Skip]", s);
-        return;
-      }
-      const pos = new kakao.maps.LatLng(lat, lng);
-
-      // 🔴 숙소 S1, S2
-      const markerHtml = `
-        <div style="
-          background:#E53935;color:white;font-weight:bold;
-          border-radius:50%;width:30px;height:30px;
-          display:flex;align-items:center;justify-content:center;
-          box-shadow:0 2px 6px rgba(0,0,0,0.25);
-          border:2px solid white;">S${s.stayOrder}</div>`;
-      const marker = new kakao.maps.CustomOverlay({ position: pos, content: markerHtml, yAnchor: 1 });
-      marker.setMap(map);
       markerRefs.current.push(marker);
+      overlayRefs.current.push(tooltip);
+      return pos;
+    };
 
-
+    /** ✅ 마커 순서대로 추가 (경로용 Path 생성) */
+    const path = [];
+    markers.forEach((m, idx) => {
+      let color = "#2F3E46";
+      let label = "📍";
+      if (m.type === "stay") {
+        color = "#ec1f1fff";
+        label = "🏨 숙소";
+      } else if (m.type === "poi") {
+        color = "#777";
+        label = "✈️ 공항";
+      } else if (m.type === "travel") {
+        color = "#0088CC";
+        label = "📍 여행지";
+      }
+      const pos = createMarker(m, idx, color, label);
+      if (pos) path.push(pos);
     });
 
-    /** 마커연결 */
-    if (travels.length > 1) {
-      const path = travels.map((m) => new kakao.maps.LatLng(m.latitude, m.longitude));
-
+    /** ✅ 경로 라인 표시 */
+    if (path.length > 1) {
       const polyline = new kakao.maps.Polyline({
         path,
-        strokeWeight: 5,
-        strokeColor: "#6846FF",
-        strokeOpacity: 0.9,
+        strokeWeight: 4,
+        strokeColor: "#479fceff",
+        strokeOpacity: 0.8,
         strokeStyle: "solid",
       });
       polyline.setMap(map);
       lineRefs.current.push(polyline);
     }
 
-    /** 📍 지도 범위 맞춤 */
+    /** ✅ 지도 범위 자동 조정 */
     const bounds = new kakao.maps.LatLngBounds();
-    markers.forEach((m) => {
-      if (!isNaN(m.latitude) && !isNaN(m.longitude)) {
-        bounds.extend(new kakao.maps.LatLng(m.latitude, m.longitude));
-      }
-    });
+    path.forEach((p) => bounds.extend(p));
     requestAnimationFrame(() => {
       if (!bounds.isEmpty()) {
         map.relayout();
         map.setBounds(bounds);
       }
     });
-  }, [isMapLoaded, markers, processedStays]);
+  }, [isMapLoaded, markers]);
 
   return (
     <div
