@@ -1,10 +1,7 @@
 package com.navi.travel.service;
 
 import com.navi.travel.domain.Travel;
-import com.navi.travel.dto.TravelDetailResponseDTO;
-import com.navi.travel.dto.TravelListResponseDTO;
-import com.navi.travel.dto.TravelRankDTO;
-import com.navi.travel.dto.TravelRequestDTO;
+import com.navi.travel.dto.*;
 import com.navi.travel.repository.TravelRepository;
 import com.navi.travel.service.internal.TravelActionService;
 import com.navi.travel.service.internal.TravelAdminService;
@@ -75,6 +72,13 @@ public class TravelServiceImpl implements TravelService {
     // ✅ 2. 조회 및 검색 (Query)
     // =====================================================
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<Travel> getTravelList() {
+        return travelRepository.findAll();
+    }
+
+
     /** 여행지 목록 조회 (필터링 + 검색 + 페이징) */
     @Override
     public Page<TravelListResponseDTO> getTravelList(Pageable pageable, List<String> region2Names,
@@ -89,6 +93,14 @@ public class TravelServiceImpl implements TravelService {
         log.debug("🔍 [Query] 여행지 상세 조회 - travelId={}, userId={}", travelId, id);
         return travelQueryService.getTravelDetail(travelId, id);
     }
+
+    /**  planner 전용 여행지 간단 목록 조회 */
+    public List<TravelSimpleResponseDTO> getSimpleTravelList() {
+        return travelRepository.findAll().stream()
+                .map(TravelSimpleResponseDTO::new)
+                .toList();
+    }
+
 
     // =====================================================
     // ✅ 3. Action (조회수, 좋아요, 북마크)

@@ -9,16 +9,16 @@ const TravelRouter = () => {
     return [
 
         /*여행계획 홈 */
-        { path: "",  element: <TravelPlanMain />  },
+        { path: "", element: <TravelPlanMain /> },
 
         /* 여행계획 생성 단계*/
-        { path: "planner",  element: <TravelPlanner />  },
+        { path: "planner", element: <TravelPlanner /> },
 
         /*나의 여행계획 목록 */
-        { path: "myplans",  element: <MyPlanPage />  },
+        { path: "myplans", element: <MyPlanPage /> },
 
-         /*나의 여행계획 공유 */
-        { path: "sharedplan",  element: <SharedPlan />  },
+        /*나의 여행계획 공유 */
+        { path: "sharedplan", element: <SharedPlan /> },
     ]
 }
 

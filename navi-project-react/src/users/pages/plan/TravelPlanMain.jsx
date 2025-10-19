@@ -1,7 +1,13 @@
 import React, { useEffect, useState } from "react";
 import MainLayout from "../../layout/MainLayout";
 import { getMyPlans } from "../../../common/api/planApi";
-import { format } from "date-fns";
+import {
+  format,
+  isBefore,
+  isAfter,
+  isSameDay,
+  startOfDay,
+} from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { Card, Button, Modal, Spin } from "antd";
 
@@ -52,13 +58,23 @@ export default function TravelPlanMain() {
     navigate(`/plans/${plan.id}`);
   };
 
-  const today = new Date();
-  const upcomingPlans = plans.filter(
-    (p) => new Date(p.endDate) >= today || !p.endDate
-  );
-  const completedPlans = plans.filter((p) => new Date(p.endDate) < today);
-  const currentList = activeTab === "upcoming" ? upcomingPlans : completedPlans;
+  /** ✅ 여행 분류 로직 */
+  const today = startOfDay(new Date());
 
+  const upcomingPlans = plans.filter((p) => {
+    const end = startOfDay(new Date(p.endDate));
+    return isAfter(end, today) || isSameDay(end, today); // 오늘 포함
+  });
+
+  const completedPlans = plans.filter((p) => {
+    const end = startOfDay(new Date(p.endDate));
+    return isBefore(end, today);
+  });
+
+  const currentList =
+    activeTab === "upcoming" ? upcomingPlans : completedPlans;
+
+  /** ✅ 날짜 포맷 */
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
     try {
@@ -93,7 +109,7 @@ export default function TravelPlanMain() {
             className="plan-btn"
             onClick={handleCreatePlan}
           >
-            여행 계획하기 <i className="bi bi-plus-circle ml-1"></i>
+            여행 계획하기
           </Button>
         </div>
       </div>
@@ -141,14 +157,11 @@ export default function TravelPlanMain() {
                   onClick={() => handleDetail(plan)}
                   className="flex justify-between items-center border border-gray-200 rounded-xl p-4 hover:shadow-md transition cursor-pointer bg-white"
                 >
-                  {/* 썸네일 */}
                   <img
                     src={plan.thumbnailPath || "https://placehold.co/100x100"}
                     alt="썸네일"
                     className="w-24 h-24 rounded-lg object-cover flex-shrink-0"
                   />
-
-                  {/* 내용 */}
                   <div className="flex-1 ml-6">
                     <h3 className="text-lg font-semibold text-[#0A3D91]">
                       {plan.title || "제목 없음"}
@@ -161,7 +174,6 @@ export default function TravelPlanMain() {
                         "등록된 세부 일정이 없습니다."}
                     </p>
                   </div>
-
                   <div className="text-gray-400 hover:text-[#0A3D91]">
                     <i className="bi bi-chevron-right text-xl"></i>
                   </div>

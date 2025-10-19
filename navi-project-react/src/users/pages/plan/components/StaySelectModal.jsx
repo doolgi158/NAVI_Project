@@ -16,44 +16,38 @@ export default function StaySelectModal({
   const [selectedDates, setSelectedDates] = useState([]);
 
   useEffect(() => setSelectedDates([]), [resetTrigger]);
+
   useEffect(() => {
-    if (open && stay?.name) {
-      setSelectedDates([...(stayPlans?.[stay.name] || [])]);
+    if (open && stay?.accId) {
+      setSelectedDates([...(stayPlans?.[stay.accId] || [])]);
     }
-  }, [open, stay?.name, stayPlans]);
+  }, [open, stay?.accId, stayPlans]);
 
   /** ✅ 날짜 클릭 시 로직 */
   const toggleDate = (dateStr) => {
-    const assigned = Object.entries(stayPlans).find(([name, dates]) =>
+    const assigned = Object.entries(stayPlans).find(([id, dates]) =>
       dates.includes(dateStr)
     );
 
     // ✅ 이미 다른 숙소에 예약된 날짜인 경우
-    if (assigned && assigned[0] !== stay.name) {
-      const assignedName = assigned[0];
-
+    if (assigned && assigned[0] !== stay.accId) {
+      const assignedId = assigned[0];
+      const assignedStay = stays.find((s) => s.accId === assignedId);
       Modal.confirm({
         title: "숙소 예약 해제",
-        content: `${assignedName}의 ${dateStr} 숙박 일정을 해제하시겠습니까?`,
+        content: `${assignedStay?.title || "숙소"}의 ${dateStr} 숙박 일정을 해제하시겠습니까?`,
         okText: "해제",
         cancelText: "취소",
         centered: true,
         onOk: () => {
           const updated = { ...stayPlans };
-          // 해당 날짜를 해당 숙소에서 제거
-          updated[assignedName] = updated[assignedName].filter(
-            (d) => d !== dateStr
-          );
-          // 해당 숙소에 더 이상 날짜가 없으면 삭제
-          if (updated[assignedName].length === 0) {
-            delete updated[assignedName];
-          }
+          updated[assignedId] = updated[assignedId].filter((d) => d !== dateStr);
+          if (updated[assignedId].length === 0) delete updated[assignedId];
 
-          // selectedStays 동기화
           const active = Object.keys(updated).filter((k) => updated[k].length);
           setStayPlans(updated);
-          setSelectedStays(stays.filter((s) => active.includes(s.name)));
-          message.success(`${assignedName}의 ${dateStr} 숙박이 해제되었습니다.`);
+          setSelectedStays(stays.filter((s) => active.includes(s.accId)));
+          message.success(`${assignedStay?.title || "숙소"}의 숙박이 해제되었습니다.`);
         },
       });
       return;
@@ -106,21 +100,20 @@ export default function StaySelectModal({
         </Button>
       </div>
 
-      <p className="text-gray-500 mb-8">{stay?.name || "선택된 숙소 없음"}</p>
+      <p className="text-gray-500 mb-8">{stay?.title || "선택된 숙소 없음"}</p>
 
-      {/* ✅ 날짜 선택 영역 */}
       <div className="grid grid-cols-4 gap-4 justify-center items-center mb-10">
         {days.slice(0, -1).map((d) => {
           const dateStr = d.format("MM/DD");
           const selected = selectedDates.includes(dateStr);
 
-          const assigned = Object.entries(stayPlans).find(([name, ds]) =>
+          const assigned = Object.entries(stayPlans).find(([id, ds]) =>
             ds.includes(dateStr)
           );
           const booked = !!assigned;
-          const bookedStayName = assigned ? assigned[0] : null;
+          const bookedStayId = assigned ? assigned[0] : null;
           const bookedStay = booked
-            ? stays.find((s) => s.name === bookedStayName)
+            ? stays.find((s) => s.accId === bookedStayId)
             : null;
 
           return (
@@ -128,7 +121,7 @@ export default function StaySelectModal({
               key={dateStr}
               onClick={() => toggleDate(dateStr)}
               className={`relative flex flex-col items-center justify-center border-2 rounded-xl p-3 cursor-pointer transition-all ${booked
-                  ? bookedStayName === stay?.name
+                  ? bookedStayId === stay?.accId
                     ? "border-[#6846FF] bg-[#6846FF]/10"
                     : "border-red-300 bg-red-50"
                   : selected
@@ -138,7 +131,7 @@ export default function StaySelectModal({
             >
               <div
                 className={`absolute -top-3 text-xs font-bold px-2 py-1 rounded-full ${booked
-                    ? bookedStayName === stay?.name
+                    ? bookedStayId === stay?.accId
                       ? "bg-[#6846FF] text-white"
                       : "bg-red-500 text-white"
                     : selected
@@ -150,13 +143,19 @@ export default function StaySelectModal({
               </div>
 
               <div className="w-16 h-16 rounded-md overflow-hidden flex items-center justify-center text-gray-400 text-2xl mt-3">
-                {booked && bookedStayName !== stay?.name ? (
+                {booked && bookedStayId !== stay?.accId ? (
                   <img
-                    src={bookedStay?.img}
-                    alt={bookedStayName}
+                    src={
+                      bookedStay?.accImages && bookedStay.accImages.length > 0
+                        ? bookedStay.accImages[0].startsWith("http")
+                          ? bookedStay.accImages[0]
+                          : `http://localhost:8080${bookedStay.accImages[0]}`
+                        : "https://placehold.co/100x100?text=No+Image"
+                    }
+                    alt={bookedStay?.title}
                     className="w-full h-full object-cover"
                   />
-                ) : selected || bookedStayName === stay?.name ? (
+                ) : selected || bookedStayId === stay?.accId ? (
                   <i className="bi bi-check-circle text-[#6846FF]"></i>
                 ) : (
                   <i className="bi bi-plus-circle"></i>
@@ -165,16 +164,16 @@ export default function StaySelectModal({
 
               <p
                 className={`text-xs mt-2 font-medium ${booked
-                    ? bookedStayName === stay?.name
+                    ? bookedStayId === stay?.accId
                       ? "text-[#6846FF]"
                       : "text-red-600"
                     : "text-gray-500"
                   }`}
               >
                 {booked
-                  ? bookedStayName === stay?.name
+                  ? bookedStayId === stay?.accId
                     ? "현재 선택됨"
-                    : `${bookedStayName} 예약됨`
+                    : `${bookedStay?.title} 예약됨`
                   : selected
                     ? "선택됨"
                     : "선택 가능"}

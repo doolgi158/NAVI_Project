@@ -59,6 +59,7 @@ public class TravelPlanServiceImpl implements TravelPlanService {
             for (TravelPlanRequestDTO.TravelItem t : dto.getTravels()) {
                 TravelPlanDay day = TravelPlanDay.builder()
                         .travelPlan(plan)
+                        .planTitle(dto.getTitle())
                         .planTitle(t.getTravelName())
                         .travelId(t.getTravelId()) // TRAVEL.TRAVEL_ID
                         .orderNo(++idx)

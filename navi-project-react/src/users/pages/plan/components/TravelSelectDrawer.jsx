@@ -25,26 +25,38 @@ export default function TravelSelectDrawer({
               <List.Item
                 onClick={() =>
                   setSelectedTravels((prev) =>
-                    prev.some((v) => v.id === item.id)
-                      ? prev.filter((v) => v.id !== item.id)
+                    prev.some((v) => v.travelId === item.travelId)
+                      ? prev.filter((v) => v.id !== item.travelId)
                       : [...prev, item]
                   )
                 }
                 className="cursor-pointer"
               >
                 <div className="flex justify-between w-full items-center bg-white px-4 py-3 rounded-lg shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <img src={item.img} alt={item.name} className="w-12 h-12 rounded-md object-cover" />
+                  <div className="flex items-center gap-3 ">
+                    {/* 여행지 대표 이미지 */}
+                    <img
+                      src={item.img}
+                      alt={item.title}
+                      className="w-12 h-12 rounded-md object-cover"
+                    />
                     <div>
-                      <p className="font-semibold text-sm text-[#2F3E46] mb-0">{item.name}</p>
-                      <p className="text-xs text-gray-500 mb-1">{item.desc}</p>
+                      {/* 지역 */}
+                      <p className="font-semibold text-sm text-[#2F3E46] mb-0">
+                        {item.title}
+                      </p>
+                      <p className="text-xs text-gray-500 mb-1">
+                        {item.region1Name || "-"} {`>`} {item.region2Name || "-"}
+                      </p>
                       <div className="flex items-center text-xs text-gray-400 gap-1">
                         <i className="bi bi-heart-fill text-red-500"></i>
-                        <span>{item.likes}</span>
+                        <span>{item.likes || 0}</span>
                       </div>
                     </div>
                   </div>
-                  {selectedTravels.some((v) => v.id === item.id) ? (
+
+                  {/* ✅ 선택/해제 아이콘 */}
+                  {selectedTravels.some((v) => v.travelId === item.travelId) ? (
                     <i className="bi bi-dash-square-fill text-red-500 text-xl"></i>
                   ) : (
                     <i className="bi bi-plus-square-fill text-blue-500 text-xl"></i>
@@ -60,7 +72,9 @@ export default function TravelSelectDrawer({
       <div className="w-1/2 bg-[#FFFFFF] p-5 flex flex-col">
         <div className="flex justify-between items-center mb-5">
           <div>
-            <h3 className="text-lg font-semibold text-[#2F3E46]">📍 여행지 일정 요약</h3>
+            <h3 className="text-lg font-semibold text-[#2F3E46]">
+              📍 여행지 일정 요약
+            </h3>
             <p className="text-sm text-gray-500 mt-1">
               총 {selectedTravels.length}개의 여행지
             </p>
@@ -88,16 +102,26 @@ export default function TravelSelectDrawer({
               <List.Item>
                 <div className="flex justify-between w-full items-center bg-white px-4 py-3 rounded-lg shadow-sm hover:bg-[#F9FAF9] transition">
                   <div className="flex items-center gap-3">
-                    <img src={item.img} alt={item.name} className="w-12 h-12 rounded-md object-cover" />
+                    <img
+                      src={item.img}
+                      alt={item.title}
+                      className="w-12 h-12 rounded-md object-cover"
+                    />
                     <div>
-                      <p className="font-semibold text-sm text-[#2F3E46] mb-0">{item.name}</p>
-                      <p className="text-xs text-gray-500 mb-1">{item.desc}</p>
+                      <p className="font-semibold text-sm text-[#2F3E46] mb-0">
+                        {item.title}
+                      </p>
+                      <p className="text-xs text-gray-500 mb-1">
+                        {item.region1Name || "-"} {`>`} {item.region2Name || '-'}
+                      </p>
                     </div>
                   </div>
                   <i
                     className="bi bi-dash-square-fill text-red-500 text-xl cursor-pointer"
                     onClick={() =>
-                      setSelectedTravels((prev) => prev.filter((v) => v.id !== item.id))
+                      setSelectedTravels((prev) =>
+                        prev.filter((v) => v.travelId !== item.travelId)
+                      )
                     }
                   ></i>
                 </div>

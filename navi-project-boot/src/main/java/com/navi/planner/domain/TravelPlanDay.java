@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Entity
-@Table(name = "travel_plan_day")
+@Table(name = "TRAVEL_PLAN_DAY", schema = "NAVI")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -17,9 +17,14 @@ public class TravelPlanDay {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "travel_plan_day_seq")
-    @SequenceGenerator(name = "travel_plan_day_seq", sequenceName = "TRAVEL_PLAN_DAY_SEQ", allocationSize = 1)
+    @SequenceGenerator(
+            name = "travel_plan_day_seq",
+            sequenceName = "TRAVEL_PLAN_DAY_SEQ",
+            allocationSize = 1
+    )
     private Long id;
 
+    /** ✅ FK: TRAVEL_PLAN.id 참조 */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "plan_id", nullable = false)
     private TravelPlan travelPlan;

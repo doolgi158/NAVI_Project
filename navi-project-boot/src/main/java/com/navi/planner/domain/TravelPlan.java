@@ -24,13 +24,9 @@ public class TravelPlan extends BaseEntity {
     @SequenceGenerator(name = "travel_plan_seq", sequenceName = "TRAVEL_PLAN_SEQ", allocationSize = 1)
     private Long id;
 
-    /**
-     * NOTE:
-     *  - 컬럼명은 user_id 지만, 실제로는 User의 PK(user_no)를 참조한다.
-     *  - 혼동 방지를 위해 referencedColumnName 명시
-     */
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", referencedColumnName = "user_no", nullable = false)
+    @JoinColumn(name = "user_no", nullable = false) // ✅ FK 컬럼명 일치
     private User user;
 
     @Column(nullable = false, length = 255)
@@ -51,16 +47,22 @@ public class TravelPlan extends BaseEntity {
     @Column(name = "end_time")
     private LocalTime endTime;
 
-    @OneToMany(mappedBy = "travelPlan", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(
+            mappedBy = "travelPlan",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
     @OrderBy("orderNo ASC, id ASC")
     @Builder.Default
     private List<TravelPlanDay> days = new ArrayList<>();
 
+    /** ✅ 양방향 편의 메서드 */
     public void setDays(List<TravelPlanDay> days) {
         this.days = days;
         if (days != null) {
-            for (TravelPlanDay d : days) {
-                d.setTravelPlan(this);
+            for (TravelPlanDay day : days) {
+                day.setTravelPlan(this);
             }
         }
     }
