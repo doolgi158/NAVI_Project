@@ -1,4 +1,3 @@
-// src/users/pages/delivery/DeliveryPage.jsx
 import MainLayout from "../../layout/MainLayout";
 import { useState, useEffect, useRef } from "react";
 import { Input, DatePicker, Button, message, Radio } from "antd";
@@ -7,6 +6,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const API_SERVER_HOST = "http://localhost:8080";
+const KAKAO_MAP_KEY = import.meta.env.VITE_KAKAO_MAP_KEY; //
 
 // ✅ bagSize별 요금표
 const BAG_PRICE_TABLE = {

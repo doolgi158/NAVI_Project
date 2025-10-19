@@ -1,4 +1,3 @@
-// src/admin/pages/flight/AdminReservationPage.jsx
 import { useEffect, useState } from "react";
 import { Table, Button, Space, Tag, message, Typography, Modal } from "antd";
 import { ReloadOutlined, DeleteOutlined, SearchOutlined } from "@ant-design/icons";

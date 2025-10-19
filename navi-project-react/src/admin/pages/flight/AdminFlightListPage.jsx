@@ -1,4 +1,3 @@
-// src/admin/pages/flight/AdminFlightListPage.jsx
 import { useEffect, useState } from "react";
 import { Table, Button, Input, Space, Tag, message, Typography } from "antd";
 import {
