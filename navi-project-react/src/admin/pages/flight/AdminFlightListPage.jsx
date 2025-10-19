@@ -1,7 +1,12 @@
 // src/admin/pages/flight/AdminFlightListPage.jsx
 import { useEffect, useState } from "react";
 import { Table, Button, Input, Space, Tag, message, Typography } from "antd";
-import { SearchOutlined, EditOutlined, DeleteOutlined, SettingOutlined } from "@ant-design/icons";
+import {
+  SearchOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  SettingOutlined,
+} from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import dayjs from "dayjs";
@@ -174,17 +179,19 @@ const AdminFlightListPage = () => {
     {
       title: "관리",
       align: "center",
-      width: 160,
+      width: 220,
       render: (_, record) => (
         <Space>
+          {/* ✅ 좌석관리 버튼 수정 */}
           <Button
             type="default"
             icon={<SettingOutlined />}
-            onClick={() =>
-              navigate(`/adm/seat/${record.flightId}/${encodeURIComponent(record.depTime)}`)
-            }
+            onClick={() => {
+              const depTime = encodeURIComponent(record.depTime);
+              navigate(`/adm/flight/seats?flightId=${record.flightId}&depTime=${depTime}`);
+            }}
           >
-            좌석
+            좌석관리
           </Button>
           <Button
             type="primary"

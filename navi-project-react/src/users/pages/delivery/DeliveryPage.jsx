@@ -202,7 +202,7 @@ const DeliveryPage = () => {
               bounds.extend(linePath[0]);
               bounds.extend(linePath[1]);
               mapRef.current.setBounds(bounds, 50);
-  
+
             } else {
               mapRef.current.setCenter(position);
             }
