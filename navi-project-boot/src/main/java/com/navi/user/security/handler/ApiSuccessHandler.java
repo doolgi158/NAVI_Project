@@ -87,6 +87,11 @@ public class ApiSuccessHandler implements AuthenticationSuccessHandler {
             String refresh = claim.getRefreshToken() != null ? claim.getRefreshToken() : "";
             String ip = claim.getIp() != null ? claim.getIp() : "0.0.0.0";
 
+            Long userNo = 0L;
+            if (userRepository.existsById(id)) {
+                userNo = userRepository.getUser(id).getNo();
+            }
+
             try (PrintWriter out = response.getWriter()) {
                 out.println(gson.toJson(
                         Map.of(
@@ -97,7 +102,8 @@ public class ApiSuccessHandler implements AuthenticationSuccessHandler {
                                 "roles", claim.getRole(),
                                 "accessToken", access,
                                 "refreshToken", refresh,
-                                "ip", ip
+                                "ip", ip,
+                                "userNo", userNo
                         )
                 ));
                 out.flush();

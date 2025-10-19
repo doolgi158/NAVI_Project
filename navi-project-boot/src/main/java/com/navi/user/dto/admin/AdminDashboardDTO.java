@@ -117,4 +117,16 @@ public class AdminDashboardDTO {
         private long accViews;
         private long flightResv;
     }
+
+    /**
+     * 항공편 관련
+     */
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Flights {
+        private long count;          // 전체 등록 항공편 수
+        private double changedPct;   // 전월 대비 증감률 (추후 사용)
+    }
 }

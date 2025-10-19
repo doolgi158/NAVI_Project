@@ -10,6 +10,7 @@ const initState = {
   refreshToken: "",
   role: "",
   ip: "",
+  userNo: "",
 };
 
 // 쿠키에서 사용자 정보 로드
@@ -29,7 +30,7 @@ const loginSlice = createSlice({
   reducers: {
     setlogin: (state, action) => {
 
-      const { username, accessToken, refreshToken, role, ip } = action.payload;
+      const { username, accessToken, refreshToken, role, ip, userNo } = action.payload;
       // roles 배열이면 첫 번째만 사용
       let roleValue = "";
       if (Array.isArray(role)) {
@@ -43,6 +44,7 @@ const loginSlice = createSlice({
       state.refreshToken = refreshToken;
       state.role = roleValue;
       state.ip = ip;
+      state.userNo = userNo;
 
       // axiosInstance에도 등록
       setAuthTokens(accessToken, refreshToken);
@@ -90,6 +92,8 @@ const loginSlice = createSlice({
       state.refreshToken = "";
       state.token = "";
       state.ip = "";
+      state.userNo = "";
+
       delete axios.defaults.headers.common["Authorization"];
     },
   },

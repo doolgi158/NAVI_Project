@@ -32,6 +32,13 @@ export const useDashboardData = (endpoints) => {
                 userTrend: responses[0]?.data?.data?.userTrend ?? [],
                 travels: responses[1]?.data?.data,
                 ranking: responses[2]?.data?.data,
+                flights: responses[3].data.data,
+                accommodations: {
+                    count:
+                        responses[4]?.data?.data?.count ??
+                        responses[4]?.data?.data ?? // 숫자만 오는 경우
+                        0,
+                },
             };
 
             setData(merged);

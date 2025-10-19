@@ -40,6 +40,7 @@ const DashboardKpiSection = ({ summary, loading }) => {
         payments: summary.payments || { amount: 0, count: 0, changedPct: 0 },
         refunds: summary.refunds || { pct: 0, changedPct: 0 },
         cs: summary.cs || { handleRate: 0 },
+        flights: summary.flights || { count: 0 },
     };
 
     return (
@@ -108,7 +109,7 @@ const DashboardKpiSection = ({ summary, loading }) => {
             <Col xs={24} sm={12} md={12} lg={6}>
                 <KpiCard
                     title="등록 항공편"
-                    value={(safe.flights?.count ?? 0).toLocaleString()}
+                    value={(safe.flights.count ?? 0).toLocaleString()}
                     icon={<RocketOutlined style={{ color: COLORS[5] }} />}
                 />
             </Col>

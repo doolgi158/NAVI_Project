@@ -25,17 +25,21 @@ export const useLogin = () => {
 
       // 상태 코드별 처리
       if (response.status === 200) {
-        const { accessToken, refreshToken, username, roles, ip } = response.data;
+        const { accessToken, refreshToken, username, roles, ip, userNo } = response.data;
 
         // JWT 토큰 저장
         localStorage.setItem("accessToken", accessToken);
         localStorage.setItem("refreshToken", refreshToken);
         localStorage.setItem("username", username);
+        localStorage.setItem("userNo", userNo);
 
         axios.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
 
         // Redux 상태 갱신
-        dispatch(setlogin({ username: username, accessToken: accessToken, refreshToken: refreshToken, role: roles, ip: ip }));
+        dispatch(setlogin({
+          username: username, accessToken: accessToken, refreshToken: refreshToken,
+          role: roles, ip: ip, userNo: userNo
+        }));
 
         await new Promise((resolve) => setTimeout(resolve, 100));
 

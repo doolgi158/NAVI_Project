@@ -1,16 +1,21 @@
 package com.navi.user.dto;
 
-import lombok.*;
+import com.navi.user.domain.User;
+import com.navi.user.enums.ActionType;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class LogDTO {
-    private long ID;        // 로그 아이디
-    private int payment;    // 결제 횟수
-    private int refund;     // 환불 요청 수
-    private int schedule;   // 계획 작성 수
-    private int delivery;   // 배송 요청 수
-    private int board;      // 게시글 작숭 수
-    private int comment;    // 잿글 작성 수
+    private long ID;                    // 로그 아이디
+    private User user;                  // 유저 정보
+    private ActionType actionType;      // 행동 타입
+    private Long targetId;              // 대상 ID
+    private String targetName;          // 대상명 (옵션 — 분석용으로 남겨도 좋음)
+    private LocalDateTime createdAt;    // 발생 시각
 }
