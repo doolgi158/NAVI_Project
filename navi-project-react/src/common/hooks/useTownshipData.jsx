@@ -28,7 +28,7 @@ const useTownshipData = () => {
             const res = await axios.get("/api/townships");
             
             // 데이터가 성공적으로 로드되거나, 유효한 빈 응답을 받은 경우
-            if (Array.isArray(res.data) && res.length >= 0) { 
+            if (Array.isArray(res.data) && res.data.length >= 0) { 
                 setTownshipList(res.data);
                 sessionStorage.setItem("townshipList", JSON.stringify(res.data));
                 setIsLoading(false);

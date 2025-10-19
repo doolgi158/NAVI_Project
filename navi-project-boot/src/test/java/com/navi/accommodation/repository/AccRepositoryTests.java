@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @Slf4j
@@ -42,15 +43,6 @@ public class AccRepositoryTests {
     public void updateAllData() {
         accSyncService.updateAll();
         log.info("✅ KakaoGeo 기반 좌표 및 읍면동 전체 동기화 완료");
-    }
-
-    /* 초기데이터 한번에 삽입 */
-    @Test
-    public void AllDate() throws Exception {
-        accSyncService.loadApiFromJsonFile();
-        accSyncService.updateApiFromJsonFile();
-        accSyncService.loadFromAdminJsonFile();
-        accSyncService.updateAll();
     }
 
     /* === 관리자 CRUD === */
