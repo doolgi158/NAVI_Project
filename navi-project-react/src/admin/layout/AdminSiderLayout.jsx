@@ -23,7 +23,7 @@ const AdminSiderLayout = () => {
     const token = localStorage.getItem("accessToken");
 
     // 로그인 안 했거나 관리자가 아닐 경우 접근 차단
-    if (!token || username !== "naviadmin") {
+    if (!token || username !== "asdf") {
       message.warning("관리자만 접근할 수 있습니다.");
       navigate("/");
     }
