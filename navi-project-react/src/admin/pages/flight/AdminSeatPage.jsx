@@ -22,6 +22,7 @@ const AdminSeatPage = () => {
     const [seatFilter, setSeatFilter] = useState("ALL");
     const [rsvFilter, setRsvFilter] = useState("ALL");
     const [flightInfo, setFlightInfo] = useState({ flightId: "", depTime: "" });
+    const [page, setPage] = useState({ current: 1, pageSize: 20 }); // ✅ 페이지네이션 상태
     const location = useLocation();
 
     /** ✅ URL에서 flightId, depTime 읽기 */
@@ -157,26 +158,32 @@ const AdminSeatPage = () => {
         }
     };
 
-    /** ✅ 컬럼 정의 */
+    /** ✅ 컬럼 스타일 */
     const cellStyle = {
         whiteSpace: "nowrap",
         overflow: "hidden",
         textOverflow: "ellipsis",
     };
 
+    /** ✅ 컬럼 정의 */
     const columns = [
+        {
+            title: "항공편명",
+            dataIndex: "flightId",
+            align: "center",
+            sorter: (a, b) => a.flightId.localeCompare(b.flightId),
+            render: (v) => <div style={cellStyle}>{v}</div>,
+        },
         {
             title: "좌석번호",
             dataIndex: "seatNo",
             align: "center",
-            width: 90,
             render: (v) => <div style={cellStyle}>{v}</div>,
         },
         {
             title: "등급",
             dataIndex: "seatClass",
             align: "center",
-            width: 110,
             sorter: (a, b) => a.seatClass.localeCompare(b.seatClass),
             render: (cls) => (
                 <Tag color={cls === "ECONOMY" ? "green" : "blue"}>
@@ -188,7 +195,6 @@ const AdminSeatPage = () => {
             title: "예약상태",
             dataIndex: "reserved",
             align: "center",
-            width: 100,
             sorter: (a, b) => (a.reserved === b.reserved ? 0 : a.reserved ? -1 : 1),
             render: (r) => (
                 <Tag color={r ? "red" : "default"}>{r ? "예약됨" : "가능"}</Tag>
@@ -198,23 +204,13 @@ const AdminSeatPage = () => {
             title: "추가요금",
             dataIndex: "extraPrice",
             align: "center",
-            width: 100,
             sorter: (a, b) => a.extraPrice - b.extraPrice,
             render: (v) => <div style={cellStyle}>{v?.toLocaleString()}원</div>,
-        },
-        {
-            title: "항공편명",
-            dataIndex: "flightId",
-            align: "center",
-            width: 120,
-            sorter: (a, b) => a.flightId.localeCompare(b.flightId),
-            render: (v) => <div style={cellStyle}>{v}</div>,
         },
         {
             title: "출발시간",
             dataIndex: "depTime",
             align: "center",
-            width: 160,
             sorter: (a, b) => dayjs(a.depTime).unix() - dayjs(b.depTime).unix(),
             render: (v) => (
                 <div style={cellStyle}>{dayjs(v).format("YYYY-MM-DD HH:mm")}</div>
@@ -223,7 +219,6 @@ const AdminSeatPage = () => {
         {
             title: "관리",
             align: "center",
-            width: 200,
             render: (_, seat) => (
                 <Space>
                     <Button
@@ -263,6 +258,11 @@ const AdminSeatPage = () => {
             if (rsvFilter === "AVAILABLE") return s.reserved === false;
             return true;
         });
+
+    /** ✅ 필터/검색 변경 시 페이지 리셋 */
+    useEffect(() => {
+        setPage((p) => ({ ...p, current: 1 }));
+    }, [search, seatFilter, rsvFilter, seats]);
 
     return (
         <div style={{ padding: 24 }}>
@@ -343,11 +343,17 @@ const AdminSeatPage = () => {
                     rowKey="seatId"
                     loading={loading}
                     bordered
+                    scroll={{ x: true }}
                     pagination={{
-                        pageSize: 20,
+                        current: page.current,
+                        pageSize: page.pageSize,
+                        showSizeChanger: true,
+                        pageSizeOptions: [10, 20, 50, 100],
                         showTotal: (t) => `총 ${t.toLocaleString()} 좌석`,
+                        onChange: (current, pageSize) => setPage({ current, pageSize }),
+                        onShowSizeChange: (current, size) =>
+                            setPage({ current: 1, pageSize: size }),
                     }}
-                    scroll={{ x: 1500 }}
                 />
             </AdminSectionCard>
         </div>
