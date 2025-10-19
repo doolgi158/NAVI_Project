@@ -128,6 +128,7 @@ const LoginModal = ({ open = false, onClose = () => { } }) => {
                 </Form.Item>
 
                 <Form.Item
+                  form={form}
                   label="비밀번호"
                   name="password"
                   rules={[{ required: true, message: "비밀번호를 입력하세요" }]}

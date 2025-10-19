@@ -1,4 +1,4 @@
-package com.navi.user.controller;
+package com.navi.user.controller.user;
 
 import com.navi.common.response.ApiResponse;
 import com.navi.image.service.ImageService;
@@ -6,7 +6,6 @@ import com.navi.user.dto.users.UserRequestDTO;
 import com.navi.user.dto.users.UserResponseDTO;
 import com.navi.user.dto.users.UserSecurityDTO;
 import com.navi.user.repository.UserRepository;
-import com.navi.user.security.util.LoginRequestUtil;
 import com.navi.user.service.user.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -82,8 +81,8 @@ public class ApiUserController {
     }
 
     @PostMapping("/delete")
-    public ResponseEntity<ApiResponse<String>> withdrawUser( @RequestBody Map<String, String> body,
-            HttpServletRequest request) {
+    public ResponseEntity<ApiResponse<String>> withdrawUser(@RequestBody Map<String, String> body,
+                                                            HttpServletRequest request) {
 
         // JWT에서 id 추출
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

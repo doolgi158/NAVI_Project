@@ -1,4 +1,4 @@
-package com.navi.user.controller;
+package com.navi.user.controller.user;
 
 import com.navi.common.response.ApiResponse;
 import com.navi.user.domain.History;
@@ -17,7 +17,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -116,7 +119,9 @@ public class ApiSocialController {
         }
     }
 
-    /** username 추출: body.username -> body.user.id -> JWT(claims.id) 순으로 시도 */
+    /**
+     * username 추출: body.username -> body.user.id -> JWT(claims.id) 순으로 시도
+     */
     private String extractUsername(Map<String, Object> body, String authorization) {
         if (body != null) {
             Object u1 = body.get("username");
@@ -135,7 +140,8 @@ public class ApiSocialController {
                 Map<String, Object> claims = jwtUtil.validateToken(token);
                 Object id = claims.get("id");
                 if (id instanceof String && !((String) id).isBlank()) return (String) id;
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
         return null;
     }

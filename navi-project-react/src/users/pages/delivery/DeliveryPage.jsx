@@ -225,7 +225,7 @@ const DeliveryPage = () => {
     ];
     const missing = required.find((k) => !form[k]);
     if (missing) {
-      message.warning("모든 필드를 입력해주세요.");
+      message.warning("모든 정보를 입력해주세요.");
       return;
     }
 
@@ -234,7 +234,7 @@ const DeliveryPage = () => {
       endAddr: form.toAddress,
       deliveryDate: form.deliveryDate.format("YYYY-MM-DD"),
       totalPrice: estimatedFare,
-      userNo: 1, // TODO: 로그인 세션에서 추출 예정
+      userNo: 2, // TODO: 로그인 세션에서 추출 예정
       bagId: form.bagSize === "S" ? 1 : form.bagSize === "M" ? 2 : 3,
       groupId: "G20251015_JEJU_AM_1",
     };
@@ -242,7 +242,7 @@ const DeliveryPage = () => {
     try {
       const res = await axios.post(`${API_SERVER_HOST}/api/delivery/rsv`, dto);
       message.success("짐배송 예약이 완료되었습니다!");
-      navigate("/delivery/result", { state: res.data }); // ✅ 결과 페이지로 이동
+      navigate("/delivery/result", { state: res.data }); // 결과 페이지로 이동
     } catch (error) {
       console.error("❌ 예약 요청 실패:", error);
       message.error("예약 중 오류가 발생했습니다.");

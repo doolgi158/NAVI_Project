@@ -5,11 +5,12 @@ import com.navi.common.entity.BaseEntity;
 import com.navi.common.enums.RsvType;
 import com.navi.payment.domain.enums.PaymentStatus;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 
 /* ======================[NAVI_PAYMENT_DETAIL]======================
                             결제 상세 테이블
@@ -31,7 +32,8 @@ import java.time.format.DateTimeFormatter;
 public class PaymentDetail extends BaseEntity {
     /* === COLUMN 정의 === */
     // 내부 식별번호 (예: 1)
-    @Id @Column(name = "no")
+    @Id
+    @Column(name = "no")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "payment_detail_generator")
     private Long no;
 
@@ -76,7 +78,9 @@ public class PaymentDetail extends BaseEntity {
     @Column(name = "reason", length = 200)
     private String reason;
 
-    /** === 기본값 보정 === */
+    /**
+     * === 기본값 보정 ===
+     */
     @PrePersist
     public void prePersist() {
         if (paymentStatus == null) paymentStatus = PaymentStatus.PAID;
@@ -90,11 +94,13 @@ public class PaymentDetail extends BaseEntity {
         this.paymentStatus = PaymentStatus.PAID;
         this.reason = null;
     }
+
     // 2. 환불 완료 처리
     public void markAsRefunded(String reason) {
         this.paymentStatus = PaymentStatus.REFUNDED;
         this.reason = reason;
     }
+
     // 3. 부분 환불 처리
     public void markAsPartialRefunded(String reason) {
         this.paymentStatus = PaymentStatus.PARTIAL_REFUNDED;

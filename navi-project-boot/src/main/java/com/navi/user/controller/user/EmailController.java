@@ -1,4 +1,4 @@
-package com.navi.user.controller;
+package com.navi.user.controller.user;
 
 import com.navi.user.service.user.EmailService;
 import lombok.RequiredArgsConstructor;

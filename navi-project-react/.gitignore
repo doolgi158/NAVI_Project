@@ -25,4 +25,13 @@ dist-ssr
 
 # Environment variables
 .env
+<<<<<<< HEAD
 .env.*
+=======
+.env.local
+.env.development
+.env.development.local
+.env.production.local
+
+navi-project-react/.env.development
+>>>>>>> 38038d521925df5d0b469ea8075a1f7b41a91833

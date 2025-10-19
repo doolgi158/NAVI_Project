@@ -1,14 +1,17 @@
-package com.navi.user.controller;
+package com.navi.user.controller.admin;
 
 import com.navi.common.response.ApiResponse;
 import com.navi.user.domain.History;
 import com.navi.user.domain.User;
+import com.navi.user.dto.admin.AdminDashboardDTO;
 import com.navi.user.dto.admin.AdminUserDTO;
 import com.navi.user.enums.UserState;
 import com.navi.user.repository.HistoryRepository;
 import com.navi.user.repository.UserRepository;
+import com.navi.user.service.admin.AdminUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.format.DateTimeFormatter;
@@ -16,17 +19,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/adm/users")
+@RequestMapping("/api/adm")
 @RequiredArgsConstructor
 public class ApiAdminUserController {
     private final UserRepository userRepository;
     private final HistoryRepository historyRepository;
+    private final AdminUserService adminUserService;
 
     private final DateTimeFormatter SIGNUP_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd");
     private final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
 
     // 사용자 + 최근 로그인 이력 조회 (페이징)
-    @GetMapping
+    @GetMapping("/users")
     public ApiResponse<?> getUserList(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -129,5 +133,11 @@ public class ApiAdminUserController {
     public ApiResponse<?> deleteUser(@PathVariable Long userNo) {
         userRepository.deleteById(userNo);
         return ApiResponse.success("삭제 완료");
+    }
+
+    @GetMapping("/userDashboard")
+    public ResponseEntity<?> getUserDashboard() {
+        AdminDashboardDTO dashboard = adminUserService.getUserStatistics();
+        return ResponseEntity.ok(ApiResponse.success(dashboard));
     }
 }
