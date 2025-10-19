@@ -15,6 +15,7 @@ export default function StaySelectDrawer({
   setSelectedStayTarget = () => { },
   setShowStayModal = () => { },
   setModalResetTrigger = () => { },
+  resetAllStays = () => { },
 }) {
   return (
     <div className="flex h-full w-full">
@@ -41,7 +42,6 @@ export default function StaySelectDrawer({
               >
                 <div className="flex justify-between w-full items-center bg-white px-4 py-3 rounded-lg shadow-sm">
                   <div className="flex items-center gap-3">
-                    {/* ✅ 이미지 */}
                     <img
                       src={
                         item.accImages && item.accImages.length > 0
@@ -93,11 +93,7 @@ export default function StaySelectDrawer({
           <Button
             type="link"
             className="text-red-500 hover:text-red-600 font-semibold"
-            onClick={() => {
-              setStayPlans({});
-              setSelectedStays([]);
-              setModalResetTrigger((p) => p + 1);
-            }}
+            onClick={() => resetAllStays()}
           >
             설정 초기화
           </Button>
@@ -172,13 +168,9 @@ export default function StaySelectDrawer({
                                   (k) => updated[k].length
                                 );
                                 setSelectedStays(
-                                  stays.filter((s) =>
-                                    active.includes(s.accId)
-                                  )
+                                  stays.filter((s) => active.includes(s.accId))
                                 );
-                                message.success(
-                                  `숙소 일정이 해제되었습니다.`
-                                );
+                                message.success(`숙소 일정이 해제되었습니다.`);
                               },
                             });
                             return;

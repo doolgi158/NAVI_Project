@@ -23,13 +23,11 @@ export default function StaySelectModal({
     }
   }, [open, stay?.accId, stayPlans]);
 
-  /** ✅ 날짜 클릭 시 로직 */
   const toggleDate = (dateStr) => {
     const assigned = Object.entries(stayPlans).find(([id, dates]) =>
       dates.includes(dateStr)
     );
 
-    // ✅ 이미 다른 숙소에 예약된 날짜인 경우
     if (assigned && assigned[0] !== stay.accId) {
       const assignedId = assigned[0];
       const assignedStay = stays.find((s) => s.accId === assignedId);
@@ -53,7 +51,6 @@ export default function StaySelectModal({
       return;
     }
 
-    // ✅ 현재 숙소에 대한 날짜 토글
     setSelectedDates((prev) =>
       prev.includes(dateStr)
         ? prev.filter((d) => d !== dateStr)
@@ -67,29 +64,12 @@ export default function StaySelectModal({
   };
 
   return (
-    <Modal
-      open={open}
-      centered
-      onCancel={handleSelectComplete}
-      footer={null}
-      width={600}
-      styles={{
-        body: {
-          background: "#fff",
-          borderRadius: 16,
-          padding: "40px 30px",
-          textAlign: "center",
-        },
-      }}
-    >
+    <Modal open={open} centered onCancel={handleSelectComplete} footer={null} width={600}>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-lg font-semibold text-[#222] mb-1">
-          숙박하실 날짜를 선택해주세요
-        </h2>
+        <h2 className="text-lg font-semibold text-[#222]">숙박하실 날짜를 선택해주세요</h2>
         <Button
           size="small"
           type="default"
-          className="rounded-md text-sm font-medium"
           onClick={() => {
             const selectable = days.slice(0, -1).map((d) => d.format("MM/DD"));
             const all = selectable.every((d) => selectedDates.includes(d));
@@ -102,11 +82,10 @@ export default function StaySelectModal({
 
       <p className="text-gray-500 mb-8">{stay?.title || "선택된 숙소 없음"}</p>
 
-      <div className="grid grid-cols-4 gap-4 justify-center items-center mb-10">
+      <div className="grid grid-cols-4 gap-4 mb-10">
         {days.slice(0, -1).map((d) => {
           const dateStr = d.format("MM/DD");
           const selected = selectedDates.includes(dateStr);
-
           const assigned = Object.entries(stayPlans).find(([id, ds]) =>
             ds.includes(dateStr)
           );
@@ -120,7 +99,7 @@ export default function StaySelectModal({
             <div
               key={dateStr}
               onClick={() => toggleDate(dateStr)}
-              className={`relative flex flex-col items-center justify-center border-2 rounded-xl p-3 cursor-pointer transition-all ${booked
+              className={`relative flex flex-col items-center border-2 rounded-xl p-3 cursor-pointer transition ${booked
                   ? bookedStayId === stay?.accId
                     ? "border-[#6846FF] bg-[#6846FF]/10"
                     : "border-red-300 bg-red-50"
@@ -142,11 +121,11 @@ export default function StaySelectModal({
                 {dateStr}
               </div>
 
-              <div className="w-16 h-16 rounded-md overflow-hidden flex items-center justify-center text-gray-400 text-2xl mt-3">
+              <div className="w-16 h-16 rounded-md overflow-hidden flex items-center justify-center mt-3">
                 {booked && bookedStayId !== stay?.accId ? (
                   <img
                     src={
-                      bookedStay?.accImages && bookedStay.accImages.length > 0
+                      bookedStay?.accImages?.[0]
                         ? bookedStay.accImages[0].startsWith("http")
                           ? bookedStay.accImages[0]
                           : `http://localhost:8080${bookedStay.accImages[0]}`
@@ -156,9 +135,9 @@ export default function StaySelectModal({
                     className="w-full h-full object-cover"
                   />
                 ) : selected || bookedStayId === stay?.accId ? (
-                  <i className="bi bi-check-circle text-[#6846FF]"></i>
+                  <i className="bi bi-check-circle text-[#6846FF] text-2xl"></i>
                 ) : (
-                  <i className="bi bi-plus-circle"></i>
+                  <i className="bi bi-plus-circle text-xl text-gray-400"></i>
                 )}
               </div>
 
@@ -167,7 +146,9 @@ export default function StaySelectModal({
                     ? bookedStayId === stay?.accId
                       ? "text-[#6846FF]"
                       : "text-red-600"
-                    : "text-gray-500"
+                    : selected
+                      ? "text-[#6846FF]"
+                      : "text-gray-500"
                   }`}
               >
                 {booked

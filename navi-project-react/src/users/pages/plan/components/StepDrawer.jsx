@@ -1,69 +1,8 @@
 import React from "react";
-import { Button, Modal } from "antd";
-import { useNavigate } from "react-router-dom";
+import { Button } from "antd";
 
-export default function StepDrawer({
-  step,
-  setStep,
-  title,
-  selectedTravels,
-  dateRange,
-  stayPlans,
-  stays,
-  handleConfirm,
-}) {
-  const navigate = useNavigate();
-
+export default function StepDrawer({ step, setStep, onSaveSchedule }) {
   const steps = ["날짜 선택", "여행 제목", "시간 설정", "여행지 선택", "숙소 선택"];
-
-  const handleComplete = async () => {
-    if (!title?.trim()) {
-      Modal.warning({
-        title: "여행 제목을 입력하세요",
-        content: "여행 제목을 입력해야 여행 계획을 완료할 수 있습니다.",
-        centered: true,
-      });
-      setStep(2);
-      return;
-    }
-
-    if (selectedTravels.length === 0) {
-      Modal.warning({
-        title: "여행지를 선택하세요",
-        content: "최소 1개 이상의 여행지를 선택해야 합니다.",
-        centered: true,
-      });
-      setStep(4);
-      return;
-    }
-
-    try {
-      const planData = {
-        title,
-        startDate: dateRange?.[0]?.format("YYYY-MM-DD"),
-        endDate: dateRange?.[1]?.format("YYYY-MM-DD"),
-        travels: selectedTravels.map((t) => t.id),
-        stays: Object.entries(stayPlans).map(([stayName, dates]) => {
-          const stayInfo = stays.find((s) => s.name === stayName);
-          return { stayId: stayInfo?.id, dates };
-        }),
-      };
-
-      await savePlan(planData);
-      Modal.success({
-        title: "🎉 여행 계획이 저장되었습니다!",
-        content: "여행계획 페이지로 이동합니다.",
-        centered: true,
-        onOk: () => navigate("/plans"),
-      });
-    } catch (err) {
-      Modal.error({
-        title: "저장 실패",
-        content: "여행계획 저장 중 오류가 발생했습니다.",
-        centered: true,
-      });
-    }
-  };
 
   return (
     <div className="flex flex-col justify-between bg-white p-5 h-full border-r border-gray-200">
@@ -88,30 +27,33 @@ export default function StepDrawer({
       </div>
 
       <div className="space-y-2">
-        {step > 1 && <Button className="w-full" onClick={() => setStep(step - 1)}>이전</Button>}
-        {step < 5 && (
+        {step > 1 && (
+          <Button className="w-full" onClick={() => setStep(step - 1)}>
+            이전
+          </Button>
+        )}
+
+        {step === 5 ? (
           <Button
             type="primary"
             className="w-full"
             style={{ background: "#2F3E46", border: "none" }}
-            onClick={() => setStep(step + 1)}
+            onClick={onSaveSchedule}
           >
-            다음
+            저장
           </Button>
+        ) : (
+          step < 5 && (
+            <Button
+              type="primary"
+              className="w-full"
+              style={{ background: "#2F3E46", border: "none" }}
+              onClick={() => setStep(step + 1)}
+            >
+              다음
+            </Button>
+          )
         )}
-        {step === 5 && (
-
-          <Button
-            type="primary"
-            className="w-full"
-            style={{ background: "#2F3E46", border: "none" }}
-            onClick={handleConfirm}
-          >
-            완료
-          </Button>
-
-        )}
-
       </div>
     </div>
   );
