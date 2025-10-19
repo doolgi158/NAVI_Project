@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom";
-import AdminSiderLayout from "@/admin/layout/AdminSiderLayout";
-import AdminFlightHeader from "@/admin/layout/AdminFlightHeader";
+import AdminSiderLayout from "../../layout/AdminSiderLayout";
+import AdminFlightHeader from "../../layout/flight/AdminFlightHeader";
 
 const AdminFlightRoot = () => {
     return (

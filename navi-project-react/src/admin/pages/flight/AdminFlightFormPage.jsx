@@ -1,12 +1,20 @@
 import { useEffect, useState } from "react";
 import {
-  Form, Input, DatePicker, InputNumber, Button,
-  Card, message, Space, Select, AutoComplete
+  Form,
+  Input,
+  DatePicker,
+  InputNumber,
+  Button,
+  Space,
+  Select,
+  AutoComplete,
+  message,
 } from "antd";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import axios from "axios";
 import dayjs from "dayjs";
+import AdminSectionCard from "../../layout/flight/AdminSectionCard";
 
 const API = "http://localhost:8080/api/admin/flights";
 
@@ -18,7 +26,13 @@ const AdminFlightFormPage = () => {
   const isEdit = !!flightId && !!depTime;
 
   const [airlines, setAirlines] = useState([
-    "대한항공", "아시아나항공", "제주항공", "진에어", "에어부산", "티웨이항공", "에어서울",
+    "대한항공",
+    "아시아나항공",
+    "제주항공",
+    "진에어",
+    "에어부산",
+    "티웨이항공",
+    "에어서울",
   ]);
 
   const [airports] = useState([
@@ -38,7 +52,7 @@ const AdminFlightFormPage = () => {
     { airportCode: "JDG", airportName: "정석(훈련)" },
   ]);
 
-  /** ✅ 단건 항공편 조회 */
+  /** ✅ 항공편 단건 조회 */
   useEffect(() => {
     const fetchFlight = async () => {
       if (!isEdit) return;
@@ -60,8 +74,7 @@ const AdminFlightFormPage = () => {
           economyCharge: data.economyCharge,
           prestigeCharge: data.prestigeCharge,
         });
-      } catch (err) {
-        console.error(err);
+      } catch {
         message.error("항공편 정보를 불러올 수 없습니다.");
       } finally {
         setLoading(false);
@@ -78,12 +91,10 @@ const AdminFlightFormPage = () => {
 
       if (values.depAirportNm === values.arrAirportNm) {
         message.warning("출발공항과 도착공항이 동일합니다.");
-        setLoading(false);
         return;
       }
       if (values.depTime.isAfter(values.arrTime)) {
         message.warning("도착시간은 출발시간보다 늦어야 합니다.");
-        setLoading(false);
         return;
       }
 
@@ -107,15 +118,14 @@ const AdminFlightFormPage = () => {
       }
 
       setTimeout(() => navigate("/adm/flight/list"), 800);
-    } catch (err) {
-      console.error(err);
+    } catch {
       message.error("저장 중 오류가 발생했습니다.");
     } finally {
       setLoading(false);
     }
   };
 
-  /** ✅ 공항 자동완성 데이터 */
+  /** ✅ 공항 자동완성 옵션 */
   const airportOptions = airports.map((a) => ({
     value: a.airportName,
     label: `${a.airportName} (${a.airportCode})`,
@@ -124,28 +134,25 @@ const AdminFlightFormPage = () => {
 
   const handleAirportSelect = (value, option, field) => {
     form.setFieldValue(field, value);
-    console.log(`[선택됨] ${field}:`, option.code);
   };
 
   return (
-    <div style={{ background: "#f8f9fc", minHeight: "100vh", padding: "50px 0" }}>
-      <Card
-        title={
-          <Space>
-            <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)} style={{ borderRadius: 8 }}>
-              뒤로가기
-            </Button>
-            <span>{isEdit ? "✈️ 항공편 수정" : "🆕 항공편 등록"}</span>
-          </Space>
+    <div style={{ padding: 24 }}>
+      <AdminSectionCard
+        title={isEdit ? "✈️ 항공편 수정" : "✈️ 항공편 등록"}
+        extra={
+          <Button
+            icon={<ArrowLeftOutlined />}
+            onClick={() => navigate(-1)}
+            style={{
+              borderRadius: 6,
+              background: "#f0f2f5",
+              border: "1px solid #d9d9d9",
+            }}
+          >
+            뒤로가기
+          </Button>
         }
-        bordered={false}
-        style={{
-          maxWidth: 800,
-          margin: "0 auto",
-          borderRadius: 16,
-          boxShadow: "0 8px 20px rgba(0,0,0,0.06)",
-          background: "#fff",
-        }}
       >
         <Form
           form={form}
@@ -154,13 +161,21 @@ const AdminFlightFormPage = () => {
           autoComplete="off"
           initialValues={{ economyCharge: 0, prestigeCharge: 0 }}
         >
-          {/* ✈️ 항공편명 */}
-          <Form.Item label="항공편명 (예: LJ305)" name="flightId" rules={[{ required: true, message: "항공편명을 입력하세요." }]}>
+          {/* 항공편명 */}
+          <Form.Item
+            label="항공편명 (예: LJ305)"
+            name="flightId"
+            rules={[{ required: true, message: "항공편명을 입력하세요." }]}
+          >
             <Input placeholder="항공편명 입력" disabled={isEdit} />
           </Form.Item>
 
-          {/* 항공사 */}
-          <Form.Item label="항공사명" name="airlineNm" rules={[{ required: true, message: "항공사를 입력하세요." }]}>
+          {/* 항공사명 */}
+          <Form.Item
+            label="항공사명"
+            name="airlineNm"
+            rules={[{ required: true, message: "항공사를 입력하세요." }]}
+          >
             <Select
               showSearch
               placeholder="항공사 선택 또는 직접 입력"
@@ -193,52 +208,103 @@ const AdminFlightFormPage = () => {
             </Select>
           </Form.Item>
 
-          {/* 공항 */}
+          {/* 출발/도착 공항 */}
           <Space size="large" style={{ display: "flex" }}>
-            <Form.Item label="출발공항" name="depAirportNm" rules={[{ required: true }]} style={{ flex: 1 }}>
+            <Form.Item
+              label="출발공항"
+              name="depAirportNm"
+              rules={[{ required: true, message: "출발공항을 입력하세요." }]}
+              style={{ flex: 1 }}
+            >
               <AutoComplete
                 options={airportOptions}
-                placeholder="출발공항 입력 (예: 김포)"
-                onSelect={(value, option) => handleAirportSelect(value, option, "depAirportNm")}
-                filterOption={(input, option) => option.label.toLowerCase().includes(input.toLowerCase())}
+                placeholder="예: 김포"
+                onSelect={(value, option) =>
+                  handleAirportSelect(value, option, "depAirportNm")
+                }
+                filterOption={(input, option) =>
+                  option.label.toLowerCase().includes(input.toLowerCase())
+                }
               />
             </Form.Item>
-            <Form.Item label="도착공항" name="arrAirportNm" rules={[{ required: true }]} style={{ flex: 1 }}>
+
+            <Form.Item
+              label="도착공항"
+              name="arrAirportNm"
+              rules={[{ required: true, message: "도착공항을 입력하세요." }]}
+              style={{ flex: 1 }}
+            >
               <AutoComplete
                 options={airportOptions}
-                placeholder="도착공항 입력 (예: 제주)"
-                onSelect={(value, option) => handleAirportSelect(value, option, "arrAirportNm")}
-                filterOption={(input, option) => option.label.toLowerCase().includes(input.toLowerCase())}
+                placeholder="예: 제주"
+                onSelect={(value, option) =>
+                  handleAirportSelect(value, option, "arrAirportNm")
+                }
+                filterOption={(input, option) =>
+                  option.label.toLowerCase().includes(input.toLowerCase())
+                }
               />
             </Form.Item>
           </Space>
 
-          {/* 시간 */}
+          {/* 출발/도착 시간 */}
           <Space size="large" style={{ display: "flex" }}>
-            <Form.Item label="출발시간" name="depTime" rules={[{ required: true }]} style={{ flex: 1 }}>
-              <DatePicker showTime format="YYYY-MM-DD HH:mm" style={{ width: "100%" }} />
+            <Form.Item
+              label="출발시간"
+              name="depTime"
+              rules={[{ required: true, message: "출발시간을 선택하세요." }]}
+              style={{ flex: 1 }}
+            >
+              <DatePicker
+                showTime
+                format="YYYY-MM-DD HH:mm"
+                style={{ width: "100%" }}
+              />
             </Form.Item>
-            <Form.Item label="도착시간" name="arrTime" rules={[{ required: true }]} style={{ flex: 1 }}>
-              <DatePicker showTime format="YYYY-MM-DD HH:mm" style={{ width: "100%" }} />
+            <Form.Item
+              label="도착시간"
+              name="arrTime"
+              rules={[{ required: true, message: "도착시간을 선택하세요." }]}
+              style={{ flex: 1 }}
+            >
+              <DatePicker
+                showTime
+                format="YYYY-MM-DD HH:mm"
+                style={{ width: "100%" }}
+              />
             </Form.Item>
           </Space>
 
           {/* 요금 */}
           <Space size="large" style={{ display: "flex" }}>
-            <Form.Item label="일반석 요금" name="economyCharge" rules={[{ required: true }]} style={{ flex: 1 }}>
+            <Form.Item
+              label="일반석 요금"
+              name="economyCharge"
+              rules={[{ required: true }]}
+              style={{ flex: 1 }}
+            >
               <InputNumber
                 min={0}
                 style={{ width: "100%" }}
-                formatter={(v) => `${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                formatter={(v) =>
+                  `${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                }
                 parser={(v) => v.replace(/,/g, "")}
                 placeholder="예: 45000"
               />
             </Form.Item>
-            <Form.Item label="비즈니스 요금" name="prestigeCharge" rules={[{ required: true }]} style={{ flex: 1 }}>
+            <Form.Item
+              label="비즈니스 요금"
+              name="prestigeCharge"
+              rules={[{ required: true }]}
+              style={{ flex: 1 }}
+            >
               <InputNumber
                 min={0}
                 style={{ width: "100%" }}
-                formatter={(v) => `${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                formatter={(v) =>
+                  `${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                }
                 parser={(v) => v.replace(/,/g, "")}
                 placeholder="예: 120000"
               />
@@ -264,7 +330,7 @@ const AdminFlightFormPage = () => {
             </Space>
           </Form.Item>
         </Form>
-      </Card>
+      </AdminSectionCard>
     </div>
   );
 };
