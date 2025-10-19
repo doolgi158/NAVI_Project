@@ -1,12 +1,8 @@
 package com.navi.payment.controller;
 
-import com.navi.payment.dto.request.PaymentConfirmRequestDTO;
-import com.navi.payment.dto.request.PaymentPrepareRequestDTO;
-import com.navi.payment.dto.request.PaymentVerifyRequestDTO;
-import com.navi.payment.dto.response.PaymentConfirmResponseDTO;
-import com.navi.payment.dto.response.PaymentPrepareResponseDTO;
-import com.navi.payment.dto.response.PaymentVerifyResponseDTO;
-import com.navi.payment.service.PaymentService;
+import com.navi.payment.dto.request.*;
+import com.navi.payment.dto.response.*;
+import com.navi.payment.service.PaymentRouterService;
 import com.siot.IamportRestClient.exception.IamportResponseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,14 +17,14 @@ import java.math.BigDecimal;
 @RequiredArgsConstructor
 @RequestMapping("/api/payment")
 public class PaymentController {
-    private final PaymentService paymentService;
+
+    private final PaymentRouterService paymentRouterService;
 
     /* === [1. 결제 준비] === */
     @PostMapping("/prepare")
     public ResponseEntity<PaymentPrepareResponseDTO> preparePayment(@RequestBody PaymentPrepareRequestDTO dto) {
         log.info("✅ 결제 준비 요청 수신 - {}", dto);
-        PaymentPrepareResponseDTO response = paymentService.preparePayment(dto);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(paymentRouterService.preparePayment(dto));
     }
 
     /* === [2. 결제 검증] === */
@@ -36,16 +32,14 @@ public class PaymentController {
     public ResponseEntity<PaymentVerifyResponseDTO> verifyPayment(@RequestBody PaymentVerifyRequestDTO dto)
             throws IamportResponseException, IOException {
         log.info("✅ 결제 검증 요청 수신 - {}", dto);
-        PaymentVerifyResponseDTO response = paymentService.verifyPayment(dto);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(paymentRouterService.verifyAndCompletePayment(dto));
     }
 
     /* === [3. 결제 확정(DB 반영)] === */
     @PostMapping("/confirm")
     public ResponseEntity<PaymentConfirmResponseDTO> confirmPayment(@RequestBody PaymentConfirmRequestDTO dto) {
         log.info("✅ 결제 확정 요청 수신 - {}", dto);
-        PaymentConfirmResponseDTO response = paymentService.confirmPayment(dto);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(paymentRouterService.confirmPayment(dto));
     }
 
     /* === [4. 결제 실패 처리] === */
@@ -53,7 +47,7 @@ public class PaymentController {
     public ResponseEntity<Void> failPayment(@RequestParam String merchantId,
                                             @RequestParam(required = false) String reason) {
         log.warn("❌ 결제 실패 처리 요청 - merchantId={}, reason={}", merchantId, reason);
-        paymentService.failPayment(merchantId, reason);
+        paymentRouterService.failPayment(merchantId, reason);
         return ResponseEntity.ok().build();
     }
 
@@ -64,10 +58,8 @@ public class PaymentController {
             @RequestParam BigDecimal refundAmount,
             @RequestParam(required = false) String reason
     ) throws IamportResponseException, IOException {
-        log.info("🔁 환불 요청 수신 - merchantId={}, amount={}, reason={}",
-                merchantId, refundAmount, reason);
-        paymentService.refundPayment(merchantId, refundAmount, reason);
+        log.info("🔁 환불 요청 수신 - merchantId={}, amount={}, reason={}", merchantId, refundAmount, reason);
+        paymentRouterService.refundPayment(merchantId, refundAmount, reason);
         return ResponseEntity.ok().build();
     }
-
 }

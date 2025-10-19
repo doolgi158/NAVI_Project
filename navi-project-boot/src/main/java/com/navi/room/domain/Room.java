@@ -1,6 +1,7 @@
 package com.navi.room.domain;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.navi.accommodation.domain.Acc;
 import com.navi.room.dto.api.RoomApiDTO;
 import com.navi.room.dto.request.RoomRequestDTO;
@@ -10,6 +11,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Nationalized;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Builder
@@ -34,11 +38,15 @@ public class Room {
     @Column(name = "content_id")
     private Long contentId;
 
-    // FK 설정
+    /* 연관관계 설정 */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name="accNo", nullable = false)
     @JsonBackReference
     private Acc acc;
+
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<RoomStock> roomStocks = new ArrayList<>();
 
     @Nationalized
     @Column(name = "room_name", length = 50, nullable = false)

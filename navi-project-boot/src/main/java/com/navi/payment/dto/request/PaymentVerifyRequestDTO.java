@@ -2,20 +2,31 @@ package com.navi.payment.dto.request;
 
 import com.navi.common.enums.RsvType;
 import lombok.*;
-
 import java.math.BigDecimal;
-
-/* =============[PaymentVerifyRequestDTO]=============
-            백엔드 → 포트원 결제 검증 요청 DTO
-        EX) 결제 완료 후, 포트원 서버에 결제 검증 요청
-   =================================================== */
+import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class PaymentVerifyRequestDTO {
-    private String impUid;              // PortOne PG 승인번호 (예: IMP_12345678)
-    private String merchantId;         // PortOne 주문번호 (결제 고유번호 - merchantId)
-    private BigDecimal totalAmount;     // 결제 금액
+    private RsvType rsvType;
+    private List<String> reserveId;
+    private String impUid;
+    private String merchantId;
+    private BigDecimal totalAmount;
+
+    public PaymentConfirmRequestDTO toConfirmRequest() {
+        List<PaymentConfirmRequestDTO.ReservePaymentItem> items =
+                this.reserveId.stream()
+                        .map(id -> new PaymentConfirmRequestDTO.ReservePaymentItem(id, this.totalAmount))
+                        .toList();
+
+        return PaymentConfirmRequestDTO.builder()
+                .merchantId(this.merchantId)
+                .rsvType(this.rsvType)
+                .impUid(this.impUid)
+                .items(items)
+                .build();
+    }
 }

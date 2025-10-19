@@ -1,10 +1,12 @@
 // src/users/pages/delivery/DeliveryPage.jsx
 import MainLayout from "../../layout/MainLayout";
-import { useState, useEffect, useRef } from "react";
-import { Input, DatePicker, Button, message, Radio } from "antd";
 import dayjs from "dayjs";
 import axios from "axios";
+import { useState, useEffect, useRef } from "react";
+import { Input, DatePicker, Button, message, Radio } from "antd";
 import { useNavigate } from "react-router-dom";
+import { setReserveData } from "../../../common/slice/paymentSlice"; 
+import { useDispatch } from "react-redux";
 
 const API_SERVER_HOST = "http://localhost:8080";
 
@@ -20,6 +22,7 @@ const JEJU_AIRPORT = { lat: 33.5055, lng: 126.495 };
 
 const DeliveryPage = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch(); // ✅ Redux 사용 준비
 
   const [form, setForm] = useState({
     senderName: "",
@@ -229,6 +232,7 @@ const DeliveryPage = () => {
       return;
     }
 
+    // [ TODO ] : usePayment의 항목과 일치시켜야 함.
     const dto = {
       startAddr: form.fromAddress,
       endAddr: form.toAddress,
@@ -250,34 +254,27 @@ const DeliveryPage = () => {
     }*/
 
     // 🚀 예약 + 결제 준비 요청 (DlvPaymentController 연결)
+    
     try {
-      const token = localStorage.getItem("accessToken");
-      const res = await axios.post(
-        `${API_SERVER_HOST}/api/payment/delivery/prepare`,
-        dto,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const res = await axios.post(`${API_SERVER_HOST}/api/delivery/rsv`, dto);
+      console.log("✅ [DeliveryPage] 예약 응답:", res.data);
 
-      console.log("✅ [DeliveryPage] 결제 준비 응답:", res.data);
-      console.log("✅ [DeliveryPage] navigate state:", {
-        rsvType: "DLV",
-        itemData: res.data,
-        formData: dto,
-      });
+      // 예약 성공 시 Redux 저장
+      dispatch(
+        setReserveData({
+          reserveId: res.data.data.drsvId,  // ✅ 예약 ID
+          itemData: res.data.data,          // ✅ 예약 상세 데이터
+        })
+      );
 
       message.success("짐배송 예약이 완료되었습니다!");
 
-      // ✅ 결제 페이지로 이동
+      // 결제 페이지로 이동 (예약 결과 전달)
       navigate("/payment", {
         state: {
           rsvType: "DLV",
-          items: res.data,    // PaymentPrepareResponseDTO
-          formData: dto,      // 사용자가 입력한 예약 정보
+          items: res.data.data,   // 예약 데이터 전달
+          formData: dto,          // 폼 데이터 전달
         },
       });
     } catch (error) {

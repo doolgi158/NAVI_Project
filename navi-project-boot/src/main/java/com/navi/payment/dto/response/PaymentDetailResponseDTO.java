@@ -20,7 +20,7 @@
 //@Builder
 //public class PaymentDetailResponseDTO {
 //    private String merchantId;              // 결제 ID (예: 20251007ACC001)
-//    private RsvType reserveType;            // 예약 대상 구분 (예: ACC, AIR, DLV)
+//    private RsvType rsvType;            // 예약 대상 구분 (예: ACC, AIR, DLV)
 //    private String reserveId;               // 예약 ID (예: 20250923ACC001)
 //    private PaymentStatus paymentStatus;    // 결제 상태 (예: PAID) Todo: Enum으로 매핑 로직 변경 필요
 //    private String impUid;                  // 결제 승인번호 (예: IMP_67283051)

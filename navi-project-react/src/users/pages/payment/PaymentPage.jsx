@@ -1,5 +1,5 @@
 import MainLayout from "../../layout/MainLayout";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { Card, Typography, Steps, Button, Radio, Divider, Space, message } from "antd";
@@ -13,7 +13,8 @@ import DlvRsvInfo from "../../../common/components/reservation/DlvRsvInfo";
 const { Title, Text } = Typography;
 
 const PaymentPage = () => {
-  const navigate = useNavigate();
+  const { executePayment } = usePayment();
+//   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
 
@@ -22,7 +23,14 @@ const PaymentPage = () => {
   const [paymentMethod, setPaymentMethod] = React.useState("KAKAOPAY");
 
   const totalAmount = formData?.totalPrice || formData?.totalAmount || 0;
-  const { executePayment } = usePayment();
+  useEffect(() => {
+    if (!totalAmount || totalAmount <= 0) {
+      message.warning("결제 금액이 유효하지 않습니다.");
+      return;
+    }
+    dispatch(setPaymentData({ totalAmount }));
+    console.log("✅ [PaymentPage] 결제 금액 Redux 저장 완료:", totalAmount);
+  }, [dispatch, totalAmount]);
 
   /** ✅ 예약 유형별 Info 컴포넌트 선택 */
   const InfoComponent = useMemo(() => {

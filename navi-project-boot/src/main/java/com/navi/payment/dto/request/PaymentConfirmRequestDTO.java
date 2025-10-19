@@ -19,7 +19,7 @@ import java.util.List;
 public class PaymentConfirmRequestDTO {
     /* 결제 완료 시 */
     private String merchantId;                  // 결제 고유번호 (예: PAY20251012-0001)
-    private RsvType reserveType;                // 예약 유형 (ACC, AIR, DLV)
+    private RsvType rsvType;                    // 예약 유형 (ACC, AIR, DLV)
     private String impUid;                      // 결제 승인번호 (예: IMP_67283051)
     private PaymentMethod paymentMethod;        // 결제 수단 (예: KGINIPAY, KAKAOPAY, TOSSPAY)
 
