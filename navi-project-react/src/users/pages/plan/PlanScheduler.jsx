@@ -1,38 +1,103 @@
 import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { Button, Splitter } from "antd";
-import { DragDropContext, Droppable, Draggable, } from "react-beautiful-dnd";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { Button, Splitter, Spin } from "antd";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import TravelMap from "./components/TravelMap";
 import FooterLayout from "@/users/layout/FooterLayout";
 import HeaderLayout from "@/users/layout/HeaderLayout";
-import { savePlan } from "@/common/api/planApi"
+import { getPlanDetail, savePlan, updatePlan } from "@/common/api/planApi";
 import { getCookie } from "@/common/util/cookie";
 
 export default function PlanScheduler() {
-    const { state } = useLocation();
+    const [searchParams] = useSearchParams();
     const navigate = useNavigate();
-    const meta = state?.meta || {};
-    const [days, setDays] = useState(state?.days || []);
+
+    const planId = searchParams.get("planId");
+    const mode = searchParams.get("mode") || "edit"; // 기본값 edit
+
+    const [loading, setLoading] = useState(true);
+    const [meta, setMeta] = useState({ title: "", startDate: "", endDate: "" });
+    const [days, setDays] = useState([]);
     const [activeDayIdx, setActiveDayIdx] = useState(-1);
     const [markers, setMarkers] = useState([]);
     const [splitSize, setSplitSize] = useState(80);
 
-    useEffect(() => {
-        if (activeDayIdx === -1) {
-            setSplitSize(80); // 전체 일정 보기 → 좌측 넓게
-        } else {
-            setSplitSize(40); // 단일 일자 보기 → 좌측 좁게
-        }
-    }, [activeDayIdx]);
+    const isViewMode = mode === "view";
     const DAY_COLORS = ["#E74C3C", "#3498DB", "#27AE60", "#F1C40F", "#9B59B6", "#FF8C00", "#8E44AD"];
 
+    /** ✅ 데이터 로드 (planId 존재 시 상세조회) */
+    useEffect(() => {
+        const fetchDetail = async () => {
+            if (!planId) {
+                setLoading(false);
+                return;
+            }
+
+            try {
+                const res = await getPlanDetail(planId);
+
+                // ✅ 데이터 유효성 확인
+                if (!res || !res.days) {
+                    console.warn("⚠️ 불완전한 plan 데이터:", res);
+                    setLoading(false);
+                    return;
+                }
+
+                // ✅ 메타 정보
+                setMeta({
+                    title: res.title || "제목 없음",
+                    startDate: res.startDate,
+                    endDate: res.endDate,
+                });
+
+                // ✅ 일자별 아이템 세팅
+                const parsedDays = res.days.map((day) => ({
+                    dateISO: day.dayDate,
+                    items: (day.items || []).map((it) => ({
+                        title: it.title,
+                        type: it.type,
+                        travelId: it.travelId,
+                        stayId: it.stayId,
+                        lat: it.lat,
+                        lng: it.lng,
+                        img: it.img,
+                        startTime: it.startTime,
+                        endTime: it.endTime,
+                    })),
+                }));
+
+                setDays(parsedDays);
+            } catch (err) {
+                console.error("❌ 계획 상세 불러오기 실패:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchDetail();
+    }, [planId]);
+
+    // 렌더 내부
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <Spin size="large" tip="여행 계획을 불러오는 중입니다..." />
+            </div>
+        );
+    }
+
+
+    /** ✅ 분할 비율 동적 조정 */
+    useEffect(() => {
+        setSplitSize(activeDayIdx === -1 ? 80 : 40);
+    }, [activeDayIdx]);
 
     /** ✅ 지도 마커 갱신 */
     useEffect(() => {
+        if (!Array.isArray(days)) return;
         const allMarkers =
             activeDayIdx === -1
                 ? days.flatMap((d, dayIdx) =>
-                    d.items
+                    (d?.items || [])
                         .filter((it) => it.lat && it.lng)
                         .map((it, i) => ({
                             type: it.type,
@@ -55,12 +120,13 @@ export default function PlanScheduler() {
                         dayIdx: activeDayIdx,
                         color: DAY_COLORS[activeDayIdx % DAY_COLORS.length],
                     }));
+
         setMarkers(allMarkers);
     }, [days, activeDayIdx]);
 
-    /** ✅ DnD 핸들러 */
+    /** ✅ Drag & Drop 핸들러 */
     const handleDragEnd = (result) => {
-        if (!result.destination) return;
+        if (!result.destination || isViewMode) return;
         const sourceDayIdx = parseInt(result.source.droppableId.split("-")[1]);
         const destDayIdx = parseInt(result.destination.droppableId.split("-")[1]);
 
@@ -77,14 +143,67 @@ export default function PlanScheduler() {
             newDays[sourceDayIdx].items = sourceItems;
             newDays[destDayIdx].items = destItems;
         }
+
         setDays(newDays);
     };
 
-    /** ✅ 일정 Step 스타일 카드 */
+    /** ✅ 여행계획 저장 or 수정 */
+    const handleSave = async () => {
+        if (isViewMode) return;
+        const userCookie = getCookie("userCookie");
+        const userId = userCookie?.userId || "navi1";
+
+        const requestData = {
+            userId,
+            title: meta.title || "새 여행 계획",
+            startDate: meta.startDate,
+            endDate: meta.endDate,
+            travels: days.flatMap((d) =>
+                (d.items || [])
+                    .filter((it) => it.type === "travel")
+                    .map((it) => ({
+                        travelId: it.travelId,
+                        travelName: it.title,
+                    }))
+            ),
+            stays: days.flatMap((d) =>
+                (d.items || [])
+                    .filter((it) => it.type === "stay")
+                    .map((it) => ({
+                        stayId: it.stayId,
+                        stayName: it.title,
+                    }))
+            ),
+            thumbnailPath:
+                days.flatMap((d) => d.items.map((it) => it.img)).find((img) => img) ||
+                "https://via.placeholder.com/300x200.png?text=Travel+Plan",
+        };
+
+        try {
+            if (planId) {
+                await updatePlan(planId, requestData);
+                alert("수정 완료!");
+            } else {
+                await savePlan(requestData);
+                alert("저장 완료!");
+            }
+            navigate("/plans");
+        } catch (err) {
+            console.error("❌ 저장 중 오류:", err);
+            alert("저장 실패");
+        }
+    };
+
+    /** ✅ 일정 Step 렌더링 */
     const renderStepItem = (it, i, isLast, dayIdx) => {
         const color = DAY_COLORS[dayIdx % DAY_COLORS.length];
         return (
-            <Draggable key={`${dayIdx}-${i}-${it.title}`} draggableId={`${dayIdx}-${i}-${it.title}`} index={i}>
+            <Draggable
+                key={`${dayIdx}-${i}-${it.title}`}
+                draggableId={`${dayIdx}-${i}-${it.title}`}
+                index={i}
+                isDragDisabled={isViewMode}
+            >
                 {(prov, snapshot) => (
                     <div
                         ref={prov.innerRef}
@@ -93,28 +212,20 @@ export default function PlanScheduler() {
                         className={`relative pl-8 pb-6 transition-all ${snapshot.isDragging ? "scale-[1.02]" : ""
                             }`}
                     >
-                        {/* 선(Line) */}
                         {!isLast && (
                             <div
                                 className="absolute top-5 left-[13px] w-[2px] h-[calc(100%-0.5rem)] z-0"
                                 style={{ backgroundColor: color }}
-                            ></div>
+                            />
                         )}
-
-                        {/* 원(Number Circle) */}
                         <div
                             className="absolute left-0 top-1 w-6 h-6 flex items-center justify-center rounded-full border-2 text-xs font-semibold z-10 bg-white"
-                            style={{
-                                borderColor: color,
-                                color: color,
-                            }}
+                            style={{ borderColor: color, color }}
                         >
                             {i + 1}
                         </div>
 
-                        {/* 내용 */}
                         <div className="ml-2 flex items-center justify-between gap-3">
-                            {/* 왼쪽 텍스트 그룹 */}
                             <div className="flex flex-col">
                                 <span className="text-xs text-gray-500">
                                     {it.startTime} ~ {it.endTime}
@@ -134,21 +245,20 @@ export default function PlanScheduler() {
                                             : "기타"}
                                 </span>
                                 <span
-                                    className="font-semibold text-[#2F3E46] text-sm truncate max-w-[140px] block"
+                                    className="font-semibold text-[#2F3E46] text-sm truncate max-w-[140px]"
                                     title={it.title}
                                 >
                                     {it.title}
                                 </span>
                             </div>
 
-                            {/* 오른쪽 이미지 */}
-                            {it.type === "poi" ? (
+                            {it.img ? (
                                 <div className="w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden border border-gray-200">
-                                    <img src="https://myip.kr/LjlOl" alt={it.title} className="w-full h-full object-cover" />
-                                </div>
-                            ) : it.img ? (
-                                <div className="w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden border border-gray-200">
-                                    <img src={it.img} alt={it.title} className="w-full h-full object-cover" />
+                                    <img
+                                        src={it.img}
+                                        alt={it.title}
+                                        className="w-full h-full object-cover"
+                                    />
                                 </div>
                             ) : (
                                 <div className="w-20 h-20 flex-shrink-0 rounded-xl bg-gray-100 flex items-center justify-center text-gray-400 text-xs">
@@ -162,49 +272,12 @@ export default function PlanScheduler() {
         );
     };
 
-    /** 저장요청 */
-    const handleConfirm = async () => {
-        const userCookie = getCookie("userCookie");
-        const userId = userCookie?.userId || "navi1";
-
-        const requestData = {
-            userId,
-            title: meta.title || "새 여행 계획", // ✅ 수정
-            startDate: meta.startDate,
-            endDate: meta.endDate,
-            travels: days.flatMap((d) =>
-                d.items
-                    .filter((it) => it.type === "travel")
-                    .map((it) => ({
-                        travelId: it.travelId,
-                        travelName: it.title,
-                    }))
-            ),
-            stays: days.flatMap((d) =>
-                d.items
-                    .filter((it) => it.type === "stay")
-                    .map((it) => ({
-                        stayId: it.stayId,
-                        stayName: it.title,
-                    }))
-            ),
-            thumbnailPath:
-                days.flatMap((d) => d.items.map((it) => it.img)).find((img) => img) ||
-                "https://via.placeholder.com/300x200.png?text=Travel+Plan",
-        };
-
-        try {
-            const res = await savePlan(requestData);
-            if (res.status === 200 || res.status === 201) {
-                alert("저장 성공!");
-                navigate("/plans");
-            } else {
-                alert("서버 응답 오류");
-            }
-        } catch (err) {
-            console.error("❌ 저장 중 오류:", err);
-        }
-    };
+    if (loading)
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <Spin size="large" tip="여행 계획을 불러오는 중입니다..." />
+            </div>
+        );
 
     return (
         <>
@@ -220,14 +293,8 @@ export default function PlanScheduler() {
                     size={splitSize}
                 >
                     {/* 좌측 일정 영역 */}
-                    <Splitter.Panel
-                        style={{
-                            background: "#fff",
-                            overflowY: "auto",
-                        }}
-                    >
+                    <Splitter.Panel style={{ background: "#fff", overflowY: "auto" }}>
                         <div className="flex h-full">
-                            {/* 사이드바 */}
                             <div className="w-28 border-r p-4 mt-10 flex flex-col justify-between bg-gray-50">
                                 <div className="space-y-2">
                                     <Button
@@ -239,7 +306,7 @@ export default function PlanScheduler() {
                                     </Button>
                                     {days.map((d, idx) => (
                                         <Button
-                                            key={d.dateISO}
+                                            key={d.dateISO || idx}
                                             block
                                             type={idx === activeDayIdx ? "primary" : "default"}
                                             onClick={() => setActiveDayIdx(idx)}
@@ -249,28 +316,22 @@ export default function PlanScheduler() {
                                     ))}
                                 </div>
 
-                                <div className="pt-6 flex flex-col">
-                                    <Button
-                                        block
-                                        className="border-gray-300 text-[#2F3E46]"
-                                        onClick={() => console.log("편집")}
-                                    >
-                                        편집
-                                    </Button>
-                                    <Button
-                                        block
-                                        type="primary"
-                                        className="bg-[#2F3E46] mt-2"
-                                        onClick={handleConfirm}
-                                    >
-                                        저장
-                                    </Button>
-
-                                </div>
+                                {!isViewMode && (
+                                    <div className="pt-6 flex flex-col">
+                                        <Button
+                                            block
+                                            type="primary"
+                                            className="bg-[#2F3E46]"
+                                            onClick={handleSave}
+                                        >
+                                            {planId ? "수정하기" : "저장하기"}
+                                        </Button>
+                                    </div>
+                                )}
                             </div>
 
-                            {/* ✅ 우측 일정 리스트 */}
-                            <div className="flex-1 p-10 ">
+                            {/* 일정 리스트 */}
+                            <div className="flex-1 p-10">
                                 <div className="pb-6 bg-white">
                                     <h2 className="text-xl font-semibold text-[#2F3E46]">
                                         {meta.title || "전체 일정"}
@@ -280,7 +341,6 @@ export default function PlanScheduler() {
                                     </h2>
                                 </div>
 
-                                {/* ✅ 전체보기: Steps 스타일 + DnD */}
                                 <DragDropContext onDragEnd={handleDragEnd}>
                                     {activeDayIdx === -1 ? (
                                         <div className="flex gap-12 overflow-x-auto px-4 h-[calc(100vh-220px)]">
@@ -294,15 +354,15 @@ export default function PlanScheduler() {
                                                         >
                                                             <h3 className="text-lg font-semibold text-[#2F3E46] mb-4 border-b pb-1">
                                                                 {dayIdx + 1}일차{" "}
-                                                                <span className="text-gray-400 text-sm">{d.dateISO}</span>
+                                                                <span className="text-gray-400 text-sm">
+                                                                    {d.dateISO}
+                                                                </span>
                                                             </h3>
-
                                                             <div className="relative">
-                                                                {d.items.map((it, i) =>
+                                                                {(d.items || []).map((it, i) =>
                                                                     renderStepItem(it, i, i === d.items.length - 1, dayIdx)
                                                                 )}
                                                             </div>
-
                                                             {provided.placeholder}
                                                         </div>
                                                     )}
@@ -317,8 +377,13 @@ export default function PlanScheduler() {
                                                     {...provided.droppableProps}
                                                     className="flex flex-col gap-5 p-3 w-[350px]"
                                                 >
-                                                    {days[activeDayIdx]?.items.map((it, i) =>
-                                                        renderStepItem(it, i, i === days[activeDayIdx].items.length - 1)
+                                                    {(days[activeDayIdx]?.items || []).map((it, i) =>
+                                                        renderStepItem(
+                                                            it,
+                                                            i,
+                                                            i === days[activeDayIdx].items.length - 1,
+                                                            activeDayIdx
+                                                        )
                                                     )}
                                                     {provided.placeholder}
                                                 </div>

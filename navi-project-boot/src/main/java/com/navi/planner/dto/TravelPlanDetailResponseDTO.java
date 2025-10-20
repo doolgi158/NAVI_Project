@@ -21,38 +21,64 @@ public class TravelPlanDetailResponseDTO {
     private LocalDate startDate;
     private LocalDate endDate;
     private String thumbnailPath;
-    private LocalTime startTime;
-    private LocalTime endTime;
-    private List<DayDTO> days;
+    private List<TravelPlanDayDTO> days;
 
+    /** ✅ 일차별 일정 DTO */
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class DayDTO {
+    public static class TravelPlanDayDTO {
         private Long id;
         private LocalDate dayDate;
         private Integer orderNo;
-        private String planTitle;
-        private Long travelId;
-        private LocalTime startTime;
-        private LocalTime endTime;
-        private String stayName;
+        private List<TravelPlanItemDTO> items;
 
-        public static DayDTO fromEntity(TravelPlanDay day) {
-            return DayDTO.builder()
+        public static TravelPlanDayDTO fromEntity(TravelPlanDay day) {
+            // 현재 TravelPlanDay에는 단일 travelId/stayName만 있으므로 items는 1개짜리 리스트로 생성
+            return TravelPlanDayDTO.builder()
                     .id(day.getId())
                     .dayDate(day.getDayDate())
                     .orderNo(day.getOrderNo())
-                    .planTitle(day.getPlanTitle())
-                    .travelId(day.getTravelId())
-                    .startTime(day.getStartTime())
-                    .endTime(day.getEndTime())
-                    .stayName(day.getStayName())
+                    .items(List.of(TravelPlanItemDTO.fromEntity(day)))
                     .build();
         }
     }
 
+    /** ✅ 일정 내부의 개별 장소 DTO */
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class TravelPlanItemDTO {
+        private Long id;
+        private String title;      // planTitle 또는 stayName
+        private String type;       // "travel" / "stay"
+        private Long travelId;
+        private Double lat;
+        private Double lng;
+        private String img;
+        private LocalTime startTime;
+        private LocalTime endTime;
+
+        public static TravelPlanItemDTO fromEntity(TravelPlanDay day) {
+            boolean isStay = (day.getStayName() != null && !day.getStayName().isEmpty());
+
+            return TravelPlanItemDTO.builder()
+                    .id(day.getId())
+                    .title(isStay ? day.getStayName() : day.getPlanTitle())
+                    .type(isStay ? "stay" : "travel")
+                    .travelId(day.getTravelId())
+                    .lat(day.getLatitude())     // 아직 구현되지 않은 메서드지만, null 허용 가능
+                    .lng(day.getLongitude())
+                    .img(day.getImagePath())
+                    .startTime(day.getStartTime())
+                    .endTime(day.getEndTime())
+                    .build();
+        }
+    }
+
+    /** ✅ 엔티티 → DTO 변환 */
     public static TravelPlanDetailResponseDTO fromEntity(TravelPlan plan) {
         return TravelPlanDetailResponseDTO.builder()
                 .id(plan.getId())
@@ -61,10 +87,8 @@ public class TravelPlanDetailResponseDTO {
                 .startDate(plan.getStartDate())
                 .endDate(plan.getEndDate())
                 .thumbnailPath(plan.getThumbnailPath())
-                .startTime(plan.getStartTime())
-                .endTime(plan.getEndTime())
                 .days(plan.getDays().stream()
-                        .map(DayDTO::fromEntity)
+                        .map(TravelPlanDayDTO::fromEntity)
                         .collect(Collectors.toList()))
                 .build();
     }

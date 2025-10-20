@@ -29,15 +29,18 @@ public class TravelPlanController {
     private final AccService accService;
     private final TravelService travelService;
 
-    /** ✅ 여행계획 등록 (기존 /planner → / 로 변경) */
-    @PostMapping
+    // ======================================================
+    // ✅ [1] 여행계획 등록 (Create)
+    // ------------------------------------------------------
+    // POST /api/plans/planner
+    // ======================================================
+    @PostMapping("/planner")
     public ResponseEntity<Long> savePlan(
             @AuthenticationPrincipal JWTClaimDTO user,
             @RequestBody TravelPlanRequestDTO dto) {
-
         try {
-            String userId = user.getId(); // JWTClaimDTO.id → userId
-            log.info("✅ [POST /api/plans] userId={}, title={}", userId, dto.getTitle());
+            String userId = user.getId();
+            log.info("✅ [POST /api/plans/planner] userId={}, title={}", userId, dto.getTitle());
             Long planId = travelPlanService.savePlan(userId, dto);
             return ResponseEntity.ok(planId);
         } catch (Exception e) {
@@ -46,7 +49,11 @@ public class TravelPlanController {
         }
     }
 
-    /** ✅ 사용자별 여행계획 목록 */
+    // ======================================================
+    // ✅ [2] 내 여행계획 목록 조회 (List)
+    // ------------------------------------------------------
+    // GET /api/plans
+    // ======================================================
     @GetMapping
     public ResponseEntity<List<TravelPlanListResponseDTO>> getMyPlans(
             @AuthenticationPrincipal JWTClaimDTO user) {
@@ -55,17 +62,57 @@ public class TravelPlanController {
         return ResponseEntity.ok(list);
     }
 
-    /** ✅ 여행계획 상세 조회 */
-    @GetMapping("/{id}")
+    // ======================================================
+    // ✅ [3] 여행계획 상세 조회 (Detail View)
+    // ------------------------------------------------------
+    // GET /api/plans/planner/{planId}
+    // ======================================================
+    @GetMapping("/planner/{planId}")
     public ResponseEntity<TravelPlanDetailResponseDTO> getPlanDetail(
-            @PathVariable("id") Long planId,
+            @PathVariable("planId") Long planId,
             @AuthenticationPrincipal JWTClaimDTO user) {
         String userId = user.getId();
         TravelPlanDetailResponseDTO detail = travelPlanQueryService.getPlanDetail(planId, userId);
         return ResponseEntity.ok(detail);
     }
 
-    /** ✅ 여행지 목록 조회 */
+    // ======================================================
+    // ✅ [4] 여행계획 수정 (Edit)
+    // ------------------------------------------------------
+    // PUT /api/plans/schedule/{planId}
+    // ======================================================
+    @PutMapping("/schedule/{planId}")
+    public ResponseEntity<?> updatePlan(
+            @PathVariable Long planId,
+            @AuthenticationPrincipal JWTClaimDTO user,
+            @RequestBody TravelPlanRequestDTO dto) {
+        try {
+            String userId = user.getId();
+            log.info("📝 [PUT /api/plans/schedule/{}] userId={}, title={}", planId, userId, dto.getTitle());
+            travelPlanService.updatePlan(planId, userId, dto);
+            return ResponseEntity.ok("수정 완료");
+        } catch (Exception e) {
+            log.error("❌ 여행계획 수정 중 오류", e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    // ======================================================
+    // ✅ [5] 여행계획 삭제 (Delete)
+    // ------------------------------------------------------
+    // DELETE /api/plans/{planId}
+    // ======================================================
+    @DeleteMapping("/{planId}")
+    public ResponseEntity<?> deletePlan(@PathVariable Long planId) {
+        travelPlanService.deletePlan(planId);
+        return ResponseEntity.ok("삭제 완료");
+    }
+
+    // ======================================================
+    // ✅ [6] 여행지 목록 (Planner 내부용)
+    // ------------------------------------------------------
+    // GET /api/plans/travel/list
+    // ======================================================
     @GetMapping("/travel/list")
     public ResponseEntity<List<TravelListResponseDTO>> getTravelList() {
         List<Travel> travels = travelService.getTravelList();
@@ -75,7 +122,11 @@ public class TravelPlanController {
         return ResponseEntity.ok(responseList);
     }
 
-    /** ✅ 숙소 목록 조회 */
+    // ======================================================
+    // ✅ [7] 숙소 목록 (Planner 내부용)
+    // ------------------------------------------------------
+    // GET /api/plans/stay/list
+    // ======================================================
     @GetMapping("/stay/list")
     public ResponseEntity<List<AccListResponseDTO>> getStayList() {
         List<Acc> accList = accService.getAllAcc();
@@ -84,13 +135,4 @@ public class TravelPlanController {
                 .toList();
         return ResponseEntity.ok(stays);
     }
-
-    /**여행 계획 삭제*/
-    @DeleteMapping("/{planId}")
-    public ResponseEntity<?> deletePlan(@PathVariable Long planId) {
-        travelPlanService.deletePlan(planId);
-        return ResponseEntity.ok("삭제 완료");
-    }
 }
-
-

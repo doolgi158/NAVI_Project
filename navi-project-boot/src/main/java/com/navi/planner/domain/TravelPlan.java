@@ -47,6 +47,15 @@ public class TravelPlan extends BaseEntity {
     @Column(name = "end_time")
     private LocalTime endTime;
 
+    @Transient
+    private Double latitude;
+
+    @Transient
+    private Double longitude;
+
+    @Transient
+    private String imagePath;
+
     @OneToMany(mappedBy = "travelPlan", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<TravelPlanDay> days = new ArrayList<>();
