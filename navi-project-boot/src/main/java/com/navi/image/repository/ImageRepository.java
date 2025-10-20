@@ -13,19 +13,11 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
     Optional<Image> findByTargetTypeAndTargetId(String targetType, String targetId);
     // 대상별 이미지 여러 개 (예: 객실, 숙소 등)
     List<Image> findAllByTargetTypeAndTargetId(String targetType, String targetId);
-    // 임시
-    @Query("SELECT i FROM Image i WHERE UPPER(i.targetType) = UPPER(:targetType) AND i.targetId = :targetId")
-    List<Image> findAllByTargetTypeAndTargetIdIgnoreCase(@Param("targetType") String targetType, @Param("targetId") String targetId);
-    @Query("""
-SELECT i FROM Image i
-WHERE UPPER(i.targetType) = UPPER(:targetType)
-AND UPPER(i.targetId) = UPPER(:targetId)
-""")
-    List<Image> findImagesIgnoreCase(@Param("targetType") String targetType,
-                                     @Param("targetId") String targetId);
     // 특정 대상의 모든 이미지 삭제
     void deleteByTargetTypeAndTargetId(String targetType, String targetId);
-
     // 숙소 대표 이미지 가져오기
     Optional<Image> findTopByTargetTypeAndTargetIdOrderByNoAsc(String targetType, String targetId);
+
+    // 임시
+    List<Image> findAllByTargetType(String targetType);
 }
