@@ -29,7 +29,6 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'com.oracle.database.jdbc:ojdbc11'
@@ -55,9 +54,6 @@ dependencies {
     // Spring WebFlux 스타터 (WebClient를 사용하기 위해 필요)
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
-    // 이메일 전송을 위한 의존성
-    implementation 'org.springframework.boot:spring-boot-starter-mail'
-
     // https://mvnrepository.com/artifact/com.oracle.database.security/osdt_cert
     implementation 'com.oracle.database.security:osdt_cert:21.17.0.0'
 
@@ -72,12 +68,17 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:4.11.0'
     implementation 'com.squareup.okio:okio-jvm:3.4.0'
 
+    // 이메일 전송을 위한 의존성
     implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation 'com.sun.mail:jakarta.mail:2.0.1'
 
     // MyBatis
     implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.5'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.5'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
 }
 
 tasks.named('test') {

@@ -1,5 +1,5 @@
-export const initIamport = () => {
 /* 아임포트 결제 유틸 */
+export const initIamport = () => {
   const { IMP } = window;
 
   if (!IMP) {

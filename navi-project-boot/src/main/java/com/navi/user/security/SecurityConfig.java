@@ -55,8 +55,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/adm/**", "/api/admin/**").hasRole(UserRole.ADMIN.name())
                 .requestMatchers("/api/users/**", "/api/seats/**", "/api/travel/**", "/api/flight/**", "/api/delivery/**",
                         "/api/auth/**", "/api/accommodations/**", "/api/townships/**", "/api/rooms/**", "/api/reservation/**",
-                        "/api/users/refresh", "/api/activity")
-                .permitAll()
+                        "/api/activity", "/api/payment/**", "/uploads/**")
+                        .permitAll()
                 .requestMatchers("/api/users/detail/**").hasAnyRole(UserRole.USER.name())
                 .anyRequest().permitAll()
         );
@@ -97,7 +97,7 @@ public class SecurityConfig {
 
         config.setAllowedOrigins(List.of("http://localhost:5173"));
         config.setAllowedOriginPatterns(List.of("http://localhost:5173"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "FETCH"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH"));
         config.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
         config.setExposedHeaders(List.of("Authorization", "Content-Type"));
         config.setAllowCredentials(true);

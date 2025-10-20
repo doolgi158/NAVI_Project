@@ -52,7 +52,7 @@ public class PaymentDetail extends BaseEntity {
     // 예약 항목 구분 (예: ACC, AIR, DLV)
     @Enumerated(EnumType.STRING)
     @Column(name = "reserve_type", length = 10, nullable = false)
-    private RsvType reserveType;
+    private RsvType rsvType;
 
     // 예약 항목 ID (예: 20251007ACC001)
     @Column(name = "reserve_id", length = 30, nullable = false)
