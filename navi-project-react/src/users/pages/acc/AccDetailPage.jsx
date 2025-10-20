@@ -18,6 +18,7 @@ import MainLayout from "../../layout/MainLayout";
 import axios from "axios";
 import { useKakaoMap } from "@/common/hooks/useKakaoMap";
 import { setSelectedAcc } from "../../../common/slice/accSlice";
+import { API_SERVER_HOST } from "../../../common/api/naviApi";
 
 const { Title, Text, Paragraph } = Typography;
 const { RangePicker } = DatePicker;
@@ -150,7 +151,6 @@ const AccDetailPage = () => {
     const checkIn = dateRange[0].format("YYYY-MM-DD");
     const checkOut = dateRange[1].format("YYYY-MM-DD");
 
-    // ✅ 예약 데이터 구성
     const reservationData = {
       accId,
       accName: accData.title,
@@ -160,7 +160,6 @@ const AccDetailPage = () => {
       roomCount,
     };
 
-    // ✅ 예약 입력 페이지로 이동
     navigate("/accommodations/detail/reservation", {
       state: reservationData,
     });
@@ -204,22 +203,35 @@ const AccDetailPage = () => {
             <Row gutter={[16, 16]} className="mb-6">
               <Col xs={24} lg={14}>
                 {accData.accImages?.length > 0 ? (
-                  <Carousel autoplay dots className="rounded-xl overflow-hidden">
-                    {accData.accImages.map((img, idx) => (
-                      <div key={idx}>
-                        <img
-                          src={img}
-                          alt={`${accData.title} 이미지 ${idx + 1}`}
-                          className="w-full h-[260px] object-cover"
-                        />
-                      </div>
-                    ))}
-                  </Carousel>
-                ) : (
-                  <div className="bg-gray-100 rounded-xl h-[260px] flex items-center justify-center text-gray-500 text-sm">
-                    이미지 준비중
-                  </div>
-                )}
+  <Carousel autoplay dots className="rounded-xl overflow-hidden">
+    {accData.accImages.map((img, idx) => (
+      <div key={idx}>
+        <img
+          src={
+            img.startsWith("http")
+              ? img
+              : `${API_SERVER_HOST}${img}` // ✅ 절대 경로 붙이기
+          }
+          alt={`${accData.title} 이미지 ${idx + 1}`}
+          className="w-full h-[260px] object-cover"
+          onError={(e) => {
+            e.target.style.display = "none";
+            const fallback = document.createElement("div");
+            fallback.className =
+              "w-full h-[260px] flex items-center justify-center text-gray-500 bg-gray-100 text-sm";
+            fallback.textContent = "이미지 준비중";
+            e.target.parentNode.appendChild(fallback);
+          }}
+        />
+      </div>
+    ))}
+  </Carousel>
+) : (
+  <div className="bg-gray-100 rounded-xl h-[260px] flex items-center justify-center text-gray-500 text-sm">
+    이미지 준비중
+  </div>
+)}
+
               </Col>
 
               <Col xs={24} lg={10}>
@@ -307,7 +319,7 @@ const AccDetailPage = () => {
                     {/* 객실 이미지 */}
                     {room.thumbnailImage ? (
                       <img
-                        src={room.thumbnailImage}
+                        src={`${API_SERVER_HOST}${room.thumbnailImage}`}
                         alt={room.roomName}
                         className="md:w-1/4 w-full h-40 object-cover"
                       />
@@ -319,16 +331,13 @@ const AccDetailPage = () => {
 
                     {/* ✅ 객실 정보 + 버튼 */}
                     <div className="flex flex-col justify-between p-4 flex-1 bg-white">
-                      {/* 상단: 객실명 / 인원 / 요금 */}
                       <div>
                         <Title level={5} className="text-gray-900 mb-1">
                           {room.roomName}
                         </Title>
-
                         <Text className="block text-gray-600 text-sm mb-1">
                           최대 인원 {room.maxCnt}명
                         </Text>
-
                         <Text className="block text-[#006D77] font-semibold text-base mb-1">
                           {room.weekdayFee
                             ? `${room.weekdayFee.toLocaleString()}원 / 1박`
@@ -336,7 +345,6 @@ const AccDetailPage = () => {
                         </Text>
                       </div>
 
-                      {/* ✅ 하단: 잔여 객실 + 예약 버튼 같은 라인 */}
                       <div className="flex justify-between items-end">
                         {room.remainCount !== null && (
                           <Text
@@ -372,13 +380,11 @@ const AccDetailPage = () => {
                 조건에 맞는 객실이 없습니다.
               </Text>
             )}
-
           </div>
         </div>
       </div>
     </MainLayout>
   );
-
 };
 
 export default AccDetailPage;

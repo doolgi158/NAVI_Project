@@ -68,7 +68,7 @@ public class ImageServiceImpl implements ImageService{
             Image newImage = Image.builder()
                     .targetType(targetType)
                     .targetId(targetId)
-                    .path("/images/" + folderName  + "/" + uuidName)
+                    .path("/uploads/" + folderName  + "/" + uuidName)
                     .uuidName(uuidName)
                     .originalName(originalName)
                     .build();

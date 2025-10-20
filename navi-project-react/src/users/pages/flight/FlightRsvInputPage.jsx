@@ -91,13 +91,20 @@ const FlightRsvInputPage = () => {
       return;
     }
     message.info("좌석을 선택하지 않은 경우 자동 배정됩니다.");
-    navigate(`/flight/payment`, {
+    navigate(`/payment`, {
       state: {
-        selectedOutbound,
-        selectedInbound,
-        passengerCount,
-        passengers,
-        autoAssign: true,
+        rsvType: "FLY",
+        formData: {
+          selectedOutbound,
+          selectedInbound,
+          passengerCount,
+          passengers,
+          autoAssign: true,
+        },
+        items: {
+          selectedOutbound,
+          selectedInbound,
+        },
       },
     });
   };
