@@ -111,7 +111,7 @@ public class Acc {
     // 운영 여부
     @Builder.Default
     @Column(name = "is_active", nullable = false)
-    private boolean isActive = true;
+    private boolean active = true;
 
     // 등록일시
     @Column(name = "created_time", nullable = false, updatable = false)
@@ -145,6 +145,7 @@ public class Acc {
         if (checkOutTime == null) checkOutTime = "11:00";
         if (hasCooking == null) hasCooking = false;
         if (hasParking == null) hasParking = false;
+        if (!this.active) this.active = true;
         if (createdTime == null) {
             createdTime = LocalDateTime.now();
             modifiedTime = LocalDateTime.now();
@@ -216,7 +217,7 @@ public class Acc {
         if (dto.getHasCooking() != null) this.hasCooking = dto.getHasCooking();
         if (dto.getHasParking() != null) this.hasParking = dto.getHasParking();
 
-        this.isActive = dto.isActive();
+        this.active = dto.isActive();
     }
 
     public void changeTownship(Township township) {

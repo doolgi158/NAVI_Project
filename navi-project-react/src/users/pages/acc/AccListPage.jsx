@@ -2,7 +2,7 @@ import axios from "axios";
 import dayjs from "dayjs";
 import useTownshipData from "../../../common/hooks/useTownshipData";
 import MainLayout from "@/users/layout/MainLayout";
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import {
   Radio, Input, DatePicker, Select, Button, Card, message, InputNumber,
   Pagination
@@ -23,8 +23,37 @@ const AccListPage = () => {
   const { townshipList, isLoading: isTownshipLoading, error: townshipError } =
     useTownshipData();
 
+  // ✅ Redux에서 기존 검색 상태 불러오기
   const savedSearch = useSelector((state) => state.acc.searchState) || {};
 
+  /* ✅ 첫 진입 시 localStorage → Redux 복원 */
+  useEffect(() => {
+    const storedState = localStorage.getItem("searchState");
+    if (storedState) {
+      try {
+        const parsed = JSON.parse(storedState);
+        dispatch(setSearchState(parsed));
+
+        // ✅ local state에도 즉시 반영 (뒤로가기 시 UI 바로 복원)
+        setSearchType(parsed.searchType || "region");
+        setCity(parsed.city || null);
+        setTownship(parsed.township || null);
+        setKeyword(parsed.keyword || "");
+        setSpot(parsed.spot || "");
+        setGuestCount(parsed.guestCount || null);
+        setRoomCount(parsed.roomCount || null);
+        if (parsed.dateRange?.length === 2) {
+          setDateRange([dayjs(parsed.dateRange[0]), dayjs(parsed.dateRange[1])]);
+        }
+        setAccommodations(parsed.accommodations || []);
+        setIsSearched(parsed.isSearched || false);
+      } catch (e) {
+        console.warn("searchState 복원 실패:", e);
+      }
+    }
+  }, [dispatch]);
+
+  /* ✅ 검색 상태 */
   const [searchType, setSearchType] = useState(savedSearch.searchType || "region");
   const [city, setCity] = useState(savedSearch.city);
   const [township, setTownship] = useState(savedSearch.township);
@@ -44,6 +73,7 @@ const AccListPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(6);
 
+  /* ✅ 시·읍면 옵션 구성 */
   const cityOptions = useMemo(() => {
     return [...new Set(townshipList.map((t) => t.sigunguName))].map((city) => ({
       value: city,
@@ -59,71 +89,97 @@ const AccListPage = () => {
       : [];
   }, [city, townshipList]);
 
+  /* ✅ 검색 실행 */
   const handleSearch = useCallback(async () => {
+    // ✅ 읍면 로딩 / 오류 체크
     if (isTownshipLoading) {
       message.warning("읍면동 데이터를 로딩 중입니다. 잠시만 기다려주세요.");
       return;
     }
     if (townshipError) {
-      message.error("읍면동 데이터 로드에 실패했습니다. 페이지를 새로고침하거나 나중에 다시 시도해 주세요.");
+      message.error("읍면동 데이터 로드에 실패했습니다. 다시 시도해주세요.");
       return;
     }
 
+    // ✅ [1️⃣ 공통 필수값 검사]
+    if (!dateRange || dateRange.length !== 2) {
+      message.warning("체크인 및 체크아웃 날짜를 모두 선택해주세요.");
+      return;
+    }
+    if (!guestCount || guestCount <= 0) {
+      message.warning("투숙 인원을 입력해주세요.");
+      return;
+    }
+    if (!roomCount || roomCount <= 0) {
+      message.warning("객실 수를 입력해주세요.");
+      return;
+    }
+
+    // ✅ [2️⃣ 검색 유형별 필수값 검사]
+    if (searchType === "region") {
+      if (!city) {
+        message.warning("행정시를 선택해주세요.");
+        return;
+      }
+      if (!township) {
+        message.warning("읍면을 선택해주세요.");
+        return;
+      }
+    } else if (searchType === "keyword") {
+      if (!keyword?.trim()) {
+        message.warning("숙소명을 입력해주세요.");
+        return;
+      }
+    } else if (searchType === "spot") {
+      if (!spot?.trim()) {
+        message.warning("관광명소를 입력해주세요.");
+        return;
+      }
+    }
+
+    // ✅ [3️⃣ 검색 로직 시작]
     try {
       const params = {};
 
       if (searchType === "region") {
-        if (!city || !township) {
-          message.warning("행정시와 읍면을 모두 선택해주세요.");
-          return;
-        }
         params.townshipName = township;
       } else if (searchType === "keyword") {
-        if (keyword && keyword.trim() !== "") {
-          params.title = keyword.trim();
-        } else {
-          message.info("숙소명을 입력해주세요.");
-          return;
-        }
-      } else {
-        if (spot && spot.trim() !== "") {
-          params.spot = spot.trim();
-        } else {
-          message.info("관광명소를 입력해주세요.");
-          return;
-        }
+        params.title = keyword.trim();
+      } else if (searchType === "spot") {
+        params.spot = spot.trim();
       }
 
-      const dateRangeArray = dateRange ? dateRange.map((d) => d.format("YYYY-MM-DD")) : null;
-      if (dateRangeArray) {
-        params.checkIn = dateRangeArray[0];
-        params.checkOut = dateRangeArray[1];
-      }
-
-      if (guestCount) params.guestCount = guestCount;
-      if (roomCount) params.roomCount = roomCount;
+      const dateRangeArray = dateRange.map((d) => d.format("YYYY-MM-DD"));
+      params.checkIn = dateRangeArray[0];
+      params.checkOut = dateRangeArray[1];
+      params.guestCount = guestCount;
+      params.roomCount = roomCount;
 
       const res = await axios.get("/api/accommodations", { params });
-      setAccommodations(res.data);
+      const resultData = res.data;
+
+      setAccommodations(resultData);
       setIsSearched(true);
       setCurrentPage(1);
 
-      dispatch(
-        setSearchState({
-          searchType,
-          city,
-          township,
-          keyword,
-          spot,
-          guestCount,
-          roomCount,
-          dateRange: dateRangeArray,
-          isSearched: true,
-          accommodations: res.data,
-        })
-      );
+      const newSearchState = {
+        searchType,
+        city,
+        township,
+        keyword,
+        spot,
+        guestCount,
+        roomCount,
+        dateRange: dateRangeArray,
+        isSearched: true,
+        accommodations: resultData,
+      };
 
-      if (res.data.length === 0) message.info("검색 결과가 없습니다 😢");
+      // ✅ Redux + localStorage 저장
+      dispatch(setSearchState(newSearchState));
+      localStorage.setItem("searchState", JSON.stringify(newSearchState));
+
+      if (resultData.length === 0) message.info("검색 결과가 없습니다 😢");
     } catch (err) {
       console.error("숙소 검색 실패:", err);
       message.error("숙소 목록을 불러오지 못했습니다.");
@@ -142,15 +198,32 @@ const AccListPage = () => {
     dispatch,
   ]);
 
+
+  /* ✅ 숙소 카드 클릭 시 */
   const handleCardClick = useCallback(
     (accId) => {
-      console.log(accId);
       dispatch(setSelectedAcc(accId));
-      navigate(`/accommodations/${accId.accId}`);
+      localStorage.setItem("selectedAccId", accId);
+
+      // ✅ 선택 당시의 검색 조건도 함께 저장 (DetailPage에서 쓸 수 있게)
+      const stateToSave = {
+        searchType,
+        city,
+        township,
+        keyword,
+        spot,
+        guestCount,
+        roomCount,
+        dateRange: dateRange ? dateRange.map(d => d.format("YYYY-MM-DD")) : null,
+      };
+      localStorage.setItem("lastSearchCondition", JSON.stringify(stateToSave));
+
+      navigate("/accommodations/detail");
     },
-    [dispatch, navigate]
+    [dispatch, navigate, searchType, city, township, keyword, spot, guestCount, roomCount, dateRange]
   );
 
+  /* ✅ 페이지네이션 계산 */
   const startIndex = (currentPage - 1) * pageSize;
   const currentData = accommodations.slice(startIndex, startIndex + pageSize);
 
@@ -160,6 +233,7 @@ const AccListPage = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  /* ✅ 렌더링 */
   return (
     <MainLayout>
       <div className="min-h-screen flex flex-col items-center pt-10 pb-12 px-8">
@@ -207,13 +281,20 @@ const AccListPage = () => {
               )}
 
               {searchType === "spot" && (
-                <Input placeholder="관광명소 입력" className="min-w-[250px] flex-grow" />
+                <Input
+                  placeholder="관광명소를 입력하세요"
+                  className="min-w-[300px] w-[400px] flex-shrink-0"
+                  size="large"
+                  value={spot}
+                  onChange={(e) => setSpot(e.target.value)}
+                />
               )}
 
               {searchType === "keyword" && (
                 <Input
                   placeholder="숙소명을 입력하세요"
-                  className="min-w-[300px] flex-grow"
+                  className="min-w-[300px] w-[400px] flex-shrink-0"
+                  size="large"
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
                 />
@@ -224,6 +305,8 @@ const AccListPage = () => {
                 format="YYYY-MM-DD"
                 placeholder={["체크인 날짜", "체크아웃 날짜"]}
                 size="large"
+                value={dateRange}
+                onChange={(v) => setDateRange(v)}
               />
 
               <InputNumber
@@ -277,7 +360,6 @@ const AccListPage = () => {
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                   {currentData.map((acc) => (
-
                     <Card
                       key={acc.accId}
                       hoverable
@@ -313,13 +395,9 @@ const AccListPage = () => {
                         title={<span className="text-lg font-bold">{acc.title}</span>}
                         description={
                           <div className="text-gray-600 mt-2">
-                            <div className="flex items-center justify-between font-semibold text-base mt-1">
-                              <span>{acc.minPrice?.toLocaleString() || 0}원 / 1박</span>
-                              <span className="flex items-center gap-1 text-gray-500 text-sm">
-                                <EyeOutlined />
-                                {acc.viewsCount ?? 0}
-                              </span>
-                            </div>
+                            <p className="font-semibold text-base mt-1">
+                              {acc.minPrice ? `${acc.minPrice.toLocaleString()}원` : "가격 미정"} / 1박
+                            </p>
                             <p>{acc.address}</p>
                           </div>
                         }

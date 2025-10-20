@@ -12,8 +12,6 @@ import {
 } from "antd";
 import dayjs from "dayjs";
 import axios from "axios";
-import { useState, useEffect, useRef } from "react";
-import { Input, DatePicker, Button, message, Radio } from "antd";
 import { useNavigate } from "react-router-dom";
 import { setReserveData } from "../../../common/slice/paymentSlice"; 
 import { useDispatch } from "react-redux";
@@ -228,16 +226,6 @@ const DeliveryPage = () => {
       bagId: form.bagSize === "S" ? 1 : form.bagSize === "M" ? 2 : 3,
       groupId: "G20251015_JEJU_AM_1",
     };
-
-    /*try {
-      const res = await axios.post(`${API_SERVER_HOST}/api/delivery/rsv`, dto);
-      message.success("짐배송 예약이 완료되었습니다!");
-      navigate("/delivery/result", { state: res.data });
-    } catch {
-      message.error("예약 중 오류가 발생했습니다.");
-    }*/
-
-    // 🚀 예약 + 결제 준비 요청 (DlvPaymentController 연결)
     
     try {
       const res = await axios.post(`${API_SERVER_HOST}/api/delivery/rsv`, dto);
@@ -246,6 +234,7 @@ const DeliveryPage = () => {
       // 예약 성공 시 Redux 저장
       dispatch(
         setReserveData({
+          rsvType: "DLV",
           reserveId: res.data.data.drsvId,  // ✅ 예약 ID
           itemData: res.data.data,          // ✅ 예약 상세 데이터
         })

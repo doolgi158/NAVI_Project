@@ -82,8 +82,8 @@ const UserMenuDropdown = () => {
     >
       {/* 프로필 버튼 */}
       <Avatar
-        src={profileUrl || loginstate.user?.profileImage || null}
-        icon={!profileUrl && !loginstate.user?.profileImage && <UserOutlined />}
+        src={profileUrl || loginstate?.user?.profileImage || null}
+        icon={!profileUrl && !loginstate?.user?.profileImage && <UserOutlined />}
         size={38}
         className="cursor-pointer border border-gray-200 shadow-sm hover:shadow-md transition-transform hover:scale-105"
         onClick={() => setMenuOpen((prev) => !prev)}

@@ -24,17 +24,10 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table(name = "NAVI_PAYMENT")   // Todo: indexes 추후 추가 예정
-@SequenceGenerator(
-        name = "payment_generator",
-        sequenceName = "PAYMENT_SEQ",
-        initialValue = 1,
-        allocationSize = 1
-)
 public class PaymentMaster extends BaseEntity {
     /* === COLUMN 정의 === */
     // 내부 식별번호 (예: 1)
     @Id @Column(name = "no")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "payment_generator")
     private Long no;
 
     // 결제 고유번호 (예: PAY20251007-0001)

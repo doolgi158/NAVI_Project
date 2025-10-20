@@ -89,7 +89,6 @@ public class AccServiceImpl implements AccService {
 
     /* === 사용자 전용 조회 === */
     @Override
-    @Transactional(readOnly = true)
     public List<AccListResponseDTO> searchAccommodations(AccSearchRequestDTO dto) {
         List<Acc> accList = accRepository.findAll();
 
@@ -133,10 +132,13 @@ public class AccServiceImpl implements AccService {
                 .orElseThrow(() -> new IllegalArgumentException("숙소를 찾을 수 없습니다."));
 
         // 숙소 이미지 리스트
-        List<String> accImages = imageRepository.findAllByTargetTypeAndTargetId("ACC", acc.getAccId())
+        List<String> accImages = imageRepository.findImagesIgnoreCase("ACC", acc.getAccId())
                 .stream()
                 .map(Image::getPath)
                 .toList();
+
+        log.info("[IMAGE-DEBUG] ACC {} 이미지 조회 결과 = {}", acc.getAccId(),
+                imageRepository.findAllByTargetTypeAndTargetIdIgnoreCase("ACC", acc.getAccId()).size());
 
         // 객실 리스트
         /*List<RoomResponseDTO> roomList = roomRepository.findByAcc_AccId(acc.getAccId())

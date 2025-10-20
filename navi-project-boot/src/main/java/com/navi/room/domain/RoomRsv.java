@@ -56,7 +56,6 @@ public class RoomRsv {
     private String roomRsvId;
 
     /* === 연관관계 === */
-
     /** 사용자 */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_no", nullable = false)
@@ -78,7 +77,7 @@ public class RoomRsv {
     private LocalDate stockDate;
 
     @Column(name = "quantity", nullable = false)
-    private int quantity;
+    private Integer quantity;
 
     @Column(name = "price", nullable = false)
     private BigDecimal price;
@@ -103,13 +102,6 @@ public class RoomRsv {
         // 기본 상태 설정
         if (rsvStatus == null) {
             rsvStatus = RsvStatus.PENDING;
-        }
-
-        // 예약 ID 자동 생성
-        if (roomRsvId == null) {
-            String today = LocalDate.now(ZoneId.of("Asia/Seoul"))
-                    .format(DateTimeFormatter.BASIC_ISO_DATE);
-            this.roomRsvId = String.format("%sROM%04d", today, (no != null ? no : (long) (Math.random() * 9999)));
         }
 
         // 수량 유효성
