@@ -396,8 +396,13 @@ const AccListPage = () => {
                         title={<span className="text-lg font-bold">{acc.title}</span>}
                         description={
                           <div className="text-gray-600 mt-2">
-                            <p className="font-semibold text-base mt-1">
+                            <p className="font-semibold text-base mt-1 flex items-center gap-2">
                               {acc.minPrice ? `${acc.minPrice.toLocaleString()}원` : "가격 미정"} / 1박
+                              {acc.viewCount !== undefined && (
+                                <span className="flex items-center text-gray-500 text-sm ml-2">
+                                  <EyeOutlined style={{ marginRight: 4 }} /> {acc.viewCount.toLocaleString()}
+                                </span>
+                              )}
                             </p>
                             <p>{acc.address}</p>
                           </div>
