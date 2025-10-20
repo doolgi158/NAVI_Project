@@ -3,7 +3,6 @@ package com.navi.accommodation.controller;
 import com.navi.accommodation.dto.request.AccSearchRequestDTO;
 import com.navi.accommodation.dto.response.AccDetailResponseDTO;
 import com.navi.accommodation.dto.response.AccListResponseDTO;
-import com.navi.accommodation.repository.AccRepository;
 import com.navi.accommodation.service.AccService;
 import com.navi.room.service.RoomService;
 import lombok.RequiredArgsConstructor;
@@ -44,4 +43,10 @@ public class AccUserController {
         return accService.getAccDetail(accId);
     }
 
+    // 조회수 증가
+    @PostMapping("/accommodations/{accId}/view")
+    public ResponseEntity<?> increaseAccView(@PathVariable String accId) {
+        accService.increaseViewCount(accId);
+        return ResponseEntity.ok().build();
+    }
 }

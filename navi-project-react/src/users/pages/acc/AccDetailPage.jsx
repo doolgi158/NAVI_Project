@@ -14,6 +14,7 @@ import {
 import MainLayout from "../../layout/MainLayout";
 import axios from "axios";
 import { useSelector } from "react-redux"; // ✅ Redux 불러오기
+import { API_SERVER_HOST } from "@/common/api/naviApi";
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -39,7 +40,7 @@ const AccDetailPage = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const accRes = await axios.get(`/api/accommodations/${accId}`);
+        const accRes = await axios.get(`${API_SERVER_HOST}/api/accommodations/${accId}`);
         setAccData(accRes.data);
       } catch (err) {
         console.error("숙소 상세 조회 실패:", err);
@@ -51,12 +52,13 @@ const AccDetailPage = () => {
     fetchData();
   }, [accId, selectedAcc]);
 
-  /* ✅ 객실 정보 로드 */
+  /* ✅ 객실 정보 로드 & 조회수 증가 */
   useEffect(() => {
     if (!accId) return;
+    axios.post(`${API_SERVER_HOST}/api/accommodations/${accId}/view`).catch(() => { });
     const fetchRooms = async () => {
       try {
-        const roomRes = await axios.get(`/api/rooms/${accId}`);
+        const roomRes = await axios.get(`${API_SERVER_HOST}/api/rooms/${accId}`);
         setRooms(roomRes.data);
       } catch (err) {
         console.error("객실 조회 실패:", err);
@@ -68,7 +70,7 @@ const AccDetailPage = () => {
   /* ✅ 예약 버튼 클릭 시 */
   const handleReserve = async (room) => {
     try {
-      const res = await axios.post(`/api/reservation/pre`, {
+      const res = await axios.post(`${API_SERVER_HOST}/api/reservation/pre`, {
         userNo: 1, // 임시
         rsvType: "ACC",
         targetId: room.roomId,
@@ -78,7 +80,7 @@ const AccDetailPage = () => {
 
       const reserveId = res.data.reserveId;
 
-      navigate(`/accommodations/${accId}/${room.roomId}/reservation`, {
+      navigate(`${API_SERVER_HOST}/accommodations/${accId}/${room.roomId}/reservation`, {
         state: {
           accName: accData?.title || accData?.name,
           room: {

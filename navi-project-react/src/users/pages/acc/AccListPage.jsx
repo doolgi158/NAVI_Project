@@ -4,16 +4,10 @@ import useTownshipData from "../../../common/hooks/useTownshipData";
 import MainLayout from "@/users/layout/MainLayout";
 import { useState, useMemo, useCallback } from "react";
 import {
-  Radio,
-  Input,
-  DatePicker,
-  Select,
-  Button,
-  Card,
-  message,
-  InputNumber,
-  Pagination,
+  Radio, Input, DatePicker, Select, Button, Card, message, InputNumber,
+  Pagination
 } from "antd";
+import { EyeOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setSearchState, setSelectedAcc } from "../../../common/slice/accSlice";
@@ -60,8 +54,8 @@ const AccListPage = () => {
   const townshipOptions = useMemo(() => {
     return city
       ? townshipList
-          .filter((t) => t.sigunguName === city)
-          .map((t) => ({ value: t.townshipName, label: t.townshipName }))
+        .filter((t) => t.sigunguName === city)
+        .map((t) => ({ value: t.townshipName, label: t.townshipName }))
       : [];
   }, [city, townshipList]);
 
@@ -150,8 +144,9 @@ const AccListPage = () => {
 
   const handleCardClick = useCallback(
     (accId) => {
+      console.log(accId);
       dispatch(setSelectedAcc(accId));
-      navigate("/accommodations/detail");
+      navigate(`/accommodations/${accId.accId}`);
     },
     [dispatch, navigate]
   );
@@ -282,12 +277,12 @@ const AccListPage = () => {
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                   {currentData.map((acc) => (
-                    
+
                     <Card
                       key={acc.accId}
                       hoverable
                       className="rounded-xl shadow-sm cursor-pointer transition-transform transform hover:scale-[1.02] duration-200"
-                      onClick={() => handleCardClick(acc.accId)}
+                      onClick={() => handleCardClick(acc)}
                       cover={
                         acc.accImage ? (
                           <img
@@ -318,9 +313,13 @@ const AccListPage = () => {
                         title={<span className="text-lg font-bold">{acc.title}</span>}
                         description={
                           <div className="text-gray-600 mt-2">
-                            <p className="font-semibold text-base mt-1">
-                              {acc.minPrice || "원"} / 1박
-                            </p>
+                            <div className="flex items-center justify-between font-semibold text-base mt-1">
+                              <span>{acc.minPrice?.toLocaleString() || 0}원 / 1박</span>
+                              <span className="flex items-center gap-1 text-gray-500 text-sm">
+                                <EyeOutlined />
+                                {acc.viewsCount ?? 0}
+                              </span>
+                            </div>
                             <p>{acc.address}</p>
                           </div>
                         }

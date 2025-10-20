@@ -12,7 +12,11 @@ const UserMenuDropdown = () => {
   const menuRef = useRef(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const loginstate = useSelector((state) => state.login);
+
+  // ✅ loginstate 기본값 방어
+  const loginstate = useSelector((state) => state.login) || {};
+  const user = loginstate?.user || {};
+
   const [profileUrl, setProfileUrl] = useState(null);
 
   // 메뉴 외부 클릭 시 닫기
@@ -43,7 +47,7 @@ const UserMenuDropdown = () => {
       }
     };
     window.addEventListener("profile-updated", handleProfileUpdate);
-    
+
     // 외부 클릭 닫기
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -51,7 +55,7 @@ const UserMenuDropdown = () => {
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-  
+
     // cleanup
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);

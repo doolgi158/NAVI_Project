@@ -9,25 +9,29 @@ import com.navi.accommodation.repository.AccRepository;
 import com.navi.image.domain.Image;
 import com.navi.image.repository.ImageRepository;
 import com.navi.location.repository.TownshipRepository;
-import com.navi.room.domain.Room;
 import com.navi.room.repository.RoomRepository;
+import com.navi.user.repository.LogRepository;
+import com.navi.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 @Transactional
-public class AccServiceImpl implements AccService{
+public class AccServiceImpl implements AccService {
     private final AccRepository accRepository;
     private final RoomRepository roomRepository;
     private final TownshipRepository townshipRepository;
     private final ImageRepository imageRepository;
+    private final UserRepository userRepository;
+    private final LogRepository logRepository;
 
     /* === 관리자 전용 CRUD === */
     @Override
@@ -43,7 +47,7 @@ public class AccServiceImpl implements AccService{
                 .orElseThrow(() -> new IllegalArgumentException("숙소가 존재하지 않습니다."));
 
         // API 숙소 수정 불가
-        if(acc.getContentId() != null) {
+        if (acc.getContentId() != null) {
             throw new IllegalStateException("API로 받아온 숙소는 수정할 수 없습니다.");
         }
         acc.changeFromRequestDTO(dto);
@@ -56,15 +60,24 @@ public class AccServiceImpl implements AccService{
                 .orElseThrow(() -> new IllegalArgumentException("숙소가 존재하지 않습니다."));
 
         // API 숙소 삭제 불가
-        if(acc.getContentId() != null) {
+        if (acc.getContentId() != null) {
             throw new IllegalStateException("API로 받아온 숙소는 삭제할 수 없습니다.");
         }
         // 예약사항이 있으면 삭제 불가
-        if(!acc.isDeletable()) {
+        if (!acc.isDeletable()) {
             throw new IllegalStateException("삭제 불가 상태의 숙소입니다.");
         }
 
         accRepository.delete(acc);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Acc> getAdminAccList(Pageable pageable, String keyword) {
+        if (keyword != null && !keyword.isBlank()) {
+            return accRepository.findByTitleContainingIgnoreCase(keyword, pageable);
+        }
+        return accRepository.findAll(pageable);
     }
 
     /* === 공통 조회 === */
@@ -78,16 +91,20 @@ public class AccServiceImpl implements AccService{
     @Override
     @Transactional(readOnly = true)
     public List<AccListResponseDTO> searchAccommodations(AccSearchRequestDTO dto) {
-        List<Acc> accList;
+        List<Acc> accList = accRepository.findAll();
 
         // 검색 조건 분기
-        if(dto.getTownshipName() != null && !dto.getTownshipName().isEmpty()) {
-            accList = accRepository.findByTownshipName(dto.getTownshipName());
-        }
-        else if(dto.getTitle() != null && !dto.getTitle().isEmpty()) {
-            accList = accRepository.findByTitle(dto.getTitle());
-        }
-        else {
+        if (dto.getTownshipName() != null && !dto.getTownshipName().isBlank()) {
+            accList = accList.stream()
+                    .filter(a -> a.getTownship() != null &&
+                            a.getTownship().getTownshipName().contains(dto.getTownshipName()))
+                    .toList();
+        } else if (dto.getTitle() != null && !dto.getTitle().isBlank()) {
+            String lowerKeyword = dto.getTitle().toLowerCase();
+            accList = accList.stream()
+                    .filter(a -> a.getTitle() != null && a.getTitle().toLowerCase().contains(lowerKeyword))
+                    .toList();
+        } else {
             // Todo: 임시방편 (이거 말고 관광지 기반 만들어야 함)
             accList = accRepository.findAll();
         }
@@ -95,9 +112,7 @@ public class AccServiceImpl implements AccService{
         /* 숙소 + 이미지 + 객실정보 DTO 조합 */
         return accList.stream().map(acc -> {
             String accImage = imageRepository
-                    .findTopByTargetTypeAndTargetId("ACC", acc.getAccId())
-                    .stream()
-                    .findFirst()
+                    .findTopByTargetTypeAndTargetIdOrderByNoAsc("ACC", acc.getAccId())
                     .map(Image::getPath)
                     .orElse("/uploads/default_hotel.jpg");
 
@@ -112,11 +127,46 @@ public class AccServiceImpl implements AccService{
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public AccDetailResponseDTO getAccDetail(String accId) {
-        // TODO: 숙소 + 객실 + 이미지 조합 응답
         Acc acc = accRepository.findByAccId(accId)
                 .orElseThrow(() -> new IllegalArgumentException("숙소를 찾을 수 없습니다."));
+
+        // 숙소 이미지 리스트
+        List<String> accImages = imageRepository.findAllByTargetTypeAndTargetId("ACC", acc.getAccId())
+                .stream()
+                .map(Image::getPath)
+                .toList();
+
+        // 객실 리스트
+        /*List<RoomResponseDTO> roomList = roomRepository.findByAcc_AccId(acc.getAccId())
+                .stream()
+                .map(RoomResponseDTO::fromEntity)
+                .toList();*/
+
+        AccDetailResponseDTO dto = AccDetailResponseDTO.fromEntity(acc);
+        dto.setAccImages(accImages);
+        //dto.setRooms(roomList);
+
+        return dto;
+    }
+
+    @Override
+    @Transactional
+    public AccDetailResponseDTO getAccDetailByNo(Long accNo) {
+        Acc acc = accRepository.findById(accNo)
+                .orElseThrow(() -> new IllegalArgumentException("숙소를 찾을 수 없습니다."));
+
         return AccDetailResponseDTO.fromEntity(acc);
+    }
+
+    @Override
+    @Transactional
+    public void increaseViewCount(String accId) {
+        accRepository.findByAccId(accId).ifPresent(acc -> {
+            acc.increaseViewCount();
+            accRepository.save(acc);
+            log.info("============================== 조회수 증가!!!!!!!");
+        });
     }
 }

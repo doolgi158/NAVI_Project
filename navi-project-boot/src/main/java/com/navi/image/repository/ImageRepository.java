@@ -11,8 +11,10 @@ import java.util.Optional;
 public interface ImageRepository extends JpaRepository<Image, Long> {
     // 대상별 이미지 조회
     Optional<Image> findByTargetTypeAndTargetId(String targetType, String targetId);
+
     // 대상별 이미지 여러 개 (예: 객실, 숙소 등)
     List<Image> findAllByTargetTypeAndTargetId(String targetType, String targetId);
+
     // 특정 대상의 모든 이미지 삭제
     void deleteByTargetTypeAndTargetId(String targetType, String targetId);
 
@@ -22,4 +24,7 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
             "ORDER BY i.no ASC")
     List<Image> findTopByTargetTypeAndTargetId(@Param("targetType") String targetType,
                                                @Param("targetId") String targetId);
+
+    // 숙소 대표 이미지 가져오기
+    Optional<Image> findTopByTargetTypeAndTargetIdOrderByNoAsc(String targetType, String targetId);
 }

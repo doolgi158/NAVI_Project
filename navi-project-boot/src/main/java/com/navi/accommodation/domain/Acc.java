@@ -1,4 +1,3 @@
-
 package com.navi.accommodation.domain;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -7,7 +6,10 @@ import com.navi.accommodation.dto.request.AccRequestDTO;
 import com.navi.location.domain.Township;
 import com.navi.room.domain.Room;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Nationalized;
 
 import java.math.BigDecimal;
@@ -24,7 +26,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name="NAVI_ACCOMMODATION")
+@Table(name = "NAVI_ACCOMMODATION")
 @SequenceGenerator(
         name = "acc_generator",
         sequenceName = "ACC_SEQ",
@@ -51,7 +53,8 @@ public class Acc {
 
     // 숙소 유형 (호텔, 펜션 등)
     @Builder.Default
-    @Nationalized @Column(length = 10)
+    @Nationalized
+    @Column(length = 10)
     private String category = "미확인";
 
     // 문의 전화번호
@@ -76,7 +79,8 @@ public class Acc {
     private BigDecimal mapx;
 
     // 숙소 설명
-    @Lob @Column(name = "overview")
+    @Lob
+    @Column(name = "overview")
     private String overview;
 
     // 체크인 시간 (예: 15:00)
@@ -117,6 +121,11 @@ public class Acc {
     @Column(name = "modified_time", nullable = false)
     private LocalDateTime modifiedTime;
 
+    // 조회수
+    @Builder.Default
+    @Column(name = "view_count", nullable = false)
+    private Long viewCount = 0L;
+
     /* === 연관관계 정의 === */
     @Builder.Default
     @OneToMany(mappedBy = "acc",
@@ -142,7 +151,7 @@ public class Acc {
         }
 
         // accId 자동 생성
-        if(accId == null && accNo != null){
+        if (accId == null && accNo != null) {
             this.accId = String.format("ACC%03d", accNo);
         }
     }
@@ -151,7 +160,7 @@ public class Acc {
     @PreUpdate
     public void preUpdate() {
         // API 데이터의 modifiedTime은 자동 갱신 안함
-        if(contentId == null) {
+        if (contentId == null) {
             modifiedTime = LocalDateTime.now();
         }
     }
@@ -211,16 +220,28 @@ public class Acc {
     }
 
     public void changeTownship(Township township) {
-        if (township != null) { this.township = township; }
+        if (township != null) {
+            this.township = township;
+        }
     }
 
     public void changeLocation(BigDecimal mapx, BigDecimal mapy) {
-        if (mapx != null) { this.mapx = mapx; }
-        if (mapy != null) { this.mapy = mapy; }
+        if (mapx != null) {
+            this.mapx = mapx;
+        }
+        if (mapy != null) {
+            this.mapy = mapy;
+        }
     }
 
     /* === 문자열 유효성 검증용 유틸 메서드 === */
     private String nonEmptyOrNull(String value) {
         return (value != null && !value.isBlank()) ? value : null;
+    }
+
+    // === 조회수 증가 메서드 ===
+    public void increaseViewCount() {
+        if (this.viewCount == null) this.viewCount = 0L;
+        this.viewCount++;
     }
 }

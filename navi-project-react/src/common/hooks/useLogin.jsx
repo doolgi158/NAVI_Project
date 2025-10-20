@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useDispatch } from "react-redux";
-import { setlogin } from "../slice/loginSlice";
+import { setlogin, setlogout } from "../slice/loginSlice";
 import { useNavigate } from "react-router-dom";
 import { message, Modal } from "antd";
 import { API_SERVER_HOST } from "../api/naviApi";
@@ -110,7 +110,7 @@ export const useLogin = () => {
   const logoutUser = () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
-    dispatch(logout());
+    dispatch(setlogout());
   };
 
   return { login, logoutUser };
