@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { Table, Button, Space, Tag, message, Typography, Modal } from "antd";
-import { ReloadOutlined, DeleteOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  ReloadOutlined,
+  DeleteOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import axios from "axios";
 import dayjs from "dayjs";
 import AdminSectionCard from "../../layout/flight/AdminSectionCard";
@@ -14,7 +18,7 @@ const AdminReservationPage = () => {
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
 
-  /* 예약 목록 조회 */
+  /** ✅ 예약 목록 조회 */
   const fetchReservations = async () => {
     setLoading(true);
     try {
@@ -34,7 +38,7 @@ const AdminReservationPage = () => {
     fetchReservations();
   }, []);
 
-  /* 예약 삭제 */
+  /** ✅ 예약 삭제 */
   const handleDelete = (rsvId) => {
     Modal.confirm({
       title: "예약 삭제",
@@ -57,7 +61,7 @@ const AdminReservationPage = () => {
     });
   };
 
-  /* 예약 상태 색상 Tag */
+  /** ✅ 상태 Tag 렌더링 */
   const renderStatus = (status) => {
     switch (status) {
       case "PAID":
@@ -73,7 +77,7 @@ const AdminReservationPage = () => {
     }
   };
 
-  /* 테이블 컬럼 */
+  /** ✅ 테이블 컬럼 */
   const columns = [
     {
       title: "예약번호",
@@ -96,13 +100,13 @@ const AdminReservationPage = () => {
     },
     {
       title: "출발지",
-      dataIndex: "depAirportNm",
+      dataIndex: "depAirport",
       align: "center",
       width: 100,
     },
     {
       title: "도착지",
-      dataIndex: "arrAirportNm",
+      dataIndex: "arrAirport",
       align: "center",
       width: 100,
     },
@@ -154,18 +158,25 @@ const AdminReservationPage = () => {
     },
   ];
 
-  /* 검색 필터 */
-  const filtered = reservations.filter(
-    (r) =>
-      r.rsvId.toLowerCase().includes(search.toLowerCase()) ||
-      r.userName.toLowerCase().includes(search.toLowerCase()) ||
-      r.flightId.toLowerCase().includes(search.toLowerCase())
-  );
+  /** ✅ 검색 필터 (안전 처리 버전) */
+  const filtered = reservations.filter((r) => {
+    const id = r?.rsvId?.toLowerCase() || "";
+    const user = r?.userName?.toLowerCase() || "";
+    const flight = r?.flightId?.toLowerCase() || "";
+    const keyword = search.toLowerCase();
+
+    return (
+      id.includes(keyword) ||
+      user.includes(keyword) ||
+      flight.includes(keyword)
+    );
+  });
+
 
   return (
     <div style={{ padding: 24 }}>
       <AdminSectionCard
-        title="예약 관리"
+        title="항공편 예약 관리"
         extra={
           <Space>
             <AdminSearchBar

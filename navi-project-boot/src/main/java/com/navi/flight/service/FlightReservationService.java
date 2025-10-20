@@ -20,7 +20,7 @@ public interface FlightReservationService {
     /** 예약 상태 변경 */
     FlightReservation updateStatus(String frsvId, String status);
 
-//    // 금액 합산용(결제파트)
-//    BigDecimal getTotalAmountByReserveId(String frsvId);
-//    BigDecimal getTotalAmountByReserveIds(List<String> reserveIds);
+    // 금액 합산용(결제파트)
+    BigDecimal getTotalAmountByReserveId(String frsvId);
+    BigDecimal getTotalAmountByReserveIds(List<String> reserveIds);
 }

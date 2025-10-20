@@ -109,17 +109,17 @@ public class FlightReservationServiceImpl implements FlightReservationService {
         return String.format("%sFLY%s", date, String.valueOf(System.nanoTime()).substring(8)); // ✅ 중복 방지
     }
 
-//    @Override
-//    public BigDecimal getTotalAmountByReserveId(String frsvId) {
-//        FlightReservation reservation = reservationRepository.findByFrsvId(frsvId)
-//                .orElseThrow(() -> new IllegalArgumentException("예약 정보를 찾을 수 없습니다. id=" + frsvId));
-//        return reservation.getTotalPrice();
-//    }
-//
-//    @Override
-//    public BigDecimal getTotalAmountByReserveIds(List<String> reserveIds) {
-//        return reserveIds.stream()
-//                .map(this::getTotalAmountByReserveId)
-//                .reduce(BigDecimal.ZERO, BigDecimal::add);
-//    }
+    @Override
+    public BigDecimal getTotalAmountByReserveId(String frsvId) {
+        FlightReservation reservation = reservationRepository.findByFrsvId(frsvId)
+                .orElseThrow(() -> new IllegalArgumentException("예약 정보를 찾을 수 없습니다. id=" + frsvId));
+        return reservation.getTotalPrice();
+    }
+
+    @Override
+    public BigDecimal getTotalAmountByReserveIds(List<String> reserveIds) {
+        return reserveIds.stream()
+                .map(this::getTotalAmountByReserveId)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
 }
