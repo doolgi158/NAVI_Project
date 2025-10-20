@@ -2,11 +2,12 @@ package com.navi.flight.service;
 
 import com.navi.common.enums.RsvStatus;
 import com.navi.flight.domain.Flight;
-import com.navi.flight.domain.FlightId;
 import com.navi.flight.domain.FlightReservation;
+import com.navi.flight.domain.Seat;
 import com.navi.flight.dto.FlightReservationDTO;
 import com.navi.flight.repository.FlightRepository;
 import com.navi.flight.repository.FlightReservationRepository;
+import com.navi.flight.repository.SeatRepository;
 import com.navi.user.domain.User;
 import com.navi.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -27,35 +28,41 @@ public class FlightReservationServiceImpl implements FlightReservationService {
     private final FlightRepository flightRepository;
     private final FlightReservationRepository reservationRepository;
     private final UserRepository userRepository;
+    private final SeatRepository seatRepository;
 
     /* 항공편 예약 생성 */
     @Override
     @Transactional
-    public FlightReservation createReservation(FlightReservationDTO dto) {
+    public FlightReservationDTO createReservation(FlightReservationDTO dto) {
 
-        // 1️.사용자 검증
+        // 1. 사용자 검증
         User user = userRepository.findById(dto.getUserNo())
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다. userNo=" + dto.getUserNo()));
 
-        // 2.항공편 검증 (복합키)
-        // DTO의 depTime은 LocalDate → 하루 전체 범위로 처리
+        // 2. 항공편 검증
         LocalDateTime startOfDay = dto.getDepTime().atStartOfDay();
         LocalDateTime endOfDay = dto.getDepTime().atTime(23, 59, 59);
-
         Flight flight = flightRepository.findByFlightIdAndDepTimeRange(dto.getFlightId(), startOfDay, endOfDay)
                 .orElseThrow(() -> new IllegalArgumentException("항공편을 찾을 수 없습니다. flightId=" + dto.getFlightId()));
 
-        // 3️.예약 ID 생성
+        // 3. 좌석 락 획득
+        Seat seat = seatRepository.findByIdForUpdate(dto.getSeatId());
+        if (seat == null) throw new IllegalArgumentException("좌석 정보를 찾을 수 없습니다. seatId=" + dto.getSeatId());
+        if (seat.isReserved()) throw new IllegalStateException("이미 예약된 좌석입니다.");
+
+        // 4. 좌석 상태 변경 및 저장
+        seat.setReserved(true);
+        seatRepository.save(seat); // ✅ 락 + 명시적 반영
+
+        // 5. 예약 생성
         String frsvId = generateFrsvId();
+        BigDecimal price = dto.getTotalPrice();
 
-        // 4.금액 BigDecimal 변환
-        BigDecimal price = BigDecimal.valueOf(dto.getTotalPrice());
-
-        // 5.예약 생성
         FlightReservation reservation = FlightReservation.builder()
                 .frsvId(frsvId)
                 .user(user)
                 .flight(flight)
+                .seat(seat)
                 .totalPrice(price)
                 .status(dto.getStatus())
                 .passengersJson(dto.getPassengersJson())
@@ -63,10 +70,10 @@ public class FlightReservationServiceImpl implements FlightReservationService {
 
         reservationRepository.save(reservation);
 
-        log.info("[항공편 예약 완료] frsvId={}, user={}, flight={}, status={}",
-                frsvId, user.getName(), dto.getFlightId(), dto.getStatus());
+        log.info("[항공편 예약 완료] frsvId={}, seat={}, user={}, flight={}, status={}",
+                frsvId, seat.getSeatNo(), user.getName(), dto.getFlightId(), dto.getStatus());
 
-        return reservation;
+        return FlightReservationDTO.fromEntity(reservation); // ✅ 바로 DTO 반환
     }
 
     /* 사용자별 예약 목록 조회 */
@@ -96,12 +103,9 @@ public class FlightReservationServiceImpl implements FlightReservationService {
         return reservationRepository.save(reservation);
     }
 
-    /* 예약번호 생성: 20251017FLY0001 */
+    /* 예약번호 생성 (고유성 강화 버전) */
     private String generateFrsvId() {
-        LocalDate today = LocalDate.now();
-        long countToday = reservationRepository.count();
-        return String.format("%sFLY%04d",
-                today.format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE),
-                countToday + 1);
+        String date = LocalDate.now().format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE);
+        return String.format("%sFLY%s", date, String.valueOf(System.nanoTime()).substring(8)); // ✅ 중복 방지
     }
 }
