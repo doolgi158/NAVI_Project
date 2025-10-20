@@ -29,4 +29,8 @@ public interface AccRepository extends JpaRepository<Acc, Long> {
     /* contentId = null인 숙소 찾기 (관리자용) */
     @Query("SELECT a FROM Acc a WHERE a.contentId IS NULL")
     List<Acc> findAllWithoutContentId();
+
+    /* accId 시퀀스 기반 생성용 */
+    @Query(value = "SELECT ACC_SEQ.NEXTVAL FROM DUAL", nativeQuery = true)
+    Long getNextSeqVal();
 }

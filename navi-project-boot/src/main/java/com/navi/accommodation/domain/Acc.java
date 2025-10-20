@@ -34,7 +34,6 @@ public class Acc {
     /* === COLUMN 정의 === */
     // 내부 식별번호 (예: 1)
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "acc_generator")
     private Long accNo;
 
     // 숙소 ID (예: ACC001)
@@ -140,11 +139,6 @@ public class Acc {
         if (createdTime == null) {
             createdTime = LocalDateTime.now();
             modifiedTime = LocalDateTime.now();
-        }
-
-        // accId 자동 생성
-        if(accId == null && accNo != null){
-            this.accId = String.format("ACC%03d", accNo);
         }
     }
 

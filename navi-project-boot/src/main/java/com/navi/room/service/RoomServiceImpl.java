@@ -22,21 +22,23 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional
 public class RoomServiceImpl implements RoomService {
-
     private final AccRepository accRepository;
     private final RoomRepository roomRepository;
     private final StockService stockService;
 
-    /* ============================================================
-       ✅ 관리자 전용 CRUD
-       ============================================================ */
+    /* 관리자 전용 CRUD  */
     @Override
     public RoomResponseDTO createRoom(Long accNo, RoomRequestDTO dto) {
         Acc acc = accRepository.findById(accNo)
                 .orElseThrow(() -> new IllegalArgumentException("숙소가 존재하지 않습니다."));
 
+        Long nextSeq = roomRepository.getNextSeqVal();
+        String roomId = String.format("ROM%04d", nextSeq);
+
         Room room = Room.builder()
                 .acc(acc)
+                .roomNo(nextSeq)
+                .roomId(roomId)
                 .roomName(dto.getRoomName())
                 .roomSize(Integer.parseInt(dto.getRoomSize()))
                 .roomCnt(Integer.parseInt(dto.getRoomCnt()))
@@ -84,22 +86,22 @@ public class RoomServiceImpl implements RoomService {
         log.info("[ADMIN] 객실 삭제 완료 → {} ({})", room.getRoomName(), room.getAcc().getTitle());
     }
 
-    /* ============================================================
-       ✅ 사용자 전용 - 객실 리스트 / 조건 검색
-       ============================================================ */
+    /* 사용자 전용 - 객실 리스트 / 조건 검색  */
     @Override
     public List<RoomListResponseDTO> getRoomList(String accId) {
-        List<Room> rooms = roomRepository.findByAcc_AccId(accId);
+        Acc acc = accRepository.findByAccId(accId)
+                .orElseThrow(() -> new IllegalArgumentException("숙소를 찾을 수 없습니다."));
+
+        List<Room> rooms = roomRepository.findByAcc(acc);
 
         if (rooms.isEmpty()) {
-            log.warn("[USER] 해당 숙소({})의 객실 정보가 없습니다.", accId);
+            log.warn("[USER] 숙소({})에 객실이 없습니다.", accId);
             return List.of();
         }
 
-        // ✅ remainCount를 null로 두면 (단순 전체 조회 시)
         return rooms.stream()
                 .map(room -> RoomListResponseDTO.fromEntity(room, null))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -120,27 +122,31 @@ public class RoomServiceImpl implements RoomService {
             Integer guestCount,
             Integer roomCount
     ) {
-        // 1️⃣ 숙소 존재 확인
         Acc acc = accRepository.findByAccId(accId)
                 .orElseThrow(() -> new IllegalArgumentException("숙소가 존재하지 않습니다."));
+        log.info("[DEBUG] accId={}, accNo={}", acc.getAccId(), acc.getAccNo());
 
-        // 2️⃣ 숙소의 모든 객실 가져오기
-        List<Room> allRooms = roomRepository.findByAcc_AccId(accId);
+        List<Room> allRooms = roomRepository.findByAcc(acc);
+        log.info("[DEBUG] 조회된 객실 수 = {}", allRooms.size());
+        for (Room r : allRooms) {
+            log.info("[DEBUG] Room({}) accNo={} accId={}", r.getRoomName(),
+                    r.getAcc().getAccNo(), r.getAcc().getAccId());
+        }
 
         if (allRooms.isEmpty()) {
             log.warn("[USER] 숙소({})에 객실이 없습니다.", accId);
             return List.of();
         }
 
-        // 3️⃣ 날짜가 없으면 전체 반환
+        // 3️⃣ 날짜 없으면 전체 반환
         if (checkIn == null || checkOut == null) {
             log.info("[USER] 날짜 미선택 → 전체 객실 반환");
             return allRooms.stream()
                     .map(room -> RoomListResponseDTO.fromEntity(room, null))
-                    .collect(Collectors.toList());
+                    .toList();
         }
 
-        // 4️⃣ 해당 날짜 범위에서 재고 확인 및 remainCount 계산
+        // 4️⃣ 재고 확인
         List<RoomListResponseDTO> availableRooms = allRooms.stream()
                 .filter(room -> stockService.hasAvailableStock(room.getRoomId(), checkIn, checkOut, roomCount))
                 .filter(room -> guestCount == null || room.getMaxCnt() >= guestCount)
@@ -148,11 +154,12 @@ public class RoomServiceImpl implements RoomService {
                     int remain = stockService.getRemainCount(room.getRoomId(), checkIn, checkOut);
                     return RoomListResponseDTO.fromEntity(room, remain);
                 })
-                .collect(Collectors.toList());
+                .toList();
 
         log.info("[USER] 숙소({})의 예약 가능 객실: {}개", accId, availableRooms.size());
         return availableRooms;
     }
+
 
     /* ============================================================
        ✅ 비즈니스 로직 - 요금 계산

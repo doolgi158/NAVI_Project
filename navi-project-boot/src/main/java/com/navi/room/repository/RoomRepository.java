@@ -27,4 +27,7 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     // 3. 비정상적인 객실은 제외된 유효한 객실만 조회
     @Query("SELECT r FROM Room r WHERE r.weekdayFee > 0 AND r.weekendFee > 0 AND r.roomCnt > 0")
     List<Room> findValidRooms();
+    // 4. roomId 자동 생성
+    @Query(value = "SELECT ROOM_SEQ.NEXTVAL FROM DUAL", nativeQuery = true)
+    Long getNextSeqVal();
 }

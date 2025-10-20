@@ -73,7 +73,15 @@ public class RoomSyncService {
                     continue;
                 }
 
-                Room room = Room.builder().acc(acc).build();
+                Long nextSeq = roomRepository.getNextSeqVal();
+                String roomId = String.format("ROM%04d", nextSeq);
+
+                Room room = Room.builder()
+                        .acc(acc)
+                        .roomNo(nextSeq)
+                        .roomId(roomId)
+                        .build();
+
                 room.changeFromApiDTO(dto);
 
                 roomRepository.save(room);
@@ -108,8 +116,13 @@ public class RoomSyncService {
             int weekday = randomWeekdayPriceBySize(Integer.parseInt(info[3]));
             int weekend = weekday + randomWeekendDiff(Integer.parseInt(info[3]));
 
+            Long nextSeq = roomRepository.getNextSeqVal();
+            String roomId = String.format("ROM%04d", nextSeq);
+
             Room room = Room.builder()
                     .acc(acc)
+                    .roomNo(nextSeq)
+                    .roomId(roomId)
                     .roomName(info[0])
                     .baseCnt(Integer.parseInt(info[1]))
                     .maxCnt(Integer.parseInt(info[2]))

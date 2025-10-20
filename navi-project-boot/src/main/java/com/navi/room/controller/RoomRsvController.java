@@ -54,10 +54,13 @@ public class RoomRsvController {
 
     /** ✅ 전체 or 사용자별 예약 목록 조회 */
     @GetMapping
-    public ResponseEntity<List<RoomRsvResponseDTO>> getReservations(@RequestParam(required = false) String userId) {
+    public ResponseEntity<List<RoomRsvResponseDTO>> getReservations(
+            @RequestParam(required = false) String userId) {
+
         List<RoomRsvResponseDTO> list = (userId != null)
                 ? roomRsvService.findAllByUserId(userId)
                 : roomRsvService.findAll();
+
         return ResponseEntity.ok(list);
     }
 

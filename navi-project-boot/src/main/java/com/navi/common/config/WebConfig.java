@@ -6,6 +6,8 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.nio.file.Paths;
+
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
     @Override
@@ -25,11 +27,16 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        // ✅ 현재 실행 위치를 기준으로 상대경로 ../images 보정
+        String imagePath = Paths.get(System.getProperty("user.dir"), "../images")
+                .normalize()
+                .toAbsolutePath()
+                .toString()
+                .replace("\\", "/");
+
         registry.addResourceHandler("/images/**")
+                .addResourceLocations("file:" + imagePath + "/")
                 .addResourceLocations("file:///C:/navi-project/images/");
 
-        // ✅ 새로 추가: uploads 폴더 매핑
-        registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:" + System.getProperty("user.dir") + "/uploads/");
     }
 }
