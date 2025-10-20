@@ -19,54 +19,6 @@ const root = createBrowserRouter([
     {
         element: <Suspense fallback={Loading}> <Appshell /> </Suspense>,
         children: [
-<<<<<<< HEAD
-    {
-        path: "*",
-        element: <Suspense fallback={Loading}><Main /></Suspense>
-    },
-    {
-        path: "/",
-        element: <Suspense fallback={Loading}><Main /></Suspense>
-    },
-    {
-        path: "/travel",
-        children: [...TravelRouter()]
-    },
-    {
-        path: "/plans",
-        children: [...PlanRouter()]
-    },
-    {
-        path: "/flight",
-       children: [...FlightRouter()]
-    },
-    {
-        path:"/adm",
-        children: [...AdminRouter()]
-    },
-    {
-        path:"/accommodations",
-        children:[...AccRouter()]
-    },
-    {
-        path:"/delivery",
-        children:[...DeliveryRouter()]
-    },
-    {
-        path: "/users",
-        children: [...UserRouter()]
-    },
-    {
-        path: "/payment",
-        children: [...PaymentRouter()]
-    },
-    {
-        path: "/board",
-        children: [...BoardRouter()]
-    },
-]
-}
-=======
             {
                 path: "*",
                 element: <Suspense fallback={Loading}><Main /></Suspense>
@@ -113,7 +65,6 @@ const root = createBrowserRouter([
             },
         ]
     }
->>>>>>> 580d5e64abd587beaa73b8ee49e48612f6a995ad
 ]);
 
 export default root;
