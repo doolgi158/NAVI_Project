@@ -5,7 +5,7 @@ import {
   DashboardOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { setlogout } from "../../common/slice/loginSlice";
 

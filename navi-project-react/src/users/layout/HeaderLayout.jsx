@@ -16,14 +16,13 @@ const HeaderLayout = () => {
   const [userProfile, setUserProfile] = useState(null);
 
   // Redux 로그인 상태 가져오기
-  const loginstate = useSelector((state) => state.login);
+  const loginstate = useSelector((state) => state.login) || {};
 
   // 로컬 스토리지 기반 로그인 상태 체크
-  const [isLoggedIn, setIsLoggedIn] = useState(!!loginstate.accessToken || !!localStorage.getItem("accessToken"));
+  const [isLoggedIn, setIsLoggedIn] = useState(!!loginstate?.accessToken || !!localStorage.getItem("accessToken"));
 
   useEffect(() => {
-    // Redux 상태가 변하면 다시 동기화
-    const token = loginstate.token || localStorage.getItem("accessToken");
+    const token = loginstate?.accessToken || localStorage.getItem("accessToken");
     setIsLoggedIn(!!token);
   }, [loginstate]);
 

@@ -4,8 +4,8 @@ import com.navi.flight.admin.dto.AdminFlightDTO;
 import com.navi.flight.domain.Airport;
 import com.navi.flight.domain.Flight;
 import com.navi.flight.domain.FlightId;
-import com.navi.flight.admin.repository.AdminFlightRepository;
 import com.navi.flight.repository.AirportRepository;
+import com.navi.flight.repository.FlightRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,10 +20,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AdminFlightServiceImpl implements AdminFlightService {
 
-    private final AdminFlightRepository flightRepository;
+    private final FlightRepository flightRepository;
     private final AirportRepository airportRepository;
 
-    /** ✅ 전체 조회 */
+    /*
+     * 전체 조회
+     */
     @Override
     public List<AdminFlightDTO> getAllFlights() {
         log.info("[ADMIN] 전체 항공편 조회 실행");
@@ -33,7 +35,9 @@ public class AdminFlightServiceImpl implements AdminFlightService {
                 .collect(Collectors.toList());
     }
 
-    /** ✅ 단건 조회 */
+    /*
+     * 단건 조회
+     */
     @Override
     public AdminFlightDTO getFlight(String flightId, LocalDateTime depTime) {
         FlightId id = new FlightId(flightId, depTime);
@@ -42,7 +46,9 @@ public class AdminFlightServiceImpl implements AdminFlightService {
         return AdminFlightDTO.fromEntity(flight);
     }
 
-    /** ✅ 등록 */
+    /*
+     * 등록
+     */
     @Override
     @Transactional
     public AdminFlightDTO createFlight(AdminFlightDTO dto) {
@@ -68,7 +74,9 @@ public class AdminFlightServiceImpl implements AdminFlightService {
         return AdminFlightDTO.fromEntity(saved);
     }
 
-    /** ✅ 수정 */
+    /*
+     * 수정
+     */
     @Override
     @Transactional
     public AdminFlightDTO updateFlight(String flightId, LocalDateTime depTime, AdminFlightDTO dto) {
@@ -92,7 +100,9 @@ public class AdminFlightServiceImpl implements AdminFlightService {
         return AdminFlightDTO.fromEntity(updated);
     }
 
-    /** ✅ 삭제 */
+    /*
+     * 삭제
+     */
     @Override
     @Transactional
     public void deleteFlight(String flightId, LocalDateTime depTime) {

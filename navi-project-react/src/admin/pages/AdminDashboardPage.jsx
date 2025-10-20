@@ -23,6 +23,8 @@ const AdminDashboard = () => {
     `${API_SERVER_HOST}/api/adm/userDashboard`,
     `${API_SERVER_HOST}/api/adm/travelDashboard`,
     `${API_SERVER_HOST}/api/adm/travelRanking`,
+    `${API_SERVER_HOST}/api/adm/flightDashboard`,
+    `${API_SERVER_HOST}/api/adm/accommodationDashboard`,
   ], []);
 
   const { data, loading, error, reload } = useDashboardData(endpoints);

@@ -24,17 +24,10 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table(name = "NAVI_PAYMENT")   // Todo: indexes 추후 추가 예정
-@SequenceGenerator(
-        name = "payment_generator",
-        sequenceName = "PAYMENT_SEQ",
-        initialValue = 1,
-        allocationSize = 1
-)
 public class PaymentMaster extends BaseEntity {
     /* === COLUMN 정의 === */
     // 내부 식별번호 (예: 1)
     @Id @Column(name = "no")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "payment_generator")
     private Long no;
 
     // 결제 고유번호 (예: PAY20251007-0001)
@@ -78,12 +71,6 @@ public class PaymentMaster extends BaseEntity {
         if (paymentStatus == null) paymentStatus = PaymentStatus.READY;
         if (totalAmount == null) totalAmount = BigDecimal.ZERO;
         if (totalFeeAmount == null) totalFeeAmount = BigDecimal.ZERO;
-
-        // merchantId 자동 생성
-        if(merchantId == null && no != null){
-            String today = LocalDate.now(ZoneId.of("Asia/Seoul")).format(DateTimeFormatter.BASIC_ISO_DATE); // yyyyMMdd
-            merchantId = String.format("PAY%s-%04d", today, no);
-        }
     }
 
     /* === 연관관계 정의 === */
@@ -100,6 +87,15 @@ public class PaymentMaster extends BaseEntity {
         if (detail == null) return;
         detail.setPaymentMaster(this);      // 내부 제어용 setter 호출
         this.paymentDetails.add(detail);
+    }
+
+    /* merchant_id 생성 메서드 */
+    public void assignMerchantId(String merchantId) {
+        if (this.merchantId == null) {
+            this.merchantId = merchantId;
+        } else {
+            throw new IllegalStateException("merchantId는 이미 지정되었습니다.");
+        }
     }
 
     /* === 상태 변경 메서드 === */

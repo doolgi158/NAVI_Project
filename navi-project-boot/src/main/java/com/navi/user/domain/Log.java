@@ -1,9 +1,16 @@
 package com.navi.user.domain;
 
+import com.navi.user.enums.ActionType;
 import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDateTime;
+
+@Entity
 @Getter
 @Builder
 @AllArgsConstructor
@@ -21,27 +28,21 @@ public class Log {
     @Column(name = "log_ID")
     private long ID;        // 로그 아이디
 
-    @Column(name = "log_payment", nullable = false)
-    @ColumnDefault(value = "0")
-    private int payment;    // 결제 횟수
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_no", nullable = false)
+    private User user;      // 유저 정보
 
-    @Column(name = "log_refund", nullable = false)
-    @ColumnDefault(value = "0")
-    private int refund;     // 환불 요청 수
+    @Enumerated(EnumType.STRING)
+    @Column(name = "action_type", length = 50, nullable = false)
+    private ActionType actionType;  // 행동 타입
 
-    @Column(name = "log_schedule", nullable = false)
-    @ColumnDefault(value = "0")
-    private int schedule;   // 계획 작성 수
+    @Column(name = "target_id", nullable = false)
+    private Long targetId;  // 대상 ID
 
-    @Column(name = "log_delivery", nullable = false)
-    @ColumnDefault(value = "0")
-    private int delivery;   // 배송 요청 수
+    @Column(name = "target_name", length = 100)
+    private String targetName;  // 대상명 (옵션 — 분석용으로 남겨도 좋음)
 
-    @Column(name = "log_board", nullable = false)
-    @ColumnDefault(value = "0")
-    private int board;      // 게시글 작성 수
-
-    @Column(name = "log_comment", nullable = false)
-    @ColumnDefault(value = "0")
-    private int comment;    // 잿글 작성 수
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;    // 발생 시각
 }
