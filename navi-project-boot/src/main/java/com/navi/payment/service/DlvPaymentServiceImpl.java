@@ -29,7 +29,7 @@ public class DlvPaymentServiceImpl {
     private final DeliveryReservationService deliveryReservationService;
     private final PaymentServiceImpl paymentService;
 
-    /* 1️⃣ 결제 준비 (merchantId 생성) */
+    // 1. 결제 준비 (merchantId 생성)
     public PaymentPrepareResponseDTO preparePayment(PaymentPrepareRequestDTO dto) {
         log.info("📦 [DLV] 결제 준비 요청 수신 - {}", dto);
 
@@ -40,14 +40,14 @@ public class DlvPaymentServiceImpl {
             throw new IllegalArgumentException("예약 정보를 찾을 수 없습니다. reserveId=" + reserveId);
         }
 
-        // ✅ 내부 트랜잭션에서 실행됨 (REQUIRES_NEW)
+        // 내부 트랜잭션에서 실행됨 (REQUIRES_NEW)
         PaymentPrepareResponseDTO response = paymentService.preparePayment(dto);
 
         log.info("✅ [DLV 결제 준비 완료] reserveId={}, merchantId={}", reserveId, response.getMerchantId());
         return response;
     }
 
-    /* 2️⃣ 결제 검증 및 확정 처리 */
+    // 2. 결제 검증 및 확정 처리
     @Transactional
     public PaymentVerifyResponseDTO verifyAndCompletePayment(PaymentVerifyRequestDTO dto)
             throws IamportResponseException, IOException {
@@ -56,7 +56,7 @@ public class DlvPaymentServiceImpl {
         log.info("📦 [DLV] 결제 검증 시작 → reserveId={}, merchantId={}, impUid={}",
                 reserveId, dto.getMerchantId(), dto.getImpUid());
 
-        // ✅ 1️⃣ PortOne 서버 결제 상태 검증
+        // PortOne 서버 결제 상태 검증
         PaymentVerifyResponseDTO verifyResult = paymentService.verifyPayment(dto);
 
         if (verifyResult == null || !verifyResult.isSuccess()) {
@@ -70,7 +70,7 @@ public class DlvPaymentServiceImpl {
                     .build();
         }
 
-        // ✅ 2️⃣ DB 금액 검증
+        // DB 금액 검증
         DeliveryReservation reservation = deliveryReservationService.getReservationById(reserveId);
         BigDecimal expectedAmount = reservation.getTotalPrice();
         BigDecimal paidAmount = dto.getTotalAmount();
@@ -87,10 +87,10 @@ public class DlvPaymentServiceImpl {
                     .build();
         }
 
-        // ✅ 3️⃣ 결제 확정
+        // 결제 확정
         paymentService.confirmPayment(dto.toConfirmRequest());
 
-        // ✅ 4️⃣ 예약 상태 갱신
+        // 예약 상태 갱신
         deliveryReservationService.updateStatus(reserveId, RsvStatus.PAID.name());
 
         log.info("✅ [DLV 결제 확정 완료] reserveId={}, merchantId={}", reserveId, dto.getMerchantId());
@@ -103,7 +103,7 @@ public class DlvPaymentServiceImpl {
                 .build();
     }
 
-    /* 3️⃣ 결제 실패 (수동 처리) */
+    // 3. 결제 실패 (수동 처리)
     public void handlePaymentFailure(String reserveId, String merchantId, String reason) {
         log.warn("💥 [DLV] 결제 실패 처리 → reserveId={}, merchantId={}, reason={}",
                 reserveId, merchantId, reason);
@@ -111,9 +111,7 @@ public class DlvPaymentServiceImpl {
         paymentService.failPayment(merchantId, reason);
     }
 
-    /* ============================================================
-       ✅ 4️⃣ 환불 처리
-    ============================================================ */
+    // 4. 환불 처리
     public void handleRefund(String reserveId, String merchantId, String reason) {
         log.info("💸 [DLV] 환불 처리 요청 → reserveId={}, merchantId={}", reserveId, merchantId);
         try {

@@ -1,5 +1,6 @@
 package com.navi.delivery.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.navi.common.enums.RsvStatus;
 import jakarta.validation.constraints.*;
@@ -28,6 +29,7 @@ public class DeliveryReservationDTO {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate deliveryDate;
 
+    @JsonAlias("totalAmount")
     @NotNull(message = "총 금액은 필수입니다.")
     @DecimalMin(value = "0", inclusive = true, message = "총 금액은 0 이상이어야 합니다.")
     private BigDecimal totalPrice;

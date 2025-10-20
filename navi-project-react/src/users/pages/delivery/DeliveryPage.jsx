@@ -237,12 +237,13 @@ const DeliveryPage = () => {
       startAddr: form.fromAddress,
       endAddr: form.toAddress,
       deliveryDate: form.deliveryDate.format("YYYY-MM-DD"),
-      totalPrice: estimatedFare,
+      // totalPrice: estimatedFare,
+      totalAmount: estimatedFare,
       userNo: 2, // TODO: 로그인 세션에서 추출 예정
       bagId: form.bagSize === "S" ? 1 : form.bagSize === "M" ? 2 : 3,
       groupId: "G20251015_JEJU_AM_1",
     };
-
+    
     try {
       const res = await axios.post(`${API_SERVER_HOST}/api/delivery/rsv`, dto);
       console.log("✅ [DeliveryPage] 예약 응답:", res.data);

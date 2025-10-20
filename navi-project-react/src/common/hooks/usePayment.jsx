@@ -13,9 +13,14 @@ import {
 } from "../api/paymentService";
 import { initIamport } from "../util/iamport";
 
-/* PortOne(아임포트) 결제 전체 흐름
-   1️⃣ 결제 ID 생성 → 2️⃣ PortOne 결제 → 3️⃣ 검증 → 4️⃣ DB 반영
-*/
+/* ============================================================
+   [usePayment Hook]
+   PortOne(아임포트) 결제 전체 흐름
+   1️⃣ 결제 ID 생성 → 2️⃣ PortOne 결제 → 3️⃣ 검증 → 4️⃣ 확정(DB 반영)
+   ------------------------------------------------------------
+   - ACC / FLY: 검증 후 confirmPayment() 별도 호출
+   - DLV: verify 단계에서 이미 confirmPayment()까지 처리됨
+   ============================================================ */
 export const usePayment = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -33,8 +38,15 @@ export const usePayment = () => {
     }
     isProcessing = true;
 
-    if (!totalAmount || totalAmount <= 0) {
+    const amount =
+      totalAmount ||
+      formData?.totalAmount ||
+      formData?.totalPrice ||
+      0;
+
+    if (!amount || amount <= 0) {
       message.error("결제 금액이 유효하지 않습니다.");
+      console.warn("❌ [usePayment] 유효하지 않은 결제 금액:", amount);
       isProcessing = false;
       return;
     }
@@ -54,7 +66,7 @@ export const usePayment = () => {
       const prepareRes = await preparePayment({
         rsvType: rsvType?.toUpperCase(),
         reserveId: Array.isArray(reserveId) ? reserveId : [reserveId],
-        totalAmount,
+        totalAmount: amount,
         paymentMethod,
       });
       const merchantId = prepareRes.merchantId;
@@ -85,7 +97,7 @@ export const usePayment = () => {
         pay_method,
         merchant_uid: merchantId,
         name: `${rsvType} 예약 결제`,
-        amount: totalAmount,
+        amount,
         buyer_name: formData?.name || formData?.senderName || "NAVI 사용자",
         buyer_tel: formData?.phone || "01000000000",
         buyer_email: formData?.email || "navi@example.com",
@@ -115,8 +127,10 @@ export const usePayment = () => {
           });
           dispatch(setVerifyData(verifyRes));
 
-          // === 5️⃣ 결제 확정(DB 반영) ===
-          if (!isConfirmed) {
+          // === 5️⃣ 결제 확정(DB 반영)
+          // ACC / FLY: confirm API 별도 호출
+          // DLV: verify 단계에서 이미 confirm 완료
+          if (rsvType !== "DLV" && !isConfirmed) {
             isConfirmed = true;
             const confirmRes = await confirmPayment({
               merchantId: rsp.merchant_uid,
@@ -126,6 +140,9 @@ export const usePayment = () => {
               reserveId: Array.isArray(reserveId) ? reserveId : [reserveId],
             });
             dispatch(setDetailData(confirmRes));
+            console.log("✅ [usePayment] confirmPayment() 완료:", confirmRes);
+          } else if (rsvType === "DLV") {
+            console.log("✅ [DLV] verify 단계에서 이미 결제 확정 완료 → confirm 생략");
           } else {
             console.warn("⚠️ confirmPayment() 중복 호출 방지됨");
           }
