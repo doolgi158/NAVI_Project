@@ -19,17 +19,20 @@ const paymentSlice = createSlice({
 	reducers: {
 		/* [ TODO ] :결제 전 예약 테이블에 들어간 정보를 Redux에 저장 */
 		setReserveData: (state, action) => {
-			const { reserveId, itemData } = action.payload;
-
+			const { rsvType, reserveId, itemData } = action.payload;
+			state.rsvType = rsvType;
 			state.reserveId = reserveId;
 			state.itemData = itemData;
 		},
 
 		/* 결제 ID 생성 시 필요한 데이터 */
 		setPaymentData: (state, action) => {
-			const { totalAmount } = action.payload;
+			const { totalAmount, paymentMethod, rsvType, reserveId } = action.payload;
 			
 			state.totalAmount = totalAmount;
+			if (paymentMethod) state.paymentMethod = paymentMethod;
+			if (rsvType) state.rsvType = rsvType;
+  			if (reserveId) state.reserveId = reserveId;
 		},
 
 		/* 결제 검증 시 필요한 데이터 */

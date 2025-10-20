@@ -1,8 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 
-/**
- * Kakao Map Hook
- */
 export const useKakaoMap = (containerId) => {
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   const mapRef = useRef(null);
@@ -10,30 +7,48 @@ export const useKakaoMap = (containerId) => {
   const customOverlayRef = useRef(null);
   const infoWindowRef = useRef(null);
 
-  const HIDE_OVERLAY_ID = 'kakao-detail-map-container';
+  const HIDE_OVERLAY_ID = "kakao-detail-map-container";
+  const KAKAO_MAP_KEY = import.meta.env.VITE_KAKAO_MAP_KEY;
 
+  /** ✅ Kakao SDK 로딩 (지연/재시도 대응) */
   useEffect(() => {
-    const loadKakaoSDK = () => {
+    let retryCount = 0;
+
+    const ensureKakaoReady = () => {
       if (window.kakao && window.kakao.maps) {
         window.kakao.maps.load(() => {
           setIsMapLoaded(true);
         });
+      } else if (retryCount < 10) {
+        retryCount++;
+        console.warn(`⏳ Kakao SDK not ready (retry ${retryCount})`);
+        setTimeout(ensureKakaoReady, 300);
+      } else {
       }
     };
 
     if (window.kakao && window.kakao.maps) {
-      loadKakaoSDK();
+      ensureKakaoReady();
     } else {
-      const script = document.createElement("script");
-      script.src = "//dapi.kakao.com/v2/maps/sdk.js?appkey=64f77515cbf4b9bf257e664e44b1ab9b&libraries=services&autoload=false";
-      script.async = true;
-      script.onload = loadKakaoSDK;
-      document.head.appendChild(script);
+      const scriptId = "kakao-map-sdk";
+      if (!document.getElementById(scriptId)) {
+        const script = document.createElement("script");
+        script.id = scriptId;
+        script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_MAP_KEY}&libraries=services&autoload=false`;
+        script.async = true;
+        script.onload = ensureKakaoReady;
+        document.head.appendChild(script);
+      } else {
+        ensureKakaoReady();
+      }
     }
-  }, []);
 
-  // wait until container has non-zero size (up to timeout)
-  const _waitForContainerVisible = async (timeout = 1200) => {
+    return () => {
+    };
+  }, [KAKAO_MAP_KEY]);
+
+  /** ✅ 컨테이너 표시될 때까지 대기 */
+  const _waitForContainerVisible = async (timeout = 1500) => {
     const start = performance.now();
     return new Promise((resolve) => {
       function check() {
@@ -50,140 +65,116 @@ export const useKakaoMap = (containerId) => {
     });
   };
 
-  // relayoutMap: 안정적으로 relayout + resize + setCenter 수행
+  /** ✅ 안정적 relayout */
   const relayoutMap = useCallback(async () => {
-    if (!mapRef.current) {
-      console.warn("[KakaoMap] relayoutMap called but mapRef is null");
+    const container = document.getElementById(containerId);
+    if (!mapRef.current || !container) {
+      console.warn("[KakaoMap] relayoutMap: map or container not ready");
       return;
     }
 
-    const containerReady = await _waitForContainerVisible(1200);
-    if (!containerReady) {
-      console.warn("[KakaoMap] container not visible or zero size when relayout attempted");
+    const ready = await _waitForContainerVisible(1500);
+    if (!ready) {
+      console.warn("[KakaoMap] relayout skipped — container not visible");
+      return;
     }
 
     try {
-      // relayout if available
-      if (typeof mapRef.current.relayout === "function") {
-        mapRef.current.relayout();
-      }
-      if (window.kakao && window.kakao.maps && window.kakao.maps.event) {
+      mapRef.current.relayout();
+      if (window.kakao?.maps?.event) {
         try {
           window.kakao.maps.event.trigger(mapRef.current, "resize");
-        } catch (e) {
-          // 일부 환경에서 trigger(mapRef.current, 'resize') 실패할 수 있으므로 안전히 캐치
-          console.warn("[KakaoMap] kakao.maps.event.trigger resize failed:", e);
+        } catch (err) {
+          console.warn("[KakaoMap] resize trigger failed", err);
         }
       }
-      // restore center if possible
-      if (typeof mapRef.current.getCenter === "function" && typeof mapRef.current.setCenter === "function") {
-        const currentCenter = mapRef.current.getCenter();
-        if (currentCenter) {
-          mapRef.current.setCenter(currentCenter);
-        }
-      }
-    } catch (err) {
+
+      const center = mapRef.current.getCenter();
+      if (center) mapRef.current.setCenter(center);
+    } catch (e) {
+      console.warn("[KakaoMap] relayout error:", e);
     }
   }, [containerId]);
 
-  // updateMap: create map if needed and set marker/overlay
+  /** ✅ 단일 아이템 지도 표시 (상세용 등) */
   const updateMap = useCallback(
     (item) => {
       const { title, latitude, longitude, thumbnailPath } = item || {};
-
       if (!isMapLoaded) {
-        console.log("[KakaoMap] SDK not ready. Skipping updateMap.");
+        console.warn("[KakaoMap] SDK not ready, skipping updateMap");
         return;
       }
 
-      const mapContainer = document.getElementById(containerId);
-      if (!mapContainer) {
-        console.error("[KakaoMap] map container not found:", containerId);
+      const container = document.getElementById(containerId);
+      if (!container) {
+        console.error("[KakaoMap] container not found:", containerId);
         return;
       }
 
       const { kakao } = window;
+      const lat = parseFloat(latitude);
+      const lng = parseFloat(longitude);
+      const coords = isNaN(lat) || isNaN(lng)
+        ? new kakao.maps.LatLng(33.3926876, 126.4948419)
+        : new kakao.maps.LatLng(lat, lng);
+
       let map = mapRef.current;
-
-      // coords
-      let coords;
-      if (latitude !== undefined && longitude !== undefined && !isNaN(parseFloat(latitude)) && !isNaN(parseFloat(longitude))) {
-        const lat = parseFloat(latitude);
-        const lng = parseFloat(longitude);
-        coords = new kakao.maps.LatLng(lat, lng);
-      } else {
-        coords = new kakao.maps.LatLng(33.3926876, 126.4948419);
-      }
-
-      // 지도 인스턴스가 없으면 새로 생성 (최초 1회)
-      if (!map) {
-        const mapOption = { center: coords, level: 9 };
-        map = new kakao.maps.Map(mapContainer, mapOption);
+      if (!map) {
+        map = new kakao.maps.Map(container, { center: coords, level: 10 });
         mapRef.current = map;
       }
-      
-      // 2. 기존 마커 및 오버레이 제거
-      if (markerRef.current) markerRef.current.setMap(null);
+
+      if (markerRef.current) markerRef.current.setMap(null);
       if (customOverlayRef.current) customOverlayRef.current.setMap(null);
 
-      // 3. 마커 생성 및 지도에 표시 (모든 페이지에서 마커는 표시)
-      const marker = new kakao.maps.Marker({ map, position: coords });
+      const marker = new kakao.maps.Marker({ map, position: coords });
       markerRef.current = marker;
 
-      // 현재 페이지가 상세 페이지(HIDE_OVERLAY_ID)인지 확인
-      const shouldShowOverlay = containerId !== HIDE_OVERLAY_ID;
+      const shouldShowOverlay = containerId !== HIDE_OVERLAY_ID;
       if (shouldShowOverlay) {
-        const imageSrc = thumbnailPath || 'https://placehold.co/100x100/cccccc/333333?text=No';
+        const imageSrc =
+          thumbnailPath ||
+          "https://placehold.co/220x140/cccccc/333333?text=No+Image";
         const content = `
-            <div style="
-              width: 220px;
-              background: white;
-              border-radius: 12px;
-              overflow: hidden;
-              box-shadow: 0px 5px 10px 0px rgba(0,0,0,0.1);
-              font-family: sans-serif;
-            ">
-              <div style="width:100%; height:140px; overflow:hidden;  ">
-                <img src="${imageSrc}" style="width:100%; height:100%; object-fit:cover;  border-radius: 12px;" 
-                  onerror="this.onerror=null;this.src='https://placehold.co/220x140/cccccc/333333?text=No'"/>
-              </div>
-                <div style="padding:8px 12px; font-size:16px; font-weight:bold; color:#111; background: white;border-radius:0px 0px 12px 12px;">
-                ${title || ""}
-              </div>
-            </div>
-          `;
-
-          // 5. 커스텀 오버레이 생성 및 지도에 표시
-          const customOverlay = new kakao.maps.CustomOverlay({
+          <div style="
+            width: 220px; background: white; border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15); overflow: hidden;
+          ">
+            <img src="${imageSrc}" style="width:100%; height:140px; object-fit:cover;" 
+              onerror="this.src='https://placehold.co/220x140/cccccc/333333?text=No+Image'"/>
+            <div style="padding:8px 10px; font-weight:600; color:#222;">
+              ${title || ""}
+            </div>
+          </div>
+        `;
+        const overlay = new kakao.maps.CustomOverlay({
           map,
           position: coords,
           content,
           yAnchor: 1,
           zIndex: 3,
         });
-        customOverlayRef.current = customOverlay;
+        customOverlayRef.current = overlay;
       }
 
-      // panTo
       try {
         map.panTo(coords);
-      } catch (e) {
-        // 안전 처리
-        console.warn("[KakaoMap] panTo failed:", e);
+      } catch (err) {
+        console.warn("[KakaoMap] panTo failed:", err);
       }
     },
     [isMapLoaded, containerId]
   );
 
-  // 3️⃣ 지도 초기화 해제 
-  const resetMap = useCallback(() => {
-    mapRef.current = null;
+  /** ✅ 맵 초기화 */
+  const resetMap = useCallback(() => {
     if (markerRef.current) markerRef.current.setMap(null);
     if (customOverlayRef.current) customOverlayRef.current.setMap(null);
     markerRef.current = null;
     customOverlayRef.current = null;
+    mapRef.current = null;
     infoWindowRef.current = null;
   }, []);
 
-   return { isMapLoaded, updateMap, relayoutMap, resetMap };
+  return { isMapLoaded, updateMap, relayoutMap, resetMap };
 };

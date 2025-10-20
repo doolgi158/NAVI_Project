@@ -44,6 +44,7 @@ public class Room {
     @JsonBackReference
     private Acc acc;
 
+    @Builder.Default
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<RoomStock> roomStocks = new ArrayList<>();

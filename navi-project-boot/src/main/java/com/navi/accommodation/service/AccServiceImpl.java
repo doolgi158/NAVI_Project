@@ -10,6 +10,7 @@ import com.navi.image.domain.Image;
 import com.navi.image.repository.ImageRepository;
 import com.navi.location.repository.TownshipRepository;
 import com.navi.room.domain.Room;
+import com.navi.room.dto.response.RoomResponseDTO;
 import com.navi.room.repository.RoomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -78,14 +79,20 @@ public class AccServiceImpl implements AccService{
     @Override
     @Transactional(readOnly = true)
     public List<AccListResponseDTO> searchAccommodations(AccSearchRequestDTO dto) {
-        List<Acc> accList;
+        List<Acc> accList = accRepository.findAll();
 
         // 검색 조건 분기
-        if(dto.getTownshipName() != null && !dto.getTownshipName().isEmpty()) {
-            accList = accRepository.findByTownshipName(dto.getTownshipName());
+        if(dto.getTownshipName() != null && !dto.getTownshipName().isBlank()) {
+            accList = accList.stream()
+                    .filter(a -> a.getTownship() != null &&
+                            a.getTownship().getTownshipName().contains(dto.getTownshipName()))
+                    .toList();
         }
-        else if(dto.getTitle() != null && !dto.getTitle().isEmpty()) {
-            accList = accRepository.findByTitle(dto.getTitle());
+        else if(dto.getTitle() != null && !dto.getTitle().isBlank()) {
+            String lowerKeyword = dto.getTitle().toLowerCase();
+            accList = accList.stream()
+                    .filter(a -> a.getTitle() != null && a.getTitle().toLowerCase().contains(lowerKeyword))
+                    .toList();
         }
         else {
             // Todo: 임시방편 (이거 말고 관광지 기반 만들어야 함)
@@ -95,9 +102,7 @@ public class AccServiceImpl implements AccService{
         /* 숙소 + 이미지 + 객실정보 DTO 조합 */
         return accList.stream().map(acc -> {
             String accImage = imageRepository
-                    .findTopByTargetTypeAndTargetId("ACC", acc.getAccId())
-                    .stream()
-                    .findFirst()
+                    .findTopByTargetTypeAndTargetIdOrderByNoAsc("ACC", acc.getAccId())
                     .map(Image::getPath)
                     .orElse("/uploads/default_hotel.jpg");
 
@@ -114,9 +119,25 @@ public class AccServiceImpl implements AccService{
     @Override
     @Transactional(readOnly = true)
     public AccDetailResponseDTO getAccDetail(String accId) {
-        // TODO: 숙소 + 객실 + 이미지 조합 응답
         Acc acc = accRepository.findByAccId(accId)
                 .orElseThrow(() -> new IllegalArgumentException("숙소를 찾을 수 없습니다."));
-        return AccDetailResponseDTO.fromEntity(acc);
+
+        // 숙소 이미지 리스트
+        List<String> accImages = imageRepository.findByTargetTypeAndTargetId("ACC", acc.getAccId())
+                .stream()
+                .map(Image::getPath)
+                .toList();
+
+        // 객실 리스트
+        /*List<RoomResponseDTO> roomList = roomRepository.findByAcc_AccId(acc.getAccId())
+                .stream()
+                .map(RoomResponseDTO::fromEntity)
+                .toList();*/
+
+        AccDetailResponseDTO dto = AccDetailResponseDTO.fromEntity(acc);
+        dto.setAccImages(accImages);
+        //dto.setRooms(roomList);
+
+        return dto;
     }
 }

@@ -33,8 +33,8 @@ public class StockScheduler {
         int deleted = stockRepository.deleteAllByStockDateBefore(today);
         log.info("🧹 지난 재고 {}건 삭제 완료 ({} 이전)", deleted, today);
 
-        // 2️⃣ 신규 재고 생성 (오늘 기준 +29일 → 항상 30일 유지)
-        LocalDate newDate = today.plusDays(29);
+        // 2️⃣ 신규 재고 생성 (오늘 기준 +6일 → 항상 7일치 유지)
+        LocalDate newDate = today.plusDays(6);
 
         // ✅ 0원 또는 0개 객실 제외된 유효한 Room만 조회
         List<Room> rooms = roomRepository.findValidRooms();

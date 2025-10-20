@@ -29,7 +29,6 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class FlyPaymentServiceImpl {
 
     private final PaymentServiceImpl paymentService;

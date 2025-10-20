@@ -16,7 +16,7 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     List<Room> findByAcc(Acc acc);
     // 2. 숙소 ID(accId)로 객실 목록 조회
     List<Room> findByAcc_AccId(String accId);
-    // 🔹 숙소별 + 예약 가능한 객실 조회 (isAvailable = true)
+    // 3. 숙소별 + 예약 가능한 객실 조회 (isAvailable = true)
     //List<Room> findByAccAndIsAvailable(Acc acc, boolean isAvailable);
 
     /* 관리자 기능 */

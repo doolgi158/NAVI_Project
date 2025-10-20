@@ -20,5 +20,5 @@ public class AccRequestDTO {
     private String checkOutTime;    // 체크아웃 시간
     private Boolean hasCooking;     // 취사 가능 여부
     private Boolean hasParking;     // 주차 가능 여부
-    private boolean isActive;       // 운영 여부
+    private boolean active;       // 운영 여부
 }

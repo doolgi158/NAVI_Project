@@ -30,19 +30,17 @@ public class DlvPaymentServiceImpl {
     private final PaymentServiceImpl paymentService;
 
     /* 1️⃣ 결제 준비 (merchantId 생성) */
-    @Transactional
     public PaymentPrepareResponseDTO preparePayment(PaymentPrepareRequestDTO dto) {
         log.info("📦 [DLV] 결제 준비 요청 수신 - {}", dto);
 
-        // ✅ 단일 예약 ID (리스트의 첫 번째만 사용)
         String reserveId = dto.getReserveId().get(0);
+        DeliveryReservation reservation = deliveryReservationService.getReservationById(reserveId);
 
-        DeliveryReservation reservation =
-                deliveryReservationService.getReservationById(reserveId);
         if (reservation == null) {
             throw new IllegalArgumentException("예약 정보를 찾을 수 없습니다. reserveId=" + reserveId);
         }
 
+        // ✅ 내부 트랜잭션에서 실행됨 (REQUIRES_NEW)
         PaymentPrepareResponseDTO response = paymentService.preparePayment(dto);
 
         log.info("✅ [DLV 결제 준비 완료] reserveId={}, merchantId={}", reserveId, response.getMerchantId());

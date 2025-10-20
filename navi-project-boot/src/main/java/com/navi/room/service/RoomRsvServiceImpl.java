@@ -16,6 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,60 +30,95 @@ public class RoomRsvServiceImpl implements RoomRsvService {
     private final RoomRsvRepository roomRsvRepository;
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
-    private final StockService stockService;  // ✅ 재고 관리 전담 서비스
+    private final StockService stockService; // ✅ 재고 관리 서비스
 
     /* ============================================================
-       ✅ [1] 단일 예약 생성 (결제 전)
-       - StockService 통해 재고 차감
+       ✅ [1] 단일 객실 예약 생성 (결제 전)
     ============================================================ */
     @Override
     @Transactional
     public RoomRsvResponseDTO createRoomReservation(RoomRsvRequestDTO dto) {
-        User user = userRepository.findById(dto.getUserNo())
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-        Room room = roomRepository.findByRoomId(dto.getRoomId())
-                .orElseThrow(() -> new IllegalArgumentException("객실 정보를 찾을 수 없습니다."));
 
-        // ✅ 재고 차감
-        stockService.decreaseStock(room, dto.getStockDate(), dto.getStockDate().plusDays(1), dto.getQuantity());
+        // ✅ 사용자 처리 (임시 userNo)
+        Long userNo = dto.getUserNo() != null ? dto.getUserNo() : 1L;
+        User user = userRepository.findById(userNo)
+                .orElseThrow(() -> new IllegalArgumentException("❌ 사용자를 찾을 수 없습니다."));
+
+        // ✅ 객실 조회
+        Room room = roomRepository.findByRoomId(dto.getRoomId())
+                .orElseThrow(() -> new IllegalArgumentException("❌ 객실 정보를 찾을 수 없습니다."));
+
+        // ✅ 날짜 검증
+        LocalDate start = dto.getStartDate();
+        LocalDate end = dto.getEndDate();
+
+        if (start == null || end == null || !end.isAfter(start)) {
+            throw new IllegalArgumentException("❌ 숙박 기간이 유효하지 않습니다.");
+        }
+
+        // ✅ 숙박일수 계산
+        long nights = ChronoUnit.DAYS.between(start, end);
+        if (nights <= 0) {
+            throw new IllegalArgumentException("❌ 숙박일수는 최소 1일 이상이어야 합니다.");
+        }
+
+        // ✅ 단가 × 숙박일수 × 객실수량
+        BigDecimal unitFee = room.getWeekdayFee() != null
+                ? BigDecimal.valueOf(room.getWeekdayFee())
+                : BigDecimal.ZERO;
+
+        BigDecimal totalPrice = unitFee
+                .multiply(BigDecimal.valueOf(nights))
+                .multiply(BigDecimal.valueOf(dto.getQuantity()));
+
+
+        // ✅ 재고 차감 (start ~ end-1)
+        stockService.decreaseStock(room, start, end, dto.getQuantity());
+
+        // ✅ 예약 ID 생성 (예: 20251020ACC0001)
+        String today = LocalDate.now(ZoneId.of("Asia/Seoul"))
+                .format(DateTimeFormatter.BASIC_ISO_DATE);
+        long seq = roomRsvRepository.count() + 1; // 단순 증가용 (운영시 전용 시퀀스로 대체 가능)
+        String reserveId = String.format("%sACC%04d", today, seq);
 
         // ✅ 예약 엔티티 생성
         RoomRsv rsv = RoomRsv.builder()
-                .roomRsvId(dto.getReserveId())
+                .roomRsvId(reserveId)
                 .user(user)
                 .room(room)
-                .roomStock(null) // StockService가 차감 처리하므로 직접 참조 불필요
-                .stockDate(dto.getStockDate())
+                .startDate(start)
+                .endDate(end)
                 .quantity(dto.getQuantity())
-                .price(dto.getPrice())
+                .price(totalPrice)
                 .rsvStatus(RsvStatus.PENDING)
                 .build();
 
         roomRsvRepository.save(rsv);
 
-        log.info("✅ 예약 생성 완료 → reserveId={}, user={}, room={}, date={}",
-                dto.getReserveId(), user.getId(), room.getRoomId(), dto.getStockDate());
+        log.info("✅ 객실 예약 생성 완료 → reserveId={}, user={}, room={}, stay={}~{}, qty={}, price={}",
+                reserveId, user.getNo(), room.getRoomId(), start, end, dto.getQuantity(), totalPrice);
 
         return RoomRsvResponseDTO.fromEntity(rsv);
     }
 
     /* ============================================================
-       ✅ [2] 다중 예약 생성 (한 예약 ID에 여러 객실)
+       ✅ [2] 다중 객실 예약 (한 예약 ID에 여러 객실)
     ============================================================ */
     @Override
     @Transactional
     public void createMultipleRoomReservations(String reserveId, Long userNo, List<RoomRsvRequestDTO> roomList) {
-        log.info("[RoomRsvService] 다중 객실 예약 생성 시작 → reserveId={}, count={}", reserveId, roomList.size());
+        log.info("[RoomRsvService] 다중 객실 예약 생성 시작 → user={}, count={}", userNo, roomList.size());
+
         for (RoomRsvRequestDTO dto : roomList) {
-            dto.setReserveId(reserveId);
             dto.setUserNo(userNo);
-            createRoomReservation(dto);
+            createRoomReservation(dto); // 각각 자동으로 reserveId 생성됨
         }
-        log.info("[RoomRsvService] 다중 객실 예약 생성 완료 - {}", reserveId);
+
+        log.info("[RoomRsvService] 다중 객실 예약 생성 완료 → user={}, total={}", userNo, roomList.size());
     }
 
     /* ============================================================
-       ✅ [3] 예약 상태 변경 + 재고 복구 (FAILED / CANCELLED / REFUNDED)
+       ✅ [3] 예약 상태 변경 + 재고 복구
     ============================================================ */
     @Override
     @Transactional
@@ -93,7 +131,6 @@ public class RoomRsvServiceImpl implements RoomRsvService {
         }
 
         for (RoomRsv rsv : rsvList) {
-            // ✅ 상태 변경
             switch (newStatus) {
                 case PAID -> rsv.markPaid();
                 case CANCELLED -> rsv.markCancelled();
@@ -103,27 +140,19 @@ public class RoomRsvServiceImpl implements RoomRsvService {
                 default -> throw new IllegalStateException("지원하지 않는 예약 상태: " + newStatus);
             }
 
-            // ✅ 결제 실패, 취소, 환불 시 재고 복구
+            // ❌ 결제 실패, 취소, 환불 시 재고 복구
             if (newStatus == RsvStatus.FAILED ||
                     newStatus == RsvStatus.CANCELLED ||
                     newStatus == RsvStatus.REFUNDED) {
-
-                Room room = rsv.getRoom();
-                LocalDate date = rsv.getStockDate();
-                int qty = rsv.getQuantity();
-
-                stockService.increaseStock(room, date, date.plusDays(1), qty);
-
-                log.info("🔁 재고 복구 완료 → room={}, date={}, qty={}",
-                        room.getRoomId(), date, qty);
+                stockService.increaseStock(rsv.getRoom(), rsv.getStartDate(), rsv.getEndDate(), rsv.getQuantity());
             }
         }
 
-        log.info("🌀 예약 상태 변경 완료 → {} (reserveId={})", newStatus, reserveId);
+        log.info("🔁 예약 상태 변경 완료 → {} (reserveId={})", newStatus, reserveId);
     }
 
     /* ============================================================
-       ✅ [4] 결제 검증용: 총 결제 금액 합산
+       ✅ [4] 결제 검증용 금액 합산
     ============================================================ */
     @Override
     @Transactional(readOnly = true)
@@ -134,9 +163,9 @@ public class RoomRsvServiceImpl implements RoomRsvService {
 
     @Override
     @Transactional(readOnly = true)
-    public boolean verifyTotalAmount(String reserveId, int paidAmount) {
+    public boolean verifyTotalAmount(String reserveId, BigDecimal paidAmount) {
         BigDecimal expected = getTotalAmountByReserveId(reserveId);
-        boolean valid = expected.compareTo(BigDecimal.valueOf(paidAmount)) == 0;
+        boolean valid = expected.compareTo(paidAmount) == 0;
 
         log.info("💰 결제 금액 검증 → reserveId={}, expected={}, paid={}, result={}",
                 reserveId, expected, paidAmount, valid ? "✅ 일치" : "❌ 불일치");

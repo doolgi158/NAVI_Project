@@ -4,6 +4,7 @@ import com.navi.common.enums.RsvStatus;
 import com.navi.room.domain.RoomRsv;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 /* ============================================================
@@ -20,7 +21,7 @@ public class RoomRsvResponseDTO {
     private String roomId;
     private LocalDate stockDate;
     private Integer quantity;
-    private Integer price;
+    private BigDecimal price;
     private RsvStatus rsvStatus;
 
     public static RoomRsvResponseDTO fromEntity(RoomRsv entity) {

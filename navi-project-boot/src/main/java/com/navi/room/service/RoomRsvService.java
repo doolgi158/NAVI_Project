@@ -22,7 +22,7 @@ public interface RoomRsvService {
     RoomRsvResponseDTO findByRoomRsvId(String roomRsvId);
 
     // 5️⃣ 결제 검증용: 총 결제 금액 확인
-    boolean verifyTotalAmount(String reserveId, int paidAmount);
+    boolean verifyTotalAmount(String reserveId, BigDecimal paidAmount);
     // 6️⃣ 예약 ID별 객실 총 금액 합산 (결제 검증용)
     BigDecimal getTotalAmountByReserveId(String reserveId);
 }

@@ -20,6 +20,7 @@ import com.siot.IamportRestClient.response.Payment;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
@@ -32,7 +33,6 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class PaymentServiceImpl implements PaymentService {
     private final IamportClient iamportClient; // PortOne(아임포트) API 클라이언트
     private final PaymentRepository paymentRepository;
@@ -40,27 +40,31 @@ public class PaymentServiceImpl implements PaymentService {
 
     /* 결제 준비 */
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)  // ✅ 트랜잭션 분리
     public PaymentPrepareResponseDTO preparePayment(PaymentPrepareRequestDTO dto) {
+
+        // 1️⃣ Oracle 시퀀스 직접 조회
+        Long nextSeq = paymentRepository.getNextSeqVal();
+
+        // 2️⃣ merchantId 생성
+        String today = LocalDate.now(ZoneId.of("Asia/Seoul"))
+                .format(DateTimeFormatter.BASIC_ISO_DATE);
+        String merchantId = String.format("PAY%s-%04d", today, nextSeq);
+
+        // 3️⃣ 엔티티 생성 (ID, merchantId 모두 세팅 후 저장)
         PaymentMaster payment = PaymentMaster.builder()
+                .no(nextSeq)
+                .merchantId(merchantId)
                 .totalAmount(dto.getTotalAmount())
                 .paymentMethod(dto.getPaymentMethod())
                 .paymentStatus(PaymentStatus.READY)
                 .build();
 
-        // 1차 저장 (시퀀스 값 생성)
-        PaymentMaster saved = paymentRepository.save(payment);
+        paymentRepository.save(payment); // ✅ 1회만 save, 절대 중복 X
 
-        // merchantId 명시적 생성 (안전)
-        String today = LocalDate.now(ZoneId.of("Asia/Seoul"))
-                .format(DateTimeFormatter.BASIC_ISO_DATE);
-        String generatedId = String.format("PAY%s-%04d", today, saved.getNo());
-        saved.assignMerchantId(generatedId);
-
-        log.info("✅ [결제 준비 완료] merchantId={}, totalAmount={}",
-                saved.getMerchantId(), saved.getTotalAmount());
-
+        log.info("✅ [결제 준비 완료] merchantId={}, totalAmount={}", merchantId, dto.getTotalAmount());
         return PaymentPrepareResponseDTO.builder()
-                .merchantId(saved.getMerchantId())
+                .merchantId(merchantId)
                 .build();
     }
 
@@ -104,7 +108,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     /* 결제 확정 */
     @Override
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public PaymentConfirmResponseDTO confirmPayment(PaymentConfirmRequestDTO dto) {
         log.info("💰 [결제 확정 요청] merchantId={}, rsvType={}, items={}",
                 dto.getMerchantId(), dto.getRsvType(), dto.getItems());

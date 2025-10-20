@@ -17,9 +17,5 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
     void deleteByTargetTypeAndTargetId(String targetType, String targetId);
 
     // 숙소 대표 이미지 가져오기
-    @Query("SELECT i FROM Image i " +
-            "WHERE i.targetType = :targetType AND i.targetId = :targetId " +
-            "ORDER BY i.no ASC")
-    List<Image> findTopByTargetTypeAndTargetId(@Param("targetType") String targetType,
-                                               @Param("targetId") String targetId);
+    Optional<Image> findTopByTargetTypeAndTargetIdOrderByNoAsc(String targetType, String targetId);
 }

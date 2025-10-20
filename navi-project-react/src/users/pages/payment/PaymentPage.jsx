@@ -1,8 +1,17 @@
 import MainLayout from "../../layout/MainLayout";
-import React, { useEffect, useMemo } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import React, { useEffect, useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { Card, Typography, Steps, Button, Radio, Divider, Space, message } from "antd";
+import {
+  Card,
+  Typography,
+  Steps,
+  Button,
+  Radio,
+  Divider,
+  Space,
+  message,
+} from "antd";
 import { setPaymentData } from "../../../common/slice/paymentSlice";
 import { usePayment } from "../../../common/hooks/usePayment";
 
@@ -14,15 +23,16 @@ const { Title, Text } = Typography;
 
 const PaymentPage = () => {
   const { executePayment } = usePayment();
-//   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
 
   /** ✅ location.state에서 전달된 데이터 */
   const { rsvType, items, formData } = location.state || {};
-  const [paymentMethod, setPaymentMethod] = React.useState("KAKAOPAY");
+  const [paymentMethod, setPaymentMethod] = useState("KAKAOPAY");
+  const [loading, setLoading] = useState(false); // ✅ 중복 클릭 방지
 
   const totalAmount = formData?.totalPrice || formData?.totalAmount || 0;
+
   useEffect(() => {
     if (!totalAmount || totalAmount <= 0) {
       message.warning("결제 금액이 유효하지 않습니다.");
@@ -48,20 +58,29 @@ const PaymentPage = () => {
 
   /** ✅ 결제 버튼 클릭 시 실행 */
   const handlePayment = async () => {
-  try {
-    // Redux 상태 저장
-    dispatch(setPaymentData({ totalAmount, paymentMethod }));
+    if (loading) return; // ✅ 중복 클릭 방지
+    setLoading(true);
 
-    // Redux 반영 대기
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    try {
+      dispatch(
+        setPaymentData({
+          rsvType,
+          reserveId: formData?.reserveId,
+          totalAmount,
+          paymentMethod,
+        })
+      );
 
-    // 실행 (navigate는 usePayment 내부에서)
-    await executePayment({ rsvType, formData, totalAmount, paymentMethod });
-  } catch (error) {
-    console.error("❌ [PaymentPage] 결제 처리 실패:", error);
-    message.error("결제 처리 중 오류가 발생했습니다.");
-  }
-};
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      await executePayment({ rsvType, formData, totalAmount, paymentMethod });
+    } catch (error) {
+      console.error("❌ [PaymentPage] 결제 처리 실패:", error);
+      message.error("결제 처리 중 오류가 발생했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   /** ✅ 데이터 로그 (디버그용) */
   console.log("[PaymentPage] location.state:", { rsvType, items, formData });
@@ -71,7 +90,10 @@ const PaymentPage = () => {
       <div className="min-h-screen flex justify-center pt-10 pb-12 px-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full max-w-7xl">
           {/* === 좌측 결제 영역 === */}
-          <Card className="lg:col-span-2" style={{ borderRadius: 16, backgroundColor: "#FFFFFF" }}>
+          <Card
+            className="lg:col-span-2"
+            style={{ borderRadius: 16, backgroundColor: "#FFFFFF" }}
+          >
             <Steps
               current={1}
               items={[
@@ -104,7 +126,9 @@ const PaymentPage = () => {
             {/* ✅ 예약자 정보 */}
             <div className="space-y-2 mb-6">
               <Title level={5}>예약자 정보</Title>
-              <Text>이름: {formData?.name || formData?.senderName || "정보 없음"}</Text>
+              <Text>
+                이름: {formData?.name || formData?.senderName || "정보 없음"}
+              </Text>
               <br />
               <Text>연락처: {formData?.phone || "정보 없음"}</Text>
               <br />
@@ -113,14 +137,13 @@ const PaymentPage = () => {
 
             {/* ✅ 타입별 예약 상세 정보 */}
             {InfoComponent && items && formData ? (
-  <InfoComponent
-    data={typeof items === "object" ? items : {}}
-    formData={typeof formData === "object" ? formData : {}}
-  />
-) : (
-  <Text type="secondary">결제 정보가 없습니다.</Text>
-)}
-
+              <InfoComponent
+                data={typeof items === "object" ? items : {}}
+                formData={typeof formData === "object" ? formData : {}}
+              />
+            ) : (
+              <Text type="secondary">결제 정보가 없습니다.</Text>
+            )}
           </Card>
 
           {/* === 우측 요약 === */}
@@ -150,6 +173,7 @@ const PaymentPage = () => {
               type="primary"
               size="large"
               style={{ marginTop: 24, height: 56, borderRadius: 12 }}
+              loading={loading}
               onClick={handlePayment}
             >
               결제하기

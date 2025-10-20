@@ -2,6 +2,7 @@ package com.navi.payment.repository;
 
 import com.navi.payment.domain.PaymentMaster;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -13,6 +14,9 @@ public interface PaymentRepository extends JpaRepository<PaymentMaster, Long> {
     Optional<PaymentMaster> findByMerchantId(String merchantId);
     // 2. PG 승인번호(impUid)로 단건 조회 (중복 결제 검증 시 사용)
     Optional<PaymentMaster> findByImpUid(String impUid);
+
+    @Query(value = "SELECT PAYMENT_SEQ.NEXTVAL FROM DUAL", nativeQuery = true)
+    Long getNextSeqVal();
 
     /* === [사용자용 - 추후 확장] === */
     // TODO: PaymentMaster <-> User 관계 매핑 후 활성화

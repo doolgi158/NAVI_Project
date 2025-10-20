@@ -11,7 +11,7 @@ const accSlice = createSlice({
     reducers: {
         // 숙소 목록 전체를 저장하는 reducer
         setAccList: (state, action) => {
-            state.list = action.payload;                // payload = 숙소 리스트 배열
+            state.list = action.payload;             // payload = 숙소 리스트 배열
         },
         // 검색 조건 및 검색 결과 전체 저장 (뒤로 가기 시 복원용) 
         setSearchState: (state, action) => {

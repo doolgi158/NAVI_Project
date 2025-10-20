@@ -14,9 +14,10 @@ public class RoomListResponseDTO {
     private Integer weekendFee;
     private Integer maxCnt;
     private Boolean hasWifi;
-    private String thumbnailImage; // Todo: 대표 이미지 1장 정도
+    private Integer remainCount;    // ✅ 잔여 객실 수 추가
+    private String thumbnailImage;  // Todo: 대표 이미지 1장 정도
 
-    public static RoomListResponseDTO fromEntity(Room room) {
+    public static RoomListResponseDTO fromEntity(Room room, Integer remainCount) {
         return RoomListResponseDTO.builder()
                 .roomId(room.getRoomId())
                 .roomName(room.getRoomName())
@@ -24,6 +25,7 @@ public class RoomListResponseDTO {
                 .weekendFee(room.getWeekendFee())
                 .maxCnt(room.getMaxCnt())
                 .hasWifi(room.getHasWifi())
+                .remainCount(remainCount)
                 //.thumbnailImage(room.getThumbnailImageUrl()) // Todo: 이미지
                 .build();
     }

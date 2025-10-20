@@ -26,12 +26,13 @@ public class StockInitializerTests {
         LocalDate today = LocalDate.now();
         int createdCount = 0;
 
+        // ✅ 7일치만 생성 (오늘 포함)
         for (Room room : rooms) {
             if (room.getRoomCnt() <= 0) {
                 log.warn("🚫 객실수 0인 Room 제외: {}", room.getRoomName());
                 continue;
             }
-            for (int i = 0; i < 30; i++) {
+            for (int i = 0; i < 7; i++) {
                 LocalDate targetDate = today.plusDays(i);
 
                 if (!stockRepository.existsByRoomAndStockDate(room, targetDate)) {
@@ -48,6 +49,6 @@ public class StockInitializerTests {
             }
         }
 
-        log.info("✅ 테스트 환경 초기화 완료: {}건 생성 ({} rooms × 30 days)", createdCount, rooms.size());
+        log.info("✅ 테스트 환경 초기화 완료: {}건 생성 ({} rooms × 7 days)", createdCount, rooms.size());
     }
 }

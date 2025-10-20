@@ -4,11 +4,13 @@ import com.navi.payment.dto.request.*;
 import com.navi.payment.dto.response.*;
 import com.siot.IamportRestClient.exception.IamportResponseException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PaymentRouterService {
@@ -20,6 +22,10 @@ public class PaymentRouterService {
 
     /* === 1. 결제 준비 === */
     public PaymentPrepareResponseDTO preparePayment(PaymentPrepareRequestDTO dto) {
+        for (String rsvId : dto.getReserveId()) {
+            log.info("✅ 결제 준비 - 예약 ID: {}", rsvId);
+            // 각 예약 ID별 로직 수행 (예: DlvPaymentService.preparePayment(rsvId))
+        }
         return switch (dto.getRsvType()) {
             case ACC -> accPaymentServiceImpl.preparePayment(dto);
             case DLV -> dlvPaymentServiceImpl.preparePayment(dto);

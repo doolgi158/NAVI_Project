@@ -19,8 +19,7 @@ const AccRouter = () => {
       ),
     },
     {
-      path: ":accId",
-      // path: "/detail",
+      path: "detail",
       element: (
         <Suspense fallback={Loading}>
           <AccDetail />
@@ -28,27 +27,10 @@ const AccRouter = () => {
       ),
     },
     {
-      path: ":accId/:roomId/reservation",
-      // path: "/detail/reservation",
+      path: "detail/reservation",
       element: (
         <Suspense fallback={Loading}>
           <AccReserve />
-        </Suspense>
-      ),
-    },
-    {
-      path: ":accId/:roomId/payment",
-      element: (
-        <Suspense fallback={Loading}>
-          <AccPayment />
-        </Suspense>
-      ),
-    },
-    {
-      path: ":accId/:roomId/result",
-      element: (
-        <Suspense fallback={Loading}>
-          <AccResult />
         </Suspense>
       ),
     },
