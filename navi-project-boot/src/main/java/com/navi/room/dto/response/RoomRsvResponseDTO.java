@@ -29,7 +29,7 @@ public class RoomRsvResponseDTO {
                 .roomId(entity.getRoom().getRoomId())
                 .stockDate(entity.getStockDate())
                 .quantity(entity.getQuantity())
-                .price(entity.getPrice())
+//                .price(entity.getPrice())
                 .rsvStatus(entity.getRsvStatus())
                 .build();
     }

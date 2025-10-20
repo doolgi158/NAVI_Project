@@ -52,7 +52,7 @@ public class RoomRsvServiceImpl implements RoomRsvService {
                 .roomStock(null) // StockService가 차감 처리하므로 직접 참조 불필요
                 .stockDate(dto.getStockDate())
                 .quantity(dto.getQuantity())
-                .price(dto.getPrice())
+//                .price(dto.getPrice())
                 .rsvStatus(RsvStatus.PENDING)
                 .build();
 
