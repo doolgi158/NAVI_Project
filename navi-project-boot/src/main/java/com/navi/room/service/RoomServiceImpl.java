@@ -1,11 +1,12 @@
 package com.navi.room.service;
 
 import com.navi.accommodation.domain.Acc;
+import com.navi.accommodation.repository.AccRepository;
 import com.navi.room.domain.Room;
+import com.navi.room.dto.api.RoomApiDTO;
 import com.navi.room.dto.request.RoomRequestDTO;
 import com.navi.room.dto.response.RoomListResponseDTO;
 import com.navi.room.dto.response.RoomResponseDTO;
-import com.navi.accommodation.repository.AccRepository;
 import com.navi.room.repository.RoomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -62,6 +63,11 @@ public class RoomServiceImpl implements RoomService {
 
         log.info("[ADMIN] 객실 수정 완료 → {} ({})", updated.getRoomName(), updated.getAcc().getTitle());
         return RoomResponseDTO.fromEntity(updated);
+    }
+
+    @Override
+    public List<RoomApiDTO> getRoomListByAcc(Long accNo, String keyword) {
+        return List.of();
     }
 
     @Override

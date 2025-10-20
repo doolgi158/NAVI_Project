@@ -43,4 +43,6 @@ public interface RoomService {
     /* === 비즈니스 로직 === */
     // 1. 숙소별 최저 숙박 요금 조회
     Integer findMinPriceByAcc(Acc acc, LocalDate checkIn, LocalDate checkOut);
+
+    List<RoomResponseDTO> getRooms(String accId);
 }

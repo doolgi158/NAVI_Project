@@ -26,7 +26,7 @@ public class RoomAdminController {
 
     @PostMapping("/rooms/new")
     public ApiResponse<?> createRoom(@RequestBody RoomRequestDTO dto) {
-        roomService.createRoom(dto);
+//        roomService.createRoom(dto);
         return ApiResponse.success("객실 등록 완료");
     }
 

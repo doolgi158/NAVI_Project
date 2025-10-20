@@ -17,10 +17,13 @@ const UserLikedTravelsPage = () => {
             return;
         }
 
-        fetch(`${API_SERVER_HOST}/api/activity/likes?userNo=${userNo}`, {
+        fetch(`${API_SERVER_HOST}/api/activity/likes`, {
             headers: { Authorization: `Bearer ${token}` },
         })
-            .then((res) => { res.json() })
+            .then((res) => {
+                console.log(res);
+                res.json()
+            })
             .then((data) => {
 
                 if (data.success) {
