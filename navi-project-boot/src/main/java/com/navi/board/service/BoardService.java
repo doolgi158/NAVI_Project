@@ -15,7 +15,6 @@ public class BoardService {
 
     private final BoardRepository boardRepository;
 
-
     // 전체 게시글 조회
     @Transactional(readOnly = true)
     public List<Board> getAllBoards() {
@@ -29,22 +28,20 @@ public class BoardService {
     }
 
     // 게시글 작성
-    public void createBoard(String title, String content) {
-        // Builder 패턴 사용 (더 깔끔한 코드)
+    public void createBoard(String title, String content, String image) {
         Board board = Board.builder()
                 .boardTitle(title)
                 .boardContent(content)
+                .boardImage(image)
                 .boardGood(0)
                 .reportCount(0)
-                .userNo(1)  // TODO: 실제로는 로그인한 사용자 번호를 받아야 함
+                .userNo(1)
                 .build();
 
-        // createDate, updateDate는 @CreationTimestamp, @UpdateTimestamp가 자동 설정
         System.out.println("저장 전 Board: " + board);
         boardRepository.save(board);
         System.out.println("저장 완료!");
     }
-
 
     // 게시글 상세 조회
     @Transactional(readOnly = true)
@@ -53,8 +50,26 @@ public class BoardService {
                 .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다. ID: " + id));
     }
 
+    // 게시글 수정
+    public void updateBoard(Integer id, String title, String content, String image) {
+        Board board = getBoard(id);
+        board.setBoardTitle(title);
+        board.setBoardContent(content);
+        board.setBoardImage(image);
+        boardRepository.save(board);
+        System.out.println("게시글 수정 완료. ID: " + id);
+    }
 
-     // 게시글 신고
+    // 게시글 삭제
+    public void deleteBoard(Integer id) {
+        if (!boardRepository.existsById(id)) {
+            throw new RuntimeException("게시글을 찾을 수 없습니다. ID: " + id);
+        }
+        boardRepository.deleteById(id);
+        System.out.println("게시글 삭제 완료. ID: " + id);
+    }
+
+    // 게시글 신고
     public void reportBoard(Integer id) {
         Board board = getBoard(id);
         board.setReportCount(board.getReportCount() + 1);
@@ -73,7 +88,6 @@ public class BoardService {
     // 게시글 좋아요 취소
     public void unlikeBoard(Integer id) {
         Board board = getBoard(id);
-        // 좋아요 수가 0보다 클 때만 감소
         if (board.getBoardGood() > 0) {
             board.setBoardGood(board.getBoardGood() - 1);
             boardRepository.save(board);

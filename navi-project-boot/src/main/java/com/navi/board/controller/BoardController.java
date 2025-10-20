@@ -69,7 +69,9 @@ public class BoardController {
 
     @PostMapping("/write")
     public String submitPost(@RequestParam(required = false) String title,
-                             @RequestParam(required = false) String content) {
+                             @RequestParam(required = false) String content,
+                             @RequestParam(required = false) String image
+                            ) {
         System.out.println("=====================================");
         System.out.println("POST /board/write 요청 받음!");
         System.out.println("제목: " + title);
@@ -88,7 +90,7 @@ public class BoardController {
 
         try {
             System.out.println("✅ 게시글 저장 시작...");
-            boardService.createBoard(title, content);
+            boardService.createBoard(title, content, image);
             System.out.println("✅ 게시글 저장 완료!");
         } catch (Exception e) {
             System.out.println("❌ 저장 중 에러 발생:");

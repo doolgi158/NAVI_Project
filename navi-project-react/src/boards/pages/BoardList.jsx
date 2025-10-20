@@ -10,7 +10,7 @@ function BoardList() {
   const [searchKeyword, setSearchKeyword] = useState('');
 
   useEffect(() => {
-    fetch('http://localhost:8080/api/board')
+    fetch('http://localhost:5173/api/board')
       .then(response => response.json())
       .then(data => {
         setBoards(data);
@@ -26,7 +26,7 @@ function BoardList() {
   const handleSearch = () => {
     if (!searchKeyword.trim()) {
       // 검색어가 없으면 전체 목록
-      fetch('http://localhost:8080/api/board')
+      fetch('http://localhost:5173/api/board')
         .then(response => response.json())
         .then(data => setBoards(data))
         .catch(error => console.error('에러:', error));
@@ -34,7 +34,7 @@ function BoardList() {
     }
 
     // 검색 API 호출
-    fetch(`http://localhost:8080/api/board/search?keyword=${encodeURIComponent(searchKeyword)}`)
+    fetch(`http://localhost:5173/api/board/search?keyword=${encodeURIComponent(searchKeyword)}`)
       .then(response => response.json())
       .then(data => setBoards(data))
       .catch(error => console.error('검색 에러:', error));
@@ -58,9 +58,6 @@ function BoardList() {
         {/* 헤더 */}
         <div className="board-list-header">
           <div className="board-list-title">일반 게시판</div>
-          <Link to="/board/write" className="btn-write">
-            ✏️ 글쓰기
-          </Link>
         </div>
 
         {/* 검색 박스 */}
@@ -123,6 +120,9 @@ function BoardList() {
               다음 ▶
             </button>
           </div>
+          <Link to="/board/write" className="btn-write">
+            글쓰기
+          </Link>
         </div>
       </div>
     </div>

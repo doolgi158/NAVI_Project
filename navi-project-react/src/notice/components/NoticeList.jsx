@@ -1,8 +1,7 @@
-// src/components/NoticeList.js
 import React, { useState, useEffect } from 'react';
-import { getAllNotices, deleteNotice, searchNotices } from '../services/noticeService';
+import { getAllNotices, deleteNotice, searchNotice } from '../services/NoticeService';
 import { useNavigate } from 'react-router-dom';
-import './NoticeList.css';
+import "../css/NoticeList.css";
 
 function NoticeList() {
   const [notices, setNotices] = useState([]);
@@ -12,11 +11,11 @@ function NoticeList() {
 
   // 컴포넌트가 처음 로드될 때 공지사항 목록 가져오기
   useEffect(() => {
-    fetchNotices();
+    fetchNotice();
   }, []);
 
   // 공지사항 목록 가져오기
-  const fetchNotices = async () => {
+  const fetchNotice = async () => {
     try {
       setLoading(true);
       const data = await getAllNotices();
@@ -32,12 +31,12 @@ function NoticeList() {
   // 검색
   const handleSearch = async () => {
     if (!searchKeyword.trim()) {
-      fetchNotices();
+      fetchNotice();
       return;
     }
 
     try {
-      const data = await searchNotices(searchKeyword);
+      const data = await searchNotice(searchKeyword);
       setNotices(data);
     } catch (error) {
       console.error('검색에 실패했습니다:', error);
@@ -54,7 +53,7 @@ function NoticeList() {
     try {
       await deleteNotice(noticeNo);
       alert('삭제되었습니다.');
-      fetchNotices(); // 목록 새로고침
+      fetchNotice(); // 목록 새로고침
     } catch (error) {
       console.error('삭제에 실패했습니다:', error);
       alert('삭제에 실패했습니다.');
@@ -86,14 +85,14 @@ function NoticeList() {
           onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
         />
         <button onClick={handleSearch}>검색</button>
-        <button onClick={fetchNotices}>전체보기</button>
+        <button onClick={fetchNotice}>전체보기</button>
       </div>
 
       {/* 작성 버튼 */}
       <div className="button-area">
         <button 
           className="create-button"
-          onClick={() => navigate('/notices/create')}
+          onClick={() => navigate('/notice/write')}
         >
           공지사항 작성
         </button>
@@ -121,7 +120,8 @@ function NoticeList() {
                 <td>{notice.noticeNo}</td>
                 <td 
                   className="notice-title"
-                  onClick={() => navigate(`/notices/${notice.noticeNo}`)}
+                  onClick={() => navigate(`/notice/detail?noticeNo=${notice.noticeNo}`)}
+                  style={{ cursor: 'pointer' }}
                 >
                   {notice.noticeTitle}
                 </td>
@@ -130,7 +130,7 @@ function NoticeList() {
                 <td>
                   <button 
                     className="edit-button"
-                    onClick={() => navigate(`/notices/edit/${notice.noticeNo}`)}
+                    onClick={() => navigate(`/notice/write?noticeNo=${notice.noticeNo}`)}
                   >
                     수정
                   </button>

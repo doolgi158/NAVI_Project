@@ -1,17 +1,22 @@
-// src/components/NoticeDetail.js
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { getNoticeById, deleteNotice } from '../services/noticeService';
-import './NoticeDetail.css';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { getNoticeById, deleteNotice } from '../services/NoticeService';
+import "../css/NoticeDetail.css";
 
 function NoticeDetail() {
-  const { noticeNo } = useParams();
+  const [searchParams] = useSearchParams();
+  const noticeNo = searchParams.get('noticeNo');
   const navigate = useNavigate();
   const [notice, setNotice] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchNotice();
+    if (noticeNo) {
+      fetchNotice();
+    } else {
+      alert('잘못된 접근입니다.');
+      navigate('/notice');
+    }
   }, [noticeNo]);
 
   const fetchNotice = async () => {
@@ -22,7 +27,7 @@ function NoticeDetail() {
     } catch (error) {
       console.error('공지사항을 불러오는데 실패했습니다:', error);
       alert('공지사항을 불러오는데 실패했습니다.');
-      navigate('/notices');
+      navigate('/notice');
     } finally {
       setLoading(false);
     }
@@ -36,7 +41,7 @@ function NoticeDetail() {
     try {
       await deleteNotice(noticeNo);
       alert('삭제되었습니다.');
-      navigate('/notices');
+      navigate('/notice');
     } catch (error) {
       console.error('삭제에 실패했습니다:', error);
       alert('삭제에 실패했습니다.');
@@ -59,7 +64,7 @@ function NoticeDetail() {
 
   return (
     <div className="notice-detail-container">
-      <h1>공지사항 상세</h1>
+      <h1>공지사항</h1>
 
       <div className="notice-info">
         <div className="info-row">
@@ -72,7 +77,7 @@ function NoticeDetail() {
         </div>
         <div className="info-row">
           <span className="label">조회수:</span>
-          <span className="value">{notice.noticeViewCount}</span>
+          <span className="value">{notice.noticeViewCount || 0}</span>
         </div>
         {notice.noticeStartDate && (
           <div className="info-row">
@@ -105,8 +110,8 @@ function NoticeDetail() {
       )}
 
       <div className="button-group">
-        <button onClick={() => navigate('/notices')}>목록</button>
-        <button onClick={() => navigate(`/notices/edit/${noticeNo}`)}>수정</button>
+        <button onClick={() => navigate('/notice')}>목록</button>
+        <button onClick={() => navigate(`/notice/write?noticeNo=${noticeNo}`)}>수정</button>
         <button className="delete-button" onClick={handleDelete}>삭제</button>
       </div>
     </div>

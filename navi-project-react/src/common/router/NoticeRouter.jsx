@@ -1,10 +1,11 @@
+// import NoticeWrite from "@/notice/components/NoticeWrite";
 import { lazy, Suspense } from "react";
 
 const Loading = <div>로딩 중...</div>;
 
 const NoticeList = lazy(() => import("../../notice/components/NoticeList"));
 const NoticeDetail = lazy(() => import("../../notice/components/NoticeDetail"));
-const NoticeForm = lazy(() => import("../../notice/components/NoticeForm"));
+const NoticeWrite = lazy(() => import("../../notice/components/NoticeWrite"));
 
 const NoticeRouter = () => {
     return [
@@ -13,8 +14,8 @@ const NoticeRouter = () => {
             element: <Suspense fallback={Loading}><NoticeList /></Suspense>
         },
         {
-            path: "form",
-            element: <Suspense fallback={Loading}><NoticeForm /></Suspense>
+            path: "write",
+            element: <Suspense fallback={Loading}><NoticeWrite /></Suspense>
         },
         {
             path: "detail",

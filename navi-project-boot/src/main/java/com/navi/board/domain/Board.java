@@ -2,6 +2,7 @@ package com.navi.board.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -26,7 +27,7 @@ public class Board {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "boot_board_generator")
     @Column(name = "board_no")
-    private Integer boardNo;   // 게시글 번호 (카멜케이스로 변경)
+    private Integer boardNo;   // 게시글 번호 (카멜케이스)
 
     @Column(name = "board_title", nullable = false, length = 30)
     private String boardTitle; // 게시글 제목
@@ -38,6 +39,12 @@ public class Board {
     @Column(name = "report_count")
     @Builder.Default
     private Integer reportCount = 0;  // 신고
+
+    // 조회수
+    @Column(name = "board_view_count")
+    @ColumnDefault("0")
+    @Builder.Default
+    private Integer boardViewCount = 0;
 
     @Lob
     @Column(name = "board_content", nullable = false)
@@ -53,4 +60,7 @@ public class Board {
     @UpdateTimestamp
     @Column(name = "update_date")
     private LocalDateTime updateDate;  // 수정일 (자동 설정됨)
+
+    @Column(name = "board_image", length = 500)
+    private String boardImage;  //이미지
 }

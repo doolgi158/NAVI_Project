@@ -1,7 +1,7 @@
 // src/services/noticeService.js
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8080/api/notices';
+const API_URL = 'http://localhost:5173/api/notice';
 
 // 공지사항 전체 목록 조회
 export const getAllNotices = async () => {
@@ -33,7 +33,7 @@ export const deleteNotice = async (noticeNo) => {
 };
 
 // 공지사항 검색
-export const searchNotices = async (keyword) => {
+export const searchNotice = async (keyword) => {
   const response = await axios.get(`${API_URL}/search`, {
     params: { keyword }
   });

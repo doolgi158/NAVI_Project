@@ -4,15 +4,16 @@ import com.navi.notice.dto.NoticeDTO;
 import com.navi.notice.entity.Notice;
 import com.navi.notice.repository.NoticeRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class NoticeService {    //데이터 조회, 생성, 수정, 삭제 담당
 
     private final NoticeRepository noticeRepository;
@@ -55,13 +56,26 @@ public class NoticeService {    //데이터 조회, 생성, 수정, 삭제 담�
                 .collect(Collectors.toList());
     }
 
-    // 공지사항 상세 조회 (조회수 증가)
+    // 공지사항 조회수 증가
+    @Transactional
     public NoticeDTO getNoticeById(Integer noticeNo) {
+        log.info("=== 조회수 증가 시작: noticeNo = {} ===", noticeNo);
+
         Notice notice = noticeRepository.findById(noticeNo)
                 .orElseThrow(() -> new RuntimeException("공지사항을 찾을 수 없습니다."));
 
+        log.info("조회 전 조회수: {}", notice.getNoticeViewCount());
+
         // 조회수 증가
         noticeRepository.incrementViewCount(noticeNo);
+        log.info("incrementViewCount 실행 완료");
+
+        // 조회수 증가 후 다시 조회
+        notice = noticeRepository.findById(noticeNo)
+                .orElseThrow(() -> new RuntimeException("공지사항을 찾을 수 없습니다."));
+
+        log.info("조회 후 조회수: {}", notice.getNoticeViewCount());
+        log.info("=== 조회수 증가 완료 ===");
 
         return convertToDTO(notice);
     }
