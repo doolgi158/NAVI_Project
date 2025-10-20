@@ -53,7 +53,7 @@ export default function PlanList({
         <Card className="w-[900px] rounded-2xl shadow-sm">
             {loading ? (
                 <div className="text-center py-10">
-                    <Spin tip="여행 데이터를 불러오는 중입니다..." />
+                    <Spin fullscreen tip="여행 데이터를 불러오는 중입니다..." />
                 </div>
             ) : paginatedList.length === 0 ? (
                 <div className="text-center py-12 text-gray-500">
@@ -98,10 +98,10 @@ export default function PlanList({
                                             {plan.title || "제목 없음"}
                                             <span
                                                 className={`ml-3 px-2 py-[2px] rounded-md text-xs font-semibold ${dDayLabel === "D-DAY"
-                                                        ? "bg-[#FFB703] text-white"
-                                                        : dDayLabel === "여행 종료"
-                                                            ? "bg-gray-300 text-gray-700"
-                                                            : "bg-[#3A6EA5] text-white"
+                                                    ? "bg-[#FFB703] text-white"
+                                                    : dDayLabel === "여행 종료"
+                                                        ? "bg-gray-300 text-gray-700"
+                                                        : "bg-[#3A6EA5] text-white"
                                                     }`}
                                             >
                                                 {dDayLabel}

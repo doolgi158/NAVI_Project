@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import MainLayout from "../../layout/MainLayout";
 import { useNavigate } from "react-router-dom";
-import { getMyPlans, deletePlan } from "../../../common/api/planApi";
+import { getMyPlans, deletePlan } from "@/common/api/planApi";
 import { Button, Modal, message } from "antd";
 import PlanList from "../plan/components/PlanList";
 
