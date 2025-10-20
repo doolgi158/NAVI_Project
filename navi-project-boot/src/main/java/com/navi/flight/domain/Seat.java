@@ -14,6 +14,7 @@ import lombok.*;
         }
 )
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -42,7 +43,9 @@ public class Seat {
     @Column(name = "seat_class", length = 20, nullable = false)
     private SeatClass seatClass;
 
-    /** 좌석 추가요금 */
+    /**
+     * 좌석 추가요금
+     */
     @Column(name = "extra_price", nullable = false)
     private int extraPrice;
 }

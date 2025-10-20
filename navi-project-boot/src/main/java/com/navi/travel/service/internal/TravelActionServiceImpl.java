@@ -64,7 +64,7 @@ public class TravelActionServiceImpl implements TravelActionService {
             likeRepository.save(like);
             travel.incrementLikesCount(); // ✅ 증가
         }
-
+        travel.setCounterOnlyChanged(true);
         return !likedBefore;
     }
 
@@ -94,7 +94,9 @@ public class TravelActionServiceImpl implements TravelActionService {
             bookmark.setUserId(userId);
             bookmarkRepository.save(bookmark);
             travel.incrementBookmarkCount(); // ✅ 증가
+
         }
+        travel.setCounterOnlyChanged(true);
 
         return !bookmarkedBefore;
     }

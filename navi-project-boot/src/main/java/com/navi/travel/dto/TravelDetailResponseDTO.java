@@ -54,8 +54,8 @@ public class TravelDetailResponseDTO {
 
     /**
      * ✅ Travel 엔티티를 기반으로 DTO 생성
-     *  - 조회수, 좋아요, 북마크, 사용자 상태 반영
-     *  - 조회수 null 방지 및 즉시 반영된 값 포함
+     * - 조회수, 좋아요, 북마크, 사용자 상태 반영
+     * - 조회수 null 방지 및 즉시 반영된 값 포함
      */
     public static TravelDetailResponseDTO of(
             Travel travel,
@@ -106,5 +106,9 @@ public class TravelDetailResponseDTO {
                 .createdAt(createdAtLDT != null ? createdAtLDT.toLocalDate() : null)
                 .updatedAt(updatedAtLDT != null ? updatedAtLDT.toLocalDate() : null)
                 .build();
+    }
+    
+    public static TravelDetailResponseDTO of(Travel travel) {
+        return of(travel, 0L, 0L, false, false);
     }
 }

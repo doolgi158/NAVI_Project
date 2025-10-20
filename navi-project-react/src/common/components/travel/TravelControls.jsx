@@ -1,5 +1,5 @@
 import React from 'react';
-import FilterPanel from '../../../common/components/travel/FilterPanel.jsx';
+import FilterPanel from './FilterPanel.jsx';
 
 const TravelControls = ({
   totalElements = 0,

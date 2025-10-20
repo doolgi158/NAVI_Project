@@ -17,7 +17,7 @@ const AdminRouter = () => {
             <AdminDashboard />
           </ProtectedRoute>
         </Suspense>
-      ),
+      )
     },
     {
       path: "users",
@@ -27,8 +27,9 @@ const AdminRouter = () => {
             <AdminUsers />
           </ProtectedRoute>
         </Suspense>
-      ),
+      )
     },
+    //travel 관리자 페이지 라우팅
     {
       path: "travel",
       element: (
@@ -37,8 +38,9 @@ const AdminRouter = () => {
             <AdminTravelList />
           </ProtectedRoute>
         </Suspense>
-      ),
+      )
     },
+    //travel 등록 페이지 라우팅
     {
       path: "travel/register",
       element: (
@@ -47,8 +49,9 @@ const AdminRouter = () => {
             <AdminTravelForm />
           </ProtectedRoute>
         </Suspense>
-      ),
+      )
     },
+    //travel 수정 페이지 라우팅
     {
       path: "travel/edit/:travelId",
       element: (

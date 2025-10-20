@@ -165,7 +165,11 @@ const UserDetailPage = () => {
                       </Select>
                     ) : (
                       <div className="py-2 px-3 border border-gray-200 rounded-md bg-gray-50">
-                        {user?.local || "-"}
+                        {user?.local === "L"
+                          ? "내국인"
+                          : user?.local === "F"
+                          ? "외국인"
+                          : "-"}
                       </div>
                     )}
                   </Form.Item>

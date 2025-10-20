@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from "react";
 import MainLayout from "../../layout/MainLayout";
-import CustomCard from "@/common/components/CustomCard";
-import CustomButton from "@/common/components/CustomButton";
 import { useNavigate, useParams } from "react-router-dom";
-import { getTravelDetail, createTravel, updateTravel } from "@/api/adminTravelApi";
+import { getTravelDetail, createTravel, updateTravel } from "../../../common/api/adminTravelApi";
 
 export default function AdminTravelForm() {
   const navigate = useNavigate();
@@ -69,7 +67,7 @@ export default function AdminTravelForm() {
         </div>
 
         {/* 폼 카드 */}
-        <CustomCard className="w-[600px]">
+        <Card className="w-[600px]">
           {loading ? (
             <p className="text-gray-500 text-center py-8">
               데이터를 불러오는 중입니다...
@@ -116,20 +114,20 @@ export default function AdminTravelForm() {
 
               {/* 버튼 영역 */}
               <div className="flex justify-between pt-4">
-                <CustomButton
+                <Button
                   type="button"
                   onClick={() => navigate(-1)}
                   className="bg-gray-400 hover:bg-gray-500"
                 >
                   취소
-                </CustomButton>
-                <CustomButton type="submit">
+                </Button>
+                <Button type="submit">
                   {id ? "수정 완료" : "등록"}
-                </CustomButton>
+                </Button>
               </div>
             </form>
           )}
-        </CustomCard>
+        </Card>
       </div>
     </MainLayout>
   );

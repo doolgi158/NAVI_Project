@@ -52,9 +52,4 @@ public class JWTClaimDTO {
                 .role(List.of(UserRole.USER.name())) // Enum.name() → String
                 .build();
     }
-
-    // 가장 첫 번째 권한 반환 (편의 메서드)
-    public String getPrimaryRole() {
-        return role != null && !role.isEmpty() ? role.get(0) : UserRole.USER.name();
-    }
 }
