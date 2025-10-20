@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
-import api, { setAuthTokens } from "../api/axiosInstance";
+import api, { setAuthTokens } from "../api/naviApi";
 
 export default function useAutoRefresh() {
     useEffect(() => {
