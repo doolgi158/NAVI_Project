@@ -43,10 +43,4 @@ public class AccUserController {
         return accService.getAccDetail(accId);
     }
 
-    // 조회수 증가
-    @PostMapping("/accommodations/{accId}/view")
-    public ResponseEntity<?> increaseAccView(@PathVariable String accId) {
-        accService.increaseViewCount(accId);
-        return ResponseEntity.ok().build();
-    }
 }

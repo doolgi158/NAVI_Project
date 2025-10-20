@@ -1,14 +1,15 @@
 package com.navi.accommodation.controller;
 
-import com.navi.accommodation.domain.Acc;
+import com.navi.accommodation.dto.api.AdminAccListDTO;
 import com.navi.accommodation.dto.request.AccRequestDTO;
 import com.navi.accommodation.dto.response.AccDetailResponseDTO;
 import com.navi.accommodation.service.AccService;
 import com.navi.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -17,33 +18,29 @@ public class AccAdminController {
     private final AccService accService;
 
     // === CREATE ===
-    @PostMapping("/accommodations")
-    public ApiResponse<?> createAccData(@RequestBody AccRequestDTO dto) {
+    @PostMapping("/accommodations/new")
+    public ApiResponse<?> createAccData(@RequestBody AdminAccListDTO dto, @RequestPart(required = false) List<MultipartFile> images) {
         return ApiResponse.success(accService.createAcc(dto));
     }
 
     // === READ (전체 조회) ===
-    @GetMapping
-    public ApiResponse<?> getAllAcc(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String keyword
-    ) {
-        Page<Acc> result = accService.getAdminAccList(PageRequest.of(page, size), keyword);
-        return ApiResponse.success(result);
+    @GetMapping("/accommodations")
+    public ApiResponse<?> getAllAcc(@RequestParam(required = false) String keyword) {
+        List<AdminAccListDTO> dtoList = accService.getAllAccList(keyword);
+        return ApiResponse.success(dtoList);
     }
 
     // === READ (단건 조회) ===
-    @GetMapping("/{accNo}")
+    @GetMapping("/accommodations/edit/{accNo}")
     public ApiResponse<?> getAccDetail(@PathVariable Long accNo) {
         AccDetailResponseDTO detail = accService.getAccDetailByNo(accNo);
         return ApiResponse.success(detail);
     }
 
     // === UPDATE ===
-    @PutMapping("/accommodations/{accNo}")
+    @PutMapping("/accommodations/edit/{accNo}")
     public ApiResponse<?> updateAccData(@PathVariable Long accNo, @RequestBody AccRequestDTO dto) {
-        return ApiResponse.success(accService.updateAcc(accNo, dto));
+        return ApiResponse.success(AdminAccListDTO.fromEntity(accService.updateAcc(accNo, dto)));
     }
 
     // === DELETE ===

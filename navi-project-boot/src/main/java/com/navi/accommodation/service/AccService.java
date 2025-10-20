@@ -1,25 +1,24 @@
 package com.navi.accommodation.service;
 
 import com.navi.accommodation.domain.Acc;
+import com.navi.accommodation.dto.api.AdminAccListDTO;
 import com.navi.accommodation.dto.request.AccRequestDTO;
 import com.navi.accommodation.dto.request.AccSearchRequestDTO;
 import com.navi.accommodation.dto.response.AccDetailResponseDTO;
 import com.navi.accommodation.dto.response.AccListResponseDTO;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
 public interface AccService {
     /* === 관리자 전용 CRUD (View) === */
     // Todo: 메서드 반환값 확인해보고 수정필수
-    Acc createAcc(AccRequestDTO dto);
+    Acc createAcc(AdminAccListDTO dto);
 
     Acc updateAcc(Long accNo, AccRequestDTO dto);
 
     void deleteAcc(Long accNo);
 
-    Page<Acc> getAdminAccList(Pageable pageable, String keyword);
+    List<AdminAccListDTO> getAllAccList(String keyword);
 
     List<Acc> getAllAcc();
 

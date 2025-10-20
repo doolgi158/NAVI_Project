@@ -1,8 +1,6 @@
 package com.navi.accommodation.repository;
 
 import com.navi.accommodation.domain.Acc;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -33,5 +31,5 @@ public interface AccRepository extends JpaRepository<Acc, Long> {
     @Query("SELECT a FROM Acc a WHERE a.contentId IS NULL")
     List<Acc> findAllWithoutContentId();
 
-    Page<Acc> findByTitleContainingIgnoreCase(String title, Pageable pageable);
+    List<Acc> findByTitleContainingIgnoreCase(String title);
 }

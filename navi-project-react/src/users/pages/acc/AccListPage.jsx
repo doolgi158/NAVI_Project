@@ -202,7 +202,8 @@ const AccListPage = () => {
   /* ✅ 숙소 카드 클릭 시 */
   const handleCardClick = useCallback(
     (accId) => {
-      dispatch(setSelectedAcc(accId));
+      console.log(accId);
+      dispatch(setSelectedAcc(String(accId)));
       localStorage.setItem("selectedAccId", accId);
 
       // ✅ 선택 당시의 검색 조건도 함께 저장 (DetailPage에서 쓸 수 있게)

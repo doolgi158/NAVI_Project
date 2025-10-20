@@ -63,9 +63,9 @@ const AccDetailPage = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`/api/accommodations/${accId}`);
+        const res = await axios.get(`${API_SERVER_HOST}/api/accommodations/${accId}`);
         const data = res.data;
-
+        console.log(res);
         if (!data.active) {
           message.warning("운영 중이 아닌 숙소입니다.");
           navigate(-1);
@@ -125,7 +125,7 @@ const AccDetailPage = () => {
       const checkIn = dateRange[0].format("YYYY-MM-DD");
       const checkOut = dateRange[1].format("YYYY-MM-DD");
 
-      const res = await axios.get(`/api/rooms/${accId}`, {
+      const res = await axios.get(`${API_SERVER_HOST}/api/rooms/${accId}`, {
         params: { checkIn, checkOut, guestCount, roomCount },
       });
 
@@ -350,8 +350,8 @@ const AccDetailPage = () => {
                           <Text
                             type={room.remainCount <= 3 ? "danger" : "secondary"}
                             className={`font-medium ${room.remainCount <= 3
-                                ? "text-red-500 font-semibold"
-                                : "text-gray-600"
+                              ? "text-red-500 font-semibold"
+                              : "text-gray-600"
                               }`}
                           >
                             잔여 객실 {room.remainCount}개
