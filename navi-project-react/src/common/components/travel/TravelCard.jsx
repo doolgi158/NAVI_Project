@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import api from '../../../common/api/naviApi.js';
+import api from '../../../common/api/naviApi';
 import { message } from 'antd';
 import { useSelector } from 'react-redux'; // ✅ Redux 로그인 정보 가져오기
 
@@ -79,9 +79,8 @@ const TravelCard = ({ item, onClick, isSelected, onMouseEnter, onMouseLeave }) =
 
   return (
     <div
-      className={`bg-white rounded-xl shadow-lg border-2 p-4 cursor-pointer transition duration-300 transform hover:shadow-xl hover:-translate-y-1 ${
-        isSelected ? 'border-blue-500 shadow-blue-300/50 scale-[1.01]' : 'border-gray-200'
-      } flex space-x-4`}
+      className={`bg-white rounded-xl shadow-lg border-2 p-4 cursor-pointer transition duration-300 transform hover:shadow-xl hover:-translate-y-1 ${isSelected ? 'border-blue-500 shadow-blue-300/50 scale-[1.01]' : 'border-gray-200'
+        } flex space-x-4`}
       onClick={() => onClick(item)}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
@@ -127,9 +126,8 @@ const TravelCard = ({ item, onClick, isSelected, onMouseEnter, onMouseLeave }) =
             onClick={handleLikeClick}
           >
             <i
-              className={`bi ${
-                isLiked ? 'bi-suit-heart-fill text-red-500' : 'bi-suit-heart text-gray-400'
-              } text-base`}
+              className={`bi ${isLiked ? 'bi-suit-heart-fill text-red-500' : 'bi-suit-heart text-gray-400'
+                } text-base`}
             ></i>
             <span>{likeCount.toLocaleString()}</span>
           </div>
@@ -139,9 +137,8 @@ const TravelCard = ({ item, onClick, isSelected, onMouseEnter, onMouseLeave }) =
             onClick={handleBookmarkClick}
           >
             <i
-              className={`bi ${
-                isBookmarked ? 'bi-bookmark-fill text-green-500' : 'bi-bookmark text-gray-400'
-              } text-base`}
+              className={`bi ${isBookmarked ? 'bi-bookmark-fill text-green-500' : 'bi-bookmark text-gray-400'
+                } text-base`}
             ></i>
             <span>{bookmarkCount.toLocaleString()}</span>
           </div>

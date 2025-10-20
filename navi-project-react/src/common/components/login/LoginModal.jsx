@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import SocialLoginButton from "./SocialLogin";
 import axios from "axios";
-import { API_SERVER_HOST } from "@/common/api/naviApi.js";
+import { API_SERVER_HOST } from "../../../common/api/naviApi.js";
 
 const LoginModal = ({ open = false, onClose = () => { } }) => {
   const [form] = Form.useForm();

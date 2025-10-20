@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
 import MainLayout from "../../layout/MainLayout";
-import CustomCard from "@/common/components/CustomCard";
-import CustomButton from "@/common/components/CustomButton";
 import { useNavigate } from "react-router-dom";
 import { getAdminTravelList, deleteTravel } from "@/api/adminTravelApi";
 import { format } from "date-fns";
@@ -62,7 +60,7 @@ export default function AdminTravelList() {
         </div>
 
         {/* 리스트 */}
-        <CustomCard className="w-[900px]">
+        <Card className="w-[900px]">
           {loading ? (
             <p className="text-gray-500 text-center py-8">
               여행지 목록을 불러오는 중입니다...
@@ -70,7 +68,7 @@ export default function AdminTravelList() {
           ) : travels.length === 0 ? (
             <div className="text-center py-10">
               <p className="text-gray-500 mb-4">등록된 여행지가 없습니다.</p>
-              <CustomButton onClick={handleAdd}>새 여행지 등록</CustomButton>
+              <Button onClick={handleAdd}>새 여행지 등록</Button>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -92,29 +90,29 @@ export default function AdminTravelList() {
                     {travel.description || "설명 없음"}
                   </p>
                   <div className="mt-4 flex justify-between">
-                    <CustomButton
+                    <Button
                       onClick={() => handleEdit(travel.id)}
                       className="bg-[#0A3D91]/80 text-sm px-4 py-2"
                     >
                       수정
-                    </CustomButton>
-                    <CustomButton
+                    </Button>
+                    <Button
                       onClick={() => handleDelete(travel.id)}
                       className="bg-red-500 hover:bg-red-600 text-sm px-4 py-2"
                     >
                       삭제
-                    </CustomButton>
+                    </Button>
                   </div>
                 </div>
               ))}
             </div>
           )}
-        </CustomCard>
+        </Card>
 
         {/* 하단 등록 버튼 */}
         {travels.length > 0 && (
           <div className="mt-8">
-            <CustomButton onClick={handleAdd}>새 여행지 등록</CustomButton>
+            <Button onClick={handleAdd}>새 여행지 등록</Button>
           </div>
         )}
       </div>

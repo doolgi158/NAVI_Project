@@ -3,6 +3,7 @@ package com.navi.travel.controller;
 import com.navi.travel.dto.TravelDetailResponseDTO;
 import com.navi.travel.dto.TravelListResponseDTO;
 import com.navi.travel.dto.TravelRankDTO;
+import com.navi.travel.dto.TravelSimpleResponseDTO;
 import com.navi.travel.service.TravelService;
 import com.navi.user.dto.JWTClaimDTO;
 import lombok.RequiredArgsConstructor;
@@ -87,6 +88,13 @@ public class TravelController {
             log.error("❌ 여행지 상세 조회 중 오류: {}", e.getMessage(), e);
             return ResponseEntity.internalServerError().build();
         }
+    }
+
+    /** 여행플래너 전용 여행지 간단 목록 조회 */
+    @GetMapping("/list")
+    public ResponseEntity<List<TravelSimpleResponseDTO>> getSimpleTravelList() {
+        List<TravelSimpleResponseDTO> travels = travelService.getSimpleTravelList();
+        return ResponseEntity.ok(travels);
     }
 
     /**

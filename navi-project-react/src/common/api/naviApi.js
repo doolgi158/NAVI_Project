@@ -77,4 +77,29 @@ export const signup = async (userData) => {
   return res.data;
 };
 
+// JWT 토큰 가져오기 (AccessToken)
+export const getAccessToken = () =>
+  localStorage.getItem("ACCESS_TOKEN") ||
+  localStorage.getItem("accessToken") ||
+  null;
+
+//JWT 디코드 함수
+export const parseJwt = (token) => {
+  if (!token) return null;
+  try {
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join("")
+    );
+    return JSON.parse(jsonPayload);
+  } catch {
+    return null;
+  }
+};
+
+
 export default api;
