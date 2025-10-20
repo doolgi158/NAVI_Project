@@ -1,15 +1,24 @@
 import { useEffect, useState } from "react";
-import { Table, Button, Space, Tag, message, Typography, Modal } from "antd";
+import {
+  Table,
+  Button,
+  Space,
+  Tag,
+  message,
+  Typography,
+  Modal,
+  Select,
+} from "antd";
 import {
   ReloadOutlined,
   DeleteOutlined,
-  SearchOutlined,
 } from "@ant-design/icons";
 import axios from "axios";
 import dayjs from "dayjs";
 import AdminSectionCard from "../../layout/flight/AdminSectionCard";
 import AdminSearchBar from "../../layout/flight/AdminSearchBar";
 
+const { Option } = Select;
 const { Title } = Typography;
 const API = "http://localhost:8080/api/admin/flight-reservations";
 
@@ -61,21 +70,46 @@ const AdminReservationPage = () => {
     });
   };
 
-  /** ✅ 상태 Tag 렌더링 */
-  const renderStatus = (status) => {
-    switch (status) {
-      case "PAID":
-        return <Tag color="blue">결제완료</Tag>;
-      case "PENDING":
-        return <Tag color="orange">대기중</Tag>;
-      case "CANCELLED":
-        return <Tag color="red">취소됨</Tag>;
-      case "COMPLETED":
-        return <Tag color="green">완료</Tag>;
-      default:
-        return <Tag color="default">{status}</Tag>;
+  /** ✅ 상태 변경 처리 */
+  const handleStatusChange = async (frsvId, newStatus) => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      await axios.patch(
+        `${API}/${frsvId}/status?status=${newStatus}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      message.success("상태가 변경되었습니다.");
+      fetchReservations();
+    } catch {
+      message.error("상태 변경 실패");
     }
   };
+
+  /** ✅ 상태 Select + 색상 Tag 렌더링 */
+  const renderStatus = (status, record) => (
+    <Select
+      value={status}
+      onChange={(value) => handleStatusChange(record.rsvId, value)}
+      style={{ width: 120 }}
+    >
+      <Option value="PENDING">
+        <Tag color="orange">대기중</Tag>
+      </Option>
+      <Option value="PAID">
+        <Tag color="blue">결제완료</Tag>
+      </Option>
+      <Option value="CANCELLED">
+        <Tag color="red">취소됨</Tag>
+      </Option>
+      <Option value="FAILED">
+        <Tag color="default">실패</Tag>
+      </Option>
+      <Option value="COMPLETED">
+        <Tag color="green">완료</Tag>
+      </Option>
+    </Select>
+  );
 
   /** ✅ 테이블 컬럼 */
   const columns = [
@@ -83,7 +117,7 @@ const AdminReservationPage = () => {
       title: "예약번호",
       dataIndex: "rsvId",
       align: "center",
-      width: 160,
+      width: 180,
       render: (t) => <b>{t}</b>,
     },
     {
@@ -121,7 +155,7 @@ const AdminReservationPage = () => {
       title: "예약상태",
       dataIndex: "status",
       align: "center",
-      width: 120,
+      width: 150,
       render: renderStatus,
     },
     {
@@ -158,7 +192,7 @@ const AdminReservationPage = () => {
     },
   ];
 
-  /** ✅ 검색 필터 (안전 처리 버전) */
+  /** ✅ 검색 필터 */
   const filtered = reservations.filter((r) => {
     const id = r?.rsvId?.toLowerCase() || "";
     const user = r?.userName?.toLowerCase() || "";
@@ -171,7 +205,6 @@ const AdminReservationPage = () => {
       flight.includes(keyword)
     );
   });
-
 
   return (
     <div style={{ padding: 24 }}>

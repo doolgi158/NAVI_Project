@@ -24,4 +24,5 @@ public interface AdminFlightReservationService {
      * ✅ 예약 삭제
      */
     void deleteReservation(String frsvId);
+
 }

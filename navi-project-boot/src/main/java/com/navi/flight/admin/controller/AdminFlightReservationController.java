@@ -41,12 +41,12 @@ public class AdminFlightReservationController {
     /**
      * ✅ 예약 상태 변경 (PENDING → PAID 등)
      */
-    @PutMapping("/{rsvId}/status")
+    @PatchMapping("/{rsvId}/status")
     public ResponseEntity<Void> updateStatus(
             @PathVariable String rsvId,
-            @RequestParam String newStatus
+            @RequestParam String status
     ) {
-        reservationService.updateStatus(rsvId, newStatus);
+        reservationService.updateStatus(rsvId, status);
         return ResponseEntity.ok().build();
     }
 
@@ -58,4 +58,5 @@ public class AdminFlightReservationController {
         reservationService.deleteReservation(rsvId);
         return ResponseEntity.ok().build();
     }
+
 }
