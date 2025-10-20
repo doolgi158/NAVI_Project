@@ -3,8 +3,6 @@ package com.navi.user.dto;
 import com.navi.user.domain.User;
 import com.navi.user.enums.UserRole;
 import com.navi.user.enums.UserState;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -54,24 +52,4 @@ public class JWTClaimDTO {
                 .role(List.of(UserRole.USER.name())) // Enum.name() → String
                 .build();
     }
-
-    // 가장 첫 번째 권한 반환 (편의 메서드)
-//    public String getPrimaryRole() {
-//        return role != null && !role.isEmpty() ? role.get(0) : UserRole.USER.name();
-//    }
-//
-//    public JWTClaimDTO validateAndParse(String token) {
-//        try {
-//            Claims claims = Jwts.parser()
-//                    .setSigningKey(secretKey)
-//                    .parseClaimsJws(token)
-//                    .getBody();
-//
-//            return convertToDTO(claims);
-//        } catch (ExpiredJwtException e) {
-//            throw e; // ✅ 무조건 던지기 (필터가 catch로 감지함)
-//        } catch (Exception e) {
-//            throw new RuntimeException("Invalid JWT Token");
-//        }
-//    }
 }

@@ -1,8 +1,6 @@
 import { RouterProvider } from "react-router-dom";
-import { Provider } from "react-redux";
 import axios from "axios";
-import store from "./common/store/store";
-import root from "./common/router/root.jsx";
+import root from "./common/router/root";
 import useAutoRefresh from "./common/hooks/useAutoRefresh";
 
 
@@ -15,9 +13,7 @@ function App() {
 
   return (
     <>
-      <Provider store={store}>
-        <RouterProvider router={root} />
-      </Provider>
+      <RouterProvider router={root} />
     </>
   );
 }

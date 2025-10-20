@@ -14,6 +14,10 @@ public interface AccRepository extends JpaRepository<Acc, Long> {
     Optional<Acc> findByContentId(Long contentId);
     Optional<Acc> findByAccId(String accId);
 
+    /* 전체 숙소 조회 (운영중 + 객실 존재) */
+    @Query("SELECT a FROM Acc a JOIN a.rooms r WHERE a.active = true")
+    List<Acc> findAllActiveWithRooms();
+
     /* 숙소명으로 찾기 */
     @Query("SELECT a FROM Acc a WHERE LOWER(a.title) LIKE %:keyword%")
     List<Acc> findByTitle(@Param("keyword") String keyword);

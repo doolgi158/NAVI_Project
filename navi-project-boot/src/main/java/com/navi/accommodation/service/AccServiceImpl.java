@@ -1,27 +1,24 @@
 package com.navi.accommodation.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.navi.accommodation.domain.Acc;
-import com.navi.accommodation.dto.api.AccApiDTO;
 import com.navi.accommodation.dto.request.AccRequestDTO;
 import com.navi.accommodation.dto.request.AccSearchRequestDTO;
 import com.navi.accommodation.dto.response.AccDetailResponseDTO;
 import com.navi.accommodation.dto.response.AccListResponseDTO;
 import com.navi.accommodation.repository.AccRepository;
-import com.navi.location.domain.Township;
+import com.navi.image.domain.Image;
+import com.navi.image.repository.ImageRepository;
 import com.navi.location.repository.TownshipRepository;
 import com.navi.room.domain.Room;
+import com.navi.room.dto.response.RoomResponseDTO;
 import com.navi.room.repository.RoomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -31,6 +28,7 @@ public class AccServiceImpl implements AccService{
     private final AccRepository accRepository;
     private final RoomRepository roomRepository;
     private final TownshipRepository townshipRepository;
+    private final ImageRepository imageRepository;
 
     /* === 관리자 전용 CRUD === */
     @Override
@@ -79,54 +77,69 @@ public class AccServiceImpl implements AccService{
 
     /* === 사용자 전용 조회 === */
     @Override
-    @Transactional(readOnly = true)
     public List<AccListResponseDTO> searchAccommodations(AccSearchRequestDTO dto) {
-        List<Acc> accList;
+        List<Acc> accList = accRepository.findAll();
 
-        // 지역 기반 검색
-        if(dto.getTownshipName() != null && !dto.getTownshipName().isEmpty()) {
-            accList = accRepository.findByTownshipName(dto.getTownshipName());
+        // 검색 조건 분기
+        if(dto.getTownshipName() != null && !dto.getTownshipName().isBlank()) {
+            accList = accList.stream()
+                    .filter(a -> a.getTownship() != null &&
+                            a.getTownship().getTownshipName().contains(dto.getTownshipName()))
+                    .toList();
         }
-        // 숙소명 기반 검색
-        else if(dto.getTitle() != null && !dto.getTitle().isEmpty()) {
-            accList = accRepository.findByTitle(dto.getTitle());
+        else if(dto.getTitle() != null && !dto.getTitle().isBlank()) {
+            String lowerKeyword = dto.getTitle().toLowerCase();
+            accList = accList.stream()
+                    .filter(a -> a.getTitle() != null && a.getTitle().toLowerCase().contains(lowerKeyword))
+                    .toList();
         }
         else {
             // Todo: 임시방편 (이거 말고 관광지 기반 만들어야 함)
             accList = accRepository.findAll();
         }
 
-        // 숙소별 DTO 변환 + 객실 최저가 정보 계산
-//        List<AccListResponseDTO> resultList = accList.stream().map(acc -> {
-//            // 예약 가능한 객실 조회
-//            List<Room> rooms = roomRepository.findByAccAndIsAvailable(acc, true);
-//
-//            // 예약 가능한 객실 중 최저가
-//            Integer minPrice = rooms.isEmpty()
-//                    ? null
-//                    : rooms.stream().map(Room::getWeekdayFee),min(Integer::compareTo).orElse(null);
-//            // 🔸 예약 가능한 객실 수
-//            Integer remainingRooms = rooms.size();
-//
-//            // 🔸 DTO 생성
-//            return AccListResponseDTO.builder()
-//                    .accId(acc.getAccId())
-//                    .title(acc.getTitle())
-//                    .address(acc.getAddress())
-//                    .accImages(null) // TODO: 이미지 연동 시 수정
-//                    .minPrice(minPrice)
-//                    .remainingRooms(remainingRooms)
-//                    .build();
-//        }).toList();
-        return accList.stream().map(AccListResponseDTO::fromEntity).toList();
+        /* 숙소 + 이미지 + 객실정보 DTO 조합 */
+        return accList.stream().map(acc -> {
+            String accImage = imageRepository
+                    .findTopByTargetTypeAndTargetIdOrderByNoAsc("ACC", acc.getAccId())
+                    .map(Image::getPath)
+                    .orElse("/uploads/default_hotel.jpg");
+
+            // TODO: 예약 가능한 객실 중 최저가 계산 (추후 구현)
+            return AccListResponseDTO.builder()
+                    .accId(acc.getAccId())
+                    .title(acc.getTitle())
+                    .address(acc.getAddress())
+                    .accImage(accImage)
+                    .build();
+        }).toList();
     }
 
     @Override
     @Transactional(readOnly = true)
     public AccDetailResponseDTO getAccDetail(String accId) {
-        // TODO: 숙소 + 객실 + 이미지 조합 응답
         Acc acc = accRepository.findByAccId(accId)
                 .orElseThrow(() -> new IllegalArgumentException("숙소를 찾을 수 없습니다."));
-        return AccDetailResponseDTO.fromEntity(acc);
+
+        // 숙소 이미지 리스트
+        List<String> accImages = imageRepository.findImagesIgnoreCase("ACC", acc.getAccId())
+                .stream()
+                .map(Image::getPath)
+                .toList();
+
+        log.info("[IMAGE-DEBUG] ACC {} 이미지 조회 결과 = {}", acc.getAccId(),
+                imageRepository.findAllByTargetTypeAndTargetIdIgnoreCase("ACC", acc.getAccId()).size());
+
+        // 객실 리스트
+        /*List<RoomResponseDTO> roomList = roomRepository.findByAcc_AccId(acc.getAccId())
+                .stream()
+                .map(RoomResponseDTO::fromEntity)
+                .toList();*/
+
+        AccDetailResponseDTO dto = AccDetailResponseDTO.fromEntity(acc);
+        dto.setAccImages(accImages);
+        //dto.setRooms(roomList);
+
+        return dto;
     }
 }

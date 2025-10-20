@@ -18,6 +18,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PaymentPrepareRequestDTO {
+    private RsvType rsvType;
+    private List<String> reserveId;
     private BigDecimal totalAmount;         // 총 결제 금액 (예: 128000)
     private PaymentMethod paymentMethod;    // 결제 수단 (예: KGINIPAY, KAKAOPAY, TOSSPAY)
 }

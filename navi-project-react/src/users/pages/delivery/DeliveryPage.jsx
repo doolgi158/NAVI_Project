@@ -13,6 +13,8 @@ import {
 import dayjs from "dayjs";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { setReserveData } from "../../../common/slice/paymentSlice"; 
+import { useDispatch } from "react-redux";
 
 const { Title, Text } = Typography;
 
@@ -27,6 +29,7 @@ const JEJU_AIRPORT = { lat: 33.5055, lng: 126.495 };
 
 const DeliveryPage = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch(); // ✅ Redux 사용 준비
 
   const [form, setForm] = useState({
     senderName: "",
@@ -213,6 +216,7 @@ const DeliveryPage = () => {
     const missing = required.find((k) => !form[k]);
     if (missing) return message.warning("모든 정보를 입력해주세요.");
 
+    // [ TODO ] : usePayment의 항목과 일치시켜야 함.
     const dto = {
       startAddr: form.fromAddress,
       endAddr: form.toAddress,
@@ -222,12 +226,32 @@ const DeliveryPage = () => {
       bagId: form.bagSize === "S" ? 1 : form.bagSize === "M" ? 2 : 3,
       groupId: "G20251015_JEJU_AM_1",
     };
-
+    
     try {
       const res = await axios.post(`${API_SERVER_HOST}/api/delivery/rsv`, dto);
+      console.log("✅ [DeliveryPage] 예약 응답:", res.data);
+
+      // 예약 성공 시 Redux 저장
+      dispatch(
+        setReserveData({
+          rsvType: "DLV",
+          reserveId: res.data.data.drsvId,  // ✅ 예약 ID
+          itemData: res.data.data,          // ✅ 예약 상세 데이터
+        })
+      );
+
       message.success("짐배송 예약이 완료되었습니다!");
-      navigate("/delivery/result", { state: res.data });
-    } catch {
+
+      // 결제 페이지로 이동 (예약 결과 전달)
+      navigate("/payment", {
+        state: {
+          rsvType: "DLV",
+          items: res.data.data,   // 예약 데이터 전달
+          formData: dto,          // 폼 데이터 전달
+        },
+      });
+    } catch (error) {
+      console.error("❌ [DeliveryPage] 예약 요청 실패:", error);
       message.error("예약 중 오류가 발생했습니다.");
     }
   };

@@ -19,5 +19,4 @@ public class PaymentConfirmResponseDTO {
     private String merchantId;                  // 결제 번호
     private List<String> reserveIds;            // 예약 ID
     private RsvStatus rsvStatus;                // 결제 상태
-    //private LocalDateTime createdAt;            // 결제 완료 시간
 }

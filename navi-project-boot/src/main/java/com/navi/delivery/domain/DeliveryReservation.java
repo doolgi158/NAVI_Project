@@ -60,4 +60,8 @@ public class DeliveryReservation extends BaseEntity {
     @Column(name = "status", length = 20, nullable = false)
     @Comment("예약/결제 상태 (PENDING/PAID/CANCELLED/REFUNDED/FAILED/COMPLETED)")
     private RsvStatus status; // 기본값은 서비스에서 PENDING 세팅 권장
+
+    // ✅ [추가] 상태 변경용 헬퍼 (로직 단순화 목적)
+    public void markAsPaid() { this.status = RsvStatus.PAID; }
+    public void markAsFailed() { this.status = RsvStatus.FAILED; }
 }

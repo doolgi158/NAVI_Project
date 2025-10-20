@@ -19,11 +19,20 @@ public interface RoomService {
     // 4. 객실 삭제
     void deleteRoom(Long roomNo);
 
+
     /* === 사용자 전용 조회 (View) === */
     // 1. 특정 숙소 객실 리스트
     List<RoomListResponseDTO> getRoomList(String accId);
     // 2. TODO: 특정 숙소 객실 상세
     RoomResponseDTO getRoomDetail(String roomId);
+    // 3. 조건 검색
+    List<RoomListResponseDTO> getAvailableRooms(
+            String accId,
+            LocalDate checkIn,
+            LocalDate checkOut,
+            Integer guestCount,
+            Integer roomCount
+    );
 
     /* === 비즈니스 로직 === */
     // 1. 숙소별 최저 숙박 요금 조회
