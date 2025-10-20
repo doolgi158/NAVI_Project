@@ -16,9 +16,10 @@ const Main = lazy(() => import("../../users/pages/UserMainPage.jsx"))
 const Appshell = lazy(() => import("../../Appshell.jsx"))
 
 const root = createBrowserRouter([
-    { 
+    {
         element: <Suspense fallback={Loading}> <Appshell /> </Suspense>,
         children: [
+<<<<<<< HEAD
     {
         path: "*",
         element: <Suspense fallback={Loading}><Main /></Suspense>
@@ -65,6 +66,54 @@ const root = createBrowserRouter([
     },
 ]
 }
+=======
+            {
+                path: "*",
+                element: <Suspense fallback={Loading}><Main /></Suspense>
+            },
+            {
+                path: "/",
+                element: <Suspense fallback={Loading}><Main /></Suspense>
+            },
+            {
+                path: "/travel",
+                children: [...TravelRouter()]
+            },
+            {
+                path: "/plans",
+                children: [...PlanRouter()]
+            },
+            {
+                path: "/flight",
+                children: [...FlightRouter()]
+            },
+            {
+                path: "/adm",
+                children: [...AdminRouter()]
+            },
+            {
+                path: "/accommodations",
+                children: [...AccRouter()]
+            },
+            {
+                path: "/delivery",
+                children: [...DeliveryRouter()]
+            },
+            {
+                path: "/users",
+                children: [...UserRouter()]
+            },
+            {
+                path: "/payments",
+                children: [...PaymentRouter()]
+            },
+            {
+                path: "/board",
+                children: [...BoardRouter()]
+            },
+        ]
+    }
+>>>>>>> 580d5e64abd587beaa73b8ee49e48612f6a995ad
 ]);
 
 export default root;

@@ -135,8 +135,8 @@ const FlightPage = () => {
 
           <Divider />
 
-          <Space direction="vertical" size="large" style={{ width: "100%" }}>
-            <div style={{ textAlign: "center" }}>
+          <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+            <div style={{ textAlign: "left" }}>
               <Tag
                 color={tripType === "round" ? "blue" : "default"}
                 style={{

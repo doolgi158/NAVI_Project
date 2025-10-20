@@ -5,7 +5,7 @@ import {
   DashboardOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { setlogout } from "../../common/slice/loginSlice";
 
@@ -16,7 +16,6 @@ const AdminSiderLayout = () => {
   const dispatch = useDispatch();
 
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("accessToken"));
-  const [adminName, setAdminName] = useState(localStorage.getItem("username") || "관리자");
 
   /* 로그아웃 처리 */
   const handleLogout = () => {
