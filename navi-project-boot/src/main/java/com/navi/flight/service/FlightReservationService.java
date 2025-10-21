@@ -8,19 +8,26 @@ import java.util.List;
 
 public interface FlightReservationService {
 
-    /** 항공편 예약 등록 */
+    // 예약 생성 (결제 전 0원)
     FlightReservationDTO createReservation(FlightReservationDTO dto);
 
-    /** 사용자별 예약 목록 조회 */
-    List<FlightReservation> getReservationsByUser(Long userNo);
+    // 결제 성공 후 금액 업데이트
+    FlightReservation updatePayment(String frsvId, BigDecimal amount);
 
-    /** 단일 예약 조회 */
-    FlightReservation getReservationById(String frsvId);
-
-    /** 예약 상태 변경 */
+    // 상태 변경 (FAILED, CANCELLED 등)
     FlightReservation updateStatus(String frsvId, String status);
 
-    // 금액 합산용(결제파트)
+    // 단일 예약 조회
+    FlightReservation getReservationById(String frsvId);
+
+    // 사용자별 예약 목록 조회
+    List<FlightReservation> getReservationsByUser(Long userNo);
+
+    // 예약 총액 조회
     BigDecimal getTotalAmountByReserveId(String frsvId);
+
     BigDecimal getTotalAmountByReserveIds(List<String> reserveIds);
+
+    // 부분 수정 (좌석, 결제일자 등)
+    FlightReservation partialUpdate(String frsvId, FlightReservationDTO dto);
 }

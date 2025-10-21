@@ -31,30 +31,24 @@ public class FlightReservationServiceImpl implements FlightReservationService {
     private final FlightReservationRepository reservationRepository;
     private final UserRepository userRepository;
     private final SeatRepository seatRepository;
-    private final SeatService seatService; // ✅ 자동배정용 SeatService 주입
+    private final SeatService seatService;
 
-    /* 항공편 예약 생성 */
+    /** ✅ 항공편 예약 생성 (0원 / 결제 전) */
     @Override
     @Transactional
     public FlightReservationDTO createReservation(FlightReservationDTO dto) {
 
-        // 1️⃣ 사용자 검증
         User user = userRepository.findById(dto.getUserNo())
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다. userNo=" + dto.getUserNo()));
 
-        // 2️⃣ 항공편 검증
         LocalDateTime startOfDay = dto.getDepTime().atStartOfDay();
         LocalDateTime endOfDay = dto.getDepTime().atTime(23, 59, 59);
         Flight flight = flightRepository.findByFlightIdAndDepTimeRange(dto.getFlightId(), startOfDay, endOfDay)
                 .orElseThrow(() -> new IllegalArgumentException("항공편을 찾을 수 없습니다. flightId=" + dto.getFlightId()));
 
-        // 3️⃣ 좌석 처리 (자동배정 or 수동 선택)
         Seat seat;
-
         if (dto.getSeatId() == null) {
-            // ✅ 좌석을 직접 선택하지 않은 경우 → 자동 배정
             log.info("[AUTO-SEAT] seatId=null → 자동 배정 시도");
-
             int passengerCount = 1;
             try {
                 if (dto.getPassengersJson() != null && !dto.getPassengersJson().isEmpty()) {
@@ -63,81 +57,78 @@ public class FlightReservationServiceImpl implements FlightReservationService {
                     passengerCount = arr.size();
                 }
             } catch (Exception e) {
-                log.warn("⚠️ 탑승객 JSON 파싱 실패, 기본값 1 사용: {}", e.getMessage());
+                log.warn("⚠️ 탑승객 JSON 파싱 실패, 기본값 1명 사용");
             }
-
-            // ✅ SeatService 자동배정 호출 (인접좌석 우선)
             List<Seat> assignedSeats = seatService.autoAssignSeats(
                     dto.getFlightId(),
                     dto.getDepTime().atStartOfDay(),
                     passengerCount
             );
             seat = assignedSeats.get(0);
-
             log.info("[AUTO-SEAT] 자동배정 완료 — {}명 / 시작좌석={}", passengerCount, seat.getSeatNo());
-
         } else {
-            // ✅ 좌석을 직접 선택한 경우 기존 로직 유지
             seat = seatRepository.findByIdForUpdate(dto.getSeatId());
-            if (seat == null)
-                throw new IllegalArgumentException("좌석 정보를 찾을 수 없습니다. seatId=" + dto.getSeatId());
-            if (seat.isReserved())
-                throw new IllegalStateException("이미 예약된 좌석입니다.");
-
+            if (seat == null) throw new IllegalArgumentException("좌석 정보를 찾을 수 없습니다. seatId=" + dto.getSeatId());
+            if (seat.isReserved()) throw new IllegalStateException("이미 예약된 좌석입니다.");
             seat.setReserved(true);
             seatRepository.save(seat);
         }
 
-        // 4️⃣ 예약 생성
         String frsvId = generateFrsvId();
-        BigDecimal price = dto.getTotalPrice();
 
         FlightReservation reservation = FlightReservation.builder()
                 .frsvId(frsvId)
                 .user(user)
                 .flight(flight)
                 .seat(seat)
-                .totalPrice(price)
-                .status(dto.getStatus())
+                .totalPrice(BigDecimal.ZERO)     // ✅ 예약 시점 금액 = 0원
+                .status(RsvStatus.PENDING)       // ✅ 예약 상태 = PENDING
                 .passengersJson(dto.getPassengersJson())
                 .build();
 
         reservationRepository.save(reservation);
 
-        log.info("[항공편 예약 완료] frsvId={}, seat={}, user={}, flight={}, status={}",
-                frsvId, seat.getSeatNo(), user.getName(), dto.getFlightId(), dto.getStatus());
+        log.info("[항공편 예약 완료] frsvId={}, seat={}, user={}, flight={}, status=PENDING",
+                frsvId, seat.getSeatNo(), user.getName(), dto.getFlightId());
 
         return FlightReservationDTO.fromEntity(reservation);
     }
 
-    /* 사용자별 예약 목록 조회 */
+    /** ✅ 결제 성공 후 금액 업데이트 */
     @Override
-    public List<FlightReservation> getReservationsByUser(Long userNo) {
-        return reservationRepository.findByUser_No(userNo);
+    @Transactional
+    public FlightReservation updatePayment(String frsvId, BigDecimal amount) {
+        FlightReservation reservation = reservationRepository.findById(frsvId)
+                .orElseThrow(() -> new IllegalArgumentException("예약 정보를 찾을 수 없습니다. frsvId=" + frsvId));
+
+        reservation.setTotalPrice(amount);
+        reservation.setStatus(RsvStatus.PAID);
+        reservation.setPaidAt(LocalDate.from(LocalDateTime.now()));
+
+        log.info("[결제 완료 반영] frsvId={}, amount={}, status=PAID", frsvId, amount);
+        return reservationRepository.save(reservation);
     }
 
-    /* 단일 예약 조회 */
     @Override
     public FlightReservation getReservationById(String frsvId) {
         return reservationRepository.findById(frsvId)
                 .orElseThrow(() -> new IllegalArgumentException("예약 정보를 찾을 수 없습니다. frsvId=" + frsvId));
     }
 
-    /* 상태 변경 */
+    @Override
+    public List<FlightReservation> getReservationsByUser(Long userNo) {
+        return reservationRepository.findByUser_No(userNo);
+    }
+
     @Override
     @Transactional
     public FlightReservation updateStatus(String frsvId, String status) {
         FlightReservation reservation = getReservationById(frsvId);
-        try {
-            RsvStatus newStatus = RsvStatus.valueOf(status.toUpperCase());
-            reservation.setStatus(newStatus);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("잘못된 상태 값입니다. 허용값: PENDING, PAID, CANCELLED, REFUNDED, FAILED, COMPLETED");
-        }
+        RsvStatus newStatus = RsvStatus.valueOf(status.toUpperCase());
+        reservation.setStatus(newStatus);
         return reservationRepository.save(reservation);
     }
 
-    /* 예약번호 생성 (고유성 강화 버전) */
     private String generateFrsvId() {
         String date = LocalDate.now().format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE);
         return String.format("%sFLY%s", date, String.valueOf(System.nanoTime()).substring(8));
@@ -156,4 +147,33 @@ public class FlightReservationServiceImpl implements FlightReservationService {
                 .map(this::getTotalAmountByReserveId)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
+
+    @Override
+    @Transactional
+    public FlightReservation partialUpdate(String frsvId, FlightReservationDTO dto) {
+        FlightReservation entity = getReservationById(frsvId);
+
+        if (dto.getSeatId() != null) {
+            Seat seat = seatRepository.findByIdForUpdate(dto.getSeatId());
+            if (seat == null)
+                throw new IllegalArgumentException("좌석 정보를 찾을 수 없습니다. seatId=" + dto.getSeatId());
+            if (seat.isReserved())
+                throw new IllegalStateException("이미 예약된 좌석입니다.");
+            seat.setReserved(true);
+            seatRepository.save(seat);
+            entity.setSeat(seat);
+        }
+
+        if (dto.getTotalPrice() != null)
+            entity.setTotalPrice(dto.getTotalPrice());
+
+        if (dto.getStatus() != null)
+            entity.setStatus(dto.getStatus());
+
+        if (dto.getPaidAt() != null)
+            entity.setPaidAt(dto.getPaidAt());
+
+        return reservationRepository.save(entity);
+    }
+
 }
