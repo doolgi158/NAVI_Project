@@ -16,6 +16,8 @@ import { useNavigate } from "react-router-dom";
 import { setReserveData } from "../../../common/slice/paymentSlice";
 import { useDispatch } from "react-redux";
 
+const token = localStorage.getItem("accessToken");
+
 const { Title, Text } = Typography;
 
 const API_SERVER_HOST = "http://localhost:8080";
@@ -222,7 +224,6 @@ const DeliveryPage = () => {
       endAddr: form.toAddress,
       deliveryDate: form.deliveryDate.format("YYYY-MM-DD"),
       totalPrice: estimatedFare,
-      userNo: 2, // TODO: 로그인 연동
       bagId: form.bagSize === "S" ? 1 : form.bagSize === "M" ? 2 : 3,
       groupId: "G20251015_JEJU_AM_1",
       memo: form.memo,
@@ -230,7 +231,11 @@ const DeliveryPage = () => {
     };
 
     try {
-      const res = await axios.post(`${API_SERVER_HOST}/api/delivery/rsv`, dto);
+      const res = await axios.post(`${API_SERVER_HOST}/api/delivery/rsv`, dto, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       console.log("✅ [DeliveryPage] 예약 응답:", res.data);
 
       // 예약 성공 시 Redux 저장
