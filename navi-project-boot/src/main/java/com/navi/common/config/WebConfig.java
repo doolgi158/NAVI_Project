@@ -35,5 +35,7 @@ public class WebConfig implements WebMvcConfigurer {
         // 정적 리소스 핸들링
         registry.addResourceHandler("/uploads/**", "/images/**")
                 .addResourceLocations(uploadDir, "file:" + uploadDir + "/");
+        registry.addResourceHandler("/uploads/**")
+                .addResourceLocations("file:./uploads/");
     }
 }
