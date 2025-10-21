@@ -21,7 +21,9 @@ import {
 } from "@ant-design/icons";
 import MainLayout from "../../layout/MainLayout";
 import dayjs from "dayjs";
+import axios from "axios";
 
+const API_SERVER_HOST = "http://localhost:8080";
 const { Title, Text } = Typography;
 
 const FlightRsvInputPage = () => {
@@ -68,6 +70,7 @@ const FlightRsvInputPage = () => {
     (p) => !p.name || !p.birth || !p.gender || !p.phone || !p.email
   );
 
+  // ✅ 좌석 선택 시 단순 이동
   const handleSeatSelection = () => {
     if (isIncomplete) {
       message.warning("모든 탑승객 정보를 입력해주세요.");
@@ -85,28 +88,65 @@ const FlightRsvInputPage = () => {
     });
   };
 
-  const handleAutoAssign = () => {
+  // ✅ 자동배정 예약 + 결제 이동
+  const handleAutoAssign = async () => {
     if (isIncomplete) {
       message.warning("모든 탑승객 정보를 입력해주세요.");
       return;
     }
-    message.info("좌석을 선택하지 않은 경우 자동 배정됩니다.");
-    navigate(`/payment`, {
-      state: {
-        rsvType: "FLY",
-        formData: {
-          selectedOutbound,
-          selectedInbound,
-          passengerCount,
-          passengers,
-          autoAssign: true,
+
+    try {
+      message.info("좌석을 선택하지 않은 경우 자동 배정됩니다.");
+
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        message.warning("로그인이 필요합니다.");
+        return;
+      }
+
+      // ✅ 예약 DTO (백엔드 FlightReservationDTO 구조 완벽 일치)
+      const dto = {
+        flightId: selectedOutbound.flightId?.flightId || selectedOutbound.flightNo,
+        depTime: selectedOutbound.depTime?.split("T")[0],
+        seatId: null, // 좌석 없음
+        passengersJson: JSON.stringify(passengers),
+        totalPrice: selectedOutbound.price * passengerCount,
+        status: "PENDING",
+      };
+
+      console.log("자동배정 예약 요청 DTO:", dto);
+
+      const res = await axios.post(`${API_SERVER_HOST}/api/flight/reservation`, dto, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
-        items: {
-          selectedOutbound,
-          selectedInbound,
-        },
-      },
-    });
+      });
+
+      if (res.data?.status === 200) {
+        message.success("항공편 예약이 완료되었습니다!");
+        navigate(`/payment`, {
+          state: {
+            rsvType: "FLY",
+            items: res.data.data, // 백엔드에서 반환한 예약 데이터
+            formData: dto, // 결제 페이지에서 필요 시 사용
+            selectedOutbound,
+            selectedInbound,
+            passengerCount,
+            passengers,
+            autoAssign: true,
+          },
+        });
+      } else {
+        message.error("예약 생성에 실패했습니다.");
+      }
+    } catch (error) {
+      console.error("❌ 자동배정 예약 실패:", error);
+      const msg =
+        error.response?.data?.message ||
+        "예약 중 오류가 발생했습니다. 다시 시도해주세요.";
+      message.error(msg);
+    }
   };
 
   const handleBack = () => navigate(-1);
@@ -130,8 +170,7 @@ const FlightRsvInputPage = () => {
             maxWidth: 960,
             borderRadius: 24,
             boxShadow: "0 10px 40px rgba(0,0,0,0.08)",
-            background:
-              "rgba(255, 255, 255, 0.8)",
+            background: "rgba(255, 255, 255, 0.8)",
             backdropFilter: "blur(10px)",
             padding: "40px 50px",
           }}
@@ -161,8 +200,7 @@ const FlightRsvInputPage = () => {
             <Card
               size="small"
               style={{
-                background:
-                  "linear-gradient(120deg, #eef6ff 0%, #e0f0ff 100%)",
+                background: "linear-gradient(120deg, #eef6ff 0%, #e0f0ff 100%)",
                 border: "1px solid #c5dcff",
                 borderRadius: 16,
                 marginBottom: 18,
@@ -197,8 +235,7 @@ const FlightRsvInputPage = () => {
             <Card
               size="small"
               style={{
-                background:
-                  "linear-gradient(120deg, #f1fff5 0%, #e0ffe7 100%)",
+                background: "linear-gradient(120deg, #f1fff5 0%, #e0ffe7 100%)",
                 border: "1px solid #bdecc3",
                 borderRadius: 16,
                 marginBottom: 20,
@@ -253,8 +290,7 @@ const FlightRsvInputPage = () => {
                 </Text>
               }
               style={{
-                background:
-                  "linear-gradient(135deg, #fafcff 0%, #f5f9ff 100%)",
+                background: "linear-gradient(135deg, #fafcff 0%, #f5f9ff 100%)",
                 border: "1px solid #dce6fa",
                 borderRadius: 16,
                 marginBottom: 24,

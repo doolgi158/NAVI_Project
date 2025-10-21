@@ -31,4 +31,16 @@ public interface FlightReservationRepository extends JpaRepository<FlightReserva
     /** 다중 예약 금액 합산 (왕복 전체 금액 계산용) */
     @Query("SELECT SUM(CAST(f.totalPrice AS bigdecimal)) FROM FlightReservation f WHERE f.frsvId IN :frsvIds")
     BigDecimal sumTotalAmountByFrsvIds(List<String> frsvIds);
+
+    @Query("""
+    SELECT fr
+    FROM FlightReservation fr
+    LEFT JOIN FETCH fr.user u
+    LEFT JOIN FETCH fr.flight f
+    LEFT JOIN FETCH fr.seat s
+    LEFT JOIN FETCH f.depAirport da
+    LEFT JOIN FETCH f.arrAirport aa
+""")
+    List<FlightReservation> findAllWithRelations();
+
 }

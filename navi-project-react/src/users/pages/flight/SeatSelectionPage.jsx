@@ -18,8 +18,9 @@ import {
 } from "antd";
 import { LeftOutlined } from "@ant-design/icons";
 
-const { Title, Text } = Typography;
+const token = localStorage.getItem("accessToken");
 const API_SERVER_HOST = "http://localhost:8080";
+const { Title, Text } = Typography;
 
 const SeatSelectPage = () => {
   const { state } = useLocation();
@@ -149,7 +150,6 @@ const SeatSelectPage = () => {
 
     try {
       const dto = {
-        userNo: 1,
         flightId: flightIdValue,
         depTime: flight?.depTime?.split("T")[0],
         seatId: selectedSeats[0]?.seatId,
