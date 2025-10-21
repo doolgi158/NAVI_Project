@@ -237,6 +237,7 @@ const DeliveryPage = () => {
           rsvType: "DLV",
           reserveId: res.data.data.drsvId,  // ✅ 예약 ID
           itemData: res.data.data,          // ✅ 예약 상세 데이터
+          formData: dto,                    // [ TODO ] : 임시 수정 - 나중에 로직 변경 후 확정
         })
       );
 

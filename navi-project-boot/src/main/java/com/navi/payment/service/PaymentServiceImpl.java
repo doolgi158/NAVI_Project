@@ -7,9 +7,8 @@ import com.navi.payment.domain.enums.PaymentStatus;
 import com.navi.payment.dto.request.PaymentConfirmRequestDTO;
 import com.navi.payment.dto.request.PaymentPrepareRequestDTO;
 import com.navi.payment.dto.request.PaymentVerifyRequestDTO;
-import com.navi.payment.dto.response.PaymentConfirmResponseDTO;
 import com.navi.payment.dto.response.PaymentPrepareResponseDTO;
-import com.navi.payment.dto.response.PaymentVerifyResponseDTO;
+import com.navi.payment.dto.response.PaymentResultResponseDTO;
 import com.navi.payment.repository.PaymentDetailRepository;
 import com.navi.payment.repository.PaymentRepository;
 import com.siot.IamportRestClient.IamportClient;
@@ -42,16 +41,15 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)  // ✅ 트랜잭션 분리
     public PaymentPrepareResponseDTO preparePayment(PaymentPrepareRequestDTO dto) {
-
-        // 1️⃣ Oracle 시퀀스 직접 조회
+        // Oracle 시퀀스 직접 조회
         Long nextSeq = paymentRepository.getNextSeqVal();
 
-        // 2️⃣ merchantId 생성
+        // merchantId 생성
         String today = LocalDate.now(ZoneId.of("Asia/Seoul"))
                 .format(DateTimeFormatter.BASIC_ISO_DATE);
         String merchantId = String.format("PAY%s-%04d", today, nextSeq);
 
-        // 3️⃣ 엔티티 생성 (ID, merchantId 모두 세팅 후 저장)
+        // 엔티티 생성 (ID, merchantId 모두 세팅 후 저장)
         PaymentMaster payment = PaymentMaster.builder()
                 .no(nextSeq)
                 .merchantId(merchantId)
@@ -60,7 +58,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .paymentStatus(PaymentStatus.READY)
                 .build();
 
-        paymentRepository.save(payment); // ✅ 1회만 save, 절대 중복 X
+        paymentRepository.save(payment);
 
         log.info("✅ [결제 준비 완료] merchantId={}, totalAmount={}", merchantId, dto.getTotalAmount());
         return PaymentPrepareResponseDTO.builder()
@@ -71,49 +69,59 @@ public class PaymentServiceImpl implements PaymentService {
     /* 포트원 결제 검증 */
     @Override
     @Transactional(readOnly = true)
-    public PaymentVerifyResponseDTO verifyPayment(PaymentVerifyRequestDTO dto)
+    public PaymentResultResponseDTO verifyPayment(PaymentVerifyRequestDTO dto)
             throws IamportResponseException, IOException {
 
-        log.info("🟦 [결제 검증 요청] impUid={}, merchantId={}", dto.getImpUid(), dto.getMerchantId());
+        log.info("🟦 [결제 검증 요청] impUid={}, merchantId={}, reserveIds={}", dto.getImpUid(), dto.getMerchantId(), dto.getReserveId());
 
-        // 1️⃣ PortOne 서버에 결제 정보 요청
+        // PortOne 서버에 결제 정보 요청
         IamportResponse<Payment> response = iamportClient.paymentByImpUid(dto.getImpUid());
         Payment paymentInfo = response.getResponse();
 
         if (paymentInfo == null) {
             log.error("❌ PortOne 응답이 비어 있음 - impUid={}", dto.getImpUid());
-            return PaymentVerifyResponseDTO.builder()
+            return PaymentResultResponseDTO.builder()
                     .success(false)
                     .message("PortOne 결제 정보 조회 실패")
+                    .rsvStatus(RsvStatus.FAILED)
+                    .merchantId(dto.getMerchantId())
                     .build();
         }
 
-        // 2️⃣ PortOne 결제 상태 확인 (PG 서버 기준)
+        // PortOne 결제 상태 확인 (PG 서버 기준)
         boolean validStatus = "paid".equalsIgnoreCase(paymentInfo.getStatus());
+        if (!validStatus) {
+            failPayment(dto.getMerchantId(), "PG 결제 실패");
+            return PaymentResultResponseDTO.builder()
+                    .success(false)
+                    .message("PG 결제 실패")
+                    .rsvStatus(RsvStatus.FAILED)
+                    .merchantId(dto.getMerchantId())
+                    .build();
+        }
 
-        // 3️⃣ 서버 검증 결과 로그
         log.info("🔍 [PG 검증 결과] impUid={}, status={}, amount={}, merchantId={}",
                 paymentInfo.getImpUid(),
                 paymentInfo.getStatus(),
                 paymentInfo.getAmount(),
                 paymentInfo.getMerchantUid());
 
-        // 4️⃣ PortOne 서버 상태만 검증 (금액 검증은 도메인 서비스에서 수행)
-        return PaymentVerifyResponseDTO.builder()
-                .success(validStatus)
-                .impUid(paymentInfo.getImpUid())
-                .merchantId(paymentInfo.getMerchantUid())
+        return PaymentResultResponseDTO.builder()
+                .success(true)
+                .message("PG 결제 검증 완료")
+                .impUid(dto.getImpUid())
+                .merchantId(dto.getMerchantId())
                 .build();
     }
 
     /* 결제 확정 */
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public PaymentConfirmResponseDTO confirmPayment(PaymentConfirmRequestDTO dto) {
+    public PaymentResultResponseDTO confirmPayment(PaymentConfirmRequestDTO dto) {
         log.info("💰 [결제 확정 요청] merchantId={}, rsvType={}, items={}",
                 dto.getMerchantId(), dto.getRsvType(), dto.getItems());
 
-        // 1️⃣ 결제 마스터 조회
+        // 결제 마스터 조회
         PaymentMaster master = paymentRepository.findByMerchantId(dto.getMerchantId())
                 .orElseThrow(() -> new IllegalArgumentException("결제 정보가 존재하지 않습니다."));
 
@@ -121,10 +129,10 @@ public class PaymentServiceImpl implements PaymentService {
             throw new IllegalStateException("이미 결제 완료된 건입니다.");
         }
 
-        // 2️⃣ 상태 갱신 (DB에 저장된 결제수단 그대로 사용)
+        // 상태 변경
         master.markAsPaid(dto.getImpUid(), master.getPaymentMethod());
 
-        // 3️⃣ 상세 내역 생성
+        // 상세 내역 생성
         BigDecimal total = BigDecimal.ZERO;
         for (PaymentConfirmRequestDTO.ReservePaymentItem item : dto.getItems()) {
             PaymentDetail detail = PaymentDetail.builder()
@@ -133,19 +141,21 @@ public class PaymentServiceImpl implements PaymentService {
                     .reserveId(item.getReserveId())
                     .amount(item.getAmount())
                     .build();
-
             master.addPaymentDetail(detail);
             total = total.add(item.getAmount());
         }
 
-        // 4️⃣ 총액 갱신 + 저장
+        // 총액 갱신 + 저장
         master.updateTotalAmount(total);
         paymentRepository.save(master);
 
         log.info("✅ [결제 확정 완료] merchantId={}, totalAmount={}", master.getMerchantId(), total);
 
-        return PaymentConfirmResponseDTO.builder()
-                .merchantId(master.getMerchantId())
+        return PaymentResultResponseDTO.builder()
+                .success(true)
+                .message("결제 검증 및 확정 완료")
+                .merchantId(dto.getMerchantId())
+                .impUid(dto.getImpUid())
                 .reserveIds(dto.getItems().stream()
                         .map(PaymentConfirmRequestDTO.ReservePaymentItem::getReserveId)
                         .toList())
@@ -170,11 +180,11 @@ public class PaymentServiceImpl implements PaymentService {
         }
 
         try {
-            // ✅ PortOne에 결제 정보 조회
+            // PortOne에 결제 정보 조회
             IamportResponse<Payment> response = iamportClient.paymentByImpUid(master.getImpUid());
             Payment paymentInfo = response.getResponse();
 
-            // ✅ 이미 결제된 경우에만 환불 시도
+            // 이미 결제된 경우에만 환불 시도
             if (paymentInfo != null && "paid".equalsIgnoreCase(paymentInfo.getStatus())) {
                 BigDecimal actualPaidAmount = paymentInfo.getAmount();
                 log.info("💸 [자동 환불 시도] impUid={}, amount={}", master.getImpUid(), actualPaidAmount);
@@ -185,7 +195,7 @@ public class PaymentServiceImpl implements PaymentService {
             log.error("❌ [자동 환불 중 오류 발생] merchantId={}, msg={}", merchantId, e.getMessage());
         }
 
-        // 🔁 DB 상태를 FAILED로 전환 (환불 후에도 실패로 기록)
+        // DB 상태를 FAILED로 전환 (환불 후에도 실패로 기록)
         master.markAsFailed(reason);
         paymentRepository.save(master);
 

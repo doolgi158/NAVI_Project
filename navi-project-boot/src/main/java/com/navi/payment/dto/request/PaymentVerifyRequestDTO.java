@@ -1,6 +1,7 @@
 package com.navi.payment.dto.request;
 
 import com.navi.common.enums.RsvType;
+import com.navi.payment.domain.enums.PaymentMethod;
 import lombok.*;
 import java.math.BigDecimal;
 import java.util.List;
@@ -15,17 +16,18 @@ public class PaymentVerifyRequestDTO {
     private String impUid;
     private String merchantId;
     private BigDecimal totalAmount;
+    private PaymentMethod paymentMethod;
 
+    /* === 결제 상세 정보 === */
+    private List<PaymentConfirmRequestDTO.ReservePaymentItem> items; // 예약별 금액 리스트
+
+    /* === 결제 확정 DTO 변환 === */
     public PaymentConfirmRequestDTO toConfirmRequest() {
-        List<PaymentConfirmRequestDTO.ReservePaymentItem> items =
-                this.reserveId.stream()
-                        .map(id -> new PaymentConfirmRequestDTO.ReservePaymentItem(id, this.totalAmount))
-                        .toList();
-
         return PaymentConfirmRequestDTO.builder()
-                .merchantId(this.merchantId)
-                .rsvType(this.rsvType)
-                .impUid(this.impUid)
+                .merchantId(merchantId)
+                .rsvType(rsvType)
+                .impUid(impUid)
+                .paymentMethod(paymentMethod)
                 .items(items)
                 .build();
     }

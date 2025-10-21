@@ -5,8 +5,6 @@ const Loading = <div>Loading....</div>;
 const AccList = lazy(() => import("../../users/pages/acc/AccListPage.jsx"));
 const AccDetail = lazy(() => import("../../users/pages/acc/AccDetailPage.jsx"));
 const AccReserve = lazy(() => import("../../users/pages/acc/AccReservationPage.jsx"));
-const AccPayment = lazy(() => import("../../users/pages/acc/AccPaymentPage.jsx"));
-const AccResult = lazy(() => import("../../users/pages/acc/AccResultPage.jsx"));
 
 const AccRouter = () => {
   return [
