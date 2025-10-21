@@ -98,7 +98,6 @@ public class StockServiceImpl implements StockService {
         log.info("📉 [재고 차감 요청] room={}, 기간:{}~{}, 수량={}", room.getRoomId(), startDate, endDate, qty);
 
         if (qty <= 0) throw new IllegalArgumentException("❌ 예약 수량은 1개 이상이어야 합니다.");
-        if (!endDate.isAfter(startDate)) throw new IllegalArgumentException("❌ 체크아웃 날짜가 체크인보다 이전입니다.");
 
         LocalDate date = startDate;
         while (date.isBefore(endDate)) {

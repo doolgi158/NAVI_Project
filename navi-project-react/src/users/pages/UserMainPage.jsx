@@ -1,13 +1,13 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import MainLayout from "../layout/MainLayout";
 import { Button, Card, Tag } from "antd";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
+import { API_SERVER_HOST } from "../../common/api/naviApi";
+import MainLayout from "../layout/MainLayout";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import { API_SERVER_HOST } from "../../common/api/naviApi";
 
 const UserMainPage = () => {
   const navigate = useNavigate();
@@ -92,11 +92,6 @@ const UserMainPage = () => {
         <div className="relative z-10 text-center text-white">
           <div className="text-4xl md:text-5xl font-extrabold drop-shadow">여행의 시작, NAVI ✈️</div>
           <p className="mt-2 text-lg opacity-90">당신의 다음 여정을 지금 찾아보세요</p>
-          <div className="mt-6">
-            <Button onClick={() => navigate("/payments", { state: { keyword: "ACC" } })}>
-              결제창
-            </Button>
-          </div>
         </div>
       </div>
 

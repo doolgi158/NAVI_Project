@@ -17,7 +17,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RoomRsvResponseDTO {
-    private String roomRsvId;     // 예약 ID
+    private String reserveId;     // 예약 ID
     private String roomId;        // 객실 ID
     private LocalDate startDate;  // 체크인
     private LocalDate endDate;    // 체크아웃
@@ -28,7 +28,7 @@ public class RoomRsvResponseDTO {
 
     public static RoomRsvResponseDTO fromEntity(RoomRsv entity) {
         return RoomRsvResponseDTO.builder()
-                .roomRsvId(entity.getRoomRsvId())
+                .reserveId(entity.getReserveId())
                 .roomId(entity.getRoom().getRoomId())
                 .startDate(entity.getStartDate())
                 .endDate(entity.getEndDate())
