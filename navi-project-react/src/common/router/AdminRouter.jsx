@@ -1,7 +1,8 @@
 import { Suspense, lazy } from "react";
 import ProtectedRoute from "./ProtectedRoute.jsx";
-import AdminFlightRouter from "./AdminFlightRouter.jsx"; // ✅ 경로 동일 폴더라 그대로
 import AdminAccommodation from "./AdminAccommodationRouter.jsx"
+import AdminFlightRouter from "./AdminFlightRouter.jsx";
+import AdminDeliveryRouter from "./AdminDeliveryRouter.jsx";
 
 const AdminUsers = lazy(() => import("../../admin/pages/user/AdminUsersPage.jsx"));
 const AdminDashboard = lazy(() => import("../../admin/pages/AdminDashboardPage.jsx"));
@@ -68,6 +69,9 @@ const AdminRouter = () => {
 
     // 숙소 라우터
     ...AdminAccommodation(),
+
+    // 짐배송 라우터
+    ...AdminDeliveryRouter(),
   ];
 };
 

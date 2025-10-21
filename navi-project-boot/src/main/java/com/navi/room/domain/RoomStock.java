@@ -47,11 +47,6 @@ public class RoomStock extends BaseEntity {
     @JsonBackReference
     private Room room;
 
-    @Builder.Default
-    @JsonManagedReference // ✅ RoomStock → RoomRsv (자식)
-    @OneToMany(mappedBy = "roomStock", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<RoomRsv> roomReservations = new ArrayList<>();
-
     // 재고 일자
     @Column(name = "stock_date", nullable = false)
     private LocalDate stockDate;

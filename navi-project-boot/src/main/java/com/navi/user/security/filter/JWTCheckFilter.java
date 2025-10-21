@@ -1,7 +1,6 @@
 package com.navi.user.security.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 import com.navi.common.response.ApiResponse;
 import com.navi.user.dto.JWTClaimDTO;
 import com.navi.user.dto.users.UserSecurityDTO;
@@ -84,6 +83,7 @@ public class JWTCheckFilter extends OncePerRequestFilter {
 
             // ✅ SecurityContext 등록
             UserSecurityDTO principal = new UserSecurityDTO(
+                    claim.getNo(),
                     claim.getName(),
                     claim.getPhone(),
                     claim.getBirth(),
@@ -140,13 +140,6 @@ public class JWTCheckFilter extends OncePerRequestFilter {
                 || path.startsWith("/api/users/logout")
                 || path.startsWith("/api/users/refresh")
                 || path.startsWith("/api/auth/oauth")
-                || path.startsWith("/api/transports")
-                || path.startsWith("/api/accommodations")
-                || path.startsWith("/api/posts")
-                || path.startsWith("/api/notices")
-                || path.startsWith("/api/login-try/")
-                || path.startsWith("/api/flight")
-                || path.startsWith("/api/delivery")
-                || path.startsWith("/api/seats");
+                || path.startsWith("/api/login-try/");
     }
 }

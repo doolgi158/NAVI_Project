@@ -13,4 +13,6 @@ public interface DeliveryReservationRepository extends JpaRepository<DeliveryRes
 
     // 생성일 기준으로 오늘 예약 수 카운트 (예약번호 생성용)
     long countByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
+
+    int countByGroup_GroupId(String groupId);
 }

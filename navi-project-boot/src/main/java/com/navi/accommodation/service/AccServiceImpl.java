@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -149,19 +150,22 @@ public class AccServiceImpl implements AccService {
             accList = accRepository.findAll();
         }
 
-        /* 숙소 + 이미지 + 객실정보 DTO 조합 */
+        /* 숙소 + 이미지 DTO 조합 */
         return accList.stream().map(acc -> {
-            String accImage = imageRepository
-                    .findTopByTargetTypeAndTargetIdOrderByNoAsc("ACC", acc.getAccId())
+            // ✅ 대표 이미지 경로 (/images/acc/uuid.jpg)
+            String accImagePath = imageRepository
+                    .findTopByTargetTypeAndTargetIdOrderByNoAsc("ACC", acc.getAccId().trim())
                     .map(Image::getPath)
-                    .orElse("/uploads/default_hotel.jpg");
+                    .orElse("/images/acc/default_hotel.jpg"); // ✅ 기본 이미지도 동일 구조로 변경
 
-            // TODO: 예약 가능한 객실 중 최저가 계산 (추후 구현)
+            // ✅ 로그로 실제 반환 확인
+            log.debug("[ACC_IMAGE] {} → {}", acc.getAccId(), accImagePath);
+
             return AccListResponseDTO.builder()
                     .accId(acc.getAccId())
                     .title(acc.getTitle())
                     .address(acc.getAddress())
-                    .accImage(accImage)
+                    .accImage(accImagePath)
                     .build();
         }).toList();
     }
@@ -172,20 +176,18 @@ public class AccServiceImpl implements AccService {
         Acc acc = accRepository.findByAccId(accId)
                 .orElseThrow(() -> new IllegalArgumentException("숙소를 찾을 수 없습니다."));
 
-        // 숙소 이미지 리스트
-        List<String> accImages = imageRepository.findImagesIgnoreCase("ACC", acc.getAccId())
+        // ✅ 숙소 이미지 리스트
+        List<String> accImages = imageRepository
+                .findAllByTargetTypeAndTargetId("ACC", acc.getAccId())
                 .stream()
-                .map(Image::getPath)
-                .toList();
+                .map(Image::getPath) // DB 저장값 그대로 사용 (/images/acc/uuid.jpg)
+                .collect(Collectors.toList());
 
-        log.info("[IMAGE-DEBUG] ACC {} 이미지 조회 결과 = {}", acc.getAccId(),
-                imageRepository.findAllByTargetTypeAndTargetIdIgnoreCase("ACC", acc.getAccId()).size());
+        if (accImages.isEmpty()) {
+            accImages = List.of("/images/acc/default_hotel.jpg");
+        }
 
-        // 객실 리스트
-        /*List<RoomResponseDTO> roomList = roomRepository.findByAcc_AccId(acc.getAccId())
-                .stream()
-                .map(RoomResponseDTO::fromEntity)
-                .toList();*/
+        log.debug("[ACC_DETAIL] {} 이미지 개수 = {}", acc.getAccId(), accImages.size());
 
         AccDetailResponseDTO dto = AccDetailResponseDTO.fromEntity(acc);
         dto.setAccImages(accImages);

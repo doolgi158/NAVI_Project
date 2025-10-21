@@ -20,10 +20,11 @@ public class FlightReservationController {
 
     /* 1.예약 생성 */
     @PostMapping
-    public ResponseEntity<ApiResponse<FlightReservation>> createReservation(
+    public ResponseEntity<ApiResponse<FlightReservationDTO>> createReservation(
             @Valid @RequestBody FlightReservationDTO dto) {
-        FlightReservation reservation = reservationService.createReservation(dto);
-        return ResponseEntity.ok(ApiResponse.success(reservation));
+
+        FlightReservationDTO responseDto = reservationService.createReservation(dto);
+        return ResponseEntity.ok(ApiResponse.success(responseDto)); // ✅ DTO 직접 반환
     }
 
     /* 2.사용자별 예약 조회 */

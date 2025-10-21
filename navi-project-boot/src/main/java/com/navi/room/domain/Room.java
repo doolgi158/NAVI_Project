@@ -29,7 +29,6 @@ import java.util.List;
 public class Room {
     /* === COLUMN 정의 === */
     @Id @Column(name = "room_no")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "room_generator")
     private Long roomNo;
 
     @Column(name = "room_id", length = 20, unique = true, updatable = false)
@@ -94,11 +93,6 @@ public class Room {
         if (weekendFee == null) weekendFee = 0;
         if (isActive == null) isActive = true;
         if (hasWifi == null) hasWifi = true;
-
-        // room_id 자동 세팅
-        if(roomId == null && roomNo != null){
-            this.roomId = String.format("ROM%03d", roomNo);
-        }
     }
 
     /* === AccApiDTO : API 적재 전용 === */

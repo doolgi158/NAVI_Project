@@ -1,6 +1,7 @@
 package com.navi.room.domain;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.navi.common.entity.BaseEntity;
 import com.navi.common.enums.RsvStatus;
 import com.navi.user.domain.User;
 import jakarta.persistence.*;
@@ -28,13 +29,12 @@ import java.time.format.DateTimeFormatter;
         uniqueConstraints = {
                 @UniqueConstraint(
                         name = "UK_ROOM_RSV_UNIQUE",
-                        columnNames = {"room_rsv_id", "room_id", "stock_date"}
+                        columnNames = {"room_rsv_id", "room_id"}
                 )
         },
         indexes = {
                 @Index(name = "IDX_ROOM_RSV_RSVID", columnList = "room_rsv_id"),
                 @Index(name = "IDX_ROOM_RSV_USER", columnList = "user_no"),
-                @Index(name = "IDX_ROOM_RSV_STOCK", columnList = "stock_date")
         }
 )
 @SequenceGenerator(
@@ -43,50 +43,47 @@ import java.time.format.DateTimeFormatter;
         initialValue = 1,
         allocationSize = 1
 )
-public class RoomRsv {
-
+public class RoomRsv extends BaseEntity{
     /* === 기본 키 === */
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "room_rsv_seq_generator")
     @Column(name = "no")
     private Long no;
 
-    /** 예약 ID (예: 20251019ROM0001) */
-    @Column(name = "room_rsv_id", length = 30, nullable = false)
-    private String roomRsvId;
+    // 예약 ID (예: 20251019ROM0001)
+    @Column(name = "reserve_id", length = 30, nullable = false)
+    private String reserveId;
 
     /* === 연관관계 === */
-    /** 사용자 */
+    // 사용자
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_no", nullable = false)
     private User user;
 
-    /** 객실 (Room) */
+    // 객실 (Room) */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_no", nullable = false)
     private Room room;
 
-    /** 재고 정보 (RoomStock) — FK 연결 */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "room_stock_id", referencedColumnName = "stock_no")
-    @JsonBackReference
-    private RoomStock roomStock;
-
     /* === 예약 기본 정보 === */
-    @Column(name = "stock_date", nullable = false)
-    private LocalDate stockDate;
-
+    // 객실수
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
 
+    // 객실단가
     @Column(name = "price", nullable = false)
     private BigDecimal price;
 
+    // 체크인날짜
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
 
+    // 체크아웃날짜
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
+
+    @Column(name="nights", nullable = false)
+    private int nights;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "rsv_status", length = 20, nullable = false)
@@ -100,14 +97,10 @@ public class RoomRsv {
     @PrePersist
     public void prePersist() {
         // 기본 상태 설정
-        if (rsvStatus == null) {
-            rsvStatus = RsvStatus.PENDING;
-        }
+        if (rsvStatus == null) { rsvStatus = RsvStatus.PENDING; }
 
         // 수량 유효성
-        if (quantity <= 0) {
-            throw new IllegalStateException("예약 수량은 1개 이상이어야 합니다.");
-        }
+        if (quantity <= 0) { throw new IllegalStateException("예약 수량은 1개 이상이어야 합니다."); }
     }
 
     /* === 상태 변경 메서드 === */

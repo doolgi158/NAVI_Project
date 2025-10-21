@@ -5,7 +5,6 @@ import com.navi.travel.dto.TravelListResponseDTO;
 import com.navi.travel.dto.TravelRankDTO;
 import com.navi.travel.dto.TravelSimpleResponseDTO;
 import com.navi.travel.service.TravelService;
-import com.navi.user.dto.JWTClaimDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -62,7 +61,7 @@ public class TravelController {
      */
     @GetMapping
     public ResponseEntity<Page<TravelListResponseDTO>> getList(
-            Pageable pageable, // @PageableDefault 제거
+            @PageableDefault(size = 50, sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable, // pageable 범위 강제 지정
             @RequestParam(value = "region2Name", required = false) String region2NameCsv,
             @RequestParam(value = "categoryName", required = false) String categoryName,
             @RequestParam(value = "search", required = false) String search
@@ -107,7 +106,9 @@ public class TravelController {
         }
     }
 
-    /** 여행플래너 전용 여행지 간단 목록 조회 */
+    /**
+     * 여행플래너 전용 여행지 간단 목록 조회
+     */
     @GetMapping("/list")
     public ResponseEntity<List<TravelSimpleResponseDTO>> getSimpleTravelList() {
         List<TravelSimpleResponseDTO> travels = travelService.getSimpleTravelList();

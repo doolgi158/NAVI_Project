@@ -27,6 +27,7 @@ public class JWTUtil {
     // 생성 (DTO 기반)
     public String generateToken(JWTClaimDTO claim, int minutes) {
         Map<String, Object> claims = Map.of(
+                "no", claim.getNo(),
                 "id", claim.getId(),
                 "name", claim.getName(),
                 "email", claim.getEmail(),
@@ -80,6 +81,7 @@ public class JWTUtil {
             }
 
             return JWTClaimDTO.builder()
+                    .no(((Number) claims.get("no")).longValue())
                     .id((String) claims.get("id"))
                     .name((String) claims.get("name"))
                     .email((String) claims.get("email"))

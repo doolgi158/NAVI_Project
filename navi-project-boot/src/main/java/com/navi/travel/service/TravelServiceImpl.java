@@ -49,7 +49,9 @@ public class TravelServiceImpl implements TravelService {
     // ✅ 1. API 동기화 관련
     // =====================================================
 
-    /** 외부 API 전체 동기화 */
+    /**
+     * 외부 API 전체 동기화
+     */
     @Override
     @Transactional
     public void syncTravelData() {
@@ -58,7 +60,9 @@ public class TravelServiceImpl implements TravelService {
         log.info("✅ [Sync] 여행지 API 동기화 완료");
     }
 
-    /** 외부 API 데이터 저장 */
+    /**
+     * 외부 API 데이터 저장
+     */
     @Override
     @Transactional
     public int saveApiData() {
@@ -79,8 +83,9 @@ public class TravelServiceImpl implements TravelService {
     }
 
 
-
-    /** 여행지 목록 조회 (필터링 + 검색 + 페이징) */
+    /**
+     * 여행지 목록 조회 (필터링 + 검색 + 페이징)
+     */
     @Override
     public Page<TravelListResponseDTO> getTravelList(Pageable pageable,
                                                      List<String> region2Names,
@@ -91,18 +96,22 @@ public class TravelServiceImpl implements TravelService {
         log.debug("📄 [Query] 여행지 목록 조회 - page={}, category={}, search={}, userId={}",
                 pageable.getPageNumber(), category, search, userId);
 
-        return travelQueryService.getTravelList(pageable, region2Names, category, search, publicOnly, userId);
+        return travelQueryService.getTravelList(pageable, region2Names, category, search, publicOnly);
     }
 
 
-    /** 여행지 상세 조회 */
+    /**
+     * 여행지 상세 조회
+     */
     @Override
     public TravelDetailResponseDTO getTravelDetail(Long travelId, String userId) {
         log.debug("🔍 [Query] 여행지 상세 조회 - travelId={}, userId={}", travelId, userId);
         return travelQueryService.getTravelDetail(travelId, userId);
     }
 
-    /**  planner 전용 여행지 간단 목록 조회 */
+    /**
+     * planner 전용 여행지 간단 목록 조회
+     */
     public List<TravelSimpleResponseDTO> getSimpleTravelList() {
         return travelRepository.findAll().stream()
                 .map(TravelSimpleResponseDTO::new)
@@ -114,7 +123,9 @@ public class TravelServiceImpl implements TravelService {
     // ✅ 3. Action (조회수, 좋아요, 북마크)
     // =====================================================
 
-    /** 조회수 증가 */
+    /**
+     * 조회수 증가
+     */
     @Override
     @Transactional
     public void incrementViews(Long travelId) {
@@ -122,7 +133,9 @@ public class TravelServiceImpl implements TravelService {
         travelActionService.incrementViews(travelId);
     }
 
-    /** 좋아요 토글 */
+    /**
+     * 좋아요 토글
+     */
     @Override
     @Transactional
     public boolean toggleLike(Long travelId, String id) {
@@ -130,7 +143,9 @@ public class TravelServiceImpl implements TravelService {
         return travelActionService.toggleLike(travelId, id);
     }
 
-    /** 북마크 토글 */
+    /**
+     * 북마크 토글
+     */
     @Override
     @Transactional
     public boolean toggleBookmark(Long travelId, String id) {
@@ -153,7 +168,9 @@ public class TravelServiceImpl implements TravelService {
     // ✅ 4. 관리자 기능 (등록 / 수정 / 삭제)
     // =====================================================
 
-    /** 여행지 등록 및 수정 */
+    /**
+     * 여행지 등록 및 수정
+     */
     @Override
     @Transactional
     public TravelListResponseDTO saveTravel(TravelRequestDTO dto) {
@@ -161,7 +178,9 @@ public class TravelServiceImpl implements TravelService {
         return travelAdminService.saveTravel(dto);
     }
 
-    /** 여행지 삭제 */
+    /**
+     * 여행지 삭제
+     */
     @Override
     @Transactional
     public void deleteTravel(Long travelId) {

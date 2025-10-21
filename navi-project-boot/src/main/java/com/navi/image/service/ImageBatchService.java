@@ -20,11 +20,14 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class ImageBatchService {
+
     private final ImageRepository imageRepository;
     private final AccRepository accRepository;
 
-    private static final String BASE_DIR = new File("uploads/acc/").getAbsolutePath() + File.separator;
+    /* 상대경로 기준 (프로젝트 루트 하위 images/acc) */
+    private static final String BASE_DIR = "../images/acc/";
 
+    /* 숙소 이미지 폴더를 순회하며 DB에 Image 등록 (파일명 UUID로 rename) */
     public void insertAccImagesFromFolder() {
         File folder = new File(BASE_DIR);
 
@@ -33,7 +36,8 @@ public class ImageBatchService {
             return;
         }
 
-        File[] files = folder.listFiles((dir, name) -> name.matches(".*\\.(jpg|png|jpeg|webp)$"));
+        // 이미지 파일 필터 (대소문자 무관)
+        File[] files = folder.listFiles((dir, name) -> name.matches(".*\\.(jpg|jpeg|png|webp|JPG|JPEG|PNG|WEBP)$"));
         if (files == null || files.length == 0) {
             log.warn("⚠️ 처리할 이미지 파일이 없습니다.");
             return;
@@ -58,8 +62,8 @@ public class ImageBatchService {
                 String cleanName = accName.replaceAll("\\s+", "").toLowerCase();
 
                 Optional<Acc> accOpt = allAcc.stream()
-                        .filter(acc -> acc.getTitle() != null
-                                && acc.getTitle().replaceAll("\\s+", "").toLowerCase().contains(cleanName))
+                        .filter(acc -> acc.getTitle() != null &&
+                                acc.getTitle().replaceAll("\\s+", "").toLowerCase().contains(cleanName))
                         .findFirst();
 
                 if (accOpt.isEmpty()) {
@@ -71,25 +75,25 @@ public class ImageBatchService {
                 Acc acc = accOpt.get();
                 String accId = acc.getAccId();
 
-                // ✅ 파일 확장자 유지
+                // ✅ 새 파일명 (UUID)
                 String ext = fileName.substring(fileName.lastIndexOf("."));
                 String uuid = UUID.randomUUID().toString();
                 String newFileName = uuid + ext;
 
-                // ✅ 실제 파일명 변경 (rename)
+                // ✅ 파일 rename (UUID 기반)
                 Path sourcePath = file.toPath();
                 Path targetPath = Path.of(BASE_DIR + newFileName);
                 Files.move(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
 
-                // ✅ DB에는 새 경로 저장
-                String relativePath = "/uploads/acc/" + newFileName;
+                // ✅ DB 저장용 경로
+                String relativePath = "/images/acc/" + newFileName;
 
                 Image image = Image.builder()
                         .targetType("ACC")
                         .targetId(accId)
                         .path(relativePath)
                         .uuidName(uuid)
-                        .originalName(fileName) // 원래 이름 보존
+                        .originalName(fileName)
                         .build();
 
                 imageRepository.save(image);
@@ -116,8 +120,7 @@ public class ImageBatchService {
     }
 
     /**
-     * 🔹 아직 UUID로 이름 변경되지 않은 이미지 파일만 처리하는 메서드
-     * (이미 uuid로 rename된 파일은 스킵)
+     * ✅ 이미 UUID로 변경된 파일은 스킵하고, 아직 변경 안 된 파일만 처리
      */
     public void insertAccImagesOnlyNonUUID() {
         File folder = new File(BASE_DIR);
@@ -127,8 +130,7 @@ public class ImageBatchService {
             return;
         }
 
-        // jpg/png/webp 파일만 필터
-        File[] files = folder.listFiles((dir, name) -> name.matches(".*\\.(jpg|png|jpeg|webp|JPG|PNG|JPEG|WEBP)$"));
+        File[] files = folder.listFiles((dir, name) -> name.matches(".*\\.(jpg|jpeg|png|webp|JPG|JPEG|PNG|WEBP)$"));
         if (files == null || files.length == 0) {
             log.warn("⚠️ 처리할 이미지 파일이 없습니다.");
             return;
@@ -144,13 +146,13 @@ public class ImageBatchService {
             try {
                 String fileName = file.getName();
 
-                // ✅ 1. 이미 UUID로 된 파일은 스킵
+                // ✅ 이미 UUID 기반이면 스킵
                 if (fileName.matches("^[0-9a-fA-F\\-]{36}\\..+$")) {
                     skipped++;
                     continue;
                 }
 
-                String accName = extractAccName(fileName); // "숙소명"
+                String accName = extractAccName(fileName);
                 if (accName == null) {
                     log.warn("❌ 숙소명 추출 실패: {}", fileName);
                     failed++;
@@ -160,8 +162,8 @@ public class ImageBatchService {
                 String cleanName = accName.replaceAll("\\s+", "").toLowerCase();
 
                 Optional<Acc> accOpt = allAcc.stream()
-                        .filter(acc -> acc.getTitle() != null
-                                && acc.getTitle().replaceAll("\\s+", "").toLowerCase().contains(cleanName))
+                        .filter(acc -> acc.getTitle() != null &&
+                                acc.getTitle().replaceAll("\\s+", "").toLowerCase().contains(cleanName))
                         .findFirst();
 
                 if (accOpt.isEmpty()) {
@@ -173,7 +175,7 @@ public class ImageBatchService {
                 Acc acc = accOpt.get();
                 String accId = acc.getAccId();
 
-                // ✅ 새 UUID 파일명 생성
+                // ✅ 새 파일명 (UUID)
                 String ext = fileName.substring(fileName.lastIndexOf("."));
                 String uuid = UUID.randomUUID().toString();
                 String newFileName = uuid + ext;
@@ -182,9 +184,8 @@ public class ImageBatchService {
                 Path targetPath = Path.of(BASE_DIR + newFileName);
                 Files.move(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
 
-                String relativePath = "/uploads/acc/" + newFileName;
+                String relativePath = "/images/acc/" + newFileName;
 
-                // ✅ DB에 신규 저장
                 Image image = Image.builder()
                         .targetType("ACC")
                         .targetId(accId)
@@ -206,5 +207,4 @@ public class ImageBatchService {
 
         log.info("🎉 UUID 미적용 숙소 이미지 등록 완료 → 성공: {}건 / 스킵: {}건 / 실패: {}건", success, skipped, failed);
     }
-
 }

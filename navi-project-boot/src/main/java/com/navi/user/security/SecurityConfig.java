@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,7 +25,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 
 import java.util.List;
 
@@ -56,7 +56,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/adm/**", "/api/admin/**").hasRole(UserRole.ADMIN.name())
                 .requestMatchers("/api/users/**", "/api/seats/**", "/api/travel/**", "/api/flight/**", "/api/delivery/**",
                         "/api/auth/**", "/api/accommodations/**", "/api/townships/**", "/api/rooms/**", "/api/reservation/**",
-                        "/api/activity", "/api/payment/**", "/uploads/**")
+                        "/api/activity", "/api/payment/**", "/uploads/**", "/images/**")
                         .permitAll()
                 .requestMatchers("/api/plans/**").authenticated()
                 .requestMatchers("/api/users/detail/**").hasAnyRole(UserRole.USER.name())

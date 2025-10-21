@@ -1,5 +1,6 @@
 package com.navi.flight.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.navi.common.entity.BaseEntity;
 import com.navi.common.enums.RsvStatus;
 import com.navi.user.domain.User;
@@ -32,6 +33,7 @@ public class FlightReservation extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_no", nullable = false)
     @Comment("예약 사용자 (FK)")
+    @JsonIgnore
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -40,12 +42,19 @@ public class FlightReservation extends BaseEntity {
             @JoinColumn(name = "dep_time", referencedColumnName = "dep_time", nullable = false)
     })
     @Comment("항공편 정보 (복합키 기반 FK)")
+    @JsonIgnore
     private Flight flight;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "seat_id")
+    @Comment("예약된 좌석 (FK)")
+    private Seat seat;
 
     @Column(name = "total_price", nullable = false)
     @Comment("결제 금액")
     private BigDecimal totalPrice;
 
+    @Enumerated(EnumType.STRING)
     @Builder.Default
     @Column(name = "status", length = 20, nullable = false)
     @Comment("예약 상태 (PENDING/PAID/CANCELLED/REFUNDED/FAILED/COMPLETED)")
