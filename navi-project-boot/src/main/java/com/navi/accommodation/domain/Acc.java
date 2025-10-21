@@ -1,3 +1,4 @@
+
 package com.navi.accommodation.domain;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -36,7 +37,6 @@ public class Acc {
     /* === COLUMN 정의 === */
     // 내부 식별번호 (예: 1)
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "acc_generator")
     private Long accNo;
 
     // 숙소 ID (예: ACC001)
@@ -150,11 +150,6 @@ public class Acc {
             createdTime = LocalDateTime.now();
             modifiedTime = LocalDateTime.now();
         }
-
-        // accId 자동 생성
-        if (accId == null && accNo != null) {
-            this.accId = String.format("ACC%03d", accNo);
-        }
     }
 
     /* === 수정일 자동 갱신 === */
@@ -221,18 +216,12 @@ public class Acc {
     }
 
     public void changeTownship(Township township) {
-        if (township != null) {
-            this.township = township;
-        }
+        if (township != null) { this.township = township; }
     }
 
     public void changeLocation(BigDecimal mapx, BigDecimal mapy) {
-        if (mapx != null) {
-            this.mapx = mapx;
-        }
-        if (mapy != null) {
-            this.mapy = mapy;
-        }
+        if (mapx != null) { this.mapx = mapx; }
+        if (mapy != null) { this.mapy = mapy; }
     }
 
     /* === 문자열 유효성 검증용 유틸 메서드 === */

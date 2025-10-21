@@ -32,4 +32,7 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
 
     // 숙소 대표 이미지 가져오기
     Optional<Image> findTopByTargetTypeAndTargetIdOrderByNoAsc(String targetType, String targetId);
+
+    // 임시
+    List<Image> findAllByTargetType(String targetType);
 }

@@ -34,7 +34,7 @@ const AccListPage = () => {
         const parsed = JSON.parse(storedState);
         dispatch(setSearchState(parsed));
 
-        // ✅ local state에도 즉시 반영 (뒤로가기 시 UI 바로 복원)
+        // ✅ local state 복원
         setSearchType(parsed.searchType || "region");
         setCity(parsed.city || null);
         setTownship(parsed.township || null);
@@ -91,7 +91,6 @@ const AccListPage = () => {
 
   /* ✅ 검색 실행 */
   const handleSearch = useCallback(async () => {
-    // ✅ 읍면 로딩 / 오류 체크
     if (isTownshipLoading) {
       message.warning("읍면동 데이터를 로딩 중입니다. 잠시만 기다려주세요.");
       return;
@@ -101,7 +100,6 @@ const AccListPage = () => {
       return;
     }
 
-    // ✅ [1️⃣ 공통 필수값 검사]
     if (!dateRange || dateRange.length !== 2) {
       message.warning("체크인 및 체크아웃 날짜를 모두 선택해주세요.");
       return;
@@ -115,7 +113,6 @@ const AccListPage = () => {
       return;
     }
 
-    // ✅ [2️⃣ 검색 유형별 필수값 검사]
     if (searchType === "region") {
       if (!city) {
         message.warning("행정시를 선택해주세요.");
@@ -137,17 +134,12 @@ const AccListPage = () => {
       }
     }
 
-    // ✅ [3️⃣ 검색 로직 시작]
     try {
       const params = {};
 
-      if (searchType === "region") {
-        params.townshipName = township;
-      } else if (searchType === "keyword") {
-        params.title = keyword.trim();
-      } else if (searchType === "spot") {
-        params.spot = spot.trim();
-      }
+      if (searchType === "region") params.townshipName = township;
+      else if (searchType === "keyword") params.title = keyword.trim();
+      else if (searchType === "spot") params.spot = spot.trim();
 
       const dateRangeArray = dateRange.map((d) => d.format("YYYY-MM-DD"));
       params.checkIn = dateRangeArray[0];
@@ -156,6 +148,8 @@ const AccListPage = () => {
       params.roomCount = roomCount;
 
       const res = await axios.get("/api/accommodations", { params });
+      console.log("📦 [axios response]", res);
+
       const resultData = res.data;
 
       setAccommodations(resultData);
@@ -175,7 +169,6 @@ const AccListPage = () => {
         accommodations: resultData,
       };
 
-      // ✅ Redux + localStorage 저장
       dispatch(setSearchState(newSearchState));
       localStorage.setItem("searchState", JSON.stringify(newSearchState));
 
@@ -198,16 +191,15 @@ const AccListPage = () => {
     dispatch,
   ]);
 
-
   /* ✅ 숙소 카드 클릭 시 */
   const handleCardClick = useCallback(
     (accId) => {
-      console.log(accId);
-      dispatch(setSelectedAcc(String(accId)));
+      // Redux + localStorage에 선택 숙소 저장
+      dispatch(setSelectedAcc(accId));
       localStorage.setItem("selectedAccId", accId);
 
-      // ✅ 선택 당시의 검색 조건도 함께 저장 (DetailPage에서 쓸 수 있게)
-      const stateToSave = {
+      // 뒤로가기 복원용 검색조건 저장
+      const condition = {
         searchType,
         city,
         township,
@@ -215,16 +207,18 @@ const AccListPage = () => {
         spot,
         guestCount,
         roomCount,
-        dateRange: dateRange ? dateRange.map(d => d.format("YYYY-MM-DD")) : null,
+        dateRange: dateRange ? dateRange.map((d) => d.format("YYYY-MM-DD")) : null,
       };
-      localStorage.setItem("lastSearchCondition", JSON.stringify(stateToSave));
+      dispatch(setSearchState(condition));
+      localStorage.setItem("searchCondition", JSON.stringify(condition));
 
+      // 디테일 페이지로 이동
       navigate("/accommodations/detail");
     },
     [dispatch, navigate, searchType, city, township, keyword, spot, guestCount, roomCount, dateRange]
   );
 
-  /* ✅ 페이지네이션 계산 */
+  /* ✅ 페이지네이션 */
   const startIndex = (currentPage - 1) * pageSize;
   const currentData = accommodations.slice(startIndex, startIndex + pageSize);
 
@@ -239,7 +233,7 @@ const AccListPage = () => {
     <MainLayout>
       <div className="min-h-screen flex flex-col items-center pt-10 pb-12 px-8">
         <div className="w-full max-w-7xl">
-          {/* ========================= 검색 폼 ========================= */}
+          {/* 검색 폼 */}
           <div className="bg-white/70 shadow-md rounded-2xl p-8 mb-8">
             <h1 className="text-2xl font-bold mb-2">숙소를 찾아보세요 🏖️</h1>
             <p className="text-gray-600 mb-6">여행 스타일에 맞게 검색해보세요!</p>
@@ -302,12 +296,25 @@ const AccListPage = () => {
               )}
 
               <RangePicker
-                style={{ minWidth: 200 }}
                 format="YYYY-MM-DD"
-                placeholder={["체크인 날짜", "체크아웃 날짜"]}
-                size="large"
+                placeholder={["체크인", "체크아웃"]}
                 value={dateRange}
+                size="large"
                 onChange={(v) => setDateRange(v)}
+                disabledDate={(current) => {
+                  // ✅ 오늘 이전 날짜 비활성화
+                  const today = dayjs().startOf("day");
+                  return current && current < today;
+                }}
+                onCalendarChange={(dates) => {
+                  if (dates && dates[0] && dates[1]) {
+                    const diff = dayjs(dates[1]).diff(dayjs(dates[0]), "day");
+                    if (diff > 7) {
+                      message.warning("최대 7박까지만 예약할 수 있습니다.");
+                      setDateRange(null);
+                    }
+                  }
+                }}
               />
 
               <InputNumber
@@ -319,7 +326,6 @@ const AccListPage = () => {
                 placeholder="인원수"
                 size="large"
               />
-
               <InputNumber
                 min={1}
                 max={30}
@@ -343,7 +349,7 @@ const AccListPage = () => {
             </div>
           </div>
 
-          {/* ===================== 검색 결과 ===================== */}
+          {/* 검색 결과 */}
           <div className="bg-white shadow-md rounded-2xl p-8 mb-10">
             <h2 className="text-2xl font-bold mb-6">검색 결과</h2>
 
@@ -352,7 +358,7 @@ const AccListPage = () => {
                 <p className="text-lg">
                   원하는 숙소를 찾아보세요! 🚀
                   <br />
-                  상단의 검색 조건을 입력하고 '검색' 버튼을 눌러주세요.
+                  상단의 검색 조건을 입력하고 ‘검색’을 눌러주세요.
                 </p>
               </div>
             ) : accommodations.length === 0 ? (
@@ -371,22 +377,22 @@ const AccListPage = () => {
                           <img
                             alt={acc.title}
                             src={
-                              acc.accImage.startsWith("/uploads/")
+                              acc.accImage.startsWith("/images/")
                                 ? `${API_SERVER_HOST}${acc.accImage}`
-                                : `${API_SERVER_HOST}/uploads/acc/${acc.accImage}`
+                                : `${API_SERVER_HOST}/images/acc/${acc.accImage}`
                             }
                             className="h-60 object-cover w-full rounded-t-xl"
                             onError={(e) => {
                               e.target.style.display = "none";
                               const fallback = document.createElement("div");
                               fallback.className =
-                                "h-60 w-full flex items-center justify-center rounded-t-xl bg-gray-200/60 backdrop-blur-md text-gray-600 font-medium text-lg select-none";
+                                "h-60 w-full flex items-center justify-center rounded-t-xl bg-gray-200/60 text-gray-600 font-medium text-lg";
                               fallback.textContent = "이미지 준비중";
                               e.target.parentNode.appendChild(fallback);
                             }}
                           />
                         ) : (
-                          <div className="h-60 w-full flex items-center justify-center rounded-t-xl bg-gray-200/60 backdrop-blur-md text-gray-600 font-medium text-lg select-none">
+                          <div className="h-60 w-full flex items-center justify-center rounded-t-xl bg-gray-200/60 text-gray-600 font-medium text-lg">
                             이미지 준비중
                           </div>
                         )

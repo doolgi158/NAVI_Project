@@ -106,13 +106,21 @@ public class AccSyncService {
     /* === 관리자 전용 API 삽입/수정 (by AccApiDTO) === */
     // 신규 데이터 삽입 (acc_list.json)
     public void insertInitialFromApi(AccApiDTO dto) {
-        Acc acc = Acc.builder().build();
-        Township townshipId = townshipRepository.findById(1L)   // townshipId 임시값
-                .orElseThrow(() -> new IllegalArgumentException("해당 지역을 찾을 수 없습니다."));
-        acc.changeFromApiDTO(dto, townshipId);
+        Long nextSeq = accRepository.getNextSeqVal();
+        String accId = String.format("ACC%03d", nextSeq);
 
+        Township township = townshipRepository.findById(1L)
+                .orElseThrow(() -> new IllegalArgumentException("해당 지역을 찾을 수 없습니다."));
+
+        Acc acc = Acc.builder()
+                .accNo(nextSeq)
+                .accId(accId)
+                .build();
+        acc.changeFromApiDTO(dto, township);
         accRepository.save(acc);
-        log.info("[API] INSERT 성공 (contentId = {})", acc.getContentId());
+
+        log.info("[API] INSERT 성공 (contentId = {}, accId = {})", acc.getContentId(), accId);
+
     }
     // 기존 데이터 갱신 (acc_basic.json & acc_extra.json)
     public void updateInitialFromApi(Acc acc, AccApiDTO dto) {
@@ -127,13 +135,22 @@ public class AccSyncService {
     // 신규 데이터 삽입 (acc_add.json)
     private void handleRequestDto(AccRequestDTO reqDto) {
         // Todo: 중복 비교 로직 고도화 필요 (나중에)
-        Acc acc = Acc.builder().build();
+        Long nextSeq = accRepository.getNextSeqVal();
+        String accId = String.format("ACC%03d", nextSeq);
+
         Township townshipId = townshipRepository.findById(1L)   // townshipId 임시값
                 .orElseThrow(() -> new IllegalArgumentException("해당 지역을 찾을 수 없습니다."));
 
+        Acc acc = Acc.builder()
+                .accNo(nextSeq)
+                .accId(accId)
+                .build();
+
         acc.changeTownship(townshipId);
         acc.changeFromRequestDTO(reqDto);
+
         accRepository.save(acc);
+        log.info("[ADMIN] JSON 기반 숙소 추가 성공 → {} ({})", acc.getTitle(), accId);
     }
 
     /* === 전체 데이터 수정 (후처리) === */
