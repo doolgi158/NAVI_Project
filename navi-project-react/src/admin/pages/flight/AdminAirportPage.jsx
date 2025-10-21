@@ -104,13 +104,17 @@ const AdminAirportPage = () => {
                         size="small"
                         icon={<EditOutlined />}
                         onClick={() => handleEdit(record)}
-                    />
+                    >
+                        수정
+                    </Button>
                     <Button
                         size="small"
                         danger
                         icon={<DeleteOutlined />}
                         onClick={() => handleDelete(record.airportCode)}
-                    />
+                    >
+                        삭제
+                    </Button>
                 </Space>
             ),
         },

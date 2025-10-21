@@ -330,6 +330,7 @@ const AdminDeliveryReservationPage = () => {
             key: "action",
             width: 180,
             align: "center",
+            fixed: "right",
             render: (_, record) => (
                 <Space>
                     <Button icon={<EditOutlined />} onClick={() => openModal(record)}>
@@ -362,7 +363,12 @@ const AdminDeliveryReservationPage = () => {
                 dataSource={reservations}
                 columns={columns}
                 bordered
-                scroll={{ x: 1300 }}
+                style={{
+                    minWidth: "100%",
+                    tableLayout: "auto",  // ✅ 자동 폭 계산
+                    whiteSpace: "nowrap", // ✅ 줄바꿈 방지
+                }}
+                scroll={{ x: "max-content" }}
             />
 
             <Modal

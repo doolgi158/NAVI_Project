@@ -66,7 +66,7 @@ const LazyDataLoader = ({ checkUrl, checkParams = {}, onReady, children }) => {
       <div className="flex flex-col items-center justify-center py-20">
         <Spin size="large" />
         <p className="mt-4 text-gray-600">데이터를 준비 중입니다...</p>
-        <p className="mt-4 text-gray-600">최대 20초 정도 소요될 수 있습니다.</p>
+        <p className="mt-4 text-gray-600">최대 30초 정도 소요될 수 있습니다.</p>
       </div>
     );
   }
