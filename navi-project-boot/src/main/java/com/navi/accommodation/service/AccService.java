@@ -32,5 +32,5 @@ public interface AccService {
     AccDetailResponseDTO getAccDetailByNo(Long accNo);
 
     // 조회수 증가
-    void increaseViewCount(String accId);
+    Acc increaseViewCount(String accId);
 }

@@ -1,12 +1,16 @@
 package com.navi.user.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.navi.travel.domain.Bookmark;
 import com.navi.travel.domain.Like;
 import com.navi.user.enums.UserRole;
 import com.navi.user.enums.UserState;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -71,6 +75,7 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    @JsonIgnore
     private List<History> histories = new ArrayList<>();    // 로그인 이력
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -94,6 +99,7 @@ public class User {
     public void addRole(UserRole userRole) {
         userRoleList.add(userRole);
     }
+
     public void clearRole(UserRole userRole) {
         userRoleList.clear();
     }

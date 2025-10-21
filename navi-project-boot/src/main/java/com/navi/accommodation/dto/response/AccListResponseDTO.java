@@ -1,10 +1,12 @@
 package com.navi.accommodation.dto.response;
 
 import com.navi.accommodation.domain.Acc;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 /* ========[AccListResponseDTO]========
            숙소 목록 조회 응답 DTO
@@ -26,14 +28,17 @@ public class AccListResponseDTO {
     private BigDecimal mapx;            // 경도
     private BigDecimal mapy;            // 위도
 
+    private Long viewCount;             // 조회수
+
     /* Entity → DTO 변환 */
     public static AccListResponseDTO fromEntity(Acc acc) {
         return AccListResponseDTO.builder()
                 .accId(acc.getAccId())           // 숙소 ID
                 .title(acc.getTitle())           // 숙소명
                 .address(acc.getAddress())       // 주소
-                .mapx(acc.getMapx())             //경도
-                .mapy(acc.getMapy())             //위도
+                .mapx(acc.getMapx())             // 경도
+                .mapy(acc.getMapy())             // 위도
+                .viewCount(acc.getViewCount())   // 조회수
                 .build();
     }
     // Todo: minPrice, remainingRooms, images는 추후 예약 연동 시 계산 예정

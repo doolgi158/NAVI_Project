@@ -166,6 +166,7 @@ public class AccServiceImpl implements AccService {
                     .title(acc.getTitle())
                     .address(acc.getAddress())
                     .accImage(accImagePath)
+                    .viewCount(acc.getViewCount())
                     .build();
         }).toList();
     }
@@ -207,11 +208,14 @@ public class AccServiceImpl implements AccService {
 
     @Override
     @Transactional
-    public void increaseViewCount(String accId) {
-        accRepository.findByAccId(accId).ifPresent(acc -> {
-            acc.increaseViewCount();
-            accRepository.save(acc);
-            log.info("============================== 조회수 증가!!!!!!!");
-        });
+    public Acc increaseViewCount(String accId) {
+        return accRepository.findByAccId(accId)
+                .map(acc -> {
+                    Acc updatedAcc = acc.increaseViewCount();
+                    accRepository.save(updatedAcc);
+                    log.info("👁️ 숙소 [{}] 조회수 증가 → {}", accId, updatedAcc.getViewCount());
+                    return updatedAcc;
+                })
+                .orElseThrow(() -> new IllegalArgumentException("숙소를 찾을 수 없습니다."));
     }
 }

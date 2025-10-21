@@ -1,9 +1,11 @@
 package com.navi.accommodation.controller;
 
+import com.navi.accommodation.domain.Acc;
 import com.navi.accommodation.dto.request.AccSearchRequestDTO;
 import com.navi.accommodation.dto.response.AccDetailResponseDTO;
 import com.navi.accommodation.dto.response.AccListResponseDTO;
 import com.navi.accommodation.service.AccService;
+import com.navi.common.response.ApiResponse;
 import com.navi.room.service.RoomService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,4 +45,10 @@ public class AccUserController {
         return accService.getAccDetail(accId);
     }
 
+    @PatchMapping("/accommodations/view/{accId}")
+    public ResponseEntity<ApiResponse<AccListResponseDTO>> increaseViewCount(@PathVariable String accId) {
+        log.info("👁️ [USER] 숙소 조회수 증가 요청 - accId: {}", accId);
+        Acc updated = accService.increaseViewCount(accId);
+        return ResponseEntity.ok(ApiResponse.success(AccListResponseDTO.fromEntity(updated)));
+    }
 }

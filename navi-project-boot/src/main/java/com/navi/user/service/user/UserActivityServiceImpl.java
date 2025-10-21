@@ -1,25 +1,26 @@
 package com.navi.user.service.user;
 
-import com.navi.travel.domain.Travel;
 import com.navi.travel.dto.TravelDetailResponseDTO;
 import com.navi.travel.repository.BookmarkRepository;
 import com.navi.travel.repository.LikeRepository;
 import com.navi.travel.repository.TravelRepository;
 import com.navi.user.domain.Log;
 import com.navi.user.domain.User;
+import com.navi.user.dto.users.UserMyPageTravelLikeDTO;
 import com.navi.user.enums.ActionType;
 import com.navi.user.repository.UserLogRepository;
 import com.navi.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class UserActivityServiceImpl implements UserActivityService {
     private final LikeRepository likeRepository;
     private final BookmarkRepository bookmarkRepository;
@@ -28,9 +29,11 @@ public class UserActivityServiceImpl implements UserActivityService {
     private final UserLogRepository userLogRepository;
 
     // 좋아요한 여행지
-    public List<TravelDetailResponseDTO> getLikedTravels(Long userNo) {
-        return likeRepository.findByUser_No(userNo).stream()
-                .map(like -> TravelDetailResponseDTO.of(like.getTravel()))
+    public List<UserMyPageTravelLikeDTO> getLikedTravels(Long userNo) {
+        var likes = likeRepository.findWithTravelByUserNo(userNo);
+
+        return likes.stream()
+                .map(like -> UserMyPageTravelLikeDTO.from(like.getTravel()))
                 .collect(Collectors.toList());
     }
 
@@ -41,18 +44,16 @@ public class UserActivityServiceImpl implements UserActivityService {
                 .collect(Collectors.toList());
     }
 
-    // 좋아요 추가
-    @Transactional
-    public void likeTravel(Long userNo, Long travelId) {
-        User user = userRepository.findById(userNo).orElseThrow();
-        Travel travel = travelRepository.findById(travelId).orElseThrow();
-        likeRepository.save(new com.navi.travel.domain.Like(null, travel, user, user.getId()));
-    }
-
     // 좋아요 취소
     @Transactional
     public void unlikeTravel(Long userNo, Long travelId) {
         likeRepository.deleteByUser_NoAndTravel_TravelId(userNo, travelId);
+    }
+
+    @Override
+    @Transactional
+    public void unmarkTravel(Long userNo, Long travelId) {
+        bookmarkRepository.deleteByUser_NoAndTravel_TravelId(userNo, travelId);
     }
 
     @Transactional

@@ -42,11 +42,15 @@ const AccListPage = () => {
         setSpot(parsed.spot || "");
         setGuestCount(parsed.guestCount || null);
         setRoomCount(parsed.roomCount || null);
+
         if (parsed.dateRange?.length === 2) {
           setDateRange([dayjs(parsed.dateRange[0]), dayjs(parsed.dateRange[1])]);
         }
-        setAccommodations(parsed.accommodations || []);
-        setIsSearched(parsed.isSearched || false);
+
+        if (parsed.accommodations?.length > 0) {
+          setAccommodations(parsed.accommodations);
+          setIsSearched(true);
+        }
       } catch (e) {
         console.warn("searchState 복원 실패:", e);
       }
@@ -193,29 +197,41 @@ const AccListPage = () => {
 
   /* ✅ 숙소 카드 클릭 시 */
   const handleCardClick = useCallback(
-    (accId) => {
-      // Redux + localStorage에 선택 숙소 저장
-      dispatch(setSelectedAcc(accId));
-      localStorage.setItem("selectedAccId", accId);
+    async (acc) => {
+      try {
+        // 조회수 증가 요청
+        const patchRes = await fetch(`${API_SERVER_HOST}/api/accommodations/view/${acc.accId}`, {
+          method: "PATCH",
+        });
+        if (!patchRes.ok) throw new Error("조회수 증가 실패");
 
-      // 뒤로가기 복원용 검색조건 저장
-      const condition = {
-        searchType,
-        city,
-        township,
-        keyword,
-        spot,
-        guestCount,
-        roomCount,
-        dateRange: dateRange ? dateRange.map((d) => d.format("YYYY-MM-DD")) : null,
-      };
-      dispatch(setSearchState(condition));
-      localStorage.setItem("searchCondition", JSON.stringify(condition));
+        // 최신 DB 값으로 재조회
+        const detailRes = await axios.get(`${API_SERVER_HOST}/api/accommodations/${acc.accId}`);
+        const updatedAcc = detailRes.data;
 
-      // 디테일 페이지로 이동
-      navigate("/accommodations/detail");
+        // accommodations 배열에서 해당 acc만 최신 값으로 교체
+        setAccommodations((prev) => {
+          const updated = prev.map((item) =>
+            item.accId === updatedAcc.accId ? { ...item, viewCount: updatedAcc.viewCount } : item
+          );
+
+          // 수정된 목록을 localStorage에도 반영
+          const newState = { ...savedSearch, accommodations: updated, isSearched: true };
+          localStorage.setItem("searchState", JSON.stringify(newState));
+
+          return updated;
+        });
+
+        // Redux 저장 및 상세 페이지 이동
+        dispatch(setSelectedAcc(updatedAcc.accId));
+        localStorage.setItem("selectedAccId", updatedAcc.accId);
+        navigate("/accommodations/detail");
+      } catch (err) {
+        console.error("🚨 조회수 증가 또는 재조회 실패:", err);
+        message.error("조회수 반영 중 오류가 발생했습니다.");
+      }
     },
-    [dispatch, navigate, searchType, city, township, keyword, spot, guestCount, roomCount, dateRange]
+    [dispatch, navigate, savedSearch]
   );
 
   /* ✅ 페이지네이션 */
@@ -401,16 +417,20 @@ const AccListPage = () => {
                       <Meta
                         title={<span className="text-lg font-bold">{acc.title}</span>}
                         description={
-                          <div className="text-gray-600 mt-2">
-                            <p className="font-semibold text-base mt-1 flex items-center gap-2">
-                              {acc.minPrice ? `${acc.minPrice.toLocaleString()}원` : "가격 미정"} / 1박
-                              {acc.viewCount !== undefined && (
-                                <span className="flex items-center text-gray-500 text-sm ml-2">
-                                  <EyeOutlined style={{ marginRight: 4 }} /> {acc.viewCount.toLocaleString()}
-                                </span>
-                              )}
-                            </p>
-                            <p>{acc.address}</p>
+                          <div className="text-gray-600 mt-3 space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="font-medium text-gray-700">
+                                {acc.minPrice ? `${acc.minPrice.toLocaleString()}원` : "가격 미정"} / 1박
+                              </span>
+
+                              {/* ✅ 값이 없을 때 기본값 0 표시 */}
+                              <span className="flex items-center text-gray-500 text-sm">
+                                <EyeOutlined className="text-gray-400 mr-1" />
+                                {(acc.viewCount ?? 0).toLocaleString()}회
+                              </span>
+                            </div>
+
+                            <p className="text-gray-500 text-sm truncate">{acc.address}</p>
                           </div>
                         }
                       />
@@ -430,8 +450,8 @@ const AccListPage = () => {
             )}
           </div>
         </div>
-      </div>
-    </MainLayout>
+      </div >
+    </MainLayout >
   );
 };
 
