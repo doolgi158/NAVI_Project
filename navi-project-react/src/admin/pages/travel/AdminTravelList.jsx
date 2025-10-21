@@ -69,6 +69,7 @@ export default function AdminTravelList() {
         order
       );
       const data = response.data;
+
       if (!data || !Array.isArray(data.content))
         throw new Error("유효하지 않은 데이터 형식입니다.");
       setTravelData({

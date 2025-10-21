@@ -162,7 +162,7 @@ public class Travel extends BaseEntityNoAudit {
     public void updateFromApi(Travel newTravel) {
         this.title = newTravel.title;
         this.introduction = newTravel.introduction;
-        this.description = newTravel.description; // ✅ 본문 추가
+        this.description = newTravel.description;
         this.address = newTravel.address;
         this.roadAddress = newTravel.roadAddress;
         this.phoneNo = newTravel.phoneNo;

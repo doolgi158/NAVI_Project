@@ -47,11 +47,8 @@ public class TravelQueryServiceImpl implements TravelQueryService {
     }
 
     @Override
-    public Page<TravelListResponseDTO> getTravelList(Pageable pageable,
-                                                     List<String> region2Names,
-                                                     String category,
-                                                     String search,
-                                                     boolean publicOnly) {
+    public Page<TravelListResponseDTO> getTravelList(Pageable pageable, List<String> region2Names, String category,
+                                                     String search, boolean publicOnly) {
 
         log.info("📋 [요청 파라미터] page={}, size={}, sort={}, region={}, category={}, search={}, publicOnly={}",
                 pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort(),
@@ -68,8 +65,6 @@ public class TravelQueryServiceImpl implements TravelQueryService {
                 remainingOrders.add(order);
             }
         }
-
-        log.info("🧭 [정렬 파싱 결과] sortByLikes={}, remainingOrders={}", sortByLikes, remainingOrders);
 
         Specification<Travel> spec = null;
         boolean noRegionFilter = (region2Names == null || region2Names.isEmpty());
@@ -95,8 +90,6 @@ public class TravelQueryServiceImpl implements TravelQueryService {
                 return TravelListResponseDTO.of(travel);
             });
 
-            log.info("✅ [인기순 변환 완료] 반환 DTO 수={}", resultPage.getContent().size());
-
             return attachLikesAndBookmarks(resultPage);
         }
 
@@ -104,13 +97,10 @@ public class TravelQueryServiceImpl implements TravelQueryService {
         if (publicOnly) {
             Specification<Travel> publicSpec = (root, query, cb) -> cb.equal(root.get("state"), 1);
             spec = combineSpec(spec, publicSpec);
-            log.info("🟢 [상태 필터 적용] state = 1");
         }
 
         // ✅ 지역 필터
         if (!noRegionFilter) {
-            log.info("📍 [지역 필터] {}", region2Names);
-
             List<Specification<Travel>> regionSpecs = region2Names.stream()
                     .filter(StringUtils::hasText)
                     .map(region -> (Specification<Travel>) (root, query, cb) ->
@@ -125,8 +115,6 @@ public class TravelQueryServiceImpl implements TravelQueryService {
 
         // ✅ 카테고리 필터
         if (!noCategoryFilter) {
-            log.info("📁 [카테고리 필터] {}", category);
-
             String lowerCategory = "%" + category.trim().toLowerCase() + "%";
             Specification<Travel> categorySpec = (root, query, cb) ->
                     cb.like(cb.lower(root.get("categoryName")), lowerCategory);
@@ -135,8 +123,6 @@ public class TravelQueryServiceImpl implements TravelQueryService {
 
         // ✅ 검색 필터
         if (!noSearchFilter) {
-            log.info("🔍 [검색 필터] {}", search);
-
             String lowerSearch = "%" + search.trim().toLowerCase() + "%";
             Specification<Travel> searchSpec = (root, query, cb) ->
                     cb.like(cb.lower(root.get("title")), lowerSearch);
@@ -159,12 +145,7 @@ public class TravelQueryServiceImpl implements TravelQueryService {
                 ? travelRepository.findAll(newPageable)
                 : travelRepository.findAll(spec, newPageable);
 
-        log.info("🧾 [쿼리 결과] contentSize={}, totalElements={}", travelPage.getContent().size(), travelPage.getTotalElements());
-
         Page<TravelListResponseDTO> mappedPage = travelPage.map(TravelListResponseDTO::of);
-
-        log.info("🎨 [DTO 변환 결과] {}", mappedPage.getContent().stream()
-                .map(TravelListResponseDTO::getTitle).limit(5).collect(Collectors.toList()));
 
         return attachLikesAndBookmarks(mappedPage);
     }
@@ -195,10 +176,10 @@ public class TravelQueryServiceImpl implements TravelQueryService {
         return (current == null) ? next : current.and(next);
     }
 
-    // ✅ 좋아요 / 북마크 수 & 로그인 사용자 상태 반영
+    /**
+     * ✅ 좋아요 / 북마크 수 & 로그인 사용자 상태 반영
+     */
     private Page<TravelListResponseDTO> attachLikesAndBookmarks(Page<TravelListResponseDTO> pageDto) {
-        log.info("🔗 [Like/Bookmark 보강] pageContentSize={}", pageDto.getContent().size());
-
         if (pageDto.isEmpty()) return pageDto;
 
         String currentUserId = null;
@@ -218,10 +199,15 @@ public class TravelQueryServiceImpl implements TravelQueryService {
             dto.setLikesCount(likes);
             dto.setBookmarkCount(bookmarks);
 
-            log.debug("💾 여행지 ID={} | 좋아요={}, 북마크={}", travelId, likes, bookmarks);
+            if (StringUtils.hasText(currentUserId) && !"anonymousUser".equals(currentUserId)) {
+                dto.setLikedByUser(likeRepository.existsByTravelIdAndId(travelId, currentUserId));
+                dto.setBookmarkedByUser(bookmarkRepository.existsByTravelIdAndId(travelId, currentUserId));
+            } else {
+                dto.setLikedByUser(false);
+                dto.setBookmarkedByUser(false);
+            }
         }
-        log.info("✅ [보강 완료] 반환 DTO 수={}", pageDto.getContent().size());
-        
+
         return pageDto;
     }
 }

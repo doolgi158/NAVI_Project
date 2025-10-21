@@ -12,6 +12,11 @@ public interface TravelPlanService {
     /** 사용자별 여행계획 목록 조회 */
     List<TravelPlan> getMyPlans(String userId);
 
+    /** 여행계획 수정 */
+    void updatePlan(Long planId, String userId, TravelPlanRequestDTO dto);
+
     /** 여행계획 삭제 */
     void deletePlan(Long planId);
+
+
 }

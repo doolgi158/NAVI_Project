@@ -35,7 +35,11 @@ const getTravelData = async (domain, pageParam, filterQuery, userId) => {
 
   // ✅ 로그인 사용자가 있다면 쿼리 파라미터로 id 전달
   try {
-    const response = await api.get(apiUrl + queryString);
+    const response = await api.get(apiUrl + queryString, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('accessToken') || ''}`,
+      },
+    });
     return response.data;
   } catch (error) {
     console.error('여행지 목록 로딩 실패:', error.message);

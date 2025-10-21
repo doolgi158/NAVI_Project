@@ -49,4 +49,16 @@ public class TravelPlanDay {
 
     @Column(name = "stay_name")
     private String stayName;
+
+    public String getImagePath() {
+        return null;
+    }
+
+    public Double getLongitude() {
+        return null;
+    }
+
+    public Double getLatitude() {
+        return null;
+    }
 }

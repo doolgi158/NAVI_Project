@@ -77,6 +77,7 @@ const TravelCard = ({ item, onClick, isSelected, onMouseEnter, onMouseLeave }) =
     }
   };
 
+
   return (
     <div
       className={`bg-white rounded-xl shadow-lg border-2 p-4 cursor-pointer transition duration-300 transform hover:shadow-xl hover:-translate-y-1 ${isSelected ? 'border-blue-500 shadow-blue-300/50 scale-[1.01]' : 'border-gray-200'

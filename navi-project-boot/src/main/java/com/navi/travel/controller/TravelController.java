@@ -73,9 +73,13 @@ public class TravelController {
                     .filter(s -> !s.isEmpty())
                     .collect(Collectors.toList());
         }
+        // 로그인 사용자 ID 가져오기
+        String userId = getUserIdFromSecurityContext();
+        log.info("🟦 [Controller] 여행지 목록 요청 - userId={}, category={}, search={}", userId, categoryName, search);
+
 
         Page<TravelListResponseDTO> list = travelService.getTravelList(
-                pageable, region2Names, categoryName, search, true
+                pageable, region2Names, categoryName, search, true, userId
         );
 
         return ResponseEntity.ok(list);

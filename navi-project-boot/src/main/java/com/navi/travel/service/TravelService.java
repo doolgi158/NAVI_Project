@@ -18,7 +18,7 @@ public interface TravelService {
     List<Travel> getTravelList();
 
     // 여행지 리스트 조회 (필터링, 검색, 페이징 포함)
-    Page<TravelListResponseDTO> getTravelList(Pageable pageable, List<String> region2Names, String category,String search, boolean publicOnly);
+    Page<TravelListResponseDTO> getTravelList(Pageable pageable, List<String> region2Names, String category,String search, boolean publicOnly,String userId);
 
     // 여행지 상세 정보 조회 (✅ userId 타입: String으로 변경)
     TravelDetailResponseDTO getTravelDetail(Long travelId, String id);
@@ -44,5 +44,5 @@ public interface TravelService {
     // 메인 대표 여행지 10개
     List<TravelRankDTO> getTop10FeaturedTravels();
 
-   
+
 }
