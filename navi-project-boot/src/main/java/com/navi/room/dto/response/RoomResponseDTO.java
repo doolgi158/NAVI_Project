@@ -28,7 +28,7 @@ public class RoomResponseDTO {
     private Integer weekdayFee;         // 평일 요금
     private Integer weekendFee;         // 주말 요금
     private Boolean hasWifi;            // 와이파이
-    private Boolean active;             // 운영 여부
+    private Boolean isActive;             // 운영 여부
     private Integer remainingRooms;     // Todo: 잔여 객실 수
     private List<String> roomImages;    // Todo: 객실 이미지 리스트
 
@@ -46,7 +46,7 @@ public class RoomResponseDTO {
                 .weekdayFee(room.getWeekdayFee())
                 .weekendFee(room.getWeekendFee())
                 .hasWifi(room.getHasWifi())
-                .active(room.getIsActive())
+                .isActive(room.getIsActive())
                 .build();
     }
 
@@ -62,7 +62,7 @@ public class RoomResponseDTO {
                 .weekdayFee(room.getWeekdayFee())
                 .weekendFee(room.getWeekendFee())
                 .hasWifi(room.getHasWifi())
-                .active(room.getIsActive())
+                .isActive(room.getIsActive())
                 .build();
     }
 }

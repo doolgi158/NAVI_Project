@@ -20,7 +20,8 @@ public class RoomRequestDTO {
     private String maxCnt;
     private String weekdayFee;
     private String weekendFee;
-    private String hasWifi;
+    private Boolean hasWifi;
+    private Boolean isActive;
 
     public Room toEntity() {
         return Room.builder()
@@ -31,7 +32,8 @@ public class RoomRequestDTO {
                 .maxCnt(Integer.parseInt(maxCnt))
                 .weekdayFee(Integer.parseInt(weekdayFee))
                 .weekendFee(Integer.parseInt(weekendFee))
-                .hasWifi("1".equals(hasWifi))
+                .hasWifi(hasWifi != null && hasWifi)
+                .isActive(isActive != null && isActive)
                 .build();
     }
 }

@@ -17,29 +17,50 @@ const AdminRoomFormPage = () => {
 
     // 수정 모드일 경우 기존 데이터 로드
     useEffect(() => {
-        if (!isEdit) return;
-        const fetchRoom = async () => {
-            try {
-                setLoading(true);
-                const res = await axios.get(`${API_SERVER_HOST}/api/adm/rooms/${roomNo}`);
-                if (res.data.status === 200 && res.data.data) {
-                    form.setFieldsValue(res.data.data);
-                } else {
-                    message.error("객실 정보를 불러오지 못했습니다.");
+        if (isEdit) {
+            // 수정 모드
+            const fetchRoom = async () => {
+                try {
+                    setLoading(true);
+                    const res = await axios.get(`${API_SERVER_HOST}/api/adm/rooms/${roomNo}`);
+                    if (res.data.status === 200 && res.data.data) {
+                        const room = res.data.data;
+                        console.log("🧾 불러온 room 데이터:", room);
+
+                        form.setFieldsValue({
+                            ...room,
+                            hasWifi: !!room.hasWifi,
+                            isActive: !!room.isActive,
+                        });
+                    } else {
+                        message.error("객실 정보를 불러오지 못했습니다.");
+                    }
+                } catch {
+                    message.error("객실 데이터 로드 실패");
+                } finally {
+                    setLoading(false);
                 }
-            } catch {
-                message.error("객실 데이터 로드 실패");
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchRoom();
-    }, [roomNo]);
+            };
+            fetchRoom();
+        } else {
+            // 등록 모드
+            form.setFieldsValue({
+                roomCnt: 4,
+                baseCnt: 2,
+                maxCnt: 2,
+                weekdayFee: 0,
+                weekendFee: 0,
+                hasWifi: true,
+                isActive: true,
+            });
+        }
+    }, [roomNo, isEdit]);
 
     // 제출 처리 (등록/수정 공용)
     const handleSubmit = async (values) => {
         try {
             setLoading(true);
+
             values.accNo = Number(accNo);
 
             console.log("🧾 전송 payload:", values);
@@ -52,7 +73,7 @@ const AdminRoomFormPage = () => {
                 message.success("객실 등록 완료");
             }
 
-            setTimeout(() => navigate("/adm/rooms"), 100);
+            navigate("/adm/rooms", { state: { refresh: true } });
         } catch (err) {
             console.error(err);
             message.error("저장 실패");
@@ -72,15 +93,6 @@ const AdminRoomFormPage = () => {
                         form={form}
                         layout="vertical"
                         onFinish={handleSubmit}
-                        initialValues={{
-                            roomCnt: 4,
-                            baseCnt: 2,
-                            maxCnt: 2,
-                            weekdayFee: 0,
-                            weekendFee: 0,
-                            hasWifi: true,
-                            isActive: true,
-                        }}
                     >
                         <Form.Item
                             label="객실명"

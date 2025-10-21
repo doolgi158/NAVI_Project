@@ -1,6 +1,6 @@
 import { Layout, Typography, Input, Button, Table, Space, Modal, Form, InputNumber, Switch, message } from "antd";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { API_SERVER_HOST } from "@/common/api/naviApi";
 import AdminSiderLayout from "../../layout/AdminSiderLayout";
@@ -25,13 +25,21 @@ const RoomAdminPage = () => {
     const [editingRoom, setEditingRoom] = useState(null);
     const [form] = Form.useForm();
     const navigate = useNavigate();
+    const location = useLocation();
 
     // 페이지 복귀 시 자동 복원
     useEffect(() => {
-        if (savedState.selectedAccNo) {
-            fetchRooms(savedState.selectedAccNo);
+        if (savedState.searchName) {
+            // 검색어가 존재하면 재검색 실행
+            fetchAccommodations().then(() => {
+                // 이전에 펼쳐져 있던 숙소도 자동 다시 확장
+                if (savedState.selectedAccNo) {
+                    fetchRooms(savedState.selectedAccNo);
+                    setExpandedRowKeys([savedState.selectedAccNo]);
+                }
+            });
         }
-    }, []);
+    }, [location.state]);
 
     // 숙소 검색
     const fetchAccommodations = async () => {
