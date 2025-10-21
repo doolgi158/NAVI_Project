@@ -27,14 +27,12 @@ public class TravelPlanServiceImpl implements TravelPlanService {
     private final TravelRepository travelRepository;
     private final UserRepository userRepository;
 
-    // ======================================================
-    // ✅ 여행 계획 저장 (CREATE)
-    // ======================================================
+    /** ✅ 여행계획 저장 */
     @Override
     public Long savePlan(String userId, TravelPlanRequestDTO dto) {
         log.info("✅ 여행계획 저장 요청: userId={}, dto={}", userId, dto);
 
-        User user = userRepository.findByUserId(userId)
+        User user = userRepository.findById(userId)  // ✅ 필드명 기준으로 변경됨
                 .orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다. userId=" + userId));
 
         LocalTime startTime = (dto.getStartTime() != null) ? dto.getStartTime() : LocalTime.of(10, 0);
@@ -52,7 +50,7 @@ public class TravelPlanServiceImpl implements TravelPlanService {
 
         List<TravelPlanDay> dayList = new ArrayList<>();
 
-        // ✅ 방문지(travels)
+        // ✅ 방문지
         if (dto.getTravels() != null) {
             int idx = 0;
             for (TravelPlanRequestDTO.TravelItem t : dto.getTravels()) {
@@ -69,7 +67,7 @@ public class TravelPlanServiceImpl implements TravelPlanService {
             }
         }
 
-        // ✅ 숙소(stays)
+        // ✅ 숙소
         if (dto.getStays() != null) {
             for (TravelPlanRequestDTO.StayItem s : dto.getStays()) {
                 if (s.getDates() == null) continue;
@@ -107,18 +105,14 @@ public class TravelPlanServiceImpl implements TravelPlanService {
         return plan.getId();
     }
 
-    // ======================================================
-    // ✅ 내 계획 목록 조회 (READ)
-    // ======================================================
+    /** ✅ 내 여행계획 목록 조회 */
     @Transactional(readOnly = true)
     @Override
     public List<TravelPlan> getMyPlans(String userId) {
-        return travelPlanRepository.findByUser_Id(userId);
+        return travelPlanRepository.findByUser_Id(userId); // ✅ 필드명 기준으로 수정 완료
     }
 
-    // ======================================================
-    // ✅ 여행계획 수정 (UPDATE)
-    // ======================================================
+    /** ✅ 여행계획 수정 */
     @Override
     public void updatePlan(Long planId, String userId, TravelPlanRequestDTO dto) {
         log.info("📝 여행계획 수정 요청: planId={}, userId={}, dto={}", planId, userId, dto);
@@ -126,23 +120,19 @@ public class TravelPlanServiceImpl implements TravelPlanService {
         TravelPlan plan = travelPlanRepository.findById(planId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 여행계획입니다. id=" + planId));
 
-        // 사용자 검증
-        if (!plan.getUser().getId().equals(userId)) {
+        if (!plan.getUser().getId().equals(userId)) { // ✅ 필드명 기준
             throw new SecurityException("해당 계획을 수정할 권한이 없습니다.");
         }
 
-        // 기본정보 수정
         plan.updatePlanInfo(dto.getTitle(), dto.getStartDate(), dto.getEndDate(),
                 dto.getStartTime(), dto.getEndTime(), dto.getThumbnailPath());
 
-        // 기존 day 리스트 초기화
         plan.getDays().clear();
         List<TravelPlanDay> newDays = new ArrayList<>();
 
         LocalTime startTime = (dto.getStartTime() != null) ? dto.getStartTime() : LocalTime.of(10, 0);
         LocalTime endTime = (dto.getEndTime() != null) ? dto.getEndTime() : LocalTime.of(22, 0);
 
-        // 방문지(travels) 다시 생성
         if (dto.getTravels() != null) {
             int idx = 0;
             for (TravelPlanRequestDTO.TravelItem t : dto.getTravels()) {
@@ -159,7 +149,6 @@ public class TravelPlanServiceImpl implements TravelPlanService {
             }
         }
 
-        // 숙소(stays) 다시 생성
         if (dto.getStays() != null) {
             for (TravelPlanRequestDTO.StayItem s : dto.getStays()) {
                 if (s.getDates() == null) continue;
@@ -192,13 +181,10 @@ public class TravelPlanServiceImpl implements TravelPlanService {
 
         plan.setDays(newDays);
         travelPlanRepository.save(plan);
-
         log.info("✅ 여행계획 수정 완료: planId={}", planId);
     }
 
-    // ======================================================
-    // ✅ 여행계획 삭제 (DELETE)
-    // ======================================================
+    /** ✅ 여행계획 삭제 */
     @Override
     public void deletePlan(Long planId) {
         TravelPlan plan = travelPlanRepository.findById(planId)

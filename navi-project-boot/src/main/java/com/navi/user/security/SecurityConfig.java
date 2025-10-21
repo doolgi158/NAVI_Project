@@ -58,6 +58,7 @@ public class SecurityConfig {
                         "/api/auth/**", "/api/accommodations/**", "/api/townships/**", "/api/rooms/**", "/api/reservation/**",
                         "/api/activity", "/api/payment/**", "/uploads/**")
                         .permitAll()
+                .requestMatchers("/api/plans/**").authenticated()
                 .requestMatchers("/api/users/detail/**").hasAnyRole(UserRole.USER.name())
                 .anyRequest().permitAll()
         );

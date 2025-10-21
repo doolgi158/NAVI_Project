@@ -1,4 +1,3 @@
-import axios from "axios";
 import api, { API_SERVER_HOST } from "../../common/api/naviApi";
 
 const host = `${API_SERVER_HOST}/api/plans`;
@@ -19,7 +18,7 @@ export const savePlan = async (planData) => {
 /** ✅ 내 여행계획 목록 조회 */
 export const getMyPlans = async () => {
   try {
-    const res = await axios.get(`${host}`);
+    const res = await api.get(`${host}`);
     return res.data;
   } catch (err) {
     console.error("❌ getMyPlans() 요청 실패:", err);
@@ -35,7 +34,7 @@ export const getPlanDetail = async (planId) => {
   }
 
   try {
-    const res = await axios.get(`${host}/${planId}`);
+    const res = await api.get(`${host}/${planId}`);
     if (!res.data) {
       console.warn(`⚠️ getPlanDetail 응답이 비어있음 (planId=${planId})`);
       return null;

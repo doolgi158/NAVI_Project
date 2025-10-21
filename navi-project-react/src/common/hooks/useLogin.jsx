@@ -32,6 +32,7 @@ export const useLogin = () => {
         localStorage.setItem("refreshToken", refreshToken);
         localStorage.setItem("username", username);
         localStorage.setItem("userNo", userNo);
+        localStorage.setItem("userId", id);
 
         axios.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
 
