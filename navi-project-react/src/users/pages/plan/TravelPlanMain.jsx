@@ -6,6 +6,8 @@ import { Button, Modal, message } from "antd";
 import PlanList from "../plan/components/PlanList";
 import { PlusOutlined } from "@ant-design/icons";
 import { startOfDay, isAfter, isBefore, isSameDay } from "date-fns";
+import api from '../../../common/api/naviApi.js';
+
 
 export default function TravelPlanMain() {
   const [plans, setPlans] = useState([]);
@@ -55,6 +57,12 @@ export default function TravelPlanMain() {
   const handleEdit = (plan) =>
     navigate(`/plans/planner/detail?planId=${plan.id}&mode=edit`);
 
+  /** ✅ 상세보기 이동 */
+  const handlePlanClick = (planId) => {
+    navigate(`/plan/detail/${planId}`);
+  };
+
+  /** ✅ 새 계획 생성 */
   const handleCreatePlan = () => navigate("/plans/planner");
 
   const handlePageChange = (newPage) =>
@@ -117,8 +125,8 @@ export default function TravelPlanMain() {
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
               className={`px-6 py-2 text-sm font-semibold border-b-2 transition ${activeTab === tab.key
-                  ? "border-[#3A6EA5] text-[#3A6EA5]"
-                  : "border-transparent text-gray-400 hover:text-[#3A6EA5]"
+                ? "border-[#3A6EA5] text-[#3A6EA5]"
+                : "border-transparent text-gray-400 hover:text-[#3A6EA5]"
                 }`}
             >
               {tab.label}

@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 @Builder
 public class TravelPlanListResponseDTO {
 
-    private Long id;
+    private Long planId;
     private String title;
     private String userId;
     private LocalDate startDate;
@@ -25,7 +25,7 @@ public class TravelPlanListResponseDTO {
     private LocalTime endTime;
     private List<String> travels;
 
-    public static TravelPlanListResponseDTO fromEntity(TravelPlan plan) {
+    public static TravelPlanListResponseDTO of(TravelPlan plan) {
 
 
         List<String> travelTitles = plan.getDays() != null
@@ -37,7 +37,7 @@ public class TravelPlanListResponseDTO {
                 : List.of();
 
         return TravelPlanListResponseDTO.builder()
-                .id(plan.getId())
+                .planId(plan.getPlanId())
                 .title(plan.getTitle())
                 .userId(plan.getUser().getId())
                 .startDate(plan.getStartDate())

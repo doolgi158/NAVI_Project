@@ -15,9 +15,9 @@ import java.util.stream.Collectors;
 @Builder
 public class TravelPlanDetailResponseDTO {
 
-    private Long id;
+    private Long planId;        // ✅ 실제 필드명 맞춤
     private String title;
-    private String userId;
+    private String userId;      // ✅ User.id (문자열 로그인 아이디)
     private LocalDate startDate;
     private LocalDate endDate;
     private String thumbnailPath;
@@ -29,15 +29,14 @@ public class TravelPlanDetailResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class TravelPlanDayDTO {
-        private Long id;
+        private Long dayId;
         private LocalDate dayDate;
         private Integer orderNo;
         private List<TravelPlanItemDTO> items;
 
         public static TravelPlanDayDTO fromEntity(TravelPlanDay day) {
-            // 현재 TravelPlanDay에는 단일 travelId/stayName만 있으므로 items는 1개짜리 리스트로 생성
             return TravelPlanDayDTO.builder()
-                    .id(day.getId())
+                    .dayId(day.getId())
                     .dayDate(day.getDayDate())
                     .orderNo(day.getOrderNo())
                     .items(List.of(TravelPlanItemDTO.fromEntity(day)))
@@ -51,7 +50,7 @@ public class TravelPlanDetailResponseDTO {
     @AllArgsConstructor
     @Builder
     public static class TravelPlanItemDTO {
-        private Long id;
+        private Long itemId;
         private String title;      // planTitle 또는 stayName
         private String type;       // "travel" / "stay"
         private Long travelId;
@@ -65,11 +64,11 @@ public class TravelPlanDetailResponseDTO {
             boolean isStay = (day.getStayName() != null && !day.getStayName().isEmpty());
 
             return TravelPlanItemDTO.builder()
-                    .id(day.getId())
+                    .itemId(day.getId())
                     .title(isStay ? day.getStayName() : day.getPlanTitle())
                     .type(isStay ? "stay" : "travel")
                     .travelId(day.getTravelId())
-                    .lat(day.getLatitude())     // 아직 구현되지 않은 메서드지만, null 허용 가능
+                    .lat(day.getLatitude())
                     .lng(day.getLongitude())
                     .img(day.getImagePath())
                     .startTime(day.getStartTime())
@@ -79,17 +78,19 @@ public class TravelPlanDetailResponseDTO {
     }
 
     /** ✅ 엔티티 → DTO 변환 */
-    public static TravelPlanDetailResponseDTO fromEntity(TravelPlan plan) {
+    public static TravelPlanDetailResponseDTO of(TravelPlan plan) {
         return TravelPlanDetailResponseDTO.builder()
-                .id(plan.getId())
+                .planId(plan.getPlanId())                   // ✅ 필드명 수정
                 .title(plan.getTitle())
-                .userId(plan.getUser().getId())
+                .userId(plan.getUser().getId())             // ✅ User.id (문자열 로그인 아이디)
                 .startDate(plan.getStartDate())
                 .endDate(plan.getEndDate())
                 .thumbnailPath(plan.getThumbnailPath())
-                .days(plan.getDays().stream()
+                .days(plan.getDays() != null
+                        ? plan.getDays().stream()
                         .map(TravelPlanDayDTO::fromEntity)
-                        .collect(Collectors.toList()))
+                        .collect(Collectors.toList())
+                        : List.of())
                 .build();
     }
 }

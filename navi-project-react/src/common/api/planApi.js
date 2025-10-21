@@ -17,13 +17,8 @@ export const savePlan = async (planData) => {
 
 /** ✅ 내 여행계획 목록 조회 */
 export const getMyPlans = async () => {
-  try {
-    const res = await api.get(`${host}`);
-    return res.data;
-  } catch (err) {
-    console.error("❌ getMyPlans() 요청 실패:", err);
-    return null;
-  }
+  const res = await api.get("/plans");
+  return res.data;
 };
 
 /** ✅ 개별 계획 상세 조회 */

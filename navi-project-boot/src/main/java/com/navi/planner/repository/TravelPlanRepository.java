@@ -9,8 +9,9 @@ import java.util.List;
 
 public interface TravelPlanRepository extends JpaRepository<TravelPlan, Long> {
 
-    // 기본: 유저 문자열 아이디(user.user_id)로 필터
-    List<TravelPlan> findByUser_Id(String userId);
+    /** ✅ 로그인 아이디(user.id) 기준 조회 */
+    @Query("SELECT p FROM TravelPlan p WHERE p.user.id = :userId")
+    List<TravelPlan> findByUserId(@Param("userId") String userId);
 
     /**
      * 리스트 조회 시 days 까지 한 방에 가져오기 (N+1 방지)

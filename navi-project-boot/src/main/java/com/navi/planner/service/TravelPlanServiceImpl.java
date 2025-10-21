@@ -30,10 +30,10 @@ public class TravelPlanServiceImpl implements TravelPlanService {
     /** ✅ 여행계획 저장 */
     @Override
     public Long savePlan(String userId, TravelPlanRequestDTO dto) {
-        log.info("✅ 여행계획 저장 요청: userId={}, dto={}", userId, dto);
+        log.info("✅ 여행계획 저장 요청: id={}, dto={}", userId, dto);
 
-        User user = userRepository.findById(userId)  // ✅ 필드명 기준으로 변경됨
-                .orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다. userId=" + userId));
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
         LocalTime startTime = (dto.getStartTime() != null) ? dto.getStartTime() : LocalTime.of(10, 0);
         LocalTime endTime = (dto.getEndTime() != null) ? dto.getEndTime() : LocalTime.of(22, 0);
@@ -100,27 +100,27 @@ public class TravelPlanServiceImpl implements TravelPlanService {
 
         plan.setDays(dayList);
         travelPlanRepository.save(plan);
-        log.info("✅ 여행 계획 저장 완료: {}", plan.getId());
+        log.info("✅ 여행 계획 저장 완료: {}", plan.getPlanId());
 
-        return plan.getId();
+        return plan.getPlanId();
     }
 
     /** ✅ 내 여행계획 목록 조회 */
     @Transactional(readOnly = true)
     @Override
     public List<TravelPlan> getMyPlans(String userId) {
-        return travelPlanRepository.findByUser_Id(userId); // ✅ 필드명 기준으로 수정 완료
+        return travelPlanRepository.findByUserId(userId); // ✅ 필드명 기준으로 수정 완료
     }
 
     /** ✅ 여행계획 수정 */
     @Override
-    public void updatePlan(Long planId, String userId, TravelPlanRequestDTO dto) {
-        log.info("📝 여행계획 수정 요청: planId={}, userId={}, dto={}", planId, userId, dto);
+    public void updatePlan(Long planId, String id, TravelPlanRequestDTO dto) {
+        log.info("📝 여행계획 수정 요청: planId={}, id={}, dto={}", planId, id, dto);
 
         TravelPlan plan = travelPlanRepository.findById(planId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 여행계획입니다. id=" + planId));
 
-        if (!plan.getUser().getId().equals(userId)) { // ✅ 필드명 기준
+        if (!plan.getPlanId().equals(planId)) { // ✅ 필드명 기준
             throw new SecurityException("해당 계획을 수정할 권한이 없습니다.");
         }
 
