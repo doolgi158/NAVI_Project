@@ -21,9 +21,9 @@ import FlyRsvInfo from "../../../common/components/reservation/FlyRsvInfo";
 import DlvRsvInfo from "../../../common/components/reservation/DlvRsvInfo";
 
 // 우측 요약 카드
-import AccSummaryCard from "../../../common/components/reservation/AccRsvSumCard";
-import FlySummaryCard from "../../../common/components/reservation/FlyRsvSumCard";
-import DlvSummaryCard from "../../../common/components/reservation/DlvRsvSumCard";
+import AccSumCard from "../../../common/components/reservation/AccRsvSumCard";
+import FlySumCard from "../../../common/components/reservation/FlyRsvSumCard";
+import DlvSumCard from "../../../common/components/reservation/DlvRsvSumCard";
 
 const { Title, Text } = Typography;
 

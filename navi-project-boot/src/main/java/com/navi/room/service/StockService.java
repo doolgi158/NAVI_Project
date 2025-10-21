@@ -12,7 +12,7 @@ public interface StockService {
     /* === 조회 로직 === */
     // 특정 객실 ID 기준으로 기간별 재고 조회
     List<StockResponseDTO> getStockByRoomAndPeriod(String roomId, LocalDate startDate, LocalDate endDate);
-    // ✅ 특정 객실 ID 기준으로 기간 내 남은 객실 수(최소값)
+    // 특정 객실 ID 기준으로 기간 내 남은 객실 수(최소값)
     int getRemainCount(String roomId, LocalDate checkIn, LocalDate checkOut);
 
     /* === 예약/취소 처리 === */

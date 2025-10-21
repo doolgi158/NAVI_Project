@@ -50,26 +50,20 @@ public class RoomRsv extends BaseEntity{
     @Column(name = "no")
     private Long no;
 
-    /** 예약 ID (예: 20251019ROM0001) */
-    @Column(name = "room_rsv_id", length = 30, nullable = false)
-    private String roomRsvId;
+    // 예약 ID (예: 20251019ROM0001)
+    @Column(name = "reserve_id", length = 30, nullable = false)
+    private String reserveId;
 
     /* === 연관관계 === */
-    /** 사용자 */
+    // 사용자
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_no", nullable = false)
     private User user;
 
-    /** 객실 (Room) */
+    // 객실 (Room) */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_no", nullable = false)
     private Room room;
-
-    /** 재고 정보 (RoomStock) — FK 연결 */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "room_stock_id", referencedColumnName = "stock_no")
-    @JsonBackReference
-    private RoomStock roomStock;
 
     /* === 예약 기본 정보 === */
     // 객실수

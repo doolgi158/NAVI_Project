@@ -1,6 +1,7 @@
 package com.navi.room.controller;
 
 import com.navi.room.dto.request.RoomRsvRequestDTO;
+import com.navi.room.dto.response.RoomPreRsvResponseDTO;
 import com.navi.room.dto.response.RoomRsvResponseDTO;
 import com.navi.room.service.RoomRsvService;
 import lombok.RequiredArgsConstructor;
@@ -9,12 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
-/* ============================================================
-   [RoomRsvController]
-   - 객실 예약 관리 Controller
-   - 결제 전 임시 예약, 확정, 취소, 조회
-   ============================================================ */
 
 @Slf4j
 @RestController
@@ -26,16 +21,44 @@ public class RoomRsvController {
 
     /** ✅ 결제 전 예약 임시 생성 (재고 선점용) */
     @PostMapping("/pending")
-    public ResponseEntity<String> createPendingReservation(@RequestBody List<RoomRsvRequestDTO> dtoList) {
-        if (dtoList.isEmpty()) return ResponseEntity.badRequest().body("요청 데이터가 비어있습니다.");
+    public ResponseEntity<RoomPreRsvResponseDTO> createPendingReservation(@RequestBody List<RoomRsvRequestDTO> dtoList) {
+        if (dtoList.isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(RoomPreRsvResponseDTO.builder()
+                            .success(false)
+                            .message("요청 데이터가 비어있습니다.")
+                            .build());
+        }
 
         String reserveId = dtoList.get(0).getReserveId();
         Long userNo = dtoList.get(0).getUserNo();
 
-        log.info("[RoomRsvController] 다중 예약 요청 수신 → reserveId={}, rooms={}", reserveId, dtoList.size());
-        roomRsvService.createMultipleRoomReservations(reserveId, userNo, dtoList);
+        try {
+            if (dtoList.size() == 1) {
+                RoomRsvRequestDTO singleDto = dtoList.get(0);
+                roomRsvService.createRoomReservation(singleDto);
 
-        return ResponseEntity.ok("✅ 다중 객실 예약 생성 완료");
+                return ResponseEntity.ok(RoomPreRsvResponseDTO.builder()
+                        .success(true)
+                        .reserveId(singleDto.getReserveId())
+                        .message("✅ 단일 객실 예약 임시 생성 완료")
+                        .build());
+            } else {
+                roomRsvService.createMultipleRoomReservations(reserveId, userNo, dtoList);
+                return ResponseEntity.ok(RoomPreRsvResponseDTO.builder()
+                        .success(true)
+                        .reserveId(reserveId)
+                        .message("✅ 다중 객실 예약 임시 생성 완료")
+                        .build());
+            }
+
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(RoomPreRsvResponseDTO.builder()
+                            .success(false)
+                            .message("❌ 예약 생성 중 오류: " + e.getMessage())
+                            .build());
+        }
     }
 
     /** ✅ 결제 완료 후 예약 확정 */

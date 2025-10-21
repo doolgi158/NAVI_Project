@@ -134,10 +134,10 @@ const AccDetailPage = () => {
 		const checkOut = dateRange[1].format("YYYY-MM-DD");				// 체크아웃 날짜
 		const nights = dayjs(checkOut).diff(dayjs(checkIn), "day");		// 숙박일수
 
-		// 결제 시 사용할 예약 폼 데이터(formData)
-		const formData = {
+		// 결제 시 사용할 예약 폼 데이터(preFormData)
+		const preFormData = {
 			reserveId: null,									// 예약ID
-			userNo: 1,											// [ TODO ] : 사용자 연결
+			userNo: 2,											// [ TODO ] : 사용자 연결
 			roomId: room.roomId,								// 객실ID
 			checkIn,											// 체크인 날짜
 			checkOut,											// 체크아웃 날짜
@@ -153,13 +153,13 @@ const AccDetailPage = () => {
 			// 백엔드에 넘길 RequestDTO
 			const dtoList = [
 				{
-					reserveId: formData.reserveId, 		// null
+					reserveId: preFormData.reserveId, 	// null
 					userNo: 2, 							// [ TODO ] : 사용자 연결
 					roomId: room.roomId,				// 객실ID
 					startDate: checkIn,					// 체크인 날짜
 					endDate: checkOut,					// 체크아웃 날짜
 					nights: nights,						// 숙박일수
-					quantity: formData.roomCount,		// 객실수량
+					quantity: preFormData.roomCount,	// 객실수량
 					price: room.weekdayFee,				// [ TODO ] : 객실단가 (임시적으로 평일만 적용)
 				},
 			];
@@ -167,37 +167,39 @@ const AccDetailPage = () => {
 			const res = await axios.post(`/api/room/reserve/pending`, dtoList);
 
 			// 예약ID 추출
-			const generatedReserveId = res.data.reserveId || res.data[0]?.reserveId;
+			const generatedReserveId = res.data?.reserveId || (Array.isArray(res.data) && res.data[0]?.reserveId);
+
 			if (!generatedReserveId) {
+				console.warn("⚠️ 서버 응답:", res.data);
 				message.error("예약 ID 생성에 실패했습니다.");
+				return;
 			} else {
-				console.log("✅ 예약 임시 생성 완료:", res.data);	// [ NOTE ] : 로그 출력
-				message.success("예약 생성되었습니다. 결제 페이지로 이동합니다.");
+				// formData에 저장
+				const formData = {
+					...preFormData,
+					reserveId: generatedReserveId,
+				};
+
+				// 숙소 및 객실 정보(items)
+				const items = {
+					accId,
+					accName: accData.title,
+					address: accData.address,
+					thumbnail: accData.accImages?.[0] || null,
+					room,
+				};
+
+				// 결제 페이지로 이동
+				navigate("/payment", {
+					state: {
+						rsvType: "ACC",
+						items,
+						formData,
+					},
+				});
 			}
 
-			// formData에 저장
-			const updatedFormData = {
-				...formData,
-				reserveId: generatedReserveId,
-			};
 
-			// 숙소 및 객실 정보(items)
-			const items = {
-				accId,
-				accName: accData.title,
-				address: accData.address,
-				thumbnail: accData.accImages?.[0] || null,
-				room,
-			};
-
-			// 결제 페이지로 이동
-			navigate("/payment", {
-				state: {
-					rsvType: "ACC",
-					items,
-					updatedFormData,
-				},
-			});
 		} catch (err) {
 			console.error("❌ 예약 임시 생성 실패:", err);
 			message.error("예약 생성 중 오류가 발생했습니다.");
@@ -407,8 +409,8 @@ const AccDetailPage = () => {
 													<Text
 														type={room.remainCount <= 3 ? "danger" : "secondary"}
 														className={`font-medium ${room.remainCount <= 3
-																? "text-red-500 font-semibold"
-																: "text-gray-600"
+															? "text-red-500 font-semibold"
+															: "text-gray-600"
 															}`}
 													>
 														잔여 객실 {room.remainCount}개

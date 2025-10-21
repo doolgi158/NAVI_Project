@@ -20,11 +20,11 @@ public class StockTimeoutScheduler {
     private final RoomRsvRepository roomRsvRepository;
     private final StockService stockService;
 
-    @Scheduled(fixedRate = 300000) // (5분 주기)
+    @Scheduled(fixedRate = 60000) // (1분 마다 실행)
     @Transactional
     public void cancelExpiredReservations() {
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime threshold = now.minusMinutes(5);
+        LocalDateTime threshold = now.minusMinutes(5); // 5분 이전에 생성된 예약 취소
 
         // [1] 5분 이상 경과한 PENDING 예약 조회
         List<RoomRsv> expiredList = roomRsvRepository.findAll().stream()
@@ -52,11 +52,11 @@ public class StockTimeoutScheduler {
                 roomRsvRepository.save(rsv);
 
                 log.info("⏰ [AUTO-CANCEL] 예약 자동 취소 완료 → reserveId={}, room={}, 기간={}~{}",
-                        rsv.getRoomRsvId(), rsv.getRoom().getRoomId(),
+                        rsv.getReserveId(), rsv.getRoom().getRoomId(),
                         rsv.getStartDate(), rsv.getEndDate());
             } catch (Exception e) {
                 log.error("❌ 예약 자동 취소 실패 → reserveId={}, 이유={}",
-                        rsv.getRoomRsvId(), e.getMessage(), e);
+                        rsv.getReserveId(), e.getMessage(), e);
             }
         }
 
