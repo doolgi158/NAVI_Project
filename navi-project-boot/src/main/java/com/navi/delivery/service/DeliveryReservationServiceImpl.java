@@ -30,7 +30,9 @@ public class DeliveryReservationServiceImpl implements DeliveryReservationServic
     private final BagRepository bagRepository;
     private final DeliveryGroupRepository groupRepository;
 
-    /** 1. 짐배송 예약 생성 (자동 그룹 배정 포함) */
+    /**
+     * 1. 짐배송 예약 생성 (자동 그룹 배정 포함)
+     */
     @Override
     @Transactional
     public DeliveryReservation createReservation(DeliveryReservationDTO dto) {
@@ -93,20 +95,26 @@ public class DeliveryReservationServiceImpl implements DeliveryReservationServic
         return saved;
     }
 
-    /** 2. 사용자별 예약 조회 */
+    /**
+     * 2. 사용자별 예약 조회
+     */
     @Override
     public List<DeliveryReservation> getReservationsByUser(Long userNo) {
         return reservationRepository.findByUser_No(userNo);
     }
 
-    /** 3. 단일 예약 조회 */
+    /**
+     * 3. 단일 예약 조회
+     */
     @Override
     public DeliveryReservation getReservationById(String drsvId) {
         return reservationRepository.findById(drsvId)
                 .orElseThrow(() -> new IllegalArgumentException("예약 정보를 찾을 수 없습니다. drsvId=" + drsvId));
     }
 
-    /** 4. 예약 상태 변경 */
+    /**
+     * 4. 예약 상태 변경
+     */
     @Override
     @Transactional
     public DeliveryReservation updateStatus(String drsvId, String status) {
@@ -120,20 +128,24 @@ public class DeliveryReservationServiceImpl implements DeliveryReservationServic
         return reservationRepository.save(reservation);
     }
 
-    /** 예약번호 생성 (예: 20251017DVL0001) */
+    /**
+     * 예약번호 생성 (예: 20251017DLV0001)
+     */
     private String generateDrsvId() {
         LocalDate today = LocalDate.now();
         long countToday = reservationRepository.countByCreatedAtBetween(
                 today.atStartOfDay(),
                 today.plusDays(1).atStartOfDay()
         );
-        return String.format("%sDVL%04d",
+        return String.format("%sDLV%04d",
                 today.format(DateTimeFormatter.BASIC_ISO_DATE),
                 countToday + 1
         );
     }
 
-    /** 그룹 ID 생성 (예: G20251017_JEJU_AM_1) */
+    /**
+     * 그룹 ID 생성 (예: G20251017_JEJU_AM_1)
+     */
     private String generateGroupId(String region, LocalDate date, String timeSlot) {
         String regionKey = region.contains("서귀포") ? "SGP" : "JEJU";
         String slotKey = timeSlot.equals("오전") ? "AM" : "PM";

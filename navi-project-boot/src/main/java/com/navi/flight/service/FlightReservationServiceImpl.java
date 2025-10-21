@@ -147,9 +147,19 @@ public class FlightReservationServiceImpl implements FlightReservationService {
     }
 
     private String generateFrsvId() {
-        String date = LocalDate.now().format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE);
-        return String.format("%sFLY%s", date, String.valueOf(System.nanoTime()).substring(8));
+        LocalDate today = LocalDate.now();
+
+        long countToday = reservationRepository.countByCreatedAtBetween(
+                today.atStartOfDay(),
+                today.plusDays(1).atStartOfDay()
+        );
+
+        return String.format("%sFLY%04d",
+                today.format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE),
+                countToday + 1
+        );
     }
+
 
     @Override
     public BigDecimal getTotalAmountByReserveId(String frsvId) {
