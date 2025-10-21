@@ -32,7 +32,7 @@ public class TravelPlanController {
     // ======================================================
     // ✅ [1] 여행계획 등록 (Create)
     // ======================================================
-    @PostMapping("/planner/")
+    @PostMapping
     public ResponseEntity<Long> savePlan(
             @AuthenticationPrincipal UserSecurityDTO user,
             @RequestBody TravelPlanRequestDTO dto) {

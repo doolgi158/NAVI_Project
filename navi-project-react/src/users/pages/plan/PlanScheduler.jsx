@@ -177,6 +177,8 @@ export default function PlanScheduler() {
                 "https://via.placeholder.com/300x200.png?text=Travel+Plan",
         };
 
+        console.log("📦 savePlan requestData:", requestData);
+
         try {
             if (planId) {
                 await updatePlan(planId, requestData);
