@@ -2,6 +2,7 @@ import { Table, Button, Input, Space, Modal, Form, message, Typography } from "a
 import { PlusOutlined, DeleteOutlined, EditOutlined, SearchOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import AdminSectionCard from "../../layout/flight/AdminSectionCard"; // ✅ 추가
 
 const { Title } = Typography;
 const API = "http://localhost:8080/api/admin/airports";
@@ -11,10 +12,10 @@ const AdminAirportPage = () => {
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState("");
     const [open, setOpen] = useState(false);
-    const [editing, setEditing] = useState(null); // ✅ 수정 모드 여부
+    const [editing, setEditing] = useState(null);
     const [form] = Form.useForm();
 
-    // ✅ 공항 목록 조회
+    /** ✅ 공항 목록 조회 */
     const fetchAirports = async () => {
         setLoading(true);
         try {
@@ -31,15 +32,13 @@ const AdminAirportPage = () => {
         fetchAirports();
     }, []);
 
-    // ✅ 공항 등록 또는 수정
+    /** ✅ 등록/수정 */
     const handleSubmit = async (values) => {
         try {
             if (editing) {
-                // ✏️ 수정 요청
                 await axios.put(`${API}/${editing.airportCode}`, values);
                 message.success("공항 정보가 수정되었습니다.");
             } else {
-                // ➕ 등록 요청
                 await axios.post(API, values);
                 message.success("공항이 등록되었습니다.");
             }
@@ -52,14 +51,14 @@ const AdminAirportPage = () => {
         }
     };
 
-    // ✅ 수정 버튼 클릭 시
+    /** ✅ 수정 버튼 */
     const handleEdit = (record) => {
         setEditing(record);
         form.setFieldsValue(record);
         setOpen(true);
     };
 
-    // ✅ 공항 삭제
+    /** ✅ 삭제 */
     const handleDelete = (code) => {
         Modal.confirm({
             title: "공항 삭제",
@@ -79,7 +78,7 @@ const AdminAirportPage = () => {
         });
     };
 
-    // ✅ 테이블 컬럼
+    /** ✅ 컬럼 정의 */
     const columns = [
         {
             title: "공항코드",
@@ -99,7 +98,7 @@ const AdminAirportPage = () => {
             align: "center",
             width: 120,
             render: (_, record) => (
-                <Space>
+                <Space size="small">
                     <Button
                         size="small"
                         icon={<EditOutlined />}
@@ -120,51 +119,62 @@ const AdminAirportPage = () => {
         },
     ];
 
-    // ✅ 검색 필터링
+    /** ✅ 검색 필터 */
     const filtered = airports.filter((a) =>
         a.airportName.toLowerCase().includes(search.toLowerCase())
     );
 
     return (
         <div style={{ padding: 24 }}>
-            <Space style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
-                <Title level={4} style={{ margin: 0 }}>
-                    공항 관리
-                </Title>
+            <AdminSectionCard
+                title="공항 관리"
+                extra={
+                    <Space>
+                        <Input
+                            placeholder="공항명 검색"
+                            prefix={<SearchOutlined />}
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            style={{ width: 200 }}
+                            allowClear
+                        />
+                        <Button
+                            type="primary"
+                            icon={<PlusOutlined />}
+                            onClick={() => {
+                                setEditing(null);
+                                form.resetFields();
+                                setOpen(true);
+                            }}
+                            style={{
+                                borderRadius: 8,
+                                fontWeight: 600,
+                                background: "#2563eb",
+                                border: "none",
+                            }}
+                        >
+                            공항 등록
+                        </Button>
+                    </Space>
+                }
+            >
+                <Table
+                    columns={columns}
+                    dataSource={filtered}
+                    loading={loading}
+                    rowKey="airportCode"
+                    pagination={false}
+                    size="middle"
+                    bordered
+                    style={{
+                        minWidth: "100%",
+                        tableLayout: "auto",
+                        whiteSpace: "nowrap",
+                    }}
+                />
+            </AdminSectionCard>
 
-                <Space>
-                    <Input
-                        placeholder="공항명 검색"
-                        prefix={<SearchOutlined />}
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        style={{ width: 200 }}
-                        allowClear
-                    />
-                    <Button
-                        type="primary"
-                        icon={<PlusOutlined />}
-                        onClick={() => {
-                            setEditing(null);
-                            form.resetFields();
-                            setOpen(true);
-                        }}
-                    >
-                        공항 등록
-                    </Button>
-                </Space>
-            </Space>
-
-            <Table
-                columns={columns}
-                dataSource={filtered}
-                loading={loading}
-                rowKey="airportCode"
-                pagination={false}
-                size="small"
-                bordered
-            />
-
+            {/* ✅ 등록/수정 모달 */}
             <Modal
                 title={editing ? "공항 수정" : "공항 등록"}
                 open={open}
@@ -192,7 +202,18 @@ const AdminAirportPage = () => {
                         <Input placeholder="예: 제주" />
                     </Form.Item>
 
-                    <Button type="primary" htmlType="submit" block>
+                    <Button
+                        type="primary"
+                        htmlType="submit"
+                        block
+                        style={{
+                            borderRadius: 8,
+                            background: "#2563eb",
+                            border: "none",
+                            height: 40,
+                            fontWeight: 600,
+                        }}
+                    >
                         {editing ? "수정" : "등록"}
                     </Button>
                 </Form>
