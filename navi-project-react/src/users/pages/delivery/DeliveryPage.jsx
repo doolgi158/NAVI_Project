@@ -17,25 +17,20 @@ import { setReserveData } from "../../../common/slice/paymentSlice";
 import { useDispatch } from "react-redux";
 
 const token = localStorage.getItem("accessToken");
-
 const { Title, Text } = Typography;
 
 const API_SERVER_HOST = "http://localhost:8080";
 const KAKAO_MAP_KEY = import.meta.env.VITE_KAKAO_MAP_KEY;
-
-// ✅ bagSize별 요금표
 const BAG_PRICE_TABLE = { S: 10000, M: 15000, L: 20000 };
-
-// ✅ 제주공항 좌표
 const JEJU_AIRPORT = { lat: 33.5055, lng: 126.495 };
 
 const DeliveryPage = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch(); // ✅ Redux 사용 준비
+  const dispatch = useDispatch();
 
   const [form, setForm] = useState({
     senderName: "",
-    phone: "",
+    phone: "", // ✅ 기본값 010-
     deliveryType: "AIRPORT_TO_HOTEL",
     fromAddress: "",
     toAddress: "",
@@ -53,6 +48,34 @@ const DeliveryPage = () => {
 
   const handleChange = (key, value) =>
     setForm((prev) => ({ ...prev, [key]: value }));
+
+  /** ✅ 이름 입력 제한 (한글/영문만 허용) */
+  const handleNameChange = (value) => {
+    const filtered = value.replace(/[^a-zA-Z가-힣\s]/g, ""); // 숫자·특수문자 제거
+    setForm((p) => ({ ...p, senderName: filtered }));
+  };
+
+  /** ✅ 전화번호 입력 제한 및 자동 포맷 */
+  const handlePhoneChange = (value) => {
+    // 010- 자동 유지
+    let digits = value.replace(/[^0-9]/g, ""); // 숫자만 추출
+    if (!digits.startsWith("010")) digits = "010" + digits;
+
+    // 010-xxxx-xxxx 형식으로 포맷팅
+    let formatted = "010";
+    if (digits.length > 3 && digits.length <= 7) {
+      formatted = `${digits.slice(0, 3)}-${digits.slice(3)}`;
+    } else if (digits.length > 7) {
+      formatted = `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(
+        7,
+        11
+      )}`;
+    } else {
+      formatted = digits;
+    }
+
+    setForm((p) => ({ ...p, phone: formatted }));
+  };
 
   /** ✅ 요금 자동 계산 */
   useEffect(() => {
@@ -138,8 +161,9 @@ const DeliveryPage = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  /** ✅ 주소 검색 */
+  /** ✅ 주소 검색 (생략: 기존 코드 동일) */
   const handleSearchAddress = (targetKey) => {
+    // ... 기존 코드 그대로 유지 ...
     if (!window.daum || !window.daum.Postcode) {
       const script = document.createElement("script");
       script.src =
@@ -218,7 +242,6 @@ const DeliveryPage = () => {
     const missing = required.find((k) => !form[k]);
     if (missing) return message.warning("모든 정보를 입력해주세요.");
 
-    // [ TODO ] : usePayment의 항목과 일치시켜야 함.
     const dto = {
       startAddr: form.fromAddress,
       endAddr: form.toAddress,
@@ -227,34 +250,30 @@ const DeliveryPage = () => {
       bagId: form.bagSize === "S" ? 1 : form.bagSize === "M" ? 2 : 3,
       groupId: "G20251015_JEJU_AM_1",
       memo: form.memo,
-      bagSize: form.bagSize
+      bagSize: form.bagSize,
+      phone: form.phone, // ✅ 포맷 그대로 전달
     };
 
     try {
       const res = await axios.post(`${API_SERVER_HOST}/api/delivery/rsv`, dto, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
       console.log("✅ [DeliveryPage] 예약 응답:", res.data);
 
-      // 예약 성공 시 Redux 저장
       dispatch(
         setReserveData({
           rsvType: "DLV",
-          reserveId: res.data.data.drsvId,  // ✅ 예약 ID
-          itemData: res.data.data,          // ✅ 예약 상세 데이터
+          reserveId: res.data.data.drsvId,
+          itemData: res.data.data,
         })
       );
 
       message.success("짐배송 예약이 완료되었습니다!");
-
-      // 결제 페이지로 이동 (예약 결과 전달)
       navigate("/payment", {
         state: {
           rsvType: "DLV",
-          items: res.data.data,   // 예약 데이터 전달
-          formData: dto,          // 폼 데이터 전달
+          items: res.data.data,
+          formData: dto,
         },
       });
     } catch (error) {
@@ -275,20 +294,25 @@ const DeliveryPage = () => {
             짐배송 예약
           </Title>
 
+          {/* ✅ 이름 입력 */}
           <Input
             placeholder="이름"
             value={form.senderName}
-            onChange={(e) => handleChange("senderName", e.target.value)}
+            onChange={(e) => handleNameChange(e.target.value)}
             className="mb-3"
           />
+
+          {/* ✅ 전화번호 입력 */}
           <Input
-            placeholder="전화번호"
+            placeholder="전화번호 (010-xxxx-xxxx)"
             value={form.phone}
-            onChange={(e) => handleChange("phone", e.target.value)}
+            onChange={(e) => handlePhoneChange(e.target.value)}
             className="mb-5"
+            maxLength={13}
           />
 
           <Text strong>배송 방향</Text>
+          {/* ... 이하 동일 */}
           <Radio.Group
             value={form.deliveryType}
             onChange={(e) => {
@@ -327,6 +351,7 @@ const DeliveryPage = () => {
 
           <Divider />
 
+          {/* ✅ 주소 입력 부분 그대로 */}
           <div className="flex gap-2 mb-3">
             <Input
               placeholder="출발지 주소"
@@ -348,13 +373,16 @@ const DeliveryPage = () => {
             </Button>
           </div>
 
+          {/* ✅ 내일부터 선택 가능 */}
           <DatePicker
             className="w-full mb-4"
             value={form.deliveryDate ? dayjs(form.deliveryDate) : null}
             onChange={(date) => handleChange("deliveryDate", date)}
             placeholder="배송 희망 일자 선택"
+            disabledDate={(current) => current && current < dayjs().endOf("day")}
           />
 
+          {/* ✅ 이하 동일 */}
           <Text strong>가방 정보</Text>
           <div className="flex gap-3 mt-2 mb-4">
             <select
@@ -403,7 +431,7 @@ const DeliveryPage = () => {
           </Button>
         </Card>
 
-        {/* ✅ 지도 카드 */}
+        {/* ✅ 지도 */}
         <Card
           className="shadow-md rounded-2xl border border-gray-200 overflow-hidden"
           styles={{ body: { padding: 0 } }}

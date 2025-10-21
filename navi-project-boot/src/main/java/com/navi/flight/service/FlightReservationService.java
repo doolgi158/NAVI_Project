@@ -11,6 +11,9 @@ public interface FlightReservationService {
     // 예약 생성 (결제 전 0원)
     FlightReservationDTO createReservation(FlightReservationDTO dto);
 
+    // 복수 예약 생성(왕복의 경우 한번에 처리)
+    List<FlightReservationDTO> createBatchReservations(List<FlightReservationDTO> dtos);
+
     // 결제 성공 후 금액 업데이트
     FlightReservation updatePayment(String frsvId, BigDecimal amount);
 
