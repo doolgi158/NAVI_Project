@@ -164,11 +164,27 @@ const SeatSelectPage = () => {
       return;
     }
 
+    // 결제에 사용할 데이터
+    const items = [
+      {
+        reserveId: selectedOutbound?.frsvId,
+        amount: selectedOutbound?.totalPrice,
+      },
+    ];
+
+    // 왕복일 경우 두 번째 아이템 추가
+    if (isRoundTrip && selectedInbound) {
+      items.push({
+        reserveId: selectedInbound?.frsvId,
+        amount: selectedInbound?.totalPrice,
+      });
+    }
+    
     // ✅ 편도 or 귀국편 완료 시 → 결제 페이지로
-    navigate("/flight/payment", {
+    navigate("/payment", {
       state: {
-        selectedOutbound,
-        selectedInbound,
+        rsvType: "FLY",
+        items,
         passengerCount,
         passengers,
         outboundDto: isRoundTrip ? outboundDto : currentDto,

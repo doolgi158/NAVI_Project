@@ -198,11 +198,26 @@ const FlightRsvInputPage = () => {
 
       message.success("항공편 예약이 완료되었습니다!");
 
-      navigate(`/flight/payment`, {
+      // 결제에 사용할 데이터
+      const items = [
+        {
+          reserveId: resOut?.data?.data?.frsvId || resOut?.data?.reserveId,
+          amount: selectedOutbound?.price * passengerCount || 0,
+        },
+      ];
+
+      if (selectedInbound && resIn?.data?.data?.frsvId) {
+        items.push({
+          reserveId: resIn.data.data.frsvId,
+          amount: selectedInbound?.price * passengerCount || 0,
+        });
+      }
+
+      navigate(`/payment`, {
         state: {
           reservation: [resOut.data.data, resIn?.data?.data].filter(Boolean),
-          selectedOutbound,
-          selectedInbound,
+          rsvType: "FLY",
+          items,
           passengerCount,
           passengers,
           totalPrice:
