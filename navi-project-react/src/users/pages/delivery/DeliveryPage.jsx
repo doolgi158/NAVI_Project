@@ -13,7 +13,7 @@ import {
 import dayjs from "dayjs";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { setReserveData } from "../../../common/slice/paymentSlice"; 
+import { setReserveData } from "../../../common/slice/paymentSlice";
 import { useDispatch } from "react-redux";
 
 const { Title, Text } = Typography;
@@ -226,7 +226,7 @@ const DeliveryPage = () => {
       bagId: form.bagSize === "S" ? 1 : form.bagSize === "M" ? 2 : 3,
       groupId: "G20251015_JEJU_AM_1",
     };
-    
+
     try {
       const res = await axios.post(`${API_SERVER_HOST}/api/delivery/rsv`, dto);
       console.log("✅ [DeliveryPage] 예약 응답:", res.data);

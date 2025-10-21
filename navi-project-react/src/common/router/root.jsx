@@ -20,10 +20,6 @@ const root = createBrowserRouter([
         element: <Suspense fallback={Loading}> <Appshell /> </Suspense>,
         children: [
             {
-                path: "*",
-                element: <Suspense fallback={Loading}><Main /></Suspense>
-            },
-            {
                 path: "/",
                 element: <Suspense fallback={Loading}><Main /></Suspense>
             },
@@ -62,6 +58,10 @@ const root = createBrowserRouter([
             {
                 path: "/board",
                 children: [...BoardRouter()]
+            },
+            {
+                path: "*",
+                element: <Suspense fallback={Loading}><Main /></Suspense>
             },
         ]
     }

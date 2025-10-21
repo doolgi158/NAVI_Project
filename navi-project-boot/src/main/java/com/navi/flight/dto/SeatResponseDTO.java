@@ -7,6 +7,7 @@ import lombok.Getter;
 @Getter
 @Builder
 public class SeatResponseDTO {
+    private Long seatId;
     private String seatNo;
     private SeatClass seatClass;
     private boolean isReserved;

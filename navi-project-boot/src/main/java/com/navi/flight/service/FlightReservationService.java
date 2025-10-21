@@ -9,7 +9,7 @@ import java.util.List;
 public interface FlightReservationService {
 
     /** 항공편 예약 등록 */
-    FlightReservation createReservation(FlightReservationDTO dto);
+    FlightReservationDTO createReservation(FlightReservationDTO dto);
 
     /** 사용자별 예약 목록 조회 */
     List<FlightReservation> getReservationsByUser(Long userNo);

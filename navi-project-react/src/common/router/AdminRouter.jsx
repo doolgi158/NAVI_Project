@@ -1,7 +1,7 @@
 import { Suspense, lazy } from "react";
 import ProtectedRoute from "./ProtectedRoute.jsx";
-import AdminFlightRouter from "./AdminFlightRouter.jsx"; // ✅ 경로 동일 폴더라 그대로
-
+import AdminFlightRouter from "./AdminFlightRouter.jsx";
+import AdminDeliveryRouter from "./AdminDeliveryRouter.jsx";
 const AdminUsers = lazy(() => import("../../admin/pages/user/AdminUsersPage.jsx"));
 const AdminDashboard = lazy(() => import("../../admin/pages/AdminDashboardPage.jsx"));
 const AdminTravelList = lazy(() => import("../../admin/pages/travel/AdminTravelList.jsx"));
@@ -64,6 +64,8 @@ const AdminRouter = () => {
     },
     // 항공 관리자 라우터 통합
     ...AdminFlightRouter(),
+
+    ...AdminDeliveryRouter(),
   ];
 };
 
