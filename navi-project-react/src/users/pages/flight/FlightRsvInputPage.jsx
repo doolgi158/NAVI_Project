@@ -94,7 +94,7 @@ const FlightRsvInputPage = () => {
       handlePhoneChange(i, value);
       return;
     } else if (field === "email") {
-      updated[i][field] = value.trim();
+      updated[i][field] = value.replace(/[^a-zA-Z0-9@._-]/g, "").trim();
     } else {
       updated[i][field] = value;
     }
@@ -102,7 +102,15 @@ const FlightRsvInputPage = () => {
     setPassengers(updated);
   };
 
-  const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const isValidEmail = (email) => {
+    const atCount = (email.match(/@/g) || []).length;
+    const dotCount = (email.match(/\./g) || []).length;
+    return (
+      atCount === 1 &&
+      dotCount >= 1 &&
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+    );
+  };
 
   const isIncomplete = passengers.some(
     (p) =>
@@ -189,7 +197,7 @@ const FlightRsvInputPage = () => {
 
       message.success("항공편 예약이 완료되었습니다!");
 
-      navigate(`/flight/payment`, {
+      navigate(`/payment`, {
         state: {
           reservation: [resOut.data.data, resIn?.data?.data].filter(Boolean),
           selectedOutbound,
