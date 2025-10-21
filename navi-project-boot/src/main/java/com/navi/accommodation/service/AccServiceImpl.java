@@ -108,6 +108,16 @@ public class AccServiceImpl implements AccService {
     }
 
     @Override
+    public List<AccListResponseDTO> searchByName(String name) {
+        List<Acc> accList = accRepository.findByTitleContainingIgnoreCase(name);
+
+        return accRepository.findByTitleContainingIgnoreCase(name)
+                .stream()
+                .map(AccListResponseDTO::fromEntity)
+                .toList();
+    }
+
+    @Override
     public List<AdminAccListDTO> getAllAccList(String keyword) {
         List<Acc> accList;
 

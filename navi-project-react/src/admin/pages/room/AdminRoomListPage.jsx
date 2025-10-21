@@ -1,211 +1,303 @@
+import { Layout, Typography, Input, Button, Table, Space, Modal, Form, InputNumber, Switch, message } from "antd";
 import { useEffect, useState } from "react";
-import {
-    Layout, Table, Button, Space, Tag, Typography, Modal, message, Input, Select, Spin
-} from "antd";
-import { PlusOutlined, EditOutlined, DeleteOutlined, ReloadOutlined } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { API_SERVER_HOST } from "@/common/api/naviApi";
 import AdminSiderLayout from "../../layout/AdminSiderLayout";
-import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import { setRoomSearchState } from "@/common/slice/roomSlice";
 
 const { Title } = Typography;
-const { Option } = Select;
+const { Content } = Layout;
 
-const AdminRoomListPage = () => {
+const RoomAdminPage = () => {
+    const dispatch = useDispatch();
+    const savedState = useSelector((state) => state.room);
+
+    const [searchName, setSearchName] = useState(savedState.searchName || "");
+    const [selectedAccNo, setSelectedAccNo] = useState(savedState.selectedAccNo);
+    const [expandedRowKeys, setExpandedRowKeys] = useState(savedState.expandedRowKeys);
+    const [accommodations, setAccommodations] = useState([]);
     const [rooms, setRooms] = useState([]);
-    const [displayRooms, setDisplayRooms] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [keyword, setKeyword] = useState("");
-    const [pagination, setPagination] = useState({ current: 1, pageSize: 30, total: 0 });
-    const [accOptions, setAccOptions] = useState([]);
-    const [selectedAcc, setSelectedAcc] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingRoom, setEditingRoom] = useState(null);
+    const [form] = Form.useForm();
     const navigate = useNavigate();
 
-    // 숙소 목록 조회 (드롭다운용)
-    const fetchAccOptions = async () => {
-        try {
-            const token = localStorage.getItem("accessToken");
-            const res = await axios.get(`${API_SERVER_HOST}/api/adm/accommodations`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            const data = res?.data?.data || [];
-            setAccOptions(data.map((a) => ({ label: a.title, value: a.accNo })));
-        } catch (err) {
-            console.error("숙소 목록 로드 실패:", err);
-            message.error("숙소 목록을 불러오지 못했습니다.");
+    // 페이지 복귀 시 자동 복원
+    useEffect(() => {
+        if (savedState.selectedAccNo) {
+            fetchRooms(savedState.selectedAccNo);
         }
-    };
+    }, []);
 
-    // 객실 목록 조회
-    const fetchRooms = async () => {
-        if (!selectedAcc) return;
+    // 숙소 검색
+    const fetchAccommodations = async () => {
+        if (!searchName.trim()) return message.warning("숙소 이름을 입력해주세요.");
         setLoading(true);
         try {
-            const token = localStorage.getItem("accessToken");
-            const res = await axios.get(`${API_SERVER_HOST}/api/adm/rooms`, {
-                params: { accNo: selectedAcc, keyword },
-                headers: { Authorization: `Bearer ${token}` },
+            const res = await axios.get(`${API_SERVER_HOST}/api/adm/accommodations/search`, {
+                params: { name: searchName },
             });
-            const data = res?.data?.data || [];
-            setRooms(data);
-            setDisplayRooms(data.slice(0, pagination.pageSize));
-            setPagination((prev) => ({ ...prev, total: data.length, current: 1 }));
-        } catch (err) {
-            console.error("객실 데이터 로드 실패:", err);
-            message.error("객실 데이터를 불러올 수 없습니다.");
+            console.log("🏨 API 응답 데이터:", res.data);
+            if (res.data.status === 200 && res.data.data) {
+                setAccommodations(res.data.data);
+                message.success(`${res.data.data.length}개의 숙소를 찾았습니다.`);
+            } else {
+                message.error("숙소를 찾을 수 없습니다.");
+            }
+        } catch {
+            message.error("숙소 검색 중 오류가 발생했습니다.");
         } finally {
             setLoading(false);
         }
     };
 
-    // 페이지 변경
-    const handlePageChange = (page, pageSize) => {
-        const start = (page - 1) * pageSize;
-        const end = start + pageSize;
-        setDisplayRooms(rooms.slice(start, end));
-        setPagination({ current: page, pageSize, total: rooms.length });
+    // 숙소 선택 → 객실 목록
+    const fetchRooms = async (accNo) => {
+        if (!accNo) return;
+        setSelectedAccNo(accNo);
+        setLoading(true);
+        try {
+            const res = await axios.get(`${API_SERVER_HOST}/api/adm/rooms/byAcc/${accNo}`);
+            if (res.data.status === 200 && res.data.data) {
+                setRooms(res.data.data);
+            } else {
+                message.error("객실을 불러오지 못했습니다.");
+            }
+        } catch {
+            message.error("객실 조회 중 오류가 발생했습니다.");
+        } finally {
+            setLoading(false);
+        }
     };
 
-    // 삭제
-    const handleDelete = (roomNo, roomName) => {
+    // 객실 추가
+    const handleAddRoom = () => {
+        if (!selectedAccNo) {
+            message.warning("객실을 추가할 숙소를 먼저 선택해주세요.");
+            return;
+        }
+
+        dispatch(setRoomSearchState({
+            searchName,
+            selectedAccNo,
+            expandedRowKeys
+        }));
+
+        navigate(`/adm/rooms/new/${selectedAccNo}`);
+    };
+
+    // 객실 수정
+    const handleEditRoom = (room) => {
+        dispatch(setRoomSearchState({
+            searchName,
+            selectedAccNo,
+            expandedRowKeys
+        }));
+
+        console.log("searchName: ", searchName);
+        console.log("selectedAccNo: ", selectedAccNo);
+        console.log("expandedRowKeys: ", expandedRowKeys);
+
+        navigate(`/adm/rooms/edit/${room.roomNo}`);
+    };
+
+    // 객실 삭제
+    const handleDeleteRoom = async (roomNo) => {
         Modal.confirm({
-            title: "객실 삭제 확인",
-            content: `정말 "${roomName}" 객실을 삭제하시겠습니까?`,
-            okText: "삭제",
+            title: "객실 삭제",
+            content: "정말 삭제하시겠습니까?",
             okType: "danger",
-            cancelText: "취소",
-            async onOk() {
+            onOk: async () => {
                 try {
-                    const token = localStorage.getItem("accessToken");
-                    await axios.delete(`${API_SERVER_HOST}/api/adm/rooms/${roomNo}`, {
-                        headers: { Authorization: `Bearer ${token}` },
-                    });
-                    message.success("객실이 삭제되었습니다.");
-                    fetchRooms();
-                } catch (err) {
-                    console.error("삭제 실패:", err);
-                    message.error("객실 삭제 중 오류가 발생했습니다.");
+                    await axios.delete(`${API_SERVER_HOST}/api/adm/rooms/${roomNo}`);
+                    message.success("삭제되었습니다.");
+                    fetchRooms(selectedAccNo);
+                } catch {
+                    message.error("삭제 중 오류가 발생했습니다.");
                 }
             },
         });
     };
 
-    useEffect(() => {
-        fetchAccOptions();
-    }, []);
+    const handleSubmit = async () => {
+        const values = form.getFieldsValue();
 
-    // 테이블 컬럼 정의
-    const columns = [
-        { title: "번호", dataIndex: "roomNo", width: 80, align: "center" },
-        { title: "코드", dataIndex: "roomId", width: 100, align: "center" },
-        { title: "객실명", dataIndex: "roomName", width: 160 },
-        { title: "면적(m²)", dataIndex: "roomSize", width: 100, align: "center" },
-        { title: "기준/최대인원", render: (r) => `${r.baseCnt}/${r.maxCnt}`, width: 120, align: "center" },
-        {
-            title: "요금(평일/주말)",
-            render: (r) => `${r.weekdayFee.toLocaleString()} / ${r.weekendFee.toLocaleString()}`,
-            align: "right", width: 180,
-        },
-        {
-            title: "와이파이",
-            dataIndex: "hasWifi",
-            width: 100,
-            align: "center",
-            render: (v) => (v ? <Tag color="green">O</Tag> : <Tag color="red">X</Tag>),
-        },
-        {
-            title: "운영여부",
-            dataIndex: "active",
-            width: 120,
-            align: "center",
-            render: (v) => (v ? <Tag color="blue">운영중</Tag> : <Tag color="gray">중단</Tag>),
-        },
+        // 선택된 숙소가 없을 경우 방어 코드
+        if (!selectedAccNo) {
+            message.warning("객실을 추가할 숙소를 먼저 선택해주세요.");
+            return;
+        }
+
+        // 백엔드에서 Long 타입으로 받기 때문에 숫자 형태로 변환
+        values.accNo = Number(selectedAccNo);
+
+        console.log("🧾 전송 payload:", values);
+
+        try {
+            if (editingRoom) {
+                await axios.put(`${API_SERVER_HOST}/api/adm/rooms/edit/${editingRoom.roomNo}`, values);
+                message.success("수정 완료");
+            } else {
+                await axios.post(`${API_SERVER_HOST}/api/adm/rooms/new`, values);
+                message.success("등록 완료");
+            }
+            setIsModalOpen(false);
+            fetchRooms(selectedAccNo);
+        } catch {
+            message.error("저장 실패");
+        }
+    };
+
+    // 페이지 이동 전 상태 저장
+    useEffect(() => {
+        dispatch(setRoomSearchState({
+            searchName,
+            selectedAccNo,
+            expandedRowKeys
+        }));
+    }, [searchName, selectedAccNo, expandedRowKeys]);
+
+    // 숙소 테이블 컬럼
+    const accColumns = [
+        { title: "숙소명", dataIndex: "title" },
+        { title: "숙소 유형", dataIndex: "category" },
+        { title: "주소", dataIndex: "address" },
+        { title: "전화번호", dataIndex: "tel" },
+    ];
+
+    // 객실 테이블 컬럼
+    const roomColumns = [
+        { title: "객실명", dataIndex: "roomName" },
+        { title: "면적", dataIndex: "roomSize" },
+        { title: "기준 인원", dataIndex: "baseCnt" },
+        { title: "최대 인원", dataIndex: "maxCnt" },
+        { title: "평일 요금", dataIndex: "weekdayFee" },
+        { title: "주말 요금", dataIndex: "weekendFee" },
+        { title: "Wi-Fi", dataIndex: "hasWifi", render: (v) => (v ? "O" : "X") },
         {
             title: "관리",
-            align: "center",
-            width: 180,
-            render: (_, record) => (
+            render: (_, r) => (
                 <Space>
-                    <Button
-                        type="primary"
-                        icon={<EditOutlined />}
-                        onClick={() => navigate(`/adm/rooms/edit/${record.roomNo}`)}
-                    >
-                        수정
-                    </Button>
-                    <Button
-                        danger
-                        icon={<DeleteOutlined />}
-                        onClick={() => handleDelete(record.roomNo, record.roomName)}
-                    >
-                        삭제
-                    </Button>
+                    <Button onClick={() => handleEditRoom(r)}>수정</Button>
+                    <Button danger onClick={() => handleDeleteRoom(r.roomNo)}>삭제</Button>
                 </Space>
             ),
         },
     ];
 
+    // 행 클릭 이벤트
+    const handleRowClick = (record) => {
+        const accKey = record.accNo;
+        console.log(record);
+        if (!accKey) return;
+
+        if (expandedRowKeys.includes(accKey)) {
+            // 이미 열려 있으면 닫기
+            setExpandedRowKeys([]);
+            setSelectedAccNo(null);
+        } else {
+            // 새 행 열기
+            setExpandedRowKeys([accKey]);
+            fetchRooms(accKey);
+        }
+    };
+
     return (
         <Layout style={{ minHeight: "100vh" }}>
             <AdminSiderLayout />
-            <Layout style={{ padding: "24px" }}>
-                <div style={{ padding: 24, background: "#fff", minHeight: "100%" }}>
-                    <Space align="center" style={{ marginBottom: 16 }}>
-                        <Title level={3} style={{ margin: 0 }}>객실 관리</Title>
+            <Layout className="bg-gray-50">
+                <Content className="p-6">
+                    <Title level={3}>객실 관리</Title>
 
-                        <Select
-                            showSearch
-                            placeholder="숙소 선택"
-                            style={{ width: 250 }}
-                            options={accOptions}
-                            onChange={(v) => setSelectedAcc(v)}
+                    <Space className="mb-4">
+                        <Input
+                            placeholder="숙소 이름 입력"
+                            value={searchName}
+                            onChange={(e) => setSearchName(e.target.value)}
+                            style={{ width: 300 }}
                         />
-
-                        <Input.Search
-                            placeholder="객실명 검색"
-                            allowClear
-                            style={{ width: 250 }}
-                            onSearch={(kw) => {
-                                setKeyword(kw);
-                                fetchRooms();
-                            }}
-                        />
-
-                        <Button icon={<ReloadOutlined />} onClick={fetchRooms}>새로고침</Button>
-
-                        <Button
-                            type="primary"
-                            icon={<PlusOutlined />}
-                            onClick={() => navigate("/adm/rooms/new")}
-                        >
-                            객실 등록
+                        <Button type="primary" onClick={fetchAccommodations}>
+                            검색
                         </Button>
                     </Space>
 
-                    {loading ? (
-                        <Spin tip="로딩 중..." />
-                    ) : (
-                        <Table
-                            rowKey="roomNo"
-                            columns={columns}
-                            dataSource={displayRooms}
-                            bordered
-                            pagination={{
-                                current: pagination.current,
-                                pageSize: pagination.pageSize,
-                                total: pagination.total,
-                                showSizeChanger: true,
-                                pageSizeOptions: ["10", "20", "30", "50", "100"],
-                                onChange: handlePageChange,
-                                onShowSizeChange: handlePageChange,
-                                showTotal: (total) => `총 ${total.toLocaleString()} 개 객실`,
-                            }}
-                        />
-                    )}
-                </div>
+                    <Table
+                        columns={accColumns}
+                        dataSource={accommodations}
+                        rowKey={(r) => r.accNo || r.accId}
+                        loading={loading}
+                        pagination={{ pageSize: 5 }}
+                        expandable={{
+                            expandedRowRender: (record) =>
+                                selectedAccNo === (record.accNo || record.accId) && (
+                                    <div className="p-4 bg-gray-50 rounded-lg">
+                                        <div className="flex justify-between mb-3">
+                                            <h3 className="font-semibold">객실 목록</h3>
+                                            <Button type="primary" onClick={handleAddRoom}>
+                                                객실 추가
+                                            </Button>
+                                        </div>
+                                        <Table
+                                            columns={roomColumns}
+                                            dataSource={rooms}
+                                            rowKey="roomNo"
+                                            pagination={false}
+                                            size="small"
+                                            bordered
+                                        />
+                                    </div>
+                                ),
+                            expandIcon: () => null,
+                            expandedRowKeys,
+                            onExpand: (expanded, record) => handleRowClick(record),
+                        }}
+                        onRow={(record) => ({
+                            onClick: () => handleRowClick(record),
+                            style: { cursor: "pointer" },
+                        })}
+                    />
+
+                    {/* 객실 등록/수정 모달 */}
+                    <Modal
+                        open={isModalOpen}
+                        title={editingRoom ? "객실 수정" : "객실 등록"}
+                        okText="저장"
+                        cancelText="취소"
+                        onOk={handleSubmit}
+                        onCancel={() => setIsModalOpen(false)}
+                    >
+                        <Form form={form} layout="vertical">
+                            <Form.Item label="객실명" name="roomName" rules={[{ required: true }]}>
+                                <Input />
+                            </Form.Item>
+                            <Form.Item label="면적" name="roomSize">
+                                <InputNumber style={{ width: "100%" }} />
+                            </Form.Item>
+                            <Form.Item label="기준 인원" name="baseCnt">
+                                <InputNumber min={1} />
+                            </Form.Item>
+                            <Form.Item label="최대 인원" name="maxCnt">
+                                <InputNumber min={1} />
+                            </Form.Item>
+                            <Form.Item label="평일 요금" name="weekdayFee">
+                                <InputNumber min={0} />
+                            </Form.Item>
+                            <Form.Item label="주말 요금" name="weekendFee">
+                                <InputNumber min={0} />
+                            </Form.Item>
+                            <Form.Item label="Wi-Fi" name="hasWifi" valuePropName="checked">
+                                <Switch checkedChildren="있음" unCheckedChildren="없음" />
+                            </Form.Item>
+                        </Form>
+                    </Modal>
+                </Content>
             </Layout>
         </Layout>
     );
 };
 
-export default AdminRoomListPage;
+export default RoomAdminPage;

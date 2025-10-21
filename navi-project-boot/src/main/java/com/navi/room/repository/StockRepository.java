@@ -13,14 +13,22 @@ import java.util.Optional;
 public interface StockRepository extends JpaRepository<RoomStock, Long> {
     // 특정 객실 + 특정 날짜 재고 조회
     Optional<RoomStock> findByRoomAndStockDate(Room room, LocalDate stockDate);
+
     // 특정 객실 번호(Long) + 날짜 구간별 재고 조회
     List<RoomStock> findByRoom_RoomNoAndStockDateBetween(Long roomNo, LocalDate startDate, LocalDate endDate);
+
     // 특정 객실 + 특정 날짜 재고 존재 여부 확인
     boolean existsByRoomAndStockDate(Room room, LocalDate stockDate);
+
     // 특정 객실 ID(String) + 특정 날짜 재고 조회 (관리자/프론트 단건 조회용)
     Optional<RoomStock> findByRoom_RoomIdAndStockDate(String roomId, LocalDate stockDate);
+
     // 특정 객실 ID(String) + 날짜 구간별 재고 조회 (관리자용)
     List<RoomStock> findByRoom_RoomIdAndStockDateBetween(String roomId, LocalDate startDate, LocalDate endDate);
+
     // 스케줄러용 - 기준일 이전의 재고 전체 삭제
     int deleteAllByStockDateBefore(LocalDate date);
+
+    // 객실 번호 기준으로 재고 찾기
+    List<RoomStock> findByRoom_RoomNo(Long roomNo);
 }

@@ -18,9 +18,11 @@ import java.util.List;
 @Builder
 public class RoomResponseDTO {
     private Long roomNo;                // 객실 번호
+    private Long accNo;                 // 숙소 번호
     private String roomId;              // 객실 ID
     private String roomName;            // 객실명
     private Integer roomSize;           // 객실 크기
+    private Integer roomCnt;            // 객실 수
     private Integer baseCnt;            // 기본 인원
     private Integer maxCnt;             // 최대 인원
     private Integer weekdayFee;         // 평일 요금
@@ -38,6 +40,23 @@ public class RoomResponseDTO {
                 .roomId(room.getRoomId())
                 .roomName(room.getRoomName())
                 .roomSize(room.getRoomSize())
+                .roomCnt(room.getRoomCnt())
+                .baseCnt(room.getBaseCnt())
+                .maxCnt(room.getMaxCnt())
+                .weekdayFee(room.getWeekdayFee())
+                .weekendFee(room.getWeekendFee())
+                .hasWifi(room.getHasWifi())
+                .active(room.getIsActive())
+                .build();
+    }
+
+    public static RoomResponseDTO of(Room room) {
+        return RoomResponseDTO.builder()
+                .roomNo(room.getRoomNo())
+                .accNo(room.getAcc().getAccNo())
+                .roomName(room.getRoomName())
+                .roomSize(room.getRoomSize())
+                .roomCnt(room.getRoomCnt())
                 .baseCnt(room.getBaseCnt())
                 .maxCnt(room.getMaxCnt())
                 .weekdayFee(room.getWeekdayFee())

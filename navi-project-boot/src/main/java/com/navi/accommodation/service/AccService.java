@@ -18,6 +18,10 @@ public interface AccService {
 
     void deleteAcc(Long accNo);
 
+    // input으로 숙소 검색
+    List<AccListResponseDTO> searchByName(String name);
+
+    // 모든 객실 리스트 조회
     List<AdminAccListDTO> getAllAccList(String keyword);
 
     List<Acc> getAllAcc();
@@ -29,8 +33,11 @@ public interface AccService {
     // 숙소 상세 조회
     AccDetailResponseDTO getAccDetail(String accId);
 
+    // 객실 번호로 객실 상세 페이지 조회
     AccDetailResponseDTO getAccDetailByNo(Long accNo);
 
     // 조회수 증가
     Acc increaseViewCount(String accId);
+
+
 }

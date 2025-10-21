@@ -1,17 +1,26 @@
-import { configureStore } from "@reduxjs/toolkit";
-import loginReducer from "../slice/loginSlice";
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
+import { persistStore, persistReducer } from "redux-persist";
+import storage from "redux-persist/lib/storage";
 import accReducer from "../slice/accSlice";
-import paymentReducer from "../slice/paymentSlice"
+import roomReducer from "../slice/roomSlice";
+import loginReducer from "../slice/loginSlice";
 
-const store = configureStore({
-  reducer: {
-    // 각 slice를 하나의 store에 결합
-    login: loginReducer,
-    acc: accReducer,
-    payment: paymentReducer,
-  },
-  // [ NOTE ]: 개발 환경일 때만 Redux DevTools 활성화 (Redux 상태를 편하게 추적 가능)
-  devTools: process.env.NODE_ENV !== "production",
+const rootReducer = combineReducers({
+  acc: accReducer,
+  room: roomReducer,
+  login: loginReducer,
 });
 
-export default store;
+const persistConfig = {
+  key: "root",
+  storage,
+  whitelist: ["room"],
+};
+
+const persistedReducer = persistReducer(persistConfig, rootReducer);
+
+export const store = configureStore({
+  reducer: persistedReducer,
+});
+
+export const persistor = persistStore(store);

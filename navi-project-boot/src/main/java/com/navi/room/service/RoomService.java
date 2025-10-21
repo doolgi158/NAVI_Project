@@ -1,6 +1,7 @@
 package com.navi.room.service;
 
 import com.navi.accommodation.domain.Acc;
+import com.navi.room.domain.Room;
 import com.navi.room.dto.api.RoomApiDTO;
 import com.navi.room.dto.request.RoomRequestDTO;
 import com.navi.room.dto.response.RoomListResponseDTO;
@@ -12,7 +13,7 @@ import java.util.List;
 public interface RoomService {
     /* === 관리자 전용 CRUD (View) === */
     // 1. 객실 생성
-    RoomResponseDTO createRoom(Long accNo, RoomRequestDTO dto);
+    RoomResponseDTO createRoom(RoomRequestDTO dto);
 
     // 2. 객실 수정
     RoomResponseDTO updateRoom(Long roomNo, RoomRequestDTO dto);
@@ -20,9 +21,16 @@ public interface RoomService {
     // 3. 객실 조회
     List<RoomApiDTO> getRoomListByAcc(Long accNo, String keyword);
 
+    RoomResponseDTO getRooms(Long roomNo);
+
     // 4. 객실 삭제
     void deleteRoom(Long roomNo);
 
+    // 5. 재고 초기화
+    void initializeRoomStock(Room room);
+
+    // 5. 숙소 번호를 기준으로 객실정보 가져오기
+    List<RoomResponseDTO> getRoomsByAcc(Long accNo);
 
     /* === 사용자 전용 조회 (View) === */
     // 1. 특정 숙소 객실 리스트
@@ -43,6 +51,4 @@ public interface RoomService {
     /* === 비즈니스 로직 === */
     // 1. 숙소별 최저 숙박 요금 조회
     Integer findMinPriceByAcc(Acc acc, LocalDate checkIn, LocalDate checkOut);
-
-    List<RoomResponseDTO> getRooms(String accId);
 }
