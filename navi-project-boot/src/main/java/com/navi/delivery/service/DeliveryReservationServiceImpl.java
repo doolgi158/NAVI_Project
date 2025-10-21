@@ -1,7 +1,7 @@
 package com.navi.delivery.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.navi.common.enums.RsvStatus;
-import com.navi.delivery.domain.Bag;
 import com.navi.delivery.domain.DeliveryGroup;
 import com.navi.delivery.domain.DeliveryReservation;
 import com.navi.delivery.dto.DeliveryReservationDTO;
@@ -20,9 +20,9 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class DeliveryReservationServiceImpl implements DeliveryReservationService {
 
     private final DeliveryReservationRepository reservationRepository;
@@ -30,9 +30,6 @@ public class DeliveryReservationServiceImpl implements DeliveryReservationServic
     private final BagRepository bagRepository;
     private final DeliveryGroupRepository groupRepository;
 
-    /**
-     * 1. 짐배송 예약 생성 (자동 그룹 배정 포함)
-     */
     @Override
     @Transactional
     public DeliveryReservation createReservation(DeliveryReservationDTO dto) {
@@ -41,25 +38,16 @@ public class DeliveryReservationServiceImpl implements DeliveryReservationServic
         User user = userRepository.findById(dto.getUserNo())
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다. userNo=" + dto.getUserNo()));
 
-        // 2. 가방 검증
-        Bag bag = bagRepository.findById(dto.getBagId())
-                .orElseThrow(() -> new IllegalArgumentException("가방 정보를 찾을 수 없습니다. bagId=" + dto.getBagId()));
-
-        // 3. 예약번호 생성
+        // 2. 예약번호 생성
         String drsvId = generateDrsvId();
 
-        // 4. 상태 기본값 설정
+        // 3. 상태 기본값
         RsvStatus status = dto.getStatus() != null ? dto.getStatus() : RsvStatus.PENDING;
 
-        // 5. 금액 계산
-        BigDecimal totalPrice = (dto.getTotalPrice() != null)
-                ? dto.getTotalPrice()
-                : BigDecimal.valueOf(bag.getPrice());
-
-        // 6. 지역 추출
+        // 4. 지역 추출
         String region = dto.getStartAddr().contains("서귀포") ? "서귀포시" : "제주시";
 
-        // 7. 그룹 자동 배정 또는 신규 생성
+        // 5. 그룹 자동 배정 또는 신규 생성
         DeliveryGroup group = groupRepository
                 .findByRegionAndDeliveryDateAndTimeSlot(region, dto.getDeliveryDate(), "오전")
                 .orElseGet(() -> {
@@ -74,47 +62,52 @@ public class DeliveryReservationServiceImpl implements DeliveryReservationServic
                     return groupRepository.save(newGroup);
                 });
 
+        // 6. ✅ 가방 JSON 변환
+        String bagsJson = null;
+        if (dto.getBags() != null && !dto.getBags().isEmpty()) {
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                bagsJson = mapper.writeValueAsString(dto.getBags());
+            } catch (Exception e) {
+                throw new RuntimeException("가방 정보 JSON 변환 실패", e);
+            }
+        }
+
+        // 7. 금액 설정
+        BigDecimal totalPrice = dto.getTotalPrice() != null ? dto.getTotalPrice() : BigDecimal.ZERO;
+
         // 8. 예약 엔티티 생성
         DeliveryReservation reservation = DeliveryReservation.builder()
                 .drsvId(drsvId)
                 .user(user)
-                .bag(bag)
                 .group(group)
                 .startAddr(dto.getStartAddr())
                 .endAddr(dto.getEndAddr())
                 .deliveryDate(dto.getDeliveryDate())
                 .totalPrice(totalPrice)
+                .bagsJson(bagsJson) // ✅ 여기 추가됨
                 .status(status)
                 .build();
 
         DeliveryReservation saved = reservationRepository.save(reservation);
 
-        log.info("[짐배송 예약 완료] drsvId={}, region={}, date={}, groupId={}, status={}",
-                saved.getDrsvId(), region, saved.getDeliveryDate(), group.getGroupId(), saved.getStatus());
+        log.info("[짐배송 예약 완료] drsvId={}, totalPrice={}, region={}, group={}, bags={}",
+                saved.getDrsvId(), saved.getTotalPrice(), region, group.getGroupId(), bagsJson);
 
         return saved;
     }
 
-    /**
-     * 2. 사용자별 예약 조회
-     */
     @Override
     public List<DeliveryReservation> getReservationsByUser(Long userNo) {
         return reservationRepository.findByUser_No(userNo);
     }
 
-    /**
-     * 3. 단일 예약 조회
-     */
     @Override
     public DeliveryReservation getReservationById(String drsvId) {
         return reservationRepository.findById(drsvId)
                 .orElseThrow(() -> new IllegalArgumentException("예약 정보를 찾을 수 없습니다. drsvId=" + drsvId));
     }
 
-    /**
-     * 4. 예약 상태 변경
-     */
     @Override
     @Transactional
     public DeliveryReservation updateStatus(String drsvId, String status) {
@@ -128,9 +121,6 @@ public class DeliveryReservationServiceImpl implements DeliveryReservationServic
         return reservationRepository.save(reservation);
     }
 
-    /**
-     * 예약번호 생성 (예: 20251017DLV0001)
-     */
     private String generateDrsvId() {
         LocalDate today = LocalDate.now();
         long countToday = reservationRepository.countByCreatedAtBetween(
@@ -143,9 +133,6 @@ public class DeliveryReservationServiceImpl implements DeliveryReservationServic
         );
     }
 
-    /**
-     * 그룹 ID 생성 (예: G20251017_JEJU_AM_1)
-     */
     private String generateGroupId(String region, LocalDate date, String timeSlot) {
         String regionKey = region.contains("서귀포") ? "SGP" : "JEJU";
         String slotKey = timeSlot.equals("오전") ? "AM" : "PM";

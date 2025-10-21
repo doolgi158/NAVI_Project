@@ -24,26 +24,13 @@ import AdminSectionCard from "../../layout/flight/AdminSectionCard";
 
 const { Option } = Select;
 const API = "http://localhost:8080/api/admin/deliveries/reservations";
-const BAG_API = "http://localhost:8080/api/admin/deliveries/bags";
 
 const AdminDeliveryReservationPage = () => {
     const [reservations, setReservations] = useState([]);
-    const [bags, setBags] = useState([]);
     const [loading, setLoading] = useState(false);
     const [form] = Form.useForm();
     const [editing, setEditing] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
-
-    /** ✅ 가방 목록 불러오기 */
-    const fetchBags = async () => {
-        try {
-            const res = await axios.get(BAG_API);
-            const result = res.data;
-            setBags(Array.isArray(result) ? result : []);
-        } catch {
-            message.error("가방 정보를 불러오지 못했습니다.");
-        }
-    };
 
     /** ✅ 예약 목록 불러오기 */
     const fetchReservations = async () => {
@@ -61,7 +48,6 @@ const AdminDeliveryReservationPage = () => {
 
     useEffect(() => {
         fetchReservations();
-        fetchBags();
     }, []);
 
     /** ✅ 수정 모달 열기 */
@@ -115,12 +101,10 @@ const AdminDeliveryReservationPage = () => {
 
     /** ✅ 카카오 주소검색 (모달 대응 버전) */
     const handleAddressSearch = (field) => {
-        // 모달 focus 트랩 해제 후 실행
         setTimeout(() => {
             new window.daum.Postcode({
                 oncomplete: (data) => {
                     const fullAddress = data.address;
-                    // 비동기로 React form 상태 반영
                     setTimeout(() => {
                         form.setFieldsValue({ [field]: fullAddress });
                     }, 100);
@@ -130,7 +114,6 @@ const AdminDeliveryReservationPage = () => {
     };
 
     /** ✅ 수정 모달 내부 Form */
-    /** ✅ 수정 모달 내부 Form (주소 필드 구조 수정본) */
     const renderModalForm = () => (
         <Form form={form} layout="vertical">
             <Form.Item label="회원 번호" name="userNo">
@@ -141,21 +124,17 @@ const AdminDeliveryReservationPage = () => {
                 <Input disabled />
             </Form.Item>
 
-            <Form.Item
-                label="가방 선택"
-                name="bagId"
-                rules={[{ required: true, message: "가방을 선택하세요." }]}
-            >
-                <Select placeholder="가방을 선택하세요">
-                    {bags.map((bag) => (
-                        <Option key={bag.bagId} value={bag.bagId}>
-                            {`${bag.bagName} - ${bag.price.toLocaleString()}원`}
-                        </Option>
-                    ))}
-                </Select>
+            {/* ✅ 가방 정보 (JSON 표시용) */}
+            <Form.Item label="가방 정보 (JSON)">
+                <Input.TextArea
+                    rows={3}
+                    value={editing?.bagsJson || ""}
+                    readOnly
+                    style={{ backgroundColor: "#fafafa" }}
+                />
             </Form.Item>
 
-            {/* ✅ 주소 입력: 바깥 Form.Item에는 label만, 실제 name/rules는 안쪽 noStyle Form.Item에 */}
+            {/* ✅ 주소 입력 */}
             <Form.Item label="출발지 주소" required>
                 <Space.Compact style={{ width: "100%" }}>
                     <Form.Item
@@ -199,7 +178,8 @@ const AdminDeliveryReservationPage = () => {
                 name="deliveryDate"
                 rules={[{ required: true, message: "배송일을 선택하세요." }]}
             >
-                <DatePicker style={{ width: "100%" }}
+                <DatePicker
+                    style={{ width: "100%" }}
                     disabledDate={(current) => current && current < dayjs().startOf("day")}
                 />
             </Form.Item>
@@ -226,7 +206,6 @@ const AdminDeliveryReservationPage = () => {
             </Form.Item>
         </Form>
     );
-
 
     /** ✅ 테이블 컬럼 정의 */
     const columns = [
@@ -261,14 +240,11 @@ const AdminDeliveryReservationPage = () => {
             sorter: (a, b) => a.endAddr.localeCompare(b.endAddr),
         },
         {
-            title: "가방명",
-            dataIndex: "bagName",
-            key: "bagName",
-            width: 140,
-            render: (v, record) =>
-                record.bagName
-                    ? `${record.bagName} (${record.bagPrice?.toLocaleString()}원)`
-                    : "-",
+            title: "가방 정보",
+            dataIndex: "bagsJson",
+            key: "bagsJson",
+            width: 180,
+            render: (v) => (v ? v : "-"),
         },
         {
             title: "총 금액",
@@ -299,7 +275,6 @@ const AdminDeliveryReservationPage = () => {
                     PAID: "blue",
                     CANCELLED: "volcano",
                     FAILED: "red",
-                    COMPLETED: "green",
                 };
                 return <Tag color={statusColors[value]}>{value}</Tag>;
             },
