@@ -31,9 +31,9 @@ const PaymentPage = () => {
 	/* location.state */
 	const state = location.state;
 	const rsvType = state?.rsvType || null;
-	const items = state?.items || [];
-	const itemData = state?.itemData || null;
+	const items = Array.isArray(state?.items) ? state.items : [state?.items];
 	const formData = state?.formData || null;
+	const uiData = state?.uiData || state?.itemData || null; 
 
 	/* state 누락 시 홈으로 리다이렉트 */
 	useEffect(() => {
@@ -77,7 +77,7 @@ const PaymentPage = () => {
 		case "ACC":
 			return (
 				<AccSumCard
-					accData={itemData}
+					accData={uiData}
 					totalAmount={totalAmount}
 					formData={formData}
 				/>
@@ -85,8 +85,8 @@ const PaymentPage = () => {
 		case "FLY":
 			return (
 				<FlySumCard
-					selectedOutbound={formData?.selectedOutbound}
-					selectedInbound={formData?.selectedInbound}
+					selectedOutbound={uiData?.selectedOutbound}
+					selectedInbound={uiData?.selectedInbound}
 				/>
 			);
 		case "DLV":
@@ -107,7 +107,7 @@ const PaymentPage = () => {
 					styles={{ body: { padding: "24px" } }}
 				>
 				<Title level={4} className="text-gray-800 mb-3 text-center">
-					{typeof itemData?.title === "string" ? itemData.title : "예약 요약"}
+					{typeof uiData?.title === "string" ? uiData.title : "예약 요약"}
 				</Title>
 				<Text className="block text-gray-600 mb-2 text-center">
 					총 결제 금액:
@@ -118,7 +118,7 @@ const PaymentPage = () => {
 				</Card>
 			);
 	}
-	}, [rsvType, itemData, formData, totalAmount]);
+	}, [rsvType, uiData, formData, totalAmount]);
 
 	/* 결제 진행 */
 	const handlePayment = async () => {
@@ -195,9 +195,9 @@ const PaymentPage = () => {
 						<Divider />
 
 						{/* ✅ 타입별 상세 정보 */}
-						{InfoComponent && itemData && formData ? (
+						{InfoComponent && uiData && formData ? (
 							<InfoComponent
-								data={typeof itemData === "object" ? itemData : {}}
+								data={typeof uiData === "object" ? uiData : {}}
 								formData={typeof formData === "object" ? formData : {}}
 							/>
 						) : (

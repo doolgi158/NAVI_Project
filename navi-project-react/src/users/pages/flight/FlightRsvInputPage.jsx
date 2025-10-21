@@ -135,6 +135,14 @@ const FlightRsvInputPage = () => {
             passengerCount,
             passengers,
             autoAssign: true,
+            // [수정 후]
+            /*uiData: {
+              selectedOutbound,
+              selectedInbound,
+              passengerCount,
+              passengers,
+              autoAssign: true,
+            }*/
           },
         });
       } else {

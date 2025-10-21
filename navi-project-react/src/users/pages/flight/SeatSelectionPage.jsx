@@ -167,7 +167,7 @@ const SeatSelectPage = () => {
         // ✅ 예약 성공 시 즉시 좌석 상태 갱신
         await fetchSeats();
 
-        if (isRoundTrip && step === "outbound") {
+        if (isRoundTrip && step === "outbound") {   
           navigate("/flight/seat", {
             state: {
               isRoundTrip: true,

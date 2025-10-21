@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import com.siot.IamportRestClient.exception.IamportResponseException;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -29,6 +30,7 @@ public class AccPaymentServiceImpl {
     }
 
     /* 결제 검증 */
+    @Transactional(rollbackFor = Exception.class)
     public PaymentResultResponseDTO verifyAndCompletePayment(PaymentVerifyRequestDTO dto) {
         log.info("🏨 [ACC] 결제 검증 시작 → reserveId(s)={}, impUid={}", dto.getReserveId(), dto.getImpUid());
 

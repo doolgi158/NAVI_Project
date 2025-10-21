@@ -10,6 +10,7 @@ import com.siot.IamportRestClient.exception.IamportResponseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -39,6 +40,7 @@ public class FlyPaymentServiceImpl {
     }
 
     // 결제 검증 및 확정 처리
+    @Transactional(rollbackFor = Exception.class)
     public PaymentResultResponseDTO verifyAndCompletePayment(PaymentVerifyRequestDTO dto) {
         log.info("🛫 [FLY] 결제 검증 시작 → reserveIds={}, impUid={}", dto.getReserveId(), dto.getImpUid());
 

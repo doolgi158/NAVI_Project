@@ -116,7 +116,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     /* 결제 확정 */
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(rollbackFor = Exception.class)
     public PaymentResultResponseDTO confirmPayment(PaymentConfirmRequestDTO dto) {
         log.info("💰 [결제 확정 요청] merchantId={}, rsvType={}, items={}",
                 dto.getMerchantId(), dto.getRsvType(), dto.getItems());
@@ -166,7 +166,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     /* 결제 실패 처리 (자동 환불 포함) */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void failPayment(String merchantId, String reason) {
         log.warn("⚠️ [결제 실패 처리 요청] merchantId={}, reason={}", merchantId, reason);
 
@@ -204,7 +204,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     /* 환불 요청 및 상태 변경 */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void refundPayment(String merchantId, BigDecimal refundAmount, String reason)
             throws IamportResponseException, IOException {
 

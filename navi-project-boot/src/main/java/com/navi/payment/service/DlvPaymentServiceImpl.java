@@ -6,10 +6,10 @@ import com.navi.delivery.service.DeliveryReservationService;
 import com.navi.payment.dto.request.*;
 import com.navi.payment.dto.response.*;
 import com.siot.IamportRestClient.exception.IamportResponseException;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -40,7 +40,7 @@ public class DlvPaymentServiceImpl {
     }
 
     // 결제 검증 및 확정 처리
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public PaymentResultResponseDTO verifyAndCompletePayment(PaymentVerifyRequestDTO dto)
             throws IamportResponseException, IOException {
 
