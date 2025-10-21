@@ -130,7 +130,6 @@ public class RoomRsvServiceImpl implements RoomRsvService {
                 case CANCELLED -> rsv.markCancelled();
                 case FAILED -> rsv.markFailed();
                 case REFUNDED -> rsv.markRefunded();
-                case COMPLETED -> rsv.markCompleted();
             }
 
             if (newStatus == RsvStatus.FAILED ||

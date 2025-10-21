@@ -225,6 +225,8 @@ const DeliveryPage = () => {
       userNo: 2, // TODO: 로그인 연동
       bagId: form.bagSize === "S" ? 1 : form.bagSize === "M" ? 2 : 3,
       groupId: "G20251015_JEJU_AM_1",
+      memo: form.memo,
+      bagSize: form.bagSize
     };
 
     try {
