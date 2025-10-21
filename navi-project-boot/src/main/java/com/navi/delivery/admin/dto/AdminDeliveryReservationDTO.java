@@ -18,19 +18,21 @@ public class AdminDeliveryReservationDTO {
 
     // ✅ FK 참조
     private Long userNo;       // FK → NAVI_USERS.USER_NO
-    private Long bagId;        // FK → NAVI_DLV_BAG.BAG_ID
     private String groupId;    // FK → NAVI_DLV_GROUP.GROUP_ID (nullable)
 
     // ✅ 표시용
     private String userName;
-    private String bagName;
-    private int bagPrice;
 
     private String startAddr;
     private String endAddr;
     private LocalDate deliveryDate;
     private BigDecimal totalPrice;
     private RsvStatus status;
+
+    /**
+     * ✅ 가방별 정보(JSON 문자열 그대로 전달)
+     */
+    private String bagsJson;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

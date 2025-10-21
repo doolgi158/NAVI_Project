@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +34,9 @@ public class FlightReservationServiceImpl implements FlightReservationService {
     private final SeatRepository seatRepository;
     private final SeatService seatService;
 
-    /** ✅ 항공편 예약 생성 (0원 / 결제 전) */
+    /**
+     * ✅ 항공편 예약 생성 (0원 / 결제 전)
+     */
     @Override
     @Transactional
     public FlightReservationDTO createReservation(FlightReservationDTO dto) {
@@ -53,7 +56,8 @@ public class FlightReservationServiceImpl implements FlightReservationService {
             try {
                 if (dto.getPassengersJson() != null && !dto.getPassengersJson().isEmpty()) {
                     ObjectMapper mapper = new ObjectMapper();
-                    List<?> arr = mapper.readValue(dto.getPassengersJson(), new TypeReference<List<?>>() {});
+                    List<?> arr = mapper.readValue(dto.getPassengersJson(), new TypeReference<List<?>>() {
+                    });
                     passengerCount = arr.size();
                 }
             } catch (Exception e) {
@@ -81,8 +85,8 @@ public class FlightReservationServiceImpl implements FlightReservationService {
                 .user(user)
                 .flight(flight)
                 .seat(seat)
-                .totalPrice(BigDecimal.ZERO)     // ✅ 예약 시점 금액 = 0원
-                .status(RsvStatus.PENDING)       // ✅ 예약 상태 = PENDING
+                .totalPrice(BigDecimal.ZERO)
+                .status(RsvStatus.PENDING)
                 .passengersJson(dto.getPassengersJson())
                 .build();
 
@@ -94,7 +98,20 @@ public class FlightReservationServiceImpl implements FlightReservationService {
         return FlightReservationDTO.fromEntity(reservation);
     }
 
-    /** ✅ 결제 성공 후 금액 업데이트 */
+    /*
+     *  복수 예약 생성 (왕복 예약 시 한 번에 insert)
+     */
+    @Override
+    @Transactional
+    public List<FlightReservationDTO> createBatchReservations(List<FlightReservationDTO> dtos) {
+        return dtos.stream()
+                .map(this::createReservation) // 기존 로직 재활용
+                .collect(Collectors.toList());
+    }
+
+    /*
+     *  결제 성공 후 금액 업데이트
+     */
     @Override
     @Transactional
     public FlightReservation updatePayment(String frsvId, BigDecimal amount) {
@@ -130,9 +147,19 @@ public class FlightReservationServiceImpl implements FlightReservationService {
     }
 
     private String generateFrsvId() {
-        String date = LocalDate.now().format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE);
-        return String.format("%sFLY%s", date, String.valueOf(System.nanoTime()).substring(8));
+        LocalDate today = LocalDate.now();
+
+        long countToday = reservationRepository.countByCreatedAtBetween(
+                today.atStartOfDay(),
+                today.plusDays(1).atStartOfDay()
+        );
+
+        return String.format("%sFLY%04d",
+                today.format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE),
+                countToday + 1
+        );
     }
+
 
     @Override
     public BigDecimal getTotalAmountByReserveId(String frsvId) {

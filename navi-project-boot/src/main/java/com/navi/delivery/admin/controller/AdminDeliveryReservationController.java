@@ -25,11 +25,6 @@ public class AdminDeliveryReservationController {
         return ApiResponse.success(reservationService.getReservation(drsvId));
     }
 
-    @PostMapping
-    public ApiResponse<AdminDeliveryReservationDTO> createReservation(@RequestBody AdminDeliveryReservationDTO dto) {
-        return ApiResponse.success(reservationService.createReservation(dto));
-    }
-
     @PutMapping("/{drsvId}")
     public ApiResponse<AdminDeliveryReservationDTO> updateReservation(
             @PathVariable String drsvId,

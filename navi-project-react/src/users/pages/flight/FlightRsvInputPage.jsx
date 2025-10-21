@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Card,
   Input,
@@ -36,17 +36,7 @@ const FlightRsvInputPage = () => {
 
   const [passengers, setPassengers] = useState([]);
 
-  useEffect(() => {
-    setPassengers(
-      Array.from({ length: passengerCount }, () => ({
-        name: "",
-        birth: null,
-        gender: "",
-        phone: "",
-        email: "",
-      }))
-    );
-  }, [passengerCount]);
+  const phoneRefs = useRef([]); // ✅ 각 탑승객별 전화번호 input ref
 
   const formatDateTime = (str) => {
     if (!str) return "";
@@ -60,17 +50,77 @@ const FlightRsvInputPage = () => {
     ).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
   };
 
-  const handleChange = (i, field, value) => {
+  useEffect(() => {
+    setPassengers(
+      Array.from({ length: passengerCount }, () => ({
+        name: "",
+        birth: null,
+        gender: "M",
+        phone: "010-", // ✅ 기본값 설정
+        email: "",
+      }))
+    );
+  }, [passengerCount]);
+
+  /** ✅ 전화번호 입력 핸들러 (010- 고정 버전) */
+  const handlePhoneChange = (i, value) => {
+    let raw = value.replace(/[^0-9]/g, "");
+
+    // 항상 010-으로 시작하도록 강제
+    if (!raw.startsWith("010")) raw = "010" + raw.replace(/^010/, "");
+
+    // 010- 뒤의 숫자만 추출
+    const digits = raw.slice(3);
+
+    // 포맷팅
+    let formatted = "010-";
+    if (digits.length <= 4) formatted += digits;
+    else formatted += `${digits.slice(0, 4)}-${digits.slice(4, 8)}`;
+
     const updated = [...passengers];
-    updated[i][field] = value;
+    updated[i].phone = formatted;
     setPassengers(updated);
   };
 
+  /** ✅ 커서 항상 뒤로 */
+  const handlePhoneFocus = (i) => {
+    const input = phoneRefs.current[i]?.input;
+    if (input) {
+      const len = input.value.length;
+      input.setSelectionRange(len, len);
+    }
+  };
+
+  /** ✅ 공통 입력 핸들러 */
+  const handleChange = (i, field, value) => {
+    const updated = [...passengers];
+
+    if (field === "name") {
+      updated[i][field] = value.replace(/[^a-zA-Z가-힣\s]/g, "");
+    } else if (field === "phone") {
+      handlePhoneChange(i, value); // ✅ 전화번호는 별도 처리
+      return;
+    } else if (field === "email") {
+      updated[i][field] = value.trim();
+    } else {
+      updated[i][field] = value;
+    }
+
+    setPassengers(updated);
+  };
+
+  const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
   const isIncomplete = passengers.some(
-    (p) => !p.name || !p.birth || !p.gender || !p.phone || !p.email
+    (p) =>
+      !p.name ||
+      !p.birth ||
+      !p.gender ||
+      !/^010-\d{3,4}-\d{4}$/.test(p.phone) ||
+      !isValidEmail(p.email)
   );
 
-  // ✅ 좌석 선택 시 단순 이동
+  // ✅ 좌석 선택 페이지 이동
   const handleSeatSelection = () => {
     if (isIncomplete) {
       message.warning("모든 탑승객 정보를 입력해주세요.");
@@ -88,7 +138,7 @@ const FlightRsvInputPage = () => {
     });
   };
 
-  // ✅ 자동배정 예약 + 결제 이동
+  // ✅ 좌석 자동배정 + 결제 페이지 이동
   const handleAutoAssign = async () => {
     if (isIncomplete) {
       message.warning("모든 탑승객 정보를 입력해주세요.");
@@ -104,50 +154,63 @@ const FlightRsvInputPage = () => {
         return;
       }
 
-      // ✅ 예약 DTO (백엔드 FlightReservationDTO 구조 완벽 일치)
-      const dto = {
-        flightId: selectedOutbound.flightId?.flightId || selectedOutbound.flightNo,
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      };
+
+      // ✅ 출발편 예약
+      const outboundDto = {
+        flightId:
+          selectedOutbound.flightId?.flightId || selectedOutbound.flightNo,
         depTime: selectedOutbound.depTime?.split("T")[0],
-        seatId: null, // 좌석 없음
+        seatId: null,
         passengersJson: JSON.stringify(passengers),
         totalPrice: selectedOutbound.price * passengerCount,
         status: "PENDING",
       };
 
-      console.log("자동배정 예약 요청 DTO:", dto);
+      const resOut = await axios.post(
+        `${API_SERVER_HOST}/api/flight/reservation`,
+        outboundDto,
+        { headers }
+      );
 
-      const res = await axios.post(`${API_SERVER_HOST}/api/flight/reservation`, dto, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
+      // ✅ 귀국편 예약
+      let resIn = null;
+      if (selectedInbound) {
+        const inboundDto = {
+          flightId:
+            selectedInbound.flightId?.flightId || selectedInbound.flightNo,
+          depTime: selectedInbound.depTime?.split("T")[0],
+          seatId: null,
+          passengersJson: JSON.stringify(passengers),
+          totalPrice: selectedInbound.price * passengerCount,
+          status: "PENDING",
+        };
+
+        resIn = await axios.post(
+          `${API_SERVER_HOST}/api/flight/reservation`,
+          inboundDto,
+          { headers }
+        );
+      }
+
+      message.success("항공편 예약이 완료되었습니다!");
+
+      navigate(`/flight/payment`, {
+        state: {
+          reservation: [resOut.data.data, resIn?.data?.data].filter(Boolean),
+          selectedOutbound,
+          selectedInbound,
+          passengerCount,
+          passengers,
+          totalPrice:
+            (selectedOutbound.price + (selectedInbound?.price || 0)) *
+            passengerCount,
+          autoAssign: true,
         },
       });
-
-      if (res.data?.status === 200) {
-        message.success("항공편 예약이 완료되었습니다!");
-        navigate(`/payment`, {
-          state: {
-            rsvType: "FLY",
-            items: res.data.data, // 백엔드에서 반환한 예약 데이터
-            formData: dto, // 결제 페이지에서 필요 시 사용
-            selectedOutbound,
-            selectedInbound,
-            passengerCount,
-            passengers,
-            autoAssign: true,
-            // [수정 후]
-            /*uiData: {
-              selectedOutbound,
-              selectedInbound,
-              passengerCount,
-              passengers,
-              autoAssign: true,
-            }*/
-          },
-        });
-      } else {
-        message.error("예약 생성에 실패했습니다.");
-      }
     } catch (error) {
       console.error("❌ 자동배정 예약 실패:", error);
       const msg =
@@ -159,6 +222,7 @@ const FlightRsvInputPage = () => {
 
   const handleBack = () => navigate(-1);
 
+  // ✅ JSX 렌더링
   return (
     <MainLayout>
       <div
@@ -172,7 +236,7 @@ const FlightRsvInputPage = () => {
         }}
       >
         <Card
-          bordered={false}
+          variant="borderless"
           style={{
             width: "92%",
             maxWidth: 960,
@@ -203,10 +267,11 @@ const FlightRsvInputPage = () => {
             </Title>
           </div>
 
-          {/* 항공편 정보 카드 */}
+          {/* 출발편 카드 */}
           {selectedOutbound && (
             <Card
               size="small"
+              variant="borderless"
               style={{
                 background: "linear-gradient(120deg, #eef6ff 0%, #e0f0ff 100%)",
                 border: "1px solid #c5dcff",
@@ -239,9 +304,11 @@ const FlightRsvInputPage = () => {
             </Card>
           )}
 
+          {/* 귀국편 카드 */}
           {selectedInbound && (
             <Card
               size="small"
+              variant="borderless"
               style={{
                 background: "linear-gradient(120deg, #f1fff5 0%, #e0ffe7 100%)",
                 border: "1px solid #bdecc3",
@@ -292,6 +359,7 @@ const FlightRsvInputPage = () => {
             <Card
               key={i}
               size="small"
+              variant="borderless"
               title={
                 <Text strong style={{ color: "#334155" }}>
                   👤 탑승객 {i + 1}
@@ -350,16 +418,10 @@ const FlightRsvInputPage = () => {
                       paddingTop: 4,
                     }}
                   >
-                    <Radio.Button
-                      value="M"
-                      style={{ flex: 1, textAlign: "center" }}
-                    >
+                    <Radio.Button value="M" style={{ flex: 1 }}>
                       남성
                     </Radio.Button>
-                    <Radio.Button
-                      value="F"
-                      style={{ flex: 1, textAlign: "center" }}
-                    >
+                    <Radio.Button value="F" style={{ flex: 1 }}>
                       여성
                     </Radio.Button>
                   </Radio.Group>
@@ -368,11 +430,14 @@ const FlightRsvInputPage = () => {
                 <Col xs={24} md={12}>
                   <label className="text-gray-600 text-sm">전화번호</label>
                   <Input
+                    ref={(el) => (phoneRefs.current[i] = el)}
                     size="large"
                     prefix={<PhoneOutlined />}
                     placeholder="010-1234-5678"
                     value={p.phone}
+                    onFocus={() => handlePhoneFocus(i)}
                     onChange={(e) => handleChange(i, "phone", e.target.value)}
+                    maxLength={13}
                     style={{
                       borderRadius: 10,
                       boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
@@ -398,7 +463,7 @@ const FlightRsvInputPage = () => {
             </Card>
           ))}
 
-          {/* 버튼 */}
+          {/* 버튼 영역 */}
           <div
             style={{
               display: "flex",
@@ -424,6 +489,7 @@ const FlightRsvInputPage = () => {
             <Button
               type="primary"
               size="large"
+              onClick={handleSeatSelection}
               style={{
                 borderRadius: 10,
                 fontWeight: 600,
@@ -432,7 +498,6 @@ const FlightRsvInputPage = () => {
                 background: "linear-gradient(90deg, #2563eb, #1d4ed8)",
                 boxShadow: "0 4px 10px rgba(37,99,235,0.3)",
               }}
-              onClick={handleSeatSelection}
             >
               좌석 선택하기 →
             </Button>

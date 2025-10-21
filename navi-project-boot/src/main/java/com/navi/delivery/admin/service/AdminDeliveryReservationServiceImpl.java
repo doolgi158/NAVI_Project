@@ -1,15 +1,10 @@
 package com.navi.delivery.admin.service;
 
-import com.navi.common.enums.RsvStatus;
 import com.navi.delivery.admin.dto.AdminDeliveryReservationDTO;
-import com.navi.delivery.domain.Bag;
 import com.navi.delivery.domain.DeliveryGroup;
 import com.navi.delivery.domain.DeliveryReservation;
-import com.navi.delivery.repository.BagRepository;
 import com.navi.delivery.repository.DeliveryGroupRepository;
 import com.navi.delivery.repository.DeliveryReservationRepository;
-import com.navi.user.domain.User;
-import com.navi.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -24,11 +19,8 @@ import java.util.stream.Collectors;
 public class AdminDeliveryReservationServiceImpl implements AdminDeliveryReservationService {
 
     private final DeliveryReservationRepository reservationRepository;
-    private final UserRepository userRepository;
-    private final BagRepository bagRepository;
     private final DeliveryGroupRepository groupRepository;
 
-    /** ✅ 전체 조회 */
     @Override
     public List<AdminDeliveryReservationDTO> getAllReservations() {
         return reservationRepository.findAll().stream()
@@ -36,7 +28,6 @@ public class AdminDeliveryReservationServiceImpl implements AdminDeliveryReserva
                 .collect(Collectors.toList());
     }
 
-    /** ✅ 단건 조회 */
     @Override
     public AdminDeliveryReservationDTO getReservation(String drsvId) {
         DeliveryReservation rsv = reservationRepository.findById(drsvId)
@@ -44,47 +35,10 @@ public class AdminDeliveryReservationServiceImpl implements AdminDeliveryReserva
         return toDTO(rsv);
     }
 
-    /** ✅ 예약 등록 */
-    @Override
-    public AdminDeliveryReservationDTO createReservation(AdminDeliveryReservationDTO dto) {
-        User user = userRepository.findById(dto.getUserNo())
-                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다."));
-        Bag bag = bagRepository.findById(dto.getBagId())
-                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 가방입니다."));
-
-        DeliveryGroup group = null;
-        if (dto.getGroupId() != null) {
-            group = groupRepository.findById(dto.getGroupId())
-                    .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 그룹입니다."));
-        }
-
-        DeliveryReservation entity = DeliveryReservation.builder()
-                .drsvId(dto.getDrsvId())
-                .user(user) // ✅ 생성 시에는 예약자 지정
-                .bag(bag)
-                .group(group)
-                .startAddr(dto.getStartAddr())
-                .endAddr(dto.getEndAddr())
-                .deliveryDate(dto.getDeliveryDate())
-                .totalPrice(dto.getTotalPrice())
-                .status(dto.getStatus() != null ? dto.getStatus() : RsvStatus.PENDING)
-                .build();
-
-        return toDTO(reservationRepository.save(entity));
-    }
-
-    /** ✅ 예약 수정 (user 변경 불가) */
     @Override
     public AdminDeliveryReservationDTO updateReservation(String drsvId, AdminDeliveryReservationDTO dto) {
         DeliveryReservation rsv = reservationRepository.findById(drsvId)
                 .orElseThrow(() -> new EntityNotFoundException("예약을 찾을 수 없습니다: " + drsvId));
-
-        // ✅ user는 변경 금지 (읽기 전용)
-        if (dto.getBagId() != null) {
-            Bag bag = bagRepository.findById(dto.getBagId())
-                    .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 가방입니다."));
-            rsv.setBag(bag);
-        }
 
         if (dto.getGroupId() != null) {
             DeliveryGroup group = groupRepository.findById(dto.getGroupId())
@@ -101,7 +55,6 @@ public class AdminDeliveryReservationServiceImpl implements AdminDeliveryReserva
         return toDTO(reservationRepository.save(rsv));
     }
 
-    /** ✅ 예약 삭제 */
     @Override
     public void deleteReservation(String drsvId) {
         if (!reservationRepository.existsById(drsvId)) {
@@ -110,21 +63,18 @@ public class AdminDeliveryReservationServiceImpl implements AdminDeliveryReserva
         reservationRepository.deleteById(drsvId);
     }
 
-    /** ✅ Entity → DTO 변환 */
     private AdminDeliveryReservationDTO toDTO(DeliveryReservation r) {
         return AdminDeliveryReservationDTO.builder()
                 .drsvId(r.getDrsvId())
                 .userNo(r.getUser().getNo())
                 .userName(r.getUser().getName())
-                .bagId(r.getBag().getBagId())
-                .bagName(r.getBag().getBagName())
-                .bagPrice(r.getBag().getPrice())
                 .groupId(r.getGroup() != null ? r.getGroup().getGroupId() : null)
                 .startAddr(r.getStartAddr())
                 .endAddr(r.getEndAddr())
                 .deliveryDate(r.getDeliveryDate())
                 .totalPrice(r.getTotalPrice())
                 .status(r.getStatus())
+                .bagsJson(r.getBagsJson())
                 .createdAt(r.getCreatedAt())
                 .updatedAt(r.getUpdatedAt())
                 .build();
