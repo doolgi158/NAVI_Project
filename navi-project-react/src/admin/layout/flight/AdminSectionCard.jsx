@@ -1,4 +1,3 @@
-// src/admin/layout/AdminSectionCard.jsx
 import { Card, Space, Typography } from "antd";
 
 const { Title } = Typography;
@@ -12,7 +11,7 @@ const { Title } = Typography;
 const AdminSectionCard = ({ title, extra, children }) => {
     return (
         <Card
-            bordered
+            variant="bordered" // ✅ Ant Design v5.16 이후 bordered 대체 속성
             style={{
                 background: "#fff",
                 borderRadius: 12,

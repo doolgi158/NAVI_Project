@@ -1,9 +1,10 @@
-package com.navi.flight.service;
+package com.navi.flight.scheduler;
 
 import com.navi.flight.dto.ApiFlightDTO;
 import com.navi.flight.repository.FlightRepository;
 import com.navi.flight.domain.Flight;
-import com.navi.flight.domain.FlightId;
+import com.navi.flight.service.ApiFlightService;
+import com.navi.flight.service.FlightService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
