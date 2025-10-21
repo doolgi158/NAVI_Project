@@ -32,7 +32,7 @@ const SeatSelectPage = () => {
     selectedInbound,
     passengerCount = 1,
     passengers = [],
-    outboundDto = null, // ✅ 출발편 DTO 저장용
+    outboundDto = null,
   } = state || {};
 
   const flight = step === "outbound" ? selectedOutbound : selectedInbound;
@@ -53,9 +53,13 @@ const SeatSelectPage = () => {
     return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(
       2,
       "0"
-    )}.${String(date.getDate()).padStart(2, "0")} (${days[date.getDay()]}) ${String(
-      date.getHours()
-    ).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+    )}.${String(date.getDate()).padStart(
+      2,
+      "0"
+    )} (${days[date.getDay()]}) ${String(date.getHours()).padStart(
+      2,
+      "0"
+    )}:${String(date.getMinutes()).padStart(2, "0")}`;
   };
 
   // ✅ 좌석 데이터 불러오기
@@ -134,50 +138,78 @@ const SeatSelectPage = () => {
     setTotalPrice(updated.reduce((sum, s) => sum + (s.totalPrice || 0), 0));
   };
 
-  // ✅ 다음 단계 (예약 DTO 생성만, insert X)
-  const handleNext = () => {
+  // ✅ 예약 insert 및 다음단계 이동
+  const handleNext = async () => {
     if (selectedSeats.length !== passengerCount)
       return message.warning(`탑승객 수(${passengerCount})에 맞게 좌석을 선택하세요.`);
 
-    const currentDto = {
-      flightId: flightIdValue,
-      depTime: flight?.depTime?.split("T")[0],
-      seatId: selectedSeats[0]?.seatId,
-      passengersJson: JSON.stringify(passengers),
-      totalPrice,
-      status: "PENDING",
-    };
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        message.warning("로그인이 필요합니다.");
+        return;
+      }
 
-    // ✅ 출발편 → 귀국편으로
-    if (isRoundTrip && step === "outbound") {
-      navigate("/flight/seat", {
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      };
+
+      // ✅ 예약 DTO 구성
+      const currentDto = {
+        flightId: flightIdValue,
+        depTime: flight?.depTime?.split("T")[0],
+        seatId: selectedSeats[0]?.seatId,
+        passengersJson: JSON.stringify(passengers),
+        totalPrice,
+        status: "PENDING",
+      };
+
+      // ✅ 서버 insert
+      const res = await axios.post(
+        `${API_SERVER_HOST}/api/flight/reservation`,
+        currentDto,
+        { headers }
+      );
+
+      // ✅ 왕복편이면 → 귀국편 이동
+      if (isRoundTrip && step === "outbound") {
+        navigate("/flight/seat", {
+          state: {
+            isRoundTrip: true,
+            step: "inbound",
+            selectedOutbound,
+            selectedInbound,
+            passengerCount,
+            passengers,
+            outboundDto: res.data.data, // ✅ 출발편 insert 결과 저장
+          },
+        });
+        return;
+      }
+
+      // ✅ 편도 or 귀국편 완료 시 → 결제 페이지
+      message.success("항공편 예약이 완료되었습니다!");
+      navigate("/flight/payment", {
         state: {
-          isRoundTrip: true,
-          step: "inbound",
           selectedOutbound,
           selectedInbound,
           passengerCount,
           passengers,
-          outboundDto: currentDto, // ✅ 출발편 DTO 저장
+          outboundDto: isRoundTrip ? outboundDto : res.data.data,
+          inboundDto: isRoundTrip ? res.data.data : null,
+          totalPrice:
+            (selectedOutbound?.price || 0) +
+            (selectedInbound?.price || 0) * passengerCount,
         },
       });
-      return;
+    } catch (error) {
+      console.error("❌ 예약 실패:", error);
+      const msg =
+        error.response?.data?.message ||
+        "예약 중 오류가 발생했습니다. 다시 시도해주세요.";
+      message.error(msg);
     }
-
-    // ✅ 편도 or 귀국편 완료 시 → 결제 페이지로
-    navigate("/flight/payment", {
-      state: {
-        selectedOutbound,
-        selectedInbound,
-        passengerCount,
-        passengers,
-        outboundDto: isRoundTrip ? outboundDto : currentDto,
-        inboundDto: isRoundTrip ? currentDto : null,
-        totalPrice:
-          (selectedOutbound?.price || 0) +
-          (selectedInbound?.price || 0) * passengerCount,
-      },
-    });
   };
 
   const handleBack = () => navigate(-1);
@@ -225,7 +257,7 @@ const SeatSelectPage = () => {
     );
   };
 
-  // ✅ 렌더링
+  // ✅ 렌더링 전체
   return (
     <MainLayout>
       <div style={{ background: "#f9fafb", minHeight: "100vh", padding: "50px 0" }}>

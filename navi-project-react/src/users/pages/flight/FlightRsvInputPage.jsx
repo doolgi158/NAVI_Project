@@ -35,8 +35,7 @@ const FlightRsvInputPage = () => {
   const passengerCount = state?.passengerCount || 1;
 
   const [passengers, setPassengers] = useState([]);
-
-  const phoneRefs = useRef([]); // ✅ 각 탑승객별 전화번호 input ref
+  const phoneRefs = useRef([]);
 
   const formatDateTime = (str) => {
     if (!str) return "";
@@ -56,27 +55,20 @@ const FlightRsvInputPage = () => {
         name: "",
         birth: null,
         gender: "M",
-        phone: "010-", // ✅ 기본값 설정
+        phone: "010-",
         email: "",
       }))
     );
   }, [passengerCount]);
 
-  /** ✅ 전화번호 입력 핸들러 (010- 고정 버전) */
+  /** ✅ 전화번호 입력 핸들러 */
   const handlePhoneChange = (i, value) => {
     let raw = value.replace(/[^0-9]/g, "");
-
-    // 항상 010-으로 시작하도록 강제
     if (!raw.startsWith("010")) raw = "010" + raw.replace(/^010/, "");
-
-    // 010- 뒤의 숫자만 추출
     const digits = raw.slice(3);
-
-    // 포맷팅
     let formatted = "010-";
     if (digits.length <= 4) formatted += digits;
     else formatted += `${digits.slice(0, 4)}-${digits.slice(4, 8)}`;
-
     const updated = [...passengers];
     updated[i].phone = formatted;
     setPassengers(updated);
@@ -96,9 +88,10 @@ const FlightRsvInputPage = () => {
     const updated = [...passengers];
 
     if (field === "name") {
-      updated[i][field] = value.replace(/[^a-zA-Z가-힣\s]/g, "");
+      // ✅ 한글 + 영어만 허용 (숫자·특수문자 제거)
+      updated[i][field] = value.replace(/[^a-zA-Z가-힣ㄱ-ㅎㅏ-ㅣ\s]/g, "");
     } else if (field === "phone") {
-      handlePhoneChange(i, value); // ✅ 전화번호는 별도 처리
+      handlePhoneChange(i, value);
       return;
     } else if (field === "email") {
       updated[i][field] = value.trim();
@@ -120,7 +113,7 @@ const FlightRsvInputPage = () => {
       !isValidEmail(p.email)
   );
 
-  // ✅ 좌석 선택 페이지 이동
+  /** ✅ 좌석 선택 페이지 이동 */
   const handleSeatSelection = () => {
     if (isIncomplete) {
       message.warning("모든 탑승객 정보를 입력해주세요.");
@@ -138,7 +131,7 @@ const FlightRsvInputPage = () => {
     });
   };
 
-  // ✅ 좌석 자동배정 + 결제 페이지 이동
+  /** ✅ 좌석 자동배정 */
   const handleAutoAssign = async () => {
     if (isIncomplete) {
       message.warning("모든 탑승객 정보를 입력해주세요.");
@@ -159,7 +152,6 @@ const FlightRsvInputPage = () => {
         "Content-Type": "application/json",
       };
 
-      // ✅ 출발편 예약
       const outboundDto = {
         flightId:
           selectedOutbound.flightId?.flightId || selectedOutbound.flightNo,
@@ -176,7 +168,6 @@ const FlightRsvInputPage = () => {
         { headers }
       );
 
-      // ✅ 귀국편 예약
       let resIn = null;
       if (selectedInbound) {
         const inboundDto = {
@@ -222,7 +213,6 @@ const FlightRsvInputPage = () => {
 
   const handleBack = () => navigate(-1);
 
-  // ✅ JSX 렌더링
   return (
     <MainLayout>
       <div
@@ -379,7 +369,7 @@ const FlightRsvInputPage = () => {
                   <Input
                     size="large"
                     prefix={<UserOutlined />}
-                    placeholder="예: 홍길동"
+                    placeholder="예: 홍길동 / John Doe"
                     value={p.name}
                     onChange={(e) => handleChange(i, "name", e.target.value)}
                     style={{
@@ -395,6 +385,9 @@ const FlightRsvInputPage = () => {
                     size="large"
                     value={p.birth ? dayjs(p.birth) : null}
                     onChange={(d, ds) => handleChange(i, "birth", ds)}
+                    disabledDate={(current) =>
+                      current && current > dayjs().endOf("day")
+                    } // ✅ 내일부터 선택 불가
                     style={{
                       width: "100%",
                       borderRadius: 10,
@@ -463,7 +456,7 @@ const FlightRsvInputPage = () => {
             </Card>
           ))}
 
-          {/* 버튼 영역 */}
+          {/* 버튼 */}
           <div
             style={{
               display: "flex",
