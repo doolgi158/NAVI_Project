@@ -35,9 +35,22 @@ public class TravelController {
     private String getUserIdFromSecurityContext() {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof JWTClaimDTO claim) {
-                return claim.getId();
+            if (auth == null || !auth.isAuthenticated()) {
+                return null;
             }
+
+            Object principal = auth.getPrincipal();
+
+            // principal이 UserSecurityDTO인 경우
+            if (principal instanceof com.navi.user.dto.users.UserSecurityDTO user) {
+                return user.getId();
+            }
+
+            // principal이 문자열로 저장된 경우 (예: anonymousUser)
+            if (principal instanceof String str && !"anonymousUser".equals(str)) {
+                return str;
+            }
+
         } catch (Exception e) {
             log.warn("⚠️ 사용자 인증 정보 추출 실패: {}", e.getMessage());
         }
@@ -61,9 +74,13 @@ public class TravelController {
                     .filter(s -> !s.isEmpty())
                     .collect(Collectors.toList());
         }
+        // 로그인 사용자 ID 가져오기
+        String userId = getUserIdFromSecurityContext();
+        log.info("🟦 [Controller] 여행지 목록 요청 - userId={}, category={}, search={}", userId, categoryName, search);
+
 
         Page<TravelListResponseDTO> list = travelService.getTravelList(
-                pageable, region2Names, categoryName, search, true
+                pageable, region2Names, categoryName, search, true, userId
         );
 
         return ResponseEntity.ok(list);

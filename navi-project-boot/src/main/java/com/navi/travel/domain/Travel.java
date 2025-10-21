@@ -218,7 +218,4 @@ public class Travel extends BaseEntityNoAudit {
 
     public void setUpdatedAt(LocalDateTime now) { }
 
-    public Object getFirstImage() {
-
-    }
 }

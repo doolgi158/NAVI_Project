@@ -46,7 +46,8 @@ public class TravelQueryServiceImpl implements TravelQueryService {
                                                      List<String> region2Names,
                                                      String category,
                                                      String search,
-                                                     boolean publicOnly) {
+                                                     boolean publicOnly,
+                                                     String userId) {
 
         Sort sort = pageable.getSort();
         List<Sort.Order> remainingOrders = new ArrayList<>();
@@ -84,7 +85,7 @@ public class TravelQueryServiceImpl implements TravelQueryService {
                 return TravelListResponseDTO.of(travel);
             });
 
-            return attachLikesAndBookmarks(resultPage);
+            return attachLikesAndBookmarks(resultPage,userId);
         }
 
         // ✅ 공개 상태 필터
@@ -136,7 +137,7 @@ public class TravelQueryServiceImpl implements TravelQueryService {
                 ? travelRepository.findAll(newPageable)
                 : travelRepository.findAll(spec, newPageable);
 
-        return attachLikesAndBookmarks(travelPage.map(TravelListResponseDTO::of));
+        return attachLikesAndBookmarks(travelPage.map(TravelListResponseDTO::of),userId);
     }
 
     /** ✅ 상세 조회 */
@@ -166,33 +167,28 @@ public class TravelQueryServiceImpl implements TravelQueryService {
     }
 
     /** ✅ 좋아요 / 북마크 수 & 로그인 사용자 상태 반영 */
-    private Page<TravelListResponseDTO> attachLikesAndBookmarks(Page<TravelListResponseDTO> pageDto) {
+    private Page<TravelListResponseDTO> attachLikesAndBookmarks(Page<TravelListResponseDTO> pageDto, String userId) {
         if (pageDto.isEmpty()) return pageDto;
-
-        String currentUserId = null;
-        try {
-            var auth = SecurityContextHolder.getContext().getAuthentication();
-            if (auth != null && auth.getPrincipal() instanceof JWTClaimDTO claimDTO) {
-                currentUserId = claimDTO.getId();
-            }
-        } catch (Exception e) {
-            log.warn("⚠️ 사용자 인증 정보 조회 실패: {}", e.getMessage());
-        }
 
         for (TravelListResponseDTO dto : pageDto) {
             Long travelId = dto.getTravelId();
             dto.setLikesCount(likeRepository.countByTravelId(travelId));
             dto.setBookmarkCount(bookmarkRepository.countByTravelId(travelId));
 
-            if (StringUtils.hasText(currentUserId) && !"anonymousUser".equals(currentUserId)) {
-                dto.setLikedByUser(likeRepository.existsByTravelIdAndId(travelId, currentUserId));
-                dto.setBookmarkedByUser(bookmarkRepository.existsByTravelIdAndId(travelId, currentUserId));
+            if (StringUtils.hasText(userId) && !"anonymousUser".equals(userId)) {
+                dto.setLikedByUser(likeRepository.existsByTravelIdAndId(travelId, userId));
+                dto.setBookmarkedByUser(bookmarkRepository.existsByTravelIdAndId(travelId, userId));
             } else {
                 dto.setLikedByUser(false);
                 dto.setBookmarkedByUser(false);
             }
         }
 
-        return pageDto;
+        return new PageImpl<>(
+                pageDto.getContent(),
+                pageDto.getPageable(),
+                pageDto.getTotalElements()
+        );
     }
+
 }

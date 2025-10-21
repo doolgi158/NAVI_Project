@@ -33,10 +33,16 @@ const getTravelData = async (domain, pageParam, filterQuery, userId) => {
     queryString += `&search=${encodedSearch}`;
   }
 
-  // ✅ 로그인 사용자가 있다면 쿼리 파라미터로 id 전달
-
+  // ✅ 로그인 사용자가 있다면 id 파라미터 추가
+  if (userId) {
+    queryString += `&id=${encodeURIComponent(userId)}`;
+  }
   try {
-    const response = await api.get(apiUrl + queryString);
+    const response = await api.get(apiUrl + queryString, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('accessToken') || ''}`,
+      },
+    });
     return response.data;
   } catch (error) {
     console.error('여행지 목록 로딩 실패:', error.message);
@@ -112,6 +118,7 @@ export const useTravelList = (userId) => {
       getTravelData('travel', param, query, userId)
         .then((data) => {
           const fetchedList = data.content || [];
+          const pageInfo = data.page || {};
           const currentPage = data.number + 1;
           const startBlock = Math.floor(data.number / 10) * 10 + 1;
           const endBlock = Math.min(data.totalPages, startBlock + 9);
@@ -119,8 +126,8 @@ export const useTravelList = (userId) => {
 
           setPageResult({
             dtoList: fetchedList,
-            totalElements: data.totalElements,
-            totalPages: data.totalPages,
+            totalElements: pageInfo.totalElements || 0,
+            totalPages: pageInfo.totalPages || 1,
             page: currentPage,
             size: data.size,
             startPage: startBlock,

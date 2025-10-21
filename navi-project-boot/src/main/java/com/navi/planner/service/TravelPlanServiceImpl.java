@@ -24,10 +24,12 @@ import java.util.List;
 public class TravelPlanServiceImpl implements TravelPlanService {
 
     private final TravelPlanRepository travelPlanRepository;
-    private final TravelRepository travelRepository; // 지금은 사용 안 하지만 향후 검증/조인 시 활용
+    private final TravelRepository travelRepository;
     private final UserRepository userRepository;
 
-    /** ✅ 여행 계획 저장 (userId = 문자열 아이디 기반) */
+    // ======================================================
+    // ✅ 여행 계획 저장 (CREATE)
+    // ======================================================
     @Override
     public Long savePlan(String userId, TravelPlanRequestDTO dto) {
         log.info("✅ 여행계획 저장 요청: userId={}, dto={}", userId, dto);
@@ -36,7 +38,7 @@ public class TravelPlanServiceImpl implements TravelPlanService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다. userId=" + userId));
 
         LocalTime startTime = (dto.getStartTime() != null) ? dto.getStartTime() : LocalTime.of(10, 0);
-        LocalTime endTime   = (dto.getEndTime() != null)   ? dto.getEndTime()   : LocalTime.of(22, 0);
+        LocalTime endTime = (dto.getEndTime() != null) ? dto.getEndTime() : LocalTime.of(22, 0);
 
         TravelPlan plan = TravelPlan.builder()
                 .user(user)
@@ -48,18 +50,16 @@ public class TravelPlanServiceImpl implements TravelPlanService {
                 .thumbnailPath(dto.getThumbnailPath())
                 .build();
 
-        // Day 데이터 설정
         List<TravelPlanDay> dayList = new ArrayList<>();
 
-        // ⓐ 방문지(travels) -> startDate에 순서대로
+        // ✅ 방문지(travels)
         if (dto.getTravels() != null) {
             int idx = 0;
             for (TravelPlanRequestDTO.TravelItem t : dto.getTravels()) {
                 TravelPlanDay day = TravelPlanDay.builder()
                         .travelPlan(plan)
-                        .planTitle(dto.getTitle())
                         .planTitle(t.getTravelName())
-                        .travelId(t.getTravelId()) // TRAVEL.TRAVEL_ID
+                        .travelId(t.getTravelId())
                         .orderNo(++idx)
                         .dayDate(dto.getStartDate())
                         .startTime(startTime)
@@ -69,7 +69,7 @@ public class TravelPlanServiceImpl implements TravelPlanService {
             }
         }
 
-        // ⓑ 숙소(stays) -> 전달받은 날짜 리스트("MM/dd")를 yyyy-MM-dd로 환산해 저장
+        // ✅ 숙소(stays)
         if (dto.getStays() != null) {
             for (TravelPlanRequestDTO.StayItem s : dto.getStays()) {
                 if (s.getDates() == null) continue;
@@ -100,39 +100,115 @@ public class TravelPlanServiceImpl implements TravelPlanService {
             }
         }
 
-        plan.setDays(dayList);      // 양방향 연결 보장
+        plan.setDays(dayList);
         travelPlanRepository.save(plan);
-
         log.info("✅ 여행 계획 저장 완료: {}", plan.getId());
+
         return plan.getId();
     }
 
-    /** ✅ 내 계획 리스트(목록) 조회: days 포함(fetch) */
+    // ======================================================
+    // ✅ 내 계획 목록 조회 (READ)
+    // ======================================================
     @Transactional(readOnly = true)
     @Override
     public List<TravelPlan> getMyPlans(String userId) {
-        // fetch join으로 days까지 함께 로딩
-        return travelPlanRepository.findAllWithDaysByUserId(userId);
+        return travelPlanRepository.findByUser_Id(userId);
     }
 
-    /** (옵션) 단건 상세 조회가 필요하다면 */
-    @Transactional(readOnly = true)
-    public TravelPlan getPlanDetail(Long id) {
-        return travelPlanRepository.findWithDaysById(id);
-    }
-
-    /**여행계획 삭제*/
+    // ======================================================
+    // ✅ 여행계획 수정 (UPDATE)
+    // ======================================================
     @Override
-    @Transactional
+    public void updatePlan(Long planId, String userId, TravelPlanRequestDTO dto) {
+        log.info("📝 여행계획 수정 요청: planId={}, userId={}, dto={}", planId, userId, dto);
+
+        TravelPlan plan = travelPlanRepository.findById(planId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 여행계획입니다. id=" + planId));
+
+        // 사용자 검증
+        if (!plan.getUser().getId().equals(userId)) {
+            throw new SecurityException("해당 계획을 수정할 권한이 없습니다.");
+        }
+
+        // 기본정보 수정
+        plan.updatePlanInfo(dto.getTitle(), dto.getStartDate(), dto.getEndDate(),
+                dto.getStartTime(), dto.getEndTime(), dto.getThumbnailPath());
+
+        // 기존 day 리스트 초기화
+        plan.getDays().clear();
+        List<TravelPlanDay> newDays = new ArrayList<>();
+
+        LocalTime startTime = (dto.getStartTime() != null) ? dto.getStartTime() : LocalTime.of(10, 0);
+        LocalTime endTime = (dto.getEndTime() != null) ? dto.getEndTime() : LocalTime.of(22, 0);
+
+        // 방문지(travels) 다시 생성
+        if (dto.getTravels() != null) {
+            int idx = 0;
+            for (TravelPlanRequestDTO.TravelItem t : dto.getTravels()) {
+                TravelPlanDay day = TravelPlanDay.builder()
+                        .travelPlan(plan)
+                        .planTitle(t.getTravelName())
+                        .travelId(t.getTravelId())
+                        .orderNo(++idx)
+                        .dayDate(dto.getStartDate())
+                        .startTime(startTime)
+                        .endTime(endTime)
+                        .build();
+                newDays.add(day);
+            }
+        }
+
+        // 숙소(stays) 다시 생성
+        if (dto.getStays() != null) {
+            for (TravelPlanRequestDTO.StayItem s : dto.getStays()) {
+                if (s.getDates() == null) continue;
+                for (String dateStr : s.getDates()) {
+                    try {
+                        String[] parts = dateStr.split("/");
+                        LocalDate base = dto.getStartDate();
+                        LocalDate stayDate = LocalDate.of(
+                                base.getYear(),
+                                Integer.parseInt(parts[0]),
+                                Integer.parseInt(parts[1])
+                        );
+
+                        TravelPlanDay day = TravelPlanDay.builder()
+                                .travelPlan(plan)
+                                .planTitle(s.getStayName())
+                                .orderNo(newDays.size() + 1)
+                                .dayDate(stayDate)
+                                .startTime(startTime)
+                                .endTime(endTime)
+                                .stayName(s.getStayName())
+                                .build();
+                        newDays.add(day);
+                    } catch (Exception e) {
+                        log.warn("⚠ 숙소 날짜 변환 실패: {}", dateStr);
+                    }
+                }
+            }
+        }
+
+        plan.setDays(newDays);
+        travelPlanRepository.save(plan);
+
+        log.info("✅ 여행계획 수정 완료: planId={}", planId);
+    }
+
+    // ======================================================
+    // ✅ 여행계획 삭제 (DELETE)
+    // ======================================================
+    @Override
     public void deletePlan(Long planId) {
         TravelPlan plan = travelPlanRepository.findById(planId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 계획입니다."));
 
-        // ✅ 연관 엔티티 명시적 제거 (보강)
         if (plan.getDays() != null) {
             plan.getDays().clear();
         }
 
         travelPlanRepository.delete(plan);
+        log.info("🗑 여행계획 삭제 완료: planId={}", planId);
     }
 }

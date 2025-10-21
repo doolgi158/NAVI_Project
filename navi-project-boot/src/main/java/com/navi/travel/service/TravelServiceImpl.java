@@ -79,19 +79,27 @@ public class TravelServiceImpl implements TravelService {
     }
 
 
+
     /** 여행지 목록 조회 (필터링 + 검색 + 페이징) */
     @Override
-    public Page<TravelListResponseDTO> getTravelList(Pageable pageable, List<String> region2Names,
-                                                     String category, String search, boolean publicOnly) {
-        log.debug("📄 [Query] 여행지 목록 조회 - page={}, category={}, search={}", pageable.getPageNumber(), category, search);
-        return travelQueryService.getTravelList(pageable, region2Names, category, search, publicOnly);
+    public Page<TravelListResponseDTO> getTravelList(Pageable pageable,
+                                                     List<String> region2Names,
+                                                     String category,
+                                                     String search,
+                                                     boolean publicOnly,
+                                                     String userId) {
+        log.debug("📄 [Query] 여행지 목록 조회 - page={}, category={}, search={}, userId={}",
+                pageable.getPageNumber(), category, search, userId);
+
+        return travelQueryService.getTravelList(pageable, region2Names, category, search, publicOnly, userId);
     }
+
 
     /** 여행지 상세 조회 */
     @Override
-    public TravelDetailResponseDTO getTravelDetail(Long travelId, String id) {
-        log.debug("🔍 [Query] 여행지 상세 조회 - travelId={}, userId={}", travelId, id);
-        return travelQueryService.getTravelDetail(travelId, id);
+    public TravelDetailResponseDTO getTravelDetail(Long travelId, String userId) {
+        log.debug("🔍 [Query] 여행지 상세 조회 - travelId={}, userId={}", travelId, userId);
+        return travelQueryService.getTravelDetail(travelId, userId);
     }
 
     /**  planner 전용 여행지 간단 목록 조회 */
