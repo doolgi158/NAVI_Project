@@ -1,5 +1,7 @@
 package com.navi.flight.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.navi.common.enums.RsvStatus;
 import com.navi.flight.domain.Flight;
 import com.navi.flight.domain.FlightReservation;
@@ -29,32 +31,64 @@ public class FlightReservationServiceImpl implements FlightReservationService {
     private final FlightReservationRepository reservationRepository;
     private final UserRepository userRepository;
     private final SeatRepository seatRepository;
+    private final SeatService seatService; // ✅ 자동배정용 SeatService 주입
 
     /* 항공편 예약 생성 */
     @Override
     @Transactional
     public FlightReservationDTO createReservation(FlightReservationDTO dto) {
 
-        // 1. 사용자 검증
+        // 1️⃣ 사용자 검증
         User user = userRepository.findById(dto.getUserNo())
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다. userNo=" + dto.getUserNo()));
 
-        // 2. 항공편 검증
+        // 2️⃣ 항공편 검증
         LocalDateTime startOfDay = dto.getDepTime().atStartOfDay();
         LocalDateTime endOfDay = dto.getDepTime().atTime(23, 59, 59);
         Flight flight = flightRepository.findByFlightIdAndDepTimeRange(dto.getFlightId(), startOfDay, endOfDay)
                 .orElseThrow(() -> new IllegalArgumentException("항공편을 찾을 수 없습니다. flightId=" + dto.getFlightId()));
 
-        // 3. 좌석 락 획득
-        Seat seat = seatRepository.findByIdForUpdate(dto.getSeatId());
-        if (seat == null) throw new IllegalArgumentException("좌석 정보를 찾을 수 없습니다. seatId=" + dto.getSeatId());
-        if (seat.isReserved()) throw new IllegalStateException("이미 예약된 좌석입니다.");
+        // 3️⃣ 좌석 처리 (자동배정 or 수동 선택)
+        Seat seat;
 
-        // 4. 좌석 상태 변경 및 저장
-        seat.setReserved(true);
-        seatRepository.save(seat); // ✅ 락 + 명시적 반영
+        if (dto.getSeatId() == null) {
+            // ✅ 좌석을 직접 선택하지 않은 경우 → 자동 배정
+            log.info("[AUTO-SEAT] seatId=null → 자동 배정 시도");
 
-        // 5. 예약 생성
+            int passengerCount = 1;
+            try {
+                if (dto.getPassengersJson() != null && !dto.getPassengersJson().isEmpty()) {
+                    ObjectMapper mapper = new ObjectMapper();
+                    List<?> arr = mapper.readValue(dto.getPassengersJson(), new TypeReference<List<?>>() {});
+                    passengerCount = arr.size();
+                }
+            } catch (Exception e) {
+                log.warn("⚠️ 탑승객 JSON 파싱 실패, 기본값 1 사용: {}", e.getMessage());
+            }
+
+            // ✅ SeatService 자동배정 호출 (인접좌석 우선)
+            List<Seat> assignedSeats = seatService.autoAssignSeats(
+                    dto.getFlightId(),
+                    dto.getDepTime().atStartOfDay(),
+                    passengerCount
+            );
+            seat = assignedSeats.get(0);
+
+            log.info("[AUTO-SEAT] 자동배정 완료 — {}명 / 시작좌석={}", passengerCount, seat.getSeatNo());
+
+        } else {
+            // ✅ 좌석을 직접 선택한 경우 기존 로직 유지
+            seat = seatRepository.findByIdForUpdate(dto.getSeatId());
+            if (seat == null)
+                throw new IllegalArgumentException("좌석 정보를 찾을 수 없습니다. seatId=" + dto.getSeatId());
+            if (seat.isReserved())
+                throw new IllegalStateException("이미 예약된 좌석입니다.");
+
+            seat.setReserved(true);
+            seatRepository.save(seat);
+        }
+
+        // 4️⃣ 예약 생성
         String frsvId = generateFrsvId();
         BigDecimal price = dto.getTotalPrice();
 
@@ -73,7 +107,7 @@ public class FlightReservationServiceImpl implements FlightReservationService {
         log.info("[항공편 예약 완료] frsvId={}, seat={}, user={}, flight={}, status={}",
                 frsvId, seat.getSeatNo(), user.getName(), dto.getFlightId(), dto.getStatus());
 
-        return FlightReservationDTO.fromEntity(reservation); // ✅ 바로 DTO 반환
+        return FlightReservationDTO.fromEntity(reservation);
     }
 
     /* 사용자별 예약 목록 조회 */
@@ -106,7 +140,7 @@ public class FlightReservationServiceImpl implements FlightReservationService {
     /* 예약번호 생성 (고유성 강화 버전) */
     private String generateFrsvId() {
         String date = LocalDate.now().format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE);
-        return String.format("%sFLY%s", date, String.valueOf(System.nanoTime()).substring(8)); // ✅ 중복 방지
+        return String.format("%sFLY%s", date, String.valueOf(System.nanoTime()).substring(8));
     }
 
     @Override

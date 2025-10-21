@@ -3,7 +3,6 @@ package com.navi.accommodation.controller;
 import com.navi.accommodation.dto.request.AccSearchRequestDTO;
 import com.navi.accommodation.dto.response.AccDetailResponseDTO;
 import com.navi.accommodation.dto.response.AccListResponseDTO;
-import com.navi.accommodation.repository.AccRepository;
 import com.navi.accommodation.service.AccService;
 import com.navi.room.service.RoomService;
 import lombok.RequiredArgsConstructor;

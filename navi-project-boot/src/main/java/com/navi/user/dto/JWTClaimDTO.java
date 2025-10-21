@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 @Builder
 @Slf4j
 public class JWTClaimDTO {
+    private Long no;
     private String id;        // 사용자 아이디
     private String name;      // 이름
     private String email;     // 이메일
@@ -29,6 +30,7 @@ public class JWTClaimDTO {
     // 사용자 계정 기반 Claim
     public static JWTClaimDTO fromUser(User user) {
         return JWTClaimDTO.builder()
+                .no(user.getNo())
                 .id(user.getId())
                 .name(user.getName())
                 .email(user.getEmail())

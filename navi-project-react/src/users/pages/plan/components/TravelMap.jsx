@@ -9,11 +9,10 @@ export default function TravelMap({ markers = [], step }) {
   const lineRefs = useRef([]);
   const containerId = "kakao-map-container";
 
-  /** ✅ 중복된 숙소 제거 + S1, S2 부여 */
+  /** ✅ 중복 숙소 제거 + S1, S2 부여 */
   const processedStays = useMemo(() => {
     const stays = markers.filter((m) => m.type === "stay");
     if (!stays.length) return [];
-
     const grouped = [];
     let lastTitle = null;
     stays.forEach((s) => {
@@ -23,7 +22,6 @@ export default function TravelMap({ markers = [], step }) {
         lastTitle = currentTitle;
       }
     });
-
     return grouped.map((s, idx) => ({
       ...s,
       stayOrder: idx + 1,
@@ -79,7 +77,7 @@ export default function TravelMap({ markers = [], step }) {
     const { kakao } = window;
     const map = mapRef.current;
 
-    // 이전 마커/오버레이/라인 제거
+    // 기존 마커/라인/오버레이 제거
     markerRefs.current.forEach((m) => m.setMap(null));
     overlayRefs.current.forEach((o) => o.setMap(null));
     lineRefs.current.forEach((l) => l.setMap(null));
@@ -89,12 +87,7 @@ export default function TravelMap({ markers = [], step }) {
 
     if (!markers.length) return;
 
-    // ✅ 타입별 구분
-    const travels = markers.filter((m) => m.type === "travel");
-    const stays = markers.filter((m) => m.type === "stay");
-    const pois = markers.filter((m) => m.type === "poi");
-
-    /** ✅ 마커 생성 함수 (타입별 스타일 적용) */
+    /** ✅ 마커 생성 함수 (색상/번호 표시) */
     const createMarker = (m, idx, color, label) => {
       const lat = parseFloat(m.latitude);
       const lng = parseFloat(m.longitude);
@@ -102,22 +95,64 @@ export default function TravelMap({ markers = [], step }) {
 
       const pos = new kakao.maps.LatLng(lat, lng);
 
-      const markerHtml = `
+      let markerHtml;
+      if (m.type === "stay") {
+        const stayNumber = m.stayOrder ?? idx + 1;
+        markerHtml = `
+      <div style="
+        position: relative;
+        width: 30px;
+        height: 30px;
+        background: ${color};
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+      ">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 16 16" fill="white">
+          <path d="M8 .5l6 6V15a1 1 0 0 1-1 1h-3v-4H6v4H3a1 1 0 0 1-1-1V6.5l6-6z"/>
+        </svg>
         <div style="
-          background:${color};
-          color:white;
-          font-weight:bold;
-          border-radius:50%;
-          width:30px;
-          height:30px;
-          display:flex;
-          align-items:center;
-          justify-content:center;
-          font-size:13px;
-          box-shadow:0 2px 6px rgba(0,0,0,0.25);
-          border:2px solid white;">
-          ${idx + 1}
-        </div>`;
+          position: absolute;
+          bottom: 9px;
+          left: 50%;
+          transform: translateX(-50%);
+          font-size: 11px;
+          font-weight: bold;
+          color: ${color};
+          background: white;
+          width: 13px;
+          height: 13px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid #eee;
+        ">
+          S${stayNumber}
+        </div>
+      </div>
+    `;
+      } else {
+        // 기본 원형 마커
+        markerHtml = `
+     <div style="
+       background:${color};
+       color:white;
+       font-weight:bold;
+       border-radius:50%;
+       width:30px;
+       height:30px;
+       display:flex;
+       align-items:center;
+       justify-content:center;
+       font-size:13px;
+       box-shadow:0 2px 6px rgba(0,0,0,0.25);
+       border:2px solid white;">
+       ${m.order ?? idx + 1}
+     </div>`;
+      }
 
       const marker = new kakao.maps.CustomOverlay({
         position: pos,
@@ -126,7 +161,7 @@ export default function TravelMap({ markers = [], step }) {
       });
       marker.setMap(map);
 
-      // Tooltip Overlay
+      // Tooltip
       const tooltip = new kakao.maps.CustomOverlay({
         position: pos,
         content: `
@@ -155,41 +190,49 @@ export default function TravelMap({ markers = [], step }) {
       return pos;
     };
 
-    /** ✅ 마커 순서대로 추가 (경로용 Path 생성) */
-    const path = [];
-    markers.forEach((m, idx) => {
-      let color = "#2F3E46";
-      let label = "📍";
-      if (m.type === "stay") {
-        color = "#ec1f1fff";
-        label = "🏨 숙소";
-      } else if (m.type === "poi") {
-        color = "#777";
-        label = "✈️ 공항";
-      } else if (m.type === "travel") {
-        color = "#0088CC";
-        label = "📍 여행지";
-      }
-      const pos = createMarker(m, idx, color, label);
-      if (pos) path.push(pos);
-    });
+    /** ✅ 일차별 그룹화 */
+    const markersByDay = markers.reduce((acc, m) => {
+      if (!acc[m.dayIdx]) acc[m.dayIdx] = [];
+      acc[m.dayIdx].push(m);
+      return acc;
+    }, {});
 
-    /** ✅ 경로 라인 표시 */
-    if (path.length > 1) {
-      const polyline = new kakao.maps.Polyline({
-        path,
-        strokeWeight: 4,
-        strokeColor: "#479fceff",
-        strokeOpacity: 0.8,
-        strokeStyle: "solid",
+    /** ✅ 일차별로 색상 반영하며 라인/마커 표시 */
+    Object.keys(markersByDay).forEach((dayIdx) => {
+      const group = markersByDay[dayIdx];
+      const path = [];
+      const color = group[0]?.color || "#2F3E46";
+
+      group.forEach((m, idx) => {
+        let label = "";
+        if (m.type === "stay") label = "🏨 숙소";
+        else if (m.type === "poi") label = "✈️ 공항";
+        else label = "📍 여행지";
+        const pos = createMarker(m, idx, color, label);
+        if (pos) path.push(pos);
       });
-      polyline.setMap(map);
-      lineRefs.current.push(polyline);
-    }
+
+      if (path.length > 1) {
+        const polyline = new kakao.maps.Polyline({
+          path,
+          strokeWeight: 4,
+          strokeColor: color, // ✅ 일차별 색상
+          strokeOpacity: 0.9,
+          strokeStyle: "solid",
+        });
+        polyline.setMap(map);
+        lineRefs.current.push(polyline);
+      }
+    });
 
     /** ✅ 지도 범위 자동 조정 */
     const bounds = new kakao.maps.LatLngBounds();
-    path.forEach((p) => bounds.extend(p));
+    markers.forEach((m) => {
+      const lat = parseFloat(m.latitude);
+      const lng = parseFloat(m.longitude);
+      if (!isNaN(lat) && !isNaN(lng)) bounds.extend(new kakao.maps.LatLng(lat, lng));
+    });
+
     requestAnimationFrame(() => {
       if (!bounds.isEmpty()) {
         map.relayout();

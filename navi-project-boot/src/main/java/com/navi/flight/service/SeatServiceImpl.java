@@ -28,12 +28,10 @@ public class SeatServiceImpl implements SeatService {
     @Override
     public List<SeatResponseDTO> getSeatsByFlight(String flightId, LocalDateTime depTime) {
 
-        // 1️⃣ 항공편 조회
         Flight flight = flightRepository.findByFlightIdAndDepDate(flightId, depTime)
                 .orElseThrow(() -> new RuntimeException(
                         "해당 운항편이 존재하지 않습니다. (flightId=" + flightId + ", depTime=" + depTime + ")"));
 
-        // 2️⃣ 좌석 존재 여부 (count 기반)
         long count = seatRepository.countByFlightIdAndDepTimeRange(
                 flightId,
                 depTime.minusMinutes(5),
@@ -41,7 +39,6 @@ public class SeatServiceImpl implements SeatService {
         );
         boolean seatExists = count > 0;
 
-        // 3️⃣ 좌석 미초기화 → 자동 생성
         if (!flight.isSeatInitialized() && !seatExists) {
             log.info("[AUTO-SEAT] 좌석 미초기화 감지 → 자동 생성 시작");
             createSeatsForFlight(flight);
@@ -49,7 +46,6 @@ public class SeatServiceImpl implements SeatService {
             flightRepository.saveAndFlush(flight);
         }
 
-        // 4️⃣ 좌석 조회
         List<Seat> seats = seatRepository.findByFlightAndDepTimeRange(
                 flightId,
                 depTime.minusMinutes(5),
@@ -89,7 +85,7 @@ public class SeatServiceImpl implements SeatService {
         generateSeats(newSeats, flight, 13, 30, new char[]{'A','B','C','D','E','F'}, SeatClass.ECONOMY, 0);
 
         seatRepository.saveAll(newSeats);
-        seatRepository.flush(); // 즉시 DB 반영
+        seatRepository.flush();
         log.info("[AUTO-SEAT] 자동 생성 완료 — {}석", newSeats.size());
     }
 
@@ -108,30 +104,77 @@ public class SeatServiceImpl implements SeatService {
         }
     }
 
-    /** ✅ 자동 좌석 배정 */
+    /** ✅ 자동 좌석 배정 (여러 명 인접 배치) */
     @Override
+    @Transactional
     public List<Seat> autoAssignSeats(String flightId, LocalDateTime depTime, int passengerCount) {
+        // 1) 날짜 단위로 항공편 찾기 (00:00 ~ 23:59:59)
+        LocalDateTime startOfDay = depTime.toLocalDate().atStartOfDay();
+        LocalDateTime endOfDay   = depTime.toLocalDate().atTime(23, 59, 59);
+
+        Flight flight = flightRepository.findByFlightIdAndDepTimeRange(flightId, startOfDay, endOfDay)
+                .orElseThrow(() -> new RuntimeException("항공편이 존재하지 않습니다."));
+
+        // 2) 좌석 미초기화 시 생성 보장 (count 기반)
+        long count = seatRepository.countByFlightIdAndDepTimeRange(
+                flightId, startOfDay, endOfDay
+        );
+        if (!flight.isSeatInitialized() && count == 0) {
+            createSeatsForFlight(flight);
+            flight.setSeatInitialized(true);
+            flightRepository.saveAndFlush(flight);
+        }
+
+        // 3) 해당 날짜 범위 내 좌석 조회 → 예약 가능 좌석만
         List<Seat> availableSeats = seatRepository.findByFlightAndDepTimeRange(
-                        flightId,
-                        depTime.minusMinutes(5),
-                        depTime.plusMinutes(5)
+                        flightId, startOfDay, endOfDay
                 ).stream()
                 .filter(s -> !s.isReserved())
+                .sorted(Comparator.comparing(Seat::getSeatNo))
                 .toList();
 
-        if (availableSeats.isEmpty())
+        if (availableSeats.isEmpty()) {
             throw new IllegalStateException("예약 가능한 좌석이 없습니다.");
+        }
 
-        Collections.shuffle(availableSeats);
-        List<Seat> selected = availableSeats.stream()
-                .limit(passengerCount)
-                .peek(s -> s.setReserved(true))
-                .collect(Collectors.toList());
+        // 4) 같은 행(row) 인접 좌석 우선 배정
+        Map<String, List<Seat>> byRow = availableSeats.stream()
+                .collect(Collectors.groupingBy(
+                        s -> s.getSeatNo().replaceAll("[^0-9]", ""), // 숫자만 = 행 번호
+                        LinkedHashMap::new,
+                        Collectors.toList()
+                ));
 
-        return seatRepository.saveAll(selected);
+        List<Seat> assigned = new ArrayList<>();
+        for (List<Seat> rowSeats : byRow.values()) {
+            // 좌석번호를 알파벳 기준으로 정렬 (A B C D E F ...)
+            rowSeats.sort(Comparator.comparing(Seat::getSeatNo));
+            if (rowSeats.size() >= passengerCount) {
+                assigned = rowSeats.subList(0, passengerCount);
+                break;
+            }
+        }
+
+        // 5) 같은 행에 다 못 앉으면 앞좌석부터 채움
+        if (assigned.isEmpty()) {
+            assigned = availableSeats.stream().limit(passengerCount).toList();
+        }
+
+        // 6) 예약 플래그 업데이트 & 저장
+        assigned.forEach(s -> s.setReserved(true));
+        seatRepository.saveAll(assigned);
+
+        log.info("[AUTO-SEAT] 자동 배정 완료 — {}명 / 시작좌석={} / 행={}",
+                passengerCount,
+                assigned.get(0).getSeatNo(),
+                assigned.get(0).getSeatNo().replaceAll("[^0-9]", "")
+        );
+
+        return assigned;
     }
 
-    /** ✅ 좌석 초기화 보장 (폴링용) */
+
+    /** ✅ 좌석 초기화 보장 */
     @Override
     public boolean ensureSeatsInitialized(String flightId, LocalDateTime depTime) {
         Optional<Flight> opt = flightRepository.findByFlightIdAndDepDate(flightId, depTime);

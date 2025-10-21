@@ -4,16 +4,10 @@ import useTownshipData from "../../../common/hooks/useTownshipData";
 import MainLayout from "@/users/layout/MainLayout";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import {
-  Radio,
-  Input,
-  DatePicker,
-  Select,
-  Button,
-  Card,
-  message,
-  InputNumber,
-  Pagination,
+  Radio, Input, DatePicker, Select, Button, Card, message, InputNumber,
+  Pagination
 } from "antd";
+import { EyeOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setSearchState, setSelectedAcc } from "../../../common/slice/accSlice";
@@ -90,8 +84,8 @@ const AccListPage = () => {
   const townshipOptions = useMemo(() => {
     return city
       ? townshipList
-          .filter((t) => t.sigunguName === city)
-          .map((t) => ({ value: t.townshipName, label: t.townshipName }))
+        .filter((t) => t.sigunguName === city)
+        .map((t) => ({ value: t.townshipName, label: t.townshipName }))
       : [];
   }, [city, townshipList]);
 
@@ -155,9 +149,9 @@ const AccListPage = () => {
 
       const res = await axios.get("/api/accommodations", { params });
       console.log("📦 [axios response]", res);
-      
+
       const resultData = res.data;
-      
+
       setAccommodations(resultData);
       setIsSearched(true);
       setCurrentPage(1);
@@ -377,7 +371,7 @@ const AccListPage = () => {
                       key={acc.accId}
                       hoverable
                       className="rounded-xl shadow-sm cursor-pointer transition-transform transform hover:scale-[1.02] duration-200"
-                      onClick={() => handleCardClick(acc.accId)}
+                      onClick={() => handleCardClick(acc)}
                       cover={
                         acc.accImage ? (
                           <img
@@ -408,11 +402,13 @@ const AccListPage = () => {
                         title={<span className="text-lg font-bold">{acc.title}</span>}
                         description={
                           <div className="text-gray-600 mt-2">
-                            <p className="font-semibold text-base mt-1">
-                              {acc.minPrice
-                                ? `${acc.minPrice.toLocaleString()}원`
-                                : "가격 미정"}{" "}
-                              / 1박
+                            <p className="font-semibold text-base mt-1 flex items-center gap-2">
+                              {acc.minPrice ? `${acc.minPrice.toLocaleString()}원` : "가격 미정"} / 1박
+                              {acc.viewCount !== undefined && (
+                                <span className="flex items-center text-gray-500 text-sm ml-2">
+                                  <EyeOutlined style={{ marginRight: 4 }} /> {acc.viewCount.toLocaleString()}
+                                </span>
+                              )}
                             </p>
                             <p>{acc.address}</p>
                           </div>

@@ -4,28 +4,33 @@ import com.navi.common.response.ApiResponse;
 import com.navi.flight.domain.FlightReservation;
 import com.navi.flight.dto.FlightReservationDTO;
 import com.navi.flight.service.FlightReservationService;
+import com.navi.user.dto.users.UserSecurityDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/flight/reservation")
+@RequestMapping("/api/flight")
 public class FlightReservationController {
 
     private final FlightReservationService reservationService;
 
     /* 1.예약 생성 */
-    @PostMapping
+    @PostMapping("/reservation")
     public ResponseEntity<ApiResponse<FlightReservationDTO>> createReservation(
-            @Valid @RequestBody FlightReservationDTO dto) {
-
-        FlightReservationDTO responseDto = reservationService.createReservation(dto);
-        return ResponseEntity.ok(ApiResponse.success(responseDto)); // ✅ DTO 직접 반환
+            @RequestBody FlightReservationDTO dto,
+            @AuthenticationPrincipal UserSecurityDTO user
+    ) {
+        dto.setUserNo(user.getNo()); // ✅ JWT 토큰 기반 자동 연결
+        FlightReservationDTO saved = reservationService.createReservation(dto);
+        return ResponseEntity.ok(ApiResponse.success(saved)); // ✅ DTO 응답
     }
+
 
     /* 2.사용자별 예약 조회 */
     @GetMapping("/user/{userNo}")

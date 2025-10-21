@@ -25,24 +25,29 @@ public interface TravelRepository extends JpaRepository<Travel, Long>, JpaSpecif
      */
     @Query(
             value = """
-        SELECT 
-            t.travel_id AS travel_id,
-            t.title AS title,
-            t.region1_name AS region1_name,
-            t.region2_name AS region2_name,
-            t.thumbnail_path AS thumbnail_path,
-            COUNT(l.like_id) AS likes_count
-        FROM navi_travel t
-        LEFT JOIN navi_like l ON t.travel_id = l.travel_id
-        GROUP BY 
-            t.travel_id, t.title, t.region1_name, t.region2_name, t.thumbnail_path, t.CONTENTS_CD
-        ORDER BY likes_count DESC, t.CONTENTS_CD ASC
+            SELECT 
+                t.travel_id AS travel_id,
+                t.title AS title,
+                t.region1_name AS region1_name,
+                t.region2_name AS region2_name,
+                t.thumbnail_path AS thumbnail_path,
+                COUNT(l.like_id) AS likes_count
+            FROM navi_travel t
+            LEFT JOIN navi_like l ON t.travel_id = l.travel_id
+            GROUP BY t.travel_id, t.title, t.region1_name, t.region2_name, t.thumbnail_path
+            ORDER BY likes_count DESC
         """,
             countQuery = """
-        SELECT COUNT(*) 
-        FROM navi_travel
+            SELECT COUNT(*) 
+            FROM (
+                SELECT t.travel_id
+                FROM navi_travel t
+                LEFT JOIN navi_like l ON t.travel_id = l.travel_id
+                GROUP BY t.travel_id
+            ) sub
         """,
             nativeQuery = true
     )
     Page<Object[]> findAllOrderByLikesCountNative(Pageable pageable);
+
 }

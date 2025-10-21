@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Layout, message } from "antd";
+import { Layout } from "antd";
 import HeaderLayout from "../../layout/HeaderLayout";
 import FooterLayout from "../../layout/FooterLayout";
 import "bootstrap-icons/font/bootstrap-icons.css";
@@ -241,57 +241,6 @@ export default function TravelPlanner() {
     const data = buildInitialSchedule();
     navigate("/plans/schedule", { state: data });
   };
-
-  // /** ✅ 저장 요청 */
-  // const handleConfirm = async () => {
-  //   if (!title || !dateRange.length) {
-  //     return message.warning("제목과 여행 기간을 입력해주세요.");
-  //   }
-  //   if (selectedTravels.length === 0) {
-  //     return message.warning("최소 1개 이상의 여행지를 선택해주세요.");
-  //   }
-  //   if (!user) {
-  //     message.warning("로그인 정보가 없습니다. 다시 로그인해주세요.");
-  //     navigate("/login");
-  //     return;
-  //   }
-
-  //   const defaultStartTime = "10:00:00";
-  //   const defaultEndTime = "22:00:00";
-  //   const thumbnailPath = selectedTravels[0]?.img || null;
-
-  //   const body = {
-  //     userId: user.id,
-  //     title,
-  //     startDate: dateRange[0].format("YYYY-MM-DD"),
-  //     endDate: dateRange[1].format("YYYY-MM-DD"),
-  //     startTime: defaultStartTime,
-  //     endTime: defaultEndTime,
-  //     thumbnailPath,
-  //     travels: selectedTravels.map((t) => ({
-  //       travelId: t.travelId,
-  //       travelName: t.title,
-  //     })),
-  //     stays: selectedStays.map((s) => ({
-  //       stayId: s.accId,
-  //       stayName: s.title,
-  //       dates: (stayPlans[s.accId] || []).map((d) =>
-  //         d?.format ? d.format("YYYY-MM-DD") : d
-  //       ),
-  //     })),
-  //   };
-
-  //   try {
-  //     await savePlan(body);
-  //     message.success("여행 계획이 저장되었습니다!");
-  //     navigate("/plans");
-  //   } catch (err) {
-  //     Modal.error({
-  //       title: "저장 실패",
-  //       content: "여행 계획 저장 중 문제가 발생했습니다.",
-  //     });
-  //   }
-  // };
 
   /** ✅ 지도 마커 */
   const markers = useMemo(() => {

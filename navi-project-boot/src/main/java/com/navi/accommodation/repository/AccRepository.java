@@ -24,11 +24,13 @@ public interface AccRepository extends JpaRepository<Acc, Long> {
 
     /* 지역별 찾기 */
     @Query("SELECT a FROM Acc a WHERE a.township.townshipName = :townshipName")
-    List<Acc>findByTownshipName(@Param("townshipName") String townshipName);
+    List<Acc> findByTownshipName(@Param("townshipName") String townshipName);
 
     /* contentId = null인 숙소 찾기 (관리자용) */
     @Query("SELECT a FROM Acc a WHERE a.contentId IS NULL")
     List<Acc> findAllWithoutContentId();
+
+    List<Acc> findByTitleContainingIgnoreCase(String title);
 
     /* accId 시퀀스 기반 생성용 */
     @Query(value = "SELECT ACC_SEQ.NEXTVAL FROM DUAL", nativeQuery = true)

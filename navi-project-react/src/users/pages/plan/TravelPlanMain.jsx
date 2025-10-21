@@ -47,16 +47,21 @@ export default function TravelPlanMain() {
       },
     });
 
-  const handleDetail = (plan) => navigate(`/plans/${plan.id}`);
-  const handleEdit = (plan) => navigate(`/plans/planner?planId=${plan.id}`);
+  /** ✅ 리스트 클릭 → 상세보기 페이지로 이동 (view 모드) */
+  const handleDetail = (plan) =>
+    navigate(`/plans/planner/detail?planId=${plan.id}&mode=view`);
+
+  /** ✅ 수정 버튼 클릭 → 수정 모드 페이지로 이동 */
+  const handleEdit = (plan) =>
+    navigate(`/plans/planner/detail?planId=${plan.id}&mode=edit`);
+
   const handleCreatePlan = () => navigate("/plans/planner");
+
   const handlePageChange = (newPage) =>
     setPage((prev) => ({ ...prev, [activeTab]: newPage }));
 
-  /** ✅ 날짜별 분류 + 정렬 */
   const today = startOfDay(new Date());
 
-  // ✅ 예정된 여행: D-Day 가까운 순으로 정렬
   const upcomingPlans = plans
     .filter((p) => {
       const end = startOfDay(new Date(p.endDate));
@@ -64,7 +69,6 @@ export default function TravelPlanMain() {
     })
     .sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
 
-  // ✅ 완료된 여행: 최근 완료 순으로 정렬
   const completedPlans = plans
     .filter((p) => {
       const end = startOfDay(new Date(p.endDate));
@@ -72,9 +76,7 @@ export default function TravelPlanMain() {
     })
     .sort((a, b) => new Date(b.endDate) - new Date(a.endDate));
 
-  // ✅ 현재 탭 리스트 결정 (이 줄이 반드시 있어야 함)
   const currentList = activeTab === "upcoming" ? upcomingPlans : completedPlans;
-
 
   return (
     <MainLayout>
@@ -115,8 +117,8 @@ export default function TravelPlanMain() {
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
               className={`px-6 py-2 text-sm font-semibold border-b-2 transition ${activeTab === tab.key
-                ? "border-[#3A6EA5] text-[#3A6EA5]"
-                : "border-transparent text-gray-400 hover:text-[#3A6EA5]"
+                  ? "border-[#3A6EA5] text-[#3A6EA5]"
+                  : "border-transparent text-gray-400 hover:text-[#3A6EA5]"
                 }`}
             >
               {tab.label}
@@ -131,7 +133,7 @@ export default function TravelPlanMain() {
           currentPage={page[activeTab]}
           pageSize={pageSize}
           onPageChange={handlePageChange}
-          onDetail={handleDetail}
+          onDetail={handleDetail}  // ✅ view 모드로 이동
           onEdit={handleEdit}
           onDelete={handleDelete}
         />

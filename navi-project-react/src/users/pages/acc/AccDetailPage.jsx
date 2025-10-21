@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { Typography, Divider,  Button, message, Spin, Row, Col, Carousel, DatePicker, InputNumber } from "antd";
+import { Typography, Divider, Button, message, Spin, Row, Col, Carousel, DatePicker, InputNumber } from "antd";
 import { useKakaoMap } from "../../../common/hooks/useKakaoMap";
 import { setSelectedAcc } from "../../../common/slice/accSlice";
 import { API_SERVER_HOST } from "../../../common/api/naviApi";
@@ -63,7 +63,7 @@ const AccDetailPage = () => {
 				setLoading(false);	// 로딩 스피너 OFF
 			}
 		};
-		
+
 		fetchData();
 
 		return () => resetMap();	// 지도 초기화
@@ -71,13 +71,13 @@ const AccDetailPage = () => {
 
 	/* Kakao 지도 업데이트 */
 	useEffect(() => {
-	if (isMapLoaded && accData?.mapx && accData?.mapy) {
-		updateMap({
-			title: accData.title,
-			latitude: accData.mapx,
-			longitude: accData.mapy,
-		});
-	}
+		if (isMapLoaded && accData?.mapx && accData?.mapy) {
+			updateMap({
+				title: accData.title,
+				latitude: accData.mapx,
+				longitude: accData.mapy,
+			});
+		}
 	}, [isMapLoaded, accData, updateMap]);
 
 	/* 검색 조건 복원(뒤로가기 방어) */
@@ -85,13 +85,13 @@ const AccDetailPage = () => {
 		const stored = localStorage.getItem("searchState");
 		if (stored) {
 			try {
-			const parsed = JSON.parse(stored);
-			if (parsed.dateRange && parsed.dateRange.length === 2) {
-				setDateRange([
-					dayjs(parsed.dateRange[0]),	// 체크인
-					dayjs(parsed.dateRange[1]),	// 체크아웃
-				]);
-			}
+				const parsed = JSON.parse(stored);
+				if (parsed.dateRange && parsed.dateRange.length === 2) {
+					setDateRange([
+						dayjs(parsed.dateRange[0]),	// 체크인
+						dayjs(parsed.dateRange[1]),	// 체크아웃
+					]);
+				}
 				if (parsed.guestCount) setGuestCount(parsed.guestCount);	// 인원수
 				if (parsed.roomCount) setRoomCount(parsed.roomCount);		// 객실수
 			} catch (e) {
@@ -168,7 +168,7 @@ const AccDetailPage = () => {
 			];
 
 			const res = await axios.post(`/api/room/reserve/pending`, dtoList);
-			
+
 			// 예약ID 추출
 			const generatedReserveId = res.data?.reserveId || (Array.isArray(res.data) && res.data[0]?.reserveId);
 			console.log(res.data?.reserveId, generatedReserveId);
@@ -177,7 +177,7 @@ const AccDetailPage = () => {
 				console.warn("⚠️ 서버 응답:", res.data);
 				message.error("예약 ID 생성에 실패했습니다.");
 				return;
-			}else {
+			} else {
 				// formData에 저장
 				const formData = {
 					...preFormData,
@@ -260,68 +260,68 @@ const AccDetailPage = () => {
 						<Text className="text-sm text-gray-600">{accData.address}</Text>
 					</div>
 
-					{/* 이미지 + 지도 */}
-					<Row gutter={[16, 16]} className="mb-6">
-						<Col xs={24} lg={14}>
-						{accData.accImages?.length > 0 ? (
-							<Carousel autoplay dots className="rounded-xl overflow-hidden">
-							{accData.accImages.map((img, idx) => {
-								// ✅ 경로 자동 처리
-								const resolvedSrc = img.startsWith("/uploads/")
-								? `${API_SERVER_HOST}${img}`
-								: img.startsWith("http")
-								? img
-								: `${API_SERVER_HOST}${img}`;
+						{/* 이미지 + 지도 */}
+						<Row gutter={[16, 16]} className="mb-6">
+							<Col xs={24} lg={14}>
+								{accData.accImages?.length > 0 ? (
+									<Carousel autoplay dots className="rounded-xl overflow-hidden">
+										{accData.accImages.map((img, idx) => {
+											// ✅ 경로 자동 처리
+											const resolvedSrc = img.startsWith("/uploads/")
+												? `${API_SERVER_HOST}${img}`
+												: img.startsWith("http")
+													? img
+													: `${API_SERVER_HOST}${img}`;
 
-								return (
-								<div key={idx}>
-									<img
-									src={resolvedSrc}
-									alt={`${accData.title} 이미지 ${idx + 1}`}
-									className="w-full h-[260px] object-cover rounded-xl"
-									onError={(e) => {
-										e.target.style.display = "none";
-										const fallback = document.createElement("div");
-										fallback.className =
-										"h-[260px] w-full flex items-center justify-center bg-gray-200 text-gray-500 text-sm";
-										fallback.textContent = "이미지 준비중";
-										e.target.parentNode.appendChild(fallback);
-									}}
-									/>
-								</div>
-								);
-							})}
-							</Carousel>
-						) : (
-							<div className="bg-gray-100 rounded-xl h-[260px] flex items-center justify-center text-gray-500 text-sm">
-							이미지 준비중
-							</div>
-						)}
-						</Col>
+											return (
+												<div key={idx}>
+													<img
+														src={resolvedSrc}
+														alt={`${accData.title} 이미지 ${idx + 1}`}
+														className="w-full h-[260px] object-cover rounded-xl"
+														onError={(e) => {
+															e.target.style.display = "none";
+															const fallback = document.createElement("div");
+															fallback.className =
+																"h-[260px] w-full flex items-center justify-center bg-gray-200 text-gray-500 text-sm";
+															fallback.textContent = "이미지 준비중";
+															e.target.parentNode.appendChild(fallback);
+														}}
+													/>
+												</div>
+											);
+										})}
+									</Carousel>
+								) : (
+									<div className="bg-gray-100 rounded-xl h-[260px] flex items-center justify-center text-gray-500 text-sm">
+										이미지 준비중
+									</div>
+								)}
+							</Col>
 
-						<Col xs={24} lg={10}>
-						<div
-							id="kakao-detail-map-container"
-							className="w-full h-[260px] rounded-xl border border-gray-200 shadow-inner"
-						/>
-						</Col>
-					</Row>
+							<Col xs={24} lg={10}>
+								<div
+									id="kakao-detail-map-container"
+									className="w-full h-[260px] rounded-xl border border-gray-200 shadow-inner"
+								/>
+							</Col>
+						</Row>
 
-					{/* 숙소 소개 */}
-					<div className="mb-6">
-						<Title level={5} className="text-gray-800 mb-2 font-semibold">
-						숙소 소개
+						{/* 숙소 소개 */}
+						<div className="mb-6">
+							<Title level={5} className="text-gray-800 mb-2 font-semibold">
+								숙소 소개
+							</Title>
+							<Paragraph className="text-base text-gray-600 leading-relaxed">
+								{accData.overview || "숙소 소개 정보가 없습니다."}
+							</Paragraph>
+						</div>
+
+						{/* 숙박 조건 선택 */}
+						<Divider />
+						<Title level={5} className="text-gray-800 mb-5 font-semibold">
+							숙박 조건 선택
 						</Title>
-						<Paragraph className="text-base text-gray-600 leading-relaxed">
-						{accData.overview || "숙소 소개 정보가 없습니다."}
-						</Paragraph>
-					</div>
-
-					{/* 숙박 조건 선택 */}
-					<Divider />
-					<Title level={5} className="text-gray-800 mb-5 font-semibold">
-						숙박 조건 선택
-					</Title>
 
 					<div className="flex flex-wrap gap-4 mb-8 items-end">
 						<div className="flex flex-col">
@@ -351,114 +351,113 @@ const AccDetailPage = () => {
 							/>
 						</div>
 
-						<div className="flex flex-col">
-						<Text className="text-sm text-gray-600 mb-2 font-medium">
-							인원 수
-						</Text>
-						<InputNumber
-							min={1}
-							max={30}
-							value={guestCount}
-							onChange={setGuestCount}
-							size="large"
-						/>
-						</div>
-
-						<div className="flex flex-col">
-						<Text className="text-sm text-gray-600 mb-2 font-medium">
-							객실 수
-						</Text>
-						<InputNumber
-							min={1}
-							max={10}
-							value={roomCount}
-							onChange={setRoomCount}
-							size="large"
-						/>
-						</div>
-
-						<Button type="primary" onClick={fetchRooms} className="h-[40px]">
-						객실 조회
-						</Button>
-					</div>
-
-					{/* 객실 목록 */}
-					<Divider className="my-6" />
-					<Title level={5} className="text-gray-800 mb-4 font-semibold">
-						객실 정보
-					</Title>
-
-					{rooms?.length > 0 ? (
-						<div className="space-y-4">
-						{rooms.map((room) => (
-							<div
-							key={room.roomId}
-							className="flex flex-col md:flex-row border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200"
-							>
-							{/* 객실 이미지 */}
-							{room.thumbnailImage ? (
-								<img
-								src={`${API_SERVER_HOST}${room.thumbnailImage}`}
-								alt={room.roomName}
-								className="md:w-1/4 w-full h-40 object-cover"
-								/>
-							) : (
-								<div className="md:w-1/4 w-full h-40 bg-gray-200 flex items-center justify-center text-gray-500 text-sm">
-								이미지 없음
-								</div>
-							)}
-
-							{/* ✅ 객실 정보 + 버튼 */}
-							<div className="flex flex-col justify-between p-4 flex-1 bg-white">
-								<div>
-								<Title level={5} className="text-gray-900 mb-1">
-									{room.roomName}
-								</Title>
-								<Text className="block text-gray-600 text-sm mb-1">
-									최대 인원 {room.maxCnt}명
+							<div className="flex flex-col">
+								<Text className="text-sm text-gray-600 mb-2 font-medium">
+									인원 수
 								</Text>
-								<Text className="block text-[#006D77] font-semibold text-base mb-1">
-									{room.weekdayFee
-									? `${room.weekdayFee.toLocaleString()}원 / 1박`
-									: "가격 미정"}
-								</Text>
-								</div>
-
-								<div className="flex justify-between items-end">
-								{room.remainCount !== null && (
-									<Text
-									type={room.remainCount <= 3 ? "danger" : "secondary"}
-									className={`font-medium ${
-										room.remainCount <= 3
-										? "text-red-500 font-semibold"
-										: "text-gray-600"
-									}`}
-									>
-									잔여 객실 {room.remainCount}개
-									</Text>
-								)}
-
-								<Button
-									type="primary"
+								<InputNumber
+									min={1}
+									max={30}
+									value={guestCount}
+									onChange={setGuestCount}
 									size="large"
-									className="w-28 font-semibold"
-									onClick={() => handleReserve(room)}
-									disabled={room.remainCount !== null && room.remainCount <= 0}
-								>
-									{room.remainCount !== null && room.remainCount <= 0
-									? "예약 마감"
-									: "예약하기"}
-								</Button>
-								</div>
+								/>
 							</div>
+
+							<div className="flex flex-col">
+								<Text className="text-sm text-gray-600 mb-2 font-medium">
+									객실 수
+								</Text>
+								<InputNumber
+									min={1}
+									max={10}
+									value={roomCount}
+									onChange={setRoomCount}
+									size="large"
+								/>
 							</div>
-						))}
+
+							<Button type="primary" onClick={fetchRooms} className="h-[40px]">
+								객실 조회
+							</Button>
 						</div>
-					) : (
-						<Text className="text-gray-500 text-sm">
-						조건에 맞는 객실이 없습니다.
-						</Text>
-					)}
+
+						{/* 객실 목록 */}
+						<Divider className="my-6" />
+						<Title level={5} className="text-gray-800 mb-4 font-semibold">
+							객실 정보
+						</Title>
+
+						{rooms?.length > 0 ? (
+							<div className="space-y-4">
+								{rooms.map((room) => (
+									<div
+										key={room.roomId}
+										className="flex flex-col md:flex-row border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200"
+									>
+										{/* 객실 이미지 */}
+										{room.thumbnailImage ? (
+											<img
+												src={`${API_SERVER_HOST}${room.thumbnailImage}`}
+												alt={room.roomName}
+												className="md:w-1/4 w-full h-40 object-cover"
+											/>
+										) : (
+											<div className="md:w-1/4 w-full h-40 bg-gray-200 flex items-center justify-center text-gray-500 text-sm">
+												이미지 없음
+											</div>
+										)}
+
+										{/* ✅ 객실 정보 + 버튼 */}
+										<div className="flex flex-col justify-between p-4 flex-1 bg-white">
+											<div>
+												<Title level={5} className="text-gray-900 mb-1">
+													{room.roomName}
+												</Title>
+												<Text className="block text-gray-600 text-sm mb-1">
+													최대 인원 {room.maxCnt}명
+												</Text>
+												<Text className="block text-[#006D77] font-semibold text-base mb-1">
+													{room.weekdayFee
+														? `${room.weekdayFee.toLocaleString()}원 / 1박`
+														: "가격 미정"}
+												</Text>
+											</div>
+
+											<div className="flex justify-between items-end">
+												{room.remainCount !== null && (
+													<Text
+														type={room.remainCount <= 3 ? "danger" : "secondary"}
+														className={`font-medium ${room.remainCount <= 3
+															? "text-red-500 font-semibold"
+															: "text-gray-600"
+															}`}
+													>
+														잔여 객실 {room.remainCount}개
+													</Text>
+												)}
+
+												<Button
+													type="primary"
+													size="large"
+													className="w-28 font-semibold"
+													onClick={() => handleReserve(room)}
+													disabled={room.remainCount !== null && room.remainCount <= 0}
+												>
+													{room.remainCount !== null && room.remainCount <= 0
+														? "예약 마감"
+														: "예약하기"}
+												</Button>
+											</div>
+										</div>
+									</div>
+								))}
+							</div>
+						) : (
+							<Text className="text-gray-500 text-sm">
+								조건에 맞는 객실이 없습니다.
+							</Text>
+						)}
 					</div>
 				</div>
 			</div>
