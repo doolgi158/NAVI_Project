@@ -87,7 +87,6 @@ export const useUserDetailFunctions = (form) => {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
       });
-
       const newPath = res.data.data.path;
       const newProfileUrl = `${API_SERVER_HOST}${newPath}?t=${Date.now()}`;
 
@@ -115,8 +114,8 @@ export const useUserDetailFunctions = (form) => {
         try {
           await axios.delete(`${API_SERVER_HOST}/api/images/delete`, {
             params: {
-            targetType: "USER",
-            targetId: localStorage.getItem("username"),
+              targetType: "USER",
+              targetId: localStorage.getItem("username"),
             },
             headers: {
               Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
@@ -136,110 +135,110 @@ export const useUserDetailFunctions = (form) => {
     });
   };
 
-// 회원탈퇴
-const handleDeleteAccount = () => {
-  Modal.confirm({
-    title: "회원 탈퇴",
-    content: "탈퇴 사유를 입력하시겠습니까?",
-    okText: "예",
-    cancelText: "아니오",
-    async onOk() {
-      // 예를 누른 경우 → 사유 입력창 띄우기
-      let reason = "";
-      Modal.confirm({
-        title: "탈퇴 사유를 입력해주세요",
-        content: (
-          <Input.TextArea
-            rows={4}
-            placeholder="탈퇴 이유를 입력하세요 (선택사항)"
-            onChange={(e) => {
-              reason = e.target.value;
-            }}
-          />
-        ),
-        okText: "탈퇴하기",
-        okType: "danger",
-        cancelText: "취소",
-        async onOk() {
-          await withdrawRequest(reason);
-        },
-      });
-    },
-    async onCancel() {
-      // 아니오를 누른 경우 → 바로 탈퇴 처리
-      await withdrawRequest(null);
-    },
-  });
+  // 회원탈퇴
+  const handleDeleteAccount = () => {
+    Modal.confirm({
+      title: "회원 탈퇴",
+      content: "탈퇴 사유를 입력하시겠습니까?",
+      okText: "예",
+      cancelText: "아니오",
+      async onOk() {
+        // 예를 누른 경우 → 사유 입력창 띄우기
+        let reason = "";
+        Modal.confirm({
+          title: "탈퇴 사유를 입력해주세요",
+          content: (
+            <Input.TextArea
+              rows={4}
+              placeholder="탈퇴 이유를 입력하세요 (선택사항)"
+              onChange={(e) => {
+                reason = e.target.value;
+              }}
+            />
+          ),
+          okText: "탈퇴하기",
+          okType: "danger",
+          cancelText: "취소",
+          async onOk() {
+            await withdrawRequest(reason);
+          },
+        });
+      },
+      async onCancel() {
+        // 아니오를 누른 경우 → 바로 탈퇴 처리
+        await withdrawRequest(null);
+      },
+    });
 
-  // 실제 서버 요청 함수
-  const withdrawRequest = async (reason) => {
-    try {
-      await axios.post(
-        `${API_SERVER_HOST}/api/users/delete`,
-        { reason },
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
-        }
-      );
-      message.success("회원 탈퇴가 완료되었습니다.");
-      localStorage.removeItem("accessToken");
-      window.location.href = "/";
-    } catch (err) {
-      console.error(err);
-      message.error("회원 탈퇴 중 오류가 발생했습니다.");
-    }
+    // 실제 서버 요청 함수
+    const withdrawRequest = async (reason) => {
+      try {
+        await axios.post(
+          `${API_SERVER_HOST}/api/users/delete`,
+          { reason },
+          {
+            headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
+          }
+        );
+        message.success("회원 탈퇴가 완료되었습니다.");
+        localStorage.removeItem("accessToken");
+        window.location.href = "/";
+      } catch (err) {
+        console.error(err);
+        message.error("회원 탈퇴 중 오류가 발생했습니다.");
+      }
+    };
   };
-};
 
   // 비밀번호 확인
   const checkPassword = async (currentPw) => {
-      try {
-        const res = await axios.post(
-          `${API_SERVER_HOST}/api/users/check-password`,
-          { currentPw },
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            },
-          }
-        );  
-        return res?.data?.data?.valid === true;
-      } catch (err) {
-        message.error("비밀번호 확인 중 오류가 발생했습니다.");
-        return false;
-      }
+    try {
+      const res = await axios.post(
+        `${API_SERVER_HOST}/api/users/check-password`,
+        { currentPw },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        }
+      );
+      return res?.data?.data?.valid === true;
+    } catch (err) {
+      message.error("비밀번호 확인 중 오류가 발생했습니다.");
+      return false;
+    }
   };
 
   // 비밀번호 변경
   const handlePasswordChange = async (currentPw, newPassword, confirmPw) => {
-  if (newPassword !== confirmPw) {
-    message.error("새 비밀번호와 확인 비밀번호가 일치하지 않습니다.");
-    return false;
-  }
+    if (newPassword !== confirmPw) {
+      message.error("새 비밀번호와 확인 비밀번호가 일치하지 않습니다.");
+      return false;
+    }
 
-  try {
-    await axios.put(
-      `${API_SERVER_HOST}/api/users/change-password`,
-      { currentPw, newPassword },
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-      }
-    );
-    message.success("비밀번호가 변경되었습니다!");
-    return true;
-  } catch (err) {
-    if (err.response?.status === 400)
-      message.error("현재 비밀번호가 일치하지 않습니다.");
-    else if (err.response?.status === 401) {
-      message.error("세션이 만료되었습니다. 다시 로그인해주세요.");
-      localStorage.removeItem("accessToken");
-      window.location.href = "/login";
-    } else message.error("비밀번호 변경 중 오류가 발생했습니다.");
-    return false;
-  }
-};
+    try {
+      await axios.put(
+        `${API_SERVER_HOST}/api/users/change-password`,
+        { currentPw, newPassword },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        }
+      );
+      message.success("비밀번호가 변경되었습니다!");
+      return true;
+    } catch (err) {
+      if (err.response?.status === 400)
+        message.error("현재 비밀번호가 일치하지 않습니다.");
+      else if (err.response?.status === 401) {
+        message.error("세션이 만료되었습니다. 다시 로그인해주세요.");
+        localStorage.removeItem("accessToken");
+        window.location.href = "/login";
+      } else message.error("비밀번호 변경 중 오류가 발생했습니다.");
+      return false;
+    }
+  };
 
   return {
     user, setUser, editing, setEditing, loading, uploading, checkPassword,

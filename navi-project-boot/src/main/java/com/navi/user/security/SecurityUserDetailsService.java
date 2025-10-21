@@ -1,6 +1,5 @@
 package com.navi.user.security;
 
-import com.navi.common.util.CustomException;
 import com.navi.user.domain.User;
 import com.navi.user.dto.users.UserSecurityDTO;
 import com.navi.user.enums.UserState;
@@ -22,13 +21,14 @@ public class SecurityUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.getUser(username);
-        if(user == null) {
+        if (user == null) {
             throw new UsernameNotFoundException(username + "번의 유저를 찾을 수 없습니다.");
-        } else if(user.getUserState() == UserState.SLEEP) {
+        } else if (user.getUserState() == UserState.SLEEP) {
             throw new LockedException("휴면 계정입니다.");
         }
 
         return new UserSecurityDTO(
+                user.getNo(),
                 user.getName(),
                 user.getPhone(),
                 user.getBirth(),
