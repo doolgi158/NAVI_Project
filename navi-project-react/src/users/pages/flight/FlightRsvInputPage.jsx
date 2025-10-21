@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Card,
   Input,
@@ -36,6 +36,8 @@ const FlightRsvInputPage = () => {
 
   const [passengers, setPassengers] = useState([]);
 
+  const phoneRefs = useRef([]); // ✅ 각 탑승객별 전화번호 input ref
+
   const formatDateTime = (str) => {
     if (!str) return "";
     const d = new Date(str);
@@ -49,44 +51,55 @@ const FlightRsvInputPage = () => {
   };
 
   useEffect(() => {
-    // ✅ 탑승객 정보 초기화 (성별 기본값 M)
     setPassengers(
       Array.from({ length: passengerCount }, () => ({
         name: "",
         birth: null,
         gender: "M",
-        phone: "",
+        phone: "010-", // ✅ 기본값 설정
         email: "",
       }))
     );
   }, [passengerCount]);
 
-  // ✅ 입력 변경 핸들러
+  /** ✅ 전화번호 입력 핸들러 (010- 고정 버전) */
+  const handlePhoneChange = (i, value) => {
+    let raw = value.replace(/[^0-9]/g, "");
+
+    // 항상 010-으로 시작하도록 강제
+    if (!raw.startsWith("010")) raw = "010" + raw.replace(/^010/, "");
+
+    // 010- 뒤의 숫자만 추출
+    const digits = raw.slice(3);
+
+    // 포맷팅
+    let formatted = "010-";
+    if (digits.length <= 4) formatted += digits;
+    else formatted += `${digits.slice(0, 4)}-${digits.slice(4, 8)}`;
+
+    const updated = [...passengers];
+    updated[i].phone = formatted;
+    setPassengers(updated);
+  };
+
+  /** ✅ 커서 항상 뒤로 */
+  const handlePhoneFocus = (i) => {
+    const input = phoneRefs.current[i]?.input;
+    if (input) {
+      const len = input.value.length;
+      input.setSelectionRange(len, len);
+    }
+  };
+
+  /** ✅ 공통 입력 핸들러 */
   const handleChange = (i, field, value) => {
     const updated = [...passengers];
 
     if (field === "name") {
-      // 숫자/특수문자 제거
-      updated[i][field] = value.replace(
-        /[0-9!@#$%^&*(),.?":{}|<>[\]\\\/'`~=_+;-]/g,
-        ""
-      );
+      updated[i][field] = value.replace(/[^a-zA-Z가-힣\s]/g, "");
     } else if (field === "phone") {
-      // 전화번호 자동 포맷
-      let digits = value.replace(/\D/g, "");
-      if (!digits.startsWith("010")) digits = "010" + digits;
-
-      let formatted = digits;
-      if (digits.length <= 3) formatted = digits;
-      else if (digits.length <= 7)
-        formatted = `${digits.slice(0, 3)}-${digits.slice(3)}`;
-      else
-        formatted = `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(
-          7,
-          11
-        )}`;
-
-      updated[i][field] = formatted;
+      handlePhoneChange(i, value); // ✅ 전화번호는 별도 처리
+      return;
     } else if (field === "email") {
       updated[i][field] = value.trim();
     } else {
@@ -96,7 +109,6 @@ const FlightRsvInputPage = () => {
     setPassengers(updated);
   };
 
-  // ✅ 이메일 유효성 검사
   const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const isIncomplete = passengers.some(
@@ -104,7 +116,7 @@ const FlightRsvInputPage = () => {
       !p.name ||
       !p.birth ||
       !p.gender ||
-      !p.phone.match(/^010-\d{4}-\d{4}$/) ||
+      !/^010-\d{3,4}-\d{4}$/.test(p.phone) ||
       !isValidEmail(p.email)
   );
 
@@ -418,12 +430,14 @@ const FlightRsvInputPage = () => {
                 <Col xs={24} md={12}>
                   <label className="text-gray-600 text-sm">전화번호</label>
                   <Input
+                    ref={(el) => (phoneRefs.current[i] = el)}
                     size="large"
                     prefix={<PhoneOutlined />}
                     placeholder="010-1234-5678"
-                    defaultValue="010-"
-                    value={p.phone || "010-"}
+                    value={p.phone}
+                    onFocus={() => handlePhoneFocus(i)}
                     onChange={(e) => handleChange(i, "phone", e.target.value)}
+                    maxLength={13}
                     style={{
                       borderRadius: 10,
                       boxShadow: "0 1px 3px rgba(0,0,0,0.04)",

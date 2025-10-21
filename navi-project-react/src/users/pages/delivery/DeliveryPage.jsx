@@ -57,25 +57,26 @@ const DeliveryPage = () => {
 
   /** ✅ 전화번호 입력 제한 및 자동 포맷 */
   const handlePhoneChange = (value) => {
-    // 010- 자동 유지
-    let digits = value.replace(/[^0-9]/g, ""); // 숫자만 추출
-    if (!digits.startsWith("010")) digits = "010" + digits;
+    // 항상 010-으로 시작하도록 강제
+    if (!value.startsWith("010-")) {
+      // 사용자가 앞부분을 지우면 다시 붙이기
+      value = "010-" + value.replace(/[^0-9]/g, "").replace(/^010/, "");
+    }
 
-    // 010-xxxx-xxxx 형식으로 포맷팅
-    let formatted = "010";
-    if (digits.length > 3 && digits.length <= 7) {
-      formatted = `${digits.slice(0, 3)}-${digits.slice(3)}`;
-    } else if (digits.length > 7) {
-      formatted = `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(
-        7,
-        11
-      )}`;
+    // 숫자만 추출 (010-은 제외)
+    let digits = value.replace(/[^0-9]/g, "").slice(3);
+
+    // 뒤쪽 번호 포맷팅 (010-xxxx-xxxx)
+    let formatted = "010-";
+    if (digits.length <= 4) {
+      formatted += digits;
     } else {
-      formatted = digits;
+      formatted += `${digits.slice(0, 4)}-${digits.slice(4, 8)}`;
     }
 
     setForm((p) => ({ ...p, phone: formatted }));
   };
+
 
   /** ✅ 요금 자동 계산 */
   useEffect(() => {
