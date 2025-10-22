@@ -9,7 +9,7 @@ const AdminDeliveryRoot = () => {
             <AdminSiderLayout />
 
             {/* ✅ 오른쪽 본문 */}
-            <div className="flex-1 p-6">
+            <div className="flex-1 p-6 overflow-x-auto">
                 {/* ✅ 상단 탭 */}
                 <AdminDeliveryHeader />
 

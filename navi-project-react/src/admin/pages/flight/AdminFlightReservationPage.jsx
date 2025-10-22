@@ -277,12 +277,14 @@ const AdminFlightReservationPage = () => {
     {
       title: "관리",
       align: "center",
-      width: 200,
+      width: 100,
+      fixed: "right",
       render: (_, record) => (
-        <Space>
+        <Space size={"small"}>
           <Button
             icon={<EditOutlined />}
             onClick={() => openEditModal(record)}
+            size="small"
             style={{ borderRadius: 8 }}
           >
             수정
@@ -291,6 +293,7 @@ const AdminFlightReservationPage = () => {
             danger
             icon={<DeleteOutlined />}
             onClick={() => handleDelete(record.rsvId)}
+            size="small"
             style={{ borderRadius: 8 }}
           >
             삭제
@@ -336,11 +339,16 @@ const AdminFlightReservationPage = () => {
           loading={loading}
           rowKey="rsvId"
           bordered
-          style={{ whiteSpace: "nowrap" }}
           pagination={{
             pageSize: 10,
             showTotal: (total) => `총 ${total.toLocaleString()}건 예약`,
           }}
+          style={{
+            minWidth: "100%",
+            tableLayout: "auto",  // ✅ 자동 폭 계산
+            whiteSpace: "nowrap", // ✅ 줄바꿈 방지
+          }}
+          scroll={{ x: "max-content" }}
         />
       </AdminSectionCard>
 
