@@ -40,29 +40,38 @@ public class DeliveryReservationServiceImpl implements DeliveryReservationServic
 
         // 2. 예약번호 생성
         String drsvId = generateDrsvId();
+        log.debug("[DEBUG] 생성된 예약 ID: {}", drsvId);
 
-        // 3. 상태 기본값
+        // 3. 상태 기본값 설정
         RsvStatus status = dto.getStatus() != null ? dto.getStatus() : RsvStatus.PENDING;
+        log.debug("[DEBUG] 초기 상태: {}", status);
 
-        // 4. 지역 추출
-        String region = dto.getStartAddr().contains("서귀포") ? "서귀포시" : "제주시";
+        // 4. 지역 추출 (유연하게 개선)
+        String region = extractRegion(dto.getStartAddr());
+        log.debug("[DEBUG] 추출된 지역(region): {}", region);
 
-        // 5. 그룹 자동 배정 또는 신규 생성
+        // 5. 시간대 (현재 오전 고정)
+        String timeSlot = "오전";
+        log.debug("[DEBUG] 사용된 시간대(timeSlot): {}", timeSlot);
+
+        // 6. 그룹 자동 배정 또는 신규 생성
+        log.debug("[DEBUG] 기존 그룹 검색 시도 → region={}, date={}", region, dto.getDeliveryDate());
         DeliveryGroup group = groupRepository
-                .findByRegionAndDeliveryDateAndTimeSlot(region, dto.getDeliveryDate(), "오전")
+                .findByRegionAndDeliveryDateAndTimeSlot(region, dto.getDeliveryDate(), timeSlot)
                 .orElseGet(() -> {
-                    String groupId = generateGroupId(region, dto.getDeliveryDate(), "오전");
+                    String groupId = generateGroupId(region, dto.getDeliveryDate(), timeSlot);
+                    log.info("[DEBUG] 기존 그룹 없음 → 새 그룹 생성: {}", groupId);
                     DeliveryGroup newGroup = DeliveryGroup.builder()
                             .groupId(groupId)
                             .region(region)
                             .deliveryDate(dto.getDeliveryDate())
-                            .timeSlot("오전")
+                            .timeSlot(timeSlot)
                             .status("READY")
                             .build();
                     return groupRepository.save(newGroup);
                 });
 
-        // 6. ✅ 가방 JSON 변환
+        // 7. 가방 정보 JSON 변환
         String bagsJson = null;
         if (dto.getBags() != null && !dto.getBags().isEmpty()) {
             try {
@@ -73,10 +82,10 @@ public class DeliveryReservationServiceImpl implements DeliveryReservationServic
             }
         }
 
-        // 7. 금액 설정
+        // 8. 금액 설정
         BigDecimal totalPrice = dto.getTotalPrice() != null ? dto.getTotalPrice() : BigDecimal.ZERO;
 
-        // 8. 예약 엔티티 생성
+        // 9. 예약 엔티티 생성
         DeliveryReservation reservation = DeliveryReservation.builder()
                 .drsvId(drsvId)
                 .user(user)
@@ -85,13 +94,13 @@ public class DeliveryReservationServiceImpl implements DeliveryReservationServic
                 .endAddr(dto.getEndAddr())
                 .deliveryDate(dto.getDeliveryDate())
                 .totalPrice(totalPrice)
-                .bagsJson(bagsJson) // ✅ 여기 추가됨
+                .bagsJson(bagsJson)
                 .status(status)
                 .build();
 
         DeliveryReservation saved = reservationRepository.save(reservation);
 
-        log.info("[짐배송 예약 완료] drsvId={}, totalPrice={}, region={}, group={}, bags={}",
+        log.info("[짐배송 예약 완료] drsvId={}, totalPrice={}, region={}, groupId={}, bags={}",
                 saved.getDrsvId(), saved.getTotalPrice(), region, group.getGroupId(), bagsJson);
 
         return saved;
@@ -121,6 +130,9 @@ public class DeliveryReservationServiceImpl implements DeliveryReservationServic
         return reservationRepository.save(reservation);
     }
 
+    /**
+     * ✅ 예약 ID 생성 (날짜 기준 + 일일 카운트)
+     */
     private String generateDrsvId() {
         LocalDate today = LocalDate.now();
         long countToday = reservationRepository.countByCreatedAtBetween(
@@ -133,6 +145,9 @@ public class DeliveryReservationServiceImpl implements DeliveryReservationServic
         );
     }
 
+    /**
+     * ✅ 그룹 ID 생성
+     */
     private String generateGroupId(String region, LocalDate date, String timeSlot) {
         String regionKey = region.contains("서귀포") ? "SGP" : "JEJU";
         String slotKey = timeSlot.equals("오전") ? "AM" : "PM";
@@ -141,5 +156,15 @@ public class DeliveryReservationServiceImpl implements DeliveryReservationServic
                 date.format(DateTimeFormatter.BASIC_ISO_DATE),
                 regionKey, slotKey, groupCount + 1
         );
+    }
+
+    /**
+     * ✅ 주소에서 지역명 추출 (서귀포/제주 유연하게 처리)
+     */
+    private String extractRegion(String startAddr) {
+        if (startAddr == null) return "기타";
+        if (startAddr.contains("서귀포")) return "서귀포시";
+        if (startAddr.contains("제주")) return "제주시";
+        return "기타";
     }
 }

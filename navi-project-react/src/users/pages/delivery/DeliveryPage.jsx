@@ -48,9 +48,10 @@ const DeliveryPage = () => {
     setForm((prev) => ({ ...prev, [key]: value }));
 
   const handleNameChange = (value) => {
-    const filtered = value.replace(/[^a-zA-Z가-힣\s]/g, "");
-    setForm((p) => ({ ...p, senderName: filtered }));
+    const filtered = value.replace(/[0-9!@#\$%\^\&*\)\(+=._-]/g, "");
+    setForm((prev) => ({ ...prev, senderName: filtered }));
   };
+
 
   const handlePhoneChange = (value) => {
     if (!value.startsWith("010-")) {

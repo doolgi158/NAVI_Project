@@ -15,4 +15,7 @@ public interface DeliveryReservationRepository extends JpaRepository<DeliveryRes
     long countByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
 
     int countByGroup_GroupId(String groupId);
+
+    List<DeliveryReservation> findByGroup_GroupId(String groupId);
+
 }
