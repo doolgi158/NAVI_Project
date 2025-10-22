@@ -18,8 +18,8 @@ import {
 } from "antd";
 import { LeftOutlined } from "@ant-design/icons";
 
-const { Title, Text } = Typography;
 const API_SERVER_HOST = "http://localhost:8080";
+const { Title, Text } = Typography;
 
 const SeatSelectPage = () => {
   const { state } = useLocation();
@@ -32,7 +32,7 @@ const SeatSelectPage = () => {
     selectedInbound,
     passengerCount = 1,
     passengers = [],
-    outboundSeats: prevOutboundSeats = [],
+    outboundDto = null, // ✅ 출발편 DTO 저장용
   } = state || {};
 
   const flight = step === "outbound" ? selectedOutbound : selectedInbound;
@@ -58,12 +58,9 @@ const SeatSelectPage = () => {
     ).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
   };
 
-  // ✅ 좌석 데이터 로드 함수 (useCallback으로 외부화)
+  // ✅ 좌석 데이터 불러오기
   const fetchSeats = useCallback(async () => {
-    if (!flightIdValue || !depTimeValue) {
-      console.warn("⚠️ flightIdValue 또는 depTimeValue가 비어있습니다.");
-      return;
-    }
+    if (!flightIdValue || !depTimeValue) return;
 
     setLoading(true);
     try {
@@ -71,13 +68,11 @@ const SeatSelectPage = () => {
         ? depTimeValue
         : depTimeValue.replace(" ", "T");
 
-      console.log("📡 좌석 요청:", flightIdValue, formattedDepTime);
-
       const res = await axios.get(
         `${API_SERVER_HOST}/api/seats/${encodeURIComponent(flightIdValue)}`,
         { params: { depTime: formattedDepTime } }
       );
-      console.log(res.data[0]);
+
       const seatData = (Array.isArray(res.data) ? res.data : []).map((s) => ({
         ...s,
         seatClass: s.seatClass || s.seat_class || "ECONOMY",
@@ -89,7 +84,6 @@ const SeatSelectPage = () => {
       setSeats(seatData);
       setSelectedSeats([]);
       setTotalPrice(0);
-      console.log("✅ 좌석 데이터 로드 완료:", seatData.length);
     } catch (err) {
       console.error("❌ 좌석 불러오기 실패:", err);
       message.error("좌석 정보를 불러오지 못했습니다.");
@@ -98,12 +92,11 @@ const SeatSelectPage = () => {
     }
   }, [flightIdValue, depTimeValue]);
 
-  // ✅ 첫 로드 시 좌석 불러오기
   useEffect(() => {
     fetchSeats();
   }, [fetchSeats]);
 
-  // ✅ 좌석 행별 그룹화
+  // ✅ 행 단위 그룹화
   const groupByRow = (arr) => {
     const rows = {};
     arr.forEach((s) => {
@@ -121,7 +114,6 @@ const SeatSelectPage = () => {
     () => groupByRow(seats.filter((s) => s.seatClass === "PRESTIGE")),
     [seats]
   );
-
   const economyRows = useMemo(
     () => groupByRow(seats.filter((s) => s.seatClass === "ECONOMY")),
     [seats]
@@ -142,82 +134,73 @@ const SeatSelectPage = () => {
     setTotalPrice(updated.reduce((sum, s) => sum + (s.totalPrice || 0), 0));
   };
 
-  // ✅ 다음 단계 (예약 생성)
-  const handleNext = async () => {
+  // ✅ 다음 단계 (예약 DTO 생성만, insert X)
+  const handleNext = () => {
     if (selectedSeats.length !== passengerCount)
       return message.warning(`탑승객 수(${passengerCount})에 맞게 좌석을 선택하세요.`);
 
-    try {
-      const dto = {
-        userNo: 1,
-        flightId: flightIdValue,
-        depTime: flight?.depTime?.split("T")[0],
-        seatId: selectedSeats[0]?.seatId,
-        passengersJson: JSON.stringify(passengers),
-        totalPrice,
-        status: "PENDING",
-      };
+    const currentDto = {
+      flightId: flightIdValue,
+      depTime: flight?.depTime?.split("T")[0],
+      seatId: selectedSeats[0]?.seatId,
+      passengersJson: JSON.stringify(passengers),
+      totalPrice,
+      status: "PENDING",
+    };
 
-      console.log("예약 DTO 전송: ", dto);
-      const res = await axios.post(`${API_SERVER_HOST}/api/flight/reservation`, dto);
-
-      if (res.data.status === 200) {
-        message.success("예약이 완료되었습니다.");
-
-        // ✅ 예약 성공 시 즉시 좌석 상태 갱신
-        await fetchSeats();
-
-        if (isRoundTrip && step === "outbound") {
-          navigate("/flight/seat", {
-            state: {
-              isRoundTrip: true,
-              step: "inbound",
-              selectedOutbound,
-              selectedInbound,
-              passengerCount,
-              passengers,
-              outboundSeats: selectedSeats,
-            },
-          });
-        } else {
-          navigate("/flight/payment", {
-            state: {
-              reservation: res.data.data,
-              selectedOutbound,
-              selectedInbound,
-              outboundSeats:
-                step === "outbound" ? selectedSeats : prevOutboundSeats,
-              inboundSeats: step === "inbound" ? selectedSeats : [],
-              passengerCount,
-              passengers,
-              totalPrice,
-            },
-          });
-        }
-      } else {
-        message.error("예약 생성에 실패했습니다.");
-      }
-    } catch (e) {
-      const msg = e.response?.data?.message;
-      if (msg?.includes("이미 예약된 좌석")) {
-        message.warning("해당 좌석은 이미 예약되었습니다. 다른 좌석을 선택해주세요.");
-        await fetchSeats(); // ⚠️ 중복 예약 시에도 즉시 갱신
-      } else if (msg) {
-        message.error(msg);
-      } else {
-        message.error("예약 중 오류가 발생했습니다. 다시 시도해주세요.");
-      }
-      console.error("예약 요청 중 오류:", e);
+    // ✅ 출발편 → 귀국편으로
+    if (isRoundTrip && step === "outbound") {
+      navigate("/flight/seat", {
+        state: {
+          isRoundTrip: true,
+          step: "inbound",
+          selectedOutbound,
+          selectedInbound,
+          passengerCount,
+          passengers,
+          outboundDto: currentDto, // ✅ 출발편 DTO 저장
+        },
+      });
+      return;
     }
+
+    // 결제에 사용할 데이터
+    const items = [
+      {
+        reserveId: selectedOutbound?.frsvId,
+        amount: selectedOutbound?.totalPrice,
+      },
+    ];
+
+    // 왕복일 경우 두 번째 아이템 추가
+    if (isRoundTrip && selectedInbound) {
+      items.push({
+        reserveId: selectedInbound?.frsvId,
+        amount: selectedInbound?.totalPrice,
+      });
+    }
+    
+    // ✅ 편도 or 귀국편 완료 시 → 결제 페이지로
+    navigate("/payment", {
+      state: {
+        rsvType: "FLY",
+        items,
+        passengerCount,
+        passengers,
+        outboundDto: isRoundTrip ? outboundDto : currentDto,
+        inboundDto: isRoundTrip ? currentDto : null,
+        totalPrice:
+          (selectedOutbound?.price || 0) +
+          (selectedInbound?.price || 0) * passengerCount,
+      },
+    });
   };
 
   const handleBack = () => navigate(-1);
 
-  // ✅ 좌석 버튼 렌더링
   const SeatButton = ({ seat }) => {
     const selected = selectedSeats.some((s) => s.seatNo === seat.seatNo);
     const isPrestige = seat.seatClass === "PRESTIGE";
-
     const bg = seat.isReserved
       ? "#e5e7eb"
       : selected
@@ -265,7 +248,7 @@ const SeatSelectPage = () => {
         <Row justify="center" gutter={[24, 24]}>
           <Col xs={23} lg={16} xl={14}>
             <Card
-              bordered={false}
+              variant="borderless"
               style={{
                 borderRadius: 20,
                 boxShadow: "0 8px 24px rgba(0,0,0,0.05)",
@@ -413,7 +396,6 @@ const SeatSelectPage = () => {
               >
                 <Text strong>선택 정보</Text>
                 <Divider style={{ margin: "8px 0 12px" }} />
-
                 {selectedSeats.length === 0 ? (
                   <Text type="secondary">좌석을 선택하세요.</Text>
                 ) : (
@@ -454,15 +436,7 @@ const SeatSelectPage = () => {
                     justifyContent: "space-between",
                   }}
                 >
-                  <Button
-                    size="large"
-                    onClick={handleBack}
-                    style={{
-                      flex: 1,
-                      borderRadius: 8,
-                      height: 46,
-                    }}
-                  >
+                  <Button size="large" onClick={handleBack} style={{ flex: 1 }}>
                     뒤로가기
                   </Button>
                   <Button

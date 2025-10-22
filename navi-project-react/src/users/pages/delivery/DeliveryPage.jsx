@@ -16,21 +16,17 @@ import { useNavigate } from "react-router-dom";
 import { setReserveData } from "../../../common/slice/paymentSlice";
 import { useDispatch } from "react-redux";
 
+const token = localStorage.getItem("accessToken");
 const { Title, Text } = Typography;
 
 const API_SERVER_HOST = "http://localhost:8080";
 const KAKAO_MAP_KEY = import.meta.env.VITE_KAKAO_MAP_KEY;
-
-// ✅ bagSize별 요금표
 const BAG_PRICE_TABLE = { S: 10000, M: 15000, L: 20000 };
-
-// ✅ 제주공항 좌표
 const JEJU_AIRPORT = { lat: 33.5055, lng: 126.495 };
 
 const DeliveryPage = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch(); // ✅ Redux 사용 준비
-
+  const dispatch = useDispatch();
   const [form, setForm] = useState({
     senderName: "",
     phone: "",
@@ -38,12 +34,11 @@ const DeliveryPage = () => {
     fromAddress: "",
     toAddress: "",
     deliveryDate: null,
-    bagSize: "",
-    bagCount: 1,
     memo: "",
   });
+  const [bags, setBags] = useState({ S: 0, M: 0, L: 0 });
+  const [estimatedFare, setEstimatedFare] = useState(0);
 
-  const [estimatedFare, setEstimatedFare] = useState(null);
   const MAP_CONTAINER_ID = "delivery-map";
   const mapRef = useRef(null);
   const markersRef = useRef({ fromAddress: null, toAddress: null });
@@ -52,14 +47,34 @@ const DeliveryPage = () => {
   const handleChange = (key, value) =>
     setForm((prev) => ({ ...prev, [key]: value }));
 
-  /** ✅ 요금 자동 계산 */
+  const handleNameChange = (value) => {
+    const filtered = value.replace(/[^a-zA-Z가-힣\s]/g, "");
+    setForm((p) => ({ ...p, senderName: filtered }));
+  };
+
+  const handlePhoneChange = (value) => {
+    if (!value.startsWith("010-")) {
+      value = "010-" + value.replace(/[^0-9]/g, "").replace(/^010/, "");
+    }
+    let digits = value.replace(/[^0-9]/g, "").slice(3);
+    let formatted = "010-";
+    if (digits.length <= 4) formatted += digits;
+    else formatted += `${digits.slice(0, 4)}-${digits.slice(4, 8)}`;
+    setForm((p) => ({ ...p, phone: formatted }));
+  };
+
+  const handleBagChange = (size, count) => {
+    setBags((prev) => ({ ...prev, [size]: Math.max(0, Number(count)) }));
+  };
+
+  /** ✅ 총 요금 자동 계산 */
   useEffect(() => {
-    const { bagSize, bagCount } = form;
-    if (bagSize && bagCount) {
-      const base = BAG_PRICE_TABLE[bagSize] || 0;
-      setEstimatedFare(base * Number(bagCount));
-    } else setEstimatedFare(null);
-  }, [form.bagSize, form.bagCount]);
+    const total =
+      bags.S * BAG_PRICE_TABLE.S +
+      bags.M * BAG_PRICE_TABLE.M +
+      bags.L * BAG_PRICE_TABLE.L;
+    setEstimatedFare(total);
+  }, [bags]);
 
   /** ✅ 지도 초기화 */
   useEffect(() => {
@@ -204,50 +219,42 @@ const DeliveryPage = () => {
 
   /** ✅ 예약 처리 */
   const handleSubmit = async () => {
-    const required = [
-      "senderName",
-      "phone",
-      "fromAddress",
-      "toAddress",
-      "deliveryDate",
-      "bagSize",
-      "bagCount",
-    ];
+    const required = ["senderName", "phone", "fromAddress", "toAddress", "deliveryDate"];
     const missing = required.find((k) => !form[k]);
     if (missing) return message.warning("모든 정보를 입력해주세요.");
 
-    // [ TODO ] : usePayment의 항목과 일치시켜야 함.
+    const totalBags = bags.S + bags.M + bags.L;
+    if (totalBags === 0) return message.warning("가방 개수를 1개 이상 입력해주세요.");
+
     const dto = {
       startAddr: form.fromAddress,
       endAddr: form.toAddress,
       deliveryDate: form.deliveryDate.format("YYYY-MM-DD"),
       totalPrice: estimatedFare,
-      userNo: 2, // TODO: 로그인 연동
-      bagId: form.bagSize === "S" ? 1 : form.bagSize === "M" ? 2 : 3,
-      groupId: "G20251015_JEJU_AM_1",
+      bags,
+      memo: form.memo,
+      phone: form.phone,
     };
 
     try {
-      const res = await axios.post(`${API_SERVER_HOST}/api/delivery/rsv`, dto);
-      console.log("✅ [DeliveryPage] 예약 응답:", res.data);
+      const res = await axios.post(`${API_SERVER_HOST}/api/delivery/rsv`, dto, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-      // 예약 성공 시 Redux 저장
       dispatch(
         setReserveData({
           rsvType: "DLV",
-          reserveId: res.data.data.drsvId,  // ✅ 예약 ID
-          itemData: res.data.data,          // ✅ 예약 상세 데이터
+          reserveId: res.data.data.drsvId,
+          itemData: res.data.data,
         })
       );
 
       message.success("짐배송 예약이 완료되었습니다!");
-
-      // 결제 페이지로 이동 (예약 결과 전달)
       navigate("/payment", {
         state: {
           rsvType: "DLV",
-          items: res.data.data,   // 예약 데이터 전달
-          formData: dto,          // 폼 데이터 전달
+          items: res.data.data,
+          formData: dto,
         },
       });
     } catch (error) {
@@ -260,27 +267,16 @@ const DeliveryPage = () => {
     <MainLayout>
       <div className="max-w-6xl mx-auto mt-12 pb-24 grid grid-cols-1 md:grid-cols-2 gap-8 px-4 md:px-0">
         {/* ✅ 왼쪽 입력폼 */}
-        <Card
-          className="shadow-md rounded-2xl border border-gray-200"
-          styles={{ body: { padding: "28px 32px" } }}
-        >
+        <Card className="shadow-md rounded-2xl border border-gray-200" styles={{ body: { padding: "28px 32px" } }}>
           <Title level={3} className="text-center mb-6 text-blue-600">
             짐배송 예약
           </Title>
 
-          <Input
-            placeholder="이름"
-            value={form.senderName}
-            onChange={(e) => handleChange("senderName", e.target.value)}
-            className="mb-3"
-          />
-          <Input
-            placeholder="전화번호"
-            value={form.phone}
-            onChange={(e) => handleChange("phone", e.target.value)}
-            className="mb-5"
-          />
+          {/* 이름/전화번호 */}
+          <Input placeholder="이름" value={form.senderName} onChange={(e) => handleNameChange(e.target.value)} className="mb-3" />
+          <Input placeholder="전화번호 (010-xxxx-xxxx)" value={form.phone} onChange={(e) => handlePhoneChange(e.target.value)} className="mb-5" maxLength={13} />
 
+          {/* ✅ 배송 방향 선택 */}
           <Text strong>배송 방향</Text>
           <Radio.Group
             value={form.deliveryType}
@@ -298,77 +294,55 @@ const DeliveryPage = () => {
               } else {
                 Object.values(markersRef.current).forEach((m) => m?.setMap(null));
                 markersRef.current = { fromAddress: null, toAddress: null };
-                mapRef.current.setCenter(
-                  new window.kakao.maps.LatLng(JEJU_AIRPORT.lat, JEJU_AIRPORT.lng)
-                );
+                mapRef.current.setCenter(new window.kakao.maps.LatLng(JEJU_AIRPORT.lat, JEJU_AIRPORT.lng));
               }
             }}
             optionType="button"
             buttonStyle="solid"
             className="w-full flex justify-between my-3"
           >
-            <Radio.Button value="AIRPORT_TO_HOTEL" className="flex-1 text-center">
-              공항 → 숙소
-            </Radio.Button>
-            <Radio.Button value="HOTEL_TO_AIRPORT" className="flex-1 text-center">
-              숙소 → 공항
-            </Radio.Button>
-            <Radio.Button value="HOTEL_TO_HOTEL" className="flex-1 text-center">
-              숙소 ↔ 숙소
-            </Radio.Button>
+            <Radio.Button value="AIRPORT_TO_HOTEL" className="flex-1 text-center">공항 → 숙소</Radio.Button>
+            <Radio.Button value="HOTEL_TO_AIRPORT" className="flex-1 text-center">숙소 → 공항</Radio.Button>
+            <Radio.Button value="HOTEL_TO_HOTEL" className="flex-1 text-center">숙소 ↔ 숙소</Radio.Button>
           </Radio.Group>
 
           <Divider />
 
+          {/* ✅ 주소 입력 */}
           <div className="flex gap-2 mb-3">
-            <Input
-              placeholder="출발지 주소"
-              value={form.fromAddress}
-              onChange={(e) => handleChange("fromAddress", e.target.value)}
-            />
-            <Button onClick={() => handleSearchAddress("fromAddress")}>
-              주소 찾기
-            </Button>
+            <Input placeholder="출발지 주소" value={form.fromAddress} onChange={(e) => handleChange("fromAddress", e.target.value)} />
+            <Button onClick={() => handleSearchAddress("fromAddress")}>주소 찾기</Button>
           </div>
           <div className="flex gap-2 mb-4">
-            <Input
-              placeholder="도착지 주소"
-              value={form.toAddress}
-              onChange={(e) => handleChange("toAddress", e.target.value)}
-            />
-            <Button onClick={() => handleSearchAddress("toAddress")}>
-              주소 찾기
-            </Button>
+            <Input placeholder="도착지 주소" value={form.toAddress} onChange={(e) => handleChange("toAddress", e.target.value)} />
+            <Button onClick={() => handleSearchAddress("toAddress")}>주소 찾기</Button>
           </div>
 
+          {/* ✅ 날짜 선택 */}
           <DatePicker
             className="w-full mb-4"
             value={form.deliveryDate ? dayjs(form.deliveryDate) : null}
             onChange={(date) => handleChange("deliveryDate", date)}
             placeholder="배송 희망 일자 선택"
+            disabledDate={(current) => current && current < dayjs().endOf("day")}
           />
 
+          {/* ✅ 가방 입력 */}
           <Text strong>가방 정보</Text>
-          <div className="flex gap-3 mt-2 mb-4">
-            <select
-              className="border rounded-md p-2 w-1/2"
-              value={form.bagSize}
-              onChange={(e) => handleChange("bagSize", e.target.value)}
-            >
-              <option value="">가방 크기 선택</option>
-              <option value="S">소형 (S)</option>
-              <option value="M">중형 (M)</option>
-              <option value="L">대형 (L)</option>
-            </select>
-
-            <input
-              type="number"
-              min="1"
-              className="border rounded-md p-2 w-1/2"
-              placeholder="가방 개수"
-              value={form.bagCount}
-              onChange={(e) => handleChange("bagCount", e.target.value)}
-            />
+          <div className="grid grid-cols-3 gap-3 mt-3 mb-4">
+            {["S", "M", "L"].map((size) => (
+              <div key={size} className="flex flex-col items-center border rounded-lg p-2">
+                <Text className="font-semibold">{size}</Text>
+                <Text type="secondary">{BAG_PRICE_TABLE[size].toLocaleString()}원</Text>
+                <input
+                  type="number"
+                  min="0"
+                  className="border rounded-md p-1 mt-2 w-16 text-center"
+                  value={bags[size]}
+                  onChange={(e) => handleBagChange(size, e.target.value)}
+                />
+              </div>
+            ))}
           </div>
 
           <textarea
@@ -379,36 +353,20 @@ const DeliveryPage = () => {
             onChange={(e) => handleChange("memo", e.target.value)}
           />
 
-          {estimatedFare && (
+          {estimatedFare > 0 && (
             <div className="bg-blue-50 text-blue-700 rounded-lg text-center p-3 mb-4">
               <strong>예상 요금:</strong> {estimatedFare.toLocaleString()}원
             </div>
           )}
 
-          <Button
-            type="primary"
-            block
-            size="large"
-            className="h-12 text-base font-semibold"
-            onClick={handleSubmit}
-          >
+          <Button type="primary" block size="large" className="h-12 text-base font-semibold" onClick={handleSubmit}>
             예약하기
           </Button>
         </Card>
 
-        {/* ✅ 지도 카드 */}
-        <Card
-          className="shadow-md rounded-2xl border border-gray-200 overflow-hidden"
-          styles={{ body: { padding: 0 } }}
-        >
-          <div
-            id={MAP_CONTAINER_ID}
-            style={{
-              width: "100%",
-              height: "calc(70vh - 2px)",
-              display: "block",
-            }}
-          ></div>
+        {/* ✅ 지도 */}
+        <Card className="shadow-md rounded-2xl border border-gray-200 overflow-hidden" styles={{ body: { padding: 0 } }}>
+          <div id={MAP_CONTAINER_ID} style={{ width: "100%", height: "calc(70vh - 2px)" }}></div>
         </Card>
       </div>
     </MainLayout>

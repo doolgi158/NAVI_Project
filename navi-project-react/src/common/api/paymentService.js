@@ -26,13 +26,3 @@ export const verifyPayment = async (data) => {
 	);
 	return res.data;
 };
-
-/* 결제 상세 테이블 INSERT - 결제 세부 정보 생성 */
-export const confirmPayment = async (data) => {
-const res = await axios.post(
-		`${API_SERVER_HOST}/api/payment/confirm`,
-		data,
-		{ headers: { ...getAuthHeader() } }
-	);
-	return res.data;
-};

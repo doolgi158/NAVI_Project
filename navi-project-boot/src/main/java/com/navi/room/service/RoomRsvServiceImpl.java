@@ -74,10 +74,13 @@ public class RoomRsvServiceImpl implements RoomRsvService {
         stockService.decreaseStock(room, start, end, dto.getQuantity());
 
         // 예약 ID 생성 (예: 20251020ACC0001)
-        String today = LocalDate.now(ZoneId.of("Asia/Seoul"))
-                .format(DateTimeFormatter.BASIC_ISO_DATE);
-        long seq = roomRsvRepository.count() + 1;
-        String reserveId = String.format("%sACC%04d", today, seq);
+        String reserveId = dto.getReserveId();
+        if (reserveId == null || reserveId.isBlank()) {
+            String today = LocalDate.now(ZoneId.of("Asia/Seoul"))
+                    .format(DateTimeFormatter.BASIC_ISO_DATE);
+            long seq = roomRsvRepository.count() + 1;
+            reserveId = String.format("%sACC%04d", today, seq);
+        }
 
         // 예약 엔티티 생성
         RoomRsv rsv = RoomRsv.builder()
@@ -97,6 +100,8 @@ public class RoomRsvServiceImpl implements RoomRsvService {
         log.info("✅ 객실 예약 생성 완료 → reserveId={}, user={}, room={}, stay={}~{}, qty={}, nights={}, total={}",
                 reserveId, user.getNo(), room.getRoomId(), start, end, dto.getQuantity(), serverNights, totalPrice);
 
+        dto.setReserveId(reserveId);
+
         return RoomRsvResponseDTO.fromEntity(rsv);
     }
 
@@ -106,13 +111,24 @@ public class RoomRsvServiceImpl implements RoomRsvService {
     public void createMultipleRoomReservations(String reserveId, Long userNo, List<RoomRsvRequestDTO> roomList) {
         log.info("[RoomRsvService] 다중 객실 예약 생성 시작 → user={}, count={}", userNo, roomList.size());
 
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        String generatedReserveId = reserveId;
+
         for (RoomRsvRequestDTO dto : roomList) {
             dto.setUserNo(userNo);
-            dto.setReserveId(reserveId); // 동일 예약 ID 공유
-            createRoomReservation(dto);
+
+            if (generatedReserveId != null) { dto.setReserveId(generatedReserveId); }
+
+            RoomRsvResponseDTO rsv = createRoomReservation(dto);
+            if (generatedReserveId == null) {
+                generatedReserveId = rsv.getReserveId();
+                log.info("🔖 다중 예약 공통 ID 생성 완료 → {}", generatedReserveId);
+            }
+
+            totalAmount = totalAmount.add(rsv.getPrice().multiply(BigDecimal.valueOf(dto.getQuantity())));
         }
 
-        log.info("[RoomRsvService] 다중 객실 예약 생성 완료 → user={}, total={}", userNo, roomList.size());
+        log.info("💰 다중 예약 완료 → reserveId={}, totalAmount={}, totalRooms={}", reserveId, totalAmount, roomList.size());
     }
 
     /* 예약 상태 변경 + 재고 복구 */
@@ -130,7 +146,6 @@ public class RoomRsvServiceImpl implements RoomRsvService {
                 case CANCELLED -> rsv.markCancelled();
                 case FAILED -> rsv.markFailed();
                 case REFUNDED -> rsv.markRefunded();
-                case COMPLETED -> rsv.markCompleted();
             }
 
             if (newStatus == RsvStatus.FAILED ||

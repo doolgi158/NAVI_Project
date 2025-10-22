@@ -1,6 +1,7 @@
 package com.navi.user.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.navi.travel.domain.Bookmark;
 import com.navi.travel.domain.Like;
 import com.navi.user.enums.UserRole;
@@ -71,6 +72,7 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    @JsonIgnore
     private List<History> histories = new ArrayList<>();    // 로그인 이력
 
     @ElementCollection(fetch = FetchType.EAGER)
