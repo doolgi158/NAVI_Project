@@ -44,7 +44,7 @@ const AdminSiderLayout = () => {
     "6": () => navigate("/adm/deliveries"),
     "7": () => navigate("/adm/payments"),
     "8": () => navigate("/adm/refunds"),
-    "9": () => navigate("/adm/board"),
+    "9": () => navigate("/adm/manager/board"),
   };
 
   const handleMenuClick = (e) => {
