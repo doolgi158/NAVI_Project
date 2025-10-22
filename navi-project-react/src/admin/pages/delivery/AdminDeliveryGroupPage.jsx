@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Table, Typography, Button, Space, message, Tag } from "antd";
+import { Table, Typography, Button, Space, message, Tag, Modal } from "antd";
 import { ReloadOutlined, SyncOutlined } from "@ant-design/icons";
 import axios from "axios";
 import dayjs from "dayjs";
@@ -46,31 +46,30 @@ const AdminDeliveryGroupPage = () => {
 
     // ✅ 상태 변경 로직
     const handleStatusChange = async (record) => {
-        let nextStatus;
-        switch (record.status) {
-            case "READY":
-                nextStatus = "IN_PROGRESS";
-                break;
-            case "IN_PROGRESS":
-                nextStatus = "DONE";
-                break;
-            case "DONE":
-                message.info("이미 완료된 배송 그룹입니다.");
-                return;
-            default:
-                nextStatus = "READY";
-        }
+        const nextStatusMap = {
+            READY: "IN_PROGRESS",
+            IN_PROGRESS: "DONE",
+            DONE: "READY",
+        };
+        const nextStatus = nextStatusMap[record.status] || "READY";
 
-        try {
-            await axios.put(`${API}/${record.groupId}/status`, null, {
-                params: { status: nextStatus },
-            });
-            message.success(`상태가 '${nextStatus}'(으)로 변경되었습니다.`);
-            fetchGroups();
-        } catch {
-            message.error("상태 변경 중 오류가 발생했습니다.");
-        }
+        Modal.confirm({
+            title: "상태 변경 확인",
+            content: `${record.status} → ${nextStatus} 으로 변경하시겠습니까?`,
+            onOk: async () => {
+                try {
+                    await axios.put(`${API}/${record.groupId}/status`, null, {
+                        params: { status: nextStatus },
+                    });
+                    message.success(`상태가 '${nextStatus}'(으)로 변경되었습니다.`);
+                    fetchGroups();
+                } catch {
+                    message.error("상태 변경 중 오류가 발생했습니다.");
+                }
+            },
+        });
     };
+
 
     // ✅ 테이블 컬럼 정의
     const columns = [
@@ -98,9 +97,26 @@ const AdminDeliveryGroupPage = () => {
             align: "center",
         },
         {
+            title: "등록일",
+            dataIndex: "createdAt",
+            align: "center",
+            width: 180,
+            sorter: (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
+            render: (t) => (t ? dayjs(t).format("YYYY-MM-DD HH:mm") : "-"),
+        },
+        {
+            title: "수정일",
+            dataIndex: "updatedAt",
+            align: "center",
+            width: 180,
+            sorter: (a, b) => new Date(a.updatedAt) - new Date(b.updatedAt),
+            render: (t) => (t ? dayjs(t).format("YYYY-MM-DD HH:mm") : "-"),
+        },
+        {
             title: "관리",
             key: "actions",
             align: "center",
+            fixed: "right",
             render: (_, record) => (
                 <Space>
                     <Button
@@ -131,6 +147,12 @@ const AdminDeliveryGroupPage = () => {
                 dataSource={groups}
                 columns={columns}
                 bordered
+                style={{
+                    minWidth: "100%",
+                    tableLayout: "auto",  // ✅ 자동 폭 계산
+                    whiteSpace: "nowrap", // ✅ 줄바꿈 방지
+                }}
+                scroll={{ x: "max-content" }}
             />
         </AdminSectionCard>
     );

@@ -45,4 +45,7 @@ public class DeliveryReservationDTO {
      * ✅ 가방 종류별 수량 정보 (예: {"S":2,"M":1,"L":0})
      */
     private Map<String, Integer> bags;
+
+    private LocalDate createdAt;
+    private LocalDate updatedAt;
 }
