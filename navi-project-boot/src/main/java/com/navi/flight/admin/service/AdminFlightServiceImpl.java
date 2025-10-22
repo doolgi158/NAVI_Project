@@ -4,6 +4,7 @@ import com.navi.flight.admin.dto.AdminFlightDTO;
 import com.navi.flight.domain.Airport;
 import com.navi.flight.domain.Flight;
 import com.navi.flight.domain.FlightId;
+import com.navi.flight.domain.Seat;
 import com.navi.flight.repository.AirportRepository;
 import com.navi.flight.repository.FlightRepository;
 import jakarta.transaction.Transactional;
@@ -101,25 +102,34 @@ public class AdminFlightServiceImpl implements AdminFlightService {
         return AdminFlightDTO.fromEntity(updated);
     }
 
-    /*
-     * 삭제
-     */
     @Override
     @Transactional
     public void deleteFlight(String flightId, LocalDateTime depTime) {
         FlightId id = new FlightId(flightId, depTime);
-        if (!flightRepository.existsById(id)) {
-            throw new IllegalArgumentException("삭제할 항공편을 찾을 수 없습니다.");
+
+        // 1️⃣ 항공편 존재 확인
+        Flight flight = flightRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("삭제할 항공편을 찾을 수 없습니다."));
+
+        // 2️⃣ 예약된 좌석 존재 여부 검사
+        boolean hasReservedSeats = flight.getSeats().stream().anyMatch(Seat::isReserved);
+        if (hasReservedSeats) {
+            throw new IllegalStateException("예약된 좌석이 있는 항공편은 삭제할 수 없습니다.");
         }
-        try{
-            flightRepository.deleteById(id);
-            log.info("[ADMIN] 항공편 삭제 완료 : {} / {}", flightId, depTime);
-        }catch (DataIntegrityViolationException e){
-            throw new IllegalStateException("예약 정보가 연결된 항공편은 삭제할 수 없습니다.");
-        }catch (Exception e){
-            throw  new RuntimeException("항공편 삭제 중 오류가 발생했습니다: " + e.getMessage());
+
+        // 3️⃣ 예약 정보 존재 여부 검사 (FlightReservation)
+        if (!flight.getReservations().isEmpty()) {
+            throw new IllegalStateException("예약 내역이 존재하는 항공편은 삭제할 수 없습니다.");
         }
-        flightRepository.deleteById(id);
-        log.info("[ADMIN] 항공편 삭제 완료: {} / {}", flightId, depTime);
+
+        try {
+            // 4️⃣ 안전하게 삭제
+            flightRepository.delete(flight);
+            log.info("[ADMIN] 항공편 및 관련 좌석 삭제 완료: {} / {}", flightId, depTime);
+        } catch (DataIntegrityViolationException e) {
+            throw new IllegalStateException("데이터 무결성 제약으로 항공편을 삭제할 수 없습니다.");
+        } catch (Exception e) {
+            throw new RuntimeException("항공편 삭제 중 오류가 발생했습니다: " + e.getMessage());
+        }
     }
 }
