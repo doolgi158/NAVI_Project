@@ -8,12 +8,9 @@ import org.hibernate.annotations.DynamicUpdate;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-
-/* =====[NAVI_TRAVEL_PLAN]=====
-        여행계획 메인 테이블
-   ============================== */
+import java.util.LinkedHashSet;
+import java.util.Objects;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -35,17 +32,17 @@ public class TravelPlan {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "travel_plan_seq_gen")
     private Long planId;
 
-    // === 관계 ===
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_no", nullable = false)
     private User user;
 
+    /** ✅ 하루 일정들 (Day) */
     @OneToMany(mappedBy = "travelPlan", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     @Builder.Default
-    private List<TravelPlanDay> days = new ArrayList<>();
+    @OrderBy("dayDate ASC, orderNo ASC")
+    private Set<TravelPlanDay> days = new LinkedHashSet<>();
 
-    // === 기본 정보 ===
     private String title;
 
     @Column(name = "start_date")
@@ -63,22 +60,27 @@ public class TravelPlan {
     @Column(name = "thumbnail_path", length = 1000)
     private String thumbnailPath;
 
-    // === 편의 메서드 ===
-    public void setDays(List<TravelPlanDay> newDays) {
+    /* ===== 편의 메서드 ===== */
+
+    /** ✅ 하루 추가 */
+    public void addDay(TravelPlanDay day) {
+        if (day == null) return;
+        day.setTravelPlan(this);
+        this.days.add(day);
+    }
+
+    /** ✅ 전체 교체 */
+    public void replaceDays(Set<TravelPlanDay> newDays) {
         this.days.clear();
         if (newDays != null) {
-            newDays.forEach(day -> day.setTravelPlan(this));
+            newDays.forEach(d -> d.setTravelPlan(this));
             this.days.addAll(newDays);
         }
     }
 
-    /** ✅ 수정용 편의 메서드 (updatePlanInfo) */
-    public void updatePlanInfo(String title,
-                               LocalDate startDate,
-                               LocalDate endDate,
-                               LocalTime startTime,
-                               LocalTime endTime,
-                               String thumbnailPath) {
+    /** ✅ 계획 기본정보 수정 */
+    public void updatePlanInfo(String title, LocalDate startDate, LocalDate endDate,
+                               LocalTime startTime, LocalTime endTime, String thumbnailPath) {
         if (title != null) this.title = title;
         if (startDate != null) this.startDate = startDate;
         if (endDate != null) this.endDate = endDate;
@@ -87,20 +89,19 @@ public class TravelPlan {
         if (thumbnailPath != null) this.thumbnailPath = thumbnailPath;
     }
 
-    /** ✅ Days 추가용 */
-    public void addDay(TravelPlanDay day) {
-        this.days.add(day);
-        day.setTravelPlan(this);
+    /* ✅ 삭제 관련 메서드 불필요 → removeAllDays() 제거 (JPA cascade가 처리) */
+
+    /* ===== equals/hashCode ===== */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TravelPlan)) return false;
+        TravelPlan that = (TravelPlan) o;
+        return planId != null && Objects.equals(planId, that.planId);
     }
 
-    /** ✅ Days 전체 교체용 */
-    public void replaceDays(List<TravelPlanDay> newDays) {
-        this.days.clear();
-        if (newDays != null) {
-            newDays.forEach(d -> d.setTravelPlan(this));
-            this.days.addAll(newDays);
-        }
+    @Override
+    public int hashCode() {
+        return 31;
     }
-
-
 }

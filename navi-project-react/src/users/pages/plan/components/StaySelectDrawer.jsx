@@ -201,8 +201,8 @@ export default function StaySelectDrawer({
                           <div className="flex flex-col ml-3 min-w-[140px]">
                             <p
                               className={`text-sm font-semibold ${displayStay.title === "숙소 미정"
-                                  ? "text-gray-500 italic"
-                                  : "text-[#2F3E46]"
+                                ? "text-gray-500 italic"
+                                : "text-[#2F3E46]"
                                 }`}
                             >
                               {displayStay.title}

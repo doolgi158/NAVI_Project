@@ -77,14 +77,20 @@ export default function PlanList({
                                     key: "edit",
                                     icon: <EditOutlined />,
                                     label: "수정",
-                                    onClick: () => onEdit(plan),
+                                    onClick: ({ domEvent }) => {
+                                        domEvent.stopPropagation(); // ✅ 상세 페이지 이동 방지
+                                        onEdit(plan);
+                                    },
                                 },
                                 {
                                     key: "delete",
                                     icon: <DeleteOutlined />,
                                     danger: true,
                                     label: "삭제",
-                                    onClick: () => onDelete(plan.id),
+                                    onClick: ({ domEvent }) => {
+                                        domEvent.stopPropagation(); // ✅ 상세 페이지 이동 방지
+                                        onDelete(plan.planId);
+                                    },
                                 },
                             ].filter(Boolean);
 
@@ -97,12 +103,20 @@ export default function PlanList({
                                     {/* ✅ 썸네일 */}
                                     <img
                                         src={
-                                            plan.thumbnailPath ||
-                                            "https://placehold.co/100x100?text=No+Image"
+                                            plan.thumbnailPath && plan.thumbnailPath.startsWith("http")
+                                                ? plan.thumbnailPath
+                                                : `https://api.cdn.visitjeju.net/photomng/imgpath/${plan.thumbnailPath}`
                                         }
                                         alt="썸네일"
                                         className="w-24 h-24 rounded-lg object-cover flex-shrink-0 cursor-pointer"
-                                        onClick={() => onDetail(plan)}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onDetail(plan);
+                                        }}
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.src = "https://placehold.co/400x300?text=No+Image";
+                                        }}
                                     />
 
                                     {/* ✅ 텍스트 정보 */}

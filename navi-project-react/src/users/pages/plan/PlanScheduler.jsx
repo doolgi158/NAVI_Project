@@ -1,130 +1,96 @@
 import React, { useEffect, useState } from "react";
-import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
-import { Button, Splitter, Spin } from "antd";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Button, Splitter } from "antd";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import TravelMap from "./components/TravelMap";
 import FooterLayout from "@/users/layout/FooterLayout";
 import HeaderLayout from "@/users/layout/HeaderLayout";
-import { getPlanDetail, savePlan, updatePlan } from "@/common/api/planApi";
+import { savePlan } from "@/common/api/planApi";
 import { getCookie } from "@/common/util/cookie";
 
 export default function PlanScheduler() {
-    const location = useLocation();
-    const initialState = location.state;
-    const [searchParams] = useSearchParams();
-    const planId = searchParams.get("planId");
-    const mode = searchParams.get("mode") || (initialState ? "create" : "edit");
-
+    const { state } = useLocation();
     const navigate = useNavigate();
-    const [loading, setLoading] = useState(true);
-    const [meta, setMeta] = useState({ title: "", startDate: "", endDate: "" });
-    const [days, setDays] = useState([]);
+    const meta = state?.meta || {};
+    const [days, setDays] = useState(state?.days || []);
     const [activeDayIdx, setActiveDayIdx] = useState(-1);
     const [markers, setMarkers] = useState([]);
     const [splitSize, setSplitSize] = useState(80);
 
-    const isViewMode = mode === "view";
-    const DAY_COLORS = ["#E74C3C", "#3498DB", "#27AE60", "#F1C40F", "#9B59B6", "#FF8C00", "#8E44AD"];
-
-    /** ✅ 데이터 로드 (planId 존재 시 상세조회) */
-    useEffect(() => {
-        const fetchDetail = async () => {
-            if (planId) {
-                try {
-                    const res = await getPlanDetail(planId);
-
-
-                    // ✅ 데이터 유효성 확인
-                    if (!res || !res.days) {
-                        console.warn("⚠️ 불완전한 plan 데이터:", res);
-                        setLoading(false);
-                        return;
-                    }
-
-                    // ✅ 메타 정보
-                    setMeta({
-                        title: res.title || "제목 없음",
-                        startDate: res.startDate,
-                        endDate: res.endDate,
-                    });
-
-                    // ✅ 일자별 아이템 세팅
-                    const parsedDays = res.days.map((day) => ({
-                        dateISO: day.dayDate,
-                        items: (day.items || []).map((it) => ({
-                            title: it.title,
-                            type: it.type,
-                            travelId: it.travelId,
-                            stayId: it.stayId,
-                            lat: it.lat,
-                            lng: it.lng,
-                            img: it.img,
-                            startTime: it.startTime,
-                            endTime: it.endTime,
-                        })),
-                    }));
-
-                    setDays(parsedDays);
-                } catch (err) {
-                    console.error("❌ 계획 상세 불러오기 실패:", err);
-                } finally {
-                    setLoading(false);
-                }
-            } else if (location.state) {
-                // 🔹 TravelPlanner에서 넘어온 신규 계획 데이터 세팅
-                setMeta(location.state.meta);
-                setDays(location.state.days);
-                setLoading(false);
-            } else {
-                setLoading(false);
-            }
-        };
-        fetchDetail();
-    }, [planId, location.state]);
+    const FALLBACK_IMG = "https://placehold.co/150x150?text=No+Image";
 
 
 
-    /** ✅ 분할 비율 동적 조정 */
     useEffect(() => {
         setSplitSize(activeDayIdx === -1 ? 80 : 40);
     }, [activeDayIdx]);
 
+    const DAY_COLORS = ["#E74C3C", "#3498DB", "#27AE60", "#F1C40F", "#9B59B6", "#FF8C00", "#8E44AD"];
+
     /** ✅ 지도 마커 갱신 */
     useEffect(() => {
-        if (!Array.isArray(days)) return;
+        if (!days.length) return;
+
+        const extractLatLng = (it) => {
+            let lat = null;
+            let lng = null;
+
+            if (it.type === "travel") {
+                lat = parseFloat(it.latitude ?? it.lat ?? it.mapy);
+                lng = parseFloat(it.longitude ?? it.lng ?? it.mapx);
+            } else if (it.type === "poi") {
+                lat = 33.510418;
+                lng = 126.4891647;
+            } else if (it.type === "stay") {
+                lat = parseFloat(it.latitude ?? it.lat ?? it.mapy);
+                lng = parseFloat(it.longitude ?? it.lng ?? it.mapx);
+            }
+
+            if (isNaN(lat) || isNaN(lng)) return null;
+            return { lat, lng };
+        };
+
         const allMarkers =
             activeDayIdx === -1
                 ? days.flatMap((d, dayIdx) =>
-                    (d?.items || [])
-                        .filter((it) => it.lat && it.lng)
-                        .map((it, i) => ({
-                            type: it.type,
-                            title: it.title,
-                            latitude: it.lat,
-                            longitude: it.lng,
-                            order: i + 1,
-                            dayIdx,
-                            color: DAY_COLORS[dayIdx % DAY_COLORS.length],
-                        }))
+                    d.items
+                        .map((it, i) => {
+                            const coords = extractLatLng(it);
+                            if (!coords) return null;
+                            return {
+                                type: it.type,
+                                title: it.title,
+                                latitude: coords.lat,
+                                longitude: coords.lng,
+                                order: i + 1,
+                                dayIdx,
+                                color: DAY_COLORS[dayIdx % DAY_COLORS.length],
+                            };
+                        })
+                        .filter(Boolean)
                 )
                 : (days[activeDayIdx]?.items || [])
-                    .filter((it) => it.lat && it.lng)
-                    .map((it, i) => ({
-                        type: it.type,
-                        title: it.title,
-                        latitude: it.lat,
-                        longitude: it.lng,
-                        order: i + 1,
-                        dayIdx: activeDayIdx,
-                        color: DAY_COLORS[activeDayIdx % DAY_COLORS.length],
-                    }));
+                    .map((it, i) => {
+                        const coords = extractLatLng(it);
+                        if (!coords) return null;
+                        return {
+                            type: it.type,
+                            title: it.title,
+                            latitude: coords.lat,
+                            longitude: coords.lng,
+                            order: i + 1,
+                            dayIdx: activeDayIdx,
+                            color: DAY_COLORS[activeDayIdx % DAY_COLORS.length],
+                        };
+                    })
+                    .filter(Boolean);
 
         setMarkers(allMarkers);
     }, [days, activeDayIdx]);
 
     /** ✅ Drag & Drop 핸들러 */
     const handleDragEnd = (result) => {
-        if (!result.destination || isViewMode) return;
+        if (!result.destination) return;
         const sourceDayIdx = parseInt(result.source.droppableId.split("-")[1]);
         const destDayIdx = parseInt(result.destination.droppableId.split("-")[1]);
 
@@ -145,82 +111,30 @@ export default function PlanScheduler() {
         setDays(newDays);
     };
 
-    /** ✅ 여행계획 저장 or 수정 */
-    const handleSave = async () => {
-        if (isViewMode) return;
-        const userCookie = getCookie("userCookie");
-        const userId = userCookie?.userId || "navi1";
-
-        const requestData = {
-            userId,
-            title: meta.title || "새 여행 계획",
-            startDate: meta.startDate,
-            endDate: meta.endDate,
-            travels: days.flatMap((d) =>
-                (d.items || [])
-                    .filter((it) => it.type === "travel")
-                    .map((it) => ({
-                        travelId: it.travelId,
-                        travelName: it.title,
-                    }))
-            ),
-            stays: days.flatMap((d) =>
-                (d.items || [])
-                    .filter((it) => it.type === "stay")
-                    .map((it) => ({
-                        stayId: it.stayId,
-                        stayName: it.title,
-                    }))
-            ),
-            thumbnailPath:
-                days.flatMap((d) => d.items.map((it) => it.img)).find((img) => img) ||
-                "https://via.placeholder.com/300x200.png?text=Travel+Plan",
-        };
-
-        console.log("📦 savePlan requestData:", requestData);
-
-        try {
-            if (planId) {
-                await updatePlan(planId, requestData);
-                alert("수정 완료!");
-            } else {
-                await savePlan(requestData);
-                alert("저장 완료!");
-            }
-            navigate("/plans");
-        } catch (err) {
-            console.error("❌ 저장 중 오류:", err);
-            alert("저장 실패");
-        }
-    };
-
     /** ✅ 일정 Step 렌더링 */
     const renderStepItem = (it, i, isLast, dayIdx) => {
         const color = DAY_COLORS[dayIdx % DAY_COLORS.length];
+        const imageSrc = it.img || FALLBACK_IMG;
+
         return (
-            <Draggable
-                key={`${dayIdx}-${i}-${it.title}`}
-                draggableId={`${dayIdx}-${i}-${it.title}`}
-                index={i}
-                isDragDisabled={isViewMode}
-            >
+            <Draggable key={`${dayIdx}-${i}-${it.title}`} draggableId={`${dayIdx}-${i}-${it.title}`} index={i}>
                 {(prov, snapshot) => (
                     <div
                         ref={prov.innerRef}
                         {...prov.draggableProps}
                         {...prov.dragHandleProps}
-                        className={`relative pl-8 pb-6 transition-all ${snapshot.isDragging ? "scale-[1.02]" : ""
-                            }`}
+                        className={`relative pl-8 pb-6 transition-all ${snapshot.isDragging ? "scale-[1.02]" : ""}`}
                     >
                         {!isLast && (
                             <div
                                 className="absolute top-5 left-[13px] w-[2px] h-[calc(100%-0.5rem)] z-0"
                                 style={{ backgroundColor: color }}
-                            />
+                            ></div>
                         )}
+
                         <div
                             className="absolute left-0 top-1 w-6 h-6 flex items-center justify-center rounded-full border-2 text-xs font-semibold z-10 bg-white"
-                            style={{ borderColor: color, color }}
+                            style={{ borderColor: color, color: color }}
                         >
                             {i + 1}
                         </div>
@@ -235,18 +149,10 @@ export default function PlanScheduler() {
                                         ? "text-[#6846FF]"
                                         : it.type === "travel"
                                             ? "text-[#0088CC]"
-                                            : it.type === "poi"
-                                                ? "text-[#cea433]"
-                                                : "text-gray-400"
+                                            : "text-gray-400"
                                         }`}
                                 >
-                                    {it.type === "stay"
-                                        ? "숙소"
-                                        : it.type === "travel"
-                                            ? "여행지"
-                                            : it.type === "poi"
-                                                ? "공항"
-                                                : "기타"}
+                                    {it.type === "stay" ? "숙소" : it.type === "travel" ? "여행지" : "기타"}
                                 </span>
                                 <span
                                     className="font-semibold text-[#2F3E46] text-sm truncate max-w-[140px]"
@@ -256,31 +162,19 @@ export default function PlanScheduler() {
                                 </span>
                             </div>
 
-                            {it.type === "poi" ? (
-                                // ✅ POI(공항 등) 전용 이미지
-                                <div className="w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden border border-gray-200">
-                                    <img
-                                        src="https://cdn.news.bbsi.co.kr/news/photo/201512/711928_19896_354.jpg"
-                                        alt={it.title}
-                                        className="w-full h-full object-cover"
-                                    />
-                                </div>
-                            ) : it.img ? (
-                                // ✅ 일반 여행지/숙소 이미지
-                                <div className="w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden border border-gray-200">
-                                    <img
-                                        src={it.img}
-                                        alt={it.title}
-                                        className="w-full h-full object-cover"
-                                    />
-                                </div>
-                            ) : (
-                                // ✅ 이미지 없음 처리
-                                <div className="w-20 h-20 flex-shrink-0 rounded-xl bg-gray-100 flex items-center justify-center text-gray-400 text-xs">
-                                    No Image
-                                </div>
-                            )}
-
+                            <div className="w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
+                                <img
+                                    src={imageSrc}
+                                    alt={it.title}
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => {
+                                        if (!e.target.dataset.fallback) {
+                                            e.target.dataset.fallback = "true";
+                                            e.target.src = FALLBACK_IMG;
+                                        }
+                                    }}
+                                />
+                            </div>
                         </div>
                     </div>
                 )}
@@ -288,12 +182,58 @@ export default function PlanScheduler() {
         );
     };
 
-    if (loading)
-        return (
-            <div className="flex justify-center items-center h-screen">
-                <Spin size="large" tip="여행 계획을 불러오는 중입니다..." />
-            </div>
-        );
+    /** ✅ 저장 요청 */
+    const handleConfirm = async () => {
+        const userCookie = getCookie("userCookie");
+        const userId = userCookie?.userId || "navi1";
+
+        const firstTravelImg =
+            days
+                .flatMap((d) => d.items)
+                .find((it) => it.type === "travel" && it.img && it.img.trim() !== "")
+                ?.img ||
+            "https://placehold.co/400x300?text=Travel+Plan";
+
+        const requestData = {
+            title: meta.title || "새 여행 계획",
+            startDate: meta.startDate,
+            endDate: meta.endDate,
+            startTime: meta.startTime,
+            endTime: meta.endTime,
+            thumbnailPath: firstTravelImg,
+            days: days.map((d, idx) => ({
+                dayDate: d.dateISO,
+                orderNo: idx + 1,
+                items: d.items.map((it) => ({
+                    title: it.title,
+                    type: it.type,
+                    travelId: it.travelId ?? null,
+                    stayId:
+                        typeof it.stayId === "string"
+                            ? Number(it.stayId.replace(/[^\d]/g, ""))
+                            : it.stayId ?? null,
+                    lat: it.lat ?? it.latitude ?? it.mapy ?? null,
+                    lng: it.lng ?? it.longitude ?? it.mapx ?? null,
+                    img:
+                        it.img && it.img.trim() !== ""
+                            ? it.img
+                            : "https://placehold.co/150x150?text=No+Image",
+                })),
+            })),
+        };
+
+        try {
+            const res = await savePlan(requestData); // ✅ async 내부 await
+            if (res.status === 200 || res.status === 201) {
+                alert("저장 성공!");
+                navigate("/plans");
+            } else {
+                alert("서버 응답 오류");
+            }
+        } catch (err) {
+            console.error("❌ savePlan() 요청 실패:", err);
+        }
+    };
 
     return (
         <>
@@ -322,7 +262,7 @@ export default function PlanScheduler() {
                                     </Button>
                                     {days.map((d, idx) => (
                                         <Button
-                                            key={d.dateISO || idx}
+                                            key={d.dateISO}
                                             block
                                             type={idx === activeDayIdx ? "primary" : "default"}
                                             onClick={() => setActiveDayIdx(idx)}
@@ -332,22 +272,20 @@ export default function PlanScheduler() {
                                     ))}
                                 </div>
 
-                                {!isViewMode && (
-                                    <div className="pt-6 flex flex-col">
-                                        <Button
-                                            block
-                                            type="primary"
-                                            className="bg-[#2F3E46]"
-                                            onClick={handleSave}
-                                        >
-                                            {planId ? "수정하기" : "저장하기"}
-                                        </Button>
-                                    </div>
-                                )}
+                                <div className="pt-6 flex flex-col">
+                                    <Button
+                                        block
+                                        type="primary"
+                                        className="bg-[#2F3E46] mt-2"
+                                        onClick={handleConfirm}
+                                    >
+                                        저장
+                                    </Button>
+                                </div>
                             </div>
 
-                            {/* 일정 리스트 */}
-                            <div className="flex-1 p-10">
+                            {/* ✅ 일정 리스트 */}
+                            <div className="flex-1 p-10 ">
                                 <div className="pb-6 bg-white">
                                     <h2 className="text-xl font-semibold text-[#2F3E46]">
                                         {meta.title || "전체 일정"}
@@ -370,12 +308,10 @@ export default function PlanScheduler() {
                                                         >
                                                             <h3 className="text-lg font-semibold text-[#2F3E46] mb-4 border-b pb-1">
                                                                 {dayIdx + 1}일차{" "}
-                                                                <span className="text-gray-400 text-sm">
-                                                                    {d.dateISO}
-                                                                </span>
+                                                                <span className="text-gray-400 text-sm">{d.dateISO}</span>
                                                             </h3>
                                                             <div className="relative">
-                                                                {(d.items || []).map((it, i) =>
+                                                                {d.items.map((it, i) =>
                                                                     renderStepItem(it, i, i === d.items.length - 1, dayIdx)
                                                                 )}
                                                             </div>
@@ -393,13 +329,8 @@ export default function PlanScheduler() {
                                                     {...provided.droppableProps}
                                                     className="flex flex-col gap-5 p-3 w-[350px]"
                                                 >
-                                                    {(days[activeDayIdx]?.items || []).map((it, i) =>
-                                                        renderStepItem(
-                                                            it,
-                                                            i,
-                                                            i === days[activeDayIdx].items.length - 1,
-                                                            activeDayIdx
-                                                        )
+                                                    {days[activeDayIdx]?.items.map((it, i) =>
+                                                        renderStepItem(it, i, i === days[activeDayIdx].items.length - 1, activeDayIdx)
                                                     )}
                                                     {provided.placeholder}
                                                 </div>
@@ -412,13 +343,7 @@ export default function PlanScheduler() {
                     </Splitter.Panel>
 
                     {/* 오른쪽 지도 */}
-                    <Splitter.Panel
-                        style={{
-                            background: "#fafafa",
-                            position: "relative",
-                            overflow: "hidden",
-                        }}
-                    >
+                    <Splitter.Panel style={{ background: "#fafafa", position: "relative", overflow: "hidden" }}>
                         <TravelMap markers={markers} step={6} />
                     </Splitter.Panel>
                 </Splitter>

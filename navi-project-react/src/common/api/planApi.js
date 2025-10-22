@@ -1,4 +1,4 @@
-import api, { API_SERVER_HOST } from "../../common/api/naviApi";
+import api, { API_SERVER_HOST } from "./naviApi"
 
 const host = `${API_SERVER_HOST}/api/plans`;
 
@@ -14,12 +14,17 @@ export const savePlan = async (planData) => {
     throw err;
   }
 };
-
 /** ✅ 내 여행계획 목록 조회 */
 export const getMyPlans = async () => {
-  const res = await api.get("/plans");
-  return res.data;
+  try {
+    const res = await api.get(`${host}`);
+    return res.data?.data || [];
+  } catch (err) {
+    console.error("❌ getMyPlans() 요청 실패:", err);
+    throw err;
+  }
 };
+
 
 /** ✅ 개별 계획 상세 조회 */
 export const getPlanDetail = async (planId) => {
@@ -49,7 +54,7 @@ export const updatePlan = async (planId, planData) => {
   }
 
   try {
-    const res = await api.put(`${host}/schedule/${planId}`, planData, {
+    const res = await api.put(`${host}/${planId}`, planData, {
       headers: { "Content-Type": "application/json" },
     });
     return res.data;
@@ -75,40 +80,60 @@ export const deletePlan = async (planId) => {
   }
 };
 
-/** ✅ 내 여행 공유 */
+/** ⚠️ (보류) 내 여행 공유 — 백엔드 미구현 */
 export const sharePlan = async (planId) => {
-  if (!planId || planId === "null" || planId === "undefined") {
-    console.warn("⚠️ sharePlan 호출 중단: 잘못된 planId =", planId);
-    return null;
-  }
-
-  try {
-    const res = await api.post(`${host}/${planId}/share`);
-    return res.data;
-  } catch (err) {
-    console.error(`❌ sharePlan(${planId}) 요청 실패:`, err);
-    throw err;
-  }
+  console.warn("⚠️ sharePlan() 백엔드 엔드포인트 미구현");
+  return null;
 };
 
 /** ✅ 여행지 목록 조회 */
 export const getAllTravels = async () => {
   try {
     const res = await api.get(`/travel/list`);
-    return res.data;
+
+    // 응답 구조 자동 감지 (배열 or 객체.data)
+    const travels = Array.isArray(res.data)
+      ? res.data
+      : Array.isArray(res.data?.data)
+        ? res.data.data
+        : [];
+
+    console.log("[getAllTravels] travels loaded:", travels.length);
+    return travels;
   } catch (err) {
     console.error("❌ getAllTravels() 요청 실패:", err);
     return [];
   }
 };
 
-/** ✅ 숙소 목록 조회 */
+//** ✅ 숙소 목록 조회 (응답 구조 자동 인식) */
 export const getAllStays = async () => {
   try {
     const res = await api.get(`/stay/list`);
-    return res.data;
+
+    // 응답 구조 자동 인식 (배열 or 객체.data)
+    const stays = Array.isArray(res.data)
+      ? res.data
+      : Array.isArray(res.data?.data)
+        ? res.data.data
+        : [];
+
+    const filtered = stays.map(stay => ({
+      accId: stay.accId,
+      title: stay.title,
+      address: stay.address,
+      mapx: stay.mapx,
+      mapy: stay.mapy,
+      image: stay.image || null, // 필요하면 유지
+    }));
+
+    console.log("[getAllStays] stays loaded:", filtered.length);
+    return filtered;
+
   } catch (err) {
     console.error("❌ getAllStays() 요청 실패:", err);
     return [];
   }
 };
+
+
