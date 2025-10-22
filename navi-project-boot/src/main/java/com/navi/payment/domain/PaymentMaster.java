@@ -134,4 +134,13 @@ public class PaymentMaster extends BaseEntity {
         }
         this.totalAmount = totalAmount;
     }
+
+    /* impUid 선 할당 */
+    public void assignImpUid(String impUid) {
+        if (this.impUid == null || this.impUid.isBlank()) {
+            this.impUid = impUid;
+        } else {
+            throw new IllegalArgumentException("이미 impUid가 존재합니다.");
+        }
+    }
 }

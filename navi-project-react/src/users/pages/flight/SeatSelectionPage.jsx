@@ -194,19 +194,20 @@ const SeatSelectPage = () => {
       
       // 결제용 items 배열 구성
       const items = [];
+      const totalPrice = (selectedOutbound.price + (selectedInbound?.price || 0)) * passengerCount;
 
       // 왕복일 경우, 먼저 출발편 예약(outboundDto)을 추가
       if (isRoundTrip && outboundDto?.frsvId) {
         items.push({
           reserveId: outboundDto.frsvId,
-          amount: outboundDto.totalPrice || 0,
+          amount: selectedOutbound.price,
         });
       }
 
       // 지금 예약(편도 or 귀국편) 추가
       items.push({
         reserveId: res?.data?.data?.frsvId,
-        amount: res?.data?.data?.totalPrice || 0,
+        amount: selectedInbound?.price || 0,
       });
       
       dispatch(setReserveData({
@@ -216,9 +217,7 @@ const SeatSelectPage = () => {
         formData: {
           passengers,
           passengerCount,
-          totalPrice:
-            (selectedOutbound?.price || 0) +
-            (selectedInbound?.price || 0) * passengerCount,
+          totalPrice,
         },
       }));
 
@@ -233,10 +232,8 @@ const SeatSelectPage = () => {
           passengers,
           outboundDto: isRoundTrip ? outboundDto : res.data.data,
           inboundDto: isRoundTrip ? res.data.data : null,
-          totalPrice:
-            (selectedOutbound?.price || 0) +
-            (selectedInbound?.price || 0) * passengerCount,
-        },
+          totalPrice,
+        }
       });
     } catch (error) {
       console.error("❌ 예약 실패:", error);

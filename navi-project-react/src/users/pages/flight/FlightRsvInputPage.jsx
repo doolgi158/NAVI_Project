@@ -200,19 +200,21 @@ const FlightRsvInputPage = () => {
       }
 
       message.success("항공편 예약이 완료되었습니다!");
-
+      
       // 결제용 items 배열 구성
+      const totalPrice = (selectedOutbound.price + (selectedInbound?.price || 0)) * passengerCount;
+
       const items = [];
       if (resOut?.data?.data?.frsvId) {
         items.push({
           reserveId: resOut.data.data.frsvId,
-          amount: resOut.data.data.totalPrice || 0,
+          amount: selectedOutbound.price || 0,
         });
       }
       if (resIn?.data?.data?.frsvId) {
         items.push({
           reserveId: resIn.data.data.frsvId,
-          amount: resIn.data.data.totalPrice || 0,
+          amount: selectedInbound?.price || 0,
         });
       }
 
@@ -226,9 +228,7 @@ const FlightRsvInputPage = () => {
         formData: {
           passengers,
           passengerCount,
-          totalPrice:
-            (selectedOutbound.price + (selectedInbound?.price || 0)) *
-            passengerCount,
+          totalPrice,
         },
       }));
       

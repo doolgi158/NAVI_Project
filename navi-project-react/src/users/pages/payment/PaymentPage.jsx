@@ -5,6 +5,7 @@ import { useDispatch } from "react-redux";
 import { Card, Typography, Steps, Button, Radio, Divider, Space,  message } from "antd";
 import { setPaymentData } from "../../../common/slice/paymentSlice";
 import { usePayment } from "../../../common/hooks/usePayment";
+import { API_SERVER_HOST } from "../../../common/api/naviApi";
 
 /* 예약 타입별 컴포넌트 */
 import AccRsvInfo from "../../../common/components/reservation/AccRsvInfo";
@@ -15,6 +16,7 @@ import DlvRsvInfo from "../../../common/components/reservation/DlvRsvInfo";
 import AccSumCard from "../../../common/components/reservation/AccRsvSumCard";
 import FlySumCard from "../../../common/components/reservation/FlyRsvSumCard";
 import DlvSumCard from "../../../common/components/reservation/DlvRsvSumCard";
+import axios from "axios";
 
 const { Title, Text } = Typography;
 
@@ -136,7 +138,24 @@ const PaymentPage = () => {
 
 			// 약간의 딜레이로 Redux 반영 후 결제 실행
 			await new Promise((resolve) => setTimeout(resolve, 150));
-			await executePayment({ rsvType, formData, items, totalAmount, paymentMethod });
+			const verifyRes = await executePayment({ rsvType, formData, items, totalAmount, paymentMethod });
+
+			if (rsvType === "FLY" && verifyRes?.data?.success) {
+				// ✅ items 배열에서 frsvId 추출
+				const reserveIds = items.map((item) => item.reserveId);
+
+				if (Array.isArray(reserveIds) && reserveIds.length > 0) {
+					for (const frsvId of reserveIds) {
+					await axios.patch(`${API_SERVER_HOST}/api/flight/rsv/${frsvId}`, {
+						status: "PAID",
+						totalPrice: totalAmount,
+					});
+					console.log(`✈️ [항공 예약 상태 변경 완료] frsvId=${frsvId}`);
+					}
+
+					message.success("항공 결제가 완료되었습니다!");
+				}
+			}
 		} catch (error) {
 			console.error("❌ [PaymentPage] 결제 처리 실패:", error);
 			message.error("결제 처리 중 오류가 발생했습니다.");

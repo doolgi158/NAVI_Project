@@ -97,14 +97,14 @@ public class AccPaymentServiceImpl {
                 .build();
     }
 
-    /* ✅ 3️⃣ 결제 실패 */
+    /* 결제 실패 */
     public void handlePaymentFailure(String reserveId, String merchantId, String reason) {
         log.warn("💥 [ACC] 결제 실패 처리 reserveId={}, merchantId={}, reason={}", reserveId, merchantId, reason);
         roomRsvService.updateStatus(reserveId, RsvStatus.FAILED.name());
         paymentService.failPayment(merchantId, reason);
     }
 
-    /* ✅ 4️⃣ 환불 처리 */
+    /* 환불 처리 */
     public void handleRefund(String reserveId, String merchantId, String reason) {
         log.info("💸 [ACC] 환불 처리 reserveId={}, merchantId={}", reserveId, merchantId);
         try {
