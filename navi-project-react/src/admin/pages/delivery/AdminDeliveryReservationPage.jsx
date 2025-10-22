@@ -32,27 +32,11 @@ const AdminDeliveryReservationPage = () => {
     const [form] = Form.useForm();
     const [editing, setEditing] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
-    const [bags, setBags] = useState({ S: 0, M: 0, L: 0 });
 
     // ✅ 검색 관련 상태
     const [searchText, setSearchText] = useState("");
     const [searchedColumn, setSearchedColumn] = useState("");
     const searchInput = useRef(null);
-
-    /** ✅ JSON 보기좋게 */
-    const formatBagsJson = (jsonString) => {
-        if (!jsonString) return "-";
-        try {
-            const bags = JSON.parse(jsonString);
-            const labels = { S: "소형", M: "중형", L: "대형" };
-            return Object.entries(bags)
-                .filter(([_, count]) => count > 0)
-                .map(([k, v]) => `${labels[k]} ${v}개`)
-                .join(" / ") || "-";
-        } catch {
-            return jsonString;
-        }
-    };
 
     /** ✅ 검색 필터 설정 */
     const getColumnSearchProps = (dataIndex, placeholder) => ({
@@ -131,7 +115,55 @@ const AdminDeliveryReservationPage = () => {
         fetchReservations();
     }, []);
 
-    /** ✅ 테이블 컬럼 정의 (검색 + 정렬 추가) */
+    /** ✅ 수정 버튼 클릭 시 모달 열기 */
+    const handleEdit = (record) => {
+        setEditing(record);
+        form.setFieldsValue({
+            deliveryDate: record.deliveryDate ? dayjs(record.deliveryDate) : null,
+            totalPrice: record.totalPrice,
+            status: record.status,
+        });
+        setModalVisible(true);
+    };
+
+    /** ✅ 수정 확정 */
+    const handleUpdate = async () => {
+        try {
+            const values = await form.validateFields();
+            const payload = {
+                ...editing,
+                status: values.status,
+            };
+            await axios.put(`${API}/${editing.drsvId}`, payload);
+            message.success("상태가 수정되었습니다.");
+            setModalVisible(false);
+            fetchReservations();
+        } catch (err) {
+            message.error("수정 실패");
+        }
+    };
+
+    /** ✅ 삭제 */
+    const handleDelete = async (record) => {
+        Modal.confirm({
+            title: "예약 삭제 확인",
+            content: `예약 ID ${record.drsvId}를 정말 삭제하시겠습니까?`,
+            okText: "삭제",
+            okType: "danger",
+            cancelText: "취소",
+            async onOk() {
+                try {
+                    await axios.delete(`${API}/${record.drsvId}`);
+                    message.success("삭제 완료");
+                    fetchReservations();
+                } catch {
+                    message.error("삭제 실패");
+                }
+            },
+        });
+    };
+
+    /** ✅ 테이블 컬럼 정의 */
     const columns = [
         {
             title: "예약 ID",
@@ -226,14 +258,14 @@ const AdminDeliveryReservationPage = () => {
                 <Space>
                     <Button
                         icon={<EditOutlined />}
-                        onClick={() => console.log(record)}
+                        onClick={() => handleEdit(record)}
                     >
-                        수정
+                        상태변경
                     </Button>
                     <Button
                         icon={<DeleteOutlined />}
                         danger
-                        onClick={() => console.log(record)}
+                        onClick={() => handleDelete(record)}
                     >
                         삭제
                     </Button>
@@ -260,6 +292,34 @@ const AdminDeliveryReservationPage = () => {
                 }}
                 scroll={{ x: "max-content" }}
             />
+
+            {/* ✅ 상태 변경 모달 */}
+            <Modal
+                title="배송 예약 상태 변경"
+                open={modalVisible}
+                onCancel={() => setModalVisible(false)}
+                onOk={handleUpdate}
+                okText="변경 완료"
+                cancelText="취소"
+            >
+                <Form form={form} layout="vertical">
+                    <Form.Item label="배송일" name="deliveryDate">
+                        <DatePicker style={{ width: "100%" }} disabled />
+                    </Form.Item>
+                    <Form.Item label="총 금액" name="totalPrice">
+                        <InputNumber style={{ width: "100%" }} disabled />
+                    </Form.Item>
+                    <Form.Item name="status" label="상태">
+                        <Select>
+                            <Option value="PENDING">PENDING</Option>
+                            <Option value="PAID">PAID</Option>
+                            <Option value="CANCELLED">CANCELLED</Option>
+                            <Option value="FAILED">FAILED</Option>
+                            <Option value="COMPLETE">COMPLETE</Option>
+                        </Select>
+                    </Form.Item>
+                </Form>
+            </Modal>
         </AdminSectionCard>
     );
 };
