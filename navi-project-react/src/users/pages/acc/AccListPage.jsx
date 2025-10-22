@@ -387,7 +387,7 @@ const AccListPage = () => {
                       key={acc.accId}
                       hoverable
                       className="rounded-xl shadow-sm cursor-pointer transition-transform transform hover:scale-[1.02] duration-200"
-                      onClick={() => handleCardClick(acc)}
+                      onClick={() => handleCardClick(acc.accId)}
                       cover={
                         acc.accImage ? (
                           <img

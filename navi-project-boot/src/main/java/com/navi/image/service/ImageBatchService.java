@@ -25,7 +25,7 @@ public class ImageBatchService {
     private final AccRepository accRepository;
 
     /* 상대경로 기준 (프로젝트 루트 하위 images/acc) */
-    private static final String BASE_DIR = "../images/acc/";
+    private static final String BASE_DIR = "C:/navi-project/images/acc/";
 
     /* 숙소 이미지 폴더를 순회하며 DB에 Image 등록 (파일명 UUID로 rename) */
     public void insertAccImagesFromFolder() {
@@ -110,7 +110,9 @@ public class ImageBatchService {
         log.info("🎉 숙소 이미지 배치 등록 완료 → 성공: {}건 / 실패: {}건", success, failed);
     }
 
-    /** 파일명에서 숙소명 추출 ("_" 앞부분) */
+    /**
+     * 파일명에서 숙소명 추출 ("_" 앞부분)
+     */
     private String extractAccName(String fileName) {
         try {
             return fileName.split("_")[0];
@@ -153,9 +155,8 @@ public class ImageBatchService {
                 }
 
                 String accName = extractAccName(fileName);
-                if (accName == null) {
-                    log.warn("❌ 숙소명 추출 실패: {}", fileName);
-                    failed++;
+                if (fileName.matches("^[0-9a-fA-F\\-]{36}\\.[a-zA-Z0-9]+$")) {
+                    skipped++;
                     continue;
                 }
 

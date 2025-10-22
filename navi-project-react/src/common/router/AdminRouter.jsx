@@ -4,6 +4,7 @@ import AdminAccommodation from "./AdminAccommodationRouter.jsx"
 import AdminFlightRouter from "./AdminFlightRouter.jsx";
 import AdminDeliveryRouter from "./AdminDeliveryRouter.jsx";
 import AdminRoomyRouter from "./AdminRoomRouter.jsx"
+import ManagerRouter from "./ManagerRouter.jsx";
 
 const AdminUsers = lazy(() => import("../../admin/pages/user/AdminUsersPage.jsx"));
 const AdminDashboard = lazy(() => import("../../admin/pages/AdminDashboardPage.jsx"));
@@ -65,6 +66,13 @@ const AdminRouter = () => {
         </Suspense>
       ),
     },
+
+    // 게시판 관리자
+    {
+      path: "manager",
+      children: [...ManagerRouter()],
+    },
+
     // 항공 관리자 라우터 통합
     ...AdminFlightRouter(),
 

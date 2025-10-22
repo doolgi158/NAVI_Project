@@ -4,8 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { API_SERVER_HOST } from "@/common/api/naviApi";
 import AdminSiderLayout from "../../layout/AdminSiderLayout";
-import { useDispatch } from "react-redux";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setRoomSearchState } from "@/common/slice/roomSlice";
 
 const { Title } = Typography;
@@ -13,19 +12,31 @@ const { Content } = Layout;
 
 const RoomAdminPage = () => {
     const dispatch = useDispatch();
-    const savedState = useSelector((state) => state.room);
+    const savedState = useSelector((state) => state.room || {});
+    const navigate = useNavigate();
+    const location = useLocation();
+    const [form] = Form.useForm();
 
-    const [searchName, setSearchName] = useState(savedState.searchName || "");
-    const [selectedAccNo, setSelectedAccNo] = useState(savedState.selectedAccNo);
-    const [expandedRowKeys, setExpandedRowKeys] = useState(savedState.expandedRowKeys);
+    // 안전한 초기값 설정
+    const [searchName, setSearchName] = useState(savedState?.searchName || "");
+    const [selectedAccNo, setSelectedAccNo] = useState(savedState?.selectedAccNo || null);
+    const [expandedRowKeys, setExpandedRowKeys] = useState(savedState?.expandedRowKeys || []);
     const [accommodations, setAccommodations] = useState([]);
     const [rooms, setRooms] = useState([]);
     const [loading, setLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingRoom, setEditingRoom] = useState(null);
-    const [form] = Form.useForm();
-    const navigate = useNavigate();
-    const location = useLocation();
+
+    // Redux 초기 상태 저장 방어
+    useEffect(() => {
+        dispatch(
+            setRoomSearchState({
+                searchName: searchName || "",
+                selectedAccNo: selectedAccNo || null,
+                expandedRowKeys: expandedRowKeys || [],
+            })
+        );
+    }, []);
 
     // 페이지 복귀 시 자동 복원
     useEffect(() => {
@@ -49,7 +60,6 @@ const RoomAdminPage = () => {
             const res = await axios.get(`${API_SERVER_HOST}/api/adm/accommodations/search`, {
                 params: { name: searchName },
             });
-            console.log("🏨 API 응답 데이터:", res.data);
             if (res.data.status === 200 && res.data.data) {
                 setAccommodations(res.data.data);
                 message.success(`${res.data.data.length}개의 숙소를 찾았습니다.`);
@@ -106,10 +116,6 @@ const RoomAdminPage = () => {
             expandedRowKeys
         }));
 
-        console.log("searchName: ", searchName);
-        console.log("selectedAccNo: ", selectedAccNo);
-        console.log("expandedRowKeys: ", expandedRowKeys);
-
         navigate(`/adm/rooms/edit/${room.roomNo}`);
     };
 
@@ -131,6 +137,7 @@ const RoomAdminPage = () => {
         });
     };
 
+    // 모달 저장
     const handleSubmit = async () => {
         const values = form.getFieldsValue();
 
@@ -142,8 +149,6 @@ const RoomAdminPage = () => {
 
         // 백엔드에서 Long 타입으로 받기 때문에 숫자 형태로 변환
         values.accNo = Number(selectedAccNo);
-
-        console.log("🧾 전송 payload:", values);
 
         try {
             if (editingRoom) {
@@ -159,15 +164,6 @@ const RoomAdminPage = () => {
             message.error("저장 실패");
         }
     };
-
-    // 페이지 이동 전 상태 저장
-    useEffect(() => {
-        dispatch(setRoomSearchState({
-            searchName,
-            selectedAccNo,
-            expandedRowKeys
-        }));
-    }, [searchName, selectedAccNo, expandedRowKeys]);
 
     // 숙소 테이블 컬럼
     const accColumns = [
@@ -200,9 +196,7 @@ const RoomAdminPage = () => {
     // 행 클릭 이벤트
     const handleRowClick = (record) => {
         const accKey = record.accNo;
-        console.log(record);
         if (!accKey) return;
-
         if (expandedRowKeys.includes(accKey)) {
             // 이미 열려 있으면 닫기
             setExpandedRowKeys([]);
