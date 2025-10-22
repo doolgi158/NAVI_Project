@@ -45,7 +45,7 @@ export default function TimeDrawer({ days, times, setTimes, title, dateRange }) 
   };
 
   return (
-    <div className="flex flex-col h-full bg-white shadow-md w-full">
+    <div className="flex flex-col h-full bg-[#FDFCF9] shadow-md w-1/4">
       {/* ✅ 제목 + 날짜 표시 */}
       <TitleDateDisplay title={title} dateRange={dateRange} />
 
@@ -72,7 +72,7 @@ export default function TimeDrawer({ days, times, setTimes, title, dateRange }) 
               return (
                 <List.Item
                   key={dayKey}
-                  className="hover:bg-[#F9FAFB] rounded-md px-2 py-1 transition"
+                  className="hover:bg-[#F9FAe3] rounded-md px-2 py-1 transition"
                 >
                   <div className="flex gap-3 items-center justify-between w-full">
                     <div className="flex items-center gap-2">
