@@ -87,10 +87,6 @@ const UserMyPage = () => {
                   <p className="text-gray-500 text-sm">결제</p>
                   <p className="text-lg font-bold text-indigo-500">0</p>
                 </div>
-                <div>
-                  <p className="text-gray-500 text-sm">좋아요</p>
-                  <p className="text-lg font-bold text-indigo-500">0</p>
-                </div>
               </div>
             </div>
           </Card>

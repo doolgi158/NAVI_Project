@@ -25,4 +25,6 @@ public interface AdminFlightReservationService {
      */
     void deleteReservation(String frsvId);
 
+    /* 예약 전체 수정 */
+    void updateReservation(String frsvId, AdminFlightReservationDTO dto);
 }

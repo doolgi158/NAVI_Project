@@ -23,10 +23,6 @@ public class PaymentConfirmRequestDTO {
     private String impUid;                      // 결제 승인번호 (예: IMP_67283051)
     private PaymentMethod paymentMethod;        // 결제 수단 (예: KGINIPAY, KAKAOPAY, TOSSPAY)
 
-    /* 환불 발생 시 */
-    private String refundReason;                // 환불사유 (예: "고객 요청에 따른 취소")
-    private BigDecimal refundAmount;            // 실환불금액 (예: 120000)
-
     /* 예약별 금액 구조 */
     private List<ReservePaymentItem> items;     // 예약 ID + 금액 묶음 리스트
 
@@ -35,6 +31,7 @@ public class PaymentConfirmRequestDTO {
     @AllArgsConstructor
     @Builder
     public static class ReservePaymentItem {
+        /* ACC, DLV는 1행, FLY는 2행 삽입 */
         private String reserveId;               // 예약 ID (예: 20251012ACC001)
         private BigDecimal amount;              // 결제 금액 (예: 85000)
     }

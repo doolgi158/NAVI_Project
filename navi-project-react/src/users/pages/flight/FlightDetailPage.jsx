@@ -170,7 +170,7 @@ const FlightDetailPage = () => {
     if (step === "outbound") {
       if (!selectedOutbound) return message.warning("출발편을 선택해주세요.");
       if (!arrDate) {
-        navigate(`/flight/rsv/${selectedOutbound.flightNo}`, {
+          navigate(`/flight/rsv/${selectedOutbound.flightNo}`, {
           state: { selectedOutbound, passengerCount },
         });
       } else {
@@ -178,7 +178,7 @@ const FlightDetailPage = () => {
       }
     } else {
       if (!selectedInbound) return message.warning("귀국편을 선택해주세요.");
-      navigate(`/flight/rsv/${selectedOutbound.flightNo}`, {
+        navigate(`/flight/rsv/${selectedOutbound.flightNo}`, {
         state: { selectedOutbound, selectedInbound, passengerCount },
       });
     }
