@@ -38,6 +38,4 @@ public interface AccService {
 
     // 조회수 증가
     Acc increaseViewCount(String accId);
-
-
 }

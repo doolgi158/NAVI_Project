@@ -23,6 +23,7 @@ const DashboardUsageChart = ({ data }) => (
             <Area type="monotone" dataKey="travelViews" name="여행지 조회" stroke={COLORS[0]} fill="url(#g1)" />
             <Area type="monotone" dataKey="accViews" name="숙소 조회" stroke={COLORS[2]} fill="url(#g2)" />
             <Line type="monotone" dataKey="flightResv" name="항공 예약" stroke={COLORS[1]} strokeWidth={2} />
+            <Line type="monotone" dataKey="deliveryResv" name="짐배송 예약" stroke={COLORS[3] || "#FF9800"} strokeWidth={2} dot={{ r: 3 }} />
         </AreaChart>
     </ChartCard>
 );

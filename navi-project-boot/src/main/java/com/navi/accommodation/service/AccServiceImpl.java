@@ -10,13 +10,19 @@ import com.navi.accommodation.repository.AccRepository;
 import com.navi.image.domain.Image;
 import com.navi.image.repository.ImageRepository;
 import com.navi.location.repository.TownshipRepository;
-import com.navi.room.repository.RoomRepository;
+import com.navi.user.domain.Log;
+import com.navi.user.dto.users.UserSecurityDTO;
+import com.navi.user.enums.ActionType;
 import com.navi.user.repository.LogRepository;
 import com.navi.user.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -28,7 +34,6 @@ import java.util.stream.Collectors;
 @Transactional
 public class AccServiceImpl implements AccService {
     private final AccRepository accRepository;
-    private final RoomRepository roomRepository;
     private final TownshipRepository townshipRepository;
     private final ImageRepository imageRepository;
     private final UserRepository userRepository;
@@ -217,15 +222,53 @@ public class AccServiceImpl implements AccService {
     }
 
     @Override
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Acc increaseViewCount(String accId) {
-        return accRepository.findByAccId(accId)
-                .map(acc -> {
-                    Acc updatedAcc = acc.increaseViewCount();
+        // 숙소 조회 및 조회수 증가
+        Acc acc = accRepository.findByAccId(accId)
+                .map(accList -> {
+                    Acc updatedAcc = accList.increaseViewCount();
                     accRepository.save(updatedAcc);
-                    log.info("👁️ 숙소 [{}] 조회수 증가 → {}", accId, updatedAcc.getViewCount());
                     return updatedAcc;
                 })
-                .orElseThrow(() -> new IllegalArgumentException("숙소를 찾을 수 없습니다."));
+                .orElseThrow(() -> new EntityNotFoundException("숙소를 찾을 수 없습니다. (AccId: " + accId + ")"));
+
+        // SecurityContext 인증 정보 확인
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null) {
+            log.warn("⚠️ Authentication 객체가 null입니다. (로그인 안됨)");
+            return acc;
+        }
+
+        if (!auth.isAuthenticated()) {
+            log.warn("⚠️ Authentication은 존재하지만 인증되지 않은 상태입니다.");
+            return acc;
+        }
+
+        // Principal이 UserSecurityDTO인지 확인
+        Object principal = auth.getPrincipal();
+
+        if (principal instanceof UserSecurityDTO userDTO) {
+            // DB에서 User 조회
+            userRepository.findById(userDTO.getNo()).ifPresentOrElse(user -> {
+                // 로그 엔티티 생성
+                Log newLog = Log.builder()
+                        .user(user)
+                        .actionType(ActionType.VIEW_ACCOMMODATION)
+                        .targetId(acc.getAccNo())
+                        .targetName(acc.getTitle())
+                        .build();
+
+                try {
+                    logRepository.save(newLog);
+                } catch (Exception e) {
+                    log.error("🚨 [ERROR] 로그 저장 중 예외 발생: {}", e.getMessage(), e);
+                }
+
+            }, () -> log.warn("⚠️ [USER-NOT-FOUND] userRepository.findById({}) 결과 없음", userDTO.getNo()));
+        }
+
+        return acc;
     }
 }

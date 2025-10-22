@@ -39,6 +39,7 @@ export const useDashboardData = (endpoints) => {
                         responses[4]?.data?.data ?? // 숫자만 오는 경우
                         0,
                 },
+                usageTrend: responses[5]?.data?.usageTrend ?? [],
             };
 
             setData(merged);

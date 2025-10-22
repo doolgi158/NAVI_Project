@@ -49,6 +49,7 @@ public class AccUserController {
     public ResponseEntity<ApiResponse<AccListResponseDTO>> increaseViewCount(@PathVariable String accId) {
         log.info("👁️ [USER] 숙소 조회수 증가 요청 - accId: {}", accId);
         Acc updated = accService.increaseViewCount(accId);
+
         return ResponseEntity.ok(ApiResponse.success(AccListResponseDTO.fromEntity(updated)));
     }
 }

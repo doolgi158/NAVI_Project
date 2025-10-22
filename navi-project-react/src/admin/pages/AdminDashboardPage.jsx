@@ -25,6 +25,7 @@ const AdminDashboard = () => {
     `${API_SERVER_HOST}/api/adm/travelRanking`,
     `${API_SERVER_HOST}/api/adm/flightDashboard`,
     `${API_SERVER_HOST}/api/adm/accommodationDashboard`,
+    `${API_SERVER_HOST}/api/adm/usageDashboard`,
   ], []);
 
   const { data, loading, error, reload } = useDashboardData(endpoints);
@@ -76,6 +77,7 @@ const AdminDashboard = () => {
   // 차트용 데이터
   const trend = data?.userTrend || [];
   const displayTrend = {
+    usageTrend: data?.usageTrend || [],
     salesTrend: MOCK_TREND_MONTHLY.salesTrend,
     paymentShare: MOCK_TREND_MONTHLY.paymentShare,
   };

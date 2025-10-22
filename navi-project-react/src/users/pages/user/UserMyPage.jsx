@@ -21,7 +21,7 @@ const UserMyPage = () => {
       })
       .then((res) => {
         const data = res.data.data;
-        console.log(data);
+
         setUser({
           ...data,
           // 프로필 경로를 절대경로로 변환

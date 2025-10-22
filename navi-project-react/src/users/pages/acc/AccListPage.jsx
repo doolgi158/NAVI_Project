@@ -200,13 +200,17 @@ const AccListPage = () => {
     async (acc) => {
       try {
         // 조회수 증가 요청
-        const patchRes = await fetch(`${API_SERVER_HOST}/api/accommodations/view/${acc.accId}`, {
+        const patchRes = await fetch(`${API_SERVER_HOST}/api/accommodations/view/${acc}`, {
           method: "PATCH",
+          headers: {
+            "Authorization": `Bearer ${localStorage.accessToken}`,
+            "Content-Type": "application/json",
+          },
         });
         if (!patchRes.ok) throw new Error("조회수 증가 실패");
 
         // 최신 DB 값으로 재조회
-        const detailRes = await axios.get(`${API_SERVER_HOST}/api/accommodations/${acc.accId}`);
+        const detailRes = await axios.get(`${API_SERVER_HOST}/api/accommodations/${acc}`);
         const updatedAcc = detailRes.data;
 
         // accommodations 배열에서 해당 acc만 최신 값으로 교체

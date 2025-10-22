@@ -16,4 +16,6 @@ public interface UserActivityService {
     void unmarkTravel(Long userNo, Long travelId);
 
     void logAction(Long userNo, ActionType type, Long targetId);
+
+    void saveAccViewLog(Long userNo, Long accNo, String accTitle);
 }
