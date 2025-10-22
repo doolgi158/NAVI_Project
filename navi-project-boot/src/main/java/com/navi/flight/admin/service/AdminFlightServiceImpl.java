@@ -9,6 +9,7 @@ import com.navi.flight.repository.FlightRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -109,6 +110,14 @@ public class AdminFlightServiceImpl implements AdminFlightService {
         FlightId id = new FlightId(flightId, depTime);
         if (!flightRepository.existsById(id)) {
             throw new IllegalArgumentException("삭제할 항공편을 찾을 수 없습니다.");
+        }
+        try{
+            flightRepository.deleteById(id);
+            log.info("[ADMIN] 항공편 삭제 완료 : {} / {}", flightId, depTime);
+        }catch (DataIntegrityViolationException e){
+            throw new IllegalStateException("예약 정보가 연결된 항공편은 삭제할 수 없습니다.");
+        }catch (Exception e){
+            throw  new RuntimeException("항공편 삭제 중 오류가 발생했습니다: " + e.getMessage());
         }
         flightRepository.deleteById(id);
         log.info("[ADMIN] 항공편 삭제 완료: {} / {}", flightId, depTime);
