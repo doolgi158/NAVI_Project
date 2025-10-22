@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../css';
+import "../css/BoardWrite.css";
 
 function BoardWrite() {
   const navigate = useNavigate();

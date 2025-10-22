@@ -79,7 +79,7 @@ useEffect(() => {
     formData.append('file', file);
 
     try {
-      const response = await fetch('/api/notice/upload', {
+      const response = await fetch('/api/admin/notice/upload', {
         method: 'POST',
         body: formData
       });
@@ -209,7 +209,7 @@ useEffect(() => {
         </div>
 
         <div className="button-group">
-          <button type="button" onClick={() => navigate('/notice')}>
+          <button type="button" onClick={() => navigate('/manager/notice')}>
             취소
           </button>
           <button type="submit" disabled={loading}>

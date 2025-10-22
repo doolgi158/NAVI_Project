@@ -29,21 +29,30 @@ function NoticeList() {
     }
   };
 
-  // 검색
-  const handleSearch = async () => {
-    if (!searchKeyword.trim()) {
-      fetchNotice();
-      return;
-    }
+// 검색
+const handleSearch = async () => {
+  if (!searchKeyword.trim()) {
+    fetchNotice();
+    return;
+  }
 
-    try {
-      const data = await searchNotice(searchKeyword);
+  try {
+    const data = await searchNotice(searchKeyword);
+    console.log('검색 결과:', data); // ← 추가!
+    
+    if (Array.isArray(data)) {
       setNotices(data);
-    } catch (error) {
-      console.error('검색에 실패했습니다:', error);
-      alert('검색에 실패했습니다.');
+    } else if (data && Array.isArray(data.notices)) {
+      setNotices(data.notices);
+    } else {
+      setNotices([]);
     }
-  };
+  } catch (error) {
+    console.error('검색에 실패했습니다:', error);
+    alert('검색에 실패했습니다.');
+    setNotices([]);
+  }
+};
 
   // 날짜 포맷 변환
   const formatDate = (dateString) => {

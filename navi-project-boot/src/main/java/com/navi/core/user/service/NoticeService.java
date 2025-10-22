@@ -71,9 +71,9 @@ public class NoticeService {
     // 공지사항 검색
     @Transactional(readOnly = true)
     public List<NoticeDTO> searchNotices(String keyword) {
-        return noticeRepository.findByNoticeTitleContainingOrderByCreateDateDesc(keyword)
-                .stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+        return null;
+    }
+
+    public void createNotice(NoticeDTO noticeDTO) {
     }
 }

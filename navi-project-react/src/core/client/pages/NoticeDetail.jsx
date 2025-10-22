@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { getNoticeById, deleteNotice } from '../../../notice/services/NoticeService';
+import { getNoticeById } from "./NoticeService";
 import "../css/NoticeDetail.css";
+import MainLayout from '@/users/layout/MainLayout';
 
 function NoticeDetail() {
   const [searchParams] = useSearchParams();
@@ -17,7 +18,7 @@ function NoticeDetail() {
       alert('잘못된 접근입니다.');
       navigate('/client/notice');
     }
-  }, [noticeNo]);
+  }, [noticeNo, navigate]);
 
   const fetchNotice = async () => {
     try {
@@ -33,21 +34,6 @@ function NoticeDetail() {
     }
   };
 
-  const handleDelete = async () => {
-    if (!window.confirm('정말 삭제하시겠습니까?')) {
-      return;
-    }
-
-    try {
-      await deleteNotice(noticeNo);
-      alert('삭제되었습니다.');
-      navigate('/client/notice');
-    } catch (error) {
-      console.error('삭제에 실패했습니다:', error);
-      alert('삭제에 실패했습니다.');
-    }
-  };
-
   const formatDate = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);
@@ -55,14 +41,23 @@ function NoticeDetail() {
   };
 
   if (loading) {
-    return <div className="loading">로딩 중...</div>;
+    return (
+      <MainLayout>
+        <div className="loading">로딩 중...</div>
+      </MainLayout>
+    );
   }
 
   if (!notice) {
-    return <div>공지사항을 찾을 수 없습니다.</div>;
+    return (
+      <MainLayout>
+        <div>공지사항을 찾을 수 없습니다.</div>
+      </MainLayout>
+    );
   }
 
   return (
+    <MainLayout>
     <div className="notice-detail-container">
       <h1>공지사항</h1>
 
@@ -111,10 +106,9 @@ function NoticeDetail() {
 
       <div className="button-group">
         <button onClick={() => navigate('/client/notice')}>목록</button>
-        <button onClick={() => navigate(`/client/notice/write?noticeNo=${noticeNo}`)}>수정</button>
-        <button className="delete-button" onClick={handleDelete}>삭제</button>
       </div>
     </div>
+    </MainLayout>
   );
 }
 

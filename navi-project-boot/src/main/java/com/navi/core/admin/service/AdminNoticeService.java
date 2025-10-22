@@ -20,10 +20,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AdminNoticeService {
 
-    private final NoticeRepository noticeRepository;
+    private static NoticeRepository noticeRepository;
 
     // Entity -> DTO 변환
-    private AdminNoticeDTO convertToDTO(Notice notice) {
+    private static AdminNoticeDTO convertToDTO(Notice notice) {
         return AdminNoticeDTO.builder()
                 .noticeNo(notice.getNoticeNo())
                 .noticeTitle(notice.getNoticeTitle())
@@ -39,7 +39,7 @@ public class AdminNoticeService {
     }
 
     // DTO -> Entity 변환
-    private Notice convertToEntity(AdminNoticeDTO dto) {
+    private static Notice convertToEntity(AdminNoticeDTO dto) {
         return Notice.builder()
                 .noticeNo(dto.getNoticeNo())
                 .noticeTitle(dto.getNoticeTitle())
@@ -57,7 +57,7 @@ public class AdminNoticeService {
     public List<AdminNoticeDTO> getAllNotices() {
         return noticeRepository.findAllByOrderByCreateDateDesc()
                 .stream()
-                .map(this::convertToDTO)
+                .map(AdminNoticeService::convertToDTO)
                 .collect(Collectors.toList());
     }
 
@@ -70,7 +70,7 @@ public class AdminNoticeService {
     }
 
     // 공지사항 작성 (관리자 전용)
-    public AdminNoticeDTO createNotice(AdminNoticeDTO noticeDTO) {
+    public static AdminNoticeDTO createNotice(AdminNoticeDTO noticeDTO) {
         Notice notice = convertToEntity(noticeDTO);
         Notice savedNotice = noticeRepository.save(notice);
         log.info("[관리자] 공지사항 작성 완료. ID: {}", savedNotice.getNoticeNo());
@@ -108,7 +108,7 @@ public class AdminNoticeService {
     public List<AdminNoticeDTO> searchNotices(String keyword) {
         return noticeRepository.findByNoticeTitleContainingOrderByCreateDateDesc(keyword)
                 .stream()
-                .map(this::convertToDTO)
+                .map(AdminNoticeService::convertToDTO)
                 .collect(Collectors.toList());
     }
 

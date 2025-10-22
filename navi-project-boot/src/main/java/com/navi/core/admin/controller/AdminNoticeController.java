@@ -4,10 +4,12 @@ package com.navi.core.admin.controller;
 
 import com.navi.core.admin.dto.AdminNoticeDTO;
 import com.navi.core.admin.service.AdminNoticeService;
+import com.navi.core.user.dto.NoticeDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,7 +27,7 @@ import java.util.UUID;
 @RequestMapping("/api/admin/notice")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:5173")
-// TODO: @PreAuthorize("hasRole('ADMIN')") 추가 예정
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminNoticeController {
 
     private final AdminNoticeService adminNoticeService;
@@ -50,10 +52,9 @@ public class AdminNoticeController {
     // 공지사항 작성 (관리자 전용)
     @PostMapping
     public ResponseEntity<AdminNoticeDTO> createNotice(@RequestBody AdminNoticeDTO noticeDTO) {
-        AdminNoticeDTO createdNotice = adminNoticeService.createNotice(noticeDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdNotice);
+        AdminNoticeDTO result = AdminNoticeService.createNotice(noticeDTO);
+        return ResponseEntity.ok(result);
     }
-
     // 파일 업로드 (관리자 전용)
     @PostMapping("/upload")
     public ResponseEntity<Map<String, String>> uploadFile(@RequestParam("file") MultipartFile file) {

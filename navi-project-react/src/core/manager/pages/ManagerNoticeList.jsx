@@ -14,35 +14,54 @@ function NoticeList() {
     fetchNotice();
   }, []);
 
-  // 공지사항 목록 가져오기
-  const fetchNotice = async () => {
-    try {
-      setLoading(true);
-      const data = await getAllNotices();
+// 공지사항 목록 가져오기
+const fetchNotice = async () => {
+  try {
+    setLoading(true);
+    const data = await getAllNotices();
+    
+    // ✅ 배열인지 확인 후 설정
+    console.log('API 응답:', data); // 디버깅용
+    
+    if (Array.isArray(data)) {
       setNotices(data);
-    } catch (error) {
-      console.error('공지사항 목록을 불러오는데 실패했습니다:', error);
-      alert('공지사항 목록을 불러오는데 실패했습니다.');
-    } finally {
-      setLoading(false);
+    } else if (data && Array.isArray(data.notices)) {
+      setNotices(data.notices); // 객체 안에 배열이 있는 경우
+    } else {
+      setNotices([]); // 배열이 아니면 빈 배열
     }
-  };
+  } catch (error) {
+    console.error('공지사항 목록을 불러오는데 실패했습니다:', error);
+    alert('공지사항 목록을 불러오는데 실패했습니다.');
+    setNotices([]); // ← 에러 시에도 빈 배열
+  } finally {
+    setLoading(false);
+  }
+};
 
-  // 검색
-  const handleSearch = async () => {
-    if (!searchKeyword.trim()) {
-      fetchNotice();
-      return;
-    }
+// 검색도 동일하게
+const handleSearch = async () => {
+  if (!searchKeyword.trim()) {
+    fetchNotice();
+    return;
+  }
 
-    try {
-      const data = await searchNotice(searchKeyword);
+  try {
+    const data = await searchNotice(searchKeyword);
+    
+    if (Array.isArray(data)) {
       setNotices(data);
-    } catch (error) {
-      console.error('검색에 실패했습니다:', error);
-      alert('검색에 실패했습니다.');
+    } else if (data && Array.isArray(data.notices)) {
+      setNotices(data.notices);
+    } else {
+      setNotices([]);
     }
-  };
+  } catch (error) {
+    console.error('검색에 실패했습니다:', error);
+    alert('검색에 실패했습니다.');
+    setNotices([]); // ← 에러 시에도 빈 배열
+  }
+};
 
   // 삭제
   const handleDelete = async (noticeNo) => {
