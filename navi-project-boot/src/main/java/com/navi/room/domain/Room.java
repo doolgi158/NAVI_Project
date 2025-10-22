@@ -48,6 +48,11 @@ public class Room {
     @JsonManagedReference
     private List<RoomStock> roomStocks = new ArrayList<>();
 
+    @Builder.Default
+    @OneToMany(mappedBy = "room", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<RoomRsv> roomReservations = new ArrayList<>();
+
     @Nationalized
     @Column(name = "room_name", length = 50, nullable = false)
     private String roomName;

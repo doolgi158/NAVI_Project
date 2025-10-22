@@ -177,14 +177,14 @@ public class RoomRsvServiceImpl implements RoomRsvService {
         return valid;
     }
 
-    /* 조회 기능 */
+    /* 조회 기능
     @Override
     @Transactional(readOnly = true)
     public List<RoomRsvResponseDTO> findAll() {
         return roomRsvRepository.findAll().stream()
                 .map(RoomRsvResponseDTO::fromEntity)
                 .collect(Collectors.toList());
-    }
+    }*/
 
     @Override
     @Transactional(readOnly = true)

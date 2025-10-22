@@ -14,7 +14,7 @@ public interface RoomRsvService {
     // 3. 예약 상태 변경
     void updateStatus(String reserveId, String status);
     // 4. 예약 조회
-    List<RoomRsvResponseDTO> findAll();
+    //List<RoomRsvResponseDTO> findAll();
     List<RoomRsvResponseDTO> findAllByUserId(String userId);
     RoomRsvResponseDTO findByRoomRsvId(String roomRsvId);
     // 5. 결제 검증용: 총 결제 금액 확인
