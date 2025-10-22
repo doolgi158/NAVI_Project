@@ -94,4 +94,7 @@ public class BoardService {
             System.out.println("좋아요 취소 완료! 현재 좋아요 수: " + board.getBoardGood());
         }
     }
+
+
+
 }

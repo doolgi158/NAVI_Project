@@ -8,7 +8,8 @@ import AccRouter from "./AccRouter.jsx";
 import UserRouter from "./UserRouter.jsx";
 import DeliveryRouter from "./DeliveryRouter.jsx"
 import PaymentRouter from "./PaymentRouter.jsx";
-import BoardRouter from "./BoardRouter.jsx";
+import ClientRouter from "./ClientRouter.jsx";
+import ManagerRouter from "./ManagerRouter.jsx";
 
 
 const Loading = <div></div>
@@ -54,14 +55,6 @@ const root = createBrowserRouter([
     {
         path: "/payments",
         children: [...PaymentRouter()]
-    },
-    {
-    path: "/board",
-    children: [...ClientRouter()]
-    },
-    {
-    path: "/notice",
-    children: [...ClientRouter()]
     },
     {
     path: "/client",

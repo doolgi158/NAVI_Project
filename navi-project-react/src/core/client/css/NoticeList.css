@@ -4,9 +4,40 @@
   padding: 20px;
 }
 
-.notice-list-container h1 {
-  margin-bottom: 30px;
-  color: #333;
+/* 헤더 */
+.notice-header {
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+/* 네비게이션 */
+.board-nav {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.nav-link {
+  font-size: 18px;
+  font-weight: 500;
+  color: #666;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.nav-link:hover {
+  color: #007bff;
+}
+
+.nav-link.active {
+  color: #007bff;
+  font-weight: bold;
+}
+
+.nav-divider {
+  color: #ddd;
+  font-size: 16px;
 }
 
 .search-box {
@@ -34,25 +65,6 @@
 
 .search-box button:hover {
   background-color: #0056b3;
-}
-
-.button-area {
-  text-align: right;
-  margin-bottom: 15px;
-}
-
-.create-button {
-  padding: 10px 20px;
-  background-color: #28a745;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.create-button:hover {
-  background-color: #218838;
 }
 
 .notice-table {
@@ -83,34 +95,6 @@
 
 .notice-table .notice-title:hover {
   text-decoration: underline;
-}
-
-.edit-button,
-.delete-button {
-  padding: 5px 15px;
-  margin: 0 5px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 12px;
-}
-
-.edit-button {
-  background-color: #ffc107;
-  color: white;
-}
-
-.edit-button:hover {
-  background-color: #e0a800;
-}
-
-.delete-button {
-  background-color: #dc3545;
-  color: white;
-}
-
-.delete-button:hover {
-  background-color: #c82333;
 }
 
 .loading {

@@ -70,6 +70,65 @@
   background-color: #f8f8f8;
 }
 
+/* 네비게이션 */
+.board-nav {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.nav-link {
+  font-size: 18px;
+  font-weight: 500;
+  color: #666;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.nav-link:hover {
+  color: #007bff;
+}
+
+.nav-link.active {
+  color: #007bff;
+  font-weight: bold;
+}
+
+.nav-divider {
+  color: #ddd;
+  font-size: 16px;
+}
+
+/* 검색 박스 */
+.search-box {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.search-input {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  width: 300px;
+  font-size: 14px;
+  margin-left: auto;
+}
+
+.btn-search {
+  padding: 8px 15px;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.btn-search:hover {
+  background-color: #f8f8f8;
+}
 
 /* 게시글 목록 */
 .board-list {

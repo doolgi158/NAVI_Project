@@ -1,5 +1,5 @@
 // 사용자용 공지사항 API 서비스
-const API_URL = 'http://localhost:8080/api/notice';
+const API_URL = '/api/notice';
 
 // 공지사항 전체 목록 조회
 export const getAllNotices = async () => {

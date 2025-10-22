@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { getAllNotices, deleteNotice, searchNotice } from '../../../notice/services/NoticeService';
-import { useNavigate } from 'react-router-dom';
+import { getAllNotices, searchNotice } from './NoticeService';
+import { Link, useNavigate } from 'react-router-dom';
 import "../css/NoticeList.css";
+import MainLayout from '@/users/layout/MainLayout';
 
 function NoticeList() {
   const [notices, setNotices] = useState([]);
@@ -44,22 +45,6 @@ function NoticeList() {
     }
   };
 
-  // 삭제
-  const handleDelete = async (noticeNo) => {
-    if (!window.confirm('정말 삭제하시겠습니까?')) {
-      return;
-    }
-
-    try {
-      await deleteNotice(noticeNo);
-      alert('삭제되었습니다.');
-      fetchNotice(); // 목록 새로고침
-    } catch (error) {
-      console.error('삭제에 실패했습니다:', error);
-      alert('삭제에 실패했습니다.');
-    }
-  };
-
   // 날짜 포맷 변환
   const formatDate = (dateString) => {
     if (!dateString) return '';
@@ -72,8 +57,16 @@ function NoticeList() {
   }
 
   return (
+    <MainLayout>
     <div className="notice-list-container">
-      <h1>공지사항</h1>
+      {/* 헤더 - 게시판/공지사항 선택 */}
+      <div className="notice-header">
+        <div className="board-nav">
+          <Link to="/client/board" className="nav-link">일반 게시판</Link>
+          <span className="nav-divider">|</span>
+          <Link to="/client/notice" className="nav-link active">공지사항</Link>
+        </div>
+      </div>
 
       {/* 검색 영역 */}
       <div className="search-box">
@@ -88,16 +81,6 @@ function NoticeList() {
         <button onClick={fetchNotice}>전체보기</button>
       </div>
 
-      {/* 작성 버튼 */}
-      <div className="button-area">
-        <button 
-          className="create-button"
-          onClick={() => navigate('/client/notice/write')}
-        >
-          공지사항 작성
-        </button>
-      </div>
-
       {/* 공지사항 테이블 */}
       <table className="notice-table">
         <thead>
@@ -106,13 +89,12 @@ function NoticeList() {
             <th>제목</th>
             <th>작성일</th>
             <th>조회수</th>
-            <th>관리</th>
           </tr>
         </thead>
         <tbody>
           {notices.length === 0 ? (
             <tr>
-              <td colSpan="5">공지사항이 없습니다.</td>
+              <td colSpan="4">공지사항이 없습니다.</td>
             </tr>
           ) : (
             notices.map((notice) => (
@@ -127,26 +109,13 @@ function NoticeList() {
                 </td>
                 <td>{formatDate(notice.createDate)}</td>
                 <td>{notice.noticeViewCount}</td>
-                <td>
-                  <button 
-                    className="edit-button"
-                    onClick={() => navigate(`/client/notice/write?noticeNo=${notice.noticeNo}`)}
-                  >
-                    수정
-                  </button>
-                  <button 
-                    className="delete-button"
-                    onClick={() => handleDelete(notice.noticeNo)}
-                  >
-                    삭제
-                  </button>
-                </td>
               </tr>
             ))
           )}
         </tbody>
       </table>
     </div>
+    </MainLayout>
   );
 }
 

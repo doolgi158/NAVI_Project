@@ -54,9 +54,13 @@ function BoardList() {
     <MainLayout>
     <div className="board-list-container">
       <div className="board-list-wrapper">
-        {/* 헤더 */}
+        {/* 헤더 - 게시판/공지사항 선택 */}
         <div className="board-list-header">
-          <div className="board-list-title">일반 게시판</div>
+          <div className="board-nav">
+            <Link to="/client/board" className="nav-link active">일반 게시판</Link>
+            <span className="nav-divider">|</span>
+            <Link to="/client/notice" className="nav-link">공지사항</Link>
+          </div>
         </div>
 
         {/* 검색 박스 */}
