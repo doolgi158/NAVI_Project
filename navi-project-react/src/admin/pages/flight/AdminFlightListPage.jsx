@@ -178,12 +178,15 @@ const AdminFlightListPage = () => {
     {
       title: "관리",
       align: "center",
-      width: 220,
+      width: 150,
+      fixed: "right", // ✅ 오른쪽 고정
       render: (_, record) => (
-        <Space>
+        <Space size={"small"}>
           {/* ✅ 좌석관리 버튼 수정 */}
           <Button
             type="default"
+            size="small"
+            style={{ borderRadius: 8 }}
             icon={<SettingOutlined />}
             onClick={() => {
               const depTime = encodeURIComponent(record.depTime);
@@ -194,6 +197,8 @@ const AdminFlightListPage = () => {
           </Button>
           <Button
             type="primary"
+            size="small"
+            style={{ borderRadius: 8 }}
             icon={<EditOutlined />}
             onClick={() =>
               navigate(`/adm/flight/edit/${record.flightId}/${record.depTime}`)
@@ -204,8 +209,9 @@ const AdminFlightListPage = () => {
           <Button
             danger
             icon={<DeleteOutlined />}
-            onClick={() => handleDelete(record.flightId, record.depTime)}
+            size="small"
             style={{ borderRadius: 8 }}
+            onClick={() => handleDelete(record.flightId, record.depTime)}
           >
             삭제
           </Button>
@@ -247,7 +253,12 @@ const AdminFlightListPage = () => {
               setPagination({ current: page, pageSize }),
             showTotal: (total) => `총 ${total.toLocaleString()}건 등록됨`,
           }}
-          style={{ whiteSpace: "nowrap" }}
+          style={{
+            minWidth: "100%",
+            tableLayout: "auto",  // ✅ 자동 폭 계산
+            whiteSpace: "nowrap", // ✅ 줄바꿈 방지
+          }}
+          scroll={{ x: "max-content" }}
         />
       </AdminSectionCard>
     </div>

@@ -5,6 +5,7 @@ import { Typography, Divider, Button, message, Spin, Row, Col, Carousel, DatePic
 import { useKakaoMap } from "../../../common/hooks/useKakaoMap";
 import { setSelectedAcc } from "../../../common/slice/accSlice";
 import { API_SERVER_HOST } from "../../../common/api/naviApi";
+import { setReserveData } from "../../../common/slice/paymentSlice";
 import dayjs from "dayjs";
 import MainLayout from "../../layout/MainLayout";
 import axios from "axios";
@@ -133,6 +134,7 @@ const AccDetailPage = () => {
 		const checkIn = dateRange[0].format("YYYY-MM-DD");				// 체크인 날짜
 		const checkOut = dateRange[1].format("YYYY-MM-DD");				// 체크아웃 날짜
 		const nights = dayjs(checkOut).diff(dayjs(checkIn), "day");		// 숙박일수
+		const totalAmount = room.weekdayFee * roomCount * nights		// [ TODO ] : 평일 가격 기준 총 금액
 
 		// 결제 시 사용할 예약 폼 데이터(preFormData)
 		const preFormData = {
@@ -143,7 +145,7 @@ const AccDetailPage = () => {
 			checkOut,											// 체크아웃 날짜
 			guestCount,											// 인원수
 			roomCount,											// 객실수
-			totalAmount: room.weekdayFee * roomCount * nights,	// 총금액
+			totalAmount,										// 총금액
 			roomName: room.roomName,							// 객실명
 			nights,												// 숙박일수
 		};
@@ -151,6 +153,7 @@ const AccDetailPage = () => {
 		// 임시 숙소 예약ID 생성(객실 선점)
 		try {
 			// 백엔드에 넘길 RequestDTO
+			// [ TODO ] : 아직 객실 단일 예약 밖에 안됨
 			const dtoList = [
 				{
 					reserveId: preFormData.reserveId, 	// null
@@ -168,6 +171,7 @@ const AccDetailPage = () => {
 
 			// 예약ID 추출
 			const generatedReserveId = res.data?.reserveId || (Array.isArray(res.data) && res.data[0]?.reserveId);
+			console.log(res.data?.reserveId, generatedReserveId);
 
 			if (!generatedReserveId) {
 				console.warn("⚠️ 서버 응답:", res.data);
@@ -180,8 +184,8 @@ const AccDetailPage = () => {
 					reserveId: generatedReserveId,
 				};
 
-				// 숙소 및 객실 정보(items)
-				const items = {
+				// 숙소 및 객실 정보(UI 용)
+				const itemData = {
 					accId,
 					accName: accData.title,
 					address: accData.address,
@@ -189,17 +193,33 @@ const AccDetailPage = () => {
 					room,
 				};
 
-				// 결제 페이지로 이동
-				navigate("/payment", {
+				// 결제 DTO 매핑용
+				const items = [
+					{
+						reserveId: generatedReserveId,
+						amount: room.weekdayFee,
+					},
+				]
+
+				dispatch(
+					setReserveData({
+						rsvType: "ACC",
+						itemData: itemData,   		// 숙소 + 객실 정보
+						items,						// reserveId + amount
+						formData, 					// 예약자 정보까시 새롭게 포함한 formData
+					})
+				);
+
+				// 예약 정보 입력 페이지로 이동
+				navigate("/accommodations/detail/reservation", {
 					state: {
 						rsvType: "ACC",
+						itemData,
 						items,
 						formData,
 					},
 				});
 			}
-
-
 		} catch (err) {
 			console.error("❌ 예약 임시 생성 실패:", err);
 			message.error("예약 생성 중 오류가 발생했습니다.");

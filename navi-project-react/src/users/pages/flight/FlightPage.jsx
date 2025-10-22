@@ -21,6 +21,7 @@ import {
   RocketOutlined,
   EnvironmentOutlined,
 } from "@ant-design/icons";
+import dayjs from "dayjs";
 import MainLayout from "../../layout/MainLayout";
 
 const { Option } = Select;
@@ -56,6 +57,12 @@ const FlightPage = () => {
     setFrom(value);
     if (value !== "CJU") setTo("CJU");
     else setTo("");
+  };
+
+  const disablePastOrFutureDates = (current) => {
+    const today = dayjs().startOf("day");
+    const lastAvailable = dayjs().add(30, "day").endOf("day");
+    return current < today || current > lastAvailable;
   };
 
   const handleSearch = () => {
@@ -214,14 +221,17 @@ const FlightPage = () => {
                 <RangePicker
                   style={{ width: "100%" }}
                   onChange={(val) => setDates({ range: val })}
+                  disabledDate={disablePastOrFutureDates} // ✅ 추가
                 />
               ) : (
                 <DatePicker
                   style={{ width: "100%" }}
                   onChange={(val) => setDates({ dep: val })}
+                  disabledDate={disablePastOrFutureDates} // ✅ 추가
                 />
               )}
             </div>
+
 
             <Row gutter={16}>
               <Col span={12}>

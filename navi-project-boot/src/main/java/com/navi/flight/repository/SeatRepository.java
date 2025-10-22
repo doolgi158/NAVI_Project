@@ -20,7 +20,6 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
     @Query("SELECT s FROM Seat s WHERE s.seatId = :seatId")
     Seat findByIdForUpdate(@Param("seatId") Long seatId);
 
-    /* ✅ 오차 허용 범위 내 좌석 수 카운트 (boolean 대신 long 사용) */
     @Query("""
         SELECT COUNT(s.seatId)
           FROM Seat s
@@ -33,7 +32,6 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
             @Param("end") LocalDateTime end
     );
 
-    /* ✅ 오차 허용 범위로 좌석 조회 */
     @Query("""
         SELECT s
           FROM Seat s
@@ -47,7 +45,6 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
             @Param("end") LocalDateTime end
     );
 
-    /* ✅ 관리자 검색용 (필터 + 페이징) */
     @Query("""
         SELECT s
           FROM Seat s
@@ -69,7 +66,6 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
                                 @Param("q") String q,
                                 Pageable pageable);
 
-    /* ✅ 관리용 (날짜 단위) */
     @Query("""
         SELECT s
           FROM Seat s
@@ -82,6 +78,7 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
                             Pageable pageable);
 
     void deleteByFlight(Flight flight);
+
     @Query("""
     SELECT s
       FROM Seat s
@@ -91,5 +88,20 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
     """)
     List<Seat> findByFlightAndDepTime(@Param("flightId") String flightId,
                                       @Param("depTime") LocalDateTime depTime);
+
+    // ✅ 추가: 자동배정용 (해당 항공편의 예약되지 않은 좌석 전체)
+    @Query("""
+        SELECT s
+          FROM Seat s
+         WHERE s.flight = :flight
+           AND s.isReserved = false
+         ORDER BY s.seatNo ASC
+        """)
+    List<Seat> findAvailableSeatsByFlight(@Param("flight") Flight flight);
+
+    List<Seat> findByFlight_FlightId_FlightIdAndFlight_FlightId_DepTimeAndIsReservedFalse(
+            String flightId,
+            LocalDateTime depTime
+    );
 
 }

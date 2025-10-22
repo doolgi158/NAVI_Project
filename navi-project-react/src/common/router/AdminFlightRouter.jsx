@@ -5,7 +5,7 @@ const AdminFlightListPage = lazy(() => import("../../admin/pages/flight/AdminFli
 const AdminFlightFormPage = lazy(() => import("../../admin/pages/flight/AdminFlightFormPage"));
 const AdminAirportPage = lazy(() => import("../../admin/pages/flight/AdminAirportPage"));
 const AdminSeatPage = lazy(() => import("../../admin/pages/flight/AdminSeatPage"));
-const AdminReservationPage = lazy(() => import("../../admin/pages/flight/AdminReservationPage"));
+const AdminFlightReservationPage = lazy(() => import("../../admin/pages/flight/AdminFlightReservationPage"));
 
 const AdminFlightRouter = () => [
     {
@@ -24,7 +24,7 @@ const AdminFlightRouter = () => [
             { path: "edit/:flightId/:depTime", element: <AdminFlightFormPage /> },
             { path: "airports", element: <AdminAirportPage /> },
             { path: "seats", element: <AdminSeatPage /> },
-            { path: "reservations", element: <AdminReservationPage /> },
+            { path: "reservations", element: <AdminFlightReservationPage /> },
         ],
     },
 

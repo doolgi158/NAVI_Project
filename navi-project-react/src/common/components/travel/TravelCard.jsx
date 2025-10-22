@@ -24,7 +24,7 @@ const TravelCard = ({ item, onClick, isSelected, onMouseEnter, onMouseLeave }) =
     setLoading(true);
 
     try {
-      const res = await api.post(`/travel/like/${item.travelId}?id=${userId}`, null, {
+      const res = await api.post(`/travel/like/${item.travelId}`, null, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -55,7 +55,7 @@ const TravelCard = ({ item, onClick, isSelected, onMouseEnter, onMouseLeave }) =
     setLoading(true);
 
     try {
-      const res = await api.post(`/travel/bookmark/${item.travelId}?id=${userId}`, null, {
+      const res = await api.post(`/travel/bookmark/${item.travelId}`, null, {
         headers: { Authorization: `Bearer ${token}` },
       });
 

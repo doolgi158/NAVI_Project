@@ -4,8 +4,10 @@ import com.navi.common.response.ApiResponse;
 import com.navi.delivery.domain.DeliveryReservation;
 import com.navi.delivery.dto.DeliveryReservationDTO;
 import com.navi.delivery.service.DeliveryReservationService;
+import com.navi.user.dto.users.UserSecurityDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,10 +25,16 @@ public class DeliveryReservationController {
      * - status 기본값은 PENDING
      */
     @PostMapping("/rsv")
-    public ResponseEntity<ApiResponse<DeliveryReservation>> createReservation(@RequestBody DeliveryReservationDTO dto) {
+    public ResponseEntity<ApiResponse<DeliveryReservation>> createReservation(
+            @RequestBody DeliveryReservationDTO dto,
+            @AuthenticationPrincipal UserSecurityDTO user // ✅ 로그인 사용자
+    ) {
+        // JWT에서 파싱된 사용자 정보가 들어있음
+        dto.setUserNo(user.getNo()); // ✅ userNo 자동 주입
         DeliveryReservation reservation = deliveryReservationService.createReservation(dto);
         return ResponseEntity.ok(ApiResponse.success(reservation));
     }
+
 
     /*
      * 2. 특정 사용자 예약 목록 조회

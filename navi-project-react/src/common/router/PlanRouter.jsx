@@ -5,11 +5,7 @@ const TravelPlanMain = lazy(() => import("../../users/pages/plan/TravelPlanMain.
 const TravelPlanner = lazy(() => import("../../users/pages/plan/TravelPlanner.jsx"))    //등록
 const PlanScheduler = lazy(() => import("../../users/pages/plan/PlanScheduler.jsx"))    //상세/수정/등록 상세
 
-
-const handleDetail = (plan) => navigate(`/plans/${plan.id}`);
-const handleEdit = (plan) => navigate(`/plans/scheduler?planId=${plan.id}`);
-
-const TravelRouter = () => {
+const PlanRouter = () => {
     return [
 
         /* 여행계획 홈,리스트 */
@@ -17,6 +13,9 @@ const TravelRouter = () => {
 
         /* 여행계획 등록*/
         { path: "planner", element: <TravelPlanner /> },
+
+        /* 여행계획 상세 등록*/
+        { path: "scheduler", element: <PlanScheduler /> },
 
         /* 조회/수정 */
         { path: "planner/detail", element: <PlanScheduler /> },
@@ -28,4 +27,4 @@ const TravelRouter = () => {
 
 }
 
-export default TravelRouter;
+export default PlanRouter;

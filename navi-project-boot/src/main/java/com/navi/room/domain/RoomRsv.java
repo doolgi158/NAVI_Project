@@ -108,7 +108,6 @@ public class RoomRsv extends BaseEntity{
     public void markCancelled()  { this.rsvStatus = RsvStatus.CANCELLED; }
     public void markRefunded()   { this.rsvStatus = RsvStatus.REFUNDED; }
     public void markFailed()     { this.rsvStatus = RsvStatus.FAILED; }
-    public void markCompleted()  { this.rsvStatus = RsvStatus.COMPLETED; }
 
     /* === 가격 수정 === */
     public void updatePrice(BigDecimal newPrice) {

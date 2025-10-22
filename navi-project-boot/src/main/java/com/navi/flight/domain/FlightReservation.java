@@ -48,6 +48,7 @@ public class FlightReservation extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seat_id")
     @Comment("예약된 좌석 (FK)")
+    @JsonIgnore
     private Seat seat;
 
     @Column(name = "total_price", nullable = false)
@@ -57,7 +58,7 @@ public class FlightReservation extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Builder.Default
     @Column(name = "status", length = 20, nullable = false)
-    @Comment("예약 상태 (PENDING/PAID/CANCELLED/REFUNDED/FAILED/COMPLETED)")
+    @Comment("예약 상태 (PENDING/PAID/CANCELLED/REFUNDED/FAILED)")
     private RsvStatus status = RsvStatus.PENDING;
 
     @Lob

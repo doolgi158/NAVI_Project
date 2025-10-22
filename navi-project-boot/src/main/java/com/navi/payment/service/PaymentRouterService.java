@@ -14,7 +14,6 @@ import java.math.BigDecimal;
 @Service
 @RequiredArgsConstructor
 public class PaymentRouterService {
-
     private final AccPaymentServiceImpl accPaymentServiceImpl;
     private final DlvPaymentServiceImpl dlvPaymentServiceImpl;
     private final FlyPaymentServiceImpl flyPaymentServiceImpl;
@@ -34,18 +33,13 @@ public class PaymentRouterService {
     }
 
     /* === 2. 결제 검증 및 확정 === */
-    public PaymentVerifyResponseDTO verifyAndCompletePayment(PaymentVerifyRequestDTO dto)
+    public PaymentResultResponseDTO verifyAndCompletePayment(PaymentVerifyRequestDTO dto)
             throws IamportResponseException, IOException {
         return switch (dto.getRsvType()) {
             case ACC -> accPaymentServiceImpl.verifyAndCompletePayment(dto);
             case DLV -> dlvPaymentServiceImpl.verifyAndCompletePayment(dto);
             case FLY -> flyPaymentServiceImpl.verifyAndCompletePayment(dto);
         };
-    }
-
-    /* === 3. 결제 확정 === */
-    public PaymentConfirmResponseDTO confirmPayment(PaymentConfirmRequestDTO dto) {
-        return paymentService.confirmPayment(dto);
     }
 
     /* === 4. 결제 실패 === */

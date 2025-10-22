@@ -25,13 +25,14 @@ export const useLogin = () => {
 
       // 상태 코드별 처리
       if (response.status === 200) {
-        const { accessToken, refreshToken, username, roles, ip, userNo } = response.data;
+        const { accessToken, refreshToken, username, roles, ip, userNo, id } = response.data;
 
         // JWT 토큰 저장
         localStorage.setItem("accessToken", accessToken);
         localStorage.setItem("refreshToken", refreshToken);
         localStorage.setItem("username", username);
         localStorage.setItem("userNo", userNo);
+        localStorage.setItem("userId", id);
 
         axios.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
 

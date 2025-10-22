@@ -1,4 +1,4 @@
-import axios from 'axios';
+import api from './naviApi';
 
 /**
  * ✅ 관리자용 여행지 목록 조회
@@ -45,7 +45,7 @@ export const updateAdminTravelState = async (ids, newState) => {
   };
 
   // ✅ 기존 PATCH, 기존 엔드포인트 유지
-  const response = await axios.patch('/api/adm/travel/state', { ids, state: newState }, config);
+  const response = await api.patch('/api/adm/travel/state', { ids, state: newState }, config);
   return response;
 };
 
@@ -60,7 +60,7 @@ export const fetchAdminTravelDetail = async (travelId) => {
   };
 
   // ✅ 기존 엔드포인트 유지
-  const response = await axios.get(`/api/adm/travel/detail/${travelId}`, config);
+  const response = await api.get(`/api/adm/travel/detail/${travelId}`, config);
   return response;
 };
 
@@ -78,7 +78,7 @@ export const saveAdminTravel = async (travelData) => {
   };
 
   // ✅ 기존 엔드포인트 유지
-  const response = await axios.post('/api/adm/travel', travelData, config);
+  const response = await api.post('/api/adm/travel', travelData, config);
   return response;
 };
 
@@ -93,6 +93,6 @@ export const deleteAdminTravel = async (travelId) => {
   };
 
   // ✅ 기존 엔드포인트 유지
-  const response = await axios.delete(`/api/adm/travel/${travelId}`, config);
+  const response = await api.delete(`/api/adm/travel/${travelId}`, config);
   return response;
 };

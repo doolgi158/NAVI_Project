@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import MainLayout from "../../layout/MainLayout";
+import LazyDataLoader from "@/common/components/common/LazyDataLoader";
 import {
   Card,
   Typography,
@@ -18,8 +19,8 @@ import {
 } from "antd";
 import { LeftOutlined } from "@ant-design/icons";
 
-const { Title, Text } = Typography;
 const API_SERVER_HOST = "http://localhost:8080";
+const { Title, Text } = Typography;
 
 const SeatSelectPage = () => {
   const { state } = useLocation();
@@ -32,7 +33,7 @@ const SeatSelectPage = () => {
     selectedInbound,
     passengerCount = 1,
     passengers = [],
-    outboundSeats: prevOutboundSeats = [],
+    outboundDto = null,
   } = state || {};
 
   const flight = step === "outbound" ? selectedOutbound : selectedInbound;
@@ -53,17 +54,18 @@ const SeatSelectPage = () => {
     return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(
       2,
       "0"
-    )}.${String(date.getDate()).padStart(2, "0")} (${days[date.getDay()]}) ${String(
-      date.getHours()
-    ).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+    )}.${String(date.getDate()).padStart(
+      2,
+      "0"
+    )} (${days[date.getDay()]}) ${String(date.getHours()).padStart(
+      2,
+      "0"
+    )}:${String(date.getMinutes()).padStart(2, "0")}`;
   };
 
-  // ✅ 좌석 데이터 로드 함수 (useCallback으로 외부화)
+  // ✅ 좌석 데이터 불러오기
   const fetchSeats = useCallback(async () => {
-    if (!flightIdValue || !depTimeValue) {
-      console.warn("⚠️ flightIdValue 또는 depTimeValue가 비어있습니다.");
-      return;
-    }
+    if (!flightIdValue || !depTimeValue) return;
 
     setLoading(true);
     try {
@@ -71,13 +73,11 @@ const SeatSelectPage = () => {
         ? depTimeValue
         : depTimeValue.replace(" ", "T");
 
-      console.log("📡 좌석 요청:", flightIdValue, formattedDepTime);
-
       const res = await axios.get(
         `${API_SERVER_HOST}/api/seats/${encodeURIComponent(flightIdValue)}`,
         { params: { depTime: formattedDepTime } }
       );
-      console.log(res.data[0]);
+
       const seatData = (Array.isArray(res.data) ? res.data : []).map((s) => ({
         ...s,
         seatClass: s.seatClass || s.seat_class || "ECONOMY",
@@ -89,7 +89,6 @@ const SeatSelectPage = () => {
       setSeats(seatData);
       setSelectedSeats([]);
       setTotalPrice(0);
-      console.log("✅ 좌석 데이터 로드 완료:", seatData.length);
     } catch (err) {
       console.error("❌ 좌석 불러오기 실패:", err);
       message.error("좌석 정보를 불러오지 못했습니다.");
@@ -98,12 +97,11 @@ const SeatSelectPage = () => {
     }
   }, [flightIdValue, depTimeValue]);
 
-  // ✅ 첫 로드 시 좌석 불러오기
   useEffect(() => {
     fetchSeats();
   }, [fetchSeats]);
 
-  // ✅ 좌석 행별 그룹화
+  // ✅ 행 단위 그룹화
   const groupByRow = (arr) => {
     const rows = {};
     arr.forEach((s) => {
@@ -121,7 +119,6 @@ const SeatSelectPage = () => {
     () => groupByRow(seats.filter((s) => s.seatClass === "PRESTIGE")),
     [seats]
   );
-
   const economyRows = useMemo(
     () => groupByRow(seats.filter((s) => s.seatClass === "ECONOMY")),
     [seats]
@@ -142,14 +139,25 @@ const SeatSelectPage = () => {
     setTotalPrice(updated.reduce((sum, s) => sum + (s.totalPrice || 0), 0));
   };
 
-  // ✅ 다음 단계 (예약 생성)
+  // ✅ 예약 insert 및 다음단계 이동
   const handleNext = async () => {
     if (selectedSeats.length !== passengerCount)
       return message.warning(`탑승객 수(${passengerCount})에 맞게 좌석을 선택하세요.`);
 
     try {
-      const dto = {
-        userNo: 1,
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        message.warning("로그인이 필요합니다.");
+        return;
+      }
+
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      };
+
+      // ✅ 예약 DTO 구성
+      const currentDto = {
         flightId: flightIdValue,
         depTime: flight?.depTime?.split("T")[0],
         seatId: selectedSeats[0]?.seatId,
@@ -158,66 +166,58 @@ const SeatSelectPage = () => {
         status: "PENDING",
       };
 
-      console.log("예약 DTO 전송: ", dto);
-      const res = await axios.post(`${API_SERVER_HOST}/api/flight/reservation`, dto);
+      // ✅ 서버 insert
+      const res = await axios.post(
+        `${API_SERVER_HOST}/api/flight/reservation`,
+        currentDto,
+        { headers }
+      );
 
-      if (res.data.status === 200) {
-        message.success("예약이 완료되었습니다.");
-
-        // ✅ 예약 성공 시 즉시 좌석 상태 갱신
-        await fetchSeats();
-
-        if (isRoundTrip && step === "outbound") {
-          navigate("/flight/seat", {
-            state: {
-              isRoundTrip: true,
-              step: "inbound",
-              selectedOutbound,
-              selectedInbound,
-              passengerCount,
-              passengers,
-              outboundSeats: selectedSeats,
-            },
-          });
-        } else {
-          navigate("/flight/payment", {
-            state: {
-              reservation: res.data.data,
-              selectedOutbound,
-              selectedInbound,
-              outboundSeats:
-                step === "outbound" ? selectedSeats : prevOutboundSeats,
-              inboundSeats: step === "inbound" ? selectedSeats : [],
-              passengerCount,
-              passengers,
-              totalPrice,
-            },
-          });
-        }
-      } else {
-        message.error("예약 생성에 실패했습니다.");
+      // ✅ 왕복편이면 → 귀국편 이동
+      if (isRoundTrip && step === "outbound") {
+        navigate("/flight/seat", {
+          state: {
+            isRoundTrip: true,
+            step: "inbound",
+            selectedOutbound,
+            selectedInbound,
+            passengerCount,
+            passengers,
+            outboundDto: res.data.data, // ✅ 출발편 insert 결과 저장
+          },
+        });
+        return;
       }
-    } catch (e) {
-      const msg = e.response?.data?.message;
-      if (msg?.includes("이미 예약된 좌석")) {
-        message.warning("해당 좌석은 이미 예약되었습니다. 다른 좌석을 선택해주세요.");
-        await fetchSeats(); // ⚠️ 중복 예약 시에도 즉시 갱신
-      } else if (msg) {
-        message.error(msg);
-      } else {
-        message.error("예약 중 오류가 발생했습니다. 다시 시도해주세요.");
-      }
-      console.error("예약 요청 중 오류:", e);
+
+      // ✅ 편도 or 귀국편 완료 시 → 결제 페이지
+      message.success("항공편 예약이 완료되었습니다!");
+      navigate("/payment", {
+        state: {
+          selectedOutbound,
+          selectedInbound,
+          passengerCount,
+          passengers,
+          outboundDto: isRoundTrip ? outboundDto : res.data.data,
+          inboundDto: isRoundTrip ? res.data.data : null,
+          totalPrice:
+            (selectedOutbound?.price || 0) +
+            (selectedInbound?.price || 0) * passengerCount,
+        },
+      });
+    } catch (error) {
+      console.error("❌ 예약 실패:", error);
+      const msg =
+        error.response?.data?.message ||
+        "예약 중 오류가 발생했습니다. 다시 시도해주세요.";
+      message.error(msg);
     }
   };
 
   const handleBack = () => navigate(-1);
 
-  // ✅ 좌석 버튼 렌더링
   const SeatButton = ({ seat }) => {
     const selected = selectedSeats.some((s) => s.seatNo === seat.seatNo);
     const isPrestige = seat.seatClass === "PRESTIGE";
-
     const bg = seat.isReserved
       ? "#e5e7eb"
       : selected
@@ -258,243 +258,242 @@ const SeatSelectPage = () => {
     );
   };
 
-  // ✅ 렌더링
+  // ✅ 렌더링 전체
   return (
     <MainLayout>
-      <div style={{ background: "#f9fafb", minHeight: "100vh", padding: "50px 0" }}>
-        <Row justify="center" gutter={[24, 24]}>
-          <Col xs={23} lg={16} xl={14}>
-            <Card
-              bordered={false}
-              style={{
-                borderRadius: 20,
-                boxShadow: "0 8px 24px rgba(0,0,0,0.05)",
-                background: "#ffffff",
-                padding: "28px 36px",
-              }}
-            >
-              <Space align="center" size={10} style={{ marginBottom: 12 }}>
-                <Button type="text" icon={<LeftOutlined />} onClick={handleBack} />
-                <Title level={4} style={{ margin: 0 }}>
-                  {step === "outbound" ? "출발편 좌석 선택" : "귀국편 좌석 선택"}
-                </Title>
-              </Space>
-
-              <Text type="secondary">
-                {flight?.depAirportName} ✈️ {flight?.arrAirportName}
-              </Text>
-              <div style={{ marginTop: 4, marginBottom: 20 }}>
-                <Text type="secondary">
-                  {formatDateTimeKOR(flight?.depTime)} 출발 ·{" "}
-                  {formatDateTimeKOR(flight?.arrTime)} 도착
-                </Text>
-              </div>
-
-              {loading ? (
-                <Skeleton active paragraph={{ rows: 6 }} />
-              ) : (
-                <Space direction="vertical" size={30} style={{ width: "100%" }}>
-                  {/* ✅ 비즈니스석 */}
-                  {Object.keys(prestigeRows).length > 0 && (
-                    <div
-                      style={{
-                        background: "rgba(220,232,255,0.25)",
-                        borderRadius: 16,
-                        padding: 18,
-                        boxShadow: "inset 0 0 10px rgba(0,0,0,0.05)",
-                      }}
-                    >
-                      <Text strong style={{ color: "#1e3a8a" }}>
-                        비즈니스석 (Prestige)
-                      </Text>
-                      <Divider style={{ margin: "8px 0 12px" }} />
-                      {Object.keys(prestigeRows)
-                        .sort((a, b) => a - b)
-                        .map((row) => (
-                          <div
-                            key={row}
-                            style={{
-                              display: "flex",
-                              justifyContent: "center",
-                              alignItems: "center",
-                              gap: 10,
-                              marginBottom: 10,
-                            }}
-                          >
-                            <Text
-                              style={{
-                                width: 40,
-                                textAlign: "right",
-                                color: "#64748b",
-                                fontWeight: 500,
-                              }}
-                            >
-                              {row}
-                            </Text>
-                            <div style={{ display: "flex", gap: 10 }}>
-                              {prestigeRows[row].map((s) => (
-                                <SeatButton seat={s} key={s.seatNo} />
-                              ))}
-                            </div>
-                          </div>
-                        ))}
-                    </div>
-                  )}
-
-                  {/* ✅ 일반석 */}
-                  {Object.keys(economyRows).length > 0 && (
-                    <div
-                      style={{
-                        background: "rgba(212,242,232,0.25)",
-                        borderRadius: 16,
-                        padding: 18,
-                        marginTop: 30,
-                      }}
-                    >
-                      <Text strong style={{ color: "#166534" }}>
-                        일반석 (Economy)
-                      </Text>
-                      <Divider style={{ margin: "8px 0 12px" }} />
-                      {Object.keys(economyRows)
-                        .sort((a, b) => a - b)
-                        .map((row) => (
-                          <div
-                            key={row}
-                            style={{
-                              display: "flex",
-                              justifyContent: "center",
-                              alignItems: "center",
-                              gap: 12,
-                              marginBottom: 10,
-                            }}
-                          >
-                            <Text
-                              style={{
-                                width: 40,
-                                textAlign: "right",
-                                color: "#64748b",
-                                fontWeight: 500,
-                              }}
-                            >
-                              {row}
-                            </Text>
-                            <div style={{ display: "flex", gap: 12 }}>
-                              {economyRows[row].map((s, idx) => (
-                                <div
-                                  key={s.seatNo}
-                                  style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    marginRight: idx === 2 ? 36 : 0,
-                                  }}
-                                >
-                                  <SeatButton seat={s} />
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        ))}
-                    </div>
-                  )}
-                </Space>
-              )}
-            </Card>
-          </Col>
-
-          {/* ✅ 오른쪽 선택 정보 */}
-          <Col xs={23} lg={8} xl={6}>
-            <Affix offsetTop={24}>
+      <LazyDataLoader
+        checkUrl={`${API_SERVER_HOST}/api/seats/${encodeURIComponent(flightIdValue)}/status`}
+        checkParams={{
+          depTime: depTimeValue,
+        }}
+        onReady={fetchSeats}
+      >
+        <div style={{ background: "#f9fafb", minHeight: "100vh", padding: "50px 0" }}>
+          <Row justify="center" gutter={[24, 24]}>
+            <Col xs={23} lg={16} xl={14}>
               <Card
-                bordered={false}
+                variant="borderless"
                 style={{
-                  borderRadius: 16,
-                  boxShadow: "0 6px 20px rgba(0,0,0,0.06)",
+                  borderRadius: 20,
+                  boxShadow: "0 8px 24px rgba(0,0,0,0.05)",
+                  background: "#ffffff",
+                  padding: "28px 36px",
                 }}
               >
-                <Text strong>선택 정보</Text>
-                <Divider style={{ margin: "8px 0 12px" }} />
+                <Space align="center" size={10} style={{ marginBottom: 12 }}>
+                  <Button type="text" icon={<LeftOutlined />} onClick={handleBack} />
+                  <Title level={4} style={{ margin: 0 }}>
+                    {step === "outbound" ? "출발편 좌석 선택" : "귀국편 좌석 선택"}
+                  </Title>
+                </Space>
 
-                {selectedSeats.length === 0 ? (
-                  <Text type="secondary">좌석을 선택하세요.</Text>
+                <Text type="secondary">
+                  {flight?.depAirportName} ✈️ {flight?.arrAirportName}
+                </Text>
+                <div style={{ marginTop: 4, marginBottom: 20 }}>
+                  <Text type="secondary">
+                    {formatDateTimeKOR(flight?.depTime)} 출발 ·{" "}
+                    {formatDateTimeKOR(flight?.arrTime)} 도착
+                  </Text>
+                </div>
+
+                {loading ? (
+                  <Skeleton active paragraph={{ rows: 6 }} />
                 ) : (
-                  selectedSeats.map((s) => (
-                    <Row key={s.seatNo} justify="space-between">
-                      <Col>
-                        <Tag color={s.seatClass === "PRESTIGE" ? "blue" : "green"}>
-                          {s.seatNo}
-                        </Tag>
-                      </Col>
-                      <Col>
-                        <Text>₩{(s.totalPrice || 0).toLocaleString()}</Text>
-                      </Col>
-                    </Row>
-                  ))
+                  <Space direction="vertical" size={30} style={{ width: "100%" }}>
+                    {/* ✅ 비즈니스석 */}
+                    {Object.keys(prestigeRows).length > 0 && (
+                      <div
+                        style={{
+                          background: "rgba(220,232,255,0.25)",
+                          borderRadius: 16,
+                          padding: 18,
+                          boxShadow: "inset 0 0 10px rgba(0,0,0,0.05)",
+                        }}
+                      >
+                        <Text strong style={{ color: "#1e3a8a" }}>
+                          비즈니스석 (Prestige)
+                        </Text>
+                        <Divider style={{ margin: "8px 0 12px" }} />
+                        {Object.keys(prestigeRows)
+                          .sort((a, b) => a - b)
+                          .map((row) => (
+                            <div
+                              key={row}
+                              style={{
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                gap: 10,
+                                marginBottom: 10,
+                              }}
+                            >
+                              <Text
+                                style={{
+                                  width: 40,
+                                  textAlign: "right",
+                                  color: "#64748b",
+                                  fontWeight: 500,
+                                }}
+                              >
+                                {row}
+                              </Text>
+                              <div style={{ display: "flex", gap: 10 }}>
+                                {prestigeRows[row].map((s) => (
+                                  <SeatButton seat={s} key={s.seatNo} />
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    )}
+
+                    {/* ✅ 일반석 */}
+                    {Object.keys(economyRows).length > 0 && (
+                      <div
+                        style={{
+                          background: "rgba(212,242,232,0.25)",
+                          borderRadius: 16,
+                          padding: 18,
+                          marginTop: 30,
+                        }}
+                      >
+                        <Text strong style={{ color: "#166534" }}>
+                          일반석 (Economy)
+                        </Text>
+                        <Divider style={{ margin: "8px 0 12px" }} />
+                        {Object.keys(economyRows)
+                          .sort((a, b) => a - b)
+                          .map((row) => (
+                            <div
+                              key={row}
+                              style={{
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                gap: 12,
+                                marginBottom: 10,
+                              }}
+                            >
+                              <Text
+                                style={{
+                                  width: 40,
+                                  textAlign: "right",
+                                  color: "#64748b",
+                                  fontWeight: 500,
+                                }}
+                              >
+                                {row}
+                              </Text>
+                              <div style={{ display: "flex", gap: 12 }}>
+                                {economyRows[row].map((s, idx) => (
+                                  <div
+                                    key={s.seatNo}
+                                    style={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      marginRight: idx === 2 ? 36 : 0,
+                                    }}
+                                  >
+                                    <SeatButton seat={s} />
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    )}
+                  </Space>
                 )}
+              </Card>
+            </Col>
 
-                <Divider style={{ margin: "12px 0" }} />
-                <Row justify="space-between">
-                  <Text type="secondary">선택 인원</Text>
-                  <Text>
-                    {selectedSeats.length}/{passengerCount}
-                  </Text>
-                </Row>
-                <Row justify="space-between" style={{ marginTop: 6 }}>
-                  <Text strong>총 금액</Text>
-                  <Text strong style={{ fontSize: 18, color: "#2563eb" }}>
-                    ₩{totalPrice.toLocaleString()}
-                  </Text>
-                </Row>
-
-                <Space
-                  direction="horizontal"
-                  size="middle"
+            {/* ✅ 오른쪽 선택 정보 */}
+            <Col xs={23} lg={8} xl={6}>
+              <Affix offsetTop={24}>
+                <Card
+                  bordered={false}
                   style={{
-                    width: "100%",
-                    marginTop: 18,
-                    justifyContent: "space-between",
+                    borderRadius: 16,
+                    boxShadow: "0 6px 20px rgba(0,0,0,0.06)",
                   }}
                 >
-                  <Button
-                    size="large"
-                    onClick={handleBack}
+                  <Text strong>선택 정보</Text>
+                  <Divider style={{ margin: "8px 0 12px" }} />
+                  {selectedSeats.length === 0 ? (
+                    <Text type="secondary">좌석을 선택하세요.</Text>
+                  ) : (
+                    selectedSeats.map((s) => (
+                      <Row key={s.seatNo} justify="space-between">
+                        <Col>
+                          <Tag color={s.seatClass === "PRESTIGE" ? "blue" : "green"}>
+                            {s.seatNo}
+                          </Tag>
+                        </Col>
+                        <Col>
+                          <Text>₩{(s.totalPrice || 0).toLocaleString()}</Text>
+                        </Col>
+                      </Row>
+                    ))
+                  )}
+
+                  <Divider style={{ margin: "12px 0" }} />
+                  <Row justify="space-between">
+                    <Text type="secondary">선택 인원</Text>
+                    <Text>
+                      {selectedSeats.length}/{passengerCount}
+                    </Text>
+                  </Row>
+                  <Row justify="space-between" style={{ marginTop: 6 }}>
+                    <Text strong>총 금액</Text>
+                    <Text strong style={{ fontSize: 18, color: "#2563eb" }}>
+                      ₩{totalPrice.toLocaleString()}
+                    </Text>
+                  </Row>
+
+                  <Space
+                    direction="horizontal"
+                    size="middle"
                     style={{
-                      flex: 1,
-                      borderRadius: 8,
-                      height: 46,
+                      width: "100%",
+                      marginTop: 18,
+                      justifyContent: "space-between",
                     }}
                   >
-                    뒤로가기
-                  </Button>
-                  <Button
-                    type="primary"
-                    size="large"
-                    onClick={handleNext}
-                    disabled={selectedSeats.length !== passengerCount}
-                    style={{
-                      flex: 1,
-                      borderRadius: 8,
-                      height: 46,
-                      background:
-                        selectedSeats.length === passengerCount
-                          ? "linear-gradient(90deg,#2563eb,#1d4ed8)"
-                          : undefined,
-                      boxShadow:
-                        selectedSeats.length === passengerCount
-                          ? "0 4px 10px rgba(37,99,235,0.3)"
-                          : "none",
-                    }}
-                  >
-                    {isRoundTrip && step === "outbound"
-                      ? "귀국편 선택으로"
-                      : "결제 진행하기"}
-                  </Button>
-                </Space>
-              </Card>
-            </Affix>
-          </Col>
-        </Row>
-      </div>
-    </MainLayout>
+                    <Button size="large" onClick={handleBack} style={{ flex: 1 }}>
+                      뒤로가기
+                    </Button>
+                    <Button
+                      type="primary"
+                      size="large"
+                      onClick={handleNext}
+                      disabled={selectedSeats.length !== passengerCount}
+                      style={{
+                        flex: 1,
+                        borderRadius: 8,
+                        height: 46,
+                        background:
+                          selectedSeats.length === passengerCount
+                            ? "linear-gradient(90deg,#2563eb,#1d4ed8)"
+                            : undefined,
+                        boxShadow:
+                          selectedSeats.length === passengerCount
+                            ? "0 4px 10px rgba(37,99,235,0.3)"
+                            : "none",
+                      }}
+                    >
+                      {isRoundTrip && step === "outbound"
+                        ? "귀국편 선택으로"
+                        : "결제 진행하기"}
+                    </Button>
+                  </Space>
+                </Card>
+              </Affix>
+            </Col>
+          </Row>
+        </div>
+      </LazyDataLoader>
+    </MainLayout >
   );
 };
 
