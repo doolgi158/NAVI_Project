@@ -1,42 +1,42 @@
 import { useEffect, useState } from "react";
-import { Table, Button, Popconfirm, Space, message, Layout } from "antd";
-import axios from "axios";
+import { Table, Button, Input, Space, Tag, message, Typography } from "antd";
+import {
+  SearchOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  SettingOutlined,
+} from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import AdminSiderLayout from "../../layout/AdminSiderLayout";
-import { Content } from "antd/es/layout/layout";
+import axios from "axios";
+import dayjs from "dayjs";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+import AdminSectionCard from "../../layout/flight/AdminSectionCard";
 
+dayjs.extend(isSameOrAfter);
+dayjs.extend(isSameOrBefore);
+dayjs.extend(customParseFormat);
+
+const { Title } = Typography;
 const API = "http://localhost:8080/api/admin/flights";
 
 const AdminFlightListPage = () => {
   const [flights, setFlights] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [pagination, setPagination] = useState({ current: 1, pageSize: 10 });
   const navigate = useNavigate();
 
-  // ✅ 항공편 목록 불러오기 (JWT 인증 포함)
+  /** ✅ 항공편 목록 조회 */
   const fetchFlights = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("accessToken"); // ✅ JWT 가져오기
-      
-      if (!token) {
-        message.warning("로그인이 필요합니다.");
-        setLoading(false);
-        return;
-      }
-
+      const token = localStorage.getItem("accessToken");
       const res = await axios.get(API, {
-        headers: {
-          Authorization: `Bearer ${token}`, // ✅ JWT 헤더 추가
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-
-      console.log("🛫 API 응답:", res.data);
-
-      // ✅ 안전한 배열 처리 (data 또는 data.data 지원)
-      const list = Array.isArray(res.data) ? res.data : res.data.data || [];
-      setFlights(list);
-    } catch (err) {
-      console.error("❌ 항공편 목록 오류:", err);
+      setFlights(res.data || []);
+    } catch {
       message.error("항공편 목록을 불러오지 못했습니다.");
     } finally {
       setLoading(false);
@@ -47,132 +47,221 @@ const AdminFlightListPage = () => {
     fetchFlights();
   }, []);
 
-  // ✅ 항공편 삭제 (JWT 포함)
-  const handleDelete = async (record) => {
+  /** ✅ 삭제 */
+  const handleDelete = async (flightId, depTime) => {
+    if (!window.confirm("정말 삭제하시겠습니까?")) return;
     try {
-      const token = localStorage.getItem("ACCESS_TOKEN");
-      if (!token) {
-        message.warning("로그인이 필요합니다.");
-        return;
-      }
-
-      const { flightId, depTime } = record;
+      const token = localStorage.getItem("accessToken");
       await axios.delete(`${API}/${flightId}/${depTime}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-
-      message.success("항공편이 삭제되었습니다.");
+      message.success("삭제되었습니다.");
       fetchFlights();
-    } catch (err) {
-      console.error("❌ 삭제 오류:", err);
+    } catch {
       message.error("삭제 중 오류가 발생했습니다.");
     }
   };
 
+  /** ✅ 컬럼별 검색 필터 */
+  const getColumnSearchProps = (dataIndex, placeholder) => ({
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+      <div style={{ padding: 8 }}>
+        <Input
+          placeholder={`${placeholder} 검색`}
+          value={selectedKeys[0]}
+          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+          onPressEnter={() => confirm()}
+          style={{ marginBottom: 8, display: "block" }}
+        />
+        <Space>
+          <Button
+            type="primary"
+            onClick={() => confirm()}
+            size="small"
+            icon={<SearchOutlined />}
+            style={{ width: 80 }}
+          >
+            검색
+          </Button>
+          <Button onClick={() => clearFilters?.()} size="small" style={{ width: 80 }}>
+            초기화
+          </Button>
+        </Space>
+      </div>
+    ),
+    filterIcon: (filtered) => (
+      <SearchOutlined style={{ color: filtered ? "#1677ff" : undefined }} />
+    ),
+    onFilter: (value, record) =>
+      record[dataIndex]?.toString().toLowerCase().includes(value.toLowerCase()),
+  });
+
+  /** ✅ 테이블 컬럼 */
   const columns = [
     {
       title: "항공편명",
       dataIndex: "flightId",
-      key: "flightId",
+      align: "center",
+      width: 120,
+      render: (t) => <b>{t}</b>,
+      ...getColumnSearchProps("flightId", "항공편명"),
     },
     {
-      title: "항공사",
+      title: "항공사명",
       dataIndex: "airlineNm",
-      key: "airlineNm",
+      align: "center",
+      width: 150,
+      ...getColumnSearchProps("airlineNm", "항공사명"),
     },
     {
       title: "출발공항",
       dataIndex: "depAirportNm",
-      key: "depAirportNm",
+      align: "center",
+      width: 120,
+      ...getColumnSearchProps("depAirportNm", "출발공항"),
     },
     {
       title: "도착공항",
       dataIndex: "arrAirportNm",
-      key: "arrAirportNm",
+      align: "center",
+      width: 120,
+      ...getColumnSearchProps("arrAirportNm", "도착공항"),
     },
     {
       title: "출발시간",
       dataIndex: "depTime",
-      key: "depTime",
-      render: (text) => new Date(text).toLocaleString(),
+      align: "center",
+      width: 180,
+      render: (t) => dayjs(t).format("YYYY-MM-DD HH:mm"),
+      sorter: (a, b) => new Date(a.depTime) - new Date(b.depTime),
     },
     {
       title: "도착시간",
       dataIndex: "arrTime",
-      key: "arrTime",
-      render: (text) => new Date(text).toLocaleString(),
+      align: "center",
+      width: 180,
+      render: (t) => dayjs(t).format("YYYY-MM-DD HH:mm"),
+      sorter: (a, b) => new Date(a.arrTime) - new Date(b.arrTime),
     },
     {
       title: "일반석 요금",
       dataIndex: "economyCharge",
-      key: "economyCharge",
-      render: (val) => val?.toLocaleString() + "원",
+      align: "center",
+      width: 140,
+      render: (v) => <Tag color="green">{v.toLocaleString()}원</Tag>,
+      sorter: (a, b) => a.economyCharge - b.economyCharge,
     },
     {
       title: "비즈니스 요금",
       dataIndex: "prestigeCharge",
-      key: "prestigeCharge",
-      render: (val) => val?.toLocaleString() + "원",
+      align: "center",
+      width: 140,
+      render: (v) => <Tag color="blue">{v.toLocaleString()}원</Tag>,
+      sorter: (a, b) => a.prestigeCharge - b.prestigeCharge,
+    },
+    {
+      title: "등록일",
+      dataIndex: "createdAt",
+      align: "center",
+      width: 180,
+      render: (t) => (t ? dayjs(t).format("YYYY-MM-DD HH:mm") : "-"),
+      sorter: (a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0),
+    },
+    {
+      title: "수정일",
+      dataIndex: "updatedAt",
+      align: "center",
+      width: 180,
+      render: (t) => (t ? dayjs(t).format("YYYY-MM-DD HH:mm") : "-"),
+      sorter: (a, b) => new Date(a.updatedAt || 0) - new Date(b.updatedAt || 0),
     },
     {
       title: "관리",
-      key: "action",
+      align: "center",
+      width: 150,
+      fixed: "right", // ✅ 오른쪽 고정
       render: (_, record) => (
-        <Space>
+        <Space size={"small"}>
+          {/* ✅ 좌석관리 버튼 수정 */}
           <Button
-            type="link"
+            type="default"
+            size="small"
+            style={{ borderRadius: 8 }}
+            icon={<SettingOutlined />}
+            onClick={() => {
+              const depTime = encodeURIComponent(record.depTime);
+              navigate(`/adm/flight/seats?flightId=${record.flightId}&depTime=${depTime}`);
+            }}
+          >
+            좌석관리
+          </Button>
+          <Button
+            type="primary"
+            size="small"
+            style={{ borderRadius: 8 }}
+            icon={<EditOutlined />}
             onClick={() =>
               navigate(`/adm/flight/edit/${record.flightId}/${record.depTime}`)
             }
           >
             수정
           </Button>
-          <Popconfirm
-            title="정말 삭제하시겠습니까?"
-            onConfirm={() => handleDelete(record)}
+          <Button
+            danger
+            icon={<DeleteOutlined />}
+            size="small"
+            style={{ borderRadius: 8 }}
+            onClick={() => handleDelete(record.flightId, record.depTime)}
           >
-            <Button type="link" danger>
-              삭제
-            </Button>
-          </Popconfirm>
+            삭제
+          </Button>
         </Space>
       ),
     },
   ];
 
   return (
-    <Layout className="min-h-screen bg-gray-50">
-      {/* ✅ 왼쪽 사이드바 */}
-      <AdminSiderLayout />
-
-      {/* ✅ 오른쪽 콘텐츠 영역 */}
-      <Layout className="bg-gray-50">
-        <Content className="p-8">
-          <div className="flex justify-between mb-6">
-            <h2 className="text-2xl font-semibold text-gray-800">항공편 목록</h2>
-            <Button
-              type="primary"
-              onClick={() => navigate("/adm/flight/new")}
-              className="bg-indigo-500 hover:bg-indigo-600"
-            >
-              항공편 등록
-            </Button>
-          </div>
-
-          <Table
-            columns={columns}
-            dataSource={flights}
-            rowKey={(r) => `${r.flightId}_${r.depTime}`}
-            loading={loading}
-            bordered
-            pagination={{ pageSize: 10 }}
-            className="bg-white shadow-sm rounded-lg"
-          />
-        </Content>
-      </Layout>
-    </Layout>
+    <div style={{ padding: 24 }}>
+      <AdminSectionCard
+        title="항공편 목록"
+        extra={
+          <Button
+            type="primary"
+            onClick={() => navigate("/adm/flight/new")}
+            style={{
+              background: "#2563eb",
+              border: "none",
+              borderRadius: 8,
+              fontWeight: 600,
+            }}
+          >
+            + 항공편 등록
+          </Button>
+        }
+      >
+        <Table
+          columns={columns}
+          dataSource={flights}
+          loading={loading}
+          rowKey={(r) => `${r.flightId}_${r.depTime}`}
+          bordered
+          pagination={{
+            current: pagination.current,
+            pageSize: pagination.pageSize,
+            total: flights.length,
+            onChange: (page, pageSize) =>
+              setPagination({ current: page, pageSize }),
+            showTotal: (total) => `총 ${total.toLocaleString()}건 등록됨`,
+          }}
+          style={{
+            minWidth: "100%",
+            tableLayout: "auto",  // ✅ 자동 폭 계산
+            whiteSpace: "nowrap", // ✅ 줄바꿈 방지
+          }}
+          scroll={{ x: "max-content" }}
+        />
+      </AdminSectionCard>
+    </div>
   );
 };
 

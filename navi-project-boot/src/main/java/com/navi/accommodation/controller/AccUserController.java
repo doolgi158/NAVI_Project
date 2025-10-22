@@ -3,11 +3,11 @@ package com.navi.accommodation.controller;
 import com.navi.accommodation.dto.request.AccSearchRequestDTO;
 import com.navi.accommodation.dto.response.AccDetailResponseDTO;
 import com.navi.accommodation.dto.response.AccListResponseDTO;
-import com.navi.accommodation.repository.AccRepository;
 import com.navi.accommodation.service.AccService;
 import com.navi.room.service.RoomService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,6 +25,15 @@ public class AccUserController {
     public List<AccListResponseDTO> getAccommodationList(@ModelAttribute AccSearchRequestDTO dto) {
         log.info("[USER] 숙소 리스트 조회 요청 - 조건: {}", dto);
         return accService.searchAccommodations(dto);
+    }
+
+    /* 추가: /stay/list 도 동일한 응답을 반환하도록 (호환용) */
+    @GetMapping("/stay/list")
+    public ResponseEntity<List<AccListResponseDTO>> getStayList() {
+        List<AccListResponseDTO> list = accService.getAllAcc().stream()
+                .map(AccListResponseDTO::fromEntity)
+                .toList();
+        return ResponseEntity.ok(list);
     }
 
     /* === 숙소 상세 조회 === */

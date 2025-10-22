@@ -1,13 +1,17 @@
 package com.navi.user.dto.users;
 
 import com.navi.user.enums.UserState;
-
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @ToString
@@ -29,8 +33,10 @@ public class UserSecurityDTO extends User {
     // 권한
     private List<String> role = new ArrayList<>();
 
-    public UserSecurityDTO(String name, String phone, String birth, String email, String id, String pw, UserState userState, List<String> role) {
+    public UserSecurityDTO(Long no, String name, String phone, String birth, String email, String id, String pw,
+                           UserState userState, List<String> role) {
         super(id, pw, role.stream().map(str -> new SimpleGrantedAuthority("ROLE_" + str)).collect(Collectors.toList()));
+        this.no = no;
         this.name = name;
         this.phone = phone;
         this.birth = birth;
@@ -42,7 +48,7 @@ public class UserSecurityDTO extends User {
 
     public Map<String, Object> getClaims() {
         Map<String, Object> data = new HashMap<>();
-
+        data.put("no", no);
         data.put("name", name);
         data.put("phone", phone);
         data.put("birth", birth);

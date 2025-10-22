@@ -1,93 +1,78 @@
 import { Suspense, lazy } from "react";
+import ProtectedRoute from "./ProtectedRoute.jsx";
+import AdminAccommodation from "./AdminAccommodationRouter.jsx"
+import AdminFlightRouter from "./AdminFlightRouter.jsx";
+import AdminDeliveryRouter from "./AdminDeliveryRouter.jsx";
 
-const AdminUsers = lazy(() => import("../../admin/pages/user/AdminUsersPage.jsx"))
-const AdminDashboard = lazy(() => import("../../admin/pages/AdminDashboardPage.jsx"))
-const AdminTravelList = lazy(() => import("../../admin/pages/travel/AdminTravelList.jsx"))
-const AdminTravelForm = lazy(() => import("../../admin/pages/travel/AdminTravelForm.jsx"))
-const AdminFlightList = lazy(() => import("../../admin/pages/flight/AdminFlightListPage.jsx"));
-const AdminFlightForm = lazy(() => import("../../admin/pages/flight/AdminFlightFormPage.jsx"));
-const ProtectedRoute = lazy(() => import("./ProtectedRoute.jsx"))
+const AdminUsers = lazy(() => import("../../admin/pages/user/AdminUsersPage.jsx"));
+const AdminDashboard = lazy(() => import("../../admin/pages/AdminDashboardPage.jsx"));
+const AdminTravelList = lazy(() => import("../../admin/pages/travel/AdminTravelList.jsx"));
+const AdminTravelForm = lazy(() => import("../../admin/pages/travel/AdminTravelForm.jsx"));
 
 const AdminRouter = () => {
-    return [      
-         {
-             path: "dashboard",
-             element: (
-                <Suspense fallback={<div></div>}>
-                    <ProtectedRoute requiredRole="ADMIN">
-                        <AdminDashboard />
-                    </ProtectedRoute> 
-                </Suspense>
-             )
-         },
-         {
-             path: "users",
-             element: (
-                 <Suspense fallback={<div></div>}>
-                    <ProtectedRoute requiredRole="ADMIN">
-                        <AdminUsers />
-                    </ProtectedRoute>                    
-                 </Suspense>
-             )
-         },
-          //travel 관리자 페이지 라우팅
-         {
-             path: "travel",
-             element: (
-                 <Suspense fallback={<div></div>}>
-                    <ProtectedRoute requiredRole="ADMIN">
-                        <AdminTravelList  />
-                    </ProtectedRoute>
-                 </Suspense>
-             )
-         },
-         //travel 등록 페이지 라우팅
-         {
-             path: "travel/register",
-             element: (
-                 <Suspense fallback={<div></div>}>
-                    <ProtectedRoute requiredRole="ADMIN">
-                        <AdminTravelForm />
-                    </ProtectedRoute>
-                 </Suspense>
-             )
-         },
-         //travel 수정 페이지 라우팅
-         {
-             path: "travel/edit/:travelId",
-             element: (
-                 <Suspense fallback={<div></div>}>
-                    <ProtectedRoute requiredRole="ADMIN">
-                        <AdminTravelForm  />
-                    </ProtectedRoute>
-                 </Suspense>
-             )
-         },
-             {
-               path: "flight", // 항공편 목록 페이지
-               element: (
-                 <Suspense fallback={<div></div>}>
-                   <AdminFlightList />
-                 </Suspense>
-               ),
-             },
-             {
-               path: "flight/new", // 항공편 등록 페이지
-               element: (
-                 <Suspense fallback={<div></div>}>
-                   <AdminFlightForm />
-                 </Suspense>
-               ),
-             },
-             {
-               path: "flight/edit/:flightId/:depTime", // 항공편 수정 페이지
-               element: (
-                 <Suspense fallback={<div></div>}>
-                   <AdminFlightForm />
-                 </Suspense>
-               ),
-             },
-    ]
-}
+  return [
+    {
+      path: "dashboard",
+      element: (
+        <Suspense fallback={<div></div>}>
+          <ProtectedRoute requiredRole="ADMIN">
+            <AdminDashboard />
+          </ProtectedRoute>
+        </Suspense>
+      )
+    },
+    {
+      path: "users",
+      element: (
+        <Suspense fallback={<div></div>}>
+          <ProtectedRoute requiredRole="ADMIN">
+            <AdminUsers />
+          </ProtectedRoute>
+        </Suspense>
+      )
+    },
+    //travel 관리자 페이지 라우팅
+    {
+      path: "travel",
+      element: (
+        <Suspense fallback={<div></div>}>
+          <ProtectedRoute requiredRole="ADMIN">
+            <AdminTravelList />
+          </ProtectedRoute>
+        </Suspense>
+      )
+    },
+    //travel 등록 페이지 라우팅
+    {
+      path: "travel/register",
+      element: (
+        <Suspense fallback={<div></div>}>
+          <ProtectedRoute requiredRole="ADMIN">
+            <AdminTravelForm />
+          </ProtectedRoute>
+        </Suspense>
+      )
+    },
+    //travel 수정 페이지 라우팅
+    {
+      path: "travel/edit/:travelId",
+      element: (
+        <Suspense fallback={<div></div>}>
+          <ProtectedRoute requiredRole="ADMIN">
+            <AdminTravelForm />
+          </ProtectedRoute>
+        </Suspense>
+      ),
+    },
+    // 항공 관리자 라우터 통합
+    ...AdminFlightRouter(),
+
+    // 숙소 라우터
+    ...AdminAccommodation(),
+
+    // 짐배송 라우터
+    ...AdminDeliveryRouter(),
+  ];
+};
 
 export default AdminRouter;

@@ -4,10 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
@@ -16,6 +13,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 /*
  * ======================================================
@@ -31,20 +29,14 @@ import java.nio.charset.StandardCharsets;
 @Service
 @RequiredArgsConstructor
 public class KakaoGeoService {
-
-    // ======================================================
-    // [의존성 주입 구성]
-    // ======================================================
-    private final KakaoConfig kakaoConfig;                         // Kakao API Key 설정 주입
+    private final KakaoConfig kakaoConfig;                          // Kakao API Key 설정 주입
     private final RestTemplate restTemplate = createRestTemplate(); // 외부 HTTP 통신용 객체
 
     // Kakao Local API 엔드포인트
     private static final String ADDRESS_URL = "https://dapi.kakao.com/v2/local/search/address.json";
     private static final String KEYWORD_URL = "https://dapi.kakao.com/v2/local/search/keyword.json";
 
-    // ======================================================
     // [RestTemplate 초기 설정]
-    // ======================================================
     private RestTemplate createRestTemplate() {
         DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory();
         factory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.NONE); // 중복 인코딩 방지
@@ -53,9 +45,7 @@ public class KakaoGeoService {
         return template;
     }
 
-    // ======================================================
     // [주소 전처리]
-    // ======================================================
     private String cleanAddress(String raw) {
         if (raw == null) return null;
         // 불필요한 행정단위나 괄호 제거
@@ -123,14 +113,15 @@ public class KakaoGeoService {
             // 1️⃣ 헤더
             HttpHeaders headers = new HttpHeaders();
             headers.set("Authorization", "KakaoAK " + kakaoConfig.getApiKey());
+            headers.set("KA", "sdk/1.0 os/java lang/ko device/pc");
+            headers.set("User-Agent", "sdk/1.0 os/java lang/ko device/pc");
+
+            headers.setAccept(List.of(MediaType.APPLICATION_JSON));
             HttpEntity<Void> entity = new HttpEntity<>(headers);
 
-            // 2️⃣ URI 직접 생성 — ⚠️ UriComponentsBuilder 인코딩 비활성화
-            String uri = UriComponentsBuilder
-                    .fromHttpUrl(baseUrl)
-                    .queryParam("query", query)
-                    .encode(StandardCharsets.UTF_8) // ✅ 여기서만 인코딩 처리
-                    .toUriString();
+            // 2️⃣ URI 직접 생성 — 한글 인코딩 안전 처리
+            String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8);
+            String uri = baseUrl + "?query=" + encodedQuery;
 
             // 3️⃣ 요청
             ResponseEntity<JsonNode> response = restTemplate.exchange(

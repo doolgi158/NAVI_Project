@@ -34,9 +34,12 @@ const getTravelData = async (domain, pageParam, filterQuery, userId) => {
   }
 
   // ✅ 로그인 사용자가 있다면 쿼리 파라미터로 id 전달
-
   try {
-    const response = await api.get(apiUrl + queryString);
+    const response = await api.get(apiUrl + queryString, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('accessToken') || ''}`,
+      },
+    });
     return response.data;
   } catch (error) {
     console.error('여행지 목록 로딩 실패:', error.message);
@@ -112,17 +115,22 @@ export const useTravelList = (userId) => {
       getTravelData('travel', param, query, userId)
         .then((data) => {
           const fetchedList = data.content || [];
-          const currentPage = data.number + 1;
-          const startBlock = Math.floor(data.number / 10) * 10 + 1;
-          const endBlock = Math.min(data.totalPages, startBlock + 9);
+          const pageInfo = data.page || {}; // 추가
+
+          const currentPage = (pageInfo.number || 0) + 1; // 수정
+          const totalPages = pageInfo.totalPages || 1;  // 추가
+          const totalElements = pageInfo.totalElements || 0;  // 추가
+
+          const startBlock = Math.floor((currentPage - 1) / 10) * 10 + 1; // 수정
+          const endBlock = Math.min(totalPages, startBlock + 9);  // 수정
           const pageList = Array.from({ length: endBlock - startBlock + 1 }, (_, i) => startBlock + i);
 
           setPageResult({
             dtoList: fetchedList,
-            totalElements: data.totalElements,
-            totalPages: data.totalPages,
+            totalElements,
+            totalPages,
             page: currentPage,
-            size: data.size,
+            size: pageInfo.size || 10, // 수정
             startPage: startBlock,
             endPage: endBlock,
             pageList,
@@ -136,7 +144,10 @@ export const useTravelList = (userId) => {
           });
           setHoveredItem(null);
         })
-        .catch(() => setHasError(true))
+        .catch((e) => {
+          console.error("❌ [API 호출 실패]", e);
+          setHasError(true)
+        })
         .finally(() => {
           isLoadingRef.current = false;
           setShowLoading(false);

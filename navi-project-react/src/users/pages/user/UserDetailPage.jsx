@@ -1,5 +1,7 @@
-import { Form, Input, Button, Card, DatePicker, Select,
-  Avatar, Modal, message } from "antd";
+import {
+  Form, Input, Button, Card, DatePicker, Select,
+  Avatar, Modal, message
+} from "antd";
 import { UserOutlined } from "@ant-design/icons";
 import { motion } from "framer-motion";
 import dayjs from "dayjs";
@@ -7,8 +9,6 @@ import MainLayout from "../../layout/MainLayout";
 import { useUserDetailFunctions } from "@/common/hooks/useUserDetailFunctions";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import axios from "axios";
-import { API_SERVER_HOST } from "@/common/api/naviApi";
 
 const { Option } = Select;
 
@@ -151,8 +151,8 @@ const UserDetailPage = () => {
                         {user?.gender === "M"
                           ? "남성"
                           : user?.gender === "F"
-                          ? "여성"
-                          : "-"}
+                            ? "여성"
+                            : "-"}
                       </div>
                     )}
                   </Form.Item>
@@ -165,7 +165,11 @@ const UserDetailPage = () => {
                       </Select>
                     ) : (
                       <div className="py-2 px-3 border border-gray-200 rounded-md bg-gray-50">
-                        {user?.local || "-"}
+                        {user?.local === "L"
+                          ? "내국인"
+                          : user?.local === "F"
+                            ? "외국인"
+                            : "-"}
                       </div>
                     )}
                   </Form.Item>
@@ -224,7 +228,7 @@ const UserDetailPage = () => {
         open={isPasswordModalOpen}
         onCancel={() => {
           setPasswordModalOpen(false);
-          setPasswordStep("verify");  
+          setPasswordStep("verify");
           setVerifiedPw(null);
           passwordForm.resetFields();
         }}
@@ -241,7 +245,7 @@ const UserDetailPage = () => {
               const valid = await checkPassword(values.currentPw);
               setPasswordLoading(false);
 
-            if (valid) {
+              if (valid) {
                 message.success("비밀번호 확인이 완료되었습니다.");
                 setVerifiedPw(values.currentPw);
                 setPasswordStep("change"); // 다음 단계로 전환
@@ -354,7 +358,7 @@ const UserDetailPage = () => {
         </Form>
       </Modal>
     </MainLayout>
-   )
+  )
 };
 
 export default UserDetailPage;

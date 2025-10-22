@@ -1,15 +1,20 @@
 import React, { useEffect, useState } from "react";
 import MainLayout from "../../layout/MainLayout";
-import CustomCard from "@/common/components/CustomCard";
-import { getMyPlans } from "@/common/api/planApi";
-import { format } from "date-fns";
+import { getMyPlans, deletePlan } from "../../../common/api/planApi";
 import { useNavigate } from "react-router-dom";
-import { Button } from "antd/es";
+import { Button, Modal, message } from "antd";
+import PlanList from "../plan/components/PlanList";
+import { PlusOutlined } from "@ant-design/icons";
+import { startOfDay, isAfter, isBefore, isSameDay } from "date-fns";
+import api from '../../../common/api/naviApi.js';
+
 
 export default function TravelPlanMain() {
   const [plans, setPlans] = useState([]);
-  const [activeTab, setActiveTab] = useState("upcoming"); // upcoming | completed
+  const [activeTab, setActiveTab] = useState("upcoming");
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState({ upcoming: 1, completed: 1 });
+  const pageSize = 5;
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -18,7 +23,7 @@ export default function TravelPlanMain() {
         const data = await getMyPlans();
         setPlans(data || []);
       } catch (err) {
-        console.error("여행 계획 불러오기 실패:", err);
+        console.error("🚨 여행 계획 불러오기 실패:", err);
       } finally {
         setLoading(false);
       }
@@ -26,139 +31,120 @@ export default function TravelPlanMain() {
     fetchPlans();
   }, []);
 
-  const today = new Date();
-  const upcomingPlans = plans.filter(
-    (p) => new Date(p.endDate) >= today || !p.endDate
-  );
-  const completedPlans = plans.filter((p) => new Date(p.endDate) < today);
+  const handleDelete = (id) =>
+    Modal.confirm({
+      title: "여행 삭제",
+      content: "정말로 이 여행을 삭제하시겠습니까?",
+      okText: "삭제",
+      okType: "danger",
+      cancelText: "취소",
+      onOk: async () => {
+        try {
+          await deletePlan(id);
+          setPlans((prev) => prev.filter((p) => p.id !== id));
+          message.success("여행이 삭제되었습니다.");
+        } catch {
+          Modal.error({ title: "삭제 실패", content: "삭제 중 오류가 발생했습니다." });
+        }
+      },
+    });
+
+  /** ✅ 리스트 클릭 → 상세보기 페이지로 이동 (view 모드) */
+  const handleDetail = (plan) =>
+    navigate(`/plans/planner/detail?planId=${plan.id}&mode=view`);
+
+  /** ✅ 수정 버튼 클릭 → 수정 모드 페이지로 이동 */
+  const handleEdit = (plan) =>
+    navigate(`/plans/planner/detail?planId=${plan.id}&mode=edit`);
+
+  /** ✅ 상세보기 이동 */
+  const handlePlanClick = (planId) => {
+    navigate(`/plan/detail/${planId}`);
+  };
+
+  /** ✅ 새 계획 생성 */
+  const handleCreatePlan = () => navigate("/plans/planner");
+
+  const handlePageChange = (newPage) =>
+    setPage((prev) => ({ ...prev, [activeTab]: newPage }));
+
+  const today = startOfDay(new Date());
+
+  const upcomingPlans = plans
+    .filter((p) => {
+      const end = startOfDay(new Date(p.endDate));
+      return isAfter(end, today) || isSameDay(end, today);
+    })
+    .sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+
+  const completedPlans = plans
+    .filter((p) => {
+      const end = startOfDay(new Date(p.endDate));
+      return isBefore(end, today);
+    })
+    .sort((a, b) => new Date(b.endDate) - new Date(a.endDate));
+
   const currentList = activeTab === "upcoming" ? upcomingPlans : completedPlans;
-
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "";
-    try {
-      return format(new Date(dateStr), "yy.MM.dd");
-    } catch {
-      return dateStr;
-    }
-  };
-
-  const handleDetail = (plan) => {
-    navigate(`/plans/shared/${plan.id}`, { state: plan });
-  };
-
-  const handleCreatePlan = () => {
-    navigate("/plans/planner");
-  };
 
   return (
     <MainLayout>
-      {/* ✅ 배너: 전체폭 + 흰색 반투명 오버레이 */}
-        <div className="relative -mx-[calc((100vw-100%)/2)] w-screen h-[320px] overflow-hidden mb-12">
-          <img
-            src="src\users\images\planbanner.jpg"
-            alt="여행 배너"
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 flex flex-col justify-center items-center z-10">
- 
-          {/*여행배너 텍스트 */}
-          <h2 className="text-3xl font-semibold text-[#1D4E89] drop-shadow-sm planTitle-text">
+      {/* 상단 배너 */}
+      <div className="relative -mx-[calc((100vw-100%)/2)] w-screen h-[300px] overflow-hidden mb-12">
+        <img
+          src="src/users/images/planbanner.jpg"
+          alt="여행 배너"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-white/60 backdrop-blur-sm" />
+        <div className="absolute inset-0 flex flex-col justify-center items-center z-10">
+          <h2 className="text-3xl font-semibold text-[#1D4E89] mb-2 drop-shadow-sm">
             나를 위한 여행 준비
           </h2>
-          <p className="text-gray-700 mt-2 text-sm planSubTitle-text">
-            설렘 가득한 순간이 기다리고 있어요
-          </p>
+          <p className="text-gray-700 text-sm">설렘 가득한 순간이 기다리고 있어요 ✈️</p>
         </div>
-
-          {/* 오버레이: 흰색+블러 */}
-          <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px]" />
-
-          {/* 버튼 */}
-          <div className="absolute bottom-8 right-16 z-10 ">
-            <Button  type="default" size="large"  
-                    className="plan-btn plan-btn:hover"
-                    onClick={handleCreatePlan} >
-               
-               여행 계획하기<i class="bi bi-plus-circle"></i>
-            </Button>
-          </div>
+        <div className="absolute bottom-10 right-16 z-20">
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            className="bg-[#3A6EA5] hover:bg-[#2F5C8F]"
+            onClick={handleCreatePlan}
+          >
+            여행 계획하기
+          </Button>
         </div>
+      </div>
 
-
-      {/* ✅ 나머지 콘텐츠는 MainLayout 컨테이너 영역 내에서 */}
-      <div className="flex flex-col items-center pb-10">
-        {/* 탭 메뉴 */}
+      {/* 여행 계획 리스트 */}
+      <div className="flex flex-col items-center pb-12">
         <div className="w-full max-w-[900px] flex justify-center mb-8">
-          <button
-            onClick={() => setActiveTab('upcoming')}
-            className={`px-6 py-2 text-sm font-semibold border-b-2 transition ${
-              activeTab === 'upcoming'
-                ? 'border-[#3A6EA5] text-[#3A6EA5]'
-                : 'border-transparent text-gray-400 hover:text-[#3A6EA5]'
-            }`}
-          >
-            여행 예정 계획
-          </button>
-          <button
-            onClick={() => setActiveTab('completed')}
-            className={`px-6 py-2 text-sm font-semibold border-b-2 transition ${
-              activeTab === 'completed'
-                ? 'border-[#3A6EA5] text-[#3A6EA5]'
-                : 'border-transparent text-gray-400 hover:text-[#3A6EA5]'
-            }`}
-          >
-            여행 완료 계획
-          </button>
+          {[
+            { key: "upcoming", label: "여행 예정 계획" },
+            { key: "completed", label: "여행 완료 계획" },
+          ].map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`px-6 py-2 text-sm font-semibold border-b-2 transition ${activeTab === tab.key
+                ? "border-[#3A6EA5] text-[#3A6EA5]"
+                : "border-transparent text-gray-400 hover:text-[#3A6EA5]"
+                }`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
 
-        {/* 리스트 */}
-        <CustomCard className="w-[900px]">
-          {loading ? (
-            <p className="text-center text-gray-500 py-10">
-              여행 데이터를 불러오는 중입니다...
-            </p>
-          ) : currentList.length === 0 ? (
-            <div className="text-center py-10">
-              <p className="text-gray-500">
-                {activeTab === "upcoming"
-                  ? "예정된 여행이 없습니다."
-                  : "완료된 여행이 없습니다."}
-              </p>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-4">
-              {currentList.map((plan) => (
-                <div
-                  key={plan.id}
-                  onClick={() => handleDetail(plan)}
-                  className="flex justify-between items-center border border-gray-200 rounded-xl p-4 hover:shadow-md transition cursor-pointer bg-white"
-                >
-                  {/* 썸네일 */}
-                  <div className="w-24 h-24 bg-blue-100 rounded-lg flex-shrink-0" />
-
-                  {/* 내용 */}
-                  <div className="flex-1 ml-6">
-                    <h3 className="text-lg font-semibold text-[#0A3D91]">
-                      {plan.travelName || "제목 없음"}
-                    </h3>
-                    <p className="text-sm text-gray-600 mt-1">
-                      여행기간: {formatDate(plan.startDate)} ~{" "}
-                      {formatDate(plan.endDate)}
-                    </p>
-                    <p className="text-gray-500 mt-1 text-sm line-clamp-1">
-                      {plan.planItems?.slice(0, 2).join(", ") ||
-                        "등록된 세부 일정이 없습니다."}
-                    </p>
-                  </div>
-
-                  <div className="text-gray-400 hover:text-[#0A3D91]">
-                    <i className="bi bi-three-dots-vertical text-xl"></i>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CustomCard>
+        <PlanList
+          plans={currentList}
+          loading={loading}
+          showPagination
+          currentPage={page[activeTab]}
+          pageSize={pageSize}
+          onPageChange={handlePageChange}
+          onDetail={handleDetail}  // ✅ view 모드로 이동
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
       </div>
     </MainLayout>
   );

@@ -8,6 +8,7 @@ import lombok.*;
 @Entity
 @Table(name = "NAVI_DLV_BAG")
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder

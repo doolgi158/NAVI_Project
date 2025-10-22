@@ -21,10 +21,11 @@ const UserMyPage = () => {
       })
       .then((res) => {
         const data = res.data.data;
+        console.log(data);
         setUser({
-        ...data,
-        // 프로필 경로를 절대경로로 변환
-        profile: data.profile ? `${API_SERVER_HOST}${data.profile}` : null,
+          ...data,
+          // 프로필 경로를 절대경로로 변환
+          profile: data.profile ? `${API_SERVER_HOST}${data.profile}` : null,
         });
       })
       .catch(() => message.error("사용자 정보를 불러오지 못했습니다."))
@@ -64,7 +65,7 @@ const UserMyPage = () => {
                   className="shadow-lg ring-2 ring-indigo-200"
                 />
                 <div>
-                  <h2 
+                  <h2
                     className="text-2xl font-semibold text-gray-800 cursor-pointer hover:text-indigo-500 transition-colors"
                     onClick={() => navigate("/users/detail")}
                   >
@@ -99,10 +100,10 @@ const UserMyPage = () => {
         <div className="w-full max-w-5xl flex flex-col gap-6">
           {[
             { title: "❤️ 좋아요한 여행지", desc: "마음에 든 여행지를 다시 보기." },
-            { title: "🔖 북마크한 여행지", desc: "나중에 갈 여행지 모아보기." },          
+            { title: "🔖 북마크한 여행지", desc: "나중에 갈 여행지 모아보기." },
             { title: "🗺️ 여행 계획", desc: "계획 중인 여행 일정입니다." },
             { title: "📅 나의 예약 현황", desc: "다가올 여행 일정을 확인하세요." },
-            { title: "💳 결제 내역", desc: "결제한 여행 내역을 한눈에." },            
+            { title: "💳 결제 내역", desc: "결제한 여행 내역을 한눈에." },
             { title: "📝 내 게시글", desc: "작성한 게시글 목록입니다." },
             { title: "💬 내 댓글", desc: "댓글 활동을 확인해보세요." },
           ].map((item, i) => (
@@ -122,7 +123,14 @@ const UserMyPage = () => {
                   </span>
                 }
                 extra={
-                  <Button type="link" className="text-indigo-500 hover:text-indigo-600">
+                  <Button
+                    type="link"
+                    className="text-indigo-500 hover:text-indigo-600"
+                    onClick={() => {
+                      if (item.title.includes("좋아요")) navigate("/users/likes");
+                      else if (item.title.includes("북마크")) navigate("/users/bookmarks");
+                    }}
+                  >
                     자세히 보기
                   </Button>
                 }

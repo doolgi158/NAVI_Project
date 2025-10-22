@@ -3,7 +3,6 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import api from '../../../common/api/naviApi.js';
-import axios from 'axios';
 import {
   Row, Col, Typography, Divider, Button, Space,
   Descriptions, Spin, Result, Tag, message, Carousel
@@ -18,11 +17,11 @@ import { useKakaoMap } from '../../../common/hooks/useKakaoMap.jsx';
 
 const { Title, Text, Paragraph } = Typography;
 
-export default function TravelDetailPage(){
+export default function TravelDetailPage() {
   const { travelId } = useParams();
   const reduxUser = useSelector((state) => state.login);
   const userId = reduxUser?.username || null;
-  const token = reduxUser?.token || localStorage.getItem("accessToken");
+  const token = reduxUser?.accessToken || localStorage.getItem("accessToken");
 
   const [travelDetail, setTravelDetail] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -52,17 +51,13 @@ export default function TravelDetailPage(){
     }).replace(/\./g, '. ').trim();
   };
 
-  
-
-useEffect(() => {
-  if (travelDetail) {
-    console.log("🧭 전체 travelDetail:", travelDetail);
+  useEffect(() => {
+    if (travelDetail) {
+      console.log("🧭 전체 travelDetail:", travelDetail);
       console.log("🧭 description 내용:", travelDetail?.description);
-  }
-}, [travelDetail]);
+    }
+  }, [travelDetail]);
 
-
-  
   /** ✅ 상세정보 + 조회수 증가 */
   useEffect(() => {
     const fetchTravelDetail = async () => {
@@ -107,13 +102,13 @@ useEffect(() => {
 
   /** ❤️ 좋아요 처리 */
   const handleLikeClick = async () => {
-    if (!userId || !token) return message.warning('로그인 후 이용 가능합니다.');
+    if (!token) return message.warning('로그인 후 이용 가능합니다.');
     if (loadingLike) return;
     setLoadingLike(true);
 
     try {
       const res = await api.post(`/travel/like/${travelId}`, null, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}`, },
       });
 
       const { success, liked, message: serverMessage } = res.data;
@@ -281,26 +276,26 @@ useEffect(() => {
 
           {/* 소개 */}
           <Title level={4} style={{ borderLeft: '4px solid #1890ff', paddingLeft: 10 }}>소개</Title>
-           <Paragraph style={{ lineHeight: 1.8, whiteSpace: 'pre-line' }}>
+          <Paragraph style={{ lineHeight: 1.8, whiteSpace: 'pre-line' }}>
             {data.introduction || '제공된 소개 내용이 없습니다.'}
           </Paragraph>
           {tags.map((tag, i) => (
             <Tag key={i} color="blue" style={{ marginBottom: 8 }}>#{tag}</Tag>
           ))}
-         
+
 
           {/* ✅ 본문(description) 추가 */}
           {data.description && (
             <div
               className="travel-description"
-              style={{ marginTop: 30, lineHeight: 1.8, fontSize: 20}}
+              style={{ marginTop: 30, lineHeight: 1.8, fontSize: 20 }}
               dangerouslySetInnerHTML={{ __html: data.description }}
             />
           )}
-          
+
           {/* 지도 */}
           <Title level={4} style={{ borderLeft: '4px solid #1890ff', paddingLeft: 10, marginTop: 40 }}>위치</Title>
-          <div style={{ margin: '10px 0 20px', border: '1px solid #ccc', borderRadius: 8, position: 'relative',marginTop: 20 }}>
+          <div style={{ margin: '10px 0 20px', border: '1px solid #ccc', borderRadius: 8, position: 'relative', marginTop: 20 }}>
             <div id={MAP_CONTAINER_ID} style={{ height: 350, width: '100%' }}>
               {!isMapLoaded && (
                 <div className="absolute inset-0 flex items-center justify-center bg-gray-100 z-10">
@@ -311,8 +306,8 @@ useEffect(() => {
           </div>
 
           {/* 상세 정보 */}
-          <Title level={4} style={{ borderLeft: '4px solid #1890ff', paddingLeft: 10,marginTop:30 }}>여행지 정보</Title>
-          <Descriptions column={2} bordered size="large" style={{ marginTop: 20, marginBottom:50}}>
+          <Title level={4} style={{ borderLeft: '4px solid #1890ff', paddingLeft: 10, marginTop: 30 }}>여행지 정보</Title>
+          <Descriptions column={2} bordered size="large" style={{ marginTop: 20, marginBottom: 50 }}>
             {infoData.map((item, i) => (
               <Descriptions.Item
                 key={i}

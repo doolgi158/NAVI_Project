@@ -63,6 +63,16 @@ public class TryLoginFilter extends OncePerRequestFilter {
                     writeJsonResponse(response, apiResponse, HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
+
+                if (user.getUserState() == UserState.DELETE) {
+                    ApiResponse<Object> apiResponse = ApiResponse.error(
+                            "탈퇴한 계정입니다.",
+                            403,
+                            "delete"
+                    );
+                    writeJsonResponse(response, apiResponse, HttpServletResponse.SC_FORBIDDEN);
+                    return;
+                }
             }
 
             // 위 조건 모두 통과 시 로그인 진행

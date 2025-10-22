@@ -1,5 +1,6 @@
 package com.navi.delivery.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.navi.common.entity.BaseEntity;
 import com.navi.common.enums.RsvStatus;
 import com.navi.user.domain.User;
@@ -27,12 +28,8 @@ public class DeliveryReservation extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_no", nullable = false)
     @Comment("예약 사용자 (FK: NAVI_USERS.USER_NO)")
+    @JsonIgnore
     private User user;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "bag_id", nullable = false)
-    @Comment("가방 요금 마스터 (FK: NAVI_BAG.BAG_ID)")
-    private Bag bag;
 
     // 그룹 배정 전 생성 가능해야 하므로 optional=true
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
@@ -58,6 +55,23 @@ public class DeliveryReservation extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20, nullable = false)
-    @Comment("예약/결제 상태 (PENDING/PAID/CANCELLED/REFUNDED/FAILED/COMPLETED)")
-    private RsvStatus status; // 기본값은 서비스에서 PENDING 세팅 권장
+    @Comment("예약/결제 상태 (PENDING/PAID/CANCELLED/REFUNDED/FAILED)")
+    private RsvStatus status;
+
+    /**
+     * ✅ 가방별 수량 정보를 JSON 형태로 저장
+     */
+    @Lob
+    @Column(name = "bags_json", columnDefinition = "CLOB")
+    @Comment("가방별 정보 JSON (예: {\"S\":2,\"M\":1,\"L\":0})")
+    private String bagsJson;
+
+    // ✅ 상태 변경 헬퍼
+    public void markAsPaid() {
+        this.status = RsvStatus.PAID;
+    }
+
+    public void markAsFailed() {
+        this.status = RsvStatus.FAILED;
+    }
 }

@@ -1,18 +1,15 @@
 package com.navi.user.repository;
 
-import com.navi.image.domain.Image;
 import com.navi.user.domain.User;
-import com.navi.user.domain.Withdraw;
 import com.navi.user.enums.UserState;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
-
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -30,6 +27,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // 아이디+이메일
     Optional<User> findByIdAndEmail(String id, String email);
+
     Optional<User> findById(String id);     //travel 연동시 필요
 
     // 이메일
@@ -40,9 +38,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // 관리자용 검색
     Page<User> findByNameContainingIgnoreCaseOrIdContainingIgnoreCase(String name, String id, Pageable pageable);
+
     Page<User> findByIdContainingIgnoreCase(String id, Pageable pageable);
+
     Page<User> findByNameContainingIgnoreCase(String name, Pageable pageable);
+
     Page<User> findByEmailContainingIgnoreCase(String email, Pageable pageable);
+
     Page<User> findByPhoneContainingIgnoreCase(String phone, Pageable pageable);
 
     // 가입일 문자열 검색 (TO_CHAR)
@@ -61,8 +63,30 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // 프로필 이미지 조회용
     Optional<User> findByNo(Long userNo);
+
     void deleteByNo(Long userNo);
 
     Optional<User> findByIdAndUserState(String id, UserState userState);
+
     boolean existsByIdAndUserState(String id, UserState userState);
+
+    // 상태별 유저 수 카운트
+    long countByUserState(UserState state);
+
+    // 월별 신규가입 / 탈퇴 / 활성 사용자 수
+    @Query(
+            value = """
+                    SELECT
+                        TO_CHAR(u.user_signup, 'YYYY-MM') AS month,
+                        COUNT(CASE WHEN u.user_state = 'NORMAL' THEN 1 END) AS active,
+                        COUNT(CASE WHEN u.user_state = 'DELETE' THEN 1 END) AS leave,
+                        COUNT(*) AS join
+                    FROM navi_users u
+                    WHERE u.user_signup IS NOT NULL
+                    GROUP BY TO_CHAR(u.user_signup, 'YYYY-MM')
+                    ORDER BY month
+                    """,
+            nativeQuery = true
+    )
+    List<Object[]> findMonthlyUserTrendRaw();
 }

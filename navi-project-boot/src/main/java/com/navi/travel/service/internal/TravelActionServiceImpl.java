@@ -49,7 +49,7 @@ public class TravelActionServiceImpl implements TravelActionService {
         Travel travel = travelRepository.findById(travelId)
                 .orElseThrow(() -> new EntityNotFoundException("여행지를 찾을 수 없습니다. (Travel ID: " + travelId + ")"));
 
-        User user = userRepository.findByUserId(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다. (User ID: " + userId + ")"));
 
         Optional<Like> existingLike = likeRepository.findByTravelIdAndId(travelId, userId);
@@ -64,7 +64,7 @@ public class TravelActionServiceImpl implements TravelActionService {
             likeRepository.save(like);
             travel.incrementLikesCount(); // ✅ 증가
         }
-
+        travel.setCounterOnlyChanged(true);
         return !likedBefore;
     }
 
@@ -80,7 +80,7 @@ public class TravelActionServiceImpl implements TravelActionService {
         Travel travel = travelRepository.findById(travelId)
                 .orElseThrow(() -> new EntityNotFoundException("여행지를 찾을 수 없습니다. (Travel ID: " + travelId + ")"));
 
-        User user = userRepository.findByUserId(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자입니다. (User ID: " + userId + ")"));
 
         Optional<Bookmark> existingBookmark = bookmarkRepository.findByTravelIdAndId(travelId, userId);
@@ -95,6 +95,7 @@ public class TravelActionServiceImpl implements TravelActionService {
             bookmarkRepository.save(bookmark);
             travel.incrementBookmarkCount(); // ✅ 증가
         }
+        travel.setCounterOnlyChanged(true);
 
         return !bookmarkedBefore;
     }

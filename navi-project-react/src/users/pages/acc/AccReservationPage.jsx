@@ -1,197 +1,208 @@
-import { useParams, useLocation, useNavigate } from 'react-router-dom';
-import { Card, Typography, Form, Input, DatePicker, Select, Button, Steps } from 'antd';
-import MainLayout from '../../layout/MainLayout';
+import { useLocation, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { Card, Typography, Form, Input, Button, Steps, Divider, Space, message } from "antd";
+import { CalendarOutlined, TeamOutlined, HomeOutlined, DollarOutlined } from "@ant-design/icons";
+import { setReserveData } from "../../../common/slice/paymentSlice";
+import MainLayout from "../../layout/MainLayout";
 
 const { Title, Text } = Typography;
-const { RangePicker } = DatePicker;
 
 const AccReservationPage = () => {
-  const { accId, roomId } = useParams();
-  const location = useLocation();
+	const location = useLocation();
+	const navigate = useNavigate();
+	const dispatch = useDispatch();
+	const [form] = Form.useForm();
 
-  const { room, accName } = location.state || {}; // 숙소명 + 객실 정보
+	/* location.state */
+	const { rsvType, items, itemData, formData } = location.state || {};
+	
+	// 유효성 검사
+	if (!formData || !itemData) {
+		message.error("예약 정보가 올바르지 않습니다. 다시 시도해주세요.");
+		navigate("/accommodations");
+		return null;
+	}
 
-  const navigate = useNavigate(); // ✅ 페이지 이동용
-  const [form] = Form.useForm();
+	/* 결제 페이지 이동 */
+	const onFinish = (values) => {
+		// [ TODO ] : 현재 해당 항목들 저장할 컬럼 없음 - @CLOB 예정
+		const updatedFormData = {
+			...formData,
+			name: values.name,		// 대표 예약자 이름
+			phone: values.phone,	// 전화번호
+			email: values.email,	// 이메일
+		};
 
-  /** ✅ 폼 제출 시 결제 페이지로 이동 */
-  const onFinish = (values) => {
-  console.log("예약 정보:", values);
+		dispatch(
+			setReserveData({
+				rsvType,   								// ACC        			
+				reserveId: formData.reserveId,         	// 예약 ID
+				itemData: itemData,   					// 숙소 + 객실 정보
+				items: items,							// reserveId + amount
+				formData: updatedFormData, 				// 예약자 정보까시 새롭게 포함한 formData
+			})
+		);
+		
+		navigate("/payment", {
+			state: {
+				rsvType: "ACC",
+				itemData,	
+				items,
+				formData : updatedFormData,
+			},
+		});
+	};
 
-  // ✅ 모든 예약 정보 한 객체로 정리
-  const reservationData = {
-    accId,
-    roomId,
-    accName,
-    room,
-    formData: {
-      name: values.name,
-      phone: values.phone,
-      email: values.email,
-      guestCount: values.guestCount,
-      checkIn: values.dateRange?.[0]?.format("YYYY-MM-DD"),
-      checkOut: values.dateRange?.[1]?.format("YYYY-MM-DD"),
-    },
-  };
+	return (
+		<MainLayout>
+		<div className="flex justify-center py-10 px-8">
+			<div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full max-w-7xl">
+			{/* === 왼쪽: 예약자 입력 폼 === */}
+			<Card
+				className="lg:col-span-2"
+				style={{
+				borderRadius: 12,
+				boxShadow: "0 4px 10px rgba(0,0,0,0.06)",
+				backgroundColor: "#fff",
+				height: "fit-content",
+				}}
+			>
+				<Steps
+				current={0}
+				items={[
+					{ title: "예약 정보 입력" },
+					{ title: "결제 진행" },
+					{ title: "예약 완료" },
+				]}
+				style={{ marginBottom: 40 }}
+				/>
 
-  // ✅ 결제 페이지로 이동하면서 전체 데이터 전달
-  navigate(`/accommodations/${accId}/${roomId}/payment`, {
-    state: reservationData,
-  });
-};
+				<Title level={3} className="mb-6 text-gray-800">
+				대표 예약자 정보 입력
+				</Title>
 
-  return (
-    <MainLayout>
-      <div className="min-h-screen bg-[#FFFBEA] flex justify-center pt-10 pb-12 px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full max-w-7xl">
+				<Form form={form} layout="vertical" onFinish={onFinish}>
+				<Form.Item
+					label="이름"
+					name="name"
+					rules={[{ required: true, message: "이름을 입력해주세요." }]}
+				>
+					<Input placeholder="홍길동" size="large" />
+				</Form.Item>
 
-          {/* === 왼쪽: 예약 입력 폼 === */}
-          <Card
-            className="lg:col-span-2"
-            style={{
-              borderRadius: 16,
-              boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
-              backgroundColor: "#FFFFFF",
-              height: "auto",
-            }}
-            styles={{
-              body: { padding: "32px" },
-            }}
-          >
-            {/* ✅ 예약 단계 Steps */}
-            <Steps
-              current={0}
-              items={[
-                { title: '예약 정보 입력' },
-                { title: '결제 진행' },
-                { title: '예약 완료' },
-              ]}
-              style={{ marginBottom: 40 }}
-            />
+				<Form.Item
+					label="연락처"
+					name="phone"
+					rules={[{ required: true, message: "연락처를 입력해주세요." }]}
+				>
+					<Input placeholder="010-1234-5678" size="large" />
+				</Form.Item>
 
-            <Title level={3} className="mb-6 text-gray-800">
-              예약 정보 입력
-            </Title>
+				<Form.Item
+					label="이메일"
+					name="email"
+					rules={[
+					{ required: true, message: "이메일을 입력해주세요." },
+					{ type: "email", message: "올바른 이메일 형식을 입력해주세요." },
+					]}
+					style={{ marginBottom: 0 }}
+				>
+					<Input placeholder="example@email.com" size="large" />
+				</Form.Item>
+				</Form>
+			</Card>
 
-            <Form
-              form={form}
-              layout="vertical"
-              onFinish={onFinish}
-              initialValues={{ guestCount: 2 }}
-            >
-              <Form.Item
-                label="예약자 이름"
-                name="name"
-                rules={[{ required: true, message: "이름을 입력해주세요." }]}
-              >
-                <Input placeholder="홍길동" />
-              </Form.Item>
+			{/* === 오른쪽: 예약 요약 카드 === */}
+			<div className="flex flex-col justify-between h-full">
+				<Card
+				style={{
+					borderRadius: 12,
+					boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
+					backgroundColor: "#fafafa",
+					height: "100%",
+					display: "flex",
+					flexDirection: "column",
+					justifyContent: "space-between",
+				}}
+				>
+				<div>
+					<div className="flex flex-col items-center text-center mb-6">
+					<Title level={4} className="text-gray-900 mb-2">
+						{itemData.accName || "숙소 이름"}
+					</Title>
+					<Text className="text-lg text-gray-700 font-medium mb-1">
+						{itemData.room?.roomName || "객실 정보 없음"}
+					</Text>
+					<Text className="text-xl font-bold text-blue-600">
+						{itemData.room?.weekdayFee
+						? `${itemData.room.weekdayFee.toLocaleString()}원 / 1박`
+						: "가격 미정"}
+					</Text>
+					</div>
 
-              <Form.Item
-                label="연락처"
-                name="phone"
-                rules={[{ required: true, message: "연락처를 입력해주세요." }]}
-              >
-                <Input placeholder="010-1234-5678" />
-              </Form.Item>
+					<Divider style={{ margin: "12px 0" }} />
 
-              <Form.Item
-                label="이메일"
-                name="email"
-                rules={[{ required: true, message: "이메일을 입력해주세요." }]}
-              >
-                <Input placeholder="example@email.com" />
-              </Form.Item>
+					<Space
+						direction="vertical"
+						size="small"
+						style={{ width: "100%", fontSize: "0.95rem" }}
+					>
+						<Text>
+							<CalendarOutlined className="text-gray-600 mr-2" />
+							<b>숙박 일정:</b>{" "}
+							{formData.checkIn && formData.checkOut
+							? `${formData.checkIn} ~ ${formData.checkOut} (${formData.nights}일)`
+							: "선택되지 않음"}
+						</Text>
 
-              {/* ✅ 숙박 일정 + 인원 수 한 줄 정렬 */}
-              <div className="flex gap-4">
-                <Form.Item
-                  label="숙박 일정"
-                  name="dateRange"
-                  className="flex-1"
-                  rules={[{ required: true, message: "숙박 일정을 선택해주세요." }]}
-                >
-                  <RangePicker style={{ width: "100%" }} format="YYYY-MM-DD" />
-                </Form.Item>
+						<Text>
+							<TeamOutlined className="text-gray-600 mr-2" />
+							<b>인원 수:</b> {formData.guestCount || 1}명
+						</Text>
 
-                <Form.Item
-                  label="인원 수"
-                  name="guestCount"
-                  style={{ width: "120px" }}
-                >
-                  <Select>
-                    <Select.Option value={1}>1명</Select.Option>
-                    <Select.Option value={2}>2명</Select.Option>
-                    <Select.Option value={3}>3명</Select.Option>
-                    <Select.Option value={4}>4명 이상</Select.Option>
-                  </Select>
-                </Form.Item>
-              </div>
-            </Form>
-          </Card>
+						<Text>
+							<HomeOutlined className="text-gray-600 mr-2" />
+							<b>객실 수:</b> {formData.roomCount || 1}개
+						</Text>
+					</Space>
 
-          {/* === 오른쪽: 숙소 + 객실 요약 정보 === */}
-          <div className="flex flex-col justify-between h-full">
-            {/* 객실 정보 카드 */}
-            <Card
-              style={{
-                borderRadius: 16,
-                boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
-                backgroundColor: "#FDF6D8",
-              }}
-              styles={{
-                body: { padding: "24px" },
-              }}
-            >
-              <div className="flex flex-col text-center mb-6">
-                <Title level={4} className="text-gray-800 mb-3">
-                  {accName || "숙소 이름"}
-                </Title>
+					<Divider style={{ margin: "16px 0" }} />
 
-                <img
-                  src={room?.image || "https://via.placeholder.com/300x200"}
-                  alt={room?.type || "객실 이미지"}
-                  className="w-full h-48 object-cover rounded-lg mb-4"
-                />
+					<Text
+					className="block text-base font-semibold text-gray-900 text-center"
+					>
+					<DollarOutlined className="text-yellow-600 mr-2" />
+					총 금액:{" "}
+					<span className="text-blue-600 font-bold">
+						{formData.totalAmount.toLocaleString()}원
+					</span>
+					</Text>
+				</div>
 
-                <Title level={5} className="text-gray-700 mb-1">
-                  {room?.type || "객실 정보 없음"}
-                </Title>
-
-                <Text className="block text-gray-500 mb-1">숙소번호: {accId}</Text>
-                <Text className="block text-gray-500 mb-1">객실번호: {roomId}</Text>
-                <Text className="text-lg text-gray-600 mb-1">
-                  최대 인원 {room?.max || "-"}명
-                </Text>
-                <Text className="text-2xl font-bold text-[#006D77] mb-2">
-                  {`${room.weekdayFee.toLocaleString()}원 / 1박`}
-                </Text>
-              </div>
-            </Card>
-
-            {/* ✅ 결제 페이지로 이동 버튼 */}
-            <div className="mt-6">
-              <Button
-                type="primary"
-                size="large"
-                style={{
-                  width: "100%",
-                  height: "50px",
-                  borderRadius: "12px",
-                  fontSize: "1.1rem",
-                  fontWeight: 700,
-                }}
-                onClick={() => form.submit()} // ✅ 폼 제출 → onFinish → navigate
-              >
-                결제하기
-              </Button>
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </MainLayout>
-  );
+				{/* ✅ 하단 버튼 */}
+				<div className="mt-6">
+					<Button
+					type="primary"
+					size="large"
+					block
+					style={{
+						height: "50px",
+						borderRadius: "10px",
+						fontSize: "1.05rem",
+						fontWeight: 600,
+						marginTop: "20px",
+					}}
+					onClick={() => form.submit()}
+					>
+					결제하기
+					</Button>
+				</div>
+				</Card>
+			</div>
+			</div>
+		</div>
+		</MainLayout>
+	);
 };
 
 export default AccReservationPage;

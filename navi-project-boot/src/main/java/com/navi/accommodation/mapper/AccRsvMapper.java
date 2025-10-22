@@ -1,6 +1,6 @@
 package com.navi.accommodation.mapper;
 
-import com.navi.accommodation.domain.AccRsv;
+
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Mapper
-public interface AccRsvMapper {
+public interface AccRsvMapper<AccRsv> {
     /* == 관리자용 == */
     // 1. 전체 숙소 예약 목록 조회
     @Select("""

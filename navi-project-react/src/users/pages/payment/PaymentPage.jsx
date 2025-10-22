@@ -1,215 +1,229 @@
-import React, { useMemo } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
 import MainLayout from "../../layout/MainLayout";
-import { Card, Typography, Steps, Button, Radio, Divider, Space, message } from "antd";
-import axios from "axios";
+import React, { useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { Card, Typography, Steps, Button, Radio, Divider, Space,  message } from "antd";
+import { setPaymentData } from "../../../common/slice/paymentSlice";
+import { usePayment } from "../../../common/hooks/usePayment";
 
-// ✅ 항목별 Info 컴포넌트만 import
+/* 예약 타입별 컴포넌트 */
 import AccRsvInfo from "../../../common/components/reservation/AccRsvInfo";
 import FlyRsvInfo from "../../../common/components/reservation/FlyRsvInfo";
 import DlvRsvInfo from "../../../common/components/reservation/DlvRsvInfo";
 
+/* 우측 요약 카드 */
+import AccSumCard from "../../../common/components/reservation/AccRsvSumCard";
+import FlySumCard from "../../../common/components/reservation/FlyRsvSumCard";
+import DlvSumCard from "../../../common/components/reservation/DlvRsvSumCard";
+
 const { Title, Text } = Typography;
 
-const PaymentPage = ({keyword}) => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const { rsvType, itemId, itemData, formData } = location.state || {};
+const PaymentPage = () => {
+	const { executePayment } = usePayment();
 
-  const [paymentMethod, setPaymentMethod] = React.useState("kakaopay");
+	const navigate = useNavigate();
+	const location = useLocation();
+	const dispatch = useDispatch();
 
-  // ✅ 타입별 Info 컴포넌트 분기
-  const InfoComponent = useMemo(() => {
-    switch (rsvType) {
-      case "ACC":
-        return AccRsvInfo;
-      case "FLY":
-        return FlyRsvInfo;         
-      case "DLV":
-        return DlvRsvInfo;
-      default:
-        return null;
-    }
-  }, [rsvType]);
+	const [paymentMethod, setPaymentMethod] = useState("KAKAOPAY");
+	const [loading, setLoading] = useState(false);
 
-  const totalAmount = formData?.totalAmount || itemData?.price || 0;
+	/* location.state */
+	const state = location.state;
+	const rsvType = state?.rsvType || null;
+	const items = Array.isArray(state?.items) ? state.items : [state?.items];
+	const formData = state?.formData || null;
+	const uiData = state?.uiData || state?.itemData || null; 
 
-  /** ✅ 결제 요청 함수 */
-  const handlePayment = async () => {
-    const { IMP } = window;
-    if (!IMP) {
-      alert("아임포트 SDK가 로드되지 않았습니다.");
-      return;
-    }
+	/* state 누락 시 홈으로 리다이렉트 */
+	useEffect(() => {
+	if (!state) {
+		message.warning("잘못된 접근입니다. 메인으로 이동합니다.");
+		navigate("/");
+		return;
+	}
+	}, [state, navigate]);
 
-    let reserveId = null;
-    try {
-      const preRes = await axios.post(`/api/${rsvType.toLowerCase()}/pre`, {
-        userNo: 1,
-        rsvType,
-        targetId: itemId,
-        totalAmount,
-        ...formData,
-      });
-      reserveId = preRes.data.reserveId;
-      console.log(`🆔 [${rsvType}] 예약번호 발급:`, reserveId);
-    } catch (err) {
-      console.error("❌ 예약번호 생성 실패:", err);
-      message.error("예약정보 생성 실패");
-      return;
-    }
+	/* 총 결제 금액 계산 */
+	const totalAmount = formData?.totalPrice || formData?.totalAmount || 0;
 
-    const iamportCode = import.meta.env.VITE_IAMPORT_CODE;
-    IMP.init(iamportCode);
+	/* Redux에 결제 금액 저장 */
+	useEffect(() => {
+		if (totalAmount && totalAmount > 0) {
+			dispatch(setPaymentData({ totalAmount }));
+			console.log("✅ [PaymentPage] 결제 금액 Redux 저장 완료:", totalAmount);
+		} else {
+			console.warn("⚠️ 결제 금액이 유효하지 않음:", totalAmount);
+		}
+	}, [dispatch, totalAmount]);
 
-    let pg, channelKey;
-    switch (paymentMethod) {
-      case "kakaopay":
-        pg = "kakaopay.TC0ONETIME";
-        channelKey = import.meta.env.VITE_KAKAOPAY_CHANNEL_KEY;
-        break;
-      case "tosspay":
-        pg = "tosspay.tosstest";
-        channelKey = import.meta.env.VITE_TOSSPAY_CHANNEL_KEY;
-        break;
-      default:
-        pg = "html5_inicis.INIpayTest";
-        channelKey = import.meta.env.VITE_INIPAY_CHANNEL_KEY;
-    }
+	// ✅ 예약 유형별 Info 컴포넌트 선택
+	const InfoComponent = useMemo(() => {
+		switch (rsvType) {
+			case "ACC":
+				return AccRsvInfo;
+			case "FLY":
+				return FlyRsvInfo;
+			case "DLV":
+				return DlvRsvInfo;
+			default:
+				return null;
+		}
+	}, [rsvType]);
 
-    const paymentData = {
-      pg,
-      pay_method: "card",
-      merchant_uid: reserveId,
-      name: `${rsvType} 예약 결제`,
-      amount: totalAmount,
-      buyer_name: formData?.name,
-      buyer_tel: formData?.phone,
-      buyer_email: formData?.email,
-      custom_data: { reserveId, rsvType, itemId, channelKey },
-    };
+	// ✅ 우측 카드 선택
+	const SummaryCard = useMemo(() => {
+	switch (rsvType) {
+		case "ACC":
+			return (
+				<AccSumCard
+					accData={uiData}
+					totalAmount={totalAmount}
+					formData={formData}
+				/>
+			);
+		case "FLY":
+			return (
+				<FlySumCard
+					selectedOutbound={uiData?.selectedOutbound}
+					selectedInbound={uiData?.selectedInbound}
+				/>
+			);
+		case "DLV":
+			return (
+				<DlvSumCard
+					formData={formData}
+					totalAmount={totalAmount}
+				/>
+			);
+		default:
+			return (
+				<Card
+					style={{
+						borderRadius: 16,
+						boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
+						backgroundColor: "#FFFBEA",
+					}}
+					styles={{ body: { padding: "24px" } }}
+				>
+				<Title level={4} className="text-gray-800 mb-3 text-center">
+					{typeof uiData?.title === "string" ? uiData.title : "예약 요약"}
+				</Title>
+				<Text className="block text-gray-600 mb-2 text-center">
+					총 결제 금액:
+					<span className="text-blue-600 font-bold text-lg ml-1">
+						{totalAmount.toLocaleString()}원
+					</span>
+				</Text>
+				</Card>
+			);
+	}
+	}, [rsvType, uiData, formData, totalAmount]);
 
-    IMP.request_pay(paymentData, async (rsp) => {
-      if (!rsp.success) {
-        message.error(`결제 실패: ${rsp.error_msg}`);
-        return;
-      }
+	/* 결제 진행 */
+	const handlePayment = async () => {
+		if (loading) return;
+		setLoading(true);
 
-      try {
-        const verifyRes = await axios.post(`/api/payment/verify`, {
-          reserveId,
-          impUid: rsp.imp_uid,
-          merchantUid: rsp.merchant_uid,
-          payMethod: paymentMethod,
-          channelKey,
-        });
+		try {
+			dispatch(
+				setPaymentData({
+					rsvType,
+					totalAmount,
+					paymentMethod,
+				})
+			);
 
-        const confirmRes = await axios.post(`/api/${rsvType.toLowerCase()}/reserve/detail`, {
-          reserveId,
-          totalAmount,
-          ...formData,
-        });
+			// 약간의 딜레이로 Redux 반영 후 결제 실행
+			await new Promise((resolve) => setTimeout(resolve, 150));
+			await executePayment({ rsvType, formData, items, totalAmount, paymentMethod });
+		} catch (error) {
+			console.error("❌ [PaymentPage] 결제 처리 실패:", error);
+			message.error("결제 처리 중 오류가 발생했습니다.");
+		} finally {
+			setLoading(false);
+		}
+	};
 
-        navigate(`/reservation/${rsvType.toLowerCase()}/result`, {
-          state: {
-            success: true,
-            reservation: confirmRes.data,
-            payment: verifyRes.data,
-          },
-        });
-      } catch (err) {
-        console.error("❌ 검증/확정 실패:", err);
-        message.error("결제 검증 또는 예약 확정 실패");
-      }
-    });
-  };
+	// state가 비어 있을 때
+	if (!rsvType || !formData) {
+		return (
+			<MainLayout>
+				<div className="min-h-screen flex items-center justify-center">
+					<Text type="secondary">결제 정보를 불러오는 중입니다...</Text>
+				</div>
+			</MainLayout>
+		);
+	}
 
-  return (
-    <MainLayout>
-      <div className="min-h-screen bg-[#FFFBEA] flex justify-center pt-10 pb-12 px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full max-w-7xl">
-          {/* === 좌측 결제 영역 === */}
-          <Card className="lg:col-span-2" style={{ borderRadius: 16, backgroundColor: "#FFFFFF" }}>
-            <Steps
-              current={1}
-              items={[{ title: "정보 입력" }, { title: "결제 진행" }, { title: "완료" }]}
-              style={{ marginBottom: 40 }}
-            />
+	return (
+		<MainLayout>
+			<div className="min-h-screen flex justify-center pt-10 pb-12 px-8">
+				<div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full max-w-7xl">
+					{/* === 좌측 결제 영역 === */}
+					<Card
+						className="lg:col-span-2"
+						style={{ borderRadius: 16, backgroundColor: "#FFFFFF" }}
+					>
+						<Steps
+							current={1}
+							items={[
+								{ title: "정보 입력" },
+								{ title: "결제 진행" },
+								{ title: "완료" },
+							]}
+							style={{ marginBottom: 40 }}
+						/>
 
-            <Title level={3}>결제 진행</Title>
+						<Title level={3}>결제 진행</Title>
 
-            {/* ✅ 결제 수단 선택 */}
-            <div className="mb-8">
-              <Title level={5}>결제 수단 선택</Title>
-              <Radio.Group onChange={(e) => setPaymentMethod(e.target.value)} value={paymentMethod}>
-                <Space direction="vertical">
-                  <Radio value="kakaopay">카카오페이</Radio>
-                  <Radio value="tosspay">토스페이</Radio>
-                  <Radio value="inipay">KG이니시스</Radio>
-                </Space>
-              </Radio.Group>
-            </div>
+						{/* ✅ 결제 수단 선택 */}
+						<div className="mb-8">
+							<Title level={5}>결제 수단 선택</Title>
+							<Radio.Group
+								onChange={(e) => setPaymentMethod(e.target.value)}
+								value={paymentMethod}
+							>
+								<Space direction="vertical">
+									<Radio value="KAKAOPAY">카카오페이</Radio>
+									<Radio value="TOSSPAY">토스페이</Radio>
+									<Radio value="KGINIPAY">KG이니시스</Radio>
+								</Space>
+							</Radio.Group>
+						</div>
 
-            <Divider />
+						<Divider />
 
-            {/* ✅ 예약자 공통 정보 */}
-            <div className="space-y-2 mb-6">
-              <Title level={5}>예약자 정보</Title>
-              <Text>이름: {formData?.name}</Text><br />
-              <Text>연락처: {formData?.phone}</Text><br />
-              <Text>이메일: {formData?.email}</Text>
-            </div>
+						{/* ✅ 타입별 상세 정보 */}
+						{InfoComponent && uiData && formData ? (
+							<InfoComponent
+								data={typeof uiData === "object" ? uiData : {}}
+								formData={typeof formData === "object" ? formData : {}}
+							/>
+						) : (
+							<Text type="secondary">결제 정보가 없습니다.</Text>
+						)}
+					</Card>
 
-            {/* ✅ 타입별 예약 상세 정보 */}
-            {InfoComponent && <InfoComponent data={itemData} formData={formData} />}
-          </Card>
+					{/* === 우측 요약 카드 === */}
+					<div className="flex flex-col justify-between h-full">
+						{SummaryCard}
 
-          {/* === 우측 요약 div (버터옐로우) === */}
-          <div className="flex flex-col justify-between h-full">
-            <Card
-              style={{
-                borderRadius: 16,
-                boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
-                backgroundColor: "#FDF6D8",
-              }}
-              styles={{
-                body: { padding: "24px" },
-              }}
-            >
-              <Title level={4} className="text-gray-800 mb-3 text-center">
-                {itemData?.title || itemData?.accName || "예약 요약"}
-              </Title>
-
-              {itemData?.image && (
-                <img
-                  src={itemData.image}
-                  alt="예약 이미지"
-                  className="w-full h-48 object-cover rounded-lg mb-4"
-                />
-              )}
-
-              <Text className="block text-gray-600 mb-2 text-center">
-                총 결제 금액:
-                <span className="text-blue-600 font-bold text-lg ml-1">
-                  {totalAmount.toLocaleString()}원
-                </span>
-              </Text>
-            </Card>
-
-            {/* 결제 버튼 */}
-            <Button
-              type="primary"
-              size="large"
-              style={{ marginTop: 24, height: 56, borderRadius: 12 }}
-              onClick={handlePayment}
-            >
-              결제하기
-            </Button>
-          </div>
-        </div>
-      </div>
-    </MainLayout>
-  );
+						{/* ✅ 결제 버튼 */}
+						<Button
+							type="primary"
+							size="large"
+							style={{ marginTop: 24, height: 56, borderRadius: 12 }}
+							loading={loading}
+							onClick={handlePayment}
+						>
+							결제하기
+						</Button>
+					</div>
+				</div>
+			</div>
+		</MainLayout>
+	);
 };
 
 export default PaymentPage;

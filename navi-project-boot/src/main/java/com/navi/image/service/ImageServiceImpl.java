@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class ImageServiceImpl implements ImageService{
+public class ImageServiceImpl implements ImageService {
     private final ImageRepository imageRepository;
 
     private static final String BASE_DIR = "C:/navi-project/images/";
@@ -45,30 +45,37 @@ public class ImageServiceImpl implements ImageService{
                     .findByTargetTypeAndTargetId(targetType, targetId)
                     .orElse(null);
 
-            // 기존 파일이 있으면 삭제
+            // === 기존 이미지 갱신 ===
             if (existing != null) {
+                // 기존 파일 삭제
                 try {
-                    Files.deleteIfExists(Paths.get(BASE_DIR)
-                            .resolve(existing.getPath().replace("/images/", "")));
-                } catch (IOException ignored) {}
+                    Files.deleteIfExists(
+                            Paths.get(BASE_DIR).resolve(existing.getPath().replace("/images/", ""))
+                    );
+                } catch (IOException ignored) {
+                }
 
+                // DB 업데이트
                 existing.updatePath(
-                        "/images/" + targetType.toLowerCase() + "/" + uuidName,
+                        "/images/" + folderName + "/" + uuidName,
                         uuidName,
                         originalName
                 );
+
                 Files.write(Paths.get(savePath), file.getBytes());
-                return ImageDTO.fromEntity(existing);
+
+                // DB에 저장
+                Image updated = imageRepository.save(existing);
+                return ImageDTO.fromEntity(updated);
             }
 
-            // 신규 파일 저장
             Files.write(Paths.get(savePath), file.getBytes());
 
             // 엔티티 생성 및 저장
             Image newImage = Image.builder()
                     .targetType(targetType)
                     .targetId(targetId)
-                    .path("/images/" + folderName  + "/" + uuidName)
+                    .path("/images/" + folderName + "/" + uuidName)
                     .uuidName(uuidName)
                     .originalName(originalName)
                     .build();
@@ -97,7 +104,8 @@ public class ImageServiceImpl implements ImageService{
                     try {
                         Files.deleteIfExists(Paths.get(BASE_DIR)
                                 .resolve(image.getPath().replace("/images/", "")));
-                    } catch (IOException ignored) {}
+                    } catch (IOException ignored) {
+                    }
                     imageRepository.delete(image);
                 });
     }

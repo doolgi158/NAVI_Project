@@ -1,25 +1,30 @@
 import { lazy } from "react";
-import MyPlanPage from "../../users/pages/plan/MyPlanPage.jsx";
 import SharedPlan from "../../users/pages/plan/SharedPlan.jsx";
 
-const TravelPlanMain = lazy(() => import("../../users/pages/plan/TravelPlanMain.jsx"))
-const TravelPlanner = lazy(() => import("../../users/pages/plan/TravelPlanner.jsx"))
+const TravelPlanMain = lazy(() => import("../../users/pages/plan/TravelPlanMain.jsx"))  //홈
+const TravelPlanner = lazy(() => import("../../users/pages/plan/TravelPlanner.jsx"))    //등록
+const PlanScheduler = lazy(() => import("../../users/pages/plan/PlanScheduler.jsx"))    //상세/수정/등록 상세
 
-const TravelRouter = () => {
+const PlanRouter = () => {
     return [
 
-        /*여행계획 홈 */
-        { path: "",  element: <TravelPlanMain />  },
+        /* 여행계획 홈,리스트 */
+        { path: "", element: <TravelPlanMain /> },
 
-        /* 여행계획 생성 단계*/
-        { path: "planner",  element: <TravelPlanner />  },
+        /* 여행계획 등록*/
+        { path: "planner", element: <TravelPlanner /> },
 
-        /*나의 여행계획 목록 */
-        { path: "myplans",  element: <MyPlanPage />  },
+        /* 여행계획 상세 등록*/
+        { path: "scheduler", element: <PlanScheduler /> },
 
-         /*나의 여행계획 공유 */
-        { path: "sharedplan",  element: <SharedPlan />  },
+        /* 조회/수정 */
+        { path: "planner/detail", element: <PlanScheduler /> },
+
+        /*공유 */
+        { path: "sharedplan", element: <SharedPlan /> },
     ]
+
+
 }
 
-export default TravelRouter;
+export default PlanRouter;

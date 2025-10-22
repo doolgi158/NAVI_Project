@@ -1,23 +1,35 @@
 package com.navi.room.domain;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.navi.common.entity.BaseEntity;
-import com.navi.room.dto.request.StockRequestDTO;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.springframework.data.annotation.LastModifiedDate;
-
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+/* ============================================================
+   [RoomStock]
+   - 객실(Room)별 일자 단위 재고 관리 테이블
+   - 항상 "오늘 ~ +30일" 범위의 재고만 유지 (Rolling Window)
+   - 예약 시 재고 차감 / 취소 시 재고 복구
+   ============================================================ */
 
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "NAVI_ROOM_STOCK")
+@Table(
+        name = "NAVI_ROOM_STOCK",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "UK_ROOM_DATE", columnNames = {"room_no", "stock_date"})
+        },
+        indexes = {
+                @Index(name = "IDX_ROOM_STOCK_DATE", columnList = "stock_date")
+        }
+)
 @SequenceGenerator(
         name = "room_stock_generator",
         sequenceName = "ROOM_STOCK_SEQ",
@@ -26,56 +38,71 @@ import java.time.LocalDateTime;
 )
 public class RoomStock extends BaseEntity {
     /* === COLUMN 정의 === */
-    // 내부 식별번호 (예: 1)
-    @Id @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "room_stock_generator")
-    @Column(name = "stock_no")
+    @Id @Column(name = "stock_no")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "room_stock_generator")
     private Long stockNo;
 
-    /* === 연관관계 설정 === */
-    // 객실 ID (예: ROM001), 기본 판매 가능 수량 (예: 5)
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "room_no", nullable = false)
     @JsonBackReference
     private Room room;
 
-    // 날짜별 (예: 2025-10-15)
-    @Id @Column(name = "stock_date", nullable = false)
+    // 재고 일자
+    @Column(name = "stock_date", nullable = false)
     private LocalDate stockDate;
 
-    // 현재 남은 수량 (예: 3)
+    // 남은 수량
     @Column(name = "remain_count", nullable = false)
     private Integer remainCount;
 
-    // 재고 상태
+    // 판매 가능 여부
     @Column(name = "is_available", nullable = false)
     private Boolean isAvailable;
 
-    // 낙관적 락 버전 (동시성 제어)
+    /* 낙관적 락 (동시 결제/예약 충돌 방지) */
     @Version
     @Column(name = "version", nullable = false)
     private Long version;
 
-    // created_at, updated_at은 BaseEntity가 자동 관리
-
     @PrePersist
     private void prePersist() {
         if (this.isAvailable == null) this.isAvailable = true;
-        if (this.remainCount == null) this.remainCount = this.room.getRoomCnt();
+        if (this.remainCount == null && this.room != null)
+            this.remainCount = this.room.getRoomCnt();
     }
 
-    /* === 비즈니스 로직 === */
-    // 1. 재고 차감 (예약 발생 시)
+    // 예약 발생 시 재고 차감
     public void decreaseStock(int count) {
+        if (count <= 0) {
+            throw new IllegalArgumentException("차감 수량은 0보다 커야 합니다.");
+        }
+        if (remainCount < count) {
+            throw new IllegalStateException("재고가 부족합니다. (남은 수량: " + remainCount + ")");
+        }
 
+        this.remainCount -= count;
+        if (this.remainCount == 0) {
+            this.isAvailable = false;
+        }
     }
 
-    // 2. 재고 복구 (예약 취소 시)
+    // 예약 취소 시 재고 복구
     public void increaseStock(int count) {
-        ;
+        if (count <= 0)
+            throw new IllegalArgumentException("복구 수량은 0보다 커야 합니다.");
+
+        int maxStock = this.room.getRoomCnt();
+        if (this.remainCount + count > maxStock)
+            throw new IllegalStateException("복구 후 재고가 최대 수량을 초과합니다.");
+
+        this.remainCount += count;
+        if (this.remainCount > 0)
+            this.isAvailable = true;
     }
 
-    /* DTO → Entity */
-    public void changeFromDTO(StockRequestDTO dto) {
-
+    // 재고 초기화용 (재고 수동 리셋 등)
+    public void resetStock() {
+        this.remainCount = this.room.getRoomCnt();
+        this.isAvailable = true;
     }
 }

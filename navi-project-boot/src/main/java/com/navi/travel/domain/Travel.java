@@ -1,6 +1,7 @@
 package com.navi.travel.domain;
 
 import com.navi.common.entity.BaseEntityNoAudit;
+import com.navi.common.listener.TravelEntityListener;
 import com.navi.travel.dto.TravelRequestDTO;
 import jakarta.persistence.*;
 import lombok.*;
@@ -19,6 +20,7 @@ import java.util.List;
 @Builder
 @DynamicUpdate
 @Entity
+@EntityListeners(TravelEntityListener.class)
 @Table(name = "NAVI_TRAVEL")
 @SequenceGenerator(name = "travel_seq", sequenceName = "TRAVEL_SEQ", allocationSize = 1)
 public class Travel extends BaseEntityNoAudit {
@@ -110,6 +112,10 @@ public class Travel extends BaseEntityNoAudit {
     @Column(name = "HOURS", length = 2000)
     private String hours;
 
+    // ✅ 내부 체크용
+    @Transient
+    private boolean counterOnlyChanged = false;
+
     /** ✅ 연관관계: Travel ↔ Like, Bookmark **/
     @Builder.Default
     @OneToMany(mappedBy = "travel", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -125,32 +131,38 @@ public class Travel extends BaseEntityNoAudit {
         likes.add(like);
         like.setTravel(this);
         this.likesCount = (this.likesCount == null ? 0 : this.likesCount) + 1;
+        this.counterOnlyChanged = true;
     }
 
     public void removeLike(Like like) {
         likes.remove(like);
         like.setTravel(null);
         this.likesCount = (this.likesCount == null || this.likesCount == 0) ? 0 : this.likesCount - 1;
+        this.counterOnlyChanged = true;
     }
 
     public void addBookmark(Bookmark bookmark) {
         bookmarks.add(bookmark);
         bookmark.setTravel(this);
         this.bookmarkCount = (this.bookmarkCount == null ? 0 : this.bookmarkCount) + 1;
+        this.counterOnlyChanged = true;
     }
 
     public void removeBookmark(Bookmark bookmark) {
         bookmarks.remove(bookmark);
         bookmark.setTravel(null);
         this.bookmarkCount = (this.bookmarkCount == null || this.bookmarkCount == 0) ? 0 : this.bookmarkCount - 1;
+        this.counterOnlyChanged = true;
     }
+
+
 
 
     /** ✅ API 기반 업데이트 **/
     public void updateFromApi(Travel newTravel) {
         this.title = newTravel.title;
         this.introduction = newTravel.introduction;
-        this.description = newTravel.description; // ✅ 본문 추가
+        this.description = newTravel.description;
         this.address = newTravel.address;
         this.roadAddress = newTravel.roadAddress;
         this.phoneNo = newTravel.phoneNo;
@@ -186,9 +198,9 @@ public class Travel extends BaseEntityNoAudit {
         if (StringUtils.hasText(dto.getCategoryName())) this.categoryName = dto.getCategoryName();
         if (StringUtils.hasText(dto.getRegion1Name())) this.region1Name = dto.getRegion1Name();
         if (StringUtils.hasText(dto.getRegion2Name())) this.region2Name = dto.getRegion2Name();
-        if (dto.getPhotoId() != null) this.photoId = dto.getPhotoId();
-        if (StringUtils.hasText(dto.getImagePath())) this.imagePath = dto.getImagePath();
-        if (StringUtils.hasText(dto.getThumbnailPath())) this.thumbnailPath = dto.getThumbnailPath();
+        this.imagePath = dto.getImagePath();
+        this.thumbnailPath = dto.getThumbnailPath();
+        if (dto.getThumbnailPath() != null) { this.thumbnailPath = dto.getThumbnailPath(); }
         this.state = dto.getState();
         if (StringUtils.hasText(dto.getHomepage())) this.homepage = dto.getHomepage();
         if (StringUtils.hasText(dto.getParking())) this.parking = dto.getParking();
@@ -205,4 +217,5 @@ public class Travel extends BaseEntityNoAudit {
     public void decrementBookmarkCount() {this.bookmarkCount = (this.bookmarkCount == null || this.bookmarkCount == 0) ? 0L : this.bookmarkCount - 1;}
 
     public void setUpdatedAt(LocalDateTime now) { }
+
 }
