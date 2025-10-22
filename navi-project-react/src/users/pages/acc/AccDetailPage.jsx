@@ -16,10 +16,14 @@ const { RangePicker } = DatePicker;
 const AccDetailPage = () => {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
-	const accIdFromRedux = useSelector((state) => state.acc.selectedAcc);
+	
+	/* Redux */
+	const selectedAcc = useSelector((state) => state.acc.selectedAcc);      // 숙소 객체
+  	const selectedAccId = useSelector((state) => state.acc.selectedAccId);  // 숙소 ID (문자열)
+
 
 	/* 로컬 상태 */
-	const [accId, setAccId] = useState(accIdFromRedux || null);	// 숙소 ID
+	const [accId, setAccId] = useState(selectedAccId || null);	// 숙소 ID
 	const [accData, setAccData] = useState(null);				// 숙소 정보
 	const [rooms, setRooms] = useState([]);						// 객실 리스트
 	const [loading, setLoading] = useState(true);				// 로딩
@@ -34,9 +38,9 @@ const AccDetailPage = () => {
 
 	/* 숙소 ID 유지(새로고침 방어) */
 	useEffect(() => {
-		if (accIdFromRedux) {
-			localStorage.setItem("selectedAccId", accIdFromRedux);
-			setAccId(accIdFromRedux);
+		if (selectedAccId) {
+			localStorage.setItem("selectedAccId", selectedAccId);
+			setAccId(selectedAccId);
 		} else {
 			const savedId = localStorage.getItem("selectedAccId");
 			if (savedId) {
@@ -44,7 +48,7 @@ const AccDetailPage = () => {
 				dispatch(setSelectedAcc(savedId));
 			}
 		}
-	}, [accIdFromRedux, dispatch]);
+	}, [selectedAccId, dispatch]);
 
 	/* 숙소 기본 데이터 로드 */
 	useEffect(() => {
@@ -264,7 +268,7 @@ const AccDetailPage = () => {
 						<Row gutter={[16, 16]} className="mb-6">
 							<Col xs={24} lg={14}>
 								{accData.accImages?.length > 0 ? (
-									<Carousel autoplay dots className="rounded-xl overflow-hidden">
+									<Carousel autoplay autoplaySpeed={3000} dots className="rounded-xl overflow-hidden">
 										{accData.accImages.map((img, idx) => {
 											// ✅ 경로 자동 처리
 											const resolvedSrc = img.startsWith("/uploads/")
