@@ -16,7 +16,7 @@ import java.math.BigDecimal;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/payment")
-public class PaymentController {
+public class PaymentUserController {
     private final PaymentRouterService paymentRouterService;
 
     /* === [1. 결제 준비] === */

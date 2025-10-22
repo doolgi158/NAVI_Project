@@ -2,6 +2,7 @@ package com.navi.user.dto.admin;
 
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Getter
@@ -77,7 +78,7 @@ public class AdminDashboardDTO {
     @AllArgsConstructor
     public static class Payments {
         private long count;
-        private long amount;
+        private BigDecimal amount;
         private double changedPct;
     }
 

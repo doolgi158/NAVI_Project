@@ -126,6 +126,11 @@ public class PaymentMaster extends BaseEntity {
         this.paymentStatus = PaymentStatus.REFUNDED;
         this.totalFeeAmount = totalFeeAmount != null ? totalFeeAmount : BigDecimal.ZERO;
     }
+    // 6. 부분 환불 완료 처리
+    public void markAsPartialRefunded(BigDecimal totalFeeAmount) {
+        this.paymentStatus = PaymentStatus.PARTIAL_REFUNDED;
+        this.totalFeeAmount = totalFeeAmount != null ? totalFeeAmount : BigDecimal.ZERO;
+    }
 
     /* 결제 금액 변경 */
     public void updateTotalAmount(BigDecimal totalAmount) {

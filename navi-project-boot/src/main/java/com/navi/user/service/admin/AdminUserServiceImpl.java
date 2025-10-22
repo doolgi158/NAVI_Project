@@ -13,6 +13,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AdminUserServiceImpl implements AdminUserService {
     private final UserRepository userRepository;
+    private final AdminPaymentDashboardService paymentDashboardService;
 
     /**
      * ✅ 유저 통계 계산
@@ -37,7 +38,7 @@ public class AdminUserServiceImpl implements AdminUserService {
                 // ✅ 아직 미구현 필드는 전부 빈 객체로 초기화
                 .travels(new AdminDashboardDTO.Travels(0, 0, 0))
                 .accommodations(new AdminDashboardDTO.Accommodations(0, 0))
-                .payments(new AdminDashboardDTO.Payments(0, 0, 0))
+                .payments(paymentDashboardService.getPaymentStats())
                 .refunds(new AdminDashboardDTO.Refunds(0, 0))
                 .cs(new AdminDashboardDTO.Cs(0))
                 .usageTrend(List.of())
