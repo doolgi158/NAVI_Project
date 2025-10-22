@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Outlet } from "react-router-dom";
 import TravelRouter from "./TravelRouter.jsx";
 import PlanRouter from "./PlanRouter.jsx";
 import FlightRouter from "./FlightRouter.jsx";
@@ -9,6 +9,7 @@ import UserRouter from "./UserRouter.jsx";
 import DeliveryRouter from "./DeliveryRouter.jsx"
 import PaymentRouter from "./PaymentRouter.jsx";
 import ClientRouter from "./ClientRouter.jsx";
+import ProtectedRoute from "./ProtectedRoute.jsx";
 
 const Loading = <div></div>
 const Main = lazy(() => import("../../users/pages/UserMainPage.jsx"))
@@ -44,6 +45,11 @@ const root = createBrowserRouter([
             },
             {
                 path: "/delivery",
+                element: (
+                    <ProtectedRoute requiredRole="USER">
+                        <Outlet />
+                    </ProtectedRoute>
+                ),
                 children: [...DeliveryRouter()]
             },
             {
