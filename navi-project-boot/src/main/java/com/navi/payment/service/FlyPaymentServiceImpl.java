@@ -23,7 +23,7 @@ public class FlyPaymentServiceImpl {
     private final PaymentServiceImpl paymentService;
     private final FlightReservationService flyRsvService;
 
-    // 결제 준비 (merchantId 생성)
+    /* 결제 준비 */
     public PaymentPrepareResponseDTO preparePayment(PaymentPrepareRequestDTO dto) {
         log.info("🛫 [FLY] 결제 준비 요청 - {}", dto);
 
@@ -46,7 +46,6 @@ public class FlyPaymentServiceImpl {
 
         PaymentResultResponseDTO verifyRes;
         try {
-            // 1️⃣ PortOne 결제 검증
             verifyRes = paymentService.verifyPayment(dto);
         } catch (IamportResponseException | IOException e) {
             log.error("❌ [PortOne 검증 오류] {}", e.getMessage());

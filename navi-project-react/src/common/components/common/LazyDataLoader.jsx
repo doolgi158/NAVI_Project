@@ -28,9 +28,9 @@ const LazyDataLoader = ({ checkUrl, checkParams = {}, onReady, children }) => {
           clearTimeout(timerId);
           setLoading(false);
           onReady?.(); // 데이터 로딩 콜백
-        } else if(attempt < maxAttempts){
-            attempt++;
-          timerId = setTimeout(checkStatus, 2000); // 2초마다 재확인
+        } else if (attempt < maxAttempts) {
+          attempt++;
+          timerId = setTimeout(checkStatus, 3000); // 3초마다 재확인
         }
       } catch (err) {
         console.error("❌ LazyDataLoader 상태 확인 실패:", err);
@@ -42,23 +42,23 @@ const LazyDataLoader = ({ checkUrl, checkParams = {}, onReady, children }) => {
     return () => clearTimeout(timerId);
   }, [checkUrl, JSON.stringify(checkParams)]);
 
-    if (error) {
-        return (
-            <div className="flex flex-col items-center justify-center py-20 text-red-600">
-                <p className="text-lg font-semibold mb-2">데이터 로딩 실패</p>
-                <p className="text-sm text-gray-500 mb-4">
-                    서버에서 데이터를 가져오는 데 실패했습니다.<br />
-                    네트워크 상태를 확인하거나 잠시 후 다시 시도해주세요.
-                </p>
-                <button
-                    onClick={() => window.location.reload()}
-                    className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
-                >
-                    다시 시도하기
-                </button>
-            </div>
-        );
-    }
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-red-600">
+        <p className="text-lg font-semibold mb-2">데이터 로딩 실패</p>
+        <p className="text-sm text-gray-500 mb-4">
+          서버에서 데이터를 가져오는 데 실패했습니다.<br />
+          네트워크 상태를 확인하거나 잠시 후 다시 시도해주세요.
+        </p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
+        >
+          다시 시도하기
+        </button>
+      </div>
+    );
+  }
 
 
   if (loading) {

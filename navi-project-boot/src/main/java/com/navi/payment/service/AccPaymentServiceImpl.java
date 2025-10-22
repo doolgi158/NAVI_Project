@@ -29,7 +29,7 @@ public class AccPaymentServiceImpl {
         return paymentService.preparePayment(dto);
     }
 
-    /* 결제 검증 */
+    /* 결제 검증 및 확정 */
     @Transactional(rollbackFor = Exception.class)
     public PaymentResultResponseDTO verifyAndCompletePayment(PaymentVerifyRequestDTO dto) {
         log.info("🏨 [ACC] 결제 검증 시작 → reserveId(s)={}, impUid={}", dto.getReserveId(), dto.getImpUid());

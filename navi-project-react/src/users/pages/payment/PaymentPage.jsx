@@ -45,7 +45,7 @@ const PaymentPage = () => {
 	}, [state, navigate]);
 
 	/* 총 결제 금액 계산 */
-	const totalAmount = formData?.totalPrice || formData?.totalAmount || 0;
+	const totalAmount = formData?.totalPrice || formData?.totalAmount || state.totalPrice || 0;
 
 	/* Redux에 결제 금액 저장 */
 	useEffect(() => {
@@ -146,7 +146,7 @@ const PaymentPage = () => {
 	};
 
 	// state가 비어 있을 때
-	if (!rsvType || !formData) {
+	if (!rsvType || (!formData && rsvType !== "FLY")) {
 		return (
 			<MainLayout>
 				<div className="min-h-screen flex items-center justify-center">

@@ -274,7 +274,7 @@ const DeliveryPage = () => {
 
           {/* 이름/전화번호 */}
           <Input placeholder="이름" value={form.senderName} onChange={(e) => handleNameChange(e.target.value)} className="mb-3" />
-          <Input placeholder="전화번호 (010-xxxx-xxxx)" value={form.phone} onChange={(e) => handlePhoneChange(e.target.value)} className="mb-5" maxLength={13} />
+          <Input placeholder="전화번호 (010-1234-5678)" value={form.phone} onChange={(e) => handlePhoneChange(e.target.value)} className="mb-5" maxLength={13} />
 
           {/* ✅ 배송 방향 선택 */}
           <Text strong>배송 방향</Text>

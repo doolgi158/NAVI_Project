@@ -31,6 +31,22 @@ const AdminDeliveryReservationPage = () => {
     const [form] = Form.useForm();
     const [editing, setEditing] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
+    const [bags, setBags] = useState({ S: 0, M: 0, L: 0 });
+
+    /** ✅ JSON 문자열을 보기 좋은 텍스트로 변환 */
+    const formatBagsJson = (jsonString) => {
+        if (!jsonString) return "-";
+        try {
+            const bags = JSON.parse(jsonString);
+            const labels = { S: "소형", M: "중형", L: "대형" };
+            return Object.entries(bags)
+                .filter(([_, count]) => count > 0)
+                .map(([k, v]) => `${labels[k]} ${v}개`)
+                .join(" / ") || "-";
+        } catch {
+            return jsonString;
+        }
+    };
 
     /** ✅ 예약 목록 불러오기 */
     const fetchReservations = async () => {
@@ -57,6 +73,18 @@ const AdminDeliveryReservationPage = () => {
             ...record,
             deliveryDate: record.deliveryDate ? dayjs(record.deliveryDate) : null,
         });
+        try {
+            const parsed = record?.bagsJson
+                ? JSON.parse(record.bagsJson)
+                : { S: 0, M: 0, L: 0 };
+            setBags({
+                S: parsed.S || 0,
+                M: parsed.M || 0,
+                L: parsed.L || 0,
+            });
+        } catch {
+            setBags({ S: 0, M: 0, L: 0 });
+        }
         setModalVisible(true);
     };
 
@@ -66,15 +94,26 @@ const AdminDeliveryReservationPage = () => {
             const values = await form.validateFields();
             const payload = {
                 ...values,
-                deliveryDate: values.deliveryDate?.format("YYYY-MM-DD"),
+                deliveryDate: values.deliveryDate
+                    ? dayjs(values.deliveryDate).format("YYYY-MM-DD")
+                    : null,
+                bagsJson: JSON.stringify(bags),
             };
 
             await axios.put(`${API}/${editing.drsvId}`, payload);
             message.success("예약 정보가 수정되었습니다.");
 
+            // ✅ 목록 즉시 갱신 (fetch 없이 상태 업데이트)
+            setReservations((prev) =>
+                prev.map((r) =>
+                    r.drsvId === editing.drsvId ? { ...r, ...payload } : r
+                )
+            );
+
             setModalVisible(false);
-            fetchReservations();
-        } catch {
+            setEditing(null);
+        } catch (err) {
+            console.error(err);
             message.error("처리 중 오류가 발생했습니다.");
         }
     };
@@ -91,7 +130,7 @@ const AdminDeliveryReservationPage = () => {
                 try {
                     await axios.delete(`${API}/${drsvId}`);
                     message.success("예약이 삭제되었습니다.");
-                    fetchReservations();
+                    setReservations((prev) => prev.filter((r) => r.drsvId !== drsvId));
                 } catch {
                     message.error("삭제 중 오류가 발생했습니다.");
                 }
@@ -124,14 +163,31 @@ const AdminDeliveryReservationPage = () => {
                 <Input disabled />
             </Form.Item>
 
-            {/* ✅ 가방 정보 (JSON 표시용) */}
-            <Form.Item label="가방 정보 (JSON)">
-                <Input.TextArea
-                    rows={3}
-                    value={editing?.bagsJson || ""}
-                    readOnly
-                    style={{ backgroundColor: "#fafafa" }}
-                />
+            {/* ✅ 가방 수량 수정 */}
+            <Form.Item label="가방 수량 수정">
+                <div className="grid grid-cols-3 gap-3">
+                    {["S", "M", "L"].map((size) => (
+                        <div
+                            key={size}
+                            className="flex flex-col items-center border rounded-md p-2"
+                        >
+                            <Typography.Text strong>
+                                {size === "S"
+                                    ? "소형"
+                                    : size === "M"
+                                        ? "중형"
+                                        : "대형"}
+                            </Typography.Text>
+                            <InputNumber
+                                min={0}
+                                value={bags[size]}
+                                onChange={(val) =>
+                                    setBags((prev) => ({ ...prev, [size]: val ?? 0 }))
+                                }
+                            />
+                        </div>
+                    ))}
+                </div>
             </Form.Item>
 
             {/* ✅ 주소 입력 */}
@@ -180,7 +236,9 @@ const AdminDeliveryReservationPage = () => {
             >
                 <DatePicker
                     style={{ width: "100%" }}
-                    disabledDate={(current) => current && current < dayjs().startOf("day")}
+                    disabledDate={(current) =>
+                        current && current < dayjs().startOf("day")
+                    }
                 />
             </Form.Item>
 
@@ -209,27 +267,15 @@ const AdminDeliveryReservationPage = () => {
 
     /** ✅ 테이블 컬럼 정의 */
     const columns = [
-        {
-            title: "예약 ID",
-            dataIndex: "drsvId",
-            key: "drsvId",
-            width: 160,
-            sorter: (a, b) => a.drsvId.localeCompare(b.drsvId),
-        },
-        {
-            title: "회원명",
-            dataIndex: "userName",
-            key: "userName",
-            width: 120,
-            sorter: (a, b) => a.userName.localeCompare(b.userName),
-        },
+        { title: "예약 ID", dataIndex: "drsvId", key: "drsvId", width: 160, align: "center" },
+        { title: "회원명", dataIndex: "userName", key: "userName", width: 120, align: "center" },
         {
             title: "출발지",
             dataIndex: "startAddr",
             key: "startAddr",
             width: 200,
             ellipsis: true,
-            sorter: (a, b) => a.startAddr.localeCompare(b.startAddr),
+            align: "center",
         },
         {
             title: "도착지",
@@ -237,22 +283,22 @@ const AdminDeliveryReservationPage = () => {
             key: "endAddr",
             width: 200,
             ellipsis: true,
-            sorter: (a, b) => a.endAddr.localeCompare(b.endAddr),
+            align: "center",
         },
         {
             title: "가방 정보",
             dataIndex: "bagsJson",
             key: "bagsJson",
             width: 180,
-            render: (v) => (v ? v : "-"),
+            align: "center",
+            render: (v) => formatBagsJson(v),
         },
         {
             title: "총 금액",
             dataIndex: "totalPrice",
             key: "totalPrice",
             width: 120,
-            align: "right",
-            sorter: (a, b) => a.totalPrice - b.totalPrice,
+            align: "center",
             render: (v) => (v ? v.toLocaleString() + "원" : "-"),
         },
         {
@@ -280,7 +326,7 @@ const AdminDeliveryReservationPage = () => {
             },
         },
         {
-            title: "액션",
+            title: "관리",
             key: "action",
             width: 180,
             align: "center",
@@ -319,7 +365,6 @@ const AdminDeliveryReservationPage = () => {
                 scroll={{ x: 1300 }}
             />
 
-            {/* ✅ 수정 모달 */}
             <Modal
                 open={modalVisible}
                 title="예약 수정"

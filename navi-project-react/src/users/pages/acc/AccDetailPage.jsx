@@ -206,7 +206,7 @@ const AccDetailPage = () => {
 						rsvType: "ACC",   						     			
 						itemData: itemData,   		// 숙소 + 객실 정보
 						items,						// reserveId + amount
-						formData, 					// 예약자 정보까시 새롭게 포함한 formData
+						formData, 					// reserveId 갱신한 formData
 					})
 				);
 				
