@@ -50,26 +50,37 @@ public class DeliveryReservationServiceImpl implements DeliveryReservationServic
         String region = extractRegion(dto.getStartAddr());
         log.debug("[DEBUG] 추출된 지역(region): {}", region);
 
-        // 5. 시간대 (현재 오전 고정)
-        String timeSlot = "오전";
+        // 5. 시간대 설정 (DTO에 값이 없으면 자동 결정)
+        String timeSlot = dto.getTimeSlot();
+        if (timeSlot == null || timeSlot.isBlank()) {
+            int hour = java.time.LocalTime.now().getHour();
+            timeSlot = (hour < 12) ? "오전" : "오후";
+        }
         log.debug("[DEBUG] 사용된 시간대(timeSlot): {}", timeSlot);
 
+
         // 6. 그룹 자동 배정 또는 신규 생성
-        log.debug("[DEBUG] 기존 그룹 검색 시도 → region={}, date={}", region, dto.getDeliveryDate());
+        log.debug("[DEBUG] 기존 그룹 검색 시도 → region={}, date={}, timeSlot={}", region, dto.getDeliveryDate(), timeSlot);
+
+        final String regionFinal = region;
+        final LocalDate dateFinal = dto.getDeliveryDate();
+        final String timeSlotFinal = timeSlot;
+
         DeliveryGroup group = groupRepository
-                .findByRegionAndDeliveryDateAndTimeSlot(region, dto.getDeliveryDate(), timeSlot)
+                .findByRegionAndDeliveryDateAndTimeSlot(regionFinal, dateFinal, timeSlotFinal)
                 .orElseGet(() -> {
-                    String groupId = generateGroupId(region, dto.getDeliveryDate(), timeSlot);
+                    String groupId = generateGroupId(regionFinal, dateFinal, timeSlotFinal);
                     log.info("[DEBUG] 기존 그룹 없음 → 새 그룹 생성: {}", groupId);
                     DeliveryGroup newGroup = DeliveryGroup.builder()
                             .groupId(groupId)
-                            .region(region)
-                            .deliveryDate(dto.getDeliveryDate())
-                            .timeSlot(timeSlot)
+                            .region(regionFinal)
+                            .deliveryDate(dateFinal)
+                            .timeSlot(timeSlotFinal)
                             .status("READY")
                             .build();
                     return groupRepository.save(newGroup);
                 });
+
 
         // 7. 가방 정보 JSON 변환
         String bagsJson = null;

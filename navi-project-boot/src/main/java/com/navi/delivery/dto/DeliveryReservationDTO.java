@@ -42,6 +42,11 @@ public class DeliveryReservationDTO {
     private RsvStatus status;
 
     /**
+     * 배송 시간대 (선택: 오전/오후) - 향후 확장 대비
+     */
+    private String timeSlot;
+
+    /**
      * ✅ 가방 종류별 수량 정보 (예: {"S":2,"M":1,"L":0})
      */
     private Map<String, Integer> bags;
