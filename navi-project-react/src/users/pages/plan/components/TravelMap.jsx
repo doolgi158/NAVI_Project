@@ -201,9 +201,25 @@ export default function TravelMap({ markers = [], step }) {
     Object.keys(markersByDay).forEach((dayIdx) => {
       const group = markersByDay[dayIdx];
       const path = [];
-      const color = group[0]?.color || "#2F3E46";
+      const color = group[0]?.color || "#2765b6ff";
+
+      /** ✅ 타입별 색상 지정 */
+      const getTypeColor = (type) => {
+        switch (type) {
+          case "stay":
+            return "#EF476F"; // 붉은색 (숙소)
+          case "travel":
+            return "#0077B6"; // 파란색 (여행지)
+          case "poi":
+            return "#FFD166"; // 노란색 (공항, 포인트 등)
+          default:
+            return color;
+        }
+      };
+
 
       group.forEach((m, idx) => {
+        const color = getTypeColor(m.type);
         let label = "";
         if (m.type === "stay") label = "🏨 숙소";
         else if (m.type === "poi") label = "✈️ 공항";
@@ -216,7 +232,7 @@ export default function TravelMap({ markers = [], step }) {
         const polyline = new kakao.maps.Polyline({
           path,
           strokeWeight: 4,
-          strokeColor: color, // ✅ 일차별 색상
+          strokeColor: color, // ✅ 라인은 일차별 기본색
           strokeOpacity: 0.9,
           strokeStyle: "solid",
         });

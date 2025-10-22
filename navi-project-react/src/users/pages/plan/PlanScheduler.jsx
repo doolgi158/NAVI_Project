@@ -253,6 +253,10 @@ export default function PlanScheduler() {
                         it.img && it.img.trim() !== ""
                             ? it.img
                             : "https://placehold.co/150x150?text=No+Image",
+
+                    // ✅ 추가해야 할 부분
+                    startTime: it.startTime || "10:00",
+                    endTime: it.endTime || "22:00",
                 })),
             })),
         };
