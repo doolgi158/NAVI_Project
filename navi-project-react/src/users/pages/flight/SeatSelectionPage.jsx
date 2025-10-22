@@ -228,11 +228,18 @@ const SeatSelectPage = () => {
         state: {
           rsvType: "FLY",
           items,
-          passengerCount,
-          passengers,
+          formData: {
+            passengers,
+            passengerCount,
+            totalPrice,
+            selectedSeats,
+          },
+          itemData: {
+            selectedOutbound,
+            selectedInbound,
+          },
           outboundDto: isRoundTrip ? outboundDto : res.data.data,
           inboundDto: isRoundTrip ? res.data.data : null,
-          totalPrice,
         }
       });
     } catch (error) {

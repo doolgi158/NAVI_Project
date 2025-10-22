@@ -237,12 +237,16 @@ const FlightRsvInputPage = () => {
           reservation: [resOut.data.data, resIn?.data?.data].filter(Boolean),
           rsvType: "FLY",
           items,
-          passengerCount,
-          passengers,
-          totalPrice:
-            (selectedOutbound.price + (selectedInbound?.price || 0)) *
+          itemData: {
+            selectedOutbound,
+            selectedInbound,
+          },
+          formData: {
+            passengers,
             passengerCount,
-          autoAssign: true,
+            totalPrice,
+            autoAssign: true,
+          },
         },
       });
     } catch (error) {
