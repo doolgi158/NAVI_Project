@@ -172,7 +172,7 @@ const AccDetailPage = () => {
 			// 예약ID 추출
 			const generatedReserveId = res.data?.reserveId || (Array.isArray(res.data) && res.data[0]?.reserveId);
 			console.log(res.data?.reserveId, generatedReserveId);
-			
+
 			if (!generatedReserveId) {
 				console.warn("⚠️ 서버 응답:", res.data);
 				message.error("예약 ID 생성에 실패했습니다.");
@@ -192,7 +192,7 @@ const AccDetailPage = () => {
 					thumbnail: accData.accImages?.[0] || null,
 					room,
 				};
-				
+
 				// 결제 DTO 매핑용
 				const items = [
 					{
@@ -200,21 +200,21 @@ const AccDetailPage = () => {
 						amount: room.weekdayFee,
 					},
 				]
-				
+
 				dispatch(
 					setReserveData({
-						rsvType: "ACC",   						     			
+						rsvType: "ACC",
 						itemData: itemData,   		// 숙소 + 객실 정보
 						items,						// reserveId + amount
 						formData, 					// 예약자 정보까시 새롭게 포함한 formData
 					})
 				);
-				
+
 				// 예약 정보 입력 페이지로 이동
 				navigate("/accommodations/detail/reservation", {
 					state: {
 						rsvType: "ACC",
-						itemData,	
+						itemData,
 						items,
 						formData,
 					},
@@ -252,13 +252,13 @@ const AccDetailPage = () => {
 			<div className="min-h-screen flex justify-center pt-8 pb-10 px-6">
 				<div className="w-full max-w-6xl">
 					<div className="bg-white shadow-md rounded-2xl p-6">
-					{/* 숙소명 + 주소 */}
-					<div className="mb-5">
-						<Title level={3} className="text-gray-900 font-bold mb-1">
-							{accData.title}
-						</Title>
-						<Text className="text-sm text-gray-600">{accData.address}</Text>
-					</div>
+						{/* 숙소명 + 주소 */}
+						<div className="mb-5">
+							<Title level={3} className="text-gray-900 font-bold mb-1">
+								{accData.title}
+							</Title>
+							<Text className="text-sm text-gray-600">{accData.address}</Text>
+						</div>
 
 						{/* 이미지 + 지도 */}
 						<Row gutter={[16, 16]} className="mb-6">
@@ -323,33 +323,33 @@ const AccDetailPage = () => {
 							숙박 조건 선택
 						</Title>
 
-					<div className="flex flex-wrap gap-4 mb-8 items-end">
-						<div className="flex flex-col">
-							<Text className="text-sm text-gray-600 mb-2 font-medium">
-								숙박 일정
-							</Text>
-							<RangePicker
-								format="YYYY-MM-DD"
-								placeholder={["체크인", "체크아웃"]}
-								value={dateRange}
-								size="large"
-								onChange={(v) => setDateRange(v)}
-								disabledDate={(current) => {
-								// ✅ 오늘 이전 날짜 비활성화
-								const today = dayjs().startOf("day");
-								return current && current < today;
-								}}
-								onCalendarChange={(dates) => {
-								if (dates && dates[0] && dates[1]) {
-									const diff = dayjs(dates[1]).diff(dayjs(dates[0]), "day");
-									if (diff > 7) {
-									message.warning("최대 7박까지만 예약할 수 있습니다.");
-									setDateRange(null);
-									}
-								}
-								}}
-							/>
-						</div>
+						<div className="flex flex-wrap gap-4 mb-8 items-end">
+							<div className="flex flex-col">
+								<Text className="text-sm text-gray-600 mb-2 font-medium">
+									숙박 일정
+								</Text>
+								<RangePicker
+									format="YYYY-MM-DD"
+									placeholder={["체크인", "체크아웃"]}
+									value={dateRange}
+									size="large"
+									onChange={(v) => setDateRange(v)}
+									disabledDate={(current) => {
+										// ✅ 오늘 이전 날짜 비활성화
+										const today = dayjs().startOf("day");
+										return current && current < today;
+									}}
+									onCalendarChange={(dates) => {
+										if (dates && dates[0] && dates[1]) {
+											const diff = dayjs(dates[1]).diff(dayjs(dates[0]), "day");
+											if (diff > 7) {
+												message.warning("최대 7박까지만 예약할 수 있습니다.");
+												setDateRange(null);
+											}
+										}
+									}}
+								/>
+							</div>
 
 							<div className="flex flex-col">
 								<Text className="text-sm text-gray-600 mb-2 font-medium">

@@ -3,11 +3,13 @@ package com.navi.room.service;
 import com.navi.accommodation.domain.Acc;
 import com.navi.accommodation.repository.AccRepository;
 import com.navi.room.domain.Room;
+import com.navi.room.domain.RoomStock;
 import com.navi.room.dto.api.RoomApiDTO;
 import com.navi.room.dto.request.RoomRequestDTO;
 import com.navi.room.dto.response.RoomListResponseDTO;
 import com.navi.room.dto.response.RoomResponseDTO;
 import com.navi.room.repository.RoomRepository;
+import com.navi.room.repository.StockRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -25,13 +26,14 @@ import java.util.stream.Collectors;
 public class RoomServiceImpl implements RoomService {
     private final AccRepository accRepository;
     private final RoomRepository roomRepository;
+    private final StockRepository stockRepository;
     private final StockService stockService;
 
     /* 관리자 전용 CRUD  */
     @Override
-    public RoomResponseDTO createRoom(Long accNo, RoomRequestDTO dto) {
-        Acc acc = accRepository.findById(accNo)
-                .orElseThrow(() -> new IllegalArgumentException("숙소가 존재하지 않습니다."));
+    public RoomResponseDTO createRoom(RoomRequestDTO dto) {
+        Acc acc = accRepository.findById(dto.getAccNo())
+                .orElseThrow(() -> new IllegalArgumentException("해당 숙소가 존재하지 않습니다. accNo=" + dto.getAccNo()));
 
         Long nextSeq = roomRepository.getNextSeqVal();
         String roomId = String.format("ROM%04d", nextSeq);
@@ -51,7 +53,8 @@ public class RoomServiceImpl implements RoomService {
                 .build();
 
         Room saved = roomRepository.save(room);
-        log.info("[ADMIN] 객실 등록 완료 → {} ({})", saved.getRoomName(), acc.getTitle());
+        initializeRoomStock(saved);
+
         return RoomResponseDTO.fromEntity(saved);
     }
 
@@ -69,19 +72,31 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public List<RoomApiDTO> getRoomListByAcc(Long accNo, String keyword) {
-        return List.of();
+        Acc acc = accRepository.findById(accNo)
+                .orElseThrow(() -> new IllegalArgumentException("숙소가 존재하지 않습니다."));
+
+        List<Room> rooms = roomRepository.findByAcc(acc);
+
+        if (keyword != null && !keyword.isBlank()) {
+            rooms = rooms.stream()
+                    .filter(r -> r.getRoomName().toLowerCase().contains(keyword.toLowerCase()))
+                    .toList();
+        }
+
+        return rooms.stream()
+                .map(RoomApiDTO::fromEntity)
+                .toList();
     }
 
     @Override
-    public List<RoomResponseDTO> getRooms(String accId) {
-        Acc acc = accRepository.findByAccId(accId)
-                .orElseThrow(() -> new IllegalArgumentException("숙소가 존재하지 않습니다."));
+    @Transactional(readOnly = true)
+    public RoomResponseDTO getRooms(Long roomNo) {
+        log.info("🔍 객실 상세 조회 요청 - roomNo={}", roomNo);
 
-        List<Room> rooms = roomRepository.findByAcc_AccId(accId);
+        Room room = roomRepository.findById(roomNo)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 객실입니다."));
 
-        return rooms.stream()
-                .map(RoomResponseDTO::fromEntity)
-                .collect(Collectors.toList());
+        return RoomResponseDTO.of(room);
     }
 
     @Override
@@ -90,6 +105,33 @@ public class RoomServiceImpl implements RoomService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 객실입니다."));
         roomRepository.delete(room);
         log.info("[ADMIN] 객실 삭제 완료 → {} ({})", room.getRoomName(), room.getAcc().getTitle());
+    }
+
+    @Override
+    public void initializeRoomStock(Room room) {
+        LocalDate today = LocalDate.now();
+        for (int i = 0; i < 30; i++) {
+            RoomStock stock = RoomStock.builder()
+                    .room(room)
+                    .stockDate(today.plusDays(i))
+                    .remainCount(room.getRoomCnt())
+                    .isAvailable(true)
+                    .version(0L)
+                    .build();
+            stockRepository.save(stock);
+        }
+    }
+
+    @Override
+    public List<RoomResponseDTO> getRoomsByAcc(Long accNo) {
+        Acc acc = accRepository.findById(accNo)
+                .orElseThrow(() -> new IllegalArgumentException("숙소가 존재하지 않습니다."));
+
+        List<Room> rooms = roomRepository.findByAcc(acc);
+
+        return rooms.stream()
+                .map(RoomResponseDTO::fromEntity)
+                .toList();
     }
 
     /* 사용자 전용 - 객실 리스트 / 조건 검색  */

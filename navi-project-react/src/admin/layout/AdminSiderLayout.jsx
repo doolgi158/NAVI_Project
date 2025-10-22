@@ -37,8 +37,8 @@ const AdminSiderLayout = () => {
     "0": () => navigate("/adm/dashboard"),
     "1": () => navigate("/adm/users"),
     "2": () => navigate("/adm/travel"),
-    "3": () => navigate("/adm/accommodations"),
-    "3-1": () => navigate("/adm/rooms"),
+    "3-1": () => navigate("/adm/accommodations"),
+    "3-2": () => navigate("/adm/rooms"),
     "4": () => navigate("/adm/flight"),
     "5": () => navigate("/adm/plans"),
     "6": () => navigate("/adm/deliveries"),
@@ -58,14 +58,22 @@ const AdminSiderLayout = () => {
         <Menu
           mode="inline"
           defaultSelectedKeys={["0"]}
+          defaultOpenKeys={["3"]}
           style={{ borderRight: 0 }}
           onClick={handleMenuClick}
           items={[
             { key: "0", icon: <DashboardOutlined />, label: "대시보드" },
             { key: "1", icon: <UserOutlined />, label: "사용자 관리" },
             { key: "2", icon: <HomeOutlined />, label: "여행지 관리" },
-            { key: "3", icon: <ApartmentOutlined />, label: "숙소 관리" },
-            { key: "3-1", icon: <KeyOutlined />, label: "객실 관리" },
+            {
+              key: "3",
+              icon: <ApartmentOutlined />,
+              label: "숙박 관리",
+              children: [
+                { key: "3-1", icon: <ApartmentOutlined />, label: "숙소 관리" },
+                { key: "3-2", icon: <KeyOutlined />, label: "객실 관리" },
+              ],
+            },
             { key: "4", icon: <RocketOutlined />, label: "항공편 관리" },
             { key: "5", icon: <CalendarOutlined />, label: "여행 계획 관리" },
             { key: "6", icon: <DropboxOutlined />, label: "짐 배송 관리" },
