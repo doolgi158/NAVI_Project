@@ -39,19 +39,8 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // 정적 리소스 핸들링
-        registry.addResourceHandler("/uploads/**", "/images/**")
-                .addResourceLocations(uploadDir, "file:" + uploadDir + "/");
-        registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:./uploads/");
-        // ✅ 현재 실행 위치를 기준으로 상대경로 ../images 보정
-        String imagePath = Paths.get(System.getProperty("user.dir"), "../images")
-                .normalize()
-                .toAbsolutePath()
-                .toString()
-                .replace("\\", "/");
-
+        String basePath = "C:/navi-project/images/";
         registry.addResourceHandler("/images/**")
-                .addResourceLocations("file:" + imagePath + "/")
-                .addResourceLocations("file:///C:/navi-project/images/");
+                .addResourceLocations("file:" + basePath);
     }
 }

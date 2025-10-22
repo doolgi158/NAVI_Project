@@ -226,7 +226,7 @@ function BoardDetail() {
         .then(result => {
           if (result === 'success') {
             alert('삭제되었습니다.');
-            navigate('/client/board')
+            navigate('/board')
           }
         })
         .catch(error => {
@@ -429,7 +429,7 @@ const renderComment = (comment, depth = 0) => (
             </div>
           ) : (
             <>
-              <Link to="/client/board" className="btn-list">
+              <Link to="/board" className="btn-list">
                 목록으로
               </Link>
               

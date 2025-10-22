@@ -38,7 +38,7 @@ const root = createBrowserRouter([
     },
     {
         path:"/adm",
-        children: [...AdminRouter()]
+        children: [...AdminRouter(), ...ManagerRouter()]
     },
     {
         path:"/accommodations",
@@ -56,14 +56,7 @@ const root = createBrowserRouter([
         path: "/payments",
         children: [...PaymentRouter()]
     },
-    {
-    path: "/client",
-    children: [...ClientRouter()],
-    },
-    {
-      path: "/manager",
-      children: [...ManagerRouter()],
-    },
+    ...ClientRouter(),
     {
     path: "*",
        element: <Suspense fallback={Loading}><Main /></Suspense>

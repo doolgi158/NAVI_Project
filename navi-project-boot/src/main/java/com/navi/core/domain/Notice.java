@@ -51,6 +51,7 @@ public class Notice {
     //조회수
     @Column(name = "notice_viewCount")
     @ColumnDefault("0")
+    @Builder.Default
     private Integer noticeViewCount = 0;
 
     //시작일

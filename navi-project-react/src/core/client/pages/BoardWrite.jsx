@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import "../css/BoardWrite.css";
+import MainLayout from '@/users/layout/MainLayout';
 
 function BoardWrite() {
   const navigate = useNavigate();
@@ -9,20 +10,6 @@ function BoardWrite() {
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
   const [isDragging, setIsDragging] = useState(false);
-
-  // 이미지 업로드
-  const uploadImage = async (file) => {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    const response = await fetch('/api/board/upload', {
-      method: 'POST',
-      body: formData
-    });
-
-    const data = await response.json();
-    return data.imageUrl;
-  };
 
   // 파일 선택
   const handleFileSelect = (e) => {
@@ -91,26 +78,28 @@ function BoardWrite() {
     }
 
     try {
-      let imageUrl = '';
+      // FormData 생성
+      const formData = new FormData();
+      formData.append('title', title);
+      formData.append('content', content);
       
-      // 이미지가 있으면 업로드
+      // 이미지가 있으면 추가
       if (image) {
-        imageUrl = await uploadImage(image);
+        formData.append('image', image);
       }
 
       // 게시글 저장
-      await fetch('/api/board', {
+      const response = await fetch('/api/board', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: title,
-          content: content,
-          image: imageUrl
-        })
+        body: formData  // FormData 전송 (Content-Type 자동 설정)
       });
 
-      alert('작성되었습니다!');
-      navigate('/client/board');
+      if (response.ok) {
+        alert('작성되었습니다!');
+        navigate('/board');
+      } else {
+        throw new Error('작성 실패');
+      }
     } catch (error) {
       console.error('작성 실패:', error);
       alert('작성에 실패했습니다.');
@@ -118,6 +107,7 @@ function BoardWrite() {
   };
 
   return (
+    <MainLayout>
     <div className="board-write-container">
       <h2>게시글 작성</h2>
 
@@ -129,7 +119,7 @@ function BoardWrite() {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="제목을 입력하세요"
-            maxLength="30"
+            maxLength="100"
           />
         </div>
 
@@ -145,7 +135,7 @@ function BoardWrite() {
 
         {/* 이미지 업로드 영역 */}
         <div className="form-group">
-          <label>이미지</label>
+          <label>이미지 (선택)</label>
           
           <div
             className={`image-upload-area ${isDragging ? 'dragging' : ''}`}
@@ -186,13 +176,14 @@ function BoardWrite() {
         </div>
 
         <div className="button-group">
-          <button type="button" onClick={() => navigate('/client/board')}>
+          <button type="button" onClick={() => navigate('/board')}>
             취소
           </button>
           <button type="submit">작성</button>
         </div>
       </form>
     </div>
+    </MainLayout>
   );
 }
 

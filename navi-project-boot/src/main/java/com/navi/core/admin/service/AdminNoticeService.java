@@ -27,14 +27,12 @@ public class AdminNoticeService {
         return AdminNoticeDTO.builder()
                 .noticeNo(notice.getNoticeNo())
                 .noticeTitle(notice.getNoticeTitle())
-                .noticeFile(notice.getNoticeFile())
                 .noticeContent(notice.getNoticeContent())
                 .createDate(notice.getCreateDate())
                 .updateDate(notice.getUpdateDate())
                 .noticeViewCount(notice.getNoticeViewCount())
                 .noticeStartDate(notice.getNoticeStartDate())
                 .noticeEndDate(notice.getNoticeEndDate())
-                .noticeAttachFile(notice.getNoticeFile())
                 .build();
     }
 
@@ -43,12 +41,10 @@ public class AdminNoticeService {
         return Notice.builder()
                 .noticeNo(dto.getNoticeNo())
                 .noticeTitle(dto.getNoticeTitle())
-                .noticeFile(dto.getNoticeFile())
                 .noticeContent(dto.getNoticeContent())
                 .noticeViewCount(dto.getNoticeViewCount())
                 .noticeStartDate(dto.getNoticeStartDate())
                 .noticeEndDate(dto.getNoticeEndDate())
-                .noticeFile(dto.getNoticeAttachFile())
                 .build();
     }
 
@@ -84,8 +80,6 @@ public class AdminNoticeService {
 
         notice.setNoticeTitle(noticeDTO.getNoticeTitle());
         notice.setNoticeContent(noticeDTO.getNoticeContent());
-        notice.setNoticeFile(noticeDTO.getNoticeFile());
-        notice.setNoticeFile(noticeDTO.getNoticeAttachFile());
         notice.setNoticeStartDate(noticeDTO.getNoticeStartDate());
         notice.setNoticeEndDate(noticeDTO.getNoticeEndDate());
 

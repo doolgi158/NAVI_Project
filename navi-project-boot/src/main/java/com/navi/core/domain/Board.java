@@ -29,7 +29,7 @@ public class Board {
     @Column(name = "board_no")
     private Integer boardNo;
 
-    @Column(name = "board_title")
+    @Column(name = "board_title", nullable = false)
     private String boardTitle;
 
     @Column(name = "board_good")
@@ -46,10 +46,14 @@ public class Board {
     private Integer boardViewCount = 0;
 
     @Lob
-    @Column(name = "board_content")
+    @Column(name = "board_content", nullable = false)
     private String boardContent;
 
-    @Column(name = "user_no")
+    /**
+     * 작성자 번호 (NAVI_USER 테이블의 user_no 참조)
+     * 로그인한 사용자의 번호가 저장됨
+     */
+    @Column(name = "user_no", nullable = false)
     private Integer userNo;
 
     @CreationTimestamp
@@ -60,6 +64,17 @@ public class Board {
     @Column(name = "update_date")
     private LocalDateTime updateDate;
 
+    /**
+     * 이미지 URL (Image 테이블과 연동)
+     * targetType="BOARD", targetId=boardNo로 조회
+     */
     @Column(name = "board_image")
     private String boardImage;
+
+    /**
+     * 게시글 작성자 확인
+     */
+    public boolean isAuthor(Integer currentUserNo) {
+        return this.userNo.equals(currentUserNo);
+    }
 }

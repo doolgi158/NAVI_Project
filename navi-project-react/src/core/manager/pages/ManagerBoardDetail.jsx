@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { getBoardById, deleteBoard } from './ManagerBoardService';
 import '../css/ManagerBoardDetail.css';
+
 function ManagerBoardDetail() {
   const [searchParams] = useSearchParams();
   const boardId = searchParams.get('id');

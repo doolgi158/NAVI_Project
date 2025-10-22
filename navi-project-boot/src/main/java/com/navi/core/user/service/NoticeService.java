@@ -24,14 +24,12 @@ public class NoticeService {
         return NoticeDTO.builder()
                 .noticeNo(notice.getNoticeNo())
                 .noticeTitle(notice.getNoticeTitle())
-                .noticeFile(notice.getNoticeFile())
                 .noticeContent(notice.getNoticeContent())
                 .createDate(notice.getCreateDate())
                 .updateDate(notice.getUpdateDate())
                 .noticeViewCount(notice.getNoticeViewCount())
                 .noticeStartDate(notice.getNoticeStartDate())
                 .noticeEndDate(notice.getNoticeEndDate())
-                .noticeAttachFile(notice.getNoticeFile())
                 .build();
     }
 
