@@ -32,14 +32,14 @@ const AdminDeliveryGroupPage = () => {
     // ✅ 상태 색상 정의
     const getStatusTag = (status) => {
         const colorMap = {
-            READY: "blue",
+            READY: "default",
             IN_PROGRESS: "orange",
-            DONE: "green",
+            COMPLETED: "green",
         };
         const labelMap = {
             READY: "준비중",
             IN_PROGRESS: "배송중",
-            DONE: "완료",
+            COMPLETED: "완료",
         };
         return <Tag color={colorMap[status]}>{labelMap[status] || status}</Tag>;
     };
@@ -48,8 +48,8 @@ const AdminDeliveryGroupPage = () => {
     const handleStatusChange = async (record) => {
         const nextStatusMap = {
             READY: "IN_PROGRESS",
-            IN_PROGRESS: "DONE",
-            DONE: "READY",
+            IN_PROGRESS: "COMPLETED",
+            COMPLETED: "READY",
         };
         const nextStatus = nextStatusMap[record.status] || "READY";
 

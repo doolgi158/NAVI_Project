@@ -17,5 +17,4 @@ public interface DeliveryReservationRepository extends JpaRepository<DeliveryRes
     int countByGroup_GroupId(String groupId);
 
     List<DeliveryReservation> findByGroup_GroupId(String groupId);
-
 }

@@ -181,6 +181,7 @@ const AdminDeliveryReservationPage = () => {
                 { text: "PAID", value: "PAID" },
                 { text: "CANCELLED", value: "CANCELLED" },
                 { text: "FAILED", value: "FAILED" },
+                { text: "COMPLETE", value: "COMPLETE" },
             ],
             onFilter: (value, record) => record.status === value,
             render: (value) => {
@@ -189,6 +190,7 @@ const AdminDeliveryReservationPage = () => {
                     PAID: "blue",
                     CANCELLED: "volcano",
                     FAILED: "red",
+                    COMPLETE: "green",
                 };
                 return <Tag color={colors[value]}>{value}</Tag>;
             },
