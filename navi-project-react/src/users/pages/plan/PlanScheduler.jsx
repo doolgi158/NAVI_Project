@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { Button, Splitter, Modal, TimePicker, message } from "antd";
+import { Button, Splitter, Modal, TimePicker, message, DatePicker } from "antd";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import TravelMap from "./components/TravelMap";
 import FooterLayout from "@/users/layout/FooterLayout";
 import HeaderLayout from "@/users/layout/HeaderLayout";
+import TitleModal from "@/users/pages/plan/components/TitleModal";
+import DateModal from "@/users/pages/plan/components/DateModal";
 import { savePlan, updatePlan, getPlanDetail } from "@/common/api/planApi";
 import { getCookie } from "@/common/util/cookie";
 import { EditOutlined } from "@ant-design/icons";
@@ -25,6 +27,10 @@ export default function PlanScheduler() {
     const isEditMode = mode === "edit";
 
     const [meta, setMeta] = useState({ ...(state?.meta || {}) });
+    const [titleModalOpen, setTitleModalOpen] = useState(false);
+    const [dateModalOpen, setDateModalOpen] = useState(false);
+
+
 
     // 플래너에서 넘어온 일자별 기본 시간 맵(없으면 10~22 기본)
     const initialDayTimes = state?.dayTimes || {};
@@ -554,16 +560,46 @@ export default function PlanScheduler() {
                             </div>
 
                             {/* ✅ 일정 리스트 (이곳만 스크롤 가능) */}
-                            <div className="flex-1 p-10 overflow-y-auto custom-scroll">
-                                <div className="pb-6 bg-white sticky top-0 z-10">
-                                    <h2 className="text-xl font-semibold text-[#2F3E46]">{meta.title || "전체 일정"}</h2>
-                                    <div className="text-gray-500 text-sm">
-                                        {meta.startDate} ~ {meta.endDate}
+                            <div className="flex-1 p-10 overflow-y-auto custom-scroll ">
+                                <div className=" border-b-2 mb-10">
+                                    <div className="flex items-center gap-2">
+                                        <h2 className="text-2xl font-semibold text-[#2F3E46] ">
+                                            {meta.title || "여행 제목 없음"}
+                                        </h2>
+                                        {!isViewMode && (
+                                            <Button
+                                                type="text"
+                                                size="small"
+                                                icon={<EditOutlined />}
+                                                onClick={() => setTitleModalOpen(true)}
+                                                className="hover:text-[#0A3D91]"
+                                            />
+                                        )}
                                     </div>
-                                    <div className="text-gray-600 text-sm mt-1">
-                                        * 각 일차 첫 일정은 시작시간, 마지막 일정은 종료시간이 자동 표시됩니다. 중간은 빈값입니다.
+
+
+                                    <div className="flex items-center gap-2 text-gray-500 text-base pb-2 border-b-2">
+                                        <span>
+                                            {meta.startDate} ~ {meta.endDate}
+                                        </span>
+                                        {!isViewMode && (
+                                            <Button
+                                                type="text"
+                                                size="small"
+                                                icon={<EditOutlined />}
+                                                onClick={() => setDateModalOpen(true)}
+                                                className="hover:text-[#0A3D91]"
+                                            />
+                                        )}
+                                    </div>
+
+
+                                    <div className="text-gray-400 text-sm mt-3 mb-5 ">
+                                        * 각 일차 첫 일정은 시작시간, 마지막 일정은 종료시간이 자동 표시됩니다. <br /> * 나머지 일정은 직접 시간을 입력할 수 있습니다.
                                     </div>
                                 </div>
+
+
 
                                 <DragDropContext onDragEnd={handleDragEnd}>
                                     {activeDayIdx === -1 ? (
@@ -606,7 +642,7 @@ export default function PlanScheduler() {
                         <TravelMap markers={markers} step={6} />
                     </Splitter.Panel>
                 </Splitter>
-            </div>
+            </div >
 
 
             <Modal
@@ -700,6 +736,26 @@ export default function PlanScheduler() {
                     둘 다 비우면 시간 미지정으로 처리되어 정렬 대상에서 제외됩니다.
                 </div>
             </Modal>
+
+            <TitleModal
+                open={titleModalOpen}
+                title={meta.title || ""}
+                setTitle={(newTitle) => setMeta((prev) => ({ ...prev, title: newTitle }))}
+                setStep={() => setTitleModalOpen(false)} // 닫기만
+                isEditMode={true}
+            />
+
+            <DateModal
+                open={dateModalOpen}
+                setStep={() => setDateModalOpen(false)} // 닫기용
+                setDateRange={() => { }} // 필요 없음
+                resetAll={() => { }} // 수정모드에서는 사용 안 함
+                isEditMode={true}
+                meta={meta}
+                setMeta={setMeta}
+                days={days}
+                setDays={setDays}
+            />
 
 
             <FooterLayout />
