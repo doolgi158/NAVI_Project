@@ -72,20 +72,34 @@ public class FlyPaymentService {
 
         // 금액 검증
         BigDecimal expectedTotal = BigDecimal.ZERO;
-        if (dto.getItems() != null && !dto.getItems().isEmpty()) {
+
+        if (dto.getItems() == null || dto.getItems().isEmpty()) {
+            log.warn("⚠️ [결제 검증] items 데이터가 비어있습니다. reserveIds={}", dto.getReserveId());
+        } else {
             expectedTotal = dto.getItems().stream()
                     .map(item -> {
+                        if (item == null) return BigDecimal.ZERO;
+
                         BigDecimal amount = BigDecimal.ZERO;
                         try {
-                            if (item.getAmount() != null) {
-                                amount = item.getAmount();
-                            } else {
-                                log.warn("⚠️ [금액 누락] reserveId={} amount=null", item.getReserveId());
+                            if (item.getAmount() == null) {
+                                log.warn("⚠️ [결제 검증] 금액 누락 - reserveId={} (null로 처리)", item.getReserveId());
+                                return BigDecimal.ZERO;
                             }
+                            amount = item.getAmount();
+                            if (amount.compareTo(BigDecimal.ZERO) < 0) {
+                                log.warn("⚠️ [결제 검증] 금액이 음수입니다. reserveId={} amount={}",
+                                        item.getReserveId(), amount);
+                                return BigDecimal.ZERO;
+                            }
+                            log.debug("💰 [결제 검증] reserveId={} amount={}",
+                                    item.getReserveId(), amount);
+                            return amount;
                         } catch (Exception e) {
-                            log.warn("⚠️ [금액 변환 오류] reserveId={}, msg={}", item.getReserveId(), e.getMessage());
+                            log.error("❌ [결제 검증] 금액 변환 오류 - reserveId={}, msg={}",
+                                    item.getReserveId(), e.getMessage());
+                            return BigDecimal.ZERO;
                         }
-                        return amount;
                     })
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
         }

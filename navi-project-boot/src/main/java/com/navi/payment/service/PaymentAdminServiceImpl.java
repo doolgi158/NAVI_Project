@@ -38,38 +38,9 @@ public class PaymentAdminServiceImpl implements PaymentAdminService {
         (RsvType rsvType, PaymentStatus paymentStatus, String keyword) {
         log.info("🔍 [ADMIN] 결제내역 조회 요청 - rsvType={}, paymentStatus={}, keyword={}", rsvType, paymentStatus, keyword);
 
-        List<PaymentMaster> resultList;
+        List<PaymentMaster> resultList =
+                paymentRepository.findAllMastersDynamic(rsvType, paymentStatus, keyword);
 
-        boolean hasType = (rsvType != null);
-        boolean hasStatus = (paymentStatus != null);
-        boolean hasKeyword = (keyword != null && !keyword.isBlank());
-
-        if (hasKeyword) {
-            // 키워드 검색 (merchantId 또는 reserveId)
-            Optional<PaymentMaster> byMerchantId = paymentRepository.findOneByMerchantId(keyword);
-            if (byMerchantId.isPresent()) {
-                resultList = List.of(byMerchantId.get());
-            } else {
-                List<PaymentDetail> foundDetails = paymentDetailRepository.findAdminDetailsByReserveId(keyword);
-
-                if (!foundDetails.isEmpty()) {
-                    resultList = foundDetails.stream()
-                            .map(PaymentDetail::getPaymentMaster)
-                            .distinct()
-                            .toList();
-                } else {
-                    resultList = Collections.emptyList();
-                }
-            }
-        } else if (hasType) {
-            resultList = paymentRepository.findAllMastersByRsvType(rsvType);
-        } else if (hasStatus) {
-            resultList = paymentRepository.findAllMastersByStatus(paymentStatus);
-        } else {
-            resultList = paymentRepository.findAllMasters();
-        }
-
-        // DTO 변환
         return resultList.stream()
                 .map(PaymentAdminListResponseDTO::fromEntity)
                 .collect(Collectors.toList());

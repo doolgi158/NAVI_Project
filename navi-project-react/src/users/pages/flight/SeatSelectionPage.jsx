@@ -199,14 +199,17 @@ const SeatSelectPage = () => {
       if (isRoundTrip && outboundDto?.frsvId) {
         items.push({
           reserveId: outboundDto.frsvId,
-          amount: selectedOutbound.price,
+          amount: selectedOutbound.price * passengerCount,
         });
       }
 
       // 지금 예약(편도 or 귀국편) 추가
       items.push({
         reserveId: res?.data?.data?.frsvId,
-        amount: selectedInbound?.price || 0,
+        amount:
+          (step === "inbound"
+            ? (selectedInbound?.price || 0)
+            : (selectedOutbound?.price || 0)) * passengerCount,
       });
       
       dispatch(setReserveData({

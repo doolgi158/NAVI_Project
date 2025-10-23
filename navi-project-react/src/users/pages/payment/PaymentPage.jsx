@@ -52,6 +52,7 @@ const PaymentPage = () => {
 	/* Redux에 결제 금액 저장 */
 	useEffect(() => {
 		if (totalAmount && totalAmount > 0) {
+			console.log(totalAmount);
 			dispatch(setPaymentData({ totalAmount }));
 			console.log("✅ [PaymentPage] 결제 금액 Redux 저장 완료:", totalAmount);
 		} else {

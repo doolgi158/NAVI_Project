@@ -46,6 +46,22 @@ const AdminPaymentListPage = () => {
     total: 0,
   });
 
+  /* === 색상 맵 정의 === */
+  const statusColorMap = {
+    READY: "default",
+    PAID: "green",
+    FAILED: "volcano",
+    CANCELLED: "magenta",
+    REFUNDED: "red",
+    PARTIAL_REFUNDED: "orange",
+  };
+
+  const rsvTypeColorMap = {
+    ACC: "geekblue",
+    FLY: "cyan",
+    DLV: "purple",
+  };
+
   /* === 데이터 조회 === */
   const fetchPayments = async () => {
     try {
@@ -86,6 +102,7 @@ const AdminPaymentListPage = () => {
     }
   };
 
+  /* === 전체 환불 === */
   const handleFullRefund = (merchantId, rsvType) => {
     Modal.confirm({
       title: "전체 환불 확인",
@@ -96,18 +113,24 @@ const AdminPaymentListPage = () => {
       async onOk() {
         try {
           const token = localStorage.getItem("accessToken");
+
+          const refundRequest = {
+            merchantId,
+            rsvType,
+            reason: `[관리자 전체 환불] ${rsvType}`,
+          };
+
           await axios.post(
-            `${API_SERVER_HOST}/api/adm/payment/refund`,
-            null,
-            {
-              params: { merchantId, reason: `[관리자 전체 환불] ${rsvType}` },
-              headers: { Authorization: `Bearer ${token}` },
-            }
+            `${API_SERVER_HOST}/api/adm/payment/refund/master`,
+            refundRequest,
+            { headers: { Authorization: `Bearer ${token}` } }
           );
+
           message.success("전체 환불이 완료되었습니다.");
           fetchPaymentDetails(merchantId);
           setExpandedRowKeys([merchantId]);
-        } catch {
+        } catch (err) {
+          console.error(err);
           message.error("환불 처리 중 오류가 발생했습니다.");
         }
       },
@@ -133,7 +156,7 @@ const AdminPaymentListPage = () => {
       width: 90,
       fixed: "left",
       render: (type) => (
-        <Tag color={type === "ACC" ? "blue" : type === "FLY" ? "cyan" : "green"}>
+        <Tag color={rsvTypeColorMap[type]}>
           {type === "ACC" ? "숙소" : type === "FLY" ? "항공" : "짐배송"}
         </Tag>
       ),
@@ -144,13 +167,15 @@ const AdminPaymentListPage = () => {
       align: "center",
       width: 100,
       render: (s) => {
-        const colorMap = { PAID: "green", REFUNDED: "red", FAILED: "volcano" };
         const labelMap = {
+          READY: "결제준비",
           PAID: "결제완료",
+          FAILED: "결제실패",
+          CANCELLED: "결제취소",
           REFUNDED: "환불완료",
-          FAILED: "실패",
+          PARTIAL_REFUNDED: "부분환불",
         };
-        return <Tag color={colorMap[s]}>{labelMap[s] || s}</Tag>;
+        return <Tag color={statusColorMap[s]}>{labelMap[s] || s}</Tag>;
       },
     },
     { title: "수단", dataIndex: "paymentMethod", align: "center", width: 100 },
@@ -224,13 +249,12 @@ const AdminPaymentListPage = () => {
       align: "center",
       width: 100,
       render: (s) => {
-        const colorMap = { PAID: "green", REFUNDED: "red", FAILED: "volcano" };
         const labelMap = {
           PAID: "결제완료",
           REFUNDED: "환불완료",
           FAILED: "실패",
         };
-        return <Tag color={colorMap[s]}>{labelMap[s] || s}</Tag>;
+        return <Tag color={statusColorMap[s]}>{labelMap[s] || s}</Tag>;
       },
     },
     {
@@ -298,7 +322,7 @@ const AdminPaymentListPage = () => {
                     scroll={{ x: 900 }}
                   />
 
-                  {/* ✅ 버튼 2개를 오른쪽에 붙여서 배치 */}
+                  {/* ✅ 버튼 2개 오른쪽 정렬 */}
                   <Row justify="end" style={{ marginTop: 12, marginRight: 10 }}>
                     <Space>
                       <Button

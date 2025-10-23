@@ -20,7 +20,8 @@ public class StockTimeoutScheduler {
     private final RoomRsvRepository roomRsvRepository;
     private final StockService stockService;
 
-    //@Scheduled(fixedRate = 60000) // (1분 마다 실행)
+
+    @Scheduled(initialDelay = 60000, fixedRate = 60000) // (1분 마다 실행)
     @Transactional
     public void cancelExpiredReservations() {
         LocalDateTime now = LocalDateTime.now();
