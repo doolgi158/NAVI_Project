@@ -10,6 +10,7 @@ import {
   Typography,
   Row,
   Col,
+  Modal
 } from "antd";
 import dayjs from "dayjs";
 import axios from "axios";
@@ -78,6 +79,22 @@ const DeliveryPage = () => {
       bags.L * BAG_PRICE_TABLE.L;
     setEstimatedFare(total);
   }, [bags]);
+
+  /** ✅ 지도 준비 완료 후 기본 공항 주소 자동 세팅 */
+  useEffect(() => {
+    if (!isMapReady || !mapRef.current) return;
+
+    // 기본 배송 방향이 공항 → 숙소일 경우
+    if (form.deliveryType === "AIRPORT_TO_HOTEL" && !form.fromAddress) {
+      const marker = setAirportMarker("fromAddress");
+      markersRef.current.fromAddress = marker;
+    }
+    // 기본 배송 방향이 숙소 → 공항일 경우
+    else if (form.deliveryType === "HOTEL_TO_AIRPORT" && !form.toAddress) {
+      const marker = setAirportMarker("toAddress");
+      markersRef.current.toAddress = marker;
+    }
+  }, [isMapReady, form.deliveryType]);
 
   /** ✅ 지도 초기화 */
   useEffect(() => {
@@ -224,7 +241,44 @@ const DeliveryPage = () => {
       );
     }
   };
+  /** ✅ 예약 전 확인 모달 */
+  const showConfirmModal = () => {
+    const required = [
+      "senderName",
+      "phone",
+      "fromAddress",
+      "toAddress",
+      "deliveryDate",
+    ];
+    const missing = required.find((k) => !form[k]);
+    if (missing) return message.warning("모든 정보를 입력해주세요.");
 
+    const totalBags = bags.S + bags.M + bags.L;
+    if (totalBags === 0)
+      return message.warning("가방 개수를 1개 이상 입력해주세요.");
+
+    Modal.confirm({
+      title: "예약 정보 확인",
+      centered: true,
+      width: 420,
+      content: (
+        <div style={{ lineHeight: 1.8 }}>
+          <p><b>이름:</b> {form.senderName}</p>
+          <p><b>전화번호:</b> {form.phone}</p>
+          <p><b>출발지:</b> {form.fromAddress}</p>
+          <p><b>도착지:</b> {form.toAddress}</p>
+          <p><b>날짜:</b> {form.deliveryDate?.format("YYYY-MM-DD")}</p>
+          <p><b>시간대:</b> {form.timeSlot || "미선택"}</p>
+          <p><b>가방:</b> S({bags.S}) / M({bags.M}) / L({bags.L})</p>
+          <p><b>예상 요금:</b> {estimatedFare.toLocaleString()}원</p>
+          {form.memo && <p><b>요청사항:</b> {form.memo}</p>}
+        </div>
+      ),
+      okText: "확인",
+      cancelText: "취소",
+      onOk: handleSubmit, // ✅ 확인 시 실제 예약 처리
+    });
+  };
   /** ✅ 예약 처리 */
   const handleSubmit = async () => {
     const required = [
@@ -400,9 +454,9 @@ const DeliveryPage = () => {
                 ))}
               </Row>
 
+              <Text strong>요청사항(선택)</Text>
               <Input.TextArea
                 rows={2}
-                placeholder="요청사항 (선택)"
                 value={form.memo}
                 onChange={(e) => handleChange("memo", e.target.value)}
                 style={{ marginBottom: 10 }}
@@ -430,7 +484,7 @@ const DeliveryPage = () => {
                 block
                 size="middle"
                 style={{ fontWeight: 600, borderRadius: 6, height: 38 }}
-                onClick={handleSubmit}
+                onClick={showConfirmModal}
               >
                 예약하기
               </Button>
