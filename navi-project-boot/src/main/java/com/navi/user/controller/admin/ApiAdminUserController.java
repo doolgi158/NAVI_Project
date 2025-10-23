@@ -136,8 +136,8 @@ public class ApiAdminUserController {
     }
 
     @GetMapping("/userDashboard")
-    public ResponseEntity<?> getUserDashboard() {
-        AdminDashboardDTO dashboard = adminUserService.getUserStatistics();
+    public ResponseEntity<?> getUserDashboard(@RequestParam(defaultValue = "monthly") String range) {
+        AdminDashboardDTO dashboard = adminUserService.getUserStatistics(range);
         return ResponseEntity.ok(ApiResponse.success(dashboard));
     }
 }

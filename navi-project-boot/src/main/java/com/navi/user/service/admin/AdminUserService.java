@@ -6,7 +6,7 @@ import com.navi.user.dto.admin.UserTrendDTO;
 import java.util.List;
 
 public interface AdminUserService {
-    AdminDashboardDTO getUserStatistics();
+    AdminDashboardDTO getUserStatistics(String range);
 
-    List<UserTrendDTO> findMonthlyUserTrend();
+    List<UserTrendDTO> findUserTrend(String range);
 }

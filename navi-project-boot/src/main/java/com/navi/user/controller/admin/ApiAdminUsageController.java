@@ -1,11 +1,14 @@
 package com.navi.user.controller.admin;
 
+import com.navi.common.enums.RsvStatus;
+import com.navi.delivery.repository.DeliveryReservationRepository;
 import com.navi.flight.repository.FlightReservationRepository;
 import com.navi.user.enums.ActionType;
 import com.navi.user.repository.LogRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
@@ -20,32 +23,56 @@ import java.util.Map;
 public class ApiAdminUsageController {
     private final LogRepository logRepository;
     private final FlightReservationRepository flightReservationRepository;
+    private final DeliveryReservationRepository deliveryReservationRepository;
 
     // 여행지 조회수, 숙소 조회수, 항공편 예약량 (최근 6개월)
     @GetMapping("/usageDashboard")
-    public Map<String, Object> getUsageDashboard() {
+    public Map<String, Object> getUsageDashboard(@RequestParam(defaultValue = "monthly") String range) {
         LocalDate now = LocalDate.now();
-        YearMonth startMonth = YearMonth.from(now.minusMonths(5)); // 최근 6개월
-
         List<Map<String, Object>> result = new ArrayList<>();
 
-        for (int i = 0; i < 6; i++) {
-            YearMonth ym = startMonth.plusMonths(i);
-            LocalDate start = ym.atDay(1);
-            LocalDate end = ym.atEndOfMonth();
+        int steps;
+        switch (range) {
+            case "daily" -> steps = 7;
+            case "weekly" -> steps = 8;
+            default -> steps = 6;
+        }
+
+        for (int i = steps - 1; i >= 0; i--) {
+            LocalDate start;
+            LocalDate end;
+            String label;
+
+            if (range.equals("daily")) {
+                start = now.minusDays(i);
+                end = start;
+                label = start.toString().substring(5);
+            } else if (range.equals("weekly")) {
+                start = now.minusWeeks(i);
+                end = start.plusDays(6);
+                label = "W" + start.get(java.time.temporal.WeekFields.ISO.weekOfYear());
+            } else {
+                YearMonth ym = YearMonth.from(now.minusMonths(i));
+                start = ym.atDay(1);
+                end = ym.atEndOfMonth();
+                label = ym.getMonthValue() + "월";
+            }
 
             long travelViews = logRepository.countByActionTypeAndCreatedAtBetween(
                     ActionType.VIEW_TRAVEL, start.atStartOfDay(), end.atTime(23, 59, 59));
             long accViews = logRepository.countByActionTypeAndCreatedAtBetween(
                     ActionType.VIEW_ACCOMMODATION, start.atStartOfDay(), end.atTime(23, 59, 59));
             long flightResv = flightReservationRepository.countByStatusAndPaidAtBetween(
-                    com.navi.common.enums.RsvStatus.PAID, start, end);
+                    RsvStatus.PAID, start, end);
+            long deliveryResv = deliveryReservationRepository.countByStatusAndCreatedAtBetween(
+                    RsvStatus.PAID, start.atStartOfDay(), end.atTime(23, 59, 59));
 
             result.add(Map.of(
-                    "name", ym.getMonthValue() + "월",
+                    "name", label,
                     "travelViews", travelViews,
                     "accViews", accViews,
-                    "flightResv", flightResv
+                    "flightResv", flightResv,
+                    "deliveryResv", deliveryResv
             ));
         }
 
