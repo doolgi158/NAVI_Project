@@ -63,6 +63,7 @@ public class RoomRsv extends BaseEntity{
     // 객실 (Room) */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_no", nullable = false)
+    @JsonBackReference
     private Room room;
 
     /* === 예약 기본 정보 === */

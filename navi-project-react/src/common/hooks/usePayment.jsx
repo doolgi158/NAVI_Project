@@ -58,6 +58,10 @@ export const usePayment = () => {
 			// 결제 ID 생성
 			const pgMethod = paymentMethod || "KAKAOPAY";
 			const reserveIds = items?.map((item) => item.reserveId) || [];
+			
+			console.log("🧩 rsvType:", rsvType);
+			console.log("🧩 items:", items);
+			console.log("🧩 reserveIds:", reserveIds);
 
 			const prepareRes = await preparePayment({
 				rsvType: rsvType?.toUpperCase(),
@@ -65,7 +69,7 @@ export const usePayment = () => {
 				totalAmount: amount,
 				paymentMethod: pgMethod,
 			});
-			const merchantId = prepareRes.merchantId;
+			const merchantId = prepareRes?.merchantId;
 
 			// === 2️⃣ PG 설정 ===
 			let pg;
@@ -89,9 +93,9 @@ export const usePayment = () => {
 				merchant_uid: merchantId,
 				name: `${rsvType} 예약 결제`,
 				amount,
-				buyer_name: formData?.name || formData?.senderName,
-				buyer_tel: formData?.phone,
-				buyer_email: formData?.email,
+				//buyer_name: formData?.name || formData?.senderName,
+				//buyer_tel: formData?.phone,
+				//buyer_email: formData?.email,
 			};
 
 			/* 결제 요청 */

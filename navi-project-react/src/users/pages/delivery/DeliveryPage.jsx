@@ -254,7 +254,8 @@ const DeliveryPage = () => {
         state: {
           rsvType: "DLV",
           items: res.data.data,
-          formData: dto,
+          formData: form,
+          totalPrice: totalBags,
         },
       });
     } catch (error) {

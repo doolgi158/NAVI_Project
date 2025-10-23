@@ -23,30 +23,20 @@ public class FlyPaymentServiceImpl {
     private final PaymentServiceImpl paymentService;
     private final FlightReservationService flyRsvService;
 
-    // 결제 준비 (merchantId 생성)
+    /* 결제 준비 */
     public PaymentPrepareResponseDTO preparePayment(PaymentPrepareRequestDTO dto) {
         log.info("🛫 [FLY] 결제 준비 요청 - {}", dto);
-
-        //  왕복일 경우 2개 예약 ID의 총액 합산
-        BigDecimal totalAmount = flyRsvService.getTotalAmountByReserveIds(dto.getReserveId());
-        dto.setTotalAmount(totalAmount);
-
-        PaymentPrepareResponseDTO response = paymentService.preparePayment(dto);
-
-        log.info("✅ [항공 결제 준비 완료] reserveIds={}, merchantId={}, totalAmount={}",
-                dto.getReserveId(), response.getMerchantId(), totalAmount);
-
-        return response;
+        return paymentService.preparePayment(dto);
     }
 
-    // 결제 검증 및 확정 처리
+    /* 결제 검증 및 확정 */
     @Transactional(rollbackFor = Exception.class)
     public PaymentResultResponseDTO verifyAndCompletePayment(PaymentVerifyRequestDTO dto) {
         log.info("🛫 [FLY] 결제 검증 시작 → reserveIds={}, impUid={}", dto.getReserveId(), dto.getImpUid());
 
         PaymentResultResponseDTO verifyRes;
         try {
-            // 1️⃣ PortOne 결제 검증
+            // PortOne 결제 검증
             verifyRes = paymentService.verifyPayment(dto);
         } catch (IamportResponseException | IOException e) {
             log.error("❌ [PortOne 검증 오류] {}", e.getMessage());
@@ -59,7 +49,8 @@ public class FlyPaymentServiceImpl {
                     .build();
         }
 
-        // 2️⃣ PortOne 검증 실패
+
+        // PortOne 검증 실패
         if (verifyRes == null || !verifyRes.isSuccess()) {
             for (String id : dto.getReserveId()) {
                 flyRsvService.updateStatus(id, RsvStatus.FAILED.name());
@@ -73,11 +64,29 @@ public class FlyPaymentServiceImpl {
                     .build();
         }
 
-        // 3️⃣ 금액 검증
-        BigDecimal expectedTotal = flyRsvService.getTotalAmountByReserveIds(dto.getReserveId());
+        // 금액 검증
+        BigDecimal expectedTotal = BigDecimal.ZERO;
+        if (dto.getItems() != null && !dto.getItems().isEmpty()) {
+            expectedTotal = dto.getItems().stream()
+                    .map(item -> {
+                        BigDecimal amount = BigDecimal.ZERO;
+                        try {
+                            if (item.getAmount() != null) {
+                                amount = item.getAmount();
+                            } else {
+                                log.warn("⚠️ [금액 누락] reserveId={} amount=null", item.getReserveId());
+                            }
+                        } catch (Exception e) {
+                            log.warn("⚠️ [금액 변환 오류] reserveId={}, msg={}", item.getReserveId(), e.getMessage());
+                        }
+                        return amount;
+                    })
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+        }
+
         BigDecimal paidTotal = dto.getTotalAmount() != null ? dto.getTotalAmount() : BigDecimal.ZERO;
 
-        log.info("💰 [항공 금액 검증] reserveIds={} expected={} paid={}", dto.getReserveId(), expectedTotal, paidTotal);
+        log.info("💰 [항공 금액 검증] reserveIds={} expectedTotal={} paid={}", dto.getReserveId(), expectedTotal, paidTotal);
 
         if (expectedTotal.compareTo(paidTotal) != 0) {
             for (String id : dto.getReserveId()) {
@@ -92,12 +101,13 @@ public class FlyPaymentServiceImpl {
                     .build();
         }
 
-        // 4️⃣ 금액 일치 → 결제 확정(DB 반영)
+        // 금액 일치 → 결제 확정(DB 반영)
         PaymentResultResponseDTO confirmRes = paymentService.confirmPayment(dto.toConfirmRequest());
 
-        // 5️⃣ 예약 상태 갱신
+        // 예약 상태 갱신
         for (String id : dto.getReserveId()) {
             flyRsvService.updateStatus(id, RsvStatus.PAID.name());
+            flyRsvService.updatePayment(id, dto.getTotalAmount());
         }
 
         log.info("✅ [항공 결제 확정 완료] merchantId={}, reserveIds={}",
@@ -113,7 +123,7 @@ public class FlyPaymentServiceImpl {
                 .build();
     }
 
-    // 3. 결제 실패 (수동 처리)
+    /* 결제 실패 */
     public void handlePaymentFailure(List<String> reserveIds, String merchantId, String reason) {
         log.warn("❌ [FLY] 결제 실패 처리 reserveIds={}, merchantId={}, reason={}",
                 reserveIds, merchantId, reason);
@@ -124,7 +134,7 @@ public class FlyPaymentServiceImpl {
         paymentService.failPayment(merchantId, reason);
     }
 
-    // 4. 환불 처리
+    /* 환불 처리 */
     public void handleRefund(List<String> reserveIds, String merchantId, String reason) {
         log.info("💸 [FLY] 환불 처리 reserveIds={}, merchantId={}", reserveIds, merchantId);
         try {

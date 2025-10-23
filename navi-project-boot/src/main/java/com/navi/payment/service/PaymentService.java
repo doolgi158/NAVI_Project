@@ -24,13 +24,4 @@ public interface PaymentService {
     // 5. 환불 요청 및 상태 변경
     void  refundPayment(String merchantId, BigDecimal refundAmount, String reason)
             throws IamportResponseException, IOException;
-
-
-    /* == 조회 전용 == */
-    // 1. 결제 단건 상세 조회 (마이페이지 등)
-    //PaymentDetailResponseDTO getPaymentDetail(String merchantId);
-    // 2. 결제 상태별 조회 (관리자용, 예: FAILED, PAID 등)
-    //List<PaymentDetailResponseDTO> getPaymentsByStatus(String status);
-
-    // TODO: 통계 전용응 매퍼 패키지에 기술할 예정
 }

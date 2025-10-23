@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { setReserveData } from "../../../common/slice/paymentSlice";
+import { useDispatch } from "react-redux";
 import axios from "axios";
 import MainLayout from "../../layout/MainLayout";
 import LazyDataLoader from "@/common/components/common/LazyDataLoader";
@@ -25,6 +27,7 @@ const { Title, Text } = Typography;
 const SeatSelectPage = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const {
     isRoundTrip = false,
@@ -188,21 +191,56 @@ const SeatSelectPage = () => {
         });
         return;
       }
+      
+      // 결제용 items 배열 구성
+      const items = [];
+      const totalPrice = (selectedOutbound.price + (selectedInbound?.price || 0)) * passengerCount;
 
+      // 왕복일 경우, 먼저 출발편 예약(outboundDto)을 추가
+      if (isRoundTrip && outboundDto?.frsvId) {
+        items.push({
+          reserveId: outboundDto.frsvId,
+          amount: selectedOutbound.price,
+        });
+      }
+
+      // 지금 예약(편도 or 귀국편) 추가
+      items.push({
+        reserveId: res?.data?.data?.frsvId,
+        amount: selectedInbound?.price || 0,
+      });
+      
+      dispatch(setReserveData({
+        rsvType: "FLY",
+        items,
+        itemData: { selectedOutbound, selectedInbound },
+        formData: {
+          passengers,
+          passengerCount,
+          totalPrice,
+        },
+      }));
+
+      
       // ✅ 편도 or 귀국편 완료 시 → 결제 페이지
       message.success("항공편 예약이 완료되었습니다!");
       navigate("/payment", {
         state: {
-          selectedOutbound,
-          selectedInbound,
-          passengerCount,
-          passengers,
+          rsvType: "FLY",
+          items,
+          formData: {
+            passengers,
+            passengerCount,
+            totalPrice,
+            selectedSeats,
+          },
+          itemData: {
+            selectedOutbound,
+            selectedInbound,
+          },
           outboundDto: isRoundTrip ? outboundDto : res.data.data,
           inboundDto: isRoundTrip ? res.data.data : null,
-          totalPrice:
-            (selectedOutbound?.price || 0) +
-            (selectedInbound?.price || 0) * passengerCount,
-        },
+        }
       });
     } catch (error) {
       console.error("❌ 예약 실패:", error);

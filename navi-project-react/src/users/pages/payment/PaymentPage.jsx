@@ -33,7 +33,9 @@ const PaymentPage = () => {
 	const rsvType = state?.rsvType || null;
 	const items = Array.isArray(state?.items) ? state.items : [state?.items];
 	const formData = state?.formData || null;
-	const uiData = state?.uiData || state?.itemData || null;
+	const itemData = state?.itemData || null;
+	console.log(formData);
+	console.log(itemData);
 
 	/* state 누락 시 홈으로 리다이렉트 */
 	useEffect(() => {
@@ -45,7 +47,7 @@ const PaymentPage = () => {
 	}, [state, navigate]);
 
 	/* 총 결제 금액 계산 */
-	const totalAmount = formData?.totalPrice || formData?.totalAmount || 0;
+	const totalAmount = formData?.totalPrice || formData?.totalAmount || state.totalPrice || 0;
 
 	/* Redux에 결제 금액 저장 */
 	useEffect(() => {
@@ -77,7 +79,7 @@ const PaymentPage = () => {
 			case "ACC":
 				return (
 					<AccSumCard
-						accData={uiData}
+						accData={itemData}
 						totalAmount={totalAmount}
 						formData={formData}
 					/>
@@ -85,8 +87,8 @@ const PaymentPage = () => {
 			case "FLY":
 				return (
 					<FlySumCard
-						selectedOutbound={uiData?.selectedOutbound}
-						selectedInbound={uiData?.selectedInbound}
+						selectedOutbound={itemData?.selectedOutbound}
+						selectedInbound={itemData?.selectedInbound}
 					/>
 				);
 			case "DLV":
@@ -107,7 +109,7 @@ const PaymentPage = () => {
 						styles={{ body: { padding: "24px" } }}
 					>
 						<Title level={4} className="text-gray-800 mb-3 text-center">
-							{typeof uiData?.title === "string" ? uiData.title : "예약 요약"}
+							{typeof itemData?.title === "string" ? itemData.title : "예약 요약"}
 						</Title>
 						<Text className="block text-gray-600 mb-2 text-center">
 							총 결제 금액:
@@ -118,7 +120,7 @@ const PaymentPage = () => {
 					</Card>
 				);
 		}
-	}, [rsvType, uiData, formData, totalAmount]);
+	}, [rsvType, itemData, formData, totalAmount]);
 
 	/* 결제 진행 */
 	const handlePayment = async () => {
@@ -146,7 +148,7 @@ const PaymentPage = () => {
 	};
 
 	// state가 비어 있을 때
-	if (!rsvType || !formData) {
+	if (!rsvType || (!formData && rsvType !== "FLY")) {
 		return (
 			<MainLayout>
 				<div className="min-h-screen flex items-center justify-center">
@@ -195,9 +197,9 @@ const PaymentPage = () => {
 						<Divider />
 
 						{/* ✅ 타입별 상세 정보 */}
-						{InfoComponent && uiData && formData ? (
+						{InfoComponent && (formData || itemData) ? (
 							<InfoComponent
-								data={typeof uiData === "object" ? uiData : {}}
+								data={typeof itemData === "object" ? itemData : {}}
 								formData={typeof formData === "object" ? formData : {}}
 							/>
 						) : (
