@@ -3,8 +3,10 @@ package com.navi.payment.service;
 import com.navi.common.enums.RsvStatus;
 import com.navi.delivery.domain.DeliveryReservation;
 import com.navi.delivery.service.DeliveryReservationService;
+import com.navi.payment.domain.PaymentMaster;
 import com.navi.payment.dto.request.*;
 import com.navi.payment.dto.response.*;
+import com.navi.payment.repository.PaymentRepository;
 import com.siot.IamportRestClient.exception.IamportResponseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,8 +20,9 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class DlvPaymentServiceImpl {
+public class DlvPaymentService {
     private final DeliveryReservationService deliveryReservationService;
+    private final PaymentRepository paymentRepository;
     private final PaymentServiceImpl paymentService;
 
     // 결제 준비 (merchantId 생성)
@@ -119,14 +122,27 @@ public class DlvPaymentServiceImpl {
     }
 
     // 4. 환불 처리
-    public void handleRefund(String reserveId, String merchantId, String reason) {
-        log.info("💸 [DLV] 환불 처리 요청 → reserveId={}, merchantId={}", reserveId, merchantId);
-        try {
-            paymentService.refundPayment(merchantId, BigDecimal.ZERO, reason);
-            deliveryReservationService.updateStatus(reserveId, RsvStatus.REFUNDED.name());
-        } catch (Exception e) {
-            log.error("❌ [DLV] 환불 처리 실패 → msg={}", e.getMessage());
-            throw new IllegalStateException("환불 처리 실패", e);
-        }
+    @Transactional(rollbackFor = Exception.class)
+    public void handleRefund(String merchantId, String reason)
+            throws IamportResponseException, IOException {
+
+        log.info("📦 [DLV] 전체 환불 처리 시작 - merchantId={}", merchantId);
+
+        PaymentMaster master = paymentRepository.findByMerchantId(merchantId)
+                .orElseThrow(() -> new IllegalArgumentException("결제 정보를 찾을 수 없습니다. merchantId=" + merchantId));
+
+        paymentService.refundPayment(merchantId, master.getTotalAmount(), reason);
+
+        master.getPaymentDetails().forEach(detail -> {
+            String reserveId = detail.getReserveId();
+            try {
+                deliveryReservationService.updateStatus(reserveId, RsvStatus.REFUNDED.name());
+                log.info("🚚 [DLV] 배송 예약 상태 환불 완료 - reserveId={}", reserveId);
+            } catch (Exception e) {
+                log.error("⚠️ [DLV] 배송 예약 상태 변경 실패 - reserveId={}, msg={}", reserveId, e.getMessage());
+            }
+        });
+
+        log.info("✅ [DLV] 전체 환불 처리 완료 - merchantId={}", merchantId);
     }
 }

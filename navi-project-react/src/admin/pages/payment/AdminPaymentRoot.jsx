@@ -1,25 +1,31 @@
+import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import AdminSiderLayout from "../../layout/AdminSiderLayout";
 import AdminPaymentHeader from "../../layout/payment/AdminPaymentHeader";
 
 const AdminPaymentRoot = () => {
-    return (
-        <div className="flex min-h-screen bg-gray-50">
-            {/* 왼쪽 사이드바 */}
-            <AdminSiderLayout />
+  const [rsvType, setRsvType] = useState("ACC");
+  const [filter, setFilter] = useState("ALL");
+  const [keyword, setKeyword] = useState("");
 
-            {/* 오른쪽 본문 */}
-            <div className="flex-1 p-6">
-                {/* 상단 탭 */}
-                <AdminPaymentHeader />
+  return (
+    <div className="flex min-h-screen bg-gray-50">
+      <AdminSiderLayout />
 
-                {/* 실제 내용 */}
-                <div className="mt-4">
-                    <Outlet />
-                </div>
-            </div>
+      <div className="p-6">
+        <AdminPaymentHeader
+          onTabChange={(type) => setRsvType(type)}
+          onSearch={(kw) => setKeyword(kw)}
+          onFilter={(status) => setFilter(status)}
+        />
+
+        <div className="mt-4">
+          {/* ✅ Outlet으로 전달 */}
+          <Outlet context={{ rsvType, filter, keyword }} />
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default AdminPaymentRoot;
