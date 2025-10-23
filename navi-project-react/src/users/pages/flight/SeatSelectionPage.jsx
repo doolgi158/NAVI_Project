@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import dayjs from "dayjs";
 import MainLayout from "../../layout/MainLayout";
-import LazyDataLoader from "@/common/components/common/LazyDataLoader";
 import {
   Card,
   Typography,
@@ -280,10 +279,12 @@ const SeatSelectPage = () => {
                   {step === "outbound" ? "출발편 좌석 선택" : "귀국편 좌석 선택"}
                 </Title>
               </Space>
-
+              <br />
               <Text type="secondary">
                 {flight?.depAirportName} ✈️ {flight?.arrAirportName}
               </Text>
+              <br />
+              <Text type="secondary">{flight.flightNo}</Text>
               <div style={{ marginTop: 4, marginBottom: 20 }}>
                 <Text type="secondary">
                   {formatDateTimeKOR(flight?.depTime)} 출발 ·{" "}
