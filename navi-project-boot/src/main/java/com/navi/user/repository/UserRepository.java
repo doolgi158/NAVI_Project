@@ -73,20 +73,33 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // 상태별 유저 수 카운트
     long countByUserState(UserState state);
 
-    // 월별 신규가입 / 탈퇴 / 활성 사용자 수
-    @Query(
-            value = """
-                    SELECT
-                        TO_CHAR(u.user_signup, 'YYYY-MM') AS month,
-                        COUNT(CASE WHEN u.user_state = 'NORMAL' THEN 1 END) AS active,
-                        COUNT(CASE WHEN u.user_state = 'DELETE' THEN 1 END) AS leave,
-                        COUNT(*) AS join
-                    FROM navi_users u
-                    WHERE u.user_signup IS NOT NULL
-                    GROUP BY TO_CHAR(u.user_signup, 'YYYY-MM')
-                    ORDER BY month
-                    """,
-            nativeQuery = true
-    )
-    List<Object[]> findMonthlyUserTrendRaw();
+    // 일간 / 주간 / 월간 사용자 데이터
+    @Query("""
+                SELECT 
+                    TO_CHAR(u.signUp, 
+                        CASE 
+                            WHEN :range = 'daily' THEN 'YYYY-MM-DD'
+                            WHEN :range = 'weekly' THEN 'IYYY-IW'
+                            ELSE 'YYYY-MM'
+                        END
+                    ) AS period,
+                    COUNT(u) AS active,
+                    SUM(CASE WHEN u.userState = 'DELETE' THEN 1 ELSE 0 END) AS leave,
+                    SUM(CASE WHEN u.userState = 'NORMAL' THEN 1 ELSE 0 END) AS join
+                FROM User u
+                WHERE u.signUp >= 
+                    CASE 
+                        WHEN :range = 'daily' THEN ADD_MONTHS(CURRENT_DATE, -1)
+                        WHEN :range = 'weekly' THEN ADD_MONTHS(CURRENT_DATE, -3)
+                        ELSE ADD_MONTHS(CURRENT_DATE, -6)
+                    END
+                GROUP BY TO_CHAR(u.signUp,
+                        CASE 
+                            WHEN :range = 'daily' THEN 'YYYY-MM-DD'
+                            WHEN :range = 'weekly' THEN 'IYYY-IW'
+                            ELSE 'YYYY-MM'
+                        END)
+                ORDER BY MIN(u.signUp)
+            """)
+    List<Object[]> findUserTrendRaw(@Param("range") String range);
 }

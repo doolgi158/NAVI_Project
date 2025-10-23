@@ -8,7 +8,14 @@ const DashboardSalesChart = ({ data }) => (
     <ChartCard title="매출 & 환불 현황">
         <ComposedChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
+            <XAxis
+                dataKey="name"
+                tickFormatter={(v) => {
+                    // 일간일 경우 YYYY-MM-DD 포맷 단축
+                    if (v?.includes("-")) return v.slice(5);
+                    return v;
+                }}
+            />
             <YAxis yAxisId="left" />
             <YAxis yAxisId="right" orientation="right" />
             <Tooltip formatter={(v, n) => (n.includes("환불") || n.includes("매출") ? money(v) : v)} />

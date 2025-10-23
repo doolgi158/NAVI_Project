@@ -25,21 +25,22 @@ export const useDashboardData = (endpoints) => {
                     })
                 )
             );
-
-            // 병합 시 각 데이터 구조 맞게 키 이름 통일
+            console.log(responses);
+            // ✅ 병합 시 각 데이터 구조 맞게 키 이름 통일
             const merged = {
                 users: responses[0]?.data?.data?.users ?? responses[0]?.data?.data,
                 userTrend: responses[0]?.data?.data?.userTrend ?? [],
                 travels: responses[1]?.data?.data,
                 ranking: responses[2]?.data?.data,
-                flights: responses[3].data.data,
+                flights: responses[3]?.data?.data,
                 accommodations: {
                     count:
                         responses[4]?.data?.data?.count ??
-                        responses[4]?.data?.data ?? // 숫자만 오는 경우
+                        responses[4]?.data?.data ??
                         0,
                 },
-                usageTrend: responses[5]?.data?.usageTrend ?? [],
+                accommodationRanking: responses[5]?.data?.data ?? [],
+                usageTrend: responses[6]?.data?.usageTrend ?? [],
             };
 
             setData(merged);

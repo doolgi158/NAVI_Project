@@ -47,11 +47,11 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     public List<UserTrendDTO> findMonthlyUserTrend() {
-        List<Object[]> result = userRepository.findMonthlyUserTrendRaw();
-
+        List<Object[]> result = userRepository.findUserTrendRaw(range);
+        
         return result.stream()
                 .map(arr -> UserTrendDTO.builder()
-                        .month((String) arr[0])
+                        .period((String) arr[0])
                         .active(((Number) arr[1]).longValue())
                         .leave(((Number) arr[2]).longValue())
                         .join(((Number) arr[3]).longValue())

@@ -1,5 +1,6 @@
 package com.navi.delivery.repository;
 
+import com.navi.common.enums.RsvStatus;
 import com.navi.delivery.domain.DeliveryReservation;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -17,4 +18,7 @@ public interface DeliveryReservationRepository extends JpaRepository<DeliveryRes
     int countByGroup_GroupId(String groupId);
 
     List<DeliveryReservation> findByGroup_GroupId(String groupId);
+
+    // 관리자 대시보드용 설정 기간 사이의 데이터 가져오기
+    long countByStatusAndCreatedAtBetween(RsvStatus status, LocalDateTime start, LocalDateTime end);
 }

@@ -1,12 +1,12 @@
 package com.navi.user.controller.admin;
 
 import com.navi.common.response.ApiResponse;
-import com.navi.user.dto.admin.AdminDashboardDTO;
 import com.navi.user.service.admin.AdminTravelDashboardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -17,8 +17,8 @@ public class ApiAdminTravelController {
 
     // 여행지 요약 (등록된 개수, 조회수 등)
     @GetMapping("/travelDashboard")
-    public ResponseEntity<?> getTravelDashboard() {
-        AdminDashboardDTO.Travels stats = adminTravelService.getTravelStats();
+    public ResponseEntity<?> getTravelDashboard(@RequestParam(defaultValue = "monthly") String range) {
+        var stats = adminTravelService.getTravelStats(range);
         return ResponseEntity.ok(ApiResponse.success(stats));
     }
 

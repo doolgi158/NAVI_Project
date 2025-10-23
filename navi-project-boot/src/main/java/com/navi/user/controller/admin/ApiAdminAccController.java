@@ -5,6 +5,7 @@ import com.navi.user.service.admin.AdminAccDashboardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -17,6 +18,13 @@ public class ApiAdminAccController {
     @GetMapping("/accommodationDashboard")
     public ApiResponse<Long> getAccommodationCount() {
         long total = adminAccDashboardService.getTotalAccommodationCount();
+        return ApiResponse.success(total);
+    }
+
+    // 인기 숙소 TOP5
+    @GetMapping("/accommodationRanking")
+    public ApiResponse<Long> getAccommodationCount(@RequestParam(defaultValue = "monthly") String range) {
+        long total = adminAccDashboardService.getTotalAccommodationCount(range);
         return ApiResponse.success(total);
     }
 }

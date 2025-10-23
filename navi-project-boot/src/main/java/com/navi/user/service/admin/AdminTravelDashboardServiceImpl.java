@@ -32,25 +32,27 @@ public class AdminTravelDashboardServiceImpl implements AdminTravelDashboardServ
      * rank, title, id, region, score(조회수+좋아요+북마크)
      */
 
+    @Override
     public List<Map<String, Object>> getTopTravelRank() {
         List<Travel> topList = dashboardTravelRepository.findTop5Popular();
 
-        return topList.stream()
-                .map((t) -> {
+
+        return java.util.stream.IntStream.range(0, topList.size())
+                .mapToObj(i -> {
+                    Travel t = topList.get(i);
+
                     Map<String, Object> map = new HashMap<>();
-                    map.put("rank", topList.indexOf(t) + 1);
+                    map.put("rank", i + 1); // ✅ index 사용 가능
                     map.put("title", t.getTitle());
                     map.put("id", t.getTravelId());
+                    map.put("region", extractRegionName(t.getAddress()));
 
-                    // 주소에서 '읍/면/동/리'까지만 추출
-                    String shortRegion = extractRegionName(t.getAddress());
-                    map.put("region", shortRegion);
-
-                    // 점수 계산
                     long score = (t.getViews() != null ? t.getViews() : 0)
                             + (t.getLikesCount() != null ? t.getLikesCount() : 0)
                             + (t.getBookmarkCount() != null ? t.getBookmarkCount() : 0);
+
                     map.put("score", score);
+                    map.put("views", t.getViews() != null ? t.getViews() : 0);
                     return map;
                 })
                 .toList();

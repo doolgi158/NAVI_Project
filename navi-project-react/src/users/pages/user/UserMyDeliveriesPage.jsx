@@ -18,7 +18,6 @@ const UserMyDeliveriesPage = () => {
             const res = await axios.get(`${API_SERVER_HOST}/api/delivery/my`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            console.log(res);
             if (res.data.status === 200) {
                 setDeliveryList(res.data.data || []);
             } else {

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Layout, Row, Col, Space, Typography, Segmented, Button, Spin } from "antd";
+import { Layout, Row, Col, Space, Typography, Segmented, Button, Spin, message } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
 import AdminSiderLayout from "../layout/AdminSiderLayout";
 
@@ -19,20 +19,30 @@ const { Title, Text } = Typography;
 const AdminDashboard = () => {
   const [range, setRange] = useState("월간");
 
-  const endpoints = useMemo(() => [
-    `${API_SERVER_HOST}/api/adm/userDashboard`,
-    `${API_SERVER_HOST}/api/adm/travelDashboard`,
-    `${API_SERVER_HOST}/api/adm/travelRanking`,
-    `${API_SERVER_HOST}/api/adm/flightDashboard`,
-    `${API_SERVER_HOST}/api/adm/accommodationDashboard`,
-    `${API_SERVER_HOST}/api/adm/usageDashboard`,
-  ], []);
+  const endpoints = useMemo(() => {
+    const rangeParam =
+      range === "일간"
+        ? "daily"
+        : range === "주간"
+          ? "weekly"
+          : "monthly"; // 기본 월간
+
+    return [
+      `${API_SERVER_HOST}/api/adm/userDashboard?range=${rangeParam}`,
+      `${API_SERVER_HOST}/api/adm/travelDashboard?range=${rangeParam}`,
+      `${API_SERVER_HOST}/api/adm/travelRanking?range=${rangeParam}`,
+      `${API_SERVER_HOST}/api/adm/flightDashboard?range=${rangeParam}`,
+      `${API_SERVER_HOST}/api/adm/accommodationDashboard?range=${rangeParam}`,
+      `${API_SERVER_HOST}/api/adm/accommodationRanking?range=${rangeParam}`,
+      `${API_SERVER_HOST}/api/adm/usageDashboard?range=${rangeParam}`,
+    ];
+  }, [range]);
 
   const { data, loading, error, reload } = useDashboardData(endpoints);
 
   useEffect(() => {
     console.log("📊 Dashboard data:", data);
-  }, [data]);
+  }, [data, range]);
 
   // Hook 이후에 조건부 렌더링
   if (loading) {
@@ -94,16 +104,18 @@ const AdminDashboard = () => {
         region: t.region || "-",
       })) || [];
 
-  // 숙소 TOP5 (아직 더미)
-  const accommodationTop5 = [
-    { rank: 1, name: "부산 해운대호텔", city: "부산", reservations: 380, rating: 4.8 },
-    { rank: 2, name: "서울 프리미어호텔", city: "서울", reservations: 290, rating: 4.7 },
-    { rank: 3, name: "제주 블루힐", city: "제주", reservations: 240, rating: 4.6 },
-    { rank: 4, name: "속초 선샤인", city: "속초", reservations: 210, rating: 4.5 },
-    { rank: 5, name: "경주 더파크", city: "경주", reservations: 180, rating: 4.5 },
-  ];
-
-  const displayRanking = MOCK_RANKINGS;
+  // 숙소 TOP5
+  const accommodationTop5 =
+    (data?.accommodationRanking || [])
+      .sort((a, b) => (b.views || 0) - (a.views || 0))
+      .slice(0, 5)
+      .map((acc, i) => ({
+        rank: i + 1,
+        id: acc.id || "-",
+        name: acc.name || acc.title || "이름 없음",
+        region: acc.region || acc.city || "-",
+        views: acc.views || 0,
+      })) || [];
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
@@ -113,14 +125,17 @@ const AdminDashboard = () => {
         <Row align="middle" justify="space-between" style={{ marginBottom: 16 }}>
           <Col>
             <Title level={3}>관리자 대시보드</Title>
-            <Text type="secondary">전체 서비스 지표 요약</Text>
+            <Text type="secondary">{range} 기준 서비스 지표 요약</Text>
           </Col>
           <Col>
             <Space>
               <Segmented
                 options={["일간", "주간", "월간"]}
                 value={range}
-                onChange={setRange}
+                onChange={(val) => {
+                  setRange(val);
+                  message.info(`${val} 데이터로 전환 중...`);
+                }}
               />
               <Button icon={<ReloadOutlined />} onClick={reload}>
                 새로고침
@@ -148,7 +163,12 @@ const AdminDashboard = () => {
               <Col xs={24} lg={12}>
                 <UserChart
                   data={trend.map((item) => ({
-                    name: item.month,
+                    name:
+                      range === "일간"
+                        ? item.day
+                        : range === "주간"
+                          ? item.week
+                          : item.month,
                     join: item.join,
                     leave: item.leave,
                     active: item.active,

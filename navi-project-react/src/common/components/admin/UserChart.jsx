@@ -6,7 +6,14 @@ const DashboardUserChart = ({ data }) => (
     <ChartCard title="사용자 성장 추이">
         <ComposedChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
+            <XAxis
+                dataKey="name"
+                tickFormatter={(v) => {
+                    // 일간일 경우 YYYY-MM-DD 포맷 단축
+                    if (v?.includes("-")) return v.slice(5);
+                    return v;
+                }}
+            />
             <YAxis />
             <Tooltip />
             <Legend />
