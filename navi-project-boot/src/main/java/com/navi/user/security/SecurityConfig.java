@@ -1,7 +1,7 @@
 package com.navi.user.security;
 
+import com.navi.admin.user.repository.HistoryRepository;
 import com.navi.user.enums.UserRole;
-import com.navi.user.repository.HistoryRepository;
 import com.navi.user.repository.TryLoginRepository;
 import com.navi.user.repository.UserRepository;
 import com.navi.user.security.filter.JWTCheckFilter;

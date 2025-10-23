@@ -4,10 +4,7 @@ import com.navi.common.enums.RsvType;
 import com.navi.payment.domain.enums.PaymentStatus;
 import com.navi.payment.dto.response.PaymentAdminDetailResponseDTO;
 import com.navi.payment.dto.response.PaymentAdminListResponseDTO;
-import com.navi.user.dto.admin.AdminDashboardDTO;
 import com.siot.IamportRestClient.exception.IamportResponseException;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.http.ResponseEntity;
 
 import java.io.IOException;
 import java.util.List;
@@ -18,11 +15,14 @@ public interface PaymentAdminService {
     List<PaymentAdminListResponseDTO> getAllPaymentsForAdmin(
             RsvType rsvType, PaymentStatus paymentStatus, String keyword
     );
+
     // 2. 단일 결제 상세 조회
     List<PaymentAdminDetailResponseDTO> getPaymentDetailsForAdmin(String merchantId);
+
     // 3. 예약 ID별 환불
     PaymentAdminDetailResponseDTO refundPaymentDetail(String reserveId, String reason)
             throws IamportResponseException, IOException;
+
     // 4. 결제 ID별 환불
     PaymentAdminListResponseDTO refundPaymentByMerchantId(String merchantId, String reason)
             throws IamportResponseException, IOException;

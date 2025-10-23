@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -70,48 +71,21 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByIdAndUserState(String id, UserState userState);
 
-    // 상태별 유저 수 카운트
-    long countByUserState(UserState state);
+    @Query("""
+                SELECT u FROM User u
+                WHERE u.userState = 'NORMAL'
+                AND (
+                    SELECT MAX(h.logout) FROM History h WHERE h.user = u
+                ) <= :threshold
+            """)
+    List<User> findNormalUsersInactiveForOneYear(@Param("threshold") LocalDateTime threshold);
 
-    // 일간 사용자 데이터
-    @Query(value = """
-                SELECT 
-                    TO_CHAR(u.user_signup, 'YYYY-MM-DD') AS period,
-                    COUNT(u.user_no) AS total,
-                    SUM(CASE WHEN u.user_state = 'DELETE' THEN 1 ELSE 0 END) AS deleted,
-                    SUM(CASE WHEN u.user_state = 'NORMAL' THEN 1 ELSE 0 END) AS active
-                FROM navi_users u
-                WHERE u.user_signup >= ADD_MONTHS(TRUNC(SYSDATE), -1)
-                GROUP BY TO_CHAR(u.user_signup, 'YYYY-MM-DD')
-                ORDER BY TO_CHAR(u.user_signup, 'YYYY-MM-DD')
-            """, nativeQuery = true)
-    List<Object[]> findUserTrendDaily();
-
-    // 주간 사용자 데이터
-    @Query(value = """
-                SELECT 
-                    TO_CHAR(u.user_signup, 'IYYY-IW') AS period,
-                    COUNT(u.user_no) AS total,
-                    SUM(CASE WHEN u.user_state = 'DELETE' THEN 1 ELSE 0 END) AS deleted,
-                    SUM(CASE WHEN u.user_state = 'NORMAL' THEN 1 ELSE 0 END) AS active
-                FROM navi_users u
-                WHERE u.user_signup >= ADD_MONTHS(TRUNC(SYSDATE), -3)
-                GROUP BY TO_CHAR(u.user_signup, 'IYYY-IW')
-                ORDER BY TO_CHAR(u.user_signup, 'IYYY-IW')
-            """, nativeQuery = true)
-    List<Object[]> findUserTrendWeekly();
-
-    // 월간 사용자 데이터
-    @Query(value = """
-                SELECT 
-                    TO_CHAR(u.user_signup, 'YYYY-MM') AS period,
-                    COUNT(u.user_no) AS total,
-                    SUM(CASE WHEN u.user_state = 'DELETE' THEN 1 ELSE 0 END) AS deleted,
-                    SUM(CASE WHEN u.user_state = 'NORMAL' THEN 1 ELSE 0 END) AS active
-                FROM navi_users u
-                WHERE u.user_signup >= ADD_MONTHS(TRUNC(SYSDATE), -6)
-                GROUP BY TO_CHAR(u.user_signup, 'YYYY-MM')
-                ORDER BY TO_CHAR(u.user_signup, 'YYYY-MM')
-            """, nativeQuery = true)
-    List<Object[]> findUserTrendMonthly();
+    @Query("""
+                SELECT u FROM User u
+                WHERE u.userState = 'SLEEP'
+                AND (
+                    SELECT MAX(h.logout) FROM History h WHERE h.user = u
+                ) <= :threshold
+            """)
+    List<User> findSleepUsersInactiveForAnotherYear(@Param("threshold") LocalDateTime threshold);
 }
