@@ -1,7 +1,9 @@
 package com.navi.core.admin.controller;
 
+import com.navi.core.admin.service.AdminCommentService;
 import com.navi.core.domain.Board;
 import com.navi.core.admin.service.AdminBoardService;
+import com.navi.core.admin.service.AdminCommentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -19,10 +21,9 @@ import java.util.List;
 public class AdminBoardController {
 
     private final AdminBoardService adminBoardService;
+    private final AdminCommentService adminCommentService;
 
-    /**
-     * 전체 게시글 목록 조회 (관리자)
-     */
+    // 전체 게시글 목록 조회 (관리자)
     @GetMapping
     public ResponseEntity<List<Board>> getAllBoards() {
         List<Board> boards = adminBoardService.getAllBoards();
@@ -30,9 +31,7 @@ public class AdminBoardController {
         return ResponseEntity.ok(boards);
     }
 
-    /**
-     * 게시글 검색 (관리자)
-     */
+    // 게시글 검색 (관리자)
     @GetMapping("/search")
     public ResponseEntity<List<Board>> searchBoards(@RequestParam String keyword) {
         List<Board> boards = adminBoardService.searchBoards(keyword);
@@ -40,9 +39,7 @@ public class AdminBoardController {
         return ResponseEntity.ok(boards);
     }
 
-    /**
-     * 게시글 상세 조회 (관리자 - 조회수 증가 없음)
-     */
+    // 게시글 상세 조회 (관리자 - 조회수 증가 없음)
     @GetMapping("/{id}")
     public ResponseEntity<Board> getBoard(@PathVariable Integer id) {
         Board board = adminBoardService.getBoard(id);
@@ -50,9 +47,7 @@ public class AdminBoardController {
         return ResponseEntity.ok(board);
     }
 
-    /**
-     * 게시글 삭제 (관리자 - 모든 게시글 삭제 가능)
-     */
+    // 게시글 삭제 (관리자 - 모든 게시글 삭제 가능)
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBoard(@PathVariable Integer id) {
         adminBoardService.deleteBoard(id);
@@ -60,20 +55,7 @@ public class AdminBoardController {
         return ResponseEntity.noContent().build();
     }
 
-    /**
-     * 게시글 숨기기/노출 (관리자 전용)
-     * TODO: 추후 구현 - Board 엔티티에 isHidden 필드 추가 필요
-     */
-//    @PutMapping("/{id}/visibility")
-//    public ResponseEntity<String> toggleVisibility(@PathVariable Integer id) {
-//        // TODO: 숨기기/노출 기능 구현
-//        log.warn("[관리자] 게시글 숨기기/노출 - 미구현: {}", id);
-//        return ResponseEntity.ok("추후 구현 예정");
-//    }
-
-    /**
-     * 신고된 게시글 목록 조회 (관리자 전용)
-     */
+    //신고된 게시글 목록 조회 (관리자 전용)
     @GetMapping("/reported")
     public ResponseEntity<List<Board>> getReportedBoards() {
         List<Board> boards = adminBoardService.getReportedBoards();
@@ -81,13 +63,19 @@ public class AdminBoardController {
         return ResponseEntity.ok(boards);
     }
 
-    /**
-     * 게시글 통계 조회 (관리자 전용)
-     */
+    //게시글 통계 조회 (관리자 전용)
     @GetMapping("/statistics")
     public ResponseEntity<BoardStatistics> getStatistics() {
         BoardStatistics stats = adminBoardService.getStatistics();
         log.info("[관리자] 게시글 통계 조회");
         return ResponseEntity.ok(stats);
+    }
+
+    // 관리자 - 댓글 삭제 (모든 댓글 삭제 가능)
+    @DeleteMapping("/comment/{commentNo}")
+    public ResponseEntity<Void> deleteComment(@PathVariable Integer commentNo) {
+        adminCommentService.deleteCommentByAdmin(commentNo);  // 이렇게 인스턴스로 호출
+        log.info("관리자 - 댓글 삭제 요청. ID: {}", commentNo);
+        return ResponseEntity.noContent().build();
     }
 }

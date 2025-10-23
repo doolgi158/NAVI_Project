@@ -7,8 +7,6 @@ import com.navi.core.user.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,19 +27,19 @@ public class BoardApiController {
      * 현재 로그인한 사용자 번호 가져오기
      */
     private Integer getCurrentUserNo() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
-            throw new RuntimeException("로그인이 필요합니다.");
-        }
-
-        // TODO: 실제 User 객체에서 userNo 추출
-        // 임시로 1 반환 (개발용)
+        // ✅ 개발 중에는 임시로 1 반환
         return 1;
 
-        // 실제 구현 예시:
-        // User user = (User) auth.getPrincipal();
-        // return user.getUserNo();
+    /* 나중에 실제 로그인 구현 후 사용
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+    if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+        throw new RuntimeException("로그인이 필요합니다.");
+    }
+
+    User user = (User) auth.getPrincipal();
+    return user.getUserNo();
+    */
     }
 
     /**
@@ -150,17 +148,17 @@ public class BoardApiController {
     /**
      * 게시글의 댓글 조회
      */
-//    @GetMapping("/{id}/comments")
-//    public ResponseEntity<?> getComments(@PathVariable Integer id) {
-//        var comments = commentService.getCommentsByBoardId(id);
-//        return ResponseEntity.ok(comments);
-//    }
+    @GetMapping("/{id}/comments")  // ✅ 이게 있나요?
+    public ResponseEntity<List<Comment>> getComments(@PathVariable Integer id) {
+        List<Comment> comments = commentService.getCommentsByBoardNo(id);
+        return ResponseEntity.ok(comments);
+    }
 
     /**
      * 댓글 작성
      */
     @PostMapping("/{id}/comment")
-    public ResponseEntity<?> createComment(
+    public ResponseEntity<Comment> createComment(
             @PathVariable Integer id,
             @RequestBody Map<String, String> request) {
 
@@ -205,4 +203,6 @@ public class BoardApiController {
         commentService.reportComment(commentNo);
         return ResponseEntity.ok().build();
     }
+
+
 }

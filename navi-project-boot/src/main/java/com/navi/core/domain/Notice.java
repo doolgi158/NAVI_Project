@@ -1,5 +1,6 @@
 package com.navi.core.domain;
 
+import com.navi.core.dto.NoticeDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -62,5 +63,7 @@ public class Notice {
     @Column(name = "notice_endDate")
     private LocalDateTime noticeEndDate;
 
+    @Column(name = "notice_image")
+    private String noticeImage;
 
 }

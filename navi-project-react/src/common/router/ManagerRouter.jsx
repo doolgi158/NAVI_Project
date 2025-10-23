@@ -16,7 +16,7 @@ const ManagerRouter = () => {
     // 관리자 - 공지사항
     {
       key: "manager-notice-list",
-      path: "notice",
+      path: "notice",  // ✅ /adm/notice
       element: (
         <Suspense fallback={Loading}>
           <ManagerNoticeList />
@@ -25,7 +25,7 @@ const ManagerRouter = () => {
     },
     {
       key: "manager-notice-write",
-      path: "notice/write",
+      path: "notice/write",  // ✅ /adm/notice/write
       element: (
         <Suspense fallback={Loading}>
           <ManagerNoticeWrite />
@@ -34,7 +34,7 @@ const ManagerRouter = () => {
     },
     {
       key: "manager-notice-detail",
-      path: "notice/detail",
+      path: "notice/detail",  // ✅ /adm/notice/detail
       element: (
         <Suspense fallback={Loading}>
           <ManagerNoticeDetail />
@@ -45,7 +45,7 @@ const ManagerRouter = () => {
     // 관리자 - 게시판
     {
       key: "manager-board-list",
-      path: "board",
+      path: "board",  // ✅ /adm/board (adm 제거!)
       element: (
         <Suspense fallback={Loading}>
           <ManagerBoardList />
@@ -54,7 +54,7 @@ const ManagerRouter = () => {
     },
     {
       key: "manager-board-detail",
-      path: "board/detail",
+      path: "board/detail",  // ✅ /adm/board/detail (adm 제거!)
       element: (
         <Suspense fallback={Loading}>
           <ManagerBoardDetail />

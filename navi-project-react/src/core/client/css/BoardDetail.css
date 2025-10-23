@@ -459,3 +459,66 @@
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
+
+/* 수정 모드 이미지 영역 */
+.edit-image-section {
+  margin-top: 20px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.edit-image-section label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.image-preview-container {
+  position: relative;
+  margin-bottom: 15px;
+}
+
+.image-preview-container img {
+  max-width: 100%;
+  border-radius: 8px;
+}
+
+.remove-image-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: rgba(255, 0, 0, 0.8);
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 100%;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.remove-image-btn:hover {
+  background: rgba(255, 0, 0, 1);
+}
+
+.no-image {
+  padding: 20px;
+  text-align: center;
+  color: #999;
+  background: #f5f5f5;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+
+.image-upload-input {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.image-upload-input:hover {
+  border-color: #007bff;
+}

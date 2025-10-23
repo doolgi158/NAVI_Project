@@ -40,8 +40,7 @@ public class Board {
     @Builder.Default
     private Integer reportCount = 0;
 
-    @Column(name = "board_viewCount")
-    @ColumnDefault("0")
+    @Column(name = "board_view_count")
     @Builder.Default
     private Integer boardViewCount = 0;
 
@@ -57,7 +56,7 @@ public class Board {
     private Integer userNo;
 
     @CreationTimestamp
-    @Column(name = "create_date")
+    @Column(name = "create_date", updatable = false)
     private LocalDateTime createDate;
 
     @UpdateTimestamp

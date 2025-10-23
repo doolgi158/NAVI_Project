@@ -3,7 +3,7 @@ package com.navi.core.user.service;
 
 import com.navi.core.domain.Notice;
 import com.navi.core.repository.NoticeRepository;
-import com.navi.core.user.dto.NoticeDTO;
+import com.navi.core.dto.NoticeDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

@@ -1,5 +1,5 @@
 // 관리자용 게시판 API 서비스
-const API_URL = '/api/admin/board';
+const API_URL = '/api/adm/board';
 
 // 게시글 전체 목록 조회
 export const getAllBoards = async () => {

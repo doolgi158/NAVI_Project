@@ -73,9 +73,9 @@ public class Comment {
     /**
      * 일반 댓글인지 확인
      */
-    public boolean isParentComment() {
-        return this.parentComment == null;
-    }
+//    public boolean isParentComment() {
+//        return this.parentComment == null;
+//    }
 
     /**
      * 대댓글인지 확인

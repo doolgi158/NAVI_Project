@@ -1,5 +1,5 @@
 // 관리자용 공지사항 API 서비스
-const API_URL = '/api/admin/notice';
+const API_URL = '/api/adm/notice';
 
 // 토큰 가져오기
 const getToken = () => {
@@ -31,37 +31,68 @@ export const getAllNotices = async () => {
   return response.json();
 };
 
-// 공지사항 상세 조회 (조회수 증가 없음)
-export const getNoticeById = async (noticeNo) => {
-  const response = await fetch(`${API_URL}/${noticeNo}`, {
-    headers: getHeaders()
-  });
-  return response.json();
-};
-
 // 공지사항 작성
 export const createNotice = async (noticeData) => {
-  const response = await fetch(API_URL, {
+  const token = localStorage.getItem('accessToken');
+  
+  const response = await fetch('/api/adm/notice', {
     method: 'POST',
-    headers: getHeaders(),
+    headers: {
+      'Authorization': token ? `Bearer ${token}` : '',
+      'Content-Type': 'application/json'
+    },
+    credentials: 'include',
     body: JSON.stringify(noticeData)
   });
+
   if (!response.ok) {
-    throw new Error('서버 오류');
+    const error = await response.text();
+    console.error('API 에러:', error);
+    throw new Error('공지사항 작성 실패');
   }
-  
-  const text = await response.text();
-  return text ? JSON.parse(text) : {};
+
+  return await response.json();
 };
+
 
 // 공지사항 수정
 export const updateNotice = async (noticeNo, noticeData) => {
-  const response = await fetch(`${API_URL}/${noticeNo}`, {
+  const token = localStorage.getItem('accessToken');
+  
+  const response = await fetch(`/api/adm/notice/${noticeNo}`, {
     method: 'PUT',
-    headers: getHeaders(),
+    headers: {
+      'Authorization': token ? `Bearer ${token}` : '',
+      'Content-Type': 'application/json'
+    },
+    credentials: 'include',
     body: JSON.stringify(noticeData)
   });
-  return response.json();
+
+  if (!response.ok) {
+    const error = await response.text();
+    console.error('API 에러:', error);
+    throw new Error('공지사항 수정 실패');
+  }
+
+  return await response.json();
+};
+
+export const getNoticeById = async (noticeNo) => {
+  const token = localStorage.getItem('accessToken');
+  
+  const response = await fetch(`/api/adm/notice/${noticeNo}`, {
+    headers: {
+      'Authorization': token ? `Bearer ${token}` : '',
+    },
+    credentials: 'include'
+  });
+
+  if (!response.ok) {
+    throw new Error('공지사항 조회 실패');
+  }
+
+  return await response.json();
 };
 
 // 공지사항 삭제

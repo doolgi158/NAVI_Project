@@ -1,6 +1,6 @@
 package com.navi.core.user.controller;
 
-import com.navi.core.user.dto.NoticeDTO;
+import com.navi.core.dto.NoticeDTO;
 import com.navi.core.user.service.NoticeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -16,10 +16,14 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      "/api": {
-        target: "http://localhost:8080",
-        changeOrigin: true,
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true
       },
-    },
-  },
-});
+      '/images': {  // ✅ 이미지 프록시 추가
+        target: 'http://localhost:8080',
+        changeOrigin: true
+      }
+    }
+  }
+})

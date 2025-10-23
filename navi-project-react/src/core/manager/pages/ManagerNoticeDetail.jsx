@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { getNoticeById, deleteNotice } from "./ManagerNoticeService";
-import "../css/NoticeDetail.css";
+import "../css/ManagerNoticeDetail.css";
 
 function NoticeDetail() {
   const [searchParams] = useSearchParams();
@@ -19,7 +19,7 @@ function NoticeDetail() {
       } catch (error) {
         console.error('공지사항을 불러오는데 실패했습니다:', error);
         alert('공지사항을 불러오는데 실패했습니다.');
-        navigate('/manager/notice');
+        navigate('/adm/notice');
       } finally {
         setLoading(false);
       }
@@ -29,7 +29,7 @@ function NoticeDetail() {
       fetchNotice();
     } else {
       alert('잘못된 접근입니다.');
-      navigate('/manager/notice');
+      navigate('/adm/notice');
     }
   }, [noticeNo, navigate]);
 
@@ -110,8 +110,8 @@ function NoticeDetail() {
       )}
 
       <div className="button-group">
-        <button onClick={() => navigate('/manager/notice')}>목록</button>
-        <button onClick={() => navigate(`/manager/notice/write?noticeNo=${noticeNo}`)}>수정</button>
+        <button onClick={() => navigate('/adm/notice')}>목록</button>
+        <button onClick={() => navigate(`/adm/notice/write?noticeNo=${noticeNo}`)}>수정</button>
         <button className="delete-button" onClick={handleDelete}>삭제</button>
       </div>
     </div>

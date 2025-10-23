@@ -17,20 +17,15 @@ public class CommentService {
 
     private final CommentRepository commentRepository;
 
-    /**
-     * 게시글의 댓글 목록 조회 (최신순)
-     */
+    //게시글의 댓글 목록 조회 (최신순)
     @Transactional(readOnly = true)
     public List<Comment> getCommentsByBoardNo(Integer boardNo) {
-        return commentRepository.findByBoardNoOrderByCreateDateDesc(boardNo);
+        List<Comment> comments = commentRepository.findByBoardNoOrderByCreateDateDesc(boardNo);
+        log.info("댓글 조회: 게시글 {}, 개수 {}", boardNo, comments.size());  // 로그 확인
+        return comments;
     }
 
-    /**
-     * 댓글 작성
-     * @param boardNo 게시글 번호
-     * @param userNo 작성자 번호
-     * @param content 댓글 내용
-     */
+    //댓글 작성
     public Comment createComment(Integer boardNo, Integer userNo, String content) {
         Comment comment = Comment.builder()
                 .boardNo(boardNo)
@@ -46,13 +41,7 @@ public class CommentService {
         return savedComment;
     }
 
-    /**
-     * 대댓글 작성
-     * @param boardNo 게시글 번호
-     * @param parentCommentNo 부모 댓글 번호
-     * @param userNo 작성자 번호
-     * @param content 댓글 내용
-     */
+    //대댓글 작성
     public Comment createReply(Integer boardNo, Integer parentCommentNo, Integer userNo, String content) {
         Comment parentComment = commentRepository.findById(parentCommentNo)
                 .orElseThrow(() -> new RuntimeException("부모 댓글을 찾을 수 없습니다. ID: " + parentCommentNo));
@@ -71,11 +60,7 @@ public class CommentService {
         return savedReply;
     }
 
-    /**
-     * 댓글 삭제 (본인만 가능)
-     * @param commentNo 댓글 번호
-     * @param currentUserNo 현재 로그인한 사용자 번호
-     */
+    //댓글 삭제 (본인만 가능)
     public void deleteComment(Integer commentNo, Integer currentUserNo) {
         Comment comment = commentRepository.findById(commentNo)
                 .orElseThrow(() -> new RuntimeException("댓글을 찾을 수 없습니다. ID: " + commentNo));
@@ -103,9 +88,7 @@ public class CommentService {
         }
     }
 
-    /**
-     * 댓글 신고
-     */
+    //댓글 신고
     public void reportComment(Integer commentNo) {
         Comment comment = commentRepository.findById(commentNo)
                 .orElseThrow(() -> new RuntimeException("댓글을 찾을 수 없습니다. ID: " + commentNo));
@@ -115,17 +98,13 @@ public class CommentService {
         log.info("댓글 신고 완료. ID: {}, 신고 횟수: {}", commentNo, comment.getReportCount());
     }
 
-    /**
-     * 게시글의 댓글 개수 조회
-     */
+    //게시글의 댓글 개수 조회
     @Transactional(readOnly = true)
     public int getCommentCount(Integer boardNo) {
         return commentRepository.countByBoardNo(boardNo);
     }
 
-    /**
-     * 댓글 상세 조회
-     */
+    //댓글 상세 조회
     @Transactional(readOnly = true)
     public Comment getComment(Integer commentNo) {
         return commentRepository.findById(commentNo)

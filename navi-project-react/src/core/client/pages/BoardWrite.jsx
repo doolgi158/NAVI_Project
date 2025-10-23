@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import "../css/BoardWrite.css";
-import MainLayout from '@/users/layout/MainLayout';
 
 function BoardWrite() {
   const navigate = useNavigate();
@@ -91,12 +90,16 @@ function BoardWrite() {
       // 게시글 저장
       const response = await fetch('/api/board', {
         method: 'POST',
+        credentials: 'include',  // ✅ 쿠키 전송
         body: formData  // FormData 전송 (Content-Type 자동 설정)
       });
 
       if (response.ok) {
         alert('작성되었습니다!');
         navigate('/board');
+      } else if (response.status === 401) {
+        alert('로그인이 필요합니다.');
+        navigate('/users/login');
       } else {
         throw new Error('작성 실패');
       }
@@ -107,7 +110,6 @@ function BoardWrite() {
   };
 
   return (
-    <MainLayout>
     <div className="board-write-container">
       <h2>게시글 작성</h2>
 
@@ -161,7 +163,6 @@ function BoardWrite() {
             ) : (
               <div className="upload-placeholder">
                 <p>이미지를 드래그하거나 클릭하여 업로드</p>
-                <p className="upload-hint">(JPG, PNG, GIF - 최대 5MB)</p>
               </div>
             )}
           </div>
@@ -183,7 +184,6 @@ function BoardWrite() {
         </div>
       </form>
     </div>
-    </MainLayout>
   );
 }
 
