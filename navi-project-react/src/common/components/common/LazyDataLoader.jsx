@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Spin } from "antd";
+import { Spin, Progress } from "antd";
 
 /**
  * LazyDataLoader.jsx
@@ -15,11 +15,11 @@ import { Spin } from "antd";
 const LazyDataLoader = ({ checkUrl, checkParams = {}, onReady, children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+  const maxAttempts = 10;
 
   useEffect(() => {
     let timerId;
-    let attempt = 0; //시도 횟수
-    const maxAttempts = 10; //최대 10번 시도(20초 정도)
 
     const checkStatus = async () => {
       try {
@@ -29,7 +29,7 @@ const LazyDataLoader = ({ checkUrl, checkParams = {}, onReady, children }) => {
           setLoading(false);
           onReady?.(); // 데이터 로딩 콜백
         } else if (attempt < maxAttempts) {
-          attempt++;
+          setAttempt((prev) => prev + 1);
           timerId = setTimeout(checkStatus, 3000); // 3초마다 재확인
         }
       } catch (err) {
@@ -62,11 +62,17 @@ const LazyDataLoader = ({ checkUrl, checkParams = {}, onReady, children }) => {
 
 
   if (loading) {
+    const progress = Math.min((attempt / maxAttempts) * 100, 100);
+
     return (
       <div className="flex flex-col items-center justify-center py-20">
         <Spin size="large" />
         <p className="mt-4 text-gray-600">데이터를 준비 중입니다...</p>
-        <p className="mt-4 text-gray-600">최대 30초 정도 소요될 수 있습니다.</p>
+        <Progress percent={progress} status="active" style={{ width: 300 }} />
+        <p className="mt-2 text-gray-500">
+          {attempt}/{maxAttempts} 단계 진행 중
+        </p>
+        {/* <p className="mt-4 text-gray-600">최대 30초 정도 소요될 수 있습니다.</p> */}
       </div>
     );
   }
