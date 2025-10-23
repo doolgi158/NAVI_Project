@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { Button, Splitter, Spin } from "antd";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import TravelMap from "./components/TravelMap";
@@ -9,12 +9,13 @@ import { getPlanDetail, savePlan, updatePlan } from "@/common/api/planApi";
 import { getCookie } from "@/common/util/cookie";
 
 export default function PlanScheduler() {
+    const location = useLocation();
+    const initialState = location.state;
     const [searchParams] = useSearchParams();
-    const navigate = useNavigate();
-
     const planId = searchParams.get("planId");
-    const mode = searchParams.get("mode") || "edit"; // 기본값 edit
+    const mode = searchParams.get("mode") || (initialState ? "create" : "edit");
 
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [meta, setMeta] = useState({ title: "", startDate: "", endDate: "" });
     const [days, setDays] = useState([]);
@@ -28,62 +29,59 @@ export default function PlanScheduler() {
     /** ✅ 데이터 로드 (planId 존재 시 상세조회) */
     useEffect(() => {
         const fetchDetail = async () => {
-            if (!planId) {
-                setLoading(false);
-                return;
-            }
+            if (planId) {
+                try {
+                    const res = await getPlanDetail(planId);
 
-            try {
-                const res = await getPlanDetail(planId);
 
-                // ✅ 데이터 유효성 확인
-                if (!res || !res.days) {
-                    console.warn("⚠️ 불완전한 plan 데이터:", res);
+                    // ✅ 데이터 유효성 확인
+                    if (!res || !res.days) {
+                        console.warn("⚠️ 불완전한 plan 데이터:", res);
+                        setLoading(false);
+                        return;
+                    }
+
+                    // ✅ 메타 정보
+                    setMeta({
+                        title: res.title || "제목 없음",
+                        startDate: res.startDate,
+                        endDate: res.endDate,
+                    });
+
+                    // ✅ 일자별 아이템 세팅
+                    const parsedDays = res.days.map((day) => ({
+                        dateISO: day.dayDate,
+                        items: (day.items || []).map((it) => ({
+                            title: it.title,
+                            type: it.type,
+                            travelId: it.travelId,
+                            stayId: it.stayId,
+                            lat: it.lat,
+                            lng: it.lng,
+                            img: it.img,
+                            startTime: it.startTime,
+                            endTime: it.endTime,
+                        })),
+                    }));
+
+                    setDays(parsedDays);
+                } catch (err) {
+                    console.error("❌ 계획 상세 불러오기 실패:", err);
+                } finally {
                     setLoading(false);
-                    return;
                 }
-
-                // ✅ 메타 정보
-                setMeta({
-                    title: res.title || "제목 없음",
-                    startDate: res.startDate,
-                    endDate: res.endDate,
-                });
-
-                // ✅ 일자별 아이템 세팅
-                const parsedDays = res.days.map((day) => ({
-                    dateISO: day.dayDate,
-                    items: (day.items || []).map((it) => ({
-                        title: it.title,
-                        type: it.type,
-                        travelId: it.travelId,
-                        stayId: it.stayId,
-                        lat: it.lat,
-                        lng: it.lng,
-                        img: it.img,
-                        startTime: it.startTime,
-                        endTime: it.endTime,
-                    })),
-                }));
-
-                setDays(parsedDays);
-            } catch (err) {
-                console.error("❌ 계획 상세 불러오기 실패:", err);
-            } finally {
+            } else if (location.state) {
+                // 🔹 TravelPlanner에서 넘어온 신규 계획 데이터 세팅
+                setMeta(location.state.meta);
+                setDays(location.state.days);
+                setLoading(false);
+            } else {
                 setLoading(false);
             }
         };
         fetchDetail();
-    }, [planId]);
+    }, [planId, location.state]);
 
-    // 렌더 내부
-    if (loading) {
-        return (
-            <div className="flex justify-center items-center h-screen">
-                <Spin size="large" tip="여행 계획을 불러오는 중입니다..." />
-            </div>
-        );
-    }
 
 
     /** ✅ 분할 비율 동적 조정 */
@@ -179,6 +177,8 @@ export default function PlanScheduler() {
                 "https://via.placeholder.com/300x200.png?text=Travel+Plan",
         };
 
+        console.log("📦 savePlan requestData:", requestData);
+
         try {
             if (planId) {
                 await updatePlan(planId, requestData);
@@ -235,14 +235,18 @@ export default function PlanScheduler() {
                                         ? "text-[#6846FF]"
                                         : it.type === "travel"
                                             ? "text-[#0088CC]"
-                                            : "text-gray-400"
+                                            : it.type === "poi"
+                                                ? "text-[#cea433]"
+                                                : "text-gray-400"
                                         }`}
                                 >
                                     {it.type === "stay"
                                         ? "숙소"
                                         : it.type === "travel"
                                             ? "여행지"
-                                            : "기타"}
+                                            : it.type === "poi"
+                                                ? "공항"
+                                                : "기타"}
                                 </span>
                                 <span
                                     className="font-semibold text-[#2F3E46] text-sm truncate max-w-[140px]"
@@ -252,7 +256,17 @@ export default function PlanScheduler() {
                                 </span>
                             </div>
 
-                            {it.img ? (
+                            {it.type === "poi" ? (
+                                // ✅ POI(공항 등) 전용 이미지
+                                <div className="w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden border border-gray-200">
+                                    <img
+                                        src="https://cdn.news.bbsi.co.kr/news/photo/201512/711928_19896_354.jpg"
+                                        alt={it.title}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                            ) : it.img ? (
+                                // ✅ 일반 여행지/숙소 이미지
                                 <div className="w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden border border-gray-200">
                                     <img
                                         src={it.img}
@@ -261,10 +275,12 @@ export default function PlanScheduler() {
                                     />
                                 </div>
                             ) : (
+                                // ✅ 이미지 없음 처리
                                 <div className="w-20 h-20 flex-shrink-0 rounded-xl bg-gray-100 flex items-center justify-center text-gray-400 text-xs">
                                     No Image
                                 </div>
                             )}
+
                         </div>
                     </div>
                 )}

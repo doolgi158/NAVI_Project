@@ -90,7 +90,8 @@ export default function PlanList({
 
                             return (
                                 <div
-                                    key={plan.id}
+                                    key={plan.planId}
+                                    onClick={() => onDetail(plan)}
                                     className="flex justify-between items-center p-4 rounded-xl border border-gray-200 hover:shadow-md transition bg-white"
                                 >
                                     {/* ✅ 썸네일 */}
@@ -113,10 +114,10 @@ export default function PlanList({
                                             {plan.title || "제목 없음"}
                                             <span
                                                 className={`ml-3 px-2 py-[2px] rounded-md text-xs font-semibold ${dDayLabel === "D-DAY"
-                                                        ? "bg-[#FFB703] text-white"
-                                                        : dDayLabel === "여행 종료"
-                                                            ? "bg-gray-300 text-gray-700"
-                                                            : "bg-[#3A6EA5] text-white"
+                                                    ? "bg-[#FFB703] text-white"
+                                                    : dDayLabel === "여행 종료"
+                                                        ? "bg-gray-300 text-gray-700"
+                                                        : "bg-[#3A6EA5] text-white"
                                                     }`}
                                             >
                                                 {dDayLabel}

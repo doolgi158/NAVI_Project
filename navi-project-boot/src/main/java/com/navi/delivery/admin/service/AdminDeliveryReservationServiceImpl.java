@@ -51,6 +51,7 @@ public class AdminDeliveryReservationServiceImpl implements AdminDeliveryReserva
         if (dto.getDeliveryDate() != null) rsv.setDeliveryDate(dto.getDeliveryDate());
         if (dto.getTotalPrice() != null) rsv.setTotalPrice(dto.getTotalPrice());
         if (dto.getStatus() != null) rsv.setStatus(dto.getStatus());
+        if (dto.getBagsJson() != null) rsv.setBagsJson(dto.getBagsJson());
 
         return toDTO(reservationRepository.save(rsv));
     }

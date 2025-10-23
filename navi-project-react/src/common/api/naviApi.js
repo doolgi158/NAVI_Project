@@ -170,6 +170,12 @@ export const searchFlights = async (params) => {
   return res.data;
 };
 
+/** 내 여행 계획 목록 조회 */
+export const getMyPlans = async () => {
+  const res = await api.get(`/plans`);
+  return res.data;
+};
+
 /** 회원가입 */
 export const signup = async (data) => {
   const res = await api.post(`/users/signup`, data);

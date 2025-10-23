@@ -33,11 +33,11 @@ public class TravelPlan {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "travel_plan_seq_gen")
-    private Long id;
+    private Long planId;
 
     // === 관계 ===
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_no")
+    @JoinColumn(name = "user_no", nullable = false)
     private User user;
 
     @OneToMany(mappedBy = "travelPlan", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -101,4 +101,6 @@ public class TravelPlan {
             this.days.addAll(newDays);
         }
     }
+
+
 }

@@ -267,6 +267,7 @@ const AdminFlightFormPage = () => {
                 showTime
                 format="YYYY-MM-DD HH:mm"
                 style={{ width: "100%" }}
+                disabledDate={(current) => current && current < dayjs().startOf("day")}
               />
             </Form.Item>
             <Form.Item
@@ -279,6 +280,7 @@ const AdminFlightFormPage = () => {
                 showTime
                 format="YYYY-MM-DD HH:mm"
                 style={{ width: "100%" }}
+                disabledDate={(current) => current && current < dayjs().startOf("day")}
               />
             </Form.Item>
           </Space>

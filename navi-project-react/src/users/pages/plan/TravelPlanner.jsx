@@ -5,9 +5,8 @@ import HeaderLayout from "../../layout/HeaderLayout";
 import FooterLayout from "../../layout/FooterLayout";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import { getAllTravels, getAllStays } from "../../../common/api/planApi";
-import { useAuth } from "../../../common/hooks/useAuth";
 import dayjs from "dayjs";
-
+import { getCookie } from "@/common/util/cookie";
 
 import TravelMap from "./components/TravelMap";
 import StepDrawer from "./components/StepDrawer";
@@ -26,7 +25,7 @@ export default function TravelPlanner() {
   const [stays, setStays] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const user = useAuth();
+
 
   const [step, setStep] = useState(1);
   const [title, setTitle] = useState("");
@@ -38,6 +37,19 @@ export default function TravelPlanner() {
   const [showStayModal, setShowStayModal] = useState(false);
   const [selectedStayTarget, setSelectedStayTarget] = useState(null);
   const [modalResetTrigger, setModalResetTrigger] = useState(0);
+
+  const cookie = getCookie("userCookie");
+  const user =
+    typeof cookie === "string"
+      ? JSON.parse(cookie)
+      : cookie;
+
+  if (!user) {
+    return <div>로그인 후 이용해주세요.</div>;
+  }
+
+  console.log("현재 로그인 유저:", user);
+
 
   const resetAll = () => {
     setTimes({});
@@ -239,7 +251,7 @@ export default function TravelPlanner() {
 
   const handleConfirm = () => {
     const data = buildInitialSchedule();
-    navigate("/plans/schedule", { state: data });
+    navigate("/plans/scheduler?mode=create", { state: data });
   };
 
   /** ✅ 지도 마커 */
@@ -307,35 +319,40 @@ export default function TravelPlanner() {
             />
 
             <div className="flex h-[calc(100vh-100px)] border-l border-[#eee]">
-              {step === 3 && (
-                <TimeDrawer days={days} times={times} setTimes={setTimes} />
-              )}
 
-              {step === 4 && (
-                <TravelSelectDrawer
-                  travels={travels}
-                  selectedTravels={selectedTravels}
-                  setSelectedTravels={setSelectedTravels}
-                />
-              )}
 
-              {step === 5 && (
-                <StaySelectDrawer
-                  stays={stays}
-                  title={title}
-                  dateRange={dateRange}
-                  days={days}
-                  hasNights={hasNights}
-                  stayPlans={stayPlans}
-                  setStayPlans={setStayPlans}
-                  selectedStays={selectedStays}
-                  setSelectedStays={setSelectedStays}
-                  setSelectedStayTarget={setSelectedStayTarget}
-                  setShowStayModal={setShowStayModal}
-                  setModalResetTrigger={setModalResetTrigger}
-                  resetAllStays={resetAllStays}
-                />
-              )}
+              {step === 3 ? (
+                <TimeDrawer key="time" days={days} times={times} setTimes={setTimes} title={title} dateRange={dateRange} />
+              ) :
+                step === 4 ? (
+                  <TravelSelectDrawer
+                    key="travel"
+                    travels={travels}
+                    title={title}
+                    dateRange={dateRange}
+                    selectedTravels={selectedTravels}
+                    setSelectedTravels={setSelectedTravels}
+                  />
+                ) :
+
+                  step === 5 ? (
+                    <StaySelectDrawer
+                      key="stay"
+                      stays={stays}
+                      title={title}
+                      dateRange={dateRange}
+                      days={days}
+                      hasNights={hasNights}
+                      stayPlans={stayPlans}
+                      setStayPlans={setStayPlans}
+                      selectedStays={selectedStays}
+                      setSelectedStays={setSelectedStays}
+                      setSelectedStayTarget={setSelectedStayTarget}
+                      setShowStayModal={setShowStayModal}
+                      setModalResetTrigger={setModalResetTrigger}
+                      resetAllStays={resetAllStays}
+                    />
+                  ) : null}
             </div>
 
             <div style={{ position: "relative" }}>
@@ -345,7 +362,8 @@ export default function TravelPlanner() {
             </div>
           </div>
         </Content>
-      )}
+      )
+      }
 
       <FooterLayout />
 
@@ -370,6 +388,6 @@ export default function TravelPlanner() {
         setSelectedStays={setSelectedStays}
         resetAllStays={resetAllStays}
       />
-    </Layout>
+    </Layout >
   );
 }

@@ -10,7 +10,7 @@ import java.util.List;
 public interface TravelPlanDayRepository extends JpaRepository<TravelPlanDay, Long> {
 
     /** ✅ 특정 여행계획(planId) 기준 조회 */
-    List<TravelPlanDay> findByTravelPlan_Id(Long planId);
+    List<TravelPlanDay> findByTravelPlan_PlanId(Long planId);
 
     /** ✅ 특정 사용자(userId) 기준 전체 일정 조회 */
     List<TravelPlanDay> findByTravelPlan_User_Id(String userId);

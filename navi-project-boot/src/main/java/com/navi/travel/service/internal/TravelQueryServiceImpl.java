@@ -185,8 +185,10 @@ public class TravelQueryServiceImpl implements TravelQueryService {
         String currentUserId = null;
         try {
             var auth = SecurityContextHolder.getContext().getAuthentication();
-            if (auth != null && auth.getPrincipal() instanceof JWTClaimDTO claimDTO) {
-                currentUserId = claimDTO.getId();
+            if (auth != null && auth.getPrincipal() instanceof com.navi.user.dto.users.UserSecurityDTO user) {
+                currentUserId = user.getId();
+            } else if (auth != null && auth.getPrincipal() instanceof String str && !"anonymousUser".equals(str)) {
+                currentUserId = str;
             }
         } catch (Exception e) {
             log.warn("⚠️ 사용자 인증 정보 조회 실패: {}", e.getMessage());
@@ -199,7 +201,7 @@ public class TravelQueryServiceImpl implements TravelQueryService {
             dto.setLikesCount(likes);
             dto.setBookmarkCount(bookmarks);
 
-            if (StringUtils.hasText(currentUserId) && !"anonymousUser".equals(currentUserId)) {
+            if (currentUserId != null && !"anonymousUser".equals(currentUserId)) {
                 dto.setLikedByUser(likeRepository.existsByTravelIdAndId(travelId, currentUserId));
                 dto.setBookmarkedByUser(bookmarkRepository.existsByTravelIdAndId(travelId, currentUserId));
             } else {
@@ -210,4 +212,5 @@ public class TravelQueryServiceImpl implements TravelQueryService {
 
         return pageDto;
     }
+
 }
