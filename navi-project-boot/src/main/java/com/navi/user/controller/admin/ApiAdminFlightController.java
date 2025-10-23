@@ -17,7 +17,7 @@ public class ApiAdminFlightController {
 
     @GetMapping("/flightDashboard")
     public ResponseEntity<?> getFlightDashboard(@RequestParam(defaultValue = "monthly") String range) {
-        var stats = adminFlightDashboard.getFlightStatistics(range);
+        var stats = adminFlightDashboard.getFlightStats(range);
         return ResponseEntity.ok(ApiResponse.success(stats));
     }
 }

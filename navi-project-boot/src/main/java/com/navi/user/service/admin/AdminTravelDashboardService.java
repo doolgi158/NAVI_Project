@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface AdminTravelDashboardService {
-    AdminDashboardDTO.Travels getTravelStats();
+    AdminDashboardDTO.Travels getTravelStats(String range);
 
     List<Map<String, Object>> getTopTravelRank();
 }

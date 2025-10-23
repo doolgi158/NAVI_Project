@@ -13,19 +13,18 @@ import Ranking from "../../common/components/admin/RankingTable";
 import { MOCK_SUMMARY, MOCK_TREND_MONTHLY, MOCK_RANKINGS } from "../mockdata/dashboardMockData";
 import { API_SERVER_HOST } from "@/common/api/naviApi";
 import { useDashboardData } from "@/common/hooks/admin/useDashboardData";
+import { generatePeriods } from "@/common/util/dateFormat";
 
 const { Title, Text } = Typography;
 
 const AdminDashboard = () => {
   const [range, setRange] = useState("월간");
 
+  // API endpoints (range 변경 시마다 갱신)
   const endpoints = useMemo(() => {
     const rangeParam =
-      range === "일간"
-        ? "daily"
-        : range === "주간"
-          ? "weekly"
-          : "monthly"; // 기본 월간
+      range === "일간" ? "daily" :
+        range === "주간" ? "weekly" : "monthly";
 
     return [
       `${API_SERVER_HOST}/api/adm/userDashboard?range=${rangeParam}`,
@@ -44,25 +43,38 @@ const AdminDashboard = () => {
     console.log("📊 Dashboard data:", data);
   }, [data, range]);
 
-  // Hook 이후에 조건부 렌더링
-  if (loading) {
-    return (
-      <Layout style={{ minHeight: "100vh" }}>
-        <AdminSiderLayout />
-        <div style={{ padding: 24 }}>
-          <Spin fullscreen tip="Loading Dashboard..." />
-        </div>
-      </Layout>
-    );
-  }
+  // range에 맞는 기간별 usageTrend 보완
+  const displayTrend = useMemo(() => {
+    const rangeParam =
+      range === "일간" ? "daily" :
+        range === "주간" ? "weekly" : "monthly";
 
-  // 전월 대비 퍼센트 계산 함수
+    const trendPeriods = generatePeriods(rangeParam);
+
+    const usageTrend = trendPeriods.map((p) => {
+      const found = data?.usageTrend?.find((d) => d.name === p);
+      return {
+        name: p,
+        travelViews: found?.travelViews || 0,
+        accViews: found?.accViews || 0,
+        flightResv: found?.flightResv || 0,
+        deliveryResv: found?.deliveryResv || 0,
+      };
+    });
+
+    return {
+      usageTrend,
+      salesTrend: data?.salesTrend || MOCK_TREND_MONTHLY.salesTrend,
+      paymentShare: data?.paymentShare || MOCK_TREND_MONTHLY.paymentShare,
+    };
+  }, [data, range]);
+
+  // KPI 계산
   const getPctChange = (curr, prev) => {
     if (!prev || prev === 0) return 0;
     return Number((((curr - prev) / prev) * 100).toFixed(1));
   };
 
-  // 증감률 추가 계산
   const processedSummary = (() => {
     if (!data) return null;
 
@@ -70,29 +82,15 @@ const AdminDashboard = () => {
     const trend = data.userTrend || [];
     const prevMonth = trend.length > 1 ? trend[trend.length - 2] : null;
     const currMonth = trend.length > 0 ? trend[trend.length - 1] : null;
-
-    // 백엔드 userTrend에는 total이 없으므로 users.total 기준으로만 계산
     const changedPct = getPctChange(users.total, users.total - (currMonth?.join || 0) + (currMonth?.leave || 0));
 
     return {
       ...data,
-      users: {
-        ...users,
-        changedPct,
-      },
+      users: { ...users, changedPct },
     };
   })();
 
-
-  // 차트용 데이터
-  const trend = data?.userTrend || [];
-  const displayTrend = {
-    usageTrend: data?.usageTrend || [],
-    salesTrend: MOCK_TREND_MONTHLY.salesTrend,
-    paymentShare: MOCK_TREND_MONTHLY.paymentShare,
-  };
-
-  // 인기 여행지 TOP5
+  // 인기 여행지 / 숙소 TOP5
   const travelTop5 =
     (data?.ranking || [])
       .slice(0, 5)
@@ -104,7 +102,6 @@ const AdminDashboard = () => {
         region: t.region || "-",
       })) || [];
 
-  // 숙소 TOP5
   const accommodationTop5 =
     (data?.accommodationRanking || [])
       .sort((a, b) => (b.views || 0) - (a.views || 0))
@@ -117,11 +114,23 @@ const AdminDashboard = () => {
         views: acc.views || 0,
       })) || [];
 
+  // 로딩 중 화면
+  if (loading) {
+    return (
+      <Layout style={{ minHeight: "100vh" }}>
+        <AdminSiderLayout />
+        <div style={{ padding: 24 }}>
+          <Spin fullscreen tip="Loading Dashboard..." />
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout style={{ minHeight: "100vh" }}>
       <AdminSiderLayout />
       <div style={{ padding: 24 }}>
-        {/* 상단 헤더 */}
+        {/* 헤더 */}
         <Row align="middle" justify="space-between" style={{ marginBottom: 16 }}>
           <Col>
             <Title level={3}>관리자 대시보드</Title>
@@ -144,25 +153,17 @@ const AdminDashboard = () => {
           </Col>
         </Row>
 
-        {/* 로딩 중 */}
-        {loading && (
-          <div style={{ textAlign: "center", marginTop: 40 }}>
-            <Spin tip="데이터 불러오는 중..." />
-          </div>
-        )}
-
-        {/* KPI 섹션 */}
+        {/* KPI */}
         {!loading && <KpiSection summary={processedSummary} loading={loading} />}
 
-        {/* 차트 섹션 */}
-        {!loading && trend.length > 0 && (
+        {/* 차트 영역 */}
+        {!loading && (
           <>
             <div style={{ height: 24 }} />
-
             <Row gutter={[16, 16]}>
               <Col xs={24} lg={12}>
                 <UserChart
-                  data={trend.map((item) => ({
+                  data={(data?.userTrend || []).map((item) => ({
                     name:
                       range === "일간"
                         ? item.day
@@ -176,7 +177,16 @@ const AdminDashboard = () => {
                 />
               </Col>
               <Col xs={24} lg={12}>
-                <SalesChart data={displayTrend.salesTrend} />
+                <SalesChart
+                  data={displayTrend.salesTrend}
+                  range={
+                    range === "일간"
+                      ? "daily"
+                      : range === "주간"
+                        ? "weekly"
+                        : "monthly"
+                  }
+                />
               </Col>
             </Row>
 
@@ -184,7 +194,16 @@ const AdminDashboard = () => {
 
             <Row gutter={[16, 16]}>
               <Col xs={24} lg={12}>
-                <UsageChart data={displayTrend.usageTrend} />
+                <UsageChart
+                  data={displayTrend.usageTrend}
+                  range={
+                    range === "일간"
+                      ? "daily"
+                      : range === "주간"
+                        ? "weekly"
+                        : "monthly"
+                  }
+                />
               </Col>
               <Col xs={24} lg={12}>
                 <PaymentPie data={displayTrend.paymentShare} />
@@ -193,11 +212,13 @@ const AdminDashboard = () => {
 
             <div style={{ height: 24 }} />
 
-
-            {/* 인기 여행지 & 숙소 섹션 */}
+            {/* 인기 여행지 & 숙소 */}
             <Ranking
               summary={processedSummary}
-              ranking={{ travels: travelTop5, accommodations: accommodationTop5 }}
+              ranking={{
+                travels: travelTop5,
+                accommodations: accommodationTop5,
+              }}
             />
           </>
         )}

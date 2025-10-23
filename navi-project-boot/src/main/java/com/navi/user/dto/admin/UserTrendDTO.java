@@ -8,7 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserTrendDTO {
-    private String month;  // YYYY-MM
+    private String period;
     private long join;
     private long leave;
     private long active;

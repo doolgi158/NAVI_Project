@@ -12,6 +12,7 @@ import java.util.Optional;
 @Repository
 public interface AccRepository extends JpaRepository<Acc, Long> {
     Optional<Acc> findByContentId(Long contentId);
+
     Optional<Acc> findByAccId(String accId);
 
     /* 전체 숙소 조회 (운영중 + 객실 존재) */

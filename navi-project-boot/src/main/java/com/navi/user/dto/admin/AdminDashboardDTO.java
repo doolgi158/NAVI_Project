@@ -19,7 +19,6 @@ public class AdminDashboardDTO {
     // 결제 / 환불 / CS 관련 (미구현)
     private Payments payments;
     private Refunds refunds;
-    private Cs cs;
 
     // 차트용 데이터 (추세)
     private List<UserTrendDTO> userTrend;
@@ -92,17 +91,6 @@ public class AdminDashboardDTO {
     public static class Refunds {
         private double pct;
         private double changedPct;
-    }
-
-    /**
-     * CS 관련
-     */
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Cs {
-        private double handleRate;
     }
 
     /**

@@ -2,7 +2,7 @@ import { Row, Col, Card, Space, Typography, Badge, Table } from "antd";
 
 const { Text } = Typography;
 
-const DashboardOperationAndRanking = ({ ranking }) => (
+const RankingTable = ({ ranking }) => (
     <Row gutter={[16, 16]}>
         {/* 인기 여행지 TOP5 */}
         <Col xs={24} lg={9}>
@@ -51,4 +51,4 @@ const DashboardOperationAndRanking = ({ ranking }) => (
     </Row>
 );
 
-export default DashboardOperationAndRanking;
+export default RankingTable;
