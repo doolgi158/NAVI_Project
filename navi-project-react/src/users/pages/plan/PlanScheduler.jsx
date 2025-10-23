@@ -510,9 +510,43 @@ export default function PlanScheduler() {
                                     ))}
                                 </div>
 
+                                {/* ✅ 하단 버튼 영역 */}
                                 {!isViewMode && (
-                                    <div className="pt-6 flex flex-col">
-                                        <Button block type="primary" className="bg-[#2F3E46] mt-2" onClick={handleConfirm}>
+                                    <div className="pt-6 flex flex-col gap-2">
+                                        {/* ✅ 이전 버튼 */}
+                                        <Button
+                                            block
+                                            className="bg-gray-200 hover:bg-gray-300 text-gray-700"
+                                            onClick={() => {
+                                                navigate("/plans/planner", {
+                                                    state: {
+                                                        from: "scheduler",
+                                                        step: 3, // 돌아갈 때 3단계부터
+                                                        restoreData: {
+                                                            meta,
+                                                            days,
+                                                            dayTimes: state?.dayTimes || {},
+                                                            title: meta.title,
+                                                            dateRange: [dayjs(meta.startDate), dayjs(meta.endDate)],
+                                                            times: state?.dayTimes || {},
+                                                            selectedTravels: state?.selectedTravels || [],
+                                                            selectedStays: state?.selectedStays || [],
+                                                            stayPlans: state?.stayPlans || {},
+                                                        },
+                                                    },
+                                                });
+                                            }}
+                                        >
+                                            이전
+                                        </Button>
+
+                                        {/* ✅ 저장/수정 버튼 */}
+                                        <Button
+                                            block
+                                            type="primary"
+                                            className="bg-[#2F3E46]"
+                                            onClick={handleConfirm}
+                                        >
                                             {isEditMode ? "수정" : "저장"}
                                         </Button>
                                     </div>
