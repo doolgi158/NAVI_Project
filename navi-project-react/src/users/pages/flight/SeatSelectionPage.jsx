@@ -194,7 +194,6 @@ const SeatSelectPage = () => {
       
       // 결제용 items 배열 구성
       const items = [];
-      const totalPrice = (selectedOutbound.price + (selectedInbound?.price || 0)) * passengerCount;
 
       // 왕복일 경우, 먼저 출발편 예약(outboundDto)을 추가
       if (isRoundTrip && outboundDto?.frsvId) {
