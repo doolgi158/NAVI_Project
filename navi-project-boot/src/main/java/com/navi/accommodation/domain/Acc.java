@@ -53,8 +53,7 @@ public class Acc {
 
     // 숙소 유형 (호텔, 펜션 등)
     @Builder.Default
-    @Nationalized
-    @Column(length = 10)
+    @Nationalized @Column(length = 10)
     private String category = "미확인";
 
     // 문의 전화번호
@@ -120,6 +119,10 @@ public class Acc {
     // 수정일시
     @Column(name = "modified_time", nullable = false)
     private LocalDateTime modifiedTime;
+
+    // 대표 이미지
+    @Column(name = "main_image", length = 255)
+    private String mainImage;
 
     // 조회수
     @Builder.Default
@@ -218,7 +221,7 @@ public class Acc {
     public void changeTownship(Township township) {
         if (township != null) { this.township = township; }
     }
-
+    public void updateMainImage(String mainImage) { this.mainImage = mainImage; }
     public void changeLocation(BigDecimal mapx, BigDecimal mapy) {
         if (mapx != null) { this.mapx = mapx; }
         if (mapy != null) { this.mapy = mapy; }

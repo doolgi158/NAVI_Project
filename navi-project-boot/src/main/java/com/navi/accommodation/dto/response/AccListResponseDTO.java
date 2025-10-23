@@ -19,22 +19,23 @@ public class AccListResponseDTO {
     private String title;               // 숙소명
     private String address;             // 숙소 주소
 
-    private String accImage;            // 대표 숙소 이미지
-    private Integer minPrice;           // 예약 가능 객실 중 최저가
+    private String mainImage;           // Todo: 대표 숙소 이미지
+    private BigDecimal minPrice;        // Todo: 예약 가능 객실 중 최저가
     private Integer remainingRooms;     // Todo: 예약 가능 잔여 객실 수
 
     private BigDecimal mapx;            // 경도
     private BigDecimal mapy;            // 위도
 
     /* Entity → DTO 변환 */
-    public static AccListResponseDTO fromEntity(Acc acc) {
+    public static AccListResponseDTO fromEntity(Acc acc, BigDecimal minPrice) {
         return AccListResponseDTO.builder()
                 .accId(acc.getAccId())           // 숙소 ID
                 .title(acc.getTitle())           // 숙소명
                 .address(acc.getAddress())       // 주소
+                .mainImage(acc.getMainImage())   // 대표 이미지
+                .minPrice(minPrice)              // 최저가 객실 가격
                 .mapx(acc.getMapx())             //경도
                 .mapy(acc.getMapy())             //위도
                 .build();
     }
-    // Todo: minPrice, remainingRooms, images는 추후 예약 연동 시 계산 예정
 }

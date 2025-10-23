@@ -131,7 +131,7 @@ public class TravelPlanController {
     public ResponseEntity<List<AccListResponseDTO>> getStayList() {
         List<Acc> accList = accService.getAllAcc();
         List<AccListResponseDTO> stays = accList.stream()
-                .map(AccListResponseDTO::fromEntity)
+                .map(acc -> AccListResponseDTO.fromEntity(acc, null))
                 .toList();
         return ResponseEntity.ok(stays);
     }
