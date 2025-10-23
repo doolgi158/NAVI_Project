@@ -1,64 +1,71 @@
 package com.navi.planner.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.OptBoolean;
-import org.springframework.format.annotation.DateTimeFormat;
 import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 
-@Data
+/**
+ * 여행계획 등록/수정 요청 DTO
+ * 프론트엔드에서 days[].items[] 구조로 전달받는 데이터를 매핑한다.
+ */
+@Getter
+@Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class TravelPlanRequestDTO {
 
-    private String userId;
+    /** 메인 정보 */
     private String title;
-
-    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate startDate;
-
-    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate endDate;
-
-    @JsonFormat(pattern = "HH:mm:ss", lenient = OptBoolean.TRUE)
-    @DateTimeFormat(pattern = "HH:mm:ss")
     private LocalTime startTime;
-
-    @JsonFormat(pattern = "HH:mm:ss", lenient = OptBoolean.TRUE)
-    @DateTimeFormat(pattern = "HH:mm:ss")
     private LocalTime endTime;
-
     private String thumbnailPath;
 
-    @Builder.Default
-    private List<TravelItem> travels = new ArrayList<>();
+    /** 일자별 일정 리스트 */
+    private List<DayRequestDTO> days;
 
-    @Builder.Default
-    private List<StayItem> stays = new ArrayList<>();
-
-    @Data
+    /** 하루 단위 일정 DTO */
+    @Getter
+    @Setter
+    @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    @Builder
-    public static class TravelItem {
-        private Long travelId;
-        private String travelName;
+    public static class DayRequestDTO {
+        private LocalDate dayDate;
+        private Integer orderNo;
+        private List<ItemRequestDTO> items;
     }
 
-    @Data
+    /** 일자별 아이템(여행지/숙소 등) DTO */
+    @Getter
+    @Setter
+    @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    @Builder
-    public static class StayItem {
-        private String stayId;
+    public static class ItemRequestDTO {
+        private String title;
+        private String type;        // "travel" | "stay" | "etc"
+
+        private Long travelId;
+        private Long stayId;
         private String stayName;
 
-        @Builder.Default
-        private List<String> dates = new ArrayList<>();
+        /** ✅ 위치 정보 (API 별 필드 통합 대응) */
+        private Double lat;         // 기본 latitude
+        private Double lng;         // 기본 longitude
+        private Double latitude;    // 여행지용 (travel API)
+        private Double longitude;   // 여행지용 (travel API)
+        private Double mapY;        // 숙소용 (stay API)
+        private Double mapX;        // 숙소용 (stay API)
+
+        private String img;
+        private String startTime;
+        private String endTime;
+
+
     }
 }

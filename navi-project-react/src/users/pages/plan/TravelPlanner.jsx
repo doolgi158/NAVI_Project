@@ -48,9 +48,6 @@ export default function TravelPlanner() {
     return <div>로그인 후 이용해주세요.</div>;
   }
 
-  console.log("현재 로그인 유저:", user);
-
-
   const resetAll = () => {
     setTimes({});
     setSelectedTravels([]);
@@ -141,42 +138,68 @@ export default function TravelPlanner() {
 
     const dcount = end.diff(start, "day") + 1;
 
-    // 1️⃣ 여행지 1/n 분배
+    // ✅ 여행지 1/n 분배
     const buckets = Array.from({ length: dcount }, () => []);
     selectedTravels.forEach((t, idx) => {
+      const lat = parseFloat(t.latitude ?? t.mapx ?? t.mapx ?? t.lat);
+      const lng = parseFloat(t.longitude ?? t.mapy ?? t.mapy ?? t.lng);
+
+      // ✅ 안전한 이미지 경로 정규화 (빈 문자열도 필터링)
+      const imageSrc =
+        t.img && t.img.trim() !== ""
+          ? t.img
+          : t.thumbnailPath && t.thumbnailPath.trim() !== ""
+            ? t.thumbnailPath
+            : t.imagePath && t.imagePath.trim() !== ""
+              ? t.imagePath
+              : "https://via.placeholder.com/150x150.png?text=No+Image";
+
       buckets[idx % dcount].push({
         type: "travel",
-        id: t.travelId,
+        travelId: t.travelId ?? t.id,
         title: t.title,
-        img: t.img,
-        lat: parseFloat(t.latitude ?? t.lat ?? t.mapy ?? t.mapY),
-        lng: parseFloat(t.longitude ?? t.lng ?? t.mapx ?? t.mapX),
+        img: imageSrc,
+        lat,
+        lng,
       });
     });
 
-    // 2️⃣ 숙소 날짜 매핑 (날짜 포맷을 YYYY-MM-DD로 고정)
+
+    // ✅ 숙소 매핑 (날짜별)
     const stayByDate = {};
     Object.entries(stayPlans).forEach(([accId, dates]) => {
       const stay = selectedStays.find((s) => s.accId === accId);
       if (!stay) return;
 
+      // ✅ 숙소 이미지 정규화
+      const stayImg =
+        stay.img && stay.img.trim() !== ""
+          ? stay.img
+          : stay.thumbnailPath && stay.thumbnailPath.trim() !== ""
+            ? stay.thumbnailPath
+            : stay.imagePath && stay.imagePath.trim() !== ""
+              ? stay.imagePath
+              : Array.isArray(stay.accImages?.[0]) && stay.accImages.length > 0
+                ? stay.accImages?.[0]
+                : "https://via.placeholder.com/150x150.png?text=No+Image";
+
       dates.forEach((dateStr) => {
         const parsed = dateStr.includes("-")
           ? dayjs(dateStr)
-          : dayjs(dateRange[0].year() + "-" + dateStr); // MM/DD → 2025-11-02 같은 형태로 보정
+          : dayjs(dateRange[0].year() + "-" + dateStr);
         const key = parsed.format("YYYY-MM-DD");
         stayByDate[key] = {
           type: "stay",
-          id: stay.accId,
+          stayId: stay.accId ?? stay.id,
           title: stay.title,
-          img: stay.accImages?.[0],
-          lat: parseFloat(stay.latitude ?? stay.mapx ?? stay.lat ?? stay.mapX),
-          lng: parseFloat(stay.longitude ?? stay.mapy ?? stay.lng ?? stay.mapY),
+          img: stayImg,
+          lat: parseFloat(stay.latitude ?? stay.mapx ?? stay.lat ?? stay.mapx),
+          lng: parseFloat(stay.longitude ?? stay.mapy ?? stay.lng ?? stay.mapy),
         };
       });
     });
 
-    // 3️⃣ 날짜별 일정 생성
+    // ✅ 날짜별 일정 구성
     const scheduleDays = [];
     for (let i = 0; i < dcount; i++) {
       const date = start.add(i, "day");
@@ -184,12 +207,9 @@ export default function TravelPlanner() {
       const items = [];
 
       const stayItem = stayByDate[dateKey] || null;
-
-      // ✅ 기본 시간 (10:00~22:00)
       const defaultStart = "10:00";
       const defaultEnd = "22:00";
 
-      // ✅ 첫날: 공항 → 숙소 → 여행지
       if (i === 0) {
         items.push({
           type: "poi",
@@ -204,9 +224,7 @@ export default function TravelPlanner() {
         buckets[i].forEach((it) =>
           items.push({ ...it, startTime: defaultStart, endTime: defaultEnd })
         );
-      }
-      // ✅ 마지막날: 숙소 → 여행지 → 공항
-      else if (i === dcount - 1) {
+      } else if (i === dcount - 1) {
         if (stayItem)
           items.push({ ...stayItem, startTime: defaultStart, endTime: defaultEnd });
         buckets[i].forEach((it) =>
@@ -220,9 +238,7 @@ export default function TravelPlanner() {
           startTime: defaultStart,
           endTime: defaultEnd,
         });
-      }
-      // ✅ 중간날: 숙소 → 여행지
-      else {
+      } else {
         if (stayItem)
           items.push({ ...stayItem, startTime: defaultStart, endTime: defaultEnd });
         buckets[i].forEach((it) =>
@@ -251,18 +267,32 @@ export default function TravelPlanner() {
 
   const handleConfirm = () => {
     const data = buildInitialSchedule();
-    navigate("/plans/scheduler?mode=create", { state: data });
+
+    // ✅ 전달 전에 모든 img 필드 재검증 (보조 안전장치)
+    if (data?.days) {
+      data.days.forEach((day) => {
+        day.items = day.items.map((it) => ({
+          ...it,
+          img:
+            it.img && it.img.trim() !== ""
+              ? it.img
+              : "https://via.placeholder.com/150x150.png?text=No+Image",
+        }));
+      });
+    }
+
+    navigate("/plans/scheduler", { state: data, replace: true });
   };
 
   /** ✅ 지도 마커 */
   const markers = useMemo(() => {
     const travelMarkers = selectedTravels
       .map((t, i) => {
-        const lat = parseFloat(t.mapY ?? t.latitude ?? t.lat);
-        const lng = parseFloat(t.mapX ?? t.longitude ?? t.lng);
+        const lat = parseFloat(t.mapy ?? t.latitude ?? t.lat);
+        const lng = parseFloat(t.mapx ?? t.longitude ?? t.lng);
 
         if (isNaN(lat) || isNaN(lng)) {
-          console.warn("[TravelMarker Skip] invalid coords:", t.title, t.mapX, t.mapY);
+          console.warn("[TravelMarker Skip] invalid coords:", t.title, t.mapx, t.mapy);
           return null;
         }
 
@@ -327,10 +357,10 @@ export default function TravelPlanner() {
                 step === 4 ? (
                   <TravelSelectDrawer
                     key="travel"
-                    travels={travels}
+                    travels={Array.isArray(travels) ? travels : []}
                     title={title}
                     dateRange={dateRange}
-                    selectedTravels={selectedTravels}
+                    selectedTravels={Array.isArray(selectedTravels) ? selectedTravels : []}
                     setSelectedTravels={setSelectedTravels}
                   />
                 ) :

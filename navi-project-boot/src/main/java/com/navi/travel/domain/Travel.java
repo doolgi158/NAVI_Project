@@ -118,6 +118,7 @@ public class Travel extends BaseEntityNoAudit {
 
     // ✅ 내부 체크용
     @Transient
+    @Builder.Default
     private boolean counterOnlyChanged = false;
 
     /**

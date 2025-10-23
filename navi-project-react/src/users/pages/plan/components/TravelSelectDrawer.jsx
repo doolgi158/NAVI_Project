@@ -21,49 +21,64 @@ export default function TravelSelectDrawer({
         <div className="flex-1 overflow-y-auto custom-scroll pb-4 pr-4 pl-4">
           <List
             dataSource={travels}
-            renderItem={(item) => (
-              <List.Item
-                onClick={() =>
-                  setSelectedTravels((prev) =>
-                    prev.some((v) => v.travelId === item.travelId)
-                      ? prev.filter((v) => v.id !== item.travelId)
-                      : [...prev, item]
-                  )
-                }
-                className="cursor-pointer"
-              >
-                <div className="flex justify-between w-full items-center bg-white px-4 py-3 rounded-lg shadow-sm">
-                  <div className="flex items-center gap-3 ">
-                    {/* 여행지 대표 이미지 */}
-                    <img
-                      src={item.img}
-                      alt={item.title}
-                      className="w-12 h-12 rounded-md object-cover"
-                    />
-                    <div>
-                      {/* 지역 */}
-                      <p className="font-semibold text-sm text-[#2F3E46] mb-0">
-                        {item.title}
-                      </p>
-                      <p className="text-xs text-gray-500 mb-1">
-                        {item.region1Name || "-"} {`>`} {item.region2Name || "-"}
-                      </p>
-                      <div className="flex items-center text-xs text-gray-400 gap-1">
-                        <i className="bi bi-heart-fill text-red-500"></i>
-                        <span>{item.likes || 0}</span>
+            locale={{
+              emptyText: <Empty description="여행지 데이터를 불러올 수 없습니다." />,
+            }}
+            renderItem={(item) => {
+              const isSelected = selectedTravels.some(
+                (v) => v.travelId === item.travelId
+              );
+              const imageSrc =
+                item.thumbnailPath ||
+                item.imagePath ||
+                "https://via.placeholder.com/150x150.png?text=No+Image";
+
+              return (
+                <List.Item
+                  onClick={() =>
+                    setSelectedTravels((prev) =>
+                      isSelected
+                        ? prev.filter((v) => v.travelId !== item.travelId)
+                        : [...prev, item]
+                    )
+                  }
+                  className="cursor-pointer"
+                >
+                  <div className="flex justify-between w-full items-center bg-white px-4 py-3 rounded-lg shadow-sm hover:shadow-md transition">
+                    <div className="flex items-center gap-3">
+                      {/* ✅ 여행지 대표 이미지 */}
+                      <img
+                        src={item.thumbnailPath || item.imagePath || item.img || "https://via.placeholder.com/400x300.png?text=No+Image"}
+                        alt={item.title}
+                        className="w-12 h-12 rounded-md object-cover"
+                      />
+                      <div>
+                        {/* ✅ 여행지명 */}
+                        <p className="font-semibold text-sm text-[#2F3E46] mb-0">
+                          {item.title}
+                        </p>
+                        {/* ✅ 지역 정보 */}
+                        <p className="text-xs text-gray-500 mb-1">
+                          {item.region1Name || "-"} {`>`} {item.region2Name || "-"}
+                        </p>
+                        {/* ✅ 좋아요 수 */}
+                        <div className="flex items-center text-xs text-gray-400 gap-1">
+                          <i className="bi bi-heart-fill text-red-500"></i>
+                          <span>{item.likesCount || 0}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* ✅ 선택/해제 아이콘 */}
-                  {selectedTravels.some((v) => v.travelId === item.travelId) ? (
-                    <i className="bi bi-dash-square-fill text-red-500 text-xl"></i>
-                  ) : (
-                    <i className="bi bi-plus-square-fill text-blue-500 text-xl"></i>
-                  )}
-                </div>
-              </List.Item>
-            )}
+                    {/* ✅ 선택/해제 아이콘 */}
+                    {isSelected ? (
+                      <i className="bi bi-dash-square-fill text-red-500 text-xl"></i>
+                    ) : (
+                      <i className="bi bi-plus-square-fill text-blue-500 text-xl"></i>
+                    )}
+                  </div>
+                </List.Item>
+              );
+            }}
           />
         </div>
       </div>
@@ -98,35 +113,41 @@ export default function TravelSelectDrawer({
             locale={{
               emptyText: <Empty description="선택된 여행지가 없습니다." />,
             }}
-            renderItem={(item) => (
-              <List.Item>
-                <div className="flex justify-between w-full items-center bg-white px-4 py-3 rounded-lg shadow-sm hover:bg-[#F9FAF9] transition">
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={item.img}
-                      alt={item.title}
-                      className="w-12 h-12 rounded-md object-cover"
-                    />
-                    <div>
-                      <p className="font-semibold text-sm text-[#2F3E46] mb-0">
-                        {item.title}
-                      </p>
-                      <p className="text-xs text-gray-500 mb-1">
-                        {item.region1Name || "-"} {`>`} {item.region2Name || '-'}
-                      </p>
+            renderItem={(item) => {
+              const imageSrc =
+                item.thumbnailPath ||
+                item.imagePath ||
+                "https://via.placeholder.com/150x150.png?text=No+Image";
+              return (
+                <List.Item>
+                  <div className="flex justify-between w-full items-center bg-white px-4 py-3 rounded-lg shadow-sm hover:bg-[#F9FAF9] transition">
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={item.thumbnailPath || item.imagePath || item.img || "https://via.placeholder.com/400x300.png?text=No+Image"}
+                        alt={item.title}
+                        className="w-12 h-12 rounded-md object-cover"
+                      />
+                      <div>
+                        <p className="font-semibold text-sm text-[#2F3E46] mb-0">
+                          {item.title}
+                        </p>
+                        <p className="text-xs text-gray-500 mb-1">
+                          {item.region1Name || "-"} {`>`} {item.region2Name || "-"}
+                        </p>
+                      </div>
                     </div>
+                    <i
+                      className="bi bi-dash-square-fill text-red-500 text-xl cursor-pointer"
+                      onClick={() =>
+                        setSelectedTravels((prev) =>
+                          prev.filter((v) => v.travelId !== item.travelId)
+                        )
+                      }
+                    ></i>
                   </div>
-                  <i
-                    className="bi bi-dash-square-fill text-red-500 text-xl cursor-pointer"
-                    onClick={() =>
-                      setSelectedTravels((prev) =>
-                        prev.filter((v) => v.travelId !== item.travelId)
-                      )
-                    }
-                  ></i>
-                </div>
-              </List.Item>
-            )}
+                </List.Item>
+              );
+            }}
           />
         </div>
       </div>

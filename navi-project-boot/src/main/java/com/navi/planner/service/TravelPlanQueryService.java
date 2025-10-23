@@ -10,6 +10,7 @@ public interface TravelPlanQueryService {
     /** 사용자별 여행계획 목록 조회 (userNo 기준) */
     List<TravelPlanListResponseDTO> getMyPlans(String userId);
 
-    /** 여행계획 상세 조회 */
+    /** ✅ 단일 여행계획 상세 조회 */
     TravelPlanDetailResponseDTO getPlanDetail(Long planId, String userId);
+
 }
