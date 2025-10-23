@@ -19,6 +19,7 @@ import {
   DeleteOutlined,
   EditOutlined,
   SearchOutlined,
+  FileSearchOutlined,
 } from "@ant-design/icons";
 import axios from "axios";
 import dayjs from "dayjs";
@@ -292,6 +293,7 @@ const AdminFlightReservationPage = () => {
         <Space size={"small"}>
           <Button
             type="default"
+            icon={<FileSearchOutlined />}
             onClick={() => openDetailModal(record)}
             size="small"
             style={{ borderRadius: 8 }}
