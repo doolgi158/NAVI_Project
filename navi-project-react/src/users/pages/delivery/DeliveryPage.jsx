@@ -240,12 +240,19 @@ const DeliveryPage = () => {
       const res = await axios.post(`${API_SERVER_HOST}/api/delivery/rsv`, dto, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
+      console.log("============");
+      console.log("drsvID: ", res.data.drsvId);
       dispatch(
         setReserveData({
           rsvType: "DLV",
           reserveId: res.data.data.drsvId,
           itemData: res.data.data,
+          items: [
+            {
+              reserveId: res.data.data.drsvId,
+              amount: estimatedFare,
+            },
+          ],
         })
       );
 
@@ -253,9 +260,14 @@ const DeliveryPage = () => {
       navigate("/payment", {
         state: {
           rsvType: "DLV",
-          items: res.data.data,
+          items: [
+            {
+              reserveId: res.data.data.drsvId,
+              amount: estimatedFare,
+            },
+          ],
           formData: form,
-          totalPrice: totalBags,
+          totalPrice: estimatedFare,
         },
       });
     } catch (error) {
