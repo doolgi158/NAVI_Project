@@ -7,8 +7,9 @@ import {
   message,
   Radio,
   Card,
-  Divider,
   Typography,
+  Row,
+  Col,
 } from "antd";
 import dayjs from "dayjs";
 import axios from "axios";
@@ -27,6 +28,7 @@ const JEJU_AIRPORT = { lat: 33.5055, lng: 126.495 };
 const DeliveryPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
   const [form, setForm] = useState({
     senderName: "",
     phone: "",
@@ -34,10 +36,12 @@ const DeliveryPage = () => {
     fromAddress: "",
     toAddress: "",
     deliveryDate: null,
+    timeSlot: "",
     memo: "",
   });
   const [bags, setBags] = useState({ S: 0, M: 0, L: 0 });
   const [estimatedFare, setEstimatedFare] = useState(0);
+  const [isMapReady, setIsMapReady] = useState(false);
 
   const MAP_CONTAINER_ID = "delivery-map";
   const mapRef = useRef(null);
@@ -48,8 +52,8 @@ const DeliveryPage = () => {
     setForm((prev) => ({ ...prev, [key]: value }));
 
   const handleNameChange = (value) => {
-    const filtered = value.replace(/[^a-zA-Z가-힣\s]/g, "");
-    setForm((p) => ({ ...p, senderName: filtered }));
+    const filtered = value.replace(/[0-9!@#\$%\^\&*\)\(+=._-]/g, "");
+    setForm((prev) => ({ ...prev, senderName: filtered }));
   };
 
   const handlePhoneChange = (value) => {
@@ -67,7 +71,6 @@ const DeliveryPage = () => {
     setBags((prev) => ({ ...prev, [size]: Math.max(0, Number(count)) }));
   };
 
-  /** ✅ 총 요금 자동 계산 */
   useEffect(() => {
     const total =
       bags.S * BAG_PRICE_TABLE.S +
@@ -98,6 +101,7 @@ const DeliveryPage = () => {
         center: new kakao.maps.LatLng(JEJU_AIRPORT.lat, JEJU_AIRPORT.lng),
         level: 5,
       });
+      setIsMapReady(true);
     };
 
     loadKakaoMap();
@@ -108,10 +112,7 @@ const DeliveryPage = () => {
     const { kakao } = window;
     if (!kakao || !mapRef.current) return;
 
-    if (markersRef.current.fromAddress)
-      markersRef.current.fromAddress.setMap(null);
-    if (markersRef.current.toAddress)
-      markersRef.current.toAddress.setMap(null);
+    Object.values(markersRef.current).forEach((m) => m?.setMap(null));
 
     const position = new kakao.maps.LatLng(JEJU_AIRPORT.lat, JEJU_AIRPORT.lng);
     const marker = new kakao.maps.Marker({ position, map: mapRef.current });
@@ -139,18 +140,6 @@ const DeliveryPage = () => {
     return marker;
   };
 
-  /** ✅ 기본 상태 세팅 (공항→숙소) */
-  useEffect(() => {
-    setForm((p) => ({ ...p, deliveryType: "AIRPORT_TO_HOTEL" }));
-    const timer = setTimeout(() => {
-      if (window.kakao && window.kakao.maps && mapRef.current) {
-        const marker = setAirportMarker("fromAddress");
-        markersRef.current.fromAddress = marker;
-      }
-    }, 600);
-    return () => clearTimeout(timer);
-  }, []);
-
   /** ✅ 주소 검색 */
   const handleSearchAddress = (targetKey) => {
     if (!window.daum || !window.daum.Postcode) {
@@ -169,10 +158,7 @@ const DeliveryPage = () => {
         setForm((p) => ({ ...p, [targetKey]: addr }));
 
         const { kakao } = window;
-        if (!kakao?.maps?.services) {
-          message.error("지도 API가 아직 준비되지 않았습니다.");
-          return;
-        }
+        if (!kakao?.maps?.services) return;
 
         const geocoder = new kakao.maps.services.Geocoder();
         geocoder.addressSearch(addr, (result, status) => {
@@ -207,7 +193,7 @@ const DeliveryPage = () => {
               const bounds = new kakao.maps.LatLngBounds();
               bounds.extend(path[0]);
               bounds.extend(path[1]);
-              mapRef.current.setBounds(bounds, 50);
+              mapRef.current.setBounds(bounds, 80);
             } else {
               mapRef.current.setCenter(pos);
             }
@@ -217,19 +203,49 @@ const DeliveryPage = () => {
     }).open();
   };
 
+  /** ✅ 배송 타입 변경 (공항 자동 세팅 포함) */
+  const handleDeliveryTypeChange = (v) => {
+    handleChange("deliveryType", v);
+    setForm((p) => ({ ...p, fromAddress: "", toAddress: "" }));
+
+    if (!isMapReady || !mapRef.current) return;
+
+    if (v === "AIRPORT_TO_HOTEL") {
+      const m = setAirportMarker("fromAddress");
+      markersRef.current.fromAddress = m;
+    } else if (v === "HOTEL_TO_AIRPORT") {
+      const m = setAirportMarker("toAddress");
+      markersRef.current.toAddress = m;
+    } else {
+      Object.values(markersRef.current).forEach((m) => m?.setMap(null));
+      markersRef.current = { fromAddress: null, toAddress: null };
+      mapRef.current.setCenter(
+        new window.kakao.maps.LatLng(JEJU_AIRPORT.lat, JEJU_AIRPORT.lng)
+      );
+    }
+  };
+
   /** ✅ 예약 처리 */
   const handleSubmit = async () => {
-    const required = ["senderName", "phone", "fromAddress", "toAddress", "deliveryDate"];
+    const required = [
+      "senderName",
+      "phone",
+      "fromAddress",
+      "toAddress",
+      "deliveryDate",
+    ];
     const missing = required.find((k) => !form[k]);
     if (missing) return message.warning("모든 정보를 입력해주세요.");
 
     const totalBags = bags.S + bags.M + bags.L;
-    if (totalBags === 0) return message.warning("가방 개수를 1개 이상 입력해주세요.");
+    if (totalBags === 0)
+      return message.warning("가방 개수를 1개 이상 입력해주세요.");
 
     const dto = {
       startAddr: form.fromAddress,
       endAddr: form.toAddress,
       deliveryDate: form.deliveryDate.format("YYYY-MM-DD"),
+      timeSlot: form.timeSlot || null,
       totalPrice: estimatedFare,
       bags,
       memo: form.memo,
@@ -266,109 +282,183 @@ const DeliveryPage = () => {
 
   return (
     <MainLayout>
-      <div className="max-w-6xl mx-auto mt-12 pb-24 grid grid-cols-1 md:grid-cols-2 gap-8 px-4 md:px-0">
-        {/* ✅ 왼쪽 입력폼 */}
-        <Card className="shadow-md rounded-2xl border border-gray-200" styles={{ body: { padding: "28px 32px" } }}>
-          <Title level={3} className="text-center mb-6 text-blue-600">
-            짐배송 예약
-          </Title>
+      <div style={{ maxWidth: 1200, margin: "48px auto", padding: "0 20px" }}>
+        <Row gutter={[20, 20]} align="stretch">
+          {/* ✅ 왼쪽 입력폼 */}
+          <Col xs={24} md={12}>
+            <Card
+              bordered
+              style={{
+                height: "100%",
+                borderRadius: 12,
+                boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+              }}
+              styles={{ body: { padding: "24px 28px" } }}
+            >
+              <Title level={3} style={{ textAlign: "center", color: "#1677ff" }}>
+                짐배송 예약
+              </Title>
 
-          {/* 이름/전화번호 */}
-          <Input placeholder="이름" value={form.senderName} onChange={(e) => handleNameChange(e.target.value)} className="mb-3" />
-          <Input placeholder="전화번호 (010-1234-5678)" value={form.phone} onChange={(e) => handlePhoneChange(e.target.value)} className="mb-5" maxLength={13} />
+              <Input
+                placeholder="이름"
+                value={form.senderName}
+                onChange={(e) => handleNameChange(e.target.value)}
+                style={{ marginBottom: 8 }}
+              />
+              <Input
+                placeholder="전화번호 (010-1234-5678)"
+                value={form.phone}
+                onChange={(e) => handlePhoneChange(e.target.value)}
+                style={{ marginBottom: 12 }}
+                maxLength={13}
+              />
 
-          {/* ✅ 배송 방향 선택 */}
-          <Text strong>배송 방향</Text>
-          <Radio.Group
-            value={form.deliveryType}
-            onChange={(e) => {
-              const v = e.target.value;
-              handleChange("deliveryType", v);
-              setForm((p) => ({ ...p, fromAddress: "", toAddress: "" }));
-
-              if (v === "AIRPORT_TO_HOTEL") {
-                const m = setAirportMarker("fromAddress");
-                markersRef.current.fromAddress = m;
-              } else if (v === "HOTEL_TO_AIRPORT") {
-                const m = setAirportMarker("toAddress");
-                markersRef.current.toAddress = m;
-              } else {
-                Object.values(markersRef.current).forEach((m) => m?.setMap(null));
-                markersRef.current = { fromAddress: null, toAddress: null };
-                mapRef.current.setCenter(new window.kakao.maps.LatLng(JEJU_AIRPORT.lat, JEJU_AIRPORT.lng));
-              }
-            }}
-            optionType="button"
-            buttonStyle="solid"
-            className="w-full flex justify-between my-3"
-          >
-            <Radio.Button value="AIRPORT_TO_HOTEL" className="flex-1 text-center">공항 → 숙소</Radio.Button>
-            <Radio.Button value="HOTEL_TO_AIRPORT" className="flex-1 text-center">숙소 → 공항</Radio.Button>
-            <Radio.Button value="HOTEL_TO_HOTEL" className="flex-1 text-center">숙소 ↔ 숙소</Radio.Button>
-          </Radio.Group>
-
-          <Divider />
-
-          {/* ✅ 주소 입력 */}
-          <div className="flex gap-2 mb-3">
-            <Input placeholder="출발지 주소" value={form.fromAddress} onChange={(e) => handleChange("fromAddress", e.target.value)} />
-            <Button onClick={() => handleSearchAddress("fromAddress")}>주소 찾기</Button>
-          </div>
-          <div className="flex gap-2 mb-4">
-            <Input placeholder="도착지 주소" value={form.toAddress} onChange={(e) => handleChange("toAddress", e.target.value)} />
-            <Button onClick={() => handleSearchAddress("toAddress")}>주소 찾기</Button>
-          </div>
-
-          {/* ✅ 날짜 선택 */}
-          <DatePicker
-            className="w-full mb-4"
-            value={form.deliveryDate ? dayjs(form.deliveryDate) : null}
-            onChange={(date) => handleChange("deliveryDate", date)}
-            placeholder="배송 희망 일자 선택"
-            disabledDate={(current) => current && current < dayjs().endOf("day")}
-          />
-
-          {/* ✅ 가방 입력 */}
-          <Text strong>가방 정보</Text>
-          <div className="grid grid-cols-3 gap-3 mt-3 mb-4">
-            {["S", "M", "L"].map((size) => (
-              <div key={size} className="flex flex-col items-center border rounded-lg p-2">
-                <Text className="font-semibold">{size}</Text>
-                <Text type="secondary">{BAG_PRICE_TABLE[size].toLocaleString()}원</Text>
-                <input
-                  type="number"
-                  min="0"
-                  className="border rounded-md p-1 mt-2 w-16 text-center"
-                  value={bags[size]}
-                  onChange={(e) => handleBagChange(size, e.target.value)}
-                />
+              <Text strong>배송 방향</Text>
+              <div style={{ display: "flex", gap: 8, margin: "8px 0 12px" }}>
+                {[
+                  { value: "AIRPORT_TO_HOTEL", label: "공항 → 숙소" },
+                  { value: "HOTEL_TO_AIRPORT", label: "숙소 → 공항" },
+                  { value: "HOTEL_TO_HOTEL", label: "숙소 ↔ 숙소" },
+                ].map((opt) => (
+                  <Button
+                    key={opt.value}
+                    type={
+                      form.deliveryType === opt.value ? "primary" : "default"
+                    }
+                    onClick={() => handleDeliveryTypeChange(opt.value)}
+                    style={{ flex: 1, height: 36, fontWeight: 500 }}
+                    disabled={!isMapReady}
+                  >
+                    {opt.label}
+                  </Button>
+                ))}
               </div>
-            ))}
-          </div>
 
-          <textarea
-            className="border rounded-md p-2 w-full mb-4"
-            placeholder="요청사항 (선택)"
-            rows="2"
-            value={form.memo}
-            onChange={(e) => handleChange("memo", e.target.value)}
-          />
+              <Text strong>출발지 주소</Text>
+              <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+                <Input
+                  placeholder="출발지 주소"
+                  value={form.fromAddress}
+                  onChange={(e) =>
+                    handleChange("fromAddress", e.target.value)
+                  }
+                />
+                <Button onClick={() => handleSearchAddress("fromAddress")}>
+                  찾기
+                </Button>
+              </div>
 
-          {estimatedFare > 0 && (
-            <div className="bg-blue-50 text-blue-700 rounded-lg text-center p-3 mb-4">
-              <strong>예상 요금:</strong> {estimatedFare.toLocaleString()}원
-            </div>
-          )}
+              <Text strong>도착지 주소</Text>
+              <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+                <Input
+                  placeholder="도착지 주소"
+                  value={form.toAddress}
+                  onChange={(e) => handleChange("toAddress", e.target.value)}
+                />
+                <Button onClick={() => handleSearchAddress("toAddress")}>
+                  찾기
+                </Button>
+              </div>
 
-          <Button type="primary" block size="large" className="h-12 text-base font-semibold" onClick={handleSubmit}>
-            예약하기
-          </Button>
-        </Card>
+              <Text strong>배송 날짜 / 시간대</Text>
+              <div style={{ display: "flex", gap: 10, marginBottom: 12 }}>
+                <DatePicker
+                  value={form.deliveryDate ? dayjs(form.deliveryDate) : null}
+                  onChange={(date) => handleChange("deliveryDate", date)}
+                  placeholder="날짜 선택"
+                  style={{ flex: 1 }}
+                  disabledDate={(current) => current && current < dayjs().endOf("day")}
+                />
+                <Radio.Group
+                  value={form.timeSlot}
+                  onChange={(e) => handleChange("timeSlot", e.target.value)}
+                  buttonStyle="solid"
+                >
+                  <Radio.Button value="오전">오전</Radio.Button>
+                  <Radio.Button value="오후">오후</Radio.Button>
+                </Radio.Group>
+              </div>
 
-        {/* ✅ 지도 */}
-        <Card className="shadow-md rounded-2xl border border-gray-200 overflow-hidden" styles={{ body: { padding: 0 } }}>
-          <div id={MAP_CONTAINER_ID} style={{ width: "100%", height: "calc(70vh - 2px)" }}></div>
-        </Card>
+              <Text strong>가방 정보</Text>
+              <Row gutter={[8, 8]} style={{ margin: "8px 0 10px" }}>
+                {["S", "M", "L"].map((size) => (
+                  <Col span={8} key={size} style={{ textAlign: "center" }}>
+                    <Text strong>{size}</Text>
+                    <div style={{ color: "#666", fontSize: 12 }}>
+                      {BAG_PRICE_TABLE[size].toLocaleString()}원
+                    </div>
+                    <Input
+                      size="small"
+                      type="number"
+                      min="0"
+                      value={bags[size]}
+                      onChange={(e) =>
+                        handleBagChange(size, e.target.value)
+                      }
+                      style={{ width: 60, marginTop: 4 }}
+                    />
+                  </Col>
+                ))}
+              </Row>
+
+              <Input.TextArea
+                rows={2}
+                placeholder="요청사항 (선택)"
+                value={form.memo}
+                onChange={(e) => handleChange("memo", e.target.value)}
+                style={{ marginBottom: 10 }}
+              />
+
+              {estimatedFare > 0 && (
+                <div
+                  style={{
+                    background: "#f0f5ff",
+                    color: "#1677ff",
+                    textAlign: "center",
+                    padding: 6,
+                    borderRadius: 6,
+                    marginBottom: 10,
+                    fontSize: 13,
+                  }}
+                >
+                  <strong>예상 요금:</strong>{" "}
+                  {estimatedFare.toLocaleString()}원
+                </div>
+              )}
+
+              <Button
+                type="primary"
+                block
+                size="middle"
+                style={{ fontWeight: 600, borderRadius: 6, height: 38 }}
+                onClick={handleSubmit}
+              >
+                예약하기
+              </Button>
+            </Card>
+          </Col>
+
+          {/* ✅ 지도 */}
+          <Col xs={24} md={12}>
+            <Card
+              style={{
+                height: "100%",
+                borderRadius: 12,
+                boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+              }}
+              styles={{ body: { padding: 0 } }} // ✅ v5 대응 완료
+            >
+              <div
+                id={MAP_CONTAINER_ID}
+                style={{
+                  width: "100%",
+                  height: "calc(100vh - 200px)",
+                  minHeight: 500,
+                }}
+              ></div>
+            </Card>
+          </Col>
+        </Row>
       </div>
     </MainLayout>
   );
