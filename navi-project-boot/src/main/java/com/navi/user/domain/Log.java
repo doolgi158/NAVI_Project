@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -41,7 +42,7 @@ public class Log {
     @Column(name = "target_name", length = 100)
     private String targetName;  // 대상명 (옵션 — 분석용으로 남겨도 좋음)
 
-
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;    // 발생 시각
 }
