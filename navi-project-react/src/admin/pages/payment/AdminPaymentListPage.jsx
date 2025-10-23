@@ -148,13 +148,12 @@ const AdminPaymentListPage = () => {
 
   /* === 컬럼 === */
   const columns = [
-    { title: "결제번호", dataIndex: "merchantId", align: "center", width: 150, fixed: "left" },
+    { title: "결제번호", dataIndex: "merchantId", align: "center", width: 200, fixed: "left" },
     {
       title: "유형",
       dataIndex: "rsvType",
       align: "center",
       width: 90,
-      fixed: "left",
       render: (type) => (
         <Tag color={rsvTypeColorMap[type]}>
           {type === "ACC" ? "숙소" : type === "FLY" ? "항공" : "짐배송"}
@@ -178,7 +177,7 @@ const AdminPaymentListPage = () => {
         return <Tag color={statusColorMap[s]}>{labelMap[s] || s}</Tag>;
       },
     },
-    { title: "수단", dataIndex: "paymentMethod", align: "center", width: 100 },
+    { title: "수단", dataIndex: "paymentMethod", align: "center", width: 120 },
     {
       title: "총 결제금액",
       dataIndex: "totalAmount",
@@ -187,7 +186,7 @@ const AdminPaymentListPage = () => {
       render: (v) => `₩${v?.toLocaleString()}`,
     },
     {
-      title: "환불금액",
+      title: "총 환불금액",
       dataIndex: "totalFeeAmount",
       align: "center",
       width: 120,
@@ -209,10 +208,17 @@ const AdminPaymentListPage = () => {
       render: (v) => (v ? dayjs(v).format("YYYY.MM.DD HH:mm") : "-"),
     },
     {
+      title: "수정일",
+      dataIndex: "updatedAt",
+      align: "center",
+      width: 160,
+      render: (v) => (v ? dayjs(v).format("YYYY.MM.DD HH:mm") : "-"),
+    },
+    {
       title: "관리",
       key: "actions",
       align: "center",
-      width: 120,
+      width: 140,
       fixed: "right",
       render: (_, record) => (
         <Tooltip title="상세 보기">
@@ -220,7 +226,7 @@ const AdminPaymentListPage = () => {
             icon={<SearchOutlined />}
             style={{ backgroundColor: "#FFF4C2", borderColor: "#F8E473" }}
             onClick={() => handleExpand(record)}
-          />
+          >상세보기</Button>
         </Tooltip>
       ),
     },
@@ -271,6 +277,13 @@ const AdminPaymentListPage = () => {
       width: 160,
       render: (v) => (v ? dayjs(v).format("YYYY.MM.DD HH:mm") : "-"),
     },
+    {
+      title: "수정일",
+      dataIndex: "updatedAt",
+      align: "center",
+      width: 160,
+      render: (v) => (v ? dayjs(v).format("YYYY.MM.DD HH:mm") : "-"),
+    },
   ];
 
   return (
@@ -311,42 +324,52 @@ const AdminPaymentListPage = () => {
             expandedRowRender: (record) => {
               const details = detailsCache[record.merchantId] || [];
               return (
-                <div style={{ marginTop: 10 }}>
-                  <Table
-                    columns={detailColumns}
-                    dataSource={details}
-                    rowKey={(r) => r.reserveId}
-                    pagination={false}
-                    size="small"
-                    bordered
-                    scroll={{ x: 900 }}
-                  />
+                <div
+                  style={{
+                    background: "white",         // 🔹 바깥 배경을 흰색으로
+                    borderRadius: 16,
+                    padding: 16,
+                    margin: "10px 12px 14px",
+                    border: "1px solid #f0f0f0",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+                  }}
+                >
+                  <div
+                    style={{
+                      background: "#f9f9f9",     // 🔹 내부 영역은 연회색
+                      borderRadius: 12,
+                      padding: "16px 16px 8px",
+                    }}
+                  >
+                    <Table
+                      columns={detailColumns}
+                      dataSource={details}
+                      rowKey={(r) => r.reserveId}
+                      pagination={false}
+                      size="small"
+                      bordered={false}
+                      style={{
+                        background: "#f9f9f9",    // 테이블도 내부 색에 맞춤
+                      }}
+                    />
 
-                  {/* ✅ 버튼 2개 오른쪽 정렬 */}
-                  <Row justify="end" style={{ marginTop: 12, marginRight: 10 }}>
-                    <Space>
-                      <Button
-                        icon={<EyeOutlined />}
-                        onClick={() => {
-                          message.info("예약 상세 페이지로 이동합니다.");
-                          // navigate(`/admin/reservation/${record.merchantId}`);
-                        }}
-                      >
-                        예약 내역
-                      </Button>
-
-                      <Button
-                        danger
-                        type="primary"
-                        icon={<RollbackOutlined />}
-                        onClick={() =>
-                          handleFullRefund(record.merchantId, record.rsvType)
-                        }
-                      >
-                        전체 환불
-                      </Button>
-                    </Space>
-                  </Row>
+                    {/* ✅ 버튼 영역 */}
+                    <Row justify="end" style={{ marginTop: 14, marginRight: 8 }}>
+                      <Space>
+                        <Button icon={<EyeOutlined />}>예약 내역</Button>
+                        <Button
+                          danger
+                          type="primary"
+                          icon={<RollbackOutlined />}
+                          onClick={() =>
+                            handleFullRefund(record.merchantId, record.rsvType)
+                          }
+                        >
+                          전체 환불
+                        </Button>
+                      </Space>
+                    </Row>
+                  </div>
                 </div>
               );
             },
