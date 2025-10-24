@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { List, TimePicker, Empty, Button } from "antd";
+import { List, TimePicker, Empty } from "antd";
 import dayjs from "dayjs";
 import { ClockCircleOutlined } from "@ant-design/icons";
 import TitleDateDisplay from "./TitleDateDisplay";
 
 export default function TimeDrawer({ days, times, setTimes, title, dateRange }) {
   const [openKey, setOpenKey] = useState(null);
-  const [selectedPart, setSelectedPart] = useState(null); // ✅ 현재 시/분 선택 상태 추적
+  const [selectedPart, setSelectedPart] = useState(null);
 
   /** 기본 시간 자동 설정 */
   useEffect(() => {
@@ -73,31 +73,37 @@ export default function TimeDrawer({ days, times, setTimes, title, dateRange }) 
           }
         }}
         onSelect={(v) => {
-          // ✅ 시/분 클릭 이벤트 추적
           if (selectedPart === null) {
-            // 처음 선택 (시)
             setSelectedPart("hour");
             handleChange(d, type, v);
           } else if (selectedPart === "hour") {
-            // 두 번째 선택 (분)
             handleChange(d, type, v);
-            setOpenKey(null); // ✅ 시+분 모두 선택 후 닫기
+            setOpenKey(null);
             setSelectedPart(null);
           }
         }}
         onChange={(v) => handleChange(d, type, v)}
         disabledTime={type === "end" ? () => getDisabledEndTime(d) : undefined}
+        className="!w-[85px]"
       />
     );
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#FDFCF9] w-[25%] ">
+    <div
+      className="flex flex-col flex-1 bg-[#FDFCF9] overflow-y-auto custom-scroll"
+      style={{
+        minWidth: "340px",
+        padding: "24px 28px 36px",
+        height: "100%", // ✅ 강제 높이 지정
+      }}
+    >
+      {/* ✅ 제목 + 날짜 표시 */}
       <TitleDateDisplay title={title} dateRange={dateRange} />
 
-
-      <div className="px-6 mt-4 mb-3 text-sm text-gray-700 leading-relaxed">
-        <p className="font-semibold text-[#2F3E46] mb-1">
+      {/* ✅ 안내 문구 */}
+      <div className="mt-5 mb-4 text-sm text-gray-700 leading-relaxed">
+        <p className="font-semibold text-[#2F3E46] mb-1 flex items-center">
           <ClockCircleOutlined className="mr-1 text-[#2F3E46]" />
           여행시간 설정
         </p>
@@ -108,7 +114,8 @@ export default function TimeDrawer({ days, times, setTimes, title, dateRange }) 
         </p>
       </div>
 
-      <div className="flex-1 overflow-y-auto custom-scroll px-6 pb-6">
+      {/* ✅ 리스트 */}
+      <div className="pb-10">
         {days.length === 0 ? (
           <Empty description="여행 날짜를 먼저 선택해주세요" />
         ) : (
@@ -117,7 +124,7 @@ export default function TimeDrawer({ days, times, setTimes, title, dateRange }) 
             renderItem={(d) => (
               <List.Item
                 key={d.format("YYYY-MM-DD")}
-                className="rounded shadow-sm px-4 py-3 mb-3 hover:bg-[#ffBf231f] transition"
+                className="rounded shadow-sm px-5 py-3 mb-3 hover:bg-[#ffbf231f] transition"
               >
                 <div className="flex items-center justify-between w-full">
                   <div className="w-24 font-medium text-[#2F3E46]">

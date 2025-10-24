@@ -326,38 +326,62 @@ export default function TravelPlanner() {
       <HeaderLayout />
       {loading || !user ? (
         <div className="flex justify-center items-center h-screen text-gray-500">
-          {loading ? "여행지 데이터를 불러오는 중..." : "로그인 정보를 확인 중..."}
+          {loading
+            ? "여행지 데이터를 불러오는 중..."
+            : "로그인 정보를 확인 중..."}
         </div>
       ) : (
         <Content style={{ width: "100vw", overflowX: "hidden" }}>
           <div
-            className="shadow-xl bg-white rounded-lg transition-all duration-500"
-            style={{
-              display: "grid",
-              gridTemplateColumns: step >= 4 ? "10% 50% 40%" : "10% 90% 0%",
-            }}
+            className="shadow-xl bg-white rounded-lg transition-all duration-500 h-[calc(100vh-100px)] flex"
           >
-            <StepDrawer
-              step={step}
-              setStep={setStep}
-              title={title}
-              selectedTravels={selectedTravels}
-              dateRange={dateRange}
-              stayPlans={stayPlans}
-              stays={stays}
-              onSaveSchedule={handleConfirm}
-            />
+            {/* ✅ StepDrawer 영역 */}
+            <div
+              className="flex-shrink-0 border-r border-gray-200 transition-all duration-500"
+              style={{
+                flexBasis: "18%",
+                minWidth: "150px",
+                maxWidth: "200px",
+              }}
+            >
+              <StepDrawer
+                step={step}
+                setStep={setStep}
+                title={title}
+                selectedTravels={selectedTravels}
+                dateRange={dateRange}
+                stayPlans={stayPlans}
+                stays={stays}
+                onSaveSchedule={handleConfirm}
+              />
+            </div>
 
-            <div className="flex h-[calc(100vh-100px)] border-l border-[#eee]">
+            {/* ✅ 중앙 본문 (TimeDrawer, TravelSelectDrawer, StaySelectDrawer) */}
+            <div
+              className={`h-full overflow-y-auto border-r border-[#eee] transition-all duration-500
+    ${step === 4 || step === 5 ? "flex" : "block"}`}
+              style={{
+                flexBasis:
+                  step <= 2
+                    ? "82%" // 날짜/제목 선택 단계
+                    : step === 3
+                      ? "20%" // 시간 설정 → 좁게
+                      : "40%", // 여행지/숙소 선택
+                minWidth: step === 3 ? "340px" : "400px", // ✅ 추가된 부분
+                maxWidth: step === 3 ? "400px" : "unset",
+              }}
+            >
               {step === 3 ? (
-                <TimeDrawer
-                  key="time"
-                  days={days}
-                  times={times}
-                  setTimes={setTimes}
-                  title={title}
-                  dateRange={dateRange}
-                />
+                <div className="flex w-full h-full">
+                  <TimeDrawer
+                    key="time"
+                    days={days}
+                    times={times}
+                    setTimes={setTimes}
+                    title={title}
+                    dateRange={dateRange}
+                  />
+                </div>
               ) : step === 4 ? (
                 <TravelSelectDrawer
                   key="travel"
@@ -387,15 +411,29 @@ export default function TravelPlanner() {
               ) : null}
             </div>
 
-            <div style={{ position: "relative" }}>
-              <div className="absolute inset-0">
-                <TravelMap markers={markers} step={step} />
-              </div>
+            {/* ✅ 지도 영역 (단계별 크기 변경) */}
+            <div
+              className="relative transition-all duration-500"
+              style={{
+                flexBasis:
+                  step <= 3 ? "0%" : "60%",
+                opacity: step <= 3 ? 0 : 1,
+                minWidth: step <= 3 ? 0 : "300px",
+              }}
+            >
+              {step > 3 && (
+                <div className="absolute inset-0">
+                  <TravelMap markers={markers} step={step} />
+                </div>
+              )}
             </div>
           </div>
         </Content>
       )}
+
       <FooterLayout />
+
+      {/* ✅ 날짜 선택 모달 */}
       <DateModal
         open={step === 1 || step === 99}
         isEditMode={step === 99}
@@ -405,31 +443,31 @@ export default function TravelPlanner() {
         }}
         onClose={() => {
           if (step === 1) {
-            // ✅ 등록 단계에서 취소 누르면 /plans로 이동
             navigate("/plans");
           } else if (step === 99) {
-            // ✅ 수정 단계에서는 단순히 닫기만
             setStep(3);
           }
         }}
         onDateChange={(start, end) => {
           setDateRange([start, end]);
           if (step === 1) {
-            // 새 등록 → 다음 단계 이동
             setStep(2);
           } else if (step === 99) {
-            // 수정 모드 → 모달 닫고 그대로 유지
             message.success("여행 날짜가 수정되었습니다.");
             setStep(3);
           }
         }}
       />
+
+      {/* ✅ 제목 입력 모달 */}
       <TitleModal
         open={step === 2}
         title={title}
         setTitle={setTitle}
         setStep={setStep}
       />
+
+      {/* ✅ 숙소 선택 모달 */}
       <StaySelectModal
         open={showStayModal}
         onClose={() => setShowStayModal(false)}
@@ -445,4 +483,6 @@ export default function TravelPlanner() {
       />
     </Layout>
   );
+
+
 }

@@ -87,6 +87,12 @@ export default function TravelMap({ markers = [], step }) {
 
     if (!markers.length) return;
 
+    /** ✅ activeDayIdx 구하기 (전체 보기: -1, 일자별 보기: 0 이상) */
+    const activeDayIdx =
+      markers.length > 0 && typeof markers[0].dayIdx !== "undefined"
+        ? markers[0].dayIdx
+        : -1;
+
     /** ✅ 마커 생성 함수 (색상/번호 표시) */
     const createMarker = (m, idx, color, label) => {
       const lat = parseFloat(m.latitude);
@@ -96,62 +102,99 @@ export default function TravelMap({ markers = [], step }) {
       const pos = new kakao.maps.LatLng(lat, lng);
 
       let markerHtml;
+
+      // ✅ 숙소: 전체보기(-1)이면 S넘버링 표시, 일자별이면 단순 집아이콘
       if (m.type === "stay") {
         const stayNumber = m.stayOrder ?? idx + 1;
+
+        if (activeDayIdx === -1) {
+          // 전체보기: 집 + S1, S2 넘버링
+          markerHtml = `
+            <div style="
+              position: relative;
+              width: 34px;
+              height: 34px;
+              background: #6846FF;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+            ">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 16 16" fill="white">
+                <path d="M8 .5l6 6V15a1 1 0 0 1-1 1h-3v-4H6v4H3a1 1 0 0 1-1-1V6.5l6-6z"/>
+              </svg>
+              <div style="
+                position: absolute;
+                bottom: -2px;
+                left: 50%;
+                transform: translateX(-50%);
+                font-size: 10px;
+                font-weight: bold;
+                color: #6846FF;
+                background: white;
+                width: 16px;
+                height: 16px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 1px solid #ddd;
+              ">
+                S${stayNumber}
+              </div>
+            </div>`;
+        } else {
+          // 일자별 보기: 단순 집 아이콘만
+          markerHtml = `
+            <div style="
+              width: 34px;
+              height: 34px;
+              background: #6846FF;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+            ">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 16 16" fill="white">
+                <path d="M8 .5l6 6V15a1 1 0 0 1-1 1h-3v-4H6v4H3a1 1 0 0 1-1-1V6.5l6-6z"/>
+              </svg>
+            </div>`;
+        }
+      } else if (m.type === "poi" && m.title?.includes("공항")) {
+        // ✅ 공항 마커: 비행기 아이콘
         markerHtml = `
-      <div style="
-        position: relative;
-        width: 30px;
-        height: 30px;
-        background: ${color};
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-      ">
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 16 16" fill="white">
-          <path d="M8 .5l6 6V15a1 1 0 0 1-1 1h-3v-4H6v4H3a1 1 0 0 1-1-1V6.5l6-6z"/>
-        </svg>
-        <div style="
-          position: absolute;
-          bottom: 9px;
-          left: 50%;
-          transform: translateX(-50%);
-          font-size: 11px;
-          font-weight: bold;
-          color: ${color};
-          background: white;
-          width: 13px;
-          height: 13px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border: 1px solid #eee;
-        ">
-          S${stayNumber}
-        </div>
-      </div>
-    `;
+          <div style="
+            width: 34px;
+            height: 34px;
+            background: #00AEEF;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+            color: white;
+            font-size: 18px;
+          ">✈️</div>`;
       } else {
-        // 기본 원형 마커
+        // ✅ 여행지: 번호 마커
         markerHtml = `
-     <div style="
-       background:${color};
-       color:white;
-       font-weight:bold;
-       border-radius:50%;
-       width:30px;
-       height:30px;
-       display:flex;
-       align-items:center;
-       justify-content:center;
-       font-size:13px;
-       box-shadow:0 2px 6px rgba(0,0,0,0.25);
-       border:2px solid white;">
-       ${m.order ?? idx + 1}
-     </div>`;
+          <div style="
+            background:${color};
+            color:white;
+            font-weight:bold;
+            border-radius:50%;
+            width:30px;
+            height:30px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:13px;
+            box-shadow:0 2px 6px rgba(0,0,0,0.25);
+            border:2px solid white;">
+            ${m.order ?? idx + 1}
+          </div>`;
       }
 
       const marker = new kakao.maps.CustomOverlay({
@@ -203,28 +246,18 @@ export default function TravelMap({ markers = [], step }) {
       const path = [];
       const color = group[0]?.color || "#2765b6ff";
 
-      /** ✅ 타입별 색상 지정 */
-      const getTypeColor = (type) => {
-        switch (type) {
-          case "stay":
-            return "#EF476F"; // 붉은색 (숙소)
-          case "travel":
-            return "#0077B6"; // 파란색 (여행지)
-          case "poi":
-            return "#FFD166"; // 노란색 (공항, 포인트 등)
-          default:
-            return color;
-        }
-      };
-
-
       group.forEach((m, idx) => {
-        const color = getTypeColor(m.type);
+        const typeColor =
+          m.type === "stay"
+            ? "#6846FF"
+            : m.type === "poi"
+              ? "#00AEEF"
+              : color;
         let label = "";
-        if (m.type === "stay") label = "🏨 숙소";
+        if (m.type === "stay") label = "🏠 숙소";
         else if (m.type === "poi") label = "✈️ 공항";
         else label = "📍 여행지";
-        const pos = createMarker(m, idx, color, label);
+        const pos = createMarker(m, idx, typeColor, label);
         if (pos) path.push(pos);
       });
 
@@ -232,7 +265,7 @@ export default function TravelMap({ markers = [], step }) {
         const polyline = new kakao.maps.Polyline({
           path,
           strokeWeight: 4,
-          strokeColor: color, // ✅ 라인은 일차별 기본색
+          strokeColor: color,
           strokeOpacity: 0.9,
           strokeStyle: "solid",
         });
@@ -246,7 +279,8 @@ export default function TravelMap({ markers = [], step }) {
     markers.forEach((m) => {
       const lat = parseFloat(m.latitude);
       const lng = parseFloat(m.longitude);
-      if (!isNaN(lat) && !isNaN(lng)) bounds.extend(new kakao.maps.LatLng(lat, lng));
+      if (!isNaN(lat) && !isNaN(lng))
+        bounds.extend(new kakao.maps.LatLng(lat, lng));
     });
 
     requestAnimationFrame(() => {

@@ -25,7 +25,9 @@ export default function PlanScheduler() {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
 
-    const mode = searchParams.get("mode") || "create";
+    const initialMode = searchParams.get("mode") || "create";
+    const [mode, setMode] = useState(initialMode); // ✅ state로 관리
+
     const planId = searchParams.get("planId");
     const isViewMode = mode === "view";
     const isEditMode = mode === "edit";
@@ -83,11 +85,10 @@ export default function PlanScheduler() {
             }
         };
         fetchPlan();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [planId, mode]);
 
     useEffect(() => {
-        setSplitSize(activeDayIdx === -1 ? 80 : 40);
+        setSplitSize(activeDayIdx === -1 ? 20 : 60);
     }, [activeDayIdx]);
 
     useEffect(() => {
@@ -141,27 +142,22 @@ export default function PlanScheduler() {
         return h * 60 + m;
     };
 
-    const fmt = (v) => (v && v !== "- : -" ? v : "- : -");
+    const getDayEdgeTimes = (dateISO) => initialDayTimes[dateISO] || { start: "10:00", end: "22:00" };
 
-    const getDayEdgeTimes = (dateISO) => {
-        const fallback = { start: "10:00", end: "22:00" };
-        return initialDayTimes[dateISO] || fallback;
+    const cleanTime = (it) => {
+        const normalize = (v) =>
+            !v || v === "- : -" ? null : dayjs(v, "HH:mm", true).isValid() ? v : null;
+        return { ...it, startTime: normalize(it.startTime), endTime: normalize(it.endTime) };
     };
 
     const applyEdgeTimes = (sourceDays) => {
         return sourceDays.map((d) => {
             if (!d.items?.length) return d;
             const { start, end } = getDayEdgeTimes(d.dateISO);
-
             return {
                 ...d,
                 items: d.items.map((it, idx) => {
-                    // ✅ 수동 입력된 일정은 절대 자동 세팅 덮어쓰기 금지
-                    if (it.__manual__ && it.startTime && it.endTime) {
-                        return it;
-                    }
-
-                    // ✅ 자동 세팅: 첫 일정과 마지막 일정만 기본값 부여
+                    if (it.__manual__ && it.startTime && it.endTime) return it;
                     const isFirst = idx === 0;
                     const isLast = idx === d.items.length - 1;
                     return {
@@ -175,18 +171,12 @@ export default function PlanScheduler() {
         });
     };
 
-    const cleanTime = (it) => {
-        const normalize = (v) => (!v || v === "- : -" ? null : dayjs(v, "HH:mm", true).isValid() ? v : null);
-        return { ...it, startTime: normalize(it.startTime), endTime: normalize(it.endTime) };
-    };
-
     const isTimeOrderValid = (items) => {
-        // ✅ 시간 지정된 일정만 필터링
+        // ✅ 시간 지정된 일정만 검사
         const timed = items.filter(
             (it) => it.startTime && it.startTime !== "--:--" && it.startTime !== "- : -"
         );
-        if (timed.length <= 1) return true; // 1개 이하면 항상 OK
-
+        if (timed.length <= 1) return true;
         for (let i = 1; i < timed.length; i++) {
             if (timed[i - 1].startTime > timed[i].startTime) return false;
         }
@@ -194,17 +184,44 @@ export default function PlanScheduler() {
     };
 
     const sortByTime = (items) => {
-        const withTime = items.filter((it) => it.startTime && it.startTime !== "- : -").sort((a, b) => a.startTime.localeCompare(b.startTime));
+        const withTime = items
+            .filter((it) => it.startTime && it.startTime !== "- : -")
+            .sort((a, b) => a.startTime.localeCompare(b.startTime));
         const noTime = items.filter((it) => !it.startTime || it.startTime === "- : -");
         return [...withTime, ...noTime];
     };
 
-    /** ✅ 수정된 DnD 로직 */
+    // ✅ 첫/마지막만 자동시간 보정 (수동 입력이면 그대로 유지)
+    const ensureEdgeAutoTimes = (day) => {
+        if (!day?.items?.length) return day;
+        const { start, end } = getDayEdgeTimes(day.dateISO);
+        const items = day.items.map((it) => ({ ...it }));
+        const first = items[0];
+        const last = items[items.length - 1];
+
+        // 첫 일정: 수동 시간 아니면 시작시간 자동 세팅
+        if (!(first.__manual__ && first.startTime && first.endTime)) {
+            first.startTime = start;
+            first.endTime = start;
+            first.__manual__ = false;
+        }
+
+        // 마지막 일정: 수동 시간 아니면 종료시간 자동 세팅
+        if (items.length > 1 && !(last.__manual__ && last.startTime && last.endTime)) {
+            last.startTime = end;
+            last.endTime = end;
+            last.__manual__ = false;
+        }
+
+        items[0] = first;
+        items[items.length - 1] = last;
+        return { ...day, items };
+    };
+
+
+
     const handleDragEnd = (result) => {
         if (isViewMode || !result.destination) return;
-
-        // 드래그 시작 전 상태를 백업
-        const originalDays = JSON.parse(JSON.stringify(days));
 
         const srcDayIdx = parseInt(result.source.droppableId.split("-")[1]);
         const dstDayIdx = parseInt(result.destination.droppableId.split("-")[1]);
@@ -212,29 +229,27 @@ export default function PlanScheduler() {
         const draft = [...days];
         const take = draft[srcDayIdx].items.slice();
         const [moved] = take.splice(result.source.index, 1);
+        const isTimed = (it) =>
+            it?.startTime && it.startTime !== "--:--" && it.startTime !== "- : -";
+        const movedHasTime = isTimed(moved);
+        const originalDays = JSON.parse(JSON.stringify(days));
 
         if (srcDayIdx === dstDayIdx) {
             take.splice(result.destination.index, 0, moved);
             draft[srcDayIdx].items = take;
-            const hasManual = draft[srcDayIdx].items.some((it) => it.__manual__ && it.startTime && it.startTime !== "- : -");
+            const hasManual = draft[srcDayIdx].items.some(
+                (it) => it.__manual__ && it.startTime && it.startTime !== "- : -"
+            );
             if (hasManual) {
-                // ✅ 수동 일정 중에서 실제 시간이 지정된 일정이 하나라도 있어야 검사
-                const hasRealTime = draft[srcDayIdx].items.some(
-                    (it) =>
-                        it.__manual__ &&
-                        it.startTime &&
-                        it.startTime !== "--:--" &&
-                        it.startTime !== "- : -"
-                );
-
-                if (hasRealTime && !isTimeOrderValid(draft[srcDayIdx].items)) {
+                if (movedHasTime && !isTimeOrderValid(draft[srcDayIdx].items)) {
                     Modal.confirm({
                         title: "시간 순서 충돌",
                         content: (
                             <>
                                 <p>선택한 일정의 이동으로 인해 시간 순서가 깨집니다.</p>
                                 <p className="mt-2">
-                                    이 일정을 <b>새 위치로 이동시키면서 시간값을 초기화(--:--)</b>
+                                    이 일정을{" "}
+                                    <b>새 위치로 이동시키면서 시간값을 초기화(--:--)</b>
                                     하시겠습니까?
                                 </p>
                             </>
@@ -251,7 +266,6 @@ export default function PlanScheduler() {
                             message.success("이동된 일정의 시간이 초기화되었습니다.");
                         },
                         onCancel: () => {
-                            // ✅ 원래 순서로 완전히 복원
                             setDays(originalDays);
                             message.info("이동이 취소되었습니다.");
                         },
@@ -261,25 +275,36 @@ export default function PlanScheduler() {
             } else {
                 draft[srcDayIdx] = applyEdgeTimes([draft[srcDayIdx]])[0];
             }
+
+            // ✅ 경고 없이 통과했을 때: 첫/마지막 자동시간 보정
+            draft[srcDayIdx] = ensureEdgeAutoTimes(draft[srcDayIdx]);
+
+            setDays(draft);
+            return;
         } else {
             const to = draft[dstDayIdx].items.slice();
             to.splice(result.destination.index, 0, moved);
             draft[srcDayIdx].items = take;
             draft[dstDayIdx].items = to;
 
-            const srcHasManual = draft[srcDayIdx].items.some((it) => it.__manual__ && it.startTime && it.startTime !== "- : -");
-            const dstHasManual = draft[dstDayIdx].items.some((it) => it.__manual__ && it.startTime && it.startTime !== "- : -");
+            const srcHasManual = draft[srcDayIdx].items.some(
+                (it) => it.__manual__ && it.startTime && it.startTime !== "- : -"
+            );
+            const dstHasManual = draft[dstDayIdx].items.some(
+                (it) => it.__manual__ && it.startTime && it.startTime !== "- : -"
+            );
 
             if (srcHasManual) {
-                if (!isTimeOrderValid(draft[srcDayIdx].items)) {
-                    // ✅ 겹치는 시간 있는 경우 수동 처리만 허용, 자동 세팅 금지
+                if (movedHasTime && !isTimeOrderValid(draft[srcDayIdx].items)) {
                     Modal.confirm({
                         title: "시간 순서 충돌",
                         content: (
                             <>
                                 <p>선택한 일정의 이동으로 인해 시간 순서가 깨집니다.</p>
                                 <p className="mt-2">
-                                    이 일정을 <b>새 위치로 이동시키면서 시간값을 초기화(--:--)</b>하시겠습니까?
+                                    이 일정을{" "}
+                                    <b>새 위치로 이동시키면서 시간값을 초기화(--:--)</b>
+                                    하시겠습니까?
                                 </p>
                             </>
                         ),
@@ -290,33 +315,40 @@ export default function PlanScheduler() {
                             moved.startTime = "--:--";
                             moved.endTime = "--:--";
                             moved.__manual__ = false;
+
+                            // 정렬
                             draft[srcDayIdx].items = sortByTime(draft[srcDayIdx].items);
+                            draft[dstDayIdx].items = sortByTime(draft[dstDayIdx].items);
+
+                            // ✅ 양쪽 엣지 보정
+                            draft[srcDayIdx] = ensureEdgeAutoTimes(draft[srcDayIdx]);
+                            draft[dstDayIdx] = ensureEdgeAutoTimes(draft[dstDayIdx]);
+
                             setDays([...draft]);
                             message.success("이동된 일정의 시간이 초기화되었습니다.");
                         },
                         onCancel: () => {
-                            setDays([...days]); // 복원
+                            setDays(originalDays);
                             message.info("이동이 취소되었습니다.");
                         },
                     });
                     return;
                 }
             } else {
-                // ✅ 수동 시간 있는 일정 덮어쓰기 방지
-                if (!draft[srcDayIdx].items.some((it) => it.__manual__)) {
-                    draft[srcDayIdx] = applyEdgeTimes([draft[srcDayIdx]])[0];
-                }
+                draft[srcDayIdx] = applyEdgeTimes([draft[srcDayIdx]])[0];
             }
 
             if (dstHasManual) {
-                if (!isTimeOrderValid(draft[dstDayIdx].items)) {
+                if (movedHasTime && !isTimeOrderValid(draft[dstDayIdx].items)) {
                     Modal.confirm({
                         title: "시간 순서 충돌",
                         content: (
                             <>
                                 <p>선택한 일정의 이동으로 인해 시간 순서가 깨집니다.</p>
                                 <p className="mt-2">
-                                    이 일정을 <b>새 위치로 이동시키면서 시간값을 초기화(--:--)</b>하시겠습니까?
+                                    이 일정을{" "}
+                                    <b>새 위치로 이동시키면서 시간값을 초기화(--:--)</b>
+                                    하시겠습니까?
                                 </p>
                             </>
                         ),
@@ -332,7 +364,7 @@ export default function PlanScheduler() {
                             message.success("이동된 일정의 시간이 초기화되었습니다.");
                         },
                         onCancel: () => {
-                            setDays([...days]);
+                            setDays(originalDays);
                             message.info("이동이 취소되었습니다.");
                         },
                     });
@@ -342,9 +374,9 @@ export default function PlanScheduler() {
                 draft[dstDayIdx] = applyEdgeTimes([draft[dstDayIdx]])[0];
             }
         }
+
         setDays(draft);
     };
-
     /** 일정 카드의 ✏️ 클릭 → 시간 편집 모달 오픈 */
     const onOpenTimeEdit = (dayIdx, index, it) => {
         setEditingDayIdx(dayIdx);
@@ -543,9 +575,10 @@ export default function PlanScheduler() {
                         transition: "all 0.4s ease-in-out",
                         height: "100%",
                     }}
-                    min="20%"
-                    max="80%"
+                    min="30%"
+                    max="70%"
                     size={splitSize}
+                    onChange={setSplitSize}
                 >
                     {/* 왼쪽 일정 패널 */}
                     <Splitter.Panel
@@ -556,7 +589,15 @@ export default function PlanScheduler() {
                             height: "100%",
                         }}
                     >
-                        <div className="flex flex-1">
+                        <div
+                            className="flex flex-1 transition-all duration-500"
+                            style={{
+                                display: "grid",
+                                gridTemplateColumns: "200px 1fr", // ✅ PlanSidebar : PlanDayList = 1 : 4 비율
+                                height: "100%",
+                                minHeight: "100%",
+                            }}
+                        >
                             {/* 좌측 사이드바 */}
                             <PlanSidebar
                                 days={days}
@@ -568,11 +609,12 @@ export default function PlanScheduler() {
                                 meta={meta}
                                 state={state}
                                 handleConfirm={handleConfirm}
+                                setMode={setMode}
                             />
 
                             {/* 일정 리스트(스크롤 영역) */}
-                            <div className="flex-1 p-10 overflow-y-auto custom-scroll ">
-                                <div className=" border-b-2 mb-10">
+                            <div className="overflow-y-auto custom-scroll px-10 py-8">
+                                <div className="border-b-2 mb-10">
                                     <div className="flex items-center gap-2">
                                         <h2 className="text-2xl font-semibold text-[#2F3E46] ">
                                             {meta.title || "여행 제목 없음"}
@@ -604,11 +646,11 @@ export default function PlanScheduler() {
                                     </div>
 
                                     <div className="text-gray-400 text-sm mt-3 mb-5 ">
-                                        * 각 일차 첫 일정은 시작시간, 마지막 일정은 종료시간이 자동 표시됩니다. <br /> * 나머지 일정은 직접 시간을 입력할 수 있습니다.
+                                        * 각 일차 첫 일정은 시작시간, 마지막 일정은 종료시간이 자동 표시됩니다.
+                                        <br /> * 나머지 일정은 직접 시간을 입력할 수 있습니다.
                                     </div>
                                 </div>
 
-                                {/* ✅ 분리된 일정 리스트 + DnD */}
                                 <PlanDayList
                                     days={days}
                                     activeDayIdx={activeDayIdx}
@@ -623,10 +665,17 @@ export default function PlanScheduler() {
                     </Splitter.Panel>
 
                     {/* 오른쪽 지도 */}
-                    <Splitter.Panel style={{ background: "#fafafa", position: "relative", overflow: "hidden" }}>
+                    <Splitter.Panel
+                        style={{
+                            background: "#fafafa",
+                            position: "relative",
+                            overflow: "hidden",
+                        }}
+                    >
                         <TravelMap markers={markers} step={6} />
                     </Splitter.Panel>
                 </Splitter>
+
             </div>
 
             {/* 시간 설정 모달 */}
