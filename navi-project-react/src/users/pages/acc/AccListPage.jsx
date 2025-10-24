@@ -235,14 +235,28 @@ const AccListPage = () => {
 
             <Radio.Group
               value={searchType}
-              onChange={(e) => setSearchType(e.target.value)}
+              onChange={(e) => {
+                const type = e.target.value;
+                setSearchType(type);
+
+                // 탭 전환 시 불필요한 값 초기화
+                if (type === "region") {
+                  setKeyword("");
+                  setSpot("");
+                } else if (type === "keyword") {
+                  setCity("");
+                  setTownship("");
+                  setSpot("");
+                }
+              }}
               className="mb-6"
               size="large"
             >
               <Radio.Button value="region">지역별 찾기</Radio.Button>
-              <Radio.Button value="spot">명소 주변 찾기</Radio.Button>
               <Radio.Button value="keyword">숙소명 검색</Radio.Button>
             </Radio.Group>
+
+            
 
             <div className="flex flex-wrap gap-2 items-center justify-start mb-6">
               {searchType === "region" && (

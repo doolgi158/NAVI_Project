@@ -39,17 +39,22 @@ public class AccSqlProvider {
                 .JOIN("NAVI_TOWNSHIP t ON a.TOWNSHIP_ID = t.TOWNSHIP_ID")
                 .WHERE("a.IS_ACTIVE = 1");
 
-        /* 지역 조건 필터 */
-        if (city != null && !city.isBlank()) {
-            sql.WHERE("t.SIGUNGU_NAME = #{city}");
-        }
-        if (townshipName != null && !townshipName.isBlank()) {
-            sql.WHERE("t.TOWNSHIP_NAME = #{townshipName}");
-        }
-
-        /* 숙소명 검색 조건 */
-        if (title != null && !title.isBlank()) {
+        /* 검색 유형 분리 */
+        if (title != null && !title.isBlank()
+                && (city == null || city.isBlank())
+                && (townshipName == null || townshipName.isBlank())) {
+            // 👉 숙소명 검색 탭 (title만 있을 때)
             sql.WHERE("LOWER(a.TITLE) LIKE '%' || LOWER(#{title}) || '%'");
+        }
+        else if ((city != null && !city.isBlank()) || (townshipName != null && !townshipName.isBlank())) {
+            // 👉 지역별 검색 탭 (city 또는 township 있을 때)
+            if (city != null && !city.isBlank() && townshipName != null && !townshipName.isBlank()) {
+                sql.WHERE("(t.SIGUNGU_NAME = #{city} OR t.TOWNSHIP_NAME = #{townshipName})");
+            } else if (city != null && !city.isBlank()) {
+                sql.WHERE("t.SIGUNGU_NAME = #{city}");
+            } else if (townshipName != null && !townshipName.isBlank()) {
+                sql.WHERE("t.TOWNSHIP_NAME = #{townshipName}");
+            }
         }
 
         /* 카테고리 필터 */
