@@ -1,7 +1,10 @@
 package com.navi.payment.dto.request;
 
 import com.navi.common.enums.RsvType;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
@@ -16,4 +19,3 @@ public class RefundRequestDTO {
     private String reason;         // 환불 사유
     private BigDecimal amount;     // 부분 환불 금액 명시 가능
 }
-
