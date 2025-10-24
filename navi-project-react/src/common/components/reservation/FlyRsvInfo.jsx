@@ -3,11 +3,6 @@ import { Typography, Divider, Card, Space, Tag, Row, Col } from "antd";
 
 const { Title, Text } = Typography;
 
-/**
- * ✈️ 항공 예약 정보 컴포넌트 (탑승객 + 좌석 정보 표시)
- * - 선택 좌석이 있을 경우: 좌석 정보 표시
- * - autoAssign=true인 경우: 자동 배정 안내
- */
 const FlyRsvInfo = ({ formData }) => {
   if (!formData) return null;
 

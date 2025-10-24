@@ -220,6 +220,10 @@ const SeatSelectPage = () => {
           passengers,
           passengerCount,
           totalPrice,
+          selectedSeats: [
+            ...(state?.outboundSeats || []),
+            ...selectedSeats,
+          ],
         },
       }));
 
@@ -234,7 +238,10 @@ const SeatSelectPage = () => {
             passengers,
             passengerCount,
             totalPrice,
-            selectedSeats,
+            selectedSeats: [
+              ...(outboundDto?.selectedSeats || []),
+              ...selectedSeats
+            ],
           },
           itemData: {
             selectedOutbound,

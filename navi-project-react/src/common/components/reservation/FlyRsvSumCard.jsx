@@ -1,15 +1,9 @@
-// src/common/components/reservation/FlySummaryCard.jsx
 import React from "react";
 import { Card, Typography, Divider } from "antd";
 
 const { Title, Text } = Typography;
 
-/**
- * ✈️ 항공 결제/요약 전용 카드 컴포넌트
- * - 출발편 / 귀국편 / 총금액 표시
- * - FlightDetailPage의 오른쪽 디자인을 기반으로 재구성
- */
-const FlyRsvSumCard = ({ selectedOutbound, selectedInbound }) => {
+const FlyRsvSumCard = ({ selectedOutbound, selectedInbound, totalAmount }) => {
   const formatTime = (str) => {
     if (!str) return "";
     const d = new Date(str);
@@ -27,8 +21,7 @@ const FlyRsvSumCard = ({ selectedOutbound, selectedInbound }) => {
     ).padStart(2, "0")} (${day})`;
   };
 
-  const totalPrice =
-    (selectedOutbound?.price || 0) + (selectedInbound?.price || 0);
+  //const totalPrice =(selectedOutbound?.price || 0) + (selectedInbound?.price || 0);
 
   return (
     <Card
@@ -107,7 +100,7 @@ const FlyRsvSumCard = ({ selectedOutbound, selectedInbound }) => {
             level={4}
             style={{ margin: 0, color: "#1677ff", fontWeight: 700 }}
           >
-            ₩{FormData.totalPrice.toLocaleString()}
+            ₩{totalAmount.toLocaleString()}원
           </Title>
         </>
       )}

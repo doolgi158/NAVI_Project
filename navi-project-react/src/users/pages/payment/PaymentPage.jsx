@@ -90,6 +90,7 @@ const PaymentPage = () => {
 				<FlySumCard
 					selectedOutbound={itemData?.selectedOutbound}
 					selectedInbound={itemData?.selectedInbound}
+					totalAmount={totalAmount}
 				/>
 			);
 		case "DLV":
@@ -159,6 +160,7 @@ const PaymentPage = () => {
 		);
 	}
 
+	console.log(paymentMethod);
 	return (
 		<MainLayout>
 			<div className="min-h-screen flex justify-center pt-10 pb-12 px-8">
@@ -184,7 +186,10 @@ const PaymentPage = () => {
 						<div className="mb-8">
 							<Title level={5}>결제 수단 선택</Title>
 							<Radio.Group
-								onChange={(e) => setPaymentMethod(e.target.value)}
+								onChange={(e) => {
+									setPaymentMethod(e.target.value);
+									dispatch(setPaymentData({ paymentMethod: e.target.value }));
+								}}
 								value={paymentMethod}
 							>
 								<Space direction="vertical">
