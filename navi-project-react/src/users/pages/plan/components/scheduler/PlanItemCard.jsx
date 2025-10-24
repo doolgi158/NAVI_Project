@@ -1,14 +1,9 @@
-// components/plan/scheduler/PlanItemCard.jsx
 import React from "react";
 import { Button } from "antd";
 import { EditOutlined } from "@ant-design/icons";
 import { Draggable } from "@hello-pangea/dnd";
 
-/**
- * PlanItemCard
- * - 기존 PlanScheduler.renderStepItem() 를 그대로 컴포넌트로 분리
- * - DnD 래핑(Draggable)과 UI/스타일 완전 동일
- */
+
 export default function PlanItemCard({
     item,
     index,

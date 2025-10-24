@@ -91,7 +91,7 @@ export default function TimeDrawer({ days, times, setTimes, title, dateRange }) 
 
   return (
     <div
-      className="flex flex-col flex-1 bg-[#FDFCF9] overflow-y-auto custom-scroll"
+      className="flex flex-col flex-1 bg-[#FDFCF9] overflow-auto custom-scroll"
       style={{
         minWidth: "340px",
         padding: "24px 28px 36px",
@@ -124,9 +124,9 @@ export default function TimeDrawer({ days, times, setTimes, title, dateRange }) 
             renderItem={(d) => (
               <List.Item
                 key={d.format("YYYY-MM-DD")}
-                className="rounded shadow-sm px-5 py-3 mb-3 hover:bg-[#ffbf231f] transition"
+                className="rounded shadow-sm px-5 py-3 mb-3 hover:bg-[#ffbf231f] transition "
               >
-                <div className="flex items-center justify-between w-full">
+                <div className="flex items-center justify-between w-full ">
                   <div className="w-24 font-medium text-[#2F3E46]">
                     {d.format("MM/DD (ddd)")}
                   </div>

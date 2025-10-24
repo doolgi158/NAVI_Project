@@ -145,17 +145,28 @@ export default function PlanScheduler() {
     const getDayEdgeTimes = (dateISO) => initialDayTimes[dateISO] || { start: "10:00", end: "22:00" };
 
     const cleanTime = (it) => {
-        const normalize = (v) =>
-            !v || v === "- : -" ? null : dayjs(v, "HH:mm", true).isValid() ? v : null;
+        const normalize = (v) => {
+            if (!v || v === "- : -" || v === "--:--") return null;
+            if (typeof v === "object" && v.$d) return dayjs(v).format("HH:mm"); // ✅ dayjs 객체면 문자열 변환
+            if (dayjs(v, "HH:mm", true).isValid()) return v;
+            return null;
+        };
         return { ...it, startTime: normalize(it.startTime), endTime: normalize(it.endTime) };
     };
 
     const applyEdgeTimes = (sourceDays) => {
         return sourceDays.map((d) => {
-            if (!d.items?.length) return d;
-            const { start, end } = getDayEdgeTimes(d.dateISO);
+            const dateString =
+                typeof d.dateISO === "object" && d.dateISO.$d
+                    ? dayjs(d.dateISO.$d).format("YYYY-MM-DD")
+                    : String(d.dateISO);
+
+            if (!d.items?.length) return { ...d, dateISO: dateString };
+
+            const { start, end } = getDayEdgeTimes(dateString);
             return {
                 ...d,
+                dateISO: dateString, // ✅ 문자열로 보정
                 items: d.items.map((it, idx) => {
                     if (it.__manual__ && it.startTime && it.endTime) return it;
                     const isFirst = idx === 0;
@@ -590,7 +601,7 @@ export default function PlanScheduler() {
                         }}
                     >
                         <div
-                            className="flex flex-1 transition-all duration-500"
+                            className="flex flex-1 transition-all duration-500 "
                             style={{
                                 display: "grid",
                                 gridTemplateColumns: "200px 1fr", // ✅ PlanSidebar : PlanDayList = 1 : 4 비율
@@ -613,7 +624,7 @@ export default function PlanScheduler() {
                             />
 
                             {/* 일정 리스트(스크롤 영역) */}
-                            <div className="overflow-y-auto custom-scroll px-10 py-8">
+                            <div className="overflow-y-auto custom-scroll px-10 py-8 ">
                                 <div className="border-b-2 mb-10">
                                     <div className="flex items-center gap-2">
                                         <h2 className="text-2xl font-semibold text-[#2F3E46] ">
@@ -768,9 +779,13 @@ export default function PlanScheduler() {
 
                     // ✅ 새로운 일정 구성
                     const newDays = buckets.map((b, i) => ({
-                        dateISO: start.add(i, "day").format("YYYY-MM-DD"),
+                        dateISO: dayjs(newStart).add(i, "day").format("YYYY-MM-DD"),
                         orderNo: i + 1,
-                        items: b,
+                        items: b.map((it) => ({
+                            ...it,
+                            startTime: typeof it.startTime === "object" ? dayjs(it.startTime).format("HH:mm") : it.startTime,
+                            endTime: typeof it.endTime === "object" ? dayjs(it.endTime).format("HH:mm") : it.endTime,
+                        })),
                     }));
 
                     // ✅ 경고창
@@ -795,8 +810,8 @@ export default function PlanScheduler() {
                             setDays(newDays);
                             setMeta((prev) => ({
                                 ...prev,
-                                startDate: newStart,
-                                endDate: newEnd,
+                                startDate: dayjs(newStart).format("YYYY-MM-DD"),
+                                endDate: dayjs(newEnd).format("YYYY-MM-DD"),
                             }));
 
                             // ✅ 숙소 초기화
