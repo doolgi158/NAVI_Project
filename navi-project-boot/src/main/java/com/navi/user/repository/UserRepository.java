@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -70,23 +71,21 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByIdAndUserState(String id, UserState userState);
 
-    // 상태별 유저 수 카운트
-    long countByUserState(UserState state);
+    @Query("""
+                SELECT u FROM User u
+                WHERE u.userState = 'NORMAL'
+                AND (
+                    SELECT MAX(h.logout) FROM History h WHERE h.user = u
+                ) <= :threshold
+            """)
+    List<User> findNormalUsersInactiveForOneYear(@Param("threshold") LocalDateTime threshold);
 
-    // 월별 신규가입 / 탈퇴 / 활성 사용자 수
-    @Query(
-            value = """
-                    SELECT
-                        TO_CHAR(u.user_signup, 'YYYY-MM') AS month,
-                        COUNT(CASE WHEN u.user_state = 'NORMAL' THEN 1 END) AS active,
-                        COUNT(CASE WHEN u.user_state = 'DELETE' THEN 1 END) AS leave,
-                        COUNT(*) AS join
-                    FROM navi_users u
-                    WHERE u.user_signup IS NOT NULL
-                    GROUP BY TO_CHAR(u.user_signup, 'YYYY-MM')
-                    ORDER BY month
-                    """,
-            nativeQuery = true
-    )
-    List<Object[]> findUserTrendRaw(String range);
+    @Query("""
+                SELECT u FROM User u
+                WHERE u.userState = 'SLEEP'
+                AND (
+                    SELECT MAX(h.logout) FROM History h WHERE h.user = u
+                ) <= :threshold
+            """)
+    List<User> findSleepUsersInactiveForAnotherYear(@Param("threshold") LocalDateTime threshold);
 }

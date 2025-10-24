@@ -11,7 +11,10 @@ export const useDashboardData = (endpoints) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    // endpoints를 useCallback의 의존성에 추가
     const fetchData = useCallback(async () => {
+        if (!endpoints || endpoints.length === 0) return;
+
         try {
             setLoading(true);
             setError(null);
@@ -26,32 +29,34 @@ export const useDashboardData = (endpoints) => {
                 )
             );
 
-            // 병합 시 각 데이터 구조 맞게 키 이름 통일
+            console.log("📦 Dashboard responses:", responses);
+
             const merged = {
                 users: responses[0]?.data?.data?.users ?? responses[0]?.data?.data,
                 userTrend: responses[0]?.data?.data?.userTrend ?? [],
                 travels: responses[1]?.data?.data,
                 ranking: responses[2]?.data?.data,
-                flights: responses[3].data.data,
+                flights: responses[3]?.data?.data,
                 accommodations: {
                     count:
                         responses[4]?.data?.data?.count ??
-                        responses[4]?.data?.data ?? // 숫자만 오는 경우
+                        responses[4]?.data?.data ??
                         0,
                 },
-                usageTrend: responses[5]?.data?.usageTrend ?? [],
+                accommodationRanking: responses[5]?.data?.data ?? [],
+                usageTrend: responses[6]?.data?.usageTrend ?? [],
             };
 
             setData(merged);
         } catch (err) {
-            console.error("대시보드 데이터 로드 실패:", err);
+            console.error("❌ 대시보드 데이터 로드 실패:", err);
             setError(err.message || "데이터 요청 실패");
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [endpoints]);
 
-    // 최초 실행
+    // endpoints가 바뀌면 자동으로 재호출
     useEffect(() => {
         fetchData();
     }, [fetchData]);

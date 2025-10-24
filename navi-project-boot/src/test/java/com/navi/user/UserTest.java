@@ -3,6 +3,8 @@ package com.navi.user;
 import com.navi.accommodation.domain.Acc;
 import com.navi.accommodation.repository.AccRepository;
 import com.navi.common.enums.RsvStatus;
+import com.navi.delivery.domain.DeliveryReservation;
+import com.navi.delivery.repository.DeliveryReservationRepository;
 import com.navi.flight.domain.Flight;
 import com.navi.flight.domain.FlightReservation;
 import com.navi.flight.domain.Seat;
@@ -33,6 +35,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,6 +67,9 @@ public class UserTest {
 
     @Autowired
     private SeatRepository seatRepository;
+
+    @Autowired
+    private DeliveryReservationRepository deliveryReservationRepository;
 
     @PersistenceContext
     private EntityManager em;
@@ -366,5 +372,98 @@ public class UserTest {
         }
         sb.append("]");
         return sb.toString();
+    }
+
+    private static final String[] CITIES = {"서울", "부산", "제주", "대구", "광주", "속초", "경주", "인천"};
+    private static final String[] DISTRICTS = {"중구", "강남구", "해운대구", "연제구", "서귀포시", "달서구", "북구"};
+
+    @Test
+    @Transactional
+    @Commit
+    public void insertDummyDeliveryReservations() {
+        // user_no=1 기준
+        User user = userRepository.findById(1L)
+                .orElseThrow(() -> new EntityNotFoundException("user_no=1 사용자를 찾을 수 없습니다."));
+
+        Random random = new Random();
+        List<DeliveryReservation> reservations = new ArrayList<>();
+        int total = 0;
+
+        String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+
+        for (int i = 0; i < 3000; i++) {
+            String drsvId = String.format("D%s%04d", today, i + 1);
+
+            String startAddr = randomAddress(random);
+            String endAddr = randomAddress(random);
+
+            // ✅ createdAt: 5월 1일 ~ 10월 23일 사이 랜덤
+            LocalDate createdDate = randomDateBetween(
+                    LocalDate.of(2025, 5, 1),
+                    LocalDate.of(2025, 10, 23),
+                    random
+            ).toLocalDate();
+
+            // ✅ deliveryDate: createdAt 이후 1~10일 사이 랜덤 지정 (최대 10월 31일까지)
+            LocalDate deliveryDate = createdDate.plusDays(random.nextInt(10) + 1);
+            if (deliveryDate.isAfter(LocalDate.of(2025, 10, 31))) {
+                deliveryDate = LocalDate.of(2025, 10, 31);
+            }
+
+            BigDecimal totalPrice = BigDecimal.valueOf(10000 + random.nextInt(150000));
+            RsvStatus status = getRandomStatus(random);
+            String bagsJson = makeRandomBagsJson(random);
+
+            DeliveryReservation dr = DeliveryReservation.builder()
+                    .drsvId(drsvId)
+                    .user(user)
+                    .startAddr(startAddr)
+                    .endAddr(endAddr)
+                    .deliveryDate(deliveryDate)
+                    .totalPrice(totalPrice)
+                    .status(status)
+                    .bagsJson(bagsJson)
+                    .build();
+
+            // ✅ BaseEntity의 createdAt / updatedAt 수동 세팅
+            dr.setCreatedAt(createdDate.atTime(random.nextInt(24), random.nextInt(60)));
+            dr.setUpdatedAt(dr.getCreatedAt().plusHours(random.nextInt(48))); // 수정일은 작성일 이후 0~48시간 사이
+
+            reservations.add(dr);
+            total++;
+
+            // 💾 500개 단위로 중간 저장
+            if (reservations.size() >= 500) {
+                deliveryReservationRepository.saveAll(reservations);
+                reservations.clear();
+                log.info("💾 {}개 중간 저장 완료", total);
+            }
+        }
+
+        if (!reservations.isEmpty()) {
+            deliveryReservationRepository.saveAll(reservations);
+        }
+
+        log.info("✅ DeliveryReservation 더미 데이터 삽입 완료: 총 {}개", total);
+    }
+
+    /**
+     * ✅ 랜덤 주소 생성
+     */
+    private String randomAddress(Random random) {
+        String city = CITIES[random.nextInt(CITIES.length)];
+        String district = DISTRICTS[random.nextInt(DISTRICTS.length)];
+        int building = 1 + random.nextInt(200);
+        return String.format("%s %s %d번지", city, district, building);
+    }
+
+    /**
+     * ✅ 가방 정보 JSON
+     */
+    private String makeRandomBagsJson(Random random) {
+        int small = random.nextInt(3);
+        int medium = random.nextInt(2);
+        int large = random.nextInt(2);
+        return String.format("{\"S\":%d,\"M\":%d,\"L\":%d}", small, medium, large);
     }
 }

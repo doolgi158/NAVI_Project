@@ -2,7 +2,6 @@ package com.navi.payment.service;
 
 import com.navi.common.enums.RsvType;
 import com.navi.payment.domain.enums.PaymentStatus;
-import com.navi.payment.dto.request.RefundRequestDTO;
 import com.navi.payment.dto.response.PaymentAdminDetailResponseDTO;
 import com.navi.payment.dto.response.PaymentAdminListResponseDTO;
 import com.siot.IamportRestClient.exception.IamportResponseException;
@@ -16,12 +15,15 @@ public interface PaymentAdminService {
     List<PaymentAdminListResponseDTO> getAllPaymentsForAdmin(
             RsvType rsvType, PaymentStatus paymentStatus, String keyword
     );
+
     // 2. 단일 결제 상세 조회
     List<PaymentAdminDetailResponseDTO> getPaymentDetailsForAdmin(String merchantId);
-    // 3. 예약 ID별 환불(부분환불 가능 - FLY)
-    void refundPaymentByReserveId(RefundRequestDTO dto)
-            throws IamportResponseException, IOException, Exception;
-    // 4. 결제 ID별 환불(전체환불)
-    void refundPaymentByMerchantId(RefundRequestDTO dto)
-            throws IamportResponseException, IOException, Exception;
+
+    // 3. 예약 ID별 환불
+    PaymentAdminDetailResponseDTO refundPaymentDetail(String reserveId, String reason)
+            throws IamportResponseException, IOException;
+
+    // 4. 결제 ID별 환불
+    PaymentAdminListResponseDTO refundPaymentByMerchantId(String merchantId, String reason)
+            throws IamportResponseException, IOException;
 }
