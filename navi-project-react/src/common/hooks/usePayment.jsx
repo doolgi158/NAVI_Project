@@ -18,6 +18,8 @@ export const usePayment = () => {
 	const payment = useSelector((state) => state.payment);
 	const { items, rsvType, formData, totalAmount, paymentMethod } = payment;
 	console.log("************************", paymentMethod, rsvType);
+	console.log("************************", items);
+
 
 	const isProcessingRef = useRef(false);
 

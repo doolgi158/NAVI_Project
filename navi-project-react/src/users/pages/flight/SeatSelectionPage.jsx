@@ -26,8 +26,8 @@ const { Title, Text } = Typography;
 
 const SeatSelectPage = () => {
   const { state } = useLocation();
-  const navigate = useNavigate();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const {
     isRoundTrip = false,
@@ -142,7 +142,7 @@ const SeatSelectPage = () => {
     setTotalPrice(updated.reduce((sum, s) => sum + (s.totalPrice || 0), 0));
   };
 
-  // ✅ 예약 insert 및 다음단계 이동
+  /** ✅ 예약 insert 및 다음 단계 이동 */
   const handleNext = async () => {
     if (selectedSeats.length !== passengerCount)
       return message.warning(`탑승객 수(${passengerCount})에 맞게 좌석을 선택하세요.`);
@@ -159,7 +159,7 @@ const SeatSelectPage = () => {
         "Content-Type": "application/json",
       };
 
-      // ✅ 예약 DTO 구성
+      // ✅ 현재 단계 예약 DTO 구성
       const currentDto = {
         flightId: flightIdValue,
         depTime: flight?.depTime?.split("T")[0],
@@ -169,14 +169,14 @@ const SeatSelectPage = () => {
         status: "PENDING",
       };
 
-      // ✅ 서버 insert
+      // ✅ 서버에 예약 요청 (출발 or 귀국)
       const res = await axios.post(
         `${API_SERVER_HOST}/api/flight/reservation`,
         currentDto,
         { headers }
       );
 
-      // ✅ 왕복편이면 → 귀국편 이동
+      // ✅ 왕복 + 출발편이면 → 귀국편으로 이동
       if (isRoundTrip && step === "outbound") {
         navigate("/flight/seat", {
           state: {
@@ -186,16 +186,19 @@ const SeatSelectPage = () => {
             selectedInbound,
             passengerCount,
             passengers,
-            outboundDto: res.data.data, // ✅ 출발편 insert 결과 저장
+            outboundDto: {
+              ...res.data.data,
+              selectedSeats, // 출발편 좌석 정보 함께 저장
+            },
           },
         });
         return;
       }
-      
+
       // 결제용 items 배열 구성
       const items = [];
 
-      // 왕복일 경우, 먼저 출발편 예약(outboundDto)을 추가
+      // 왕복이면 출발편 예약 추가
       if (isRoundTrip && outboundDto?.frsvId) {
         items.push({
           reserveId: outboundDto.frsvId,
@@ -203,7 +206,7 @@ const SeatSelectPage = () => {
         });
       }
 
-      // 지금 예약(편도 or 귀국편) 추가
+      // 현재편 예약 추가 (편도 or 귀국편)
       items.push({
         reserveId: res?.data?.data?.frsvId,
         amount:
@@ -211,24 +214,22 @@ const SeatSelectPage = () => {
             ? (selectedInbound?.price || 0)
             : (selectedOutbound?.price || 0)) * passengerCount,
       });
-      
-      dispatch(setReserveData({
-        rsvType: "FLY",
-        items,
-        itemData: { selectedOutbound, selectedInbound },
-        formData: {
-          passengers,
-          passengerCount,
-          totalPrice,
-          selectedSeats: [
-            ...(state?.outboundSeats || []),
-            ...selectedSeats,
-          ],
-        },
-      }));
 
-      
-      // ✅ 편도 or 귀국편 완료 시 → 결제 페이지
+      // ✅ Redux 결제 데이터 저장
+      dispatch(
+        setReserveData({
+          rsvType: "FLY",
+          items,
+          itemData: { selectedOutbound, selectedInbound },
+          formData: {
+            passengers,
+            passengerCount,
+            totalPrice,
+          },
+        })
+      );
+
+      // ✅ 결제 페이지로 이동
       message.success("항공편 예약이 완료되었습니다!");
       navigate("/payment", {
         state: {
@@ -240,16 +241,17 @@ const SeatSelectPage = () => {
             totalPrice,
             selectedSeats: [
               ...(outboundDto?.selectedSeats || []),
-              ...selectedSeats
+              ...(selectedSeats || []),
             ],
           },
-          itemData: {
-            selectedOutbound,
-            selectedInbound,
-          },
-          outboundDto: isRoundTrip ? outboundDto : res.data.data,
-          inboundDto: isRoundTrip ? res.data.data : null,
-        }
+          itemData: { selectedOutbound, selectedInbound },
+          outboundDto: isRoundTrip
+            ? { ...outboundDto, selectedSeats: outboundDto?.selectedSeats || [] }
+            : res.data.data,
+          inboundDto: isRoundTrip
+            ? { ...res.data.data, selectedSeats }
+            : null,
+        },
       });
     } catch (error) {
       console.error("❌ 예약 실패:", error);
@@ -259,6 +261,7 @@ const SeatSelectPage = () => {
       message.error(msg);
     }
   };
+
 
   const handleBack = () => navigate(-1);
 

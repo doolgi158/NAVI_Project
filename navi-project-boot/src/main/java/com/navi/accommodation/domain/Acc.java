@@ -103,14 +103,14 @@ public class Acc {
     private Boolean hasParking = false;
 
     // 삭제 가능 여부
-    @Builder.Default
-    @Column(name = "is_deletable", nullable = false)
-    private boolean isDeletable = false;
+    //@Builder.Default
+    //@Column(name = "is_deletable", nullable = false)
+    //private Boolean deletable = false;
 
     // 운영 여부
     @Builder.Default
     @Column(name = "is_active", nullable = false)
-    private boolean active = true;
+    private Boolean active = true;
 
     // 등록일시
     @Column(name = "created_time", nullable = false, updatable = false)
@@ -148,11 +148,10 @@ public class Acc {
         if (checkOutTime == null) checkOutTime = "11:00";
         if (hasCooking == null) hasCooking = false;
         if (hasParking == null) hasParking = false;
-        if (!this.active) this.active = true;
-        if (createdTime == null) {
-            createdTime = LocalDateTime.now();
-            modifiedTime = LocalDateTime.now();
-        }
+        if (active == null) active = true;
+        //if (deletable == null) deletable = false;
+        if (createdTime == null) createdTime = LocalDateTime.now();
+        if (modifiedTime == null) modifiedTime = LocalDateTime.now();
     }
 
     /* === 수정일 자동 갱신 === */

@@ -208,13 +208,13 @@ const FlightRsvInputPage = () => {
       if (resOut?.data?.data?.frsvId) {
         items.push({
           reserveId: resOut.data.data.frsvId,
-          amount: selectedOutbound.price || 0,
+          amount: (selectedOutbound.price || 0) * passengerCount,
         });
       }
       if (resIn?.data?.data?.frsvId) {
         items.push({
           reserveId: resIn.data.data.frsvId,
-          amount: selectedInbound?.price || 0,
+          amount: (selectedInbound?.price || 0) * passengerCount,
         });
       }
 

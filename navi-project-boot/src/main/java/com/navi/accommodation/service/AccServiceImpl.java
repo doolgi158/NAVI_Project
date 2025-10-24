@@ -6,6 +6,7 @@ import com.navi.accommodation.dto.request.AccRequestDTO;
 import com.navi.accommodation.dto.request.AccSearchRequestDTO;
 import com.navi.accommodation.dto.response.AccDetailResponseDTO;
 import com.navi.accommodation.dto.response.AccListResponseDTO;
+import com.navi.accommodation.mapper.AccMapper;
 import com.navi.accommodation.repository.AccRepository;
 import com.navi.image.domain.Image;
 import com.navi.image.repository.ImageRepository;
@@ -34,16 +35,22 @@ public class AccServiceImpl implements AccService {
     private final UserRepository userRepository;
     private final LogRepository logRepository;
 
+    private final AccMapper accMapper;
+
     /* === 관리자 전용 CRUD === */
     // 1. 숙소 생성
     @Override
     public Acc createAcc(AdminAccListDTO dto) {
+        Long nextSeq = accRepository.getNextSeqVal();
+        String accId = String.format("ACC%03d", nextSeq);
+
         // Township 조회 (필수)
         var township = townshipRepository.findById(dto.getTownshipId())
                 .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 지역 정보입니다."));
 
         // 엔티티 생성 및 값 주입
         Acc acc = Acc.builder()
+                .accId(accId)
                 .title(dto.getTitle())
                 .category(dto.getCategory())
                 .tel(dto.getTel())
@@ -102,8 +109,8 @@ public class AccServiceImpl implements AccService {
             throw new IllegalStateException("API로 받아온 숙소는 삭제할 수 없습니다.");
         }
         // 예약사항이 있으면 삭제 불가
-        if (!acc.isDeletable()) {
-            throw new IllegalStateException("삭제 불가 상태의 숙소입니다.");
+        if (!roomRepository.findByAcc_AccNo(accNo).isEmpty()) {
+            throw new IllegalStateException("해당 숙소에 예약된 객실이 존재합니다.");
         }
 
         accRepository.delete(acc);
@@ -151,52 +158,47 @@ public class AccServiceImpl implements AccService {
 
     /* === 사용자 전용 조회 === */
     @Override
+    @Transactional(readOnly = true)
     public List<AccListResponseDTO> searchAccommodations(AccSearchRequestDTO dto) {
-        List<Acc> accList = accRepository.findAll();
+        log.info("🔍 [ACC_SEARCH] 요청 수신 - {}", dto);
 
-        // 검색 조건 분기
-        if (dto.getTownshipName() != null && !dto.getTownshipName().isBlank()) {
-            accList = accList.stream()
-                    .filter(a -> a.getTownship() != null &&
-                            a.getTownship().getTownshipName().contains(dto.getTownshipName()))
-                    .toList();
-        } else if (dto.getTitle() != null && !dto.getTitle().isBlank()) {
-            String lowerKeyword = dto.getTitle().toLowerCase();
-            accList = accList.stream()
-                    .filter(a -> a.getTitle() != null && a.getTitle().toLowerCase().contains(lowerKeyword))
-                    .toList();
-        } else {
-            // Todo: 임시방편 (이거 말고 관광지 기반 만들어야 함)
-            accList = accRepository.findAll();
-        }
+        // Mapper 기반 DB 검색 수행
+        List<Acc> accList = accMapper.searchAccommodations(
+                dto.getCity(),
+                dto.getTownshipName(),
+                dto.getTitle(),
+                dto.getCategoryList(),
+                dto.getCheckIn() != null ? dto.getCheckIn().toString() : null,
+                dto.getCheckOut() != null ? dto.getCheckOut().toString() : null,
+                dto.getGuestCount(),
+                dto.getRoomCount(),
+                dto.getSort()
+        );
 
-        /* 숙소 + 이미지 DTO 조합 */
-        return accList.stream().map(acc -> {
-            // ✅ 대표 이미지 경로 (/images/acc/uuid.jpg)
-            String accImagePath = imageRepository
-                    .findTopByTargetTypeAndTargetIdOrderByNoAsc("ACC", acc.getAccId().trim())
-                    .map(Image::getPath)
-                    .orElse("/images/acc/default_hotel.jpg"); // ✅ 기본 이미지도 동일 구조로 변경
+        log.debug("✅ [ACC_SEARCH] 결과 {}건", accList.size());
 
-            // ✅ 로그로 실제 반환 확인
-            log.debug("[ACC_IMAGE] {} → {}", acc.getAccId(), accImagePath);
-
-            return AccListResponseDTO.builder()
-                    .accId(acc.getAccId())
-                    .title(acc.getTitle())
-                    .address(acc.getAddress())
-                    .mainImage(accImagePath)
-                    .build();
-        }).toList();
+        return accList.stream()
+                .map(acc -> AccListResponseDTO.builder()
+                        .accId(acc.getAccId())
+                        .title(acc.getTitle())
+                        .address(acc.getAddress())
+                        .mainImage(
+                                (acc.getMainImage() != null && !acc.getMainImage().isBlank())
+                                        ? acc.getMainImage()
+                                        : "/images/acc/default_hotel.jpg"
+                        )
+                        .build())
+                .toList();
     }
 
+
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public AccDetailResponseDTO getAccDetail(String accId) {
         Acc acc = accRepository.findByAccId(accId)
                 .orElseThrow(() -> new IllegalArgumentException("숙소를 찾을 수 없습니다."));
 
-        // ✅ 숙소 이미지 리스트
+        // 숙소 이미지 리스트
         List<String> accImages = imageRepository
                 .findAllByTargetTypeAndTargetId("ACC", acc.getAccId())
                 .stream()
@@ -233,7 +235,7 @@ public class AccServiceImpl implements AccService {
         accRepository.findByAccId(accId).ifPresent(acc -> {
             acc.increaseViewCount();
             accRepository.save(acc);
-            log.info("============================== 조회수 증가!!!!!!!");
+            log.info("[ACC] 조회수 증가 - accId={}, title={}", accId, acc.getTitle());
         });
     }
 }
