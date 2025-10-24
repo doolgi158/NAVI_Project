@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @SpringBootTest
 @Slf4j
 public class AccRepositoryTests {
@@ -42,7 +44,29 @@ public class AccRepositoryTests {
     @Test
     public void updateAllData() {
         accSyncService.updateAll();
-        log.info("✅ KakaoGeo 기반 좌표 및 읍면동 전체 동기화 완료");
+        log.info("✅ KakaoGeo 기반 좌표, 카테고리 및 읍면동 전체 동기화 완료");
+    }
+
+    /* === 대표 이미지 컬럼 갱신 === */
+    @Test
+    public void updateAllMainImages() {
+        log.info("🧩 [TEST] 숙소 대표 이미지 일괄 갱신 시작");
+
+        List<Acc> accList = accRepository.findAll();
+        log.info("총 숙소 개수: {}", accList.size());
+
+        int updatedCount = 0;
+
+        for (Acc acc : accList) {
+            try {
+                accService.updateMainImage(acc.getAccId());
+                updatedCount++;
+            } catch (Exception e) {
+                log.warn("⚠️ 대표 이미지 갱신 실패 - accId={}, 이유={}", acc.getAccId(), e.getMessage());
+            }
+        }
+
+        log.info("✅ 대표 이미지 갱신 완료: {}/{}건 성공", updatedCount, accList.size());
     }
 
     /* === 관리자 CRUD === */

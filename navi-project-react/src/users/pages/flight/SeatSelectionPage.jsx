@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import dayjs from "dayjs";
 import MainLayout from "../../layout/MainLayout";
-import LazyDataLoader from "@/common/components/common/LazyDataLoader";
 import {
   Card,
   Typography,
@@ -190,6 +189,38 @@ const SeatSelectPage = () => {
         return;
       }
 
+      // 결제용 items 배열 구성
+      const items = [];
+
+      // 왕복일 경우, 먼저 출발편 예약(outboundDto)을 추가
+      if (isRoundTrip && outboundDto?.frsvId) {
+        items.push({
+          reserveId: outboundDto.frsvId,
+          amount: selectedOutbound.price * passengerCount,
+        });
+      }
+
+      // 지금 예약(편도 or 귀국편) 추가
+      items.push({
+        reserveId: res?.data?.data?.frsvId,
+        amount:
+          (step === "inbound"
+            ? (selectedInbound?.price || 0)
+            : (selectedOutbound?.price || 0)) * passengerCount,
+      });
+
+      dispatch(setReserveData({
+        rsvType: "FLY",
+        items,
+        itemData: { selectedOutbound, selectedInbound },
+        formData: {
+          passengers,
+          passengerCount,
+          totalPrice,
+        },
+      }));
+
+
       // ✅ 편도 or 귀국편 완료 시 → 결제 페이지
       message.success("항공편 예약이 완료되었습니다!");
       navigate("/payment", {
@@ -280,10 +311,12 @@ const SeatSelectPage = () => {
                   {step === "outbound" ? "출발편 좌석 선택" : "귀국편 좌석 선택"}
                 </Title>
               </Space>
-
+              <br />
               <Text type="secondary">
                 {flight?.depAirportName} ✈️ {flight?.arrAirportName}
               </Text>
+              <br />
+              <Text type="secondary">{flight.flightNo}</Text>
               <div style={{ marginTop: 4, marginBottom: 20 }}>
                 <Text type="secondary">
                   {formatDateTimeKOR(flight?.depTime)} 출발 ·{" "}

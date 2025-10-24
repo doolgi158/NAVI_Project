@@ -1,10 +1,14 @@
 package com.navi.payment.service;
 
 import com.navi.common.enums.RsvStatus;
+import com.navi.payment.domain.PaymentDetail;
+import com.navi.payment.domain.PaymentMaster;
 import com.navi.payment.dto.request.PaymentPrepareRequestDTO;
 import com.navi.payment.dto.request.PaymentVerifyRequestDTO;
 import com.navi.payment.dto.response.PaymentPrepareResponseDTO;
 import com.navi.payment.dto.response.PaymentResultResponseDTO;
+import com.navi.payment.repository.PaymentDetailRepository;
+import com.navi.payment.repository.PaymentRepository;
 import com.navi.room.service.RoomRsvService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,13 +19,17 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class AccPaymentServiceImpl {
+public class AccPaymentService {
     private final PaymentServiceImpl paymentService;
     private final RoomRsvService roomRsvService;
+    private final PaymentRepository paymentRepository;
+    private final PaymentDetailRepository paymentDetailRepository;
 
     /* 결제 준비 */
     public PaymentPrepareResponseDTO preparePayment(PaymentPrepareRequestDTO dto) {
@@ -105,14 +113,31 @@ public class AccPaymentServiceImpl {
     }
 
     /* 환불 처리 */
-    public void handleRefund(String reserveId, String merchantId, String reason) {
-        log.info("💸 [ACC] 환불 처리 reserveId={}, merchantId={}", reserveId, merchantId);
-        try {
-            paymentService.refundPayment(merchantId, BigDecimal.ZERO, reason);
-            roomRsvService.updateStatus(reserveId, RsvStatus.REFUNDED.name());
-        } catch (Exception e) {
-            log.error("❌ [ACC] 환불 처리 실패 reserveId={}, msg={}", reserveId, e.getMessage());
-            throw new IllegalStateException("환불 처리 실패", e);
+    @Transactional(rollbackFor = Exception.class)
+    public void handleRefund(String merchantId, String reason)
+            throws IamportResponseException, IOException {
+
+        log.info("🏨 [ACC] 전체 환불 처리 시작 - merchantId={}", merchantId);
+
+        PaymentMaster master = paymentRepository.findByMerchantId(merchantId)
+                .orElseThrow(() -> new IllegalArgumentException("결제 정보를 찾을 수 없습니다. merchantId=" + merchantId));
+
+        paymentService.refundPayment(merchantId, master.getTotalAmount(), reason);
+
+        // reserveId 중복 제거 후 예약 상태 갱신
+        Set<String> uniqueReserveIds = master.getPaymentDetails().stream()
+                .map(PaymentDetail::getReserveId)
+                .collect(Collectors.toSet());
+
+        for (String reserveId : uniqueReserveIds) {
+            try {
+                roomRsvService.updateStatus(reserveId, RsvStatus.REFUNDED.name());
+                log.info("🛏️ [ACC] 숙소 예약 환불 완료 - reserveId={}", reserveId);
+            } catch (Exception e) {
+                log.error("⚠️ [ACC] 숙소 예약 상태 변경 실패 - reserveId={}, msg={}", reserveId, e.getMessage());
+            }
         }
+
+        log.info("✅ [ACC] 전체 환불 처리 완료 - merchantId={}, 환불 건수={}", merchantId, uniqueReserveIds.size());
     }
 }

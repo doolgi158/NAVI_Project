@@ -229,11 +229,6 @@ public class PaymentServiceImpl implements PaymentService {
         PaymentMaster master = paymentRepository.findByMerchantId(merchantId)
                 .orElseThrow(() -> new IllegalArgumentException("결제 정보를 찾을 수 없습니다."));
 
-        if (master.getPaymentStatus() != PaymentStatus.PAID &&
-                master.getPaymentStatus() != PaymentStatus.PARTIAL_REFUNDED) {
-            throw new IllegalStateException("환불할 수 없는 상태입니다. 현재 상태=" + master.getPaymentStatus());
-        }
-
         // PortOne 서버에서 실제 결제 상태 조회
         IamportResponse<Payment> paymentResponse = iamportClient.paymentByImpUid(master.getImpUid());
         Payment paymentInfo = paymentResponse.getResponse();

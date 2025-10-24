@@ -89,7 +89,7 @@ export const usePayment = () => {
 
 			const payData = {
 				pg,
-				pay_method: pgMethod,
+				pay_method: "card",
 				merchant_uid: merchantId,
 				name: `${rsvType} 예약 결제`,
 				amount,

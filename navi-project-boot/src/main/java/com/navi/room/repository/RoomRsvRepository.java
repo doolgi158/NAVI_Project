@@ -1,11 +1,14 @@
 package com.navi.room.repository;
 
+import com.navi.common.enums.RsvStatus;
 import com.navi.room.domain.RoomRsv;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,4 +27,10 @@ public interface RoomRsvRepository extends JpaRepository<RoomRsv, Long> {
     /* 총 결제 금액 계산 */
     @Query("SELECT SUM(r.price * r.quantity) FROM RoomRsv r WHERE r.reserveId = :reserveId")
     BigDecimal sumTotalAmountByReserveId(String reserveId);
+
+    /* 예약 만료된 숙소 예약 조회 */
+    @Query("SELECT r FROM RoomRsv r WHERE r.rsvStatus = :status AND r.createdAt < :threshold")
+    List<RoomRsv> findExpiredReservations(@Param("status") RsvStatus status,
+                                          @Param("threshold") LocalDateTime threshold);
+
 }

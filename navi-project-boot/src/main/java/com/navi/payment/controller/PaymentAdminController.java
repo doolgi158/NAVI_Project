@@ -2,6 +2,7 @@ package com.navi.payment.controller;
 
 import com.navi.common.enums.RsvType;
 import com.navi.payment.domain.enums.PaymentStatus;
+import com.navi.payment.dto.request.RefundRequestDTO;
 import com.navi.payment.dto.response.PaymentAdminDetailResponseDTO;
 import com.navi.payment.dto.response.PaymentAdminListResponseDTO;
 import com.navi.payment.service.PaymentAdminService;
@@ -10,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.util.List;
 
 @Slf4j
@@ -47,16 +47,17 @@ public class PaymentAdminController {
         return ResponseEntity.ok(details);
     }
 
+    @PostMapping("/refund/master")
+    public ResponseEntity<String> refundMaster(@RequestBody RefundRequestDTO dto) throws Exception {
+        log.info("💰 [ADMIN API] 전체 환불 요청 수신 - {}", dto);
+        paymentAdminService.refundPaymentByMerchantId(dto);
+        return ResponseEntity.ok("전체 환불이 완료되었습니다.");
+    }
+
     @PostMapping("/refund/detail")
-    public ResponseEntity<PaymentAdminListResponseDTO> refundByMerchantId(
-            @RequestParam String merchantId,
-            @RequestParam(defaultValue = "관리자 전체 환불") String reason
-    ) throws Exception {
-        log.info("💰 [ADMIN API] 전체 환불 요청 - merchantId={}, reason={}", merchantId, reason);
-
-        PaymentAdminListResponseDTO refunded =
-                paymentAdminService.refundPaymentByMerchantId(merchantId, reason);
-
-        return ResponseEntity.ok(refunded);
+    public ResponseEntity<String> refundDetail(@RequestBody RefundRequestDTO dto) throws Exception {
+        log.info("💰 [ADMIN API] 부분 환불 요청 수신 - {}", dto);
+        paymentAdminService.refundPaymentByReserveId(dto);
+        return ResponseEntity.ok("부분 환불이 완료되었습니다.");
     }
 }
