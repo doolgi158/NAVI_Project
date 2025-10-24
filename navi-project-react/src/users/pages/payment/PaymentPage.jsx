@@ -2,7 +2,7 @@ import MainLayout from "../../layout/MainLayout";
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { Card, Typography, Steps, Button, Radio, Divider, Space,  message } from "antd";
+import { Card, Typography, Steps, Button, Radio, Divider, Space, message } from "antd";
 import { setPaymentData } from "../../../common/slice/paymentSlice";
 import { usePayment } from "../../../common/hooks/usePayment";
 
@@ -33,17 +33,17 @@ const PaymentPage = () => {
 	const rsvType = state?.rsvType || null;
 	const items = Array.isArray(state?.items) ? state.items : [state?.items];
 	const formData = state?.formData || null;
-	const itemData = state?.itemData || null; 
+	const itemData = state?.itemData || null;
 	console.log(formData);
 	console.log(itemData);
 
 	/* state 누락 시 홈으로 리다이렉트 */
 	useEffect(() => {
-	if (!state) {
-		message.warning("잘못된 접근입니다. 메인으로 이동합니다.");
-		navigate("/");
-		return;
-	}
+		if (!state) {
+			message.warning("잘못된 접근입니다. 메인으로 이동합니다.");
+			navigate("/");
+			return;
+		}
 	}, [state, navigate]);
 
 	/* 총 결제 금액 계산 */
@@ -76,52 +76,52 @@ const PaymentPage = () => {
 
 	// ✅ 우측 카드 선택
 	const SummaryCard = useMemo(() => {
-	switch (rsvType) {
-		case "ACC":
-			return (
-				<AccSumCard
-					accData={itemData}
-					totalAmount={totalAmount}
-					formData={formData}
-				/>
-			);
-		case "FLY":
-			return (
-				<FlySumCard
-					selectedOutbound={itemData?.selectedOutbound}
-					selectedInbound={itemData?.selectedInbound}
-					totalAmount={totalAmount}
-				/>
-			);
-		case "DLV":
-			return (
-				<DlvSumCard
-					formData={formData}
-					totalAmount={totalAmount}
-				/>
-			);
-		default:
-			return (
-				<Card
-					style={{
-						borderRadius: 16,
-						boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
-						backgroundColor: "#FFFBEA",
-					}}
-					styles={{ body: { padding: "24px" } }}
-				>
-				<Title level={4} className="text-gray-800 mb-3 text-center">
-					{typeof itemData?.title === "string" ? itemData.title : "예약 요약"}
-				</Title>
-				<Text className="block text-gray-600 mb-2 text-center">
-					총 결제 금액:
-					<span className="text-blue-600 font-bold text-lg ml-1">
-						{totalAmount.toLocaleString()}원
-					</span>
-				</Text>
-				</Card>
-			);
-	}
+		switch (rsvType) {
+			case "ACC":
+				return (
+					<AccSumCard
+						accData={itemData}
+						totalAmount={totalAmount}
+						formData={formData}
+					/>
+				);
+			case "FLY":
+				return (
+					<FlySumCard
+						selectedOutbound={itemData?.selectedOutbound}
+						selectedInbound={itemData?.selectedInbound}
+						totalAmount={totalAmount}
+					/>
+				);
+			case "DLV":
+				return (
+					<DlvSumCard
+						formData={formData}
+						totalAmount={totalAmount}
+					/>
+				);
+			default:
+				return (
+					<Card
+						style={{
+							borderRadius: 16,
+							boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
+							backgroundColor: "#FFFBEA",
+						}}
+						styles={{ body: { padding: "24px" } }}
+					>
+						<Title level={4} className="text-gray-800 mb-3 text-center">
+							{typeof itemData?.title === "string" ? itemData.title : "예약 요약"}
+						</Title>
+						<Text className="block text-gray-600 mb-2 text-center">
+							총 결제 금액:
+							<span className="text-blue-600 font-bold text-lg ml-1">
+								{totalAmount.toLocaleString()}원
+							</span>
+						</Text>
+					</Card>
+				);
+		}
 	}, [rsvType, itemData, formData, totalAmount]);
 
 	/* 결제 진행 */
@@ -209,7 +209,7 @@ const PaymentPage = () => {
 								formData={typeof formData === "object" ? formData : {}}
 							/>
 						) : (
-						<Text type="secondary">결제 정보가 없습니다.</Text>
+							<Text type="secondary">결제 정보가 없습니다.</Text>
 						)}
 					</Card>
 

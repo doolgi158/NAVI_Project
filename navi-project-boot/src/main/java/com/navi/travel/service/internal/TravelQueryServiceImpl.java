@@ -212,5 +212,4 @@ public class TravelQueryServiceImpl implements TravelQueryService {
 
         return pageDto;
     }
-
 }

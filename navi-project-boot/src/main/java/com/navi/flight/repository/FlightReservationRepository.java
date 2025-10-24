@@ -1,10 +1,12 @@
 package com.navi.flight.repository;
 
+import com.navi.common.enums.RsvStatus;
 import com.navi.flight.domain.FlightReservation;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -42,7 +44,6 @@ public interface FlightReservationRepository extends JpaRepository<FlightReserva
     @Query("SELECT SUM(CAST(f.totalPrice AS bigdecimal)) FROM FlightReservation f WHERE f.frsvId IN :frsvIds")
     BigDecimal sumTotalAmountByFrsvIds(List<String> frsvIds);
 
-
     @Query("""
                 select distinct fr
                 from FlightReservation fr
@@ -54,8 +55,8 @@ public interface FlightReservationRepository extends JpaRepository<FlightReserva
             """)
     List<FlightReservation> findAllWithRelations();
 
-
     long countByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
 
-
+    // 관리자 대시보드용 (일정 기간 사이의 예약 상태 기반)
+    long countByStatusAndPaidAtBetween(RsvStatus status, LocalDate start, LocalDate end);
 }

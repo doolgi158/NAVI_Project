@@ -31,7 +31,7 @@ const AccListPage = () => {
 				const parsed = JSON.parse(storedState);
 				dispatch(setSearchState(parsed));
 
-				// local state 복원
+				// ✅ local state 복원
 				setSearchType(parsed.searchType || "region");
 				setCity(parsed.city || null);
 				setTownship(parsed.township || null);
@@ -39,11 +39,15 @@ const AccListPage = () => {
 				setSpot(parsed.spot || "");
 				setGuestCount(parsed.guestCount || null);
 				setRoomCount(parsed.roomCount || null);
+
 				if (parsed.dateRange?.length === 2) {
 					setDateRange([dayjs(parsed.dateRange[0]), dayjs(parsed.dateRange[1])]);
 				}
-				setAccommodations(parsed.accommodations || []);
-				setIsSearched(parsed.isSearched || false);
+
+				if (parsed.accommodations?.length > 0) {
+					setAccommodations(parsed.accommodations);
+					setIsSearched(true);
+				}
 			} catch (e) {
 				console.warn("searchState 복원 실패:", e);
 			}
@@ -81,97 +85,97 @@ const AccListPage = () => {
 	const townshipOptions = useMemo(() => {
 		return city
 			? townshipList
-			.filter((t) => t.sigunguName === city)
-			.map((t) => ({ value: t.townshipName, label: t.townshipName }))
+				.filter((t) => t.sigunguName === city)
+				.map((t) => ({ value: t.townshipName, label: t.townshipName }))
 			: [];
 	}, [city, townshipList]);
 
 	/* 검색 실행 */
 	const handleSearch = useCallback(async () => {
-	if (isTownshipLoading) {
-		message.warning("읍면동 데이터를 로딩 중입니다. 잠시만 기다려주세요.");
-		return;
-	}
-	if (townshipError) {
-		message.error("읍면동 데이터 로드에 실패했습니다. 다시 시도해주세요.");
-		return;
-	}
-	if (!dateRange || dateRange.length !== 2) {
-		message.warning("체크인 및 체크아웃 날짜를 모두 선택해주세요.");
-		return;
-	}
-	if (!guestCount || guestCount <= 0) {
-		message.warning("투숙 인원을 입력해주세요.");
-		return;
-	}
-	if (!roomCount || roomCount <= 0) {
-		message.warning("객실 수를 입력해주세요.");
-		return;
-	}
-	if (searchType === "region") {
-		if (!city) {
-		message.warning("행정시를 선택해주세요.");
-		return;
+		if (isTownshipLoading) {
+			message.warning("읍면동 데이터를 로딩 중입니다. 잠시만 기다려주세요.");
+			return;
 		}
-		if (!township) {
-		message.warning("읍면을 선택해주세요.");
-		return;
+		if (townshipError) {
+			message.error("읍면동 데이터 로드에 실패했습니다. 다시 시도해주세요.");
+			return;
 		}
-	} else if (searchType === "keyword") {
-		if (!keyword?.trim()) {
-		message.warning("숙소명을 입력해주세요.");
-		return;
+		if (!dateRange || dateRange.length !== 2) {
+			message.warning("체크인 및 체크아웃 날짜를 모두 선택해주세요.");
+			return;
 		}
-	} else if (searchType === "spot") {
-		if (!spot?.trim()) {
-		message.warning("관광명소를 입력해주세요.");
-		return;
+		if (!guestCount || guestCount <= 0) {
+			message.warning("투숙 인원을 입력해주세요.");
+			return;
 		}
-	}
+		if (!roomCount || roomCount <= 0) {
+			message.warning("객실 수를 입력해주세요.");
+			return;
+		}
+		if (searchType === "region") {
+			if (!city) {
+				message.warning("행정시를 선택해주세요.");
+				return;
+			}
+			if (!township) {
+				message.warning("읍면을 선택해주세요.");
+				return;
+			}
+		} else if (searchType === "keyword") {
+			if (!keyword?.trim()) {
+				message.warning("숙소명을 입력해주세요.");
+				return;
+			}
+		} else if (searchType === "spot") {
+			if (!spot?.trim()) {
+				message.warning("관광명소를 입력해주세요.");
+				return;
+			}
+		}
 
-	try {
-		const params = {};
+		try {
+			const params = {};
 
-		if (searchType === "region") params.townshipName = township;
-		else if (searchType === "keyword") params.title = keyword.trim();
-		else if (searchType === "spot") params.spot = spot.trim();
+			if (searchType === "region") params.townshipName = township;
+			else if (searchType === "keyword") params.title = keyword.trim();
+			else if (searchType === "spot") params.spot = spot.trim();
 
-		const dateRangeArray = dateRange.map((d) => d.format("YYYY-MM-DD"));
-		params.checkIn = dateRangeArray[0];
-		params.checkOut = dateRangeArray[1];
-		params.guestCount = guestCount;
-		params.roomCount = roomCount;
+			const dateRangeArray = dateRange.map((d) => d.format("YYYY-MM-DD"));
+			params.checkIn = dateRangeArray[0];
+			params.checkOut = dateRangeArray[1];
+			params.guestCount = guestCount;
+			params.roomCount = roomCount;
 
-		const res = await axios.get("/api/accommodations", { params });
-		console.log("[axios response]", res);
+			const res = await axios.get("/api/accommodations", { params });
+			console.log("[axios response]", res);
 
-		const resultData = res.data;
+			const resultData = res.data;
 
-		setAccommodations(resultData);
-		setIsSearched(true);
-		setCurrentPage(1);
+			setAccommodations(resultData);
+			setIsSearched(true);
+			setCurrentPage(1);
 
-		const newSearchState = {
-			searchType,
-			city,
-			township,
-			keyword,
-			spot,
-			guestCount,
-			roomCount,
-			dateRange: dateRangeArray,
-			isSearched: true,
-			accommodations: resultData,
-		};
+			const newSearchState = {
+				searchType,
+				city,
+				township,
+				keyword,
+				spot,
+				guestCount,
+				roomCount,
+				dateRange: dateRangeArray,
+				isSearched: true,
+				accommodations: resultData,
+			};
 
-		dispatch(setSearchState(newSearchState));
-		localStorage.setItem("searchState", JSON.stringify(newSearchState));
+			dispatch(setSearchState(newSearchState));
+			localStorage.setItem("searchState", JSON.stringify(newSearchState));
 
-		if (resultData.length === 0) message.info("검색 결과가 없습니다 😢");
-	} catch (err) {
-		console.error("숙소 검색 실패:", err);
-		message.error("숙소 목록을 불러오지 못했습니다.");
-	}
+			if (resultData.length === 0) message.info("검색 결과가 없습니다 😢");
+		} catch (err) {
+			console.error("숙소 검색 실패:", err);
+			message.error("숙소 목록을 불러오지 못했습니다.");
+		}
 	}, [
 		searchType,
 		city,
@@ -195,14 +199,14 @@ const AccListPage = () => {
 
 			// 뒤로가기 복원용 검색조건 저장
 			const condition = {
-			searchType,
-			city,
-			township,
-			keyword,
-			spot,
-			guestCount,
-			roomCount,
-			dateRange: dateRange ? dateRange.map((d) => d.format("YYYY-MM-DD")) : null,
+				searchType,
+				city,
+				township,
+				keyword,
+				spot,
+				guestCount,
+				roomCount,
+				dateRange: dateRange ? dateRange.map((d) => d.format("YYYY-MM-DD")) : null,
 			};
 			dispatch(setSearchState(condition));
 			localStorage.setItem("searchCondition", JSON.stringify(condition));
@@ -224,203 +228,203 @@ const AccListPage = () => {
 
 	/* 렌더링 */
 	return (
-	<MainLayout>
-		<div className="min-h-screen flex flex-col items-center pt-10 pb-12 px-8">
-		<div className="w-full max-w-7xl">
-			{/* 검색 폼 */}
-			<div className="bg-white/70 shadow-md rounded-2xl p-8 mb-8">
-				<h1 className="text-2xl font-bold mb-2">숙소를 찾아보세요 🏖️</h1>
-				<p className="text-gray-600 mb-6">여행 스타일에 맞게 검색해보세요!</p>
+		<MainLayout>
+			<div className="min-h-screen flex flex-col items-center pt-10 pb-12 px-8">
+				<div className="w-full max-w-7xl">
+					{/* 검색 폼 */}
+					<div className="bg-white/70 shadow-md rounded-2xl p-8 mb-8">
+						<h1 className="text-2xl font-bold mb-2">숙소를 찾아보세요 🏖️</h1>
+						<p className="text-gray-600 mb-6">여행 스타일에 맞게 검색해보세요!</p>
 
-				<Radio.Group
-					value={searchType}
-					onChange={(e) => setSearchType(e.target.value)}
-					className="mb-6"
-					size="large"
-				>
-					<Radio.Button value="region">지역별 찾기</Radio.Button>
-					<Radio.Button value="spot">명소 주변 찾기</Radio.Button>
-					<Radio.Button value="keyword">숙소명 검색</Radio.Button>
-				</Radio.Group>
-
-				<div className="flex flex-wrap gap-2 items-center justify-start">
-					{searchType === "region" && (
-						<>
-							<Select
-								placeholder="행정시 선택"
-								className="min-w-[150px]"
-								value={city || undefined}
-								onChange={(c) => {
-									setCity(c);
-									setTownship("");
-								}}
-								options={cityOptions}
-								size="large"
-							/>
-							<Select
-								placeholder="읍면 선택"
-								className="min-w-[150px]"
-								value={township || undefined}
-								onChange={setTownship}
-								options={townshipOptions}
-								disabled={!city}
-								size="large"
-							/>
-						</>
-					)}
-
-					{searchType === "spot" && (
-					<Input
-						placeholder="관광명소를 입력하세요"
-						className="min-w-[300px] w-[400px] flex-shrink-0"
-						size="large"
-						value={spot}
-						onChange={(e) => setSpot(e.target.value)}
-					/>
-					)}
-
-					{searchType === "keyword" && (
-					<Input
-						placeholder="숙소명을 입력하세요"
-						className="min-w-[300px] w-[400px] flex-shrink-0"
-						size="large"
-						value={keyword}
-						onChange={(e) => setKeyword(e.target.value)}
-					/>
-					)}
-
-					<RangePicker
-						format="YYYY-MM-DD"
-						placeholder={["체크인", "체크아웃"]}
-						value={dateRange}
-						size="large"
-						onChange={(v) => setDateRange(v)}
-						disabledDate={(current) => {
-							// ✅ 오늘 이전 날짜 비활성화
-							const today = dayjs().startOf("day");
-							return current && current < today;
-						}}
-						onCalendarChange={(dates) => {
-							if (dates && dates[0] && dates[1]) {
-							const diff = dayjs(dates[1]).diff(dayjs(dates[0]), "day");
-							if (diff > 7) {
-								message.warning("최대 7박까지만 예약할 수 있습니다.");
-								setDateRange(null);
-							}
-							}
-						}}
-					/>
-
-					<InputNumber
-						min={1}
-						max={30}
-						value={guestCount}
-						onChange={(v) => setGuestCount(v)}
-						className="min-w-[80px]"
-						placeholder="인원수"
-						size="large"
-					/>
-					<InputNumber
-						min={1}
-						max={30}
-						value={roomCount}
-						onChange={(v) => setRoomCount(v)}
-						className="min-w-[80px]"
-						placeholder="객실수"
-						size="large"
-					/>
-
-					<div className="ml-auto flex-shrink-0">
-						<Button
-							type="primary"
-							className="h-10 px-8 text-base font-semibold"
-							onClick={handleSearch}
+						<Radio.Group
+							value={searchType}
+							onChange={(e) => setSearchType(e.target.value)}
+							className="mb-6"
 							size="large"
 						>
-							검색
-						</Button>
+							<Radio.Button value="region">지역별 찾기</Radio.Button>
+							<Radio.Button value="spot">명소 주변 찾기</Radio.Button>
+							<Radio.Button value="keyword">숙소명 검색</Radio.Button>
+						</Radio.Group>
+
+						<div className="flex flex-wrap gap-2 items-center justify-start">
+							{searchType === "region" && (
+								<>
+									<Select
+										placeholder="행정시 선택"
+										className="min-w-[150px]"
+										value={city || undefined}
+										onChange={(c) => {
+											setCity(c);
+											setTownship("");
+										}}
+										options={cityOptions}
+										size="large"
+									/>
+									<Select
+										placeholder="읍면 선택"
+										className="min-w-[150px]"
+										value={township || undefined}
+										onChange={setTownship}
+										options={townshipOptions}
+										disabled={!city}
+										size="large"
+									/>
+								</>
+							)}
+
+							{searchType === "spot" && (
+								<Input
+									placeholder="관광명소를 입력하세요"
+									className="min-w-[300px] w-[400px] flex-shrink-0"
+									size="large"
+									value={spot}
+									onChange={(e) => setSpot(e.target.value)}
+								/>
+							)}
+
+							{searchType === "keyword" && (
+								<Input
+									placeholder="숙소명을 입력하세요"
+									className="min-w-[300px] w-[400px] flex-shrink-0"
+									size="large"
+									value={keyword}
+									onChange={(e) => setKeyword(e.target.value)}
+								/>
+							)}
+
+							<RangePicker
+								format="YYYY-MM-DD"
+								placeholder={["체크인", "체크아웃"]}
+								value={dateRange}
+								size="large"
+								onChange={(v) => setDateRange(v)}
+								disabledDate={(current) => {
+									// ✅ 오늘 이전 날짜 비활성화
+									const today = dayjs().startOf("day");
+									return current && current < today;
+								}}
+								onCalendarChange={(dates) => {
+									if (dates && dates[0] && dates[1]) {
+										const diff = dayjs(dates[1]).diff(dayjs(dates[0]), "day");
+										if (diff > 7) {
+											message.warning("최대 7박까지만 예약할 수 있습니다.");
+											setDateRange(null);
+										}
+									}
+								}}
+							/>
+
+							<InputNumber
+								min={1}
+								max={30}
+								value={guestCount}
+								onChange={(v) => setGuestCount(v)}
+								className="min-w-[80px]"
+								placeholder="인원수"
+								size="large"
+							/>
+							<InputNumber
+								min={1}
+								max={30}
+								value={roomCount}
+								onChange={(v) => setRoomCount(v)}
+								className="min-w-[80px]"
+								placeholder="객실수"
+								size="large"
+							/>
+
+							<div className="ml-auto flex-shrink-0">
+								<Button
+									type="primary"
+									className="h-10 px-8 text-base font-semibold"
+									onClick={handleSearch}
+									size="large"
+								>
+									검색
+								</Button>
+							</div>
+						</div>
+					</div>
+
+					{/* 검색 결과 */}
+					<div className="bg-white shadow-md rounded-2xl p-8 mb-10">
+						<h2 className="text-2xl font-bold mb-6">검색 결과</h2>
+
+						{!isSearched ? (
+							<div className="text-center text-gray-500 min-h-[300px] flex items-center justify-center border border-dashed border-gray-300 rounded-lg p-4">
+								<p className="text-lg">
+									원하는 숙소를 찾아보세요! 🚀
+									<br />
+									상단의 검색 조건을 입력하고 ‘검색’을 눌러주세요.
+								</p>
+							</div>
+						) : accommodations.length === 0 ? (
+							<div className="text-center text-gray-400 py-20">검색 결과가 없습니다 😢</div>
+						) : (
+							<>
+								<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+									{currentData.map((acc) => (
+										<Card
+											key={acc.accId}
+											hoverable
+											className="rounded-xl shadow-sm cursor-pointer transition-transform transform hover:scale-[1.02] duration-200"
+											onClick={() => handleCardClick(acc)}
+											cover={
+												acc.mainImage ? (
+													<img
+														alt={acc.title}
+														src={`${API_SERVER_HOST}${acc.mainImage}`}
+														className="h-60 object-cover w-full rounded-t-xl"
+														onError={(e) => {
+															e.target.style.display = "none";
+															const fallback = document.createElement("div");
+															fallback.className = "h-60 w-full flex items-center justify-center rounded-t-xl bg-gray-200/60 text-gray-600 font-medium text-lg";
+															fallback.textContent = "이미지 준비중";
+															e.target.parentNode.appendChild(fallback);
+														}}
+													/>
+												) : (
+													<div className="h-60 w-full flex items-center justify-center rounded-t-xl bg-gray-200/60 text-gray-600 font-medium text-lg">
+														이미지 준비중
+													</div>
+												)
+											}
+										>
+											<Meta
+												title={<span className="text-lg font-bold">{acc.title}</span>}
+												description={
+													<div className="text-gray-600 mt-2">
+														<p className="font-semibold text-base mt-1 flex items-center gap-2">
+															{acc.minPrice ? `${acc.minPrice.toLocaleString()}원` : "가격 미정"} / 1박
+															{acc.viewCount !== undefined && (
+																<span className="flex items-center text-gray-500 text-sm ml-2">
+																	<EyeOutlined style={{ marginRight: 4 }} /> {acc.viewCount.toLocaleString()}
+																</span>
+															)}
+														</p>
+														<p>{acc.address}</p>
+													</div>
+												}
+											/>
+										</Card>
+									))}
+								</div>
+
+								<Pagination
+									current={currentPage}
+									pageSize={pageSize}
+									total={accommodations.length}
+									onChange={handlePageChange}
+									showSizeChanger={false}
+									className="mt-8 text-center"
+								/>
+							</>
+						)}
 					</div>
 				</div>
 			</div>
-
-			{/* 검색 결과 */}
-			<div className="bg-white shadow-md rounded-2xl p-8 mb-10">
-			<h2 className="text-2xl font-bold mb-6">검색 결과</h2>
-
-			{!isSearched ? (
-				<div className="text-center text-gray-500 min-h-[300px] flex items-center justify-center border border-dashed border-gray-300 rounded-lg p-4">
-				<p className="text-lg">
-					원하는 숙소를 찾아보세요! 🚀
-					<br />
-					상단의 검색 조건을 입력하고 ‘검색’을 눌러주세요.
-				</p>
-				</div>
-			) : accommodations.length === 0 ? (
-				<div className="text-center text-gray-400 py-20">검색 결과가 없습니다 😢</div>
-			) : (
-				<>
-				<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-					{currentData.map((acc) => (
-						<Card
-							key={acc.accId}
-							hoverable
-							className="rounded-xl shadow-sm cursor-pointer transition-transform transform hover:scale-[1.02] duration-200"
-							onClick={() => handleCardClick(acc)}
-							cover={
-								acc.mainImage ? (
-									<img
-									alt={acc.title}
-									src={`${API_SERVER_HOST}${acc.mainImage}`}
-									className="h-60 object-cover w-full rounded-t-xl"
-									onError={(e) => {
-										e.target.style.display = "none";
-										const fallback = document.createElement("div");
-										fallback.className = "h-60 w-full flex items-center justify-center rounded-t-xl bg-gray-200/60 text-gray-600 font-medium text-lg";
-										fallback.textContent = "이미지 준비중";
-										e.target.parentNode.appendChild(fallback);
-									}}
-									/>
-								) : (
-									<div className="h-60 w-full flex items-center justify-center rounded-t-xl bg-gray-200/60 text-gray-600 font-medium text-lg">
-									이미지 준비중
-									</div>
-								)
-							}
-						>
-							<Meta
-							title={<span className="text-lg font-bold">{acc.title}</span>}
-							description={
-								<div className="text-gray-600 mt-2">
-								<p className="font-semibold text-base mt-1 flex items-center gap-2">
-									{acc.minPrice ? `${acc.minPrice.toLocaleString()}원` : "가격 미정"} / 1박
-									{acc.viewCount !== undefined && (
-									<span className="flex items-center text-gray-500 text-sm ml-2">
-										<EyeOutlined style={{ marginRight: 4 }} /> {acc.viewCount.toLocaleString()}
-									</span>
-									)}
-								</p>
-								<p>{acc.address}</p>
-								</div>
-							}
-							/>
-						</Card>
-					))}
-				</div>
-
-				<Pagination
-					current={currentPage}
-					pageSize={pageSize}
-					total={accommodations.length}
-					onChange={handlePageChange}
-					showSizeChanger={false}
-					className="mt-8 text-center"
-				/>
-				</>
-			)}
-			</div>
-		</div>
-		</div>
-	</MainLayout>
+		</MainLayout>
 	);
 };
 

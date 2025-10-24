@@ -138,6 +138,14 @@ public class FlightReservationServiceImpl implements FlightReservationService {
     }
 
     @Override
+    public List<FlightReservationDTO> getReservationsByUserDTO(Long userNo) {
+        return reservationRepository.findByUser_No(userNo)
+                .stream()
+                .map(FlightReservationDTO::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     @Transactional
     public FlightReservation updateStatus(String frsvId, String status) {
         FlightReservation reservation = getReservationById(frsvId);

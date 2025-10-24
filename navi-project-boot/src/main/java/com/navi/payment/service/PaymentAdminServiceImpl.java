@@ -17,9 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -35,7 +33,7 @@ public class PaymentAdminServiceImpl implements PaymentAdminService {
     /* 결제 전체 조회 - 필터링 */
     @Override
     public List<PaymentAdminListResponseDTO> getAllPaymentsForAdmin
-        (RsvType rsvType, PaymentStatus paymentStatus, String keyword) {
+    (RsvType rsvType, PaymentStatus paymentStatus, String keyword) {
         log.info("🔍 [ADMIN] 결제내역 조회 요청 - rsvType={}, paymentStatus={}, keyword={}", rsvType, paymentStatus, keyword);
 
         List<PaymentMaster> resultList =
@@ -92,7 +90,9 @@ public class PaymentAdminServiceImpl implements PaymentAdminService {
         log.info("💸 [ADMIN] 부분 환불 요청 - reserveId={}, type={}, merchantId={}", reserveId, rsvType, merchantId);
 
         // FLY만 부분 환불 허용
-        if (rsvType != RsvType.FLY) { throw new UnsupportedOperationException("부분 환불은 항공(FLY) 결제만 지원됩니다."); }
+        if (rsvType != RsvType.FLY) {
+            throw new UnsupportedOperationException("부분 환불은 항공(FLY) 결제만 지원됩니다.");
+        }
 
         paymentRouterService.refundByReserveId(reserveId, rsvType, merchantId, reason);
         log.info("✅ [ADMIN] 부분 환불 완료 - reserveId={}, type={}", reserveId, rsvType);

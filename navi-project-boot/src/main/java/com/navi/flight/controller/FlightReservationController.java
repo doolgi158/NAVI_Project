@@ -51,6 +51,15 @@ public class FlightReservationController {
         ));
     }
 
+    /* 마이페이지용 사용자별 예약 조회 */
+    @GetMapping("/my")
+    public ResponseEntity<ApiResponse<List<FlightReservationDTO>>> getMyReservations(
+            @AuthenticationPrincipal UserSecurityDTO user
+    ) {
+        List<FlightReservationDTO> list = reservationService.getReservationsByUserDTO(user.getNo());
+        return ResponseEntity.ok(ApiResponse.success(list));
+    }
+
     /* 단일 예약 조회 */
     @GetMapping("/{frsvId}")
     public ResponseEntity<ApiResponse<FlightReservation>> getReservationById(

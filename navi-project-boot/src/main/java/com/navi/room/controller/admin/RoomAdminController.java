@@ -3,12 +3,15 @@ package com.navi.room.controller.admin;
 import com.navi.common.response.ApiResponse;
 import com.navi.room.dto.api.RoomApiDTO;
 import com.navi.room.dto.request.RoomRequestDTO;
+import com.navi.room.dto.response.RoomResponseDTO;
 import com.navi.room.service.RoomService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/adm")
@@ -25,20 +28,30 @@ public class RoomAdminController {
     }
 
     @PostMapping("/rooms/new")
-    public ApiResponse<?> createRoom(@RequestBody RoomRequestDTO dto) {
-//        roomService.createRoom(dto);
-        return ApiResponse.success("객실 등록 완료");
+    public ApiResponse<RoomResponseDTO> createRoom(@RequestBody RoomRequestDTO dto) {
+        return ApiResponse.success(roomService.createRoom(dto));
     }
 
     @PutMapping("/rooms/edit/{roomNo}")
-    public ApiResponse<?> updateRoom(@PathVariable Long roomNo, @RequestBody RoomRequestDTO dto) {
-        roomService.updateRoom(roomNo, dto);
-        return ApiResponse.success("객실 수정 완료");
+    public ApiResponse<RoomResponseDTO> updateRoom(
+            @PathVariable Long roomNo,
+            @RequestBody RoomRequestDTO dto) {
+        return ApiResponse.success(roomService.updateRoom(roomNo, dto));
     }
 
     @DeleteMapping("/rooms/{roomNo}")
-    public ApiResponse<?> deleteRoom(@PathVariable Long roomNo) {
+    public ApiResponse<String> deleteRoom(@PathVariable Long roomNo) {
         roomService.deleteRoom(roomNo);
-        return ApiResponse.success("객실 삭제 완료");
+        return ApiResponse.success("객실이 삭제되었습니다.");
+    }
+
+    @GetMapping("/rooms/byAcc/{accNo}")
+    public ApiResponse<List<RoomResponseDTO>> getRoomsByAcc(@PathVariable Long accNo) {
+        return ApiResponse.success(roomService.getRoomsByAcc(accNo));
+    }
+
+    @GetMapping("/rooms/{roomNo}")
+    public ApiResponse<RoomResponseDTO> getRoomDetail(@PathVariable Long roomNo) {
+        return ApiResponse.success(roomService.getRooms(roomNo));
     }
 }

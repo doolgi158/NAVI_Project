@@ -2,6 +2,7 @@ package com.navi.user.controller.user;
 
 import com.navi.common.response.ApiResponse;
 import com.navi.travel.dto.TravelDetailResponseDTO;
+import com.navi.user.dto.users.UserMyPageTravelLikeDTO;
 import com.navi.user.dto.users.UserSecurityDTO;
 import com.navi.user.service.user.UserActivityService;
 import lombok.RequiredArgsConstructor;
@@ -22,25 +23,18 @@ public class ApiUserActivityController {
 
     // 내가 좋아요한 여행지 리스트
     @GetMapping("/likes")
-    public ResponseEntity<ApiResponse<List<TravelDetailResponseDTO>>> getLikedTravels(Authentication authentication) {
+    public ResponseEntity<ApiResponse<List<UserMyPageTravelLikeDTO>>> getLikedTravels(Authentication authentication) {
         try {
-            // 현재 로그인한 사용자 정보 추출
             UserSecurityDTO user = (UserSecurityDTO) authentication.getPrincipal();
             Long userNo = user.getNo();
             String userId = user.getId();
 
             log.info("❤️ [좋아요 여행지 조회 요청] userNo={}, userId={}", userNo, userId);
 
-            // 서비스 호출
-            List<TravelDetailResponseDTO> likedTravels = userActivityService.getLikedTravels(userNo);
+            List<UserMyPageTravelLikeDTO> likedTravels = userActivityService.getLikedTravels(userNo);
 
-            // 응답
             return ResponseEntity.ok(ApiResponse.success(likedTravels));
 
-        } catch (ClassCastException e) {
-            log.warn("⚠️ 인증 정보 파싱 실패: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(ApiResponse.error("인증 정보가 올바르지 않습니다.", 401, null));
         } catch (Exception e) {
             log.error("❌ 좋아요한 여행지 조회 중 오류: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -60,5 +54,12 @@ public class ApiUserActivityController {
     public ResponseEntity<?> unlikeTravel(@PathVariable Long travelId, @RequestParam Long userNo) {
         userActivityService.unlikeTravel(userNo, travelId);
         return ResponseEntity.ok(ApiResponse.success("좋아요 취소됨"));
+    }
+
+    // 북마크 좋아요 취소
+    @DeleteMapping("/bookmark/{travelId}")
+    public ResponseEntity<?> unmarkeTravel(@PathVariable Long travelId, @RequestParam Long userNo) {
+        userActivityService.unmarkTravel(userNo, travelId);
+        return ResponseEntity.ok(ApiResponse.success("북마크 취소됨"));
     }
 }

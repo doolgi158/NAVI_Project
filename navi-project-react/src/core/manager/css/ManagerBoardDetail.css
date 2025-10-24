@@ -1,0 +1,53 @@
+/* 관리자 배지 */
+.manager-badge {
+  background-color: #ff6b6b;
+  color: white;
+  padding: 8px 15px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  display: inline-block;
+  font-weight: bold;
+}
+
+/* 신고 횟수 */
+.report-count {
+  color: #ff6b6b;
+  font-weight: bold;
+}
+
+/* 관리자 버튼 영역 */
+.manager-actions {
+  justify-content: space-between;
+}
+
+/* 삭제 버튼 */
+.btn-delete-manager {
+  padding: 10px 25px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.btn-delete-manager:hover {
+  background-color: #c82333;
+}
+
+/* 관리자 안내 메시지 */
+.manager-notice {
+  margin-top: 30px;
+  padding: 15px;
+  background-color: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 4px;
+  color: #856404;
+  line-height: 1.6;
+}
+
+.manager-notice strong {
+  font-size: 15px;
+}

@@ -1,11 +1,11 @@
 package com.navi.user.security.handler;
 
 import com.google.gson.Gson;
+import com.navi.admin.user.repository.HistoryRepository;
 import com.navi.user.domain.History;
 import com.navi.user.domain.User;
 import com.navi.user.dto.JWTClaimDTO;
 import com.navi.user.dto.users.UserSecurityDTO;
-import com.navi.user.repository.HistoryRepository;
 import com.navi.user.repository.TryLoginRepository;
 import com.navi.user.repository.UserRepository;
 import com.navi.user.security.util.JWTUtil;
