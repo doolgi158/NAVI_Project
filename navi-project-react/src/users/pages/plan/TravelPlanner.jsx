@@ -143,8 +143,8 @@ export default function TravelPlanner() {
     const dcount = end.diff(start, "day") + 1;
     const buckets = Array.from({ length: dcount }, () => []);
     selectedTravels.forEach((t, idx) => {
-      const lat = parseFloat(t.latitude ?? t.mapx ?? t.mapx ?? t.lat);
-      const lng = parseFloat(t.longitude ?? t.mapy ?? t.mapy ?? t.lng);
+      const lat = parseFloat(t.latitude ?? t.mapy ?? t.mapy ?? t.lat);
+      const lng = parseFloat(t.longitude ?? t.mapx ?? t.mapx ?? t.lng);
       const imageSrc =
         t.img && t.img.trim() !== ""
           ? t.img
@@ -190,8 +190,8 @@ export default function TravelPlanner() {
           stayId: stay.accId ?? stay.id,
           title: stay.title,
           img: stayImg,
-          lat: parseFloat(stay.latitude ?? stay.mapx ?? stay.lat ?? stay.mapx),
-          lng: parseFloat(stay.longitude ?? stay.mapy ?? stay.lng ?? stay.mapy),
+          lat: parseFloat(stay.latitude ?? stay.mapy ?? stay.lat ?? stay.mapy),
+          lng: parseFloat(stay.longitude ?? stay.mapx ?? stay.lng ?? stay.mapx),
         };
       });
     });
@@ -397,10 +397,32 @@ export default function TravelPlanner() {
       )}
       <FooterLayout />
       <DateModal
-        open={step === 1}
-        setStep={setStep}
-        setDateRange={setDateRange}
-        resetAll={resetAll}
+        open={step === 1 || step === 99}
+        isEditMode={step === 99}
+        meta={{
+          startDate: dateRange?.[0]?.format("YYYY-MM-DD"),
+          endDate: dateRange?.[1]?.format("YYYY-MM-DD"),
+        }}
+        onClose={() => {
+          if (step === 1) {
+            // ✅ 등록 단계에서 취소 누르면 /plans로 이동
+            navigate("/plans");
+          } else if (step === 99) {
+            // ✅ 수정 단계에서는 단순히 닫기만
+            setStep(3);
+          }
+        }}
+        onDateChange={(start, end) => {
+          setDateRange([start, end]);
+          if (step === 1) {
+            // 새 등록 → 다음 단계 이동
+            setStep(2);
+          } else if (step === 99) {
+            // 수정 모드 → 모달 닫고 그대로 유지
+            message.success("여행 날짜가 수정되었습니다.");
+            setStep(3);
+          }
+        }}
       />
       <TitleModal
         open={step === 2}

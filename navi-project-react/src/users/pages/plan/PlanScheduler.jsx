@@ -1,16 +1,20 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { Button, Splitter, Modal, TimePicker, message, DatePicker } from "antd";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import TravelMap from "./components/TravelMap";
-import FooterLayout from "@/users/layout/FooterLayout";
+import { Button, Splitter, Modal, message } from "antd";
+import { EditOutlined } from "@ant-design/icons";
+import dayjs from "dayjs";
+
 import HeaderLayout from "@/users/layout/HeaderLayout";
+import FooterLayout from "@/users/layout/FooterLayout";
+import TravelMap from "./components/TravelMap";
 import TitleModal from "@/users/pages/plan/components/TitleModal";
 import DateModal from "@/users/pages/plan/components/DateModal";
 import { savePlan, updatePlan, getPlanDetail } from "@/common/api/planApi";
 import { getCookie } from "@/common/util/cookie";
-import { EditOutlined } from "@ant-design/icons";
-import dayjs from "dayjs";
+
+import PlanSidebar from "@/users/pages/plan/components/scheduler/PlanSidebar";
+import PlanDayList from "@/users/pages/plan/components/scheduler/PlanDayList";
+import TimeEditModal from "@/users/pages/plan/components/scheduler/TimeEditModal";
 
 /**
  * 기대 입력 (플래너에서 전달):
@@ -30,19 +34,16 @@ export default function PlanScheduler() {
     const [titleModalOpen, setTitleModalOpen] = useState(false);
     const [dateModalOpen, setDateModalOpen] = useState(false);
 
+    const [stayPlans, setStayPlans] = useState({});
+    const [selectedStays, setSelectedStays] = useState([]);
 
-
-    // 플래너에서 넘어온 일자별 기본 시간 맵(없으면 10~22 기본)
     const initialDayTimes = state?.dayTimes || {};
 
-    const endPickerRef = useRef(null);
-
-    const [days, setDays] = useState(state?.days || []); // [{ dateISO, orderNo, items: [...] }]
+    const [days, setDays] = useState(state?.days || []);
     const [activeDayIdx, setActiveDayIdx] = useState(-1);
     const [markers, setMarkers] = useState([]);
     const [splitSize, setSplitSize] = useState(80);
 
-    // 개별 일정 시간 편집 모달
     const [timeModalOpen, setTimeModalOpen] = useState(false);
     const [editingDayIdx, setEditingDayIdx] = useState(null);
     const [editingItemIdx, setEditingItemIdx] = useState(null);
@@ -54,13 +55,10 @@ export default function PlanScheduler() {
     const FALLBACK_IMG = "https://placehold.co/150x150?text=No+Image";
     const DAY_COLORS = ["#E74C3C", "#3498DB", "#27AE60", "#F1C40F", "#9B59B6", "#FF8C00", "#8E44AD"];
 
-    // 서버에서 상세 불러오기(수정/보기 모드)
     useEffect(() => {
         const fetchPlan = async () => {
             if (!planId || mode === "create") {
-                if (state?.days?.length) {
-                    setDays((prev) => applyEdgeTimes(prev));
-                }
+                if (state?.days?.length) setDays((prev) => applyEdgeTimes(prev));
                 return;
             }
             try {
@@ -88,12 +86,10 @@ export default function PlanScheduler() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [planId, mode]);
 
-    // Splitter 자동 리사이즈
     useEffect(() => {
         setSplitSize(activeDayIdx === -1 ? 80 : 40);
     }, [activeDayIdx]);
 
-    // 지도 마커 갱신
     useEffect(() => {
         if (!days.length) return;
         const extractLatLng = (it) => {
@@ -121,91 +117,95 @@ export default function PlanScheduler() {
                         })
                         .filter(Boolean)
                 )
-                : (days[activeDayIdx]?.items || []).map((it, i) => {
-                    const pos = extractLatLng(it);
-                    if (!pos) return null;
-                    return {
-                        type: it.type,
-                        title: it.title,
-                        latitude: pos.lat,
-                        longitude: pos.lng,
-                        order: i + 1,
-                        dayIdx: activeDayIdx,
-                        color: DAY_COLORS[activeDayIdx % DAY_COLORS.length],
-                    };
-                }).filter(Boolean);
+                : (days[activeDayIdx]?.items || [])
+                    .map((it, i) => {
+                        const pos = extractLatLng(it);
+                        if (!pos) return null;
+                        return {
+                            type: it.type,
+                            title: it.title,
+                            latitude: pos.lat,
+                            longitude: pos.lng,
+                            order: i + 1,
+                            dayIdx: activeDayIdx,
+                            color: DAY_COLORS[activeDayIdx % DAY_COLORS.length],
+                        };
+                    })
+                    .filter(Boolean);
         setMarkers(visibleMarkers);
     }, [days, activeDayIdx]);
 
-    // ⏱ 문자열 "HH:mm" → 분(min) 변환
     const toMinutes = (hhmm) => {
         if (!hhmm || hhmm === "- : -") return null;
         const [h, m] = hhmm.split(":").map(Number);
         return h * 60 + m;
     };
 
-    // "HH:mm" 포맷 보정
     const fmt = (v) => (v && v !== "- : -" ? v : "- : -");
 
-    /** 일자별 기본 시간 조회 */
     const getDayEdgeTimes = (dateISO) => {
         const fallback = { start: "10:00", end: "22:00" };
         return initialDayTimes[dateISO] || fallback;
     };
 
-    /** 규칙1: 각 일자 첫/마지막만 시간 세팅, 그 외는 "- : -" */
     const applyEdgeTimes = (sourceDays) => {
         return sourceDays.map((d) => {
             if (!d.items?.length) return d;
             const { start, end } = getDayEdgeTimes(d.dateISO);
+
             return {
                 ...d,
-                items: d.items.map((it, idx) => ({
-                    ...cleanTime(it),
-                    startTime: idx === 0 ? start : idx === d.items.length - 1 ? end : "- : -",
-                    endTime: idx === 0 ? start : idx === d.items.length - 1 ? end : "- : -",
-                    __manual__: false,
-                })),
+                items: d.items.map((it, idx) => {
+                    // ✅ 수동 입력된 일정은 절대 자동 세팅 덮어쓰기 금지
+                    if (it.__manual__ && it.startTime && it.endTime) {
+                        return it;
+                    }
+
+                    // ✅ 자동 세팅: 첫 일정과 마지막 일정만 기본값 부여
+                    const isFirst = idx === 0;
+                    const isLast = idx === d.items.length - 1;
+                    return {
+                        ...cleanTime(it),
+                        startTime: isFirst ? start : isLast ? end : "- : -",
+                        endTime: isFirst ? start : isLast ? end : "- : -",
+                        __manual__: false,
+                    };
+                }),
             };
         });
     };
 
-    /** 수동 입력 시 혼재 방지용 정규화 */
     const cleanTime = (it) => {
         const normalize = (v) => (!v || v === "- : -" ? null : dayjs(v, "HH:mm", true).isValid() ? v : null);
-        return {
-            ...it,
-            startTime: normalize(it.startTime),
-            endTime: normalize(it.endTime),
-        };
+        return { ...it, startTime: normalize(it.startTime), endTime: normalize(it.endTime) };
     };
 
-    /** 리스트가 시간순인지 검사(수동 시간 있는 경우) */
     const isTimeOrderValid = (items) => {
-        const timed = items
-            .map((it, idx) => ({ idx, t: it.startTime }))
-            .filter((x) => x.t && x.t !== "- : -");
+        // ✅ 시간 지정된 일정만 필터링
+        const timed = items.filter(
+            (it) => it.startTime && it.startTime !== "--:--" && it.startTime !== "- : -"
+        );
+        if (timed.length <= 1) return true; // 1개 이하면 항상 OK
+
         for (let i = 1; i < timed.length; i++) {
-            if (timed[i - 1].t > timed[i].t) return false;
+            if (timed[i - 1].startTime > timed[i].startTime) return false;
         }
         return true;
     };
 
-    /** 시간 기준 정렬: 시간 있는 항목 오름차순, 나머지 뒤 */
     const sortByTime = (items) => {
-        const withTime = items
-            .map((it, i) => ({ it, i }))
-            .filter(({ it }) => it.startTime && it.startTime !== "- : -")
-            .sort((a, b) => a.it.startTime.localeCompare(b.it.startTime));
-        const noTime = items
-            .map((it, i) => ({ it, i }))
-            .filter(({ it }) => !it.startTime || it.startTime === "- : -");
-        return [...withTime.map((x) => x.it), ...noTime.map((x) => x.it)];
+        const withTime = items.filter((it) => it.startTime && it.startTime !== "- : -").sort((a, b) => a.startTime.localeCompare(b.startTime));
+        const noTime = items.filter((it) => !it.startTime || it.startTime === "- : -");
+        return [...withTime, ...noTime];
     };
 
-    /** DnD 끝났을 때 */
+    /** ✅ 수정된 DnD 로직 */
     const handleDragEnd = (result) => {
         if (isViewMode || !result.destination) return;
+
+        // 드래그 시작 전 상태를 백업
+        const originalDays = JSON.parse(JSON.stringify(days));
+
         const srcDayIdx = parseInt(result.source.droppableId.split("-")[1]);
         const dstDayIdx = parseInt(result.destination.droppableId.split("-")[1]);
 
@@ -218,9 +218,45 @@ export default function PlanScheduler() {
             draft[srcDayIdx].items = take;
             const hasManual = draft[srcDayIdx].items.some((it) => it.__manual__ && it.startTime && it.startTime !== "- : -");
             if (hasManual) {
-                if (!isTimeOrderValid(draft[srcDayIdx].items)) {
-                    draft[srcDayIdx].items = sortByTime(draft[srcDayIdx].items);
-                    message.info("시간이 지정된 일차는 시간순으로 유지됩니다.");
+                // ✅ 수동 일정 중에서 실제 시간이 지정된 일정이 하나라도 있어야 검사
+                const hasRealTime = draft[srcDayIdx].items.some(
+                    (it) =>
+                        it.__manual__ &&
+                        it.startTime &&
+                        it.startTime !== "--:--" &&
+                        it.startTime !== "- : -"
+                );
+
+                if (hasRealTime && !isTimeOrderValid(draft[srcDayIdx].items)) {
+                    Modal.confirm({
+                        title: "시간 순서 충돌",
+                        content: (
+                            <>
+                                <p>선택한 일정의 이동으로 인해 시간 순서가 깨집니다.</p>
+                                <p className="mt-2">
+                                    이 일정을 <b>새 위치로 이동시키면서 시간값을 초기화(--:--)</b>
+                                    하시겠습니까?
+                                </p>
+                            </>
+                        ),
+                        okText: "확인",
+                        cancelText: "취소",
+                        centered: true,
+                        onOk: () => {
+                            moved.startTime = "--:--";
+                            moved.endTime = "--:--";
+                            moved.__manual__ = false;
+                            draft[srcDayIdx].items = sortByTime(draft[srcDayIdx].items);
+                            setDays([...draft]);
+                            message.success("이동된 일정의 시간이 초기화되었습니다.");
+                        },
+                        onCancel: () => {
+                            // ✅ 원래 순서로 완전히 복원
+                            setDays(originalDays);
+                            message.info("이동이 취소되었습니다.");
+                        },
+                    });
+                    return;
                 }
             } else {
                 draft[srcDayIdx] = applyEdgeTimes([draft[srcDayIdx]])[0];
@@ -236,17 +272,71 @@ export default function PlanScheduler() {
 
             if (srcHasManual) {
                 if (!isTimeOrderValid(draft[srcDayIdx].items)) {
-                    draft[srcDayIdx].items = sortByTime(draft[srcDayIdx].items);
-                    message.info("시간이 지정된 일차는 시간순으로 유지됩니다.");
+                    // ✅ 겹치는 시간 있는 경우 수동 처리만 허용, 자동 세팅 금지
+                    Modal.confirm({
+                        title: "시간 순서 충돌",
+                        content: (
+                            <>
+                                <p>선택한 일정의 이동으로 인해 시간 순서가 깨집니다.</p>
+                                <p className="mt-2">
+                                    이 일정을 <b>새 위치로 이동시키면서 시간값을 초기화(--:--)</b>하시겠습니까?
+                                </p>
+                            </>
+                        ),
+                        okText: "확인",
+                        cancelText: "취소",
+                        centered: true,
+                        onOk: () => {
+                            moved.startTime = "--:--";
+                            moved.endTime = "--:--";
+                            moved.__manual__ = false;
+                            draft[srcDayIdx].items = sortByTime(draft[srcDayIdx].items);
+                            setDays([...draft]);
+                            message.success("이동된 일정의 시간이 초기화되었습니다.");
+                        },
+                        onCancel: () => {
+                            setDays([...days]); // 복원
+                            message.info("이동이 취소되었습니다.");
+                        },
+                    });
+                    return;
                 }
             } else {
-                draft[srcDayIdx] = applyEdgeTimes([draft[srcDayIdx]])[0];
+                // ✅ 수동 시간 있는 일정 덮어쓰기 방지
+                if (!draft[srcDayIdx].items.some((it) => it.__manual__)) {
+                    draft[srcDayIdx] = applyEdgeTimes([draft[srcDayIdx]])[0];
+                }
             }
 
             if (dstHasManual) {
                 if (!isTimeOrderValid(draft[dstDayIdx].items)) {
-                    draft[dstDayIdx].items = sortByTime(draft[dstDayIdx].items);
-                    message.info("시간이 지정된 일차는 시간순으로 유지됩니다.");
+                    Modal.confirm({
+                        title: "시간 순서 충돌",
+                        content: (
+                            <>
+                                <p>선택한 일정의 이동으로 인해 시간 순서가 깨집니다.</p>
+                                <p className="mt-2">
+                                    이 일정을 <b>새 위치로 이동시키면서 시간값을 초기화(--:--)</b>하시겠습니까?
+                                </p>
+                            </>
+                        ),
+                        okText: "확인",
+                        cancelText: "취소",
+                        centered: true,
+                        onOk: () => {
+                            moved.startTime = "--:--";
+                            moved.endTime = "--:--";
+                            moved.__manual__ = false;
+                            draft[dstDayIdx].items = sortByTime(draft[dstDayIdx].items);
+                            setDays([...draft]);
+                            message.success("이동된 일정의 시간이 초기화되었습니다.");
+                        },
+                        onCancel: () => {
+                            setDays([...days]);
+                            message.info("이동이 취소되었습니다.");
+                        },
+                    });
+                    return;
                 }
             } else {
                 draft[dstDayIdx] = applyEdgeTimes([draft[dstDayIdx]])[0];
@@ -255,60 +345,13 @@ export default function PlanScheduler() {
         setDays(draft);
     };
 
-    /** 일정 카드 렌더 */
-    const renderStepItem = (it, i, isLast, dayIdx) => {
-        const color = DAY_COLORS[dayIdx % DAY_COLORS.length];
-        const imageSrc = it.img || FALLBACK_IMG;
-
-        return (
-            <Draggable key={`${dayIdx}-${i}-${it.title}-${i}`} draggableId={`${dayIdx}-${i}-${it.title}-${i}`} index={i} isDragDisabled={isViewMode}>
-                {(prov, snapshot) => (
-                    <div ref={prov.innerRef} {...prov.draggableProps} {...prov.dragHandleProps} className={`relative pl-8 pb-6 transition-all ${snapshot.isDragging ? "scale-[1.02]" : ""}`}>
-                        {!isLast && (
-                            <div className="absolute top-5 left-[13px] w-[2px] h-[calc(100%-0.5rem)] z-0" style={{ backgroundColor: color }}></div>
-                        )}
-                        <div className="absolute left-0 top-1 w-6 h-6 flex items-center justify-center rounded-full border-2 text-xs font-semibold z-10 bg-white" style={{ borderColor: color, color }}>
-                            {i + 1}
-                        </div>
-                        <div className="ml-2 flex items-center justify-between gap-3">
-                            <div className="flex flex-col">
-                                <div className="flex items-center gap-2 text-xs text-gray-500">
-                                    <span>
-                                        {(it.startTime && it.startTime !== "- : -") ? it.startTime : "- : -"} ~ {(it.endTime && it.endTime !== "- : -") ? it.endTime : "- : -"}
-                                    </span>
-                                    {!isViewMode && (
-                                        <Button size="small" type="text" icon={<EditOutlined />} onClick={() => {
-                                            setEditingDayIdx(dayIdx);
-                                            setEditingItemIdx(i);
-                                            setTempStart(it.startTime && it.startTime !== "- : -" ? dayjs(it.startTime, "HH:mm") : null);
-                                            setTempEnd(it.endTime && it.endTime !== "- : -" ? dayjs(it.endTime, "HH:mm") : null);
-                                            setTimeModalOpen(true);
-                                        }} />
-                                    )}
-                                </div>
-                                <span className={`text-xs font-semibold ${it.type === "stay" ? "text-[#6846FF]" : it.type === "travel" ? "text-[#0088CC]" : "text-gray-400"}`}>
-                                    {it.type === "stay" ? "숙소" : it.type === "travel" ? "여행지" : "기타"}
-                                </span>
-                                <span className="font-semibold text-[#2F3E46] text-sm truncate max-w-[160px]" title={it.title}>{it.title}</span>
-                            </div>
-                            <div className="w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden border border-gray-200 bg-gray-50 ">
-                                <img
-                                    src={imageSrc}
-                                    alt={it.title}
-                                    className="w-full h-full object-cover"
-                                    onError={(e) => {
-                                        if (!e.target.dataset.fallback) {
-                                            e.target.dataset.fallback = "true";
-                                            e.target.src = FALLBACK_IMG;
-                                        }
-                                    }}
-                                />
-                            </div>
-                        </div>
-                    </div>
-                )}
-            </Draggable>
-        );
+    /** 일정 카드의 ✏️ 클릭 → 시간 편집 모달 오픈 */
+    const onOpenTimeEdit = (dayIdx, index, it) => {
+        setEditingDayIdx(dayIdx);
+        setEditingItemIdx(index);
+        setTempStart(it.startTime && it.startTime !== "- : -" ? dayjs(it.startTime, "HH:mm") : null);
+        setTempEnd(it.endTime && it.endTime !== "- : -" ? dayjs(it.endTime, "HH:mm") : null);
+        setTimeModalOpen(true);
     };
 
     /** 개별 일정 시간 저장 (검증 + 자동 정렬) */
@@ -338,17 +381,17 @@ export default function PlanScheduler() {
 
         const newDays = [...days];
         const day = newDays[editingDayIdx];
-        const items = day.items.slice();
+        const items = [...day.items];
         const target = items[editingItemIdx];
 
+        // ✅ 겹침 및 순서 검사
         if (s && e) {
             const sMin = toMinutes(s);
             const eMin = toMinutes(e);
             const others = items
                 .map((it, idx) => ({ it, idx }))
                 .filter(({ idx }) => idx !== editingItemIdx)
-                .filter(({ it }) => it.startTime && it.endTime && it.startTime !== "--:--")
-                .sort((a, b) => a.it.startTime.localeCompare(b.it.startTime));
+                .filter(({ it }) => it.startTime && it.endTime && it.startTime !== "- : -");
 
             let prev = null, next = null;
             for (const o of others) {
@@ -358,20 +401,21 @@ export default function PlanScheduler() {
                 if (!next && eMin <= os) next = o;
             }
 
+            // ✅ 1. 시간대 겹침 검사
             const overlap = others.find(({ it }) => {
                 const os = toMinutes(it.startTime);
                 const oe = toMinutes(it.endTime);
                 return Math.max(sMin, os) < Math.min(eMin, oe);
             });
-
             if (overlap) {
                 Modal.warning({
                     title: "시간 겹침",
                     content: (
                         <>
-                            선택한 시간대({s}~{e})가<br />
-                            기존 일정 <b>{overlap.it.title}</b>의 시간대<br />
-                            ({fmt(overlap.it.startTime)}~{fmt(overlap.it.endTime)})와 겹칩니다.
+                            선택한 시간대 ({s} ~ {e})가 <br />
+                            기존 일정 <b>{overlap.it.title}</b>의 시간대
+                            <br />
+                            ({overlap.it.startTime} ~ {overlap.it.endTime})와 겹칩니다.
                         </>
                     ),
                     centered: true,
@@ -379,27 +423,41 @@ export default function PlanScheduler() {
                 return;
             }
 
+            // ✅ 2. 순서 위반 검사
             const prevEndOk = !prev || toMinutes(prev.it.endTime) <= sMin;
             const nextStartOk = !next || eMin <= toMinutes(next.it.startTime);
             if (!prevEndOk || !nextStartOk) {
                 const refTxt = [
-                    prev ? `이전 "${prev.it.title}" (${fmt(prev.it.startTime)}~${fmt(prev.it.endTime)})` : null,
-                    next ? `다음 "${next.it.title}" (${fmt(next.it.startTime)}~${fmt(next.it.endTime)})` : null,
-                ].filter(Boolean).join(", ");
+                    prev ? `이전 "${prev.it.title}" (${prev.it.startTime}~${prev.it.endTime})` : null,
+                    next ? `다음 "${next.it.title}" (${next.it.startTime}~${next.it.endTime})` : null,
+                ]
+                    .filter(Boolean)
+                    .join(", ");
                 Modal.warning({
                     title: "시간 순서 오류",
-                    content: `선택한 시간대(${s}~${e})가 기존 시간 순서를 깨뜨립니다. 참고: ${refTxt}`,
+                    content: `선택한 시간대(${s}~${e})가 기존 시간 순서를 깨뜨립니다.\n참고: ${refTxt}`,
                     centered: true,
                 });
                 return;
             }
         }
 
-        items[editingItemIdx] = { ...target, startTime: s || "--:--", endTime: e || "--:--", __manual__: !!(s && e) };
+        // ✅ 문제 없으면 저장
+        items[editingItemIdx] = {
+            ...target,
+            startTime: s || "--:--",
+            endTime: e || "--:--",
+            __manual__: !!(s && e),
+        };
+
+        // ✅ 시간 순 자동 정렬
         const sorted = [
-            ...items.filter((x) => x.startTime && x.startTime !== "--:--").sort((a, b) => a.startTime.localeCompare(b.startTime)),
+            ...items
+                .filter((x) => x.startTime && x.startTime !== "--:--")
+                .sort((a, b) => a.startTime.localeCompare(b.startTime)),
             ...items.filter((x) => !x.startTime || x.startTime === "--:--"),
         ];
+
         newDays[editingDayIdx] = { ...day, items: sorted };
         setDays(newDays);
         setTimeModalOpen(false);
@@ -407,14 +465,14 @@ export default function PlanScheduler() {
         setEditingItemIdx(null);
     };
 
-    // ✅ TimePicker disabledTime 함수 외부 정의
+    // ✅ TimePicker disabledTime 함수
     const getDisabledStartTime = (endTime) => {
         if (!endTime) return {};
         const endHour = endTime.hour();
         const endMinute = endTime.minute();
         return {
             disabledHours: () => Array.from({ length: 24 }, (_, i) => i).filter((h) => h > endHour),
-            disabledMinutes: (h) => h === endHour ? Array.from({ length: 60 }, (_, i) => i).filter((m) => m >= endMinute) : [],
+            disabledMinutes: (h) => (h === endHour ? Array.from({ length: 60 }, (_, i) => i).filter((m) => m >= endMinute) : []),
         };
     };
 
@@ -424,7 +482,7 @@ export default function PlanScheduler() {
         const startMinute = startTime.minute();
         return {
             disabledHours: () => Array.from({ length: 24 }, (_, i) => i).filter((h) => h < startHour),
-            disabledMinutes: (h) => h === startHour ? Array.from({ length: 60 }, (_, i) => i).filter((m) => m <= startMinute) : [],
+            disabledMinutes: (h) => (h === startHour ? Array.from({ length: 60 }, (_, i) => i).filter((m) => m <= startMinute) : []),
         };
     };
 
@@ -434,8 +492,9 @@ export default function PlanScheduler() {
         const userCookie = getCookie("userCookie");
         const userId = userCookie?.userId || "navi1";
 
-        const firstTravelImg = days.flatMap((d) => d.items).find((it) => it.type === "travel" && it.img && it.img.trim() !== "")?.img
-            || "https://placehold.co/400x300?text=Travel+Plan";
+        const firstTravelImg =
+            days.flatMap((d) => d.items).find((it) => it.type === "travel" && it.img && it.img.trim() !== "")
+                ?.img || "https://placehold.co/400x300?text=Travel+Plan";
 
         const requestData = {
             title: meta.title || "새 여행 계획",
@@ -482,7 +541,7 @@ export default function PlanScheduler() {
                     style={{
                         borderTop: "1px solid #eee",
                         transition: "all 0.4s ease-in-out",
-                        height: "100%", // ✅ Splitter가 화면 전체 차지
+                        height: "100%",
                     }}
                     min="20%"
                     max="80%"
@@ -498,68 +557,20 @@ export default function PlanScheduler() {
                         }}
                     >
                         <div className="flex flex-1">
-                            {/* 왼쪽 버튼 영역 */}
-                            <div className="w-28 border-r p-4 flex flex-col justify-between bg-gray-50">
-                                <div className="space-y-2  mt-5">
-                                    <Button block type={activeDayIdx === -1 ? "primary" : "default"} onClick={() => setActiveDayIdx(-1)}>
-                                        전체
-                                    </Button>
-                                    {days.map((d, idx) => (
-                                        <Button
-                                            key={d.dateISO}
-                                            block
-                                            type={idx === activeDayIdx ? "primary" : "default"}
-                                            onClick={() => setActiveDayIdx(idx)}
-                                        >
-                                            {idx + 1}일차
-                                        </Button>
-                                    ))}
-                                </div>
+                            {/* 좌측 사이드바 */}
+                            <PlanSidebar
+                                days={days}
+                                activeDayIdx={activeDayIdx}
+                                setActiveDayIdx={setActiveDayIdx}
+                                isViewMode={isViewMode}
+                                isEditMode={isEditMode}
+                                navigate={navigate}
+                                meta={meta}
+                                state={state}
+                                handleConfirm={handleConfirm}
+                            />
 
-                                {/* ✅ 하단 버튼 영역 */}
-                                {!isViewMode && (
-                                    <div className="pt-6 flex flex-col gap-2">
-                                        {/* ✅ 이전 버튼 */}
-                                        <Button
-                                            block
-                                            className="bg-gray-200 hover:bg-gray-300 text-gray-700"
-                                            onClick={() => {
-                                                navigate("/plans/planner", {
-                                                    state: {
-                                                        from: "scheduler",
-                                                        step: 3, // 돌아갈 때 3단계부터
-                                                        restoreData: {
-                                                            meta,
-                                                            days,
-                                                            dayTimes: state?.dayTimes || {},
-                                                            title: meta.title,
-                                                            dateRange: [dayjs(meta.startDate), dayjs(meta.endDate)],
-                                                            times: state?.dayTimes || {},
-                                                            selectedTravels: state?.selectedTravels || [],
-                                                            selectedStays: state?.selectedStays || [],
-                                                            stayPlans: state?.stayPlans || {},
-                                                        },
-                                                    },
-                                                });
-                                            }}
-                                        >
-                                            이전
-                                        </Button>
-
-                                        {/* ✅ 저장/수정 버튼 */}
-                                        <Button
-                                            block
-                                            type="primary"
-                                            className="bg-[#2F3E46]"
-                                            onClick={handleConfirm}
-                                        >
-                                            {isEditMode ? "수정" : "저장"}
-                                        </Button>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* ✅ 일정 리스트 (이곳만 스크롤 가능) */}
+                            {/* 일정 리스트(스크롤 영역) */}
                             <div className="flex-1 p-10 overflow-y-auto custom-scroll ">
                                 <div className=" border-b-2 mb-10">
                                     <div className="flex items-center gap-2">
@@ -577,7 +588,6 @@ export default function PlanScheduler() {
                                         )}
                                     </div>
 
-
                                     <div className="flex items-center gap-2 text-gray-500 text-base pb-2 border-b-2">
                                         <span>
                                             {meta.startDate} ~ {meta.endDate}
@@ -593,150 +603,50 @@ export default function PlanScheduler() {
                                         )}
                                     </div>
 
-
                                     <div className="text-gray-400 text-sm mt-3 mb-5 ">
                                         * 각 일차 첫 일정은 시작시간, 마지막 일정은 종료시간이 자동 표시됩니다. <br /> * 나머지 일정은 직접 시간을 입력할 수 있습니다.
                                     </div>
                                 </div>
 
-
-
-                                <DragDropContext onDragEnd={handleDragEnd}>
-                                    {activeDayIdx === -1 ? (
-                                        <div className="flex gap-12 overflow-x-auto px-4 custom-scroll">
-                                            {days.map((d, dayIdx) => (
-                                                <Droppable key={dayIdx} droppableId={`day-${dayIdx}`} isDropDisabled={isViewMode}>
-                                                    {(provided) => (
-                                                        <div ref={provided.innerRef} {...provided.droppableProps} className="flex flex-col min-w-[300px] relative">
-                                                            <h3 className="text-lg font-semibold text-[#2F3E46] mb-4 border-b pb-1">
-                                                                {dayIdx + 1}일차 <span className="text-gray-400 text-sm">{d.dateISO}</span>
-                                                            </h3>
-                                                            <div className="relative">
-                                                                {d.items.map((it, i) => renderStepItem(it, i, i === d.items.length - 1, dayIdx))}
-                                                            </div>
-                                                            {provided.placeholder}
-                                                        </div>
-                                                    )}
-                                                </Droppable>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <Droppable droppableId={`day-${activeDayIdx}`} isDropDisabled={isViewMode}>
-                                            {(provided) => (
-                                                <div ref={provided.innerRef} {...provided.droppableProps} className="flex flex-col gap-5 p-3 w-[380px]">
-                                                    {days[activeDayIdx]?.items.map((it, i) =>
-                                                        renderStepItem(it, i, i === days[activeDayIdx].items.length - 1, activeDayIdx)
-                                                    )}
-                                                    {provided.placeholder}
-                                                </div>
-                                            )}
-                                        </Droppable>
-                                    )}
-                                </DragDropContext>
+                                {/* ✅ 분리된 일정 리스트 + DnD */}
+                                <PlanDayList
+                                    days={days}
+                                    activeDayIdx={activeDayIdx}
+                                    isViewMode={isViewMode}
+                                    onDragEnd={handleDragEnd}
+                                    onEditTime={onOpenTimeEdit}
+                                    dayColors={DAY_COLORS}
+                                    fallbackImg={FALLBACK_IMG}
+                                />
                             </div>
                         </div>
                     </Splitter.Panel>
 
-
+                    {/* 오른쪽 지도 */}
                     <Splitter.Panel style={{ background: "#fafafa", position: "relative", overflow: "hidden" }}>
                         <TravelMap markers={markers} step={6} />
                     </Splitter.Panel>
                 </Splitter>
-            </div >
+            </div>
 
-
-            <Modal
-                title="일정 시간 설정"
+            {/* 시간 설정 모달 */}
+            <TimeEditModal
                 open={timeModalOpen}
+                tempStart={tempStart}
+                tempEnd={tempEnd}
+                setTempStart={setTempStart}
+                setTempEnd={setTempEnd}
                 onCancel={() => setTimeModalOpen(false)}
-                onOk={handleTimeSave}
-                okText="저장"
-                cancelText="취소"
-                centered
-            >
-                <div className="flex items-center gap-3 justify-center py-2">
-                    {/* ✅ 시/분 선택 추적용 상태 */}
-                    {/* 이 부분은 Modal 컴포넌트 상단(useState 영역)에 추가하세요 */}
-                    {/* const [openKey, setOpenKey] = useState(null); */}
-                    {/* const [selectedPart, setSelectedPart] = useState(null); */}
+                onSave={handleTimeSave}
+                openKey={openKey}
+                setOpenKey={setOpenKey}
+                selectedPart={selectedPart}
+                setSelectedPart={setSelectedPart}
+                getDisabledStartTime={getDisabledStartTime}
+                getDisabledEndTime={getDisabledEndTime}
+            />
 
-                    {/* 시작시간 */}
-                    <TimePicker
-                        format="HH:mm"
-                        minuteStep={5}
-                        showNow={false}
-                        needConfirm={false}
-                        value={tempStart}
-                        open={openKey === "start"}
-                        onOpenChange={(open) => {
-                            if (open) {
-                                setSelectedPart(null);
-                                setOpenKey("start");
-                            } else {
-                                setOpenKey(null);
-                            }
-                        }}
-                        onSelect={(v) => {
-                            if (selectedPart === null) {
-                                // 첫 번째 선택(시)
-                                setSelectedPart("hour");
-                                setTempStart(v);
-                            } else if (selectedPart === "hour") {
-                                // 두 번째 선택(분)
-                                setTempStart(v);
-                                setSelectedPart(null);
-                                setOpenKey(null); // ✅ 시+분 모두 선택 후 자동 닫기
-                                // 종료시간 선택창으로 자동 포커스 이동
-                                setTimeout(() => {
-                                    if (endPickerRef.current) endPickerRef.current.focus();
-                                }, 150);
-                            }
-                        }}
-                        onChange={(v) => setTempStart(v)}
-                        placeholder="시작"
-                        disabledTime={() => getDisabledStartTime(tempEnd)}
-                    />
-
-                    <span>~</span>
-
-                    {/* 종료시간 */}
-                    <TimePicker
-                        ref={endPickerRef}
-                        format="HH:mm"
-                        minuteStep={5}
-                        showNow={false}
-                        needConfirm={false}
-                        value={tempEnd}
-                        open={openKey === "end"}
-                        onOpenChange={(open) => {
-                            if (open) {
-                                setSelectedPart(null);
-                                setOpenKey("end");
-                            } else {
-                                setOpenKey(null);
-                            }
-                        }}
-                        onSelect={(v) => {
-                            if (selectedPart === null) {
-                                setSelectedPart("hour");
-                                setTempEnd(v);
-                            } else if (selectedPart === "hour") {
-                                setTempEnd(v);
-                                setSelectedPart(null);
-                                setOpenKey(null); // ✅ 시+분 모두 선택 후 자동 닫기
-                            }
-                        }}
-                        onChange={(v) => setTempEnd(v)}
-                        placeholder="종료"
-                        disabledTime={() => getDisabledEndTime(tempStart)}
-                    />
-                </div>
-
-                <div className="text-xs text-gray-500 text-center mt-2">
-                    둘 다 비우면 시간 미지정으로 처리되어 정렬 대상에서 제외됩니다.
-                </div>
-            </Modal>
-
+            {/* 제목/날짜 모달 */}
             <TitleModal
                 open={titleModalOpen}
                 title={meta.title || ""}
@@ -747,16 +657,114 @@ export default function PlanScheduler() {
 
             <DateModal
                 open={dateModalOpen}
-                setStep={() => setDateModalOpen(false)} // 닫기용
-                setDateRange={() => { }} // 필요 없음
-                resetAll={() => { }} // 수정모드에서는 사용 안 함
+                onClose={() => setDateModalOpen(false)} // ✅ 모달 닫기 전달
                 isEditMode={true}
                 meta={meta}
-                setMeta={setMeta}
-                days={days}
-                setDays={setDays}
-            />
+                onDateChange={(newStart, newEnd) => {
+                    const start = dayjs(newStart);
+                    const end = dayjs(newEnd);
+                    const diff = end.diff(start, "day") + 1;
 
+                    // ✅ 기존 날짜 동일할 경우 → 아무 동작 안 함
+                    if (meta.startDate === start.format("YYYY-MM-DD") && meta.endDate === end.format("YYYY-MM-DD")) {
+                        setDateModalOpen(false);
+                        return;
+                    }
+
+                    // ✅ 기존 일정 전체
+                    const allItems = days.flatMap((d) => d.items);
+
+                    // ✅ 제주공항 일정 추출
+                    const jejuArrivals = allItems.filter((it) => it.type === "poi" && it.title?.includes("제주공항 도착"));
+                    const jejuDepartures = allItems.filter((it) => it.type === "poi" && it.title?.includes("제주공항 출발"));
+
+                    const arrival =
+                        jejuArrivals[0] || {
+                            type: "poi",
+                            title: "제주공항 도착",
+                            icon: "bi bi-airplane",
+                            fixed: true,
+                            lat: 33.50684612635678,
+                            lng: 126.49271493655533,
+                            img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTtda-mfQ8IclFL2JOrafNwY_03skX839tZ60IPclmkut3tH4r7xDFySp8ZOt6tSUaHFvA&usqp=CAU",
+                            startTime: "10:00",
+                            endTime: "22:00",
+                        };
+
+                    const departure =
+                        jejuDepartures[0] || {
+                            type: "poi",
+                            title: "제주공항 출발",
+                            icon: "bi bi-airplane",
+                            fixed: true,
+                            lat: 33.50684612635678,
+                            lng: 126.49271493655533,
+                            img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTtda-mfQ8IclFL2JOrafNwY_03skX839tZ60IPclmkut3tH4r7xDFySp8ZOt6tSUaHFvA&usqp=CAU",
+                            startTime: "10:00",
+                            endTime: "22:00",
+                        };
+
+                    // ✅ 일반 여행지만 필터링 (공항 제외)
+                    const generalTravels = allItems.filter((it) => it.type === "travel" || it.type === "stay");
+
+                    // ✅ n일 분배
+                    const buckets = Array.from({ length: diff }, () => []);
+                    generalTravels.forEach((t, idx) => {
+                        buckets[idx % diff].push(t);
+                    });
+
+                    // ✅ 공항 재배치
+                    if (arrival) buckets[0].unshift(arrival);
+                    if (departure && diff > 1) buckets[diff - 1].push(departure);
+
+                    // ✅ 새로운 일정 구성
+                    const newDays = buckets.map((b, i) => ({
+                        dateISO: start.add(i, "day").format("YYYY-MM-DD"),
+                        orderNo: i + 1,
+                        items: b,
+                    }));
+
+                    // ✅ 경고창
+                    Modal.confirm({
+                        title: "날짜 변경 안내",
+                        content: (
+                            <>
+                                여행 날짜를 <b>{meta.startDate}</b> ~ <b>{meta.endDate}</b>에서
+                                <br />
+                                <b>{start.format("YYYY-MM-DD")}</b> ~ <b>{end.format("YYYY-MM-DD")}</b>
+                                (으)로 변경하시겠습니까?
+                                <br />
+                                <br />
+                                ⚠️ 숙소 정보는 초기화됩니다.
+                            </>
+                        ),
+                        okText: "변경하기",
+                        cancelText: "취소",
+                        centered: true,
+                        onOk: () => {
+                            // ✅ 상태 반영
+                            setDays(newDays);
+                            setMeta((prev) => ({
+                                ...prev,
+                                startDate: newStart,
+                                endDate: newEnd,
+                            }));
+
+                            // ✅ 숙소 초기화
+                            setStayPlans({});
+                            setSelectedStays([]);
+
+                            message.success("여행 날짜가 변경되었습니다. 숙소 정보가 초기화되었습니다.");
+
+                            // ✅ 모달 닫기
+                            setDateModalOpen(false);
+                        },
+                        onCancel: () => {
+                            setDateModalOpen(false);
+                        },
+                    });
+                }}
+            />
 
             <FooterLayout />
         </>
