@@ -9,7 +9,7 @@ const { Title, Text } = Typography;
  * - 출발편 / 귀국편 / 총금액 표시
  * - FlightDetailPage의 오른쪽 디자인을 기반으로 재구성
  */
-const FlyRsvSumCard = ({ selectedOutbound, selectedInbound }) => {
+const FlyRsvSumCard = ({ selectedOutbound, selectedInbound, totalAmount }) => {
   const formatTime = (str) => {
     if (!str) return "";
     const d = new Date(str);
@@ -107,7 +107,7 @@ const FlyRsvSumCard = ({ selectedOutbound, selectedInbound }) => {
             level={4}
             style={{ margin: 0, color: "#1677ff", fontWeight: 700 }}
           >
-            ₩{FormData.totalPrice.toLocaleString()}
+            ₩{totalAmount.toLocaleString()}
           </Title>
         </>
       )}
