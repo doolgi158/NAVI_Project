@@ -143,7 +143,7 @@ public class Acc {
     // 따라서, INSERT 직전에 null을 기본값으로 보정하는 작업 (for not null column)
     @PrePersist
     public void prePersist() {
-        if (category == null) category = "미확인";
+        if (category == null) category = "숙박시설";
         if (checkInTime == null) checkInTime = "15:00";
         if (checkOutTime == null) checkOutTime = "11:00";
         if (hasCooking == null) hasCooking = false;
@@ -226,13 +226,14 @@ public class Acc {
         if (mapx != null) { this.mapx = mapx; }
         if (mapy != null) { this.mapy = mapy; }
     }
+    public void changeCategory(String category){ if (category != null) { this.category = category; } }
 
     /* === 문자열 유효성 검증용 유틸 메서드 === */
     private String nonEmptyOrNull(String value) {
         return (value != null && !value.isBlank()) ? value : null;
     }
 
-    // === 조회수 증가 메서드 ===
+    /* === 조회수 증가 메서드 === */
     public void increaseViewCount() {
         if (this.viewCount == null) this.viewCount = 0L;
         this.viewCount++;
