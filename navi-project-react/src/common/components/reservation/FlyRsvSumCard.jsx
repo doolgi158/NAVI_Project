@@ -21,8 +21,6 @@ const FlyRsvSumCard = ({ selectedOutbound, selectedInbound, totalAmount }) => {
     ).padStart(2, "0")} (${day})`;
   };
 
-  //const totalPrice =(selectedOutbound?.price || 0) + (selectedInbound?.price || 0);
-
   return (
     <Card
       style={{
