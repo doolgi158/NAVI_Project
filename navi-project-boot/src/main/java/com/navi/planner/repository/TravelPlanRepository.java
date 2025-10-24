@@ -1,40 +1,32 @@
 package com.navi.planner.repository;
 
 import com.navi.planner.domain.TravelPlan;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface TravelPlanRepository extends JpaRepository<TravelPlan, Long> {
 
-    /** ✅ 로그인 아이디(user.id) 기준 조회 */
-    @Query("SELECT p FROM TravelPlan p WHERE p.user.id = :userId")
-    List<TravelPlan> findByUserId(@Param("userId") String userId);
-
-    /**
-     * 리스트 조회 시 days 까지 한 방에 가져오기 (N+1 방지)
-     * distinct로 중복 제거
-     */
     @Query("""
-           select distinct p
-           from TravelPlan p
-             join p.user u
-             left join fetch p.days d
-           where u.id = :userId
-           order by p.startDate desc, p.id desc
-           """)
-    List<TravelPlan> findAllWithDaysByUserId(@Param("userId") String userId);
+    select distinct p from TravelPlan p
+      left join fetch p.days d
+      left join fetch d.items i
+      left join fetch p.user u
+    where u.id = :userId
+    """)
+    List<TravelPlan> findAllWithDaysAndItemsByUserId(@Param("userId") String userId);
 
-    /**
-     * 단건 상세 조회 + days fetch
-     */
     @Query("""
-           select p
-           from TravelPlan p
-             left join fetch p.days d
-           where p.id = :id
-           """)
-    TravelPlan findWithDaysById(@Param("id") Long id);
+    select p from TravelPlan p
+      left join fetch p.days d
+      left join fetch d.items i
+      left join fetch p.user u
+    where p.planId = :planId
+    """)
+    Optional<TravelPlan> findByIdWithDaysAndItems(@Param("planId") Long planId);
+
 }

@@ -25,11 +25,8 @@ if (accessToken) {
 
 // ✅ 토큰 저장 및 갱신 함수
 export const setAuthTokens = (access, refresh) => {
-  accessToken = access;
-  refreshToken = refresh;
   localStorage.setItem("accessToken", access);
   localStorage.setItem("refreshToken", refresh);
-  api.defaults.headers.common.Authorization = `Bearer ${access}`;
 };
 
 // ✅ JWT 디코드 함수
@@ -58,6 +55,8 @@ api.interceptors.request.use(
     const token = localStorage.getItem("accessToken");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    } else {
+      delete config.headers.Authorization;
     }
     return config;
   },
@@ -83,66 +82,32 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    const status = error.response?.status;
-    const isRefreshCall = originalRequest?.url?.includes("/users/refresh");
-
-    // 🔒 Refresh 요청 자체는 무시
-    if (isRefreshCall) {
-      return Promise.reject(error);
-    }
-
-    // 🔑 AccessToken 만료 시
-    if (status === 401 && !originalRequest._retry) {
-      if (isRefreshing) {
-        // 이미 refresh 중이면 큐에 등록
-        return new Promise((resolve) => {
-          addSubscriber((newToken) => {
-            originalRequest.headers.Authorization = `Bearer ${newToken}`;
-            resolve(api(originalRequest));
-          });
-        });
-      }
-
+    if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      isRefreshing = true;
 
-      try {
-        const rt = localStorage.getItem("refreshToken");
-        if (!rt) throw new Error("RefreshToken이 없습니다.");
-
-        // ✅ Refresh API 호출
-        const res = await axios.post(
-          `${API_SERVER_HOST}/api/users/refresh`,
-          {},
-          {
-            headers: { Authorization: `Bearer ${rt}` },
-            withCredentials: true,
-          }
-        );
-
-        const newAccessToken = res.data.accessToken;
-        if (!newAccessToken) throw new Error("새 AccessToken이 없습니다.");
-
-        // ✅ 토큰 갱신
-        setAuthTokens(newAccessToken, rt);
-        isRefreshing = false;
-        onAccessTokenFetched(newAccessToken);
-
-        // ✅ 원래 요청 재시도
-        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-        return api(originalRequest);
-      } catch (refreshError) {
-        console.error("❌ 토큰 갱신 실패:", refreshError);
-        isRefreshing = false;
-        refreshSubscribers = [];
+      const rt = localStorage.getItem("refreshToken");
+      if (!rt) {
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
         history.push("/");
-        return Promise.reject(refreshError);
+        return Promise.reject(error);
+      }
+
+      try {
+        const res = await axios.post(`${API_SERVER_HOST}/api/users/refresh`, {}, {
+          headers: { Authorization: `Bearer ${rt}` },
+        });
+        const newAccessToken = res.data.accessToken;
+        localStorage.setItem("accessToken", newAccessToken);
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+        return api(originalRequest);
+      } catch (err) {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        history.push("/");
+        return Promise.reject(err);
       }
     }
-
-    // ⚠️ 기타 에러
     return Promise.reject(error);
   }
 );

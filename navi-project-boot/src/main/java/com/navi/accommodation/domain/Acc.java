@@ -1,4 +1,3 @@
-
 package com.navi.accommodation.domain;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -23,7 +22,7 @@ import java.util.List;
    ============================== */
 
 @Getter
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -219,12 +218,18 @@ public class Acc {
     }
 
     public void changeTownship(Township township) {
-        if (township != null) { this.township = township; }
+        if (township != null) {
+            this.township = township;
+        }
     }
     public void updateMainImage(String mainImage) { this.mainImage = mainImage; }
     public void changeLocation(BigDecimal mapx, BigDecimal mapy) {
-        if (mapx != null) { this.mapx = mapx; }
-        if (mapy != null) { this.mapy = mapy; }
+        if (mapx != null) {
+            this.mapx = mapx;
+        }
+        if (mapy != null) {
+            this.mapy = mapy;
+        }
     }
 
     /* === 문자열 유효성 검증용 유틸 메서드 === */
@@ -233,8 +238,11 @@ public class Acc {
     }
 
     // === 조회수 증가 메서드 ===
-    public void increaseViewCount() {
-        if (this.viewCount == null) this.viewCount = 0L;
-        this.viewCount++;
+    public Acc increaseViewCount() {
+        long newCount = (this.viewCount == null ? 0L : this.viewCount) + 1;
+        return this.toBuilder()
+                .viewCount(newCount)
+                .modifiedTime(LocalDateTime.now())
+                .build();
     }
 }

@@ -3,6 +3,8 @@ import ProtectedRoute from "./ProtectedRoute.jsx";
 import AdminAccommodation from "./AdminAccommodationRouter.jsx"
 import AdminFlightRouter from "./AdminFlightRouter.jsx";
 import AdminDeliveryRouter from "./AdminDeliveryRouter.jsx";
+import AdminRoomyRouter from "./AdminRoomRouter.jsx"
+import ManagerRouter from "./ManagerRouter.jsx";
 import AdminPaymentRouter from "./AdminPaymentRouter.jsx"
 
 const AdminUsers = lazy(() => import("../../admin/pages/user/AdminUsersPage.jsx"));
@@ -65,11 +67,21 @@ const AdminRouter = () => {
         </Suspense>
       ),
     },
+
+    // 게시판 관리자
+    {
+      path: "manager",
+      children: [...ManagerRouter()],
+    },
+
     // 항공 관리자 라우터 통합
     ...AdminFlightRouter(),
 
     // 숙소 라우터
     ...AdminAccommodation(),
+
+    // 객실 라우터
+    ...AdminRoomyRouter(),
 
     // 짐배송 라우터
     ...AdminDeliveryRouter(),

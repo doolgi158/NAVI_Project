@@ -12,6 +12,7 @@ import com.navi.user.repository.UserRepository;
 import com.navi.user.repository.WithdrawRepository;
 import com.navi.user.security.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,11 +20,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class UserServiceImpl implements UserService{
+@Slf4j
+public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final ImageRepository imageRepository;
@@ -190,5 +193,31 @@ public class UserServiceImpl implements UserService{
                 .userState(saved.getUserState())
                 .signUp(saved.getSignUp() != null ? saved.getSignUp().format(formatter) : null)
                 .build();
+    }
+
+    // 1년 이상 활동 없는 NORMAL 유저 → SLEEP 전환
+    public void autoSleepInactiveUsers() {
+        LocalDateTime threshold = LocalDateTime.now().minusYears(1);
+        List<User> targets = userRepository.findNormalUsersInactiveForOneYear(threshold);
+
+        targets.forEach(user -> {
+            user.toBuilder().userState(UserState.SLEEP).build();
+            log.info("💤 휴면 전환: {}", user.getEmail());
+        });
+
+        userRepository.saveAll(targets);
+    }
+
+    // 휴면 1년 이상 지난 SLEEP 유저 → DELETE 전환
+    public void autoDeleteSleepUsers() {
+        LocalDateTime threshold = LocalDateTime.now().minusYears(1);
+        List<User> targets = userRepository.findSleepUsersInactiveForAnotherYear(threshold);
+
+        targets.forEach(user -> {
+            user.toBuilder().userState(UserState.DELETE).build();
+            log.info("🗑️ 자동 탈퇴 처리: {}", user.getEmail());
+        });
+
+        userRepository.saveAll(targets);
     }
 }

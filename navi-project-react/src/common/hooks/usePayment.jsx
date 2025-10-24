@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { setVerifyData, clearPaymentData } from "../slice/paymentSlice";
 import { preparePayment, verifyPayment } from "../api/paymentService";
 import { initIamport } from "../util/iamport";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 
 /* =================================================================
 	[usePayment Hook]
@@ -14,9 +14,17 @@ import { useRef } from "react";
 export const usePayment = () => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
-	
+
 	const payment = useSelector((state) => state.payment);
-	const { items, rsvType, formData, totalAmount, paymentMethod } = payment;
+	const { items = [], formData = {}, rsvType = "", totalAmount = 0, paymentMethod = "" } = payment || {};
+
+	// ✅ payment가 undefined면 홈으로 리다이렉트
+	useEffect(() => {
+		if (!payment || Object.keys(payment).length === 0) {
+			console.warn("⚠️ 결제 데이터 없음 → 홈으로 이동");
+			navigate("/", { replace: true });
+		}
+	}, [payment, navigate]);
 
 	const isProcessingRef = useRef(false);
 

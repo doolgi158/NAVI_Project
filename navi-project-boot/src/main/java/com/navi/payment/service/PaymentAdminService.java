@@ -16,11 +16,14 @@ public interface PaymentAdminService {
     List<PaymentAdminListResponseDTO> getAllPaymentsForAdmin(
             RsvType rsvType, PaymentStatus paymentStatus, String keyword
     );
+
     // 2. 단일 결제 상세 조회
     List<PaymentAdminDetailResponseDTO> getPaymentDetailsForAdmin(String merchantId);
+
     // 3. 예약 ID별 환불(부분환불 가능 - FLY)
     void refundPaymentByReserveId(RefundRequestDTO dto)
             throws IamportResponseException, IOException, Exception;
+
     // 4. 결제 ID별 환불(전체환불)
     void refundPaymentByMerchantId(RefundRequestDTO dto)
             throws IamportResponseException, IOException, Exception;

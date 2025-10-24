@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { setReserveData } from "../../../common/slice/paymentSlice";
-import { useDispatch } from "react-redux";
 import axios from "axios";
 import dayjs from "dayjs";
 import MainLayout from "../../layout/MainLayout";
@@ -27,7 +25,6 @@ const { Title, Text } = Typography;
 const SeatSelectPage = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
   const {
     isRoundTrip = false,
@@ -195,7 +192,11 @@ const SeatSelectPage = () => {
         return;
       }
 
+<<<<<<< HEAD
       // ✅ items 배열 구성 (결제용)
+=======
+      // 결제용 items 배열 구성
+>>>>>>> ed5f66f3cade51564fb9514c379f6500ad5b0e03
       const items = [];
 
       // 왕복이면 출발편 예약 추가
