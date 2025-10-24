@@ -9,7 +9,7 @@ import FooterLayout from "@/users/layout/FooterLayout";
 import TravelMap from "./components/TravelMap";
 import TitleModal from "@/users/pages/plan/components/TitleModal";
 import DateModal from "@/users/pages/plan/components/DateModal";
-import { savePlan, updatePlan, getPlanDetail } from "@/common/api/planApi";
+import { savePlan, updatePlan, getPlanDetail, getMyPlans } from "@/common/api/planApi";
 import { getCookie } from "@/common/util/cookie";
 
 import PlanSidebar from "@/users/pages/plan/components/scheduler/PlanSidebar";
@@ -42,6 +42,15 @@ export default function PlanScheduler() {
     const initialDayTimes = state?.dayTimes || {};
 
     const [days, setDays] = useState(state?.days || []);
+    const [myPlans, setMyPlans] = useState([]);
+
+    const [deletedTravelIds, setDeletedTravelIds] = useState([]);
+    const [deletedStayIds, setDeletedStayIds] = useState([]);
+
+    const [stageTravels, setStageTravels] = useState(state?.selectedTravels || []);
+    const [stageStays, setStageStays] = useState(state?.selectedStays || []);
+    const [stageStayPlans, setStageStayPlans] = useState(state?.stayPlans || {});
+
     const [activeDayIdx, setActiveDayIdx] = useState(-1);
     const [markers, setMarkers] = useState([]);
     const [splitSize, setSplitSize] = useState(80);
@@ -56,6 +65,44 @@ export default function PlanScheduler() {
 
     const FALLBACK_IMG = "https://placehold.co/150x150?text=No+Image";
     const DAY_COLORS = ["#E74C3C", "#3498DB", "#27AE60", "#F1C40F", "#9B59B6", "#FF8C00", "#8E44AD"];
+
+    /** ✅ 삭제 후 새로고침 함수 */
+    const refreshPlans = async (deletedId) => {
+        try {
+            if (deletedId) {
+                // ✅ [추가] 삭제된 travelId를 상태에 추가 (중복 방지)
+                setDeletedTravelIds((prev) => {
+                    if (prev.includes(deletedId)) return prev;
+                    return [...prev, deletedId];
+                });
+            }
+
+            // ✅ 서버 데이터 갱신
+            const updatedPlans = await getMyPlans();
+            setMyPlans(updatedPlans);
+
+            // ✅ days 배열에서도 삭제된 여행지 제거
+            setDays((prevDays) =>
+                prevDays.map((day) => ({
+                    ...day,
+                    items: day.items.filter((it) => {
+                        // 서버에 없는 travelId는 제거
+                        if (it.type !== "travel") return true;
+                        return updatedPlans.some((plan) =>
+                            plan.travels?.some((t) => t.travelId === it.travelId)
+                        );
+                    }),
+                }))
+            );
+
+            message.success("일정 목록이 갱신되었습니다.");
+        } catch (err) {
+            console.error("❌ refreshPlans() 실패:", err);
+            message.error("일정 목록 갱신 실패");
+        }
+    };
+
+
 
     useEffect(() => {
         const fetchPlan = async () => {
@@ -532,8 +579,10 @@ export default function PlanScheduler() {
     /** 저장/수정 */
     const handleConfirm = async () => {
         if (isViewMode) return;
+
+        await new Promise((resolve) => setTimeout(resolve, 50));
+
         const userCookie = getCookie("userCookie");
-        const userId = userCookie?.userId || "navi1";
 
         const firstTravelImg =
             days.flatMap((d) => d.items).find((it) => it.type === "travel" && it.img && it.img.trim() !== "")
@@ -569,7 +618,29 @@ export default function PlanScheduler() {
                 await savePlan(requestData);
                 Modal.success({ title: "저장 완료", content: "여행 계획이 성공적으로 저장되었습니다.", centered: true });
             }
-            navigate("/plans");
+
+            const cleanedDays = days.map((day) => ({
+                ...day,
+                items: day.items.filter((it) => it.type !== "travel" || it.travelId),
+            }));
+
+
+            navigate("/plans", {
+                replace: true,
+                state: {
+                    refresh: true,
+                    updatedTravels: cleanedDays
+                        .flatMap((d) => d.items)
+                        .filter((it) => it.type === "travel")
+                        .map((t) => ({
+                            travelId: t.travelId,
+                            title: t.title,
+                            img: t.img,
+                            lat: t.lat,
+                            lng: t.lng,
+                        })),
+                },
+            });
         } catch (err) {
             console.error("❌ 저장 중 오류:", err);
             Modal.error({ title: "저장 실패", content: "여행 계획 저장 중 오류가 발생했습니다.", centered: true });
@@ -618,9 +689,21 @@ export default function PlanScheduler() {
                                 isEditMode={isEditMode}
                                 navigate={navigate}
                                 meta={meta}
-                                state={state}
                                 handleConfirm={handleConfirm}
                                 setMode={setMode}
+                                state={{
+                                    ...state,
+                                    selectedTravels: stageTravels,
+                                    selectedStays: stageStays,
+                                    stayPlans: stageStayPlans,
+                                    deletedTravelIds,
+                                    deletedStayIds,
+                                }}
+                                stageTravels={stageTravels}
+                                stageStays={stageStays}
+                                stageStayPlans={stageStayPlans}
+                                deletedTravelIds={deletedTravelIds}
+                                deletedStayIds={deletedStayIds}
                             />
 
                             {/* 일정 리스트(스크롤 영역) */}
@@ -670,6 +753,31 @@ export default function PlanScheduler() {
                                     onEditTime={onOpenTimeEdit}
                                     dayColors={DAY_COLORS}
                                     fallbackImg={FALLBACK_IMG}
+                                    setDays={setDays}
+                                    onAfterDelete={(deletedId, type) => {
+                                        if (!deletedId) return;
+
+                                        if (type === "travel") {
+                                            // stageTravels에서도 제거
+                                            setStageTravels((prev) => prev.filter((t) => t.travelId !== deletedId));
+                                            setDeletedTravelIds((prev) =>
+                                                prev.includes(deletedId) ? prev : [...prev, deletedId]
+                                            );
+                                        }
+
+                                        if (type === "stay") {
+                                            // 숙소도 stage 상태에서 제거
+                                            setStageStays((prev) => prev.filter((s) => s.accId !== deletedId));
+                                            setStageStayPlans((prev) => {
+                                                const updated = { ...prev };
+                                                delete updated[deletedId];
+                                                return updated;
+                                            });
+                                            setDeletedStayIds((prev) =>
+                                                prev.includes(deletedId) ? prev : [...prev, deletedId]
+                                            );
+                                        }
+                                    }}
                                 />
                             </div>
                         </div>

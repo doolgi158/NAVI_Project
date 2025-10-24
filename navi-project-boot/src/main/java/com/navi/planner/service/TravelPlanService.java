@@ -19,5 +19,8 @@ public interface TravelPlanService {
     /** 여행계획 삭제 */
     void deletePlan(Long planId);
 
+    /** ✅ 단일 일정(여행지/숙소 등) 삭제 */
+    void deleteItem(Long itemId);
+
 
 }

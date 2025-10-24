@@ -14,6 +14,11 @@ export default function PlanSidebar({
     state = {},
     handleConfirm = () => { },
     setMode = () => { },
+    stageTravels = [],
+    stageStays = [],
+    stageStayPlans = {},
+    deletedTravelIds = [],
+    deletedStayIds = [],
 }) {
     return (
         <div
@@ -103,10 +108,13 @@ export default function PlanSidebar({
                                                     dayjs(meta.endDate),
                                                 ],
                                                 times: state?.dayTimes || {},
-                                                selectedTravels: state?.selectedTravels || [],
-                                                selectedStays: state?.selectedStays || [],
-                                                stayPlans: state?.stayPlans || {},
+                                                selectedTravels: stageTravels,      // ✅ 수정된 stageTravels 전달
+                                                selectedStays: stageStays,          // ✅ 수정된 stageStays 전달
+                                                stayPlans: stageStayPlans,          // ✅ 수정된 숙소배정 전달
                                             },
+                                            deletedTravelIds,
+                                            deletedStayIds,
+                                            refreshSource: "scheduler",
                                         },
                                     });
                                 }}

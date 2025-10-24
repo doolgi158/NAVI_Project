@@ -80,12 +80,14 @@ public class TravelPlanController {
         return ResponseEntity.ok(ApiResponse.success("수정 완료"));
     }
 
-    /** ✅ [DELETE] 여행계획 삭제 */
-    @DeleteMapping("/{planId}")
-    public ResponseEntity<ApiResponse<String>> deletePlan(@PathVariable Long planId) {
-        log.info("🗑️ 여행계획 삭제 요청: planId={}", planId);
-        travelPlanService.deletePlan(planId);
-        return ResponseEntity.ok(ApiResponse.success("삭제 완료"));
+    /** ✅ [DELETE] 단일 일정(여행지/숙소 등) 삭제 */
+    @DeleteMapping("/items/{itemId}")
+    public ResponseEntity<ApiResponse<String>> deletePlanItem(
+            @PathVariable Long itemId
+    ) {
+        log.info("🗑️ 여행계획 내 일정(아이템) 삭제 요청: itemId={}", itemId);
+        travelPlanService.deleteItem(itemId);
+        return ResponseEntity.ok(ApiResponse.success("일정 아이템 삭제 완료"));
     }
 
     /** ✅ JWT 토큰에서 userId 추출 */

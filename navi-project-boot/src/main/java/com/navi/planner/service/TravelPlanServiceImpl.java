@@ -5,6 +5,7 @@ import com.navi.planner.domain.TravelPlanDay;
 import com.navi.planner.domain.TravelPlanItem;
 import com.navi.planner.dto.TravelPlanListResponseDTO;
 import com.navi.planner.dto.TravelPlanRequestDTO;
+import com.navi.planner.repository.TravelPlanItemRepository;
 import com.navi.planner.repository.TravelPlanRepository;
 import com.navi.accommodation.domain.Acc;
 import com.navi.accommodation.repository.AccRepository;
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
 public class TravelPlanServiceImpl implements TravelPlanService {
 
     private final TravelPlanRepository travelPlanRepository;
+    private final TravelPlanItemRepository travelPlanItemRepository;
     private final UserRepository userRepository;
     private final AccRepository accRepository;
     private final EntityManager em;
@@ -145,7 +147,6 @@ public class TravelPlanServiceImpl implements TravelPlanService {
     /** ✅ 여행계획 수정 */
     @Override
     public void updatePlan(Long planId, String userId, TravelPlanRequestDTO dto) {
-        log.info("✏️ 여행계획 수정 요청: planId={}, userId={}", planId, userId);
 
         TravelPlan plan = travelPlanRepository.findByIdWithDaysAndItems(planId)
                 .orElseThrow(() -> new EntityNotFoundException("해당 여행계획을 찾을 수 없습니다."));
@@ -162,8 +163,18 @@ public class TravelPlanServiceImpl implements TravelPlanService {
                 dto.getThumbnailPath()
         );
 
-        plan.getDays().clear();
+        // ✅ 기존 일정과 아이템 완전 삭제 (DB 반영 포함)
+        if (plan.getDays() != null && !plan.getDays().isEmpty()) {
+            plan.getDays().forEach(day -> {
+                if (day.getItems() != null && !day.getItems().isEmpty()) {
+                    day.getItems().clear(); // item clear
+                }
+            });
+            plan.getDays().clear();
+            em.flush(); // ✅ 즉시 삭제 반영
+        }
 
+        // ✅ 새 일정 추가
         if (dto.getDays() != null) {
             dto.getDays().forEach(dayDto -> {
                 TravelPlanDay day = TravelPlanDay.builder()
@@ -174,6 +185,7 @@ public class TravelPlanServiceImpl implements TravelPlanService {
 
                 if (dayDto.getItems() != null) {
                     var itemEntities = dayDto.getItems().stream()
+                            .filter(itemDto -> !itemDto.isDeleted())
                             .map(itemDto -> {
                                 Double lat = itemDto.getLat();
                                 Double lng = itemDto.getLng();
@@ -185,14 +197,12 @@ public class TravelPlanServiceImpl implements TravelPlanService {
                                     try {
                                         Acc acc = accRepository.findById(itemDto.getStayId()).orElse(null);
                                         if (acc != null && acc.getMapy() != null && acc.getMapx() != null) {
-                                            lat = acc.getMapy().doubleValue(); // ✅ BigDecimal → Double 안전 변환
+                                            lat = acc.getMapy().doubleValue();
                                             lng = acc.getMapx().doubleValue();
                                             if (lat == 0.0 || lng == 0.0) {
-
                                                 lat = null;
                                                 lng = null;
                                             }
-
                                         } else {
                                             log.warn("⚠️ 숙소 좌표 없음: stayId={}", itemDto.getStayId());
                                         }
@@ -223,8 +233,9 @@ public class TravelPlanServiceImpl implements TravelPlanService {
             });
         }
 
-        log.info("✅ 여행계획 수정 완료: planId={}", planId);
+        em.flush(); // ✅ 변경사항 즉시 DB 반영
     }
+
 
     /** ✅ 여행계획 삭제 */
     @Override
@@ -238,5 +249,19 @@ public class TravelPlanServiceImpl implements TravelPlanService {
         travelPlanRepository.delete(plan);
         em.flush(); // ✅ 삭제 순서 강제 반영
         log.info("✅ 여행계획 및 하위 일정 삭제 완료: planId={}", planId);
+    }
+
+    /** ✅ 개별 일정(여행지/숙소 등) 삭제 */
+    @Override
+    public void deleteItem(Long itemId) {
+        log.info("🗑️ 단일 일정 삭제 요청: itemId={}", itemId);
+
+        if (!travelPlanItemRepository.existsById(itemId)) {
+            throw new EntityNotFoundException("삭제할 일정 아이템이 존재하지 않습니다.");
+        }
+
+        travelPlanItemRepository.deleteItemById(itemId);
+        em.flush(); // ✅ 즉시 반영
+        log.info("✅ 일정 아이템 삭제 완료: itemId={}", itemId);
     }
 }

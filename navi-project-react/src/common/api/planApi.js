@@ -18,10 +18,12 @@ export const savePlan = async (planData) => {
 export const getMyPlans = async () => {
   try {
     const res = await api.get(`${host}`);
-    return res.data?.data || [];
+    // ✅ 응답 구조 통일 (data || data.data)
+    const data = res.data?.data ?? res.data ?? [];
+    return Array.isArray(data) ? data : [];
   } catch (err) {
     console.error("❌ getMyPlans() 요청 실패:", err);
-    throw err;
+    return [];
   }
 };
 
@@ -79,6 +81,24 @@ export const deletePlan = async (planId) => {
     throw err;
   }
 };
+
+/** ✅ 단일 일정(여행지/숙소 등) 삭제 */
+export const deletePlanItem = async (itemId) => {
+  if (!itemId || itemId === "null" || itemId === "undefined") {
+    console.warn("⚠️ deletePlanItem 호출 중단: 잘못된 itemId =", itemId);
+    return null;
+  }
+
+  try {
+    const res = await api.delete(`${host}/items/${itemId}`);
+    console.log(`🗑️ deletePlanItem(${itemId}) 성공:`, res.data);
+    return res.data;
+  } catch (err) {
+    console.error(`❌ deletePlanItem(${itemId}) 요청 실패:`, err);
+    throw err;
+  }
+};
+
 
 /** ⚠️ (보류) 내 여행 공유 — 백엔드 미구현 */
 export const sharePlan = async (planId) => {
