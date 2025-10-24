@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
-import { useDispatch } from "react-redux";
-import { setReserveData } from "../../../common/slice/paymentSlice";
 import { useLocation, useNavigate } from "react-router-dom";
+import { setReserveData } from "../../../common/slice/paymentSlice";
+import { useDispatch } from "react-redux";
 import axios from "axios";
+import dayjs from "dayjs";
 import MainLayout from "../../layout/MainLayout";
 import {
   Card,
@@ -49,9 +50,26 @@ const SeatSelectPage = () => {
     flight?.flightId?.flightId || flight?.flightNo || flight?.flightId;
   const depTimeValue = flight?.flightId?.depTime || flight?.depTime;
 
+  const formatDateTimeKOR = (dateStr) => {
+    if (!dateStr) return "";
+    const date = new Date(dateStr);
+    const days = ["일", "월", "화", "수", "목", "금", "토"];
+    return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(
+      2,
+      "0"
+    )}.${String(date.getDate()).padStart(
+      2,
+      "0"
+    )} (${days[date.getDay()]}) ${String(date.getHours()).padStart(
+      2,
+      "0"
+    )}:${String(date.getMinutes()).padStart(2, "0")}`;
+  };
+
   // ✅ 좌석 데이터 불러오기
   const fetchSeats = useCallback(async () => {
     if (!flightIdValue || !depTimeValue) return;
+
     setLoading(true);
     try {
       const formattedDepTime = depTimeValue.includes("T")
@@ -124,7 +142,7 @@ const SeatSelectPage = () => {
     setTotalPrice(updated.reduce((sum, s) => sum + (s.totalPrice || 0), 0));
   };
 
-  /** ✅ 예약 저장 + 결제 페이지 이동 */
+  // ✅ 예약 insert 및 다음단계 이동
   const handleNext = async () => {
     if (selectedSeats.length !== passengerCount)
       return message.warning(`탑승객 수(${passengerCount})에 맞게 좌석을 선택하세요.`);
@@ -141,6 +159,7 @@ const SeatSelectPage = () => {
         "Content-Type": "application/json",
       };
 
+      // ✅ 예약 DTO 구성
       const currentDto = {
         flightId: flightIdValue,
         depTime: flight?.depTime?.split("T")[0],
@@ -150,13 +169,14 @@ const SeatSelectPage = () => {
         status: "PENDING",
       };
 
+      // ✅ 서버 insert
       const res = await axios.post(
         `${API_SERVER_HOST}/api/flight/reservation`,
         currentDto,
         { headers }
       );
 
-      // ✅ 왕복: 출발편 선택 → 귀국편 좌석 선택으로 이동
+      // ✅ 왕복편이면 → 귀국편 이동
       if (isRoundTrip && step === "outbound") {
         navigate("/flight/seat", {
           state: {
@@ -166,118 +186,75 @@ const SeatSelectPage = () => {
             selectedInbound,
             passengerCount,
             passengers,
-            outboundDto: { ...res.data.data, selectedSeats },
+            outboundDto: res.data.data, // ✅ 출발편 insert 결과 저장
           },
         });
         return;
       }
 
-      // ✅ 결제 페이지 데이터 구성
-      const outboundData =
-        isRoundTrip && outboundDto ? outboundDto : res.data.data;
-      const inboundData =
-        isRoundTrip && step === "inbound" ? res.data.data : null;
+      // 결제용 items 배열 구성
+      const items = [];
 
-      const items = [
-        {
-          reserveId: outboundData?.frsvId,
-          amount: selectedOutbound.price * passengerCount,
-        },
-      ];
-      if (inboundData)
+      // 왕복일 경우, 먼저 출발편 예약(outboundDto)을 추가
+      if (isRoundTrip && outboundDto?.frsvId) {
         items.push({
-          reserveId: inboundData?.frsvId,
-          amount: selectedInbound?.price * passengerCount,
+          reserveId: outboundDto.frsvId,
+          amount: selectedOutbound.price * passengerCount,
         });
+      }
 
-      // ✅ Redux 저장
-      dispatch(
-        setReserveData({
+      // 지금 예약(편도 or 귀국편) 추가
+      items.push({
+        reserveId: res?.data?.data?.frsvId,
+        amount:
+          (step === "inbound"
+            ? (selectedInbound?.price || 0)
+            : (selectedOutbound?.price || 0)) * passengerCount,
+      });
+
+      dispatch(setReserveData({
+        rsvType: "FLY",
+        items,
+        itemData: { selectedOutbound, selectedInbound },
+        formData: {
+          passengers,
+          passengerCount,
+          totalPrice,
+        },
+      }));
+
+
+      // ✅ 편도 or 귀국편 완료 시 → 결제 페이지
+      message.success("항공편 예약이 완료되었습니다!");
+      navigate("/payment", {
+        state: {
           rsvType: "FLY",
           items,
-          itemData: { selectedOutbound, selectedInbound },
           formData: {
             passengers,
             passengerCount,
-            totalPrice:
-              selectedSeats.reduce((sum, s) => sum + (s.totalPrice || 0), 0) +
-              (outboundDto?.selectedSeats.reduce(
-                (sum, s) => sum + (s.totalPrice || 0), 0) || 0),
-            selectedSeats: [
-              ...(outboundDto?.selectedSeats || []),
-              ...(selectedSeats || []),
-            ],
+            totalPrice,
+            selectedSeats,
           },
-        })
-      );
-
-      // ✅ 결제 페이지 이동
-      message.success("항공편 예약이 완료되었습니다!");
-      navigate("/payment");
+          itemData: {
+            selectedOutbound,
+            selectedInbound,
+          },
+          outboundDto: isRoundTrip ? outboundDto : res.data.data,
+          inboundDto: isRoundTrip ? res.data.data : null,
+        }
+      });
     } catch (error) {
       console.error("❌ 예약 실패:", error);
-      message.error(
-        error.response?.data?.message || "예약 중 오류가 발생했습니다."
-      );
+      const msg =
+        error.response?.data?.message ||
+        "예약 중 오류가 발생했습니다. 다시 시도해주세요.";
+      message.error(msg);
     }
   };
 
   const handleBack = () => navigate(-1);
 
-  // ✅ SeatSection 컴포넌트
-  const SeatSection = ({ title, rows }) => {
-    const isPrestige = title.includes("비즈니스");
-    return (
-      <div
-        style={{
-          background: isPrestige
-            ? "rgba(220,232,255,0.25)"
-            : "rgba(212,242,232,0.25)",
-          borderRadius: 16,
-          padding: 18,
-          boxShadow: "inset 0 0 10px rgba(0,0,0,0.05)",
-          marginTop: 30,
-        }}
-      >
-        <Text strong style={{ color: isPrestige ? "#1e3a8a" : "#166534" }}>
-          {title}
-        </Text>
-        <Divider style={{ margin: "8px 0 12px" }} />
-        {Object.keys(rows)
-          .sort((a, b) => a - b)
-          .map((row) => (
-            <div
-              key={row}
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: 12,
-                marginBottom: 10,
-              }}
-            >
-              <Text
-                style={{
-                  width: 40,
-                  textAlign: "right",
-                  color: "#64748b",
-                  fontWeight: 500,
-                }}
-              >
-                {row}
-              </Text>
-              <div style={{ display: "flex", gap: 12 }}>
-                {rows[row].map((s) => (
-                  <SeatButton seat={s} key={s.seatNo} />
-                ))}
-              </div>
-            </div>
-          ))}
-      </div>
-    );
-  };
-
-  // ✅ SeatButton
   const SeatButton = ({ seat }) => {
     const selected = selectedSeats.some((s) => s.seatNo === seat.seatNo);
     const isPrestige = seat.seatClass === "PRESTIGE";
@@ -288,6 +265,7 @@ const SeatSelectPage = () => {
         : isPrestige
           ? "#dce8ff"
           : "#d4f2e8";
+
     const border = seat.isReserved
       ? "1px solid #d1d5db"
       : selected
@@ -320,13 +298,14 @@ const SeatSelectPage = () => {
     );
   };
 
-  // ✅ 전체 렌더링
+  // ✅ 렌더링 전체
   return (
     <MainLayout>
       <div style={{ background: "#f9fafb", minHeight: "100vh", padding: "50px 0" }}>
         <Row justify="center" gutter={[24, 24]}>
           <Col xs={23} lg={16} xl={14}>
             <Card
+              variant="borderless"
               style={{
                 borderRadius: 20,
                 boxShadow: "0 8px 24px rgba(0,0,0,0.05)",
@@ -348,7 +327,8 @@ const SeatSelectPage = () => {
               <Text type="secondary">{flight.flightNo}</Text>
               <div style={{ marginTop: 4, marginBottom: 20 }}>
                 <Text type="secondary">
-                  {flight.depTime} 출발 · {flight.arrTime} 도착
+                  {formatDateTimeKOR(flight?.depTime)} 출발 ·{" "}
+                  {formatDateTimeKOR(flight?.arrTime)} 도착
                 </Text>
               </div>
 
@@ -356,26 +336,125 @@ const SeatSelectPage = () => {
                 <Skeleton active paragraph={{ rows: 6 }} />
               ) : (
                 <Space direction="vertical" size={30} style={{ width: "100%" }}>
+                  {/* ✅ 비즈니스석 */}
                   {Object.keys(prestigeRows).length > 0 && (
-                    <SeatSection title="비즈니스석 (Prestige)" rows={prestigeRows} />
+                    <div
+                      style={{
+                        background: "rgba(220,232,255,0.25)",
+                        borderRadius: 16,
+                        padding: 18,
+                        boxShadow: "inset 0 0 10px rgba(0,0,0,0.05)",
+                      }}
+                    >
+                      <Text strong style={{ color: "#1e3a8a" }}>
+                        비즈니스석 (Prestige)
+                      </Text>
+                      <Divider style={{ margin: "8px 0 12px" }} />
+                      {Object.keys(prestigeRows)
+                        .sort((a, b) => a - b)
+                        .map((row) => (
+                          <div
+                            key={row}
+                            style={{
+                              display: "flex",
+                              justifyContent: "center",
+                              alignItems: "center",
+                              gap: 10,
+                              marginBottom: 10,
+                            }}
+                          >
+                            <Text
+                              style={{
+                                width: 40,
+                                textAlign: "right",
+                                color: "#64748b",
+                                fontWeight: 500,
+                              }}
+                            >
+                              {row}
+                            </Text>
+                            <div style={{ display: "flex", gap: 10 }}>
+                              {prestigeRows[row].map((s) => (
+                                <SeatButton seat={s} key={s.seatNo} />
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                    </div>
                   )}
+
+                  {/* ✅ 일반석 */}
                   {Object.keys(economyRows).length > 0 && (
-                    <SeatSection title="일반석 (Economy)" rows={economyRows} />
+                    <div
+                      style={{
+                        background: "rgba(212,242,232,0.25)",
+                        borderRadius: 16,
+                        padding: 18,
+                        marginTop: 30,
+                      }}
+                    >
+                      <Text strong style={{ color: "#166534" }}>
+                        일반석 (Economy)
+                      </Text>
+                      <Divider style={{ margin: "8px 0 12px" }} />
+                      {Object.keys(economyRows)
+                        .sort((a, b) => a - b)
+                        .map((row) => (
+                          <div
+                            key={row}
+                            style={{
+                              display: "flex",
+                              justifyContent: "center",
+                              alignItems: "center",
+                              gap: 12,
+                              marginBottom: 10,
+                            }}
+                          >
+                            <Text
+                              style={{
+                                width: 40,
+                                textAlign: "right",
+                                color: "#64748b",
+                                fontWeight: 500,
+                              }}
+                            >
+                              {row}
+                            </Text>
+                            <div style={{ display: "flex", gap: 12 }}>
+                              {economyRows[row].map((s, idx) => (
+                                <div
+                                  key={s.seatNo}
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    marginRight: idx === 2 ? 36 : 0,
+                                  }}
+                                >
+                                  <SeatButton seat={s} />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                    </div>
                   )}
                 </Space>
               )}
             </Card>
           </Col>
 
-          {/* 오른쪽 요약 카드 */}
+          {/* ✅ 오른쪽 선택 정보 */}
           <Col xs={23} lg={8} xl={6}>
             <Affix offsetTop={24}>
               <Card
                 bordered={false}
-                style={{ borderRadius: 16, boxShadow: "0 6px 20px rgba(0,0,0,0.06)" }}
+                style={{
+                  borderRadius: 16,
+                  boxShadow: "0 6px 20px rgba(0,0,0,0.06)",
+                }}
               >
                 <Text strong>선택 정보</Text>
-                <Divider />
+                <Divider style={{ margin: "8px 0 12px" }} />
                 {selectedSeats.length === 0 ? (
                   <Text type="secondary">좌석을 선택하세요.</Text>
                 ) : (
@@ -407,7 +486,15 @@ const SeatSelectPage = () => {
                   </Text>
                 </Row>
 
-                <Space style={{ width: "100%", marginTop: 18, justifyContent: "space-between" }}>
+                <Space
+                  direction="horizontal"
+                  size="middle"
+                  style={{
+                    width: "100%",
+                    marginTop: 18,
+                    justifyContent: "space-between",
+                  }}
+                >
                   <Button size="large" onClick={handleBack} style={{ flex: 1 }}>
                     뒤로가기
                   </Button>
@@ -440,7 +527,7 @@ const SeatSelectPage = () => {
           </Col>
         </Row>
       </div>
-    </MainLayout>
+    </MainLayout >
   );
 };
 
