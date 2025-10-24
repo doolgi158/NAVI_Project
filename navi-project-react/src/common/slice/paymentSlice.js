@@ -29,7 +29,7 @@ const paymentSlice = createSlice({
 		/* 결제 ID 생성 시 필요한 데이터 */
 		setPaymentData: (state, action) => {
 			const { totalAmount, paymentMethod, rsvType } = action.payload;
-			
+
 			if (totalAmount) state.totalAmount = totalAmount;
 			if (paymentMethod) state.paymentMethod = paymentMethod;
 			if (rsvType) state.rsvType = rsvType;
@@ -38,7 +38,7 @@ const paymentSlice = createSlice({
 		/* 결제 검증 시 필요한 데이터 */
 		setVerifyData: (state, action) => {
 			const { impUid, merchantId, totalAmount } = action.payload;
-			
+
 			state.impUid = impUid;
 			state.merchantId = merchantId;
 			state.totalAmount = totalAmount;
@@ -47,7 +47,7 @@ const paymentSlice = createSlice({
 		/* 결제 완료시 결제 상세 테이블에 들어가는 데이터 */
 		setDetailData: (state, action) => {
 			const { merchantId, rsvType, impUid, paymentMethod } = action.payload;
-			
+
 			state.merchantId = merchantId;
 			state.rsvType = rsvType;
 			state.impUid = impUid;

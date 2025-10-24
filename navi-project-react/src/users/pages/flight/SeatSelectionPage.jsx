@@ -37,6 +37,7 @@ const SeatSelectPage = () => {
     passengerCount = 1,
     passengers = [],
     outboundDto = null,
+    outboundTotalPrice = null, // ✅ 추가
   } = state || {};
 
   const flight = step === "outbound" ? selectedOutbound : selectedInbound;
@@ -187,6 +188,7 @@ const SeatSelectPage = () => {
             passengerCount,
             passengers,
             outboundDto: res.data.data, // ✅ 출발편 insert 결과 저장
+            outboundTotalPrice: totalPrice, // ✅ 출발편 총 금액 전달
           },
         });
         return;
@@ -199,33 +201,47 @@ const SeatSelectPage = () => {
       if (isRoundTrip && outboundDto?.frsvId) {
         items.push({
           reserveId: outboundDto.frsvId,
-          amount: selectedOutbound.price * passengerCount,
+          amount:
+            typeof outboundTotalPrice === "number"
+              ? outboundTotalPrice
+              : (selectedOutbound.price || 0) * passengerCount,
         });
       }
 
       // 지금 예약(편도 or 귀국편) 추가
       items.push({
         reserveId: res?.data?.data?.frsvId,
-        amount:
-          (step === "inbound"
-            ? (selectedInbound?.price || 0)
-            : (selectedOutbound?.price || 0)) * passengerCount,
+        amount: totalPrice,
       });
 
-      dispatch(setReserveData({
-        rsvType: "FLY",
-        items,
-        itemData: { selectedOutbound, selectedInbound },
-        formData: {
-          passengers,
-          passengerCount,
-          totalPrice,
-        },
-      }));
-
+      dispatch(
+        setReserveData({
+          rsvType: "FLY",
+          items,
+          itemData: { selectedOutbound, selectedInbound },
+          formData: {
+            passengers,
+            passengerCount,
+            totalPrice,
+          },
+        })
+      );
 
       // ✅ 편도 or 귀국편 완료 시 → 결제 페이지
       message.success("항공편 예약이 완료되었습니다!");
+      // ✅ 왕복일 경우: 출발편 + 귀국편 합산 금액
+      // ✅ 왕복일 경우: 출발편 + 귀국편 합산 금액
+      const finalTotalPrice =
+        isRoundTrip && typeof outboundTotalPrice === "number"
+          ? outboundTotalPrice + totalPrice
+          : totalPrice;
+
+      // ✅ 왕복일 경우: 출발/귀국편 좌석 목록 병합
+      const combinedSeats =
+        isRoundTrip && Array.isArray(outboundDto?.selectedSeats)
+          ? [...(outboundDto.selectedSeats || []), ...selectedSeats]
+          : selectedSeats;
+
       navigate("/payment", {
         state: {
           rsvType: "FLY",
@@ -233,8 +249,10 @@ const SeatSelectPage = () => {
           formData: {
             passengers,
             passengerCount,
-            totalPrice,
-            selectedSeats,
+            totalPrice: finalTotalPrice,
+            selectedSeats: combinedSeats, // ✅ 두 편 좌석 모두 전달
+            outboundSeats: outboundDto?.selectedSeats || selectedSeats, // ✅ 출발편 좌석
+            inboundSeats: step === "inbound" ? selectedSeats : [],      // ✅ 귀국편 좌석
           },
           itemData: {
             selectedOutbound,
@@ -242,8 +260,12 @@ const SeatSelectPage = () => {
           },
           outboundDto: isRoundTrip ? outboundDto : res.data.data,
           inboundDto: isRoundTrip ? res.data.data : null,
-        }
+          outboundTotalPrice, // ✅ 출발편 합계
+          inboundTotalPrice: totalPrice, // ✅ 귀국편 합계
+        },
       });
+
+
     } catch (error) {
       console.error("❌ 예약 실패:", error);
       const msg =
