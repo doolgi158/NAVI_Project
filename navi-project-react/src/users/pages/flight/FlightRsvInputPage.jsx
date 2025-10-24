@@ -200,7 +200,7 @@ const FlightRsvInputPage = () => {
       }
 
       message.success("항공편 예약이 완료되었습니다!");
-      
+
       // 결제용 items 배열 구성
       const totalPrice = (selectedOutbound.price + (selectedInbound?.price || 0)) * passengerCount;
 
@@ -231,7 +231,7 @@ const FlightRsvInputPage = () => {
           totalPrice,
         },
       }));
-      
+
       navigate(`/payment`, {
         state: {
           reservation: [resOut.data.data, resIn?.data?.data].filter(Boolean),

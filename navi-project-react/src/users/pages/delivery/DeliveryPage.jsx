@@ -12,6 +12,7 @@ import {
   Col,
   Modal
 } from "antd";
+import { ArrowLeftOutlined, } from "@ant-design/icons";
 import dayjs from "dayjs";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -353,14 +354,26 @@ const DeliveryPage = () => {
           {/* ✅ 왼쪽 입력폼 */}
           <Col xs={24} md={12}>
             <Card
-              bordered
               style={{
                 height: "100%",
                 borderRadius: 12,
                 boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                position: "relative",
               }}
               styles={{ body: { padding: "24px 28px" } }}
             >
+              <Button
+                type="text"
+                icon={<ArrowLeftOutlined />}
+                style={{
+                  position: "absolute",
+                  top: 20,
+                  left: 20,
+                  color: "#1677ff",
+                  fontWeight: "500",
+                }}
+                onClick={() => navigate(-1)}
+              ></Button>
               <Title level={3} style={{ textAlign: "center", color: "#1677ff" }}>
                 짐배송 예약
               </Title>

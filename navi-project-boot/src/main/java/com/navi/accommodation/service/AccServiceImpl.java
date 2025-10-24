@@ -98,6 +98,7 @@ public class AccServiceImpl implements AccService {
         acc.changeFromRequestDTO(dto);
         return accRepository.save(acc);
     }
+
     // 3. 숙소 삭제
     @Override
     public void deleteAcc(Long accNo) {
@@ -115,6 +116,7 @@ public class AccServiceImpl implements AccService {
 
         accRepository.delete(acc);
     }
+
     // 3. 대표 이미지 변경
     @Override
     public void updateMainImage(String accId) {
@@ -226,7 +228,6 @@ public class AccServiceImpl implements AccService {
 
         return AccDetailResponseDTO.fromEntity(acc);
     }
-
 
 
     @Override

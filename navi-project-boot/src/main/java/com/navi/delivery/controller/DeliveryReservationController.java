@@ -46,6 +46,19 @@ public class DeliveryReservationController {
         return ResponseEntity.ok(ApiResponse.success(reservations));
     }
 
+    // 마이페이지용 예약 목록 조회
+    @GetMapping("/my")
+    public ResponseEntity<ApiResponse<List<DeliveryReservationDTO>>> getMyReservations(
+            @AuthenticationPrincipal UserSecurityDTO user
+    ) {
+        List<DeliveryReservationDTO> list = deliveryReservationService
+                .getReservationsByUser(user.getNo())
+                .stream()
+                .map(DeliveryReservationDTO::fromEntity)
+                .toList();
+        return ResponseEntity.ok(ApiResponse.success(list));
+    }
+
     /*
      * 3. 단일 예약 상세 조회
      * - /api/delivery/rsv/{drsvId}

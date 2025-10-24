@@ -20,7 +20,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name="NAVI_ROOM")
+@Table(name = "NAVI_ROOM")
 @SequenceGenerator(
         name = "room_generator",
         sequenceName = "ROOM_SEQ",
@@ -28,7 +28,8 @@ import java.util.List;
         allocationSize = 1)
 public class Room {
     /* === COLUMN 정의 === */
-    @Id @Column(name = "room_no")
+    @Id
+    @Column(name = "room_no")
     private Long roomNo;
 
     @Column(name = "room_id", length = 20, unique = true, updatable = false)
@@ -39,7 +40,7 @@ public class Room {
 
     /* 연관관계 설정 */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name="accNo", nullable = false)
+    @JoinColumn(name = "accNo", nullable = false)
     @JsonBackReference
     private Acc acc;
 
@@ -114,6 +115,7 @@ public class Room {
         if (nonEmptyOrNull(dto.getWeekendFee()) != null) weekendFee = Integer.parseInt(dto.getWeekendFee());
         if (nonEmptyOrNull(dto.getHasWifi()) != null) hasWifi = "1".equals(dto.getHasWifi());
     }
+
     /* === AccRequestDTO : 관리자 전용 === */
     public void changeFromRequestDTO(RoomRequestDTO dto) {
         if (nonEmptyOrNull(dto.getRoomName()) != null) roomName = dto.getRoomName();
@@ -123,17 +125,21 @@ public class Room {
         if (nonEmptyOrNull(dto.getMaxCnt()) != null) maxCnt = Integer.parseInt(dto.getMaxCnt());
         if (nonEmptyOrNull(dto.getWeekdayFee()) != null) weekdayFee = Integer.parseInt(dto.getWeekdayFee());
         if (nonEmptyOrNull(dto.getWeekendFee()) != null) weekendFee = Integer.parseInt(dto.getWeekendFee());
-        if (nonEmptyOrNull(dto.getHasWifi()) != null) hasWifi = "1".equals(dto.getHasWifi());
+        if (dto.getHasWifi() != null) this.hasWifi = dto.getHasWifi();
+        if (dto.getIsActive() != null) this.isActive = dto.getIsActive();
     }
+
     /* === 가격 변경 === */
     public void changePrice(Integer weekdayFee, Integer weekendFee) {
         if (weekdayFee != null) this.weekdayFee = weekdayFee;
         if (weekendFee != null) this.weekendFee = weekendFee;
     }
+
     /* 유효성 검증용 유틸 메서드 */
     private String nonEmptyOrNull(String value) {
         return (value != null && !value.isBlank()) ? value : null;
     }
+
     private Integer parseOrDefault(String value, int defaultVal) {
         try {
             int result = Integer.parseInt(value);

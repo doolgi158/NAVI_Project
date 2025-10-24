@@ -1,7 +1,7 @@
 package com.navi.user.security;
 
+import com.navi.admin.user.repository.HistoryRepository;
 import com.navi.user.enums.UserRole;
-import com.navi.user.repository.HistoryRepository;
 import com.navi.user.repository.TryLoginRepository;
 import com.navi.user.repository.UserRepository;
 import com.navi.user.security.filter.JWTCheckFilter;
@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -30,6 +31,7 @@ import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     private final TryLoginRepository tryLoginRepository;
@@ -54,12 +56,12 @@ public class SecurityConfig {
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/api/adm/**", "/api/admin/**").hasRole(UserRole.ADMIN.name())
-                .requestMatchers("/api/users/**", "/api/seats/**", "/api/travel/**", "/api/flight/**", "/api/delivery/**",
+                .requestMatchers("/api/users/**", "/api/seats/**", "/api/travel/**", "/api/flight/**",
                         "/api/auth/**", "/api/accommodations/**", "/api/townships/**", "/api/rooms/**", "/api/reservation/**",
                         "/api/activity", "/api/payment/**", "/uploads/**", "/images/**")
-                        .permitAll()
+                .permitAll()
                 .requestMatchers("/api/plans/**").authenticated()
-                .requestMatchers("/api/users/detail/**").hasAnyRole(UserRole.USER.name())
+                .requestMatchers("/api/users/detail/**", "/api/delivery/**").hasAnyRole(UserRole.USER.name())
                 .anyRequest().permitAll()
         );
 

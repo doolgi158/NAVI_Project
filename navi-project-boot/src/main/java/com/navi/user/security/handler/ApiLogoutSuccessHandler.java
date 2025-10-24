@@ -1,10 +1,10 @@
 package com.navi.user.security.handler;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.navi.admin.user.repository.HistoryRepository;
 import com.navi.user.domain.History;
 import com.navi.user.domain.User;
-import com.navi.user.dto.HistoryDTO;
-import com.navi.user.repository.HistoryRepository;
 import com.navi.user.repository.UserRepository;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,12 +14,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.stereotype.Component;
-import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -45,10 +43,12 @@ public class ApiLogoutSuccessHandler implements LogoutSuccessHandler {
             try {
                 ObjectMapper mapper = new ObjectMapper();
                 Map<String, Object> json = mapper.readValue(
-                        body, new TypeReference<Map<String, Object>>() {}
+                        body, new TypeReference<Map<String, Object>>() {
+                        }
                 );
                 usernameFromBody = (String) json.get("username");
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
 
         // 인증 객체에서 사용자 이름 추출

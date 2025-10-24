@@ -1,12 +1,12 @@
 package com.navi.user.controller.user;
 
+import com.navi.admin.user.repository.HistoryRepository;
 import com.navi.common.response.ApiResponse;
 import com.navi.user.domain.History;
 import com.navi.user.domain.User;
 import com.navi.user.dto.HistoryDTO;
 import com.navi.user.dto.SocialDTO;
 import com.navi.user.enums.SocialState;
-import com.navi.user.repository.HistoryRepository;
 import com.navi.user.repository.UserRepository;
 import com.navi.user.security.util.JWTUtil;
 import com.navi.user.service.social.SocialLoginService;

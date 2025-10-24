@@ -10,7 +10,7 @@ import { COLORS } from "../../../admin/mockdata/dashboardMockData";
 const { Title } = Typography;
 const money = (v) => `₩${(v || 0).toLocaleString()}`;
 
-const DashboardKpiSection = ({ summary, loading }) => {
+const KpiSection = ({ summary, loading }) => {
     // 아직 데이터가 안 들어왔을 때
     if (!summary || !summary.users) {
         return (
@@ -117,4 +117,4 @@ const DashboardKpiSection = ({ summary, loading }) => {
     );
 };
 
-export default DashboardKpiSection;
+export default KpiSection;

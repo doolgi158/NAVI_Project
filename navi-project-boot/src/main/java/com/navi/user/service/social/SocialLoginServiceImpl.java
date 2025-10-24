@@ -1,5 +1,6 @@
 package com.navi.user.service.social;
 
+import com.navi.admin.user.repository.HistoryRepository;
 import com.navi.user.domain.History;
 import com.navi.user.domain.User;
 import com.navi.user.dto.SocialDTO;
@@ -7,7 +8,6 @@ import com.navi.user.dto.users.UserDTO;
 import com.navi.user.enums.SocialState;
 import com.navi.user.enums.UserRole;
 import com.navi.user.enums.UserState;
-import com.navi.user.repository.HistoryRepository;
 import com.navi.user.repository.SocialRepository;
 import com.navi.user.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -42,8 +42,8 @@ public class SocialLoginServiceImpl implements SocialLoginService {
         // 프로바이더별 토큰/시간 정보 획득 (SocialDTO 반환)
         SocialDTO dto = switch (provider) {
             case google -> googleOAuthService.getTokenInfo(code);
-            case kakao  -> kakaoOAuthService.getTokenInfo(code);
-            case naver  -> naverOAuthService.getTokenInfo(code);
+            case kakao -> kakaoOAuthService.getTokenInfo(code);
+            case naver -> naverOAuthService.getTokenInfo(code);
         };
 
         // 클라이언트 IP 추출

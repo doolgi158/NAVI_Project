@@ -6,10 +6,15 @@ import com.navi.travel.domain.Travel;
 import com.navi.travel.repository.BookmarkRepository;
 import com.navi.travel.repository.LikeRepository;
 import com.navi.travel.repository.TravelRepository;
+import com.navi.user.domain.Log;
 import com.navi.user.domain.User;
+import com.navi.user.enums.ActionType;
+import com.navi.user.repository.LogRepository;
 import com.navi.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +30,7 @@ public class TravelActionServiceImpl implements TravelActionService {
     private final LikeRepository likeRepository;
     private final BookmarkRepository bookmarkRepository;
     private final UserRepository userRepository;
+    private final LogRepository logRepository;
 
     /**
      * ✅ 조회수 증가
@@ -34,6 +40,23 @@ public class TravelActionServiceImpl implements TravelActionService {
         int updated = travelRepository.incrementViews(travelId);
         if (updated == 0) {
             throw new EntityNotFoundException("여행지를 찾을 수 없습니다. (Travel ID: " + travelId + ")");
+        }
+
+        // 조회 로그 기록 추가
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) return;
+
+        Object principal = auth.getPrincipal();
+        if (principal instanceof com.navi.user.dto.users.UserSecurityDTO userDTO) {
+            userRepository.findById(userDTO.getId()).ifPresent(user -> {
+                Log log = Log.builder()
+                        .user(user)
+                        .actionType(ActionType.VIEW_TRAVEL)
+                        .targetId(travelId)
+                        .targetName("Travel View") // 또는 travelRepository.findById(travelId).get().getTitle()
+                        .build();
+                logRepository.save(log);
+            });
         }
     }
 
@@ -65,6 +88,7 @@ public class TravelActionServiceImpl implements TravelActionService {
             travel.incrementLikesCount(); // ✅ 증가
         }
         travel.setCounterOnlyChanged(true);
+
         return !likedBefore;
     }
 

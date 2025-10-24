@@ -1,10 +1,12 @@
 package com.navi.accommodation.dto.response;
 
 import com.navi.accommodation.domain.Acc;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 /* ========[AccListResponseDTO]========
            숙소 목록 조회 응답 DTO

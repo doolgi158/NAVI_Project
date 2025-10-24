@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { setVerifyData, clearPaymentData } from "../slice/paymentSlice";
 import { preparePayment, verifyPayment } from "../api/paymentService";
 import { initIamport } from "../util/iamport";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 
 /* =================================================================
 	[usePayment Hook]
@@ -14,7 +14,7 @@ import { useRef } from "react";
 export const usePayment = () => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
-	
+
 	const payment = useSelector((state) => state.payment);
 	const { items, rsvType, formData, totalAmount, paymentMethod } = payment;
 	console.log("************************", paymentMethod, rsvType);

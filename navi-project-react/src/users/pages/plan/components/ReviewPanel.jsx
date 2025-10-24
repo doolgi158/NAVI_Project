@@ -70,9 +70,9 @@ export default function ReviewPanel({
                                 <img
                                     src={
                                         s.accImages?.[0]
-                                            ? (s.accImages[0].startsWith("http")
-                                                ? s.accImages[0]
-                                                : `http://localhost:8080${s.accImages[0]}`)
+                                            ? (s.accImages?.[0].startsWith("http")
+                                                ? s.accImages?.[0]
+                                                : `http://localhost:8080${s.accImages?.[0]}`)
                                             : "https://placehold.co/80x80?text=Stay"
                                     }
                                     className="w-10 h-10 rounded object-cover"

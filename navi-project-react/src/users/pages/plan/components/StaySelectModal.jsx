@@ -100,22 +100,22 @@ export default function StaySelectModal({
               key={dateStr}
               onClick={() => toggleDate(dateStr)}
               className={`relative flex flex-col items-center border-2 rounded-xl p-3 cursor-pointer transition ${booked
-                  ? bookedStayId === stay?.accId
-                    ? "border-[#6846FF] bg-[#6846FF]/10"
-                    : "border-red-300 bg-red-50"
-                  : selected
-                    ? "border-[#6846FF] bg-[#6846FF]/10"
-                    : "border-gray-300 hover:border-[#6846FF]"
+                ? bookedStayId === stay?.accId
+                  ? "border-[#6846FF] bg-[#6846FF]/10"
+                  : "border-red-300 bg-red-50"
+                : selected
+                  ? "border-[#6846FF] bg-[#6846FF]/10"
+                  : "border-gray-300 hover:border-[#6846FF]"
                 }`}
             >
               <div
                 className={`absolute -top-3 text-xs font-bold px-2 py-1 rounded-full ${booked
-                    ? bookedStayId === stay?.accId
-                      ? "bg-[#6846FF] text-white"
-                      : "bg-red-500 text-white"
-                    : selected
-                      ? "bg-[#6846FF] text-white"
-                      : "bg-gray-200 text-gray-600"
+                  ? bookedStayId === stay?.accId
+                    ? "bg-[#6846FF] text-white"
+                    : "bg-red-500 text-white"
+                  : selected
+                    ? "bg-[#6846FF] text-white"
+                    : "bg-gray-200 text-gray-600"
                   }`}
               >
                 {dateStr}
@@ -143,12 +143,12 @@ export default function StaySelectModal({
 
               <p
                 className={`text-xs mt-2 font-medium ${booked
-                    ? bookedStayId === stay?.accId
-                      ? "text-[#6846FF]"
-                      : "text-red-600"
-                    : selected
-                      ? "text-[#6846FF]"
-                      : "text-gray-500"
+                  ? bookedStayId === stay?.accId
+                    ? "text-[#6846FF]"
+                    : "text-red-600"
+                  : selected
+                    ? "text-[#6846FF]"
+                    : "text-gray-500"
                   }`}
               >
                 {booked
