@@ -127,7 +127,7 @@ public class SeatServiceImpl implements SeatService {
         }
 
         // 3) 해당 날짜 범위 내 좌석 조회 → 예약 가능 좌석만
-        List<Seat> availableSeats = seatRepository.findByFlightAndDepTimeRange(
+        List<Seat> availableSeats = seatRepository.findAvailableSeatsForUpdate(
                         flightId, startOfDay, endOfDay
                 ).stream()
                 .filter(s -> !s.isReserved())

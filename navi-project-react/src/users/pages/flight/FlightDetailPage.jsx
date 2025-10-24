@@ -13,8 +13,6 @@ import {
   Divider,
 } from "antd";
 import {
-  ArrowRightOutlined,
-  ArrowLeftOutlined,
   LeftOutlined,
 } from "@ant-design/icons";
 

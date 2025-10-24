@@ -1,9 +1,22 @@
+// src/common/components/reservation/FlyRsvSumCard.jsx
 import React from "react";
 import { Card, Typography, Divider } from "antd";
 
 const { Title, Text } = Typography;
 
-const FlyRsvSumCard = ({ selectedOutbound, selectedInbound, totalAmount }) => {
+/**
+ * ✈️ 항공 결제/요약 전용 카드 컴포넌트
+ * - 출발편 / 귀국편 / 총금액 표시
+ * - FlightDetailPage의 오른쪽 디자인을 기반으로 재구성
+ * - 좌석 선택 시 좌석 추가금(totalPrice) 반영
+ */
+const FlyRsvSumCard = ({
+  selectedOutbound,
+  selectedInbound,
+  outboundTotalPrice, // ✅ 출발편 좌석 포함 합계
+  inboundTotalPrice,  // ✅ 귀국편 좌석 포함 합계
+  totalAmount,
+}) => {
   const formatTime = (str) => {
     if (!str) return "";
     const d = new Date(str);
@@ -57,8 +70,14 @@ const FlyRsvSumCard = ({ selectedOutbound, selectedInbound, totalAmount }) => {
                   {formatDate(selectedOutbound.depTime)} 출발
                 </Text>
                 <br />
+                {/* ✅ 좌석 추가금 포함 금액 표시 */}
                 <Text strong style={{ color: "#1677ff", fontSize: 15 }}>
-                  ₩{selectedOutbound.price?.toLocaleString()}
+                  ₩
+                  {Number(
+                    outboundTotalPrice ??
+                    selectedOutbound.price ??
+                    0
+                  ).toLocaleString()}
                 </Text>
               </div>
             </>
@@ -83,8 +102,14 @@ const FlyRsvSumCard = ({ selectedOutbound, selectedInbound, totalAmount }) => {
                   {formatDate(selectedInbound.depTime)} 출발
                 </Text>
                 <br />
+                {/* ✅ 좌석 추가금 포함 금액 표시 */}
                 <Text strong style={{ color: "#1677ff", fontSize: 15 }}>
-                  ₩{selectedInbound.price?.toLocaleString()}
+                  ₩
+                  {Number(
+                    inboundTotalPrice ??
+                    selectedInbound.price ??
+                    0
+                  ).toLocaleString()}
                 </Text>
               </div>
             </>
@@ -98,7 +123,7 @@ const FlyRsvSumCard = ({ selectedOutbound, selectedInbound, totalAmount }) => {
             level={4}
             style={{ margin: 0, color: "#1677ff", fontWeight: 700 }}
           >
-            ₩{totalAmount.toLocaleString()}원
+            ₩{Number(totalAmount ?? 0).toLocaleString()}
           </Title>
         </>
       )}

@@ -31,7 +31,11 @@ const PaymentPage = () => {
 	/* location.state */
 	const state = location.state;
 	const rsvType = state?.rsvType || null;
-	const items = Array.isArray(state?.items) ? state.items : [state?.items];
+	const items = state.items || [];
+	const summed = Array.isArray(items)
+		? items.reduce((a, b) => a + (Number(b?.amount || 0)), 0)
+		: 0;
+
 	const formData = state?.formData || null;
 	const itemData = state?.itemData || null;
 	console.log(formData);
@@ -90,6 +94,8 @@ const PaymentPage = () => {
 					<FlySumCard
 						selectedOutbound={itemData?.selectedOutbound}
 						selectedInbound={itemData?.selectedInbound}
+						outboundTotalPrice={state?.outboundTotalPrice}   // ✅ 추가
+						inboundTotalPrice={state?.inboundTotalPrice}     // ✅ 추가
 						totalAmount={totalAmount}
 					/>
 				);
