@@ -4,11 +4,13 @@ import storage from "redux-persist/lib/storage";
 import accReducer from "../slice/accSlice";
 import roomReducer from "../slice/roomSlice";
 import loginReducer from "../slice/loginSlice";
+import paymentReducer from "../slice/paymentSlice";
 
 const rootReducer = combineReducers({
   acc: accReducer,
   room: roomReducer,
   login: loginReducer,
+  payment: paymentReducer,
 });
 
 const persistConfig = {

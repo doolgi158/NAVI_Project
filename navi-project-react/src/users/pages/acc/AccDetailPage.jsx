@@ -18,7 +18,7 @@ const AccDetailPage = () => {
 	const dispatch = useDispatch();
 	
 	/* Redux */
-	const selectedAcc = useSelector((state) => state.acc.selectedAcc);      // 숙소 객체
+	//const selectedAcc = useSelector((state) => state.acc.selectedAcc);      // 숙소 객체
   	const selectedAccId = useSelector((state) => state.acc.selectedAccId);  // 숙소 ID (문자열)
 
 
@@ -130,6 +130,12 @@ const AccDetailPage = () => {
 
 	/* 예약 과정 */
 	const handleReserve = async (room) => {
+		// 로그인 체크
+		const token = localStorage.getItem("accessToken");
+		if (!token) {
+			message.warning("로그인이 필요한 서비스입니다.");
+			return;
+		}
 		if (!dateRange || dateRange.length !== 2) {
 			message.warning("체크인 및 체크아웃 날짜를 선택해주세요.");
 			return;
@@ -171,7 +177,11 @@ const AccDetailPage = () => {
 				},
 			];
 
-			const res = await axios.post(`/api/room/reserve/pending`, dtoList);
+			const res = await axios.post(`/api/room/reserve/pending`, dtoList, {
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			});
 
 			// 예약ID 추출
 			const generatedReserveId = res.data?.reserveId || (Array.isArray(res.data) && res.data[0]?.reserveId);

@@ -1,6 +1,7 @@
 package com.navi.room.service;
 
 import com.navi.room.dto.request.RoomRsvRequestDTO;
+import com.navi.room.dto.response.RoomPreRsvResponseDTO;
 import com.navi.room.dto.response.RoomRsvResponseDTO;
 
 import java.math.BigDecimal;
@@ -8,9 +9,9 @@ import java.util.List;
 
 public interface RoomRsvService {
     // 1. 단일 예약 생성 (결제 전)
-    RoomRsvResponseDTO createRoomReservation(RoomRsvRequestDTO dto);
+    RoomPreRsvResponseDTO createRoomReservation(RoomRsvRequestDTO dto);
     // 2. 다중 예약 생성 (한 예약 ID에 여러 객실 포함)
-    void createMultipleRoomReservations(String reserveId, Long userNo, List<RoomRsvRequestDTO> roomList);
+    RoomPreRsvResponseDTO createMultipleRoomReservations(List<RoomRsvRequestDTO> roomList);
     // 3. 예약 상태 변경
     void updateStatus(String reserveId, String status);
     // 4. 예약 조회

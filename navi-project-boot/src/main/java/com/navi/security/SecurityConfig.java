@@ -1,4 +1,4 @@
-package com.navi.security;
+package com.navi.user.security;
 
 import com.navi.admin.user.repository.HistoryRepository;
 import com.navi.security.filter.JWTCheckFilter;
@@ -56,12 +56,11 @@ public class SecurityConfig {
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/api/adm/**", "/api/admin/**").hasRole(UserRole.ADMIN.name())
-                .requestMatchers(
-                        "/api/users/**", "/api/auth/**", "/api/travel/**", "/api/accommodations/**",
-                        "/api/flight/**", "/api/townships/**", "/api/rooms/**", "/api/reservation/**",
-                        "/api/payment/**", "/api/activity", "/api/seats/**", "/images/**"
-                ).permitAll()
-                .requestMatchers("/api/plans/**").authenticated()
+                .requestMatchers("/api/users/**", "/api/seats/**", "/api/travel/**", "/api/flight/**",
+                        "/api/auth/**", "/api/accommodations/**", "/api/townships/**", "/api/rooms/**", "/api/reservation/**",
+                        "/api/activity", "/api/payment/**", "/uploads/**", "/images/**")
+                .permitAll()
+                .requestMatchers("/api/plans/**", "/api/room/reserve/**").authenticated()
                 .requestMatchers("/api/users/detail/**", "/api/delivery/**").hasAnyRole(UserRole.USER.name())
                 .anyRequest().permitAll()
         );

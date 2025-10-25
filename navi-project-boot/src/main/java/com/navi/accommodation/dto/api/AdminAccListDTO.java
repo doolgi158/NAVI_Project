@@ -20,7 +20,7 @@ public class AdminAccListDTO {
     private boolean hasCooking;    // 취사 가능
     private boolean hasParking;    // 주차 가능
     private boolean isActive;      // 운영 여부
-    private boolean isDeletable;   // 삭제 가능 여부
+    //private boolean isDeletable;   // 삭제 가능 여부
     private String checkInTime;    // 체크인 시간
     private String checkOutTime;   // 체크아웃 시간
     private Long viewCount;        // 조회수
@@ -45,8 +45,8 @@ public class AdminAccListDTO {
                         : "(미등록 지역)")
                 .hasCooking(acc.getHasCooking())
                 .hasParking(acc.getHasParking())
-                .isActive(acc.isActive())
-                .isDeletable(acc.isDeletable())
+                .isActive(acc.getActive())
+                //.isDeletable(acc.isDeletable())
                 .checkInTime(acc.getCheckInTime())
                 .checkOutTime(acc.getCheckOutTime())
                 .viewCount(acc.getViewCount())

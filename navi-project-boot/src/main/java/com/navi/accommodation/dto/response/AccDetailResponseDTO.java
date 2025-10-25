@@ -54,7 +54,7 @@ public class AccDetailResponseDTO {
                 .checkOutTime(acc.getCheckOutTime())
                 .hasCooking(acc.getHasCooking())
                 .hasParking(acc.getHasParking())
-                .active(acc.isActive())
+                .active(acc.getActive())
                 .viewCount(acc.getViewCount())
                 .build();
     }

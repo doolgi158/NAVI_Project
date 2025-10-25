@@ -4,6 +4,7 @@ import { Card, Typography, Form, Input, Button, Steps, Divider, Space, message }
 import { CalendarOutlined, TeamOutlined, HomeOutlined, DollarOutlined } from "@ant-design/icons";
 import { setReserveData } from "../../../common/slice/paymentSlice";
 import MainLayout from "../../layout/MainLayout";
+import { useEffect } from "react";
 
 const { Title, Text } = Typography;
 
@@ -13,6 +14,14 @@ const AccReservationPage = () => {
 	const dispatch = useDispatch();
 	const [form] = Form.useForm();
 
+	useEffect(() => {
+		const token = localStorage.getItem("accessToken");
+		if (!token) {
+			message.warning("로그인이 필요한 서비스입니다.");
+			navigate("/", { replace: true });
+		}
+	}, [navigate]);
+	
 	/* location.state */
 	const { rsvType, items, itemData, formData } = location.state || {};
 	

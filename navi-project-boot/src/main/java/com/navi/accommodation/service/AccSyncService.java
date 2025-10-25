@@ -170,6 +170,7 @@ public class AccSyncService {
 
                 acc.changeTownship(township);
                 acc.changeLocation(geo.getMapx(), geo.getMapy());
+                acc.changeCategory(geo.getCategory());
 
                 // 랜덤 필드 설정
                 AccRequestDTO dto = AccRequestDTO.builder()

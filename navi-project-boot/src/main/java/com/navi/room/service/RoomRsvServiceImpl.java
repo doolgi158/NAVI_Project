@@ -4,13 +4,17 @@ import com.navi.common.enums.RsvStatus;
 import com.navi.room.domain.Room;
 import com.navi.room.domain.RoomRsv;
 import com.navi.room.dto.request.RoomRsvRequestDTO;
+import com.navi.room.dto.response.RoomPreRsvResponseDTO;
 import com.navi.room.dto.response.RoomRsvResponseDTO;
 import com.navi.room.repository.RoomRepository;
 import com.navi.room.repository.RoomRsvRepository;
 import com.navi.user.domain.User;
+import com.navi.user.dto.users.UserSecurityDTO;
 import com.navi.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,7 +31,6 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class RoomRsvServiceImpl implements RoomRsvService {
-
     private final RoomRsvRepository roomRsvRepository;
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
@@ -36,11 +39,15 @@ public class RoomRsvServiceImpl implements RoomRsvService {
     /* 단일 객실 예약 생성 (결제 전) */
     @Override
     @Transactional
-    public RoomRsvResponseDTO createRoomReservation(RoomRsvRequestDTO dto) {
-        // 사용자 처리 (임시 userNo)
-        Long userNo = dto.getUserNo() != null ? dto.getUserNo() : 2L;
-        User user = userRepository.findById(userNo)
-                .orElseThrow(() -> new IllegalArgumentException("❌ 사용자를 찾을 수 없습니다."));
+    public RoomPreRsvResponseDTO createRoomReservation(RoomRsvRequestDTO dto) {
+        // 로그인 사용자 가져오기 (SecurityContextHolder 사용)
+        User user = getLoginUser();
+
+        // 이미 reserveId가 있다면 그대로 사용 (다중 예약 시)
+        String reserveId = dto.getReserveId();
+        if (reserveId == null || reserveId.isBlank()) {
+            reserveId = generateReserveId();
+        }
 
         // 객실 조회
         Room room = roomRepository.findByRoomId(dto.getRoomId())
@@ -49,7 +56,6 @@ public class RoomRsvServiceImpl implements RoomRsvService {
         // 날짜 검증
         LocalDate start = dto.getStartDate();
         LocalDate end = dto.getEndDate();
-
         if (start == null || end == null || !end.isAfter(start)) {
             throw new IllegalArgumentException("❌ 숙박 기간이 유효하지 않습니다.");
         }
@@ -73,15 +79,6 @@ public class RoomRsvServiceImpl implements RoomRsvService {
         // 재고 차감 (start ~ end-1)
         stockService.decreaseStock(room, start, end, dto.getQuantity());
 
-        // 예약 ID 생성 (예: 20251020ACC0001)
-        String reserveId = dto.getReserveId();
-        if (reserveId == null || reserveId.isBlank()) {
-            String today = LocalDate.now(ZoneId.of("Asia/Seoul"))
-                    .format(DateTimeFormatter.BASIC_ISO_DATE);
-            long seq = roomRsvRepository.count() + 1;
-            reserveId = String.format("%sACC%04d", today, seq);
-        }
-
         // 예약 엔티티 생성
         RoomRsv rsv = RoomRsv.builder()
                 .reserveId(reserveId)
@@ -100,35 +97,38 @@ public class RoomRsvServiceImpl implements RoomRsvService {
         log.info("✅ 객실 예약 생성 완료 → reserveId={}, user={}, room={}, stay={}~{}, qty={}, nights={}, total={}",
                 reserveId, user.getNo(), room.getRoomId(), start, end, dto.getQuantity(), serverNights, totalPrice);
 
-        dto.setReserveId(reserveId);
-
-        return RoomRsvResponseDTO.fromEntity(rsv);
+        return RoomPreRsvResponseDTO.builder()
+                .success(true)
+                .reserveId(reserveId)
+                .message("✅ 객실 임시 예약 생성 완료")
+                .build();
     }
 
     /* 다중 객실 예약 (한 예약 ID에 여러 객실) */
     @Override
     @Transactional
-    public void createMultipleRoomReservations(String reserveId, Long userNo, List<RoomRsvRequestDTO> roomList) {
-        log.info("[RoomRsvService] 다중 객실 예약 생성 시작 → user={}, count={}", userNo, roomList.size());
+    public RoomPreRsvResponseDTO createMultipleRoomReservations(List<RoomRsvRequestDTO> roomList) {
+        log.info("[RoomRsvService] 다중 객실 예약 생성 시작 → count={}", roomList.size());
 
-        BigDecimal totalAmount = BigDecimal.ZERO;
-        String generatedReserveId = reserveId;
-
-        for (RoomRsvRequestDTO dto : roomList) {
-            dto.setUserNo(userNo);
-
-            if (generatedReserveId != null) { dto.setReserveId(generatedReserveId); }
-
-            RoomRsvResponseDTO rsv = createRoomReservation(dto);
-            if (generatedReserveId == null) {
-                generatedReserveId = rsv.getReserveId();
-                log.info("🔖 다중 예약 공통 ID 생성 완료 → {}", generatedReserveId);
-            }
-
-            totalAmount = totalAmount.add(rsv.getPrice().multiply(BigDecimal.valueOf(dto.getQuantity())));
+        if (roomList.isEmpty()) {
+            throw new IllegalArgumentException("요청 데이터가 비어있습니다.");
         }
 
-        log.info("💰 다중 예약 완료 → reserveId={}, totalAmount={}, totalRooms={}", reserveId, totalAmount, roomList.size());
+        // 예약 ID 한번만 생성
+        String reserveId = generateReserveId();
+        BigDecimal totalAmount = BigDecimal.ZERO;
+
+        // 각 객실 예약 생성
+        for (RoomRsvRequestDTO dto : roomList) {
+            dto.setReserveId(reserveId);
+            RoomPreRsvResponseDTO result = createRoomReservation(dto); // 단일 생성 재사용
+        }
+
+        return RoomPreRsvResponseDTO.builder()
+                .success(true)
+                .reserveId(reserveId)
+                .message("✅ 다중 객실 임시 예약 생성 완료")
+                .build();
     }
 
     /* 예약 상태 변경 + 재고 복구 */
@@ -207,5 +207,27 @@ public class RoomRsvServiceImpl implements RoomRsvService {
         RoomRsv rsv = roomRsvRepository.findByReserveId(roomRsvId)
                 .orElseThrow(() -> new IllegalArgumentException("예약 정보를 찾을 수 없습니다."));
         return RoomRsvResponseDTO.fromEntity(rsv);
+    }
+
+    /* === 공통 유틸 메서드 === */
+    /* 로그인 사용자 조회 */
+    private User getLoginUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("로그인이 필요한 서비스입니다.");
+        }
+
+        UserSecurityDTO loginUser = (UserSecurityDTO) authentication.getPrincipal();
+
+        return userRepository.findByNo(loginUser.getNo())
+                .orElseThrow(() -> new IllegalArgumentException("❌ 사용자 정보를 찾을 수 없습니다."));
+    }
+
+    /* 예약 ID 생성 (예: 20251025ACC0001) */
+    private String generateReserveId() {
+        String today = LocalDate.now(ZoneId.of("Asia/Seoul"))
+                .format(DateTimeFormatter.BASIC_ISO_DATE);
+        long seq = roomRsvRepository.count() + 1;
+        return String.format("%sACC%04d", today, seq);
     }
 }
