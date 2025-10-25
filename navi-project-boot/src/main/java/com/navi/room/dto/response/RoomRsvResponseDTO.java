@@ -2,7 +2,10 @@ package com.navi.room.dto.response;
 
 import com.navi.common.enums.RsvStatus;
 import com.navi.room.domain.RoomRsv;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -25,6 +28,9 @@ public class RoomRsvResponseDTO {
     private Integer quantity;     // 객실 수량
     private BigDecimal price;     // 객실 단가
     private RsvStatus rsvStatus;  // 예약 상태
+    private int guestCount;       // 투숙인원
+    private String accTitle;      // 숙소명
+    private String roomName;      // 객실명
 
     public static RoomRsvResponseDTO fromEntity(RoomRsv entity) {
         return RoomRsvResponseDTO.builder()
@@ -36,6 +42,7 @@ public class RoomRsvResponseDTO {
                 .quantity(entity.getQuantity())
                 .price(entity.getPrice())
                 .rsvStatus(entity.getRsvStatus())
+                .guestCount(entity.getGuestCount())
                 .build();
     }
 }

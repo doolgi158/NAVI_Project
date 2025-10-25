@@ -1,12 +1,15 @@
 package com.navi.room.controller;
 
+import com.navi.common.response.ApiResponse;
 import com.navi.room.dto.request.RoomRsvRequestDTO;
 import com.navi.room.dto.response.RoomPreRsvResponseDTO;
 import com.navi.room.dto.response.RoomRsvResponseDTO;
 import com.navi.room.service.RoomRsvService;
+import com.navi.user.dto.auth.UserSecurityDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -67,12 +70,18 @@ public class RoomRsvController {
 
     /* 사용자별 예약 목록 조회 */
     @GetMapping
-    public ResponseEntity<List<RoomRsvResponseDTO>> getReservations(
-            @RequestParam(required = false) String userId) {
+    public ApiResponse<List<RoomRsvResponseDTO>> getReservations(
+            @AuthenticationPrincipal UserSecurityDTO userSecurity) {
 
-        List<RoomRsvResponseDTO> list = roomRsvService.findAllByUserId(userId);
+        if (userSecurity == null) {
+            throw new IllegalArgumentException("❌ 로그인 정보가 없습니다. 토큰이 만료되었을 수 있습니다.");
+        }
 
-        return ResponseEntity.ok(list);
+        log.info("🔐 [예약 조회 요청] 토큰 기반 사용자: {}", userSecurity.getId());
+
+        List<RoomRsvResponseDTO> list = roomRsvService.findAllByUserId(userSecurity.getId());
+
+        return ApiResponse.success(list);
     }
 
     /* 단일 예약 상세 조회 */

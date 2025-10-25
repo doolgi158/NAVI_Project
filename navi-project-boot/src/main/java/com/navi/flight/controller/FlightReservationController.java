@@ -4,7 +4,7 @@ import com.navi.common.response.ApiResponse;
 import com.navi.flight.domain.FlightReservation;
 import com.navi.flight.dto.FlightReservationDTO;
 import com.navi.flight.service.FlightReservationService;
-import com.navi.user.dto.users.UserSecurityDTO;
+import com.navi.user.dto.auth.UserSecurityDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

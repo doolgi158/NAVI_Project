@@ -1,5 +1,6 @@
 package com.navi.room.service;
 
+import com.navi.accommodation.domain.Acc;
 import com.navi.common.enums.RsvStatus;
 import com.navi.room.domain.Room;
 import com.navi.room.domain.RoomRsv;
@@ -9,7 +10,7 @@ import com.navi.room.dto.response.RoomRsvResponseDTO;
 import com.navi.room.repository.RoomRepository;
 import com.navi.room.repository.RoomRsvRepository;
 import com.navi.user.domain.User;
-import com.navi.user.dto.users.UserSecurityDTO;
+import com.navi.user.dto.auth.UserSecurityDTO;
 import com.navi.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -189,15 +190,30 @@ public class RoomRsvServiceImpl implements RoomRsvService {
     @Override
     @Transactional(readOnly = true)
     public List<RoomRsvResponseDTO> findAllByUserId(String userId) {
-        // userId로 user 조회
+        // 1. 유저 조회
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalArgumentException("❌ 사용자 정보를 찾을 수 없습니다."));
 
-        // userNo로 예약 조회
+        // 2. 예약 목록 조회
         List<RoomRsv> list = roomRsvRepository.findAllByUserNo(user.getNo());
 
+        // 3. DTO 변환 (숙소명 + 객실명 포함)
         return list.stream()
-                .map(RoomRsvResponseDTO::fromEntity)
+                .map(r -> {
+                    Room room = r.getRoom();
+                    Acc acc = room.getAcc();
+
+                    return RoomRsvResponseDTO.builder()
+                            .reserveId(r.getReserveId())
+                            .startDate(r.getStartDate())
+                            .endDate(r.getEndDate())
+                            .guestCount(r.getGuestCount())
+                            .price(r.getPrice())
+                            .rsvStatus(r.getRsvStatus())
+                            .accTitle(acc != null ? acc.getTitle() : null)
+                            .roomName(room != null ? room.getRoomName() : null)
+                            .build();
+                })
                 .collect(Collectors.toList());
     }
 

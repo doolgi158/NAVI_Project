@@ -4,7 +4,6 @@ import org.apache.ibatis.jdbc.SQL;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /* SQLProvider : 자바 코드로 SQL을 동적으로 조립하는 역할 */
 public class AccSqlProvider {
@@ -14,8 +13,14 @@ public class AccSqlProvider {
         String city = (String) params.get("city");                      // 💡 행정시
         String townshipName = (String) params.get("townshipName");      // 💡 읍면동
         String title = (String) params.get("title");                    // 💡 숙소명
-        String checkIn = (String) params.get("checkIn");                // 💡 체크인
-        String checkOut = (String) params.get("checkOut");              // 💡 체크아웃
+        Object checkInObj = params.get("checkIn");                      // 💡 체크인
+        String checkIn = (checkInObj instanceof java.time.LocalDate)
+                ? ((java.time.LocalDate) checkInObj).toString()
+                : (String) checkInObj;
+        Object checkOutObj = params.get("checkOut");                    // 💡 체크아웃
+        String checkOut = (checkOutObj instanceof java.time.LocalDate)
+                ? ((java.time.LocalDate) checkOutObj).toString()
+                : (String) checkOutObj;
         Integer guestCount = (Integer) params.get("guestCount");        // 💡 투숙 인원
         Integer roomCount = (Integer) params.get("roomCount");          // 💡 객실 수
         String sort = (String) params.get("sort");                      // 💡 정렬 기준
@@ -45,8 +50,7 @@ public class AccSqlProvider {
                 && (townshipName == null || townshipName.isBlank())) {
             // 👉 숙소명 검색 탭 (title만 있을 때)
             sql.WHERE("LOWER(a.TITLE) LIKE '%' || LOWER(#{title}) || '%'");
-        }
-        else if ((city != null && !city.isBlank()) || (townshipName != null && !townshipName.isBlank())) {
+        } else if ((city != null && !city.isBlank()) || (townshipName != null && !townshipName.isBlank())) {
             // 👉 지역별 검색 탭 (city 또는 township 있을 때)
             if (city != null && !city.isBlank() && townshipName != null && !townshipName.isBlank()) {
                 sql.WHERE("(t.SIGUNGU_NAME = #{city} OR t.TOWNSHIP_NAME = #{townshipName})");
@@ -70,11 +74,16 @@ public class AccSqlProvider {
 
         // 객실 조건: 재고, 인원, 날짜
         if (checkIn != null && checkOut != null) {
-            sql.WHERE("EXISTS (SELECT 1 FROM NAVI_ROOM r " +
-                    "JOIN NAVI_ROOM_STOCK s ON r.ROOM_NO = s.ROOM_NO " +
-                    "WHERE r.ACC_NO = a.ACC_NO " +
-                    "AND s.STOCK_DATE BETWEEN #{checkIn} AND #{checkOut} " +
-                    "AND s.REMAIN_COUNT > 0)");
+            sql.WHERE("""
+                        EXISTS (
+                            SELECT 1
+                            FROM NAVI_ROOM r
+                            JOIN NAVI_ROOM_STOCK s ON r.ROOM_NO = s.ROOM_NO
+                            WHERE r.ACC_NO = a.ACC_NO
+                              AND s.STOCK_DATE BETWEEN TRUNC(#{checkIn}) AND TRUNC(#{checkOut}) - 1
+                              AND s.REMAIN_COUNT > 0
+                        )
+                    """);
         }
         if (guestCount != null) {
             sql.WHERE("EXISTS (SELECT 1 FROM NAVI_ROOM r WHERE r.ACC_NO = a.ACC_NO AND r.MAX_CNT >= #{guestCount})");

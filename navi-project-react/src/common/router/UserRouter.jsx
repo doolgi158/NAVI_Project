@@ -12,6 +12,7 @@ const LikedTravelsPage = lazy(() => import("../../users/pages/user/UserLikedTrav
 const BookmarkedTravelsPage = lazy(() => import("../../users/pages/user/UserBookmarkedTravelsPage"));
 const UserMyFlight = lazy(() => import("../../users/pages/user/UserMyFlightsPage"));
 const UserMyDelivery = lazy(() => import("../../users/pages/user/UserMyDeliveriesPage"))
+const UserAccommodation = lazy(() => import("../../users/pages/user/UserMyAccommodationsPage"))
 
 const UserRouter = () => {
     return [
@@ -94,6 +95,10 @@ const UserRouter = () => {
         {
             path: "/users/my-deliveries",
             element: <UserMyDelivery />,
+        },
+        {
+            path: "/users/my-accommodations",
+            element: <UserAccommodation />,
         },
     ]
 }

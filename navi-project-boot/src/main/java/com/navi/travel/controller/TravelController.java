@@ -5,6 +5,7 @@ import com.navi.travel.dto.TravelListResponseDTO;
 import com.navi.travel.dto.TravelRankDTO;
 import com.navi.travel.dto.TravelSimpleResponseDTO;
 import com.navi.travel.service.TravelService;
+import com.navi.user.dto.auth.UserSecurityDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -41,7 +42,7 @@ public class TravelController {
             Object principal = auth.getPrincipal();
 
             // principal이 UserSecurityDTO인 경우
-            if (principal instanceof com.navi.user.dto.users.UserSecurityDTO user) {
+            if (principal instanceof UserSecurityDTO user) {
                 return user.getId();
             }
 

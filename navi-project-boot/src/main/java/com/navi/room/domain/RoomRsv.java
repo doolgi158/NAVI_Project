@@ -5,12 +5,13 @@ import com.navi.common.entity.BaseEntity;
 import com.navi.common.enums.RsvStatus;
 import com.navi.user.domain.User;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 
 /* ============================================================
    [RoomRsv]
@@ -43,7 +44,7 @@ import java.time.format.DateTimeFormatter;
         initialValue = 1,
         allocationSize = 1
 )
-public class RoomRsv extends BaseEntity{
+public class RoomRsv extends BaseEntity {
     /* === 기본 키 === */
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "room_rsv_seq_generator")
@@ -83,7 +84,7 @@ public class RoomRsv extends BaseEntity{
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
 
-    @Column(name="nights", nullable = false)
+    @Column(name = "nights", nullable = false)
     private int nights;
 
     @Enumerated(EnumType.STRING)
@@ -94,20 +95,38 @@ public class RoomRsv extends BaseEntity{
     @Column(name = "version", nullable = false)
     private Long version;
 
+    @Column(name = "guestCount", nullable = false)
+    private int guestCount;
+
     /* === 기본값 처리 === */
     @PrePersist
     public void prePersist() {
         // 기본 상태 설정
-        if (rsvStatus == null) { rsvStatus = RsvStatus.PENDING; }
+        if (rsvStatus == null) {
+            rsvStatus = RsvStatus.PENDING;
+        }
         // 수량 유효성
-        if (quantity <= 0) { throw new IllegalStateException("예약 수량은 1개 이상이어야 합니다."); }
+        if (quantity <= 0) {
+            throw new IllegalStateException("예약 수량은 1개 이상이어야 합니다.");
+        }
     }
 
     /* === 상태 변경 메서드 === */
-    public void markPaid()       { this.rsvStatus = RsvStatus.PAID; }
-    public void markCancelled()  { this.rsvStatus = RsvStatus.CANCELLED; }
-    public void markRefunded()   { this.rsvStatus = RsvStatus.REFUNDED; }
-    public void markFailed()     { this.rsvStatus = RsvStatus.FAILED; }
+    public void markPaid() {
+        this.rsvStatus = RsvStatus.PAID;
+    }
+
+    public void markCancelled() {
+        this.rsvStatus = RsvStatus.CANCELLED;
+    }
+
+    public void markRefunded() {
+        this.rsvStatus = RsvStatus.REFUNDED;
+    }
+
+    public void markFailed() {
+        this.rsvStatus = RsvStatus.FAILED;
+    }
 
     /* === 가격 수정 === */
     public void updatePrice(BigDecimal newPrice) {

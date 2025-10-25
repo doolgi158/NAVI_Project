@@ -4,7 +4,7 @@ import com.navi.common.response.ApiResponse;
 import com.navi.delivery.domain.DeliveryReservation;
 import com.navi.delivery.dto.DeliveryReservationDTO;
 import com.navi.delivery.service.DeliveryReservationService;
-import com.navi.user.dto.users.UserSecurityDTO;
+import com.navi.user.dto.auth.UserSecurityDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

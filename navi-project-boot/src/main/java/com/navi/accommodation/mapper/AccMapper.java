@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.SelectProvider;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /* 숙소 검색용 MyBatis 매퍼 */
@@ -17,8 +18,8 @@ public interface AccMapper {
             @Param("townshipName") String townshipName,
             @Param("title") String title,
             @Param("categoryList") List<String> categoryList,
-            @Param("checkIn") String checkIn,
-            @Param("checkOut") String checkOut,
+            @Param("checkIn") LocalDate checkIn,
+            @Param("checkOut") LocalDate checkOut,
             @Param("guestCount") int guestCount,
             @Param("roomCount") Integer roomCount,
             @Param("sort") String sort
