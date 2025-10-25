@@ -189,7 +189,7 @@ export default function StaySelectDrawer({
         >
           <div className="flex items-center gap-3">
             {/* ✅ 둥근 이미지 썸네일 */}
-            <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 shadow-sm ring-1 ring-gray-200">
+            <div className="w-20 h-16 rounded-xl overflow-hidden flex-shrink-0 shadow-sm ring-1 ring-gray-200">
               <img
                 src={imgSrc}
                 alt={item.title}
@@ -223,7 +223,7 @@ export default function StaySelectDrawer({
   return (
     <div className="flex h-full w-full bg-white overflow-hidden">
       {/* 왼쪽: 숙소 검색 / 나의 숙소 */}
-      <div className="w-1/2 border-r border-gray-200 flex flex-col overflow-hidden">
+      <div className="w-1/2 border-r border-gray-200 flex flex-col overflow-hidden  w-[360px]">
         <TitleDateDisplay title={title} dateRange={dateRange} />
 
         <Tabs
@@ -239,29 +239,32 @@ export default function StaySelectDrawer({
         {/* ✅ 왼쪽 콘텐츠 스크롤 */}
         <div ref={listContainerRef} className="flex-1 overflow-y-auto custom-scroll">
           {activeTab === "search" && (
-            <div className="flex flex-col gap-3 px-4 mt-1 mb-2">
-              <Search
-                placeholder="숙소명을 입력하세요"
-                allowClear
-                enterButton
-                onSearch={(val) => setSearchText(val)}
-                onChange={(e) => setSearchText(e.target.value)}
-                value={searchText}
-              />
+            <div className="flex flex-col h-full">
+              {/* ✅ 상단 검색 + 정렬 영역 sticky 고정 */}
+              <div className="sticky top-0 z-10 bg-white px-4 pt-2 pb-3 border-b border-gray-200">
+                <Search
+                  placeholder="숙소명을 입력하세요"
+                  allowClear
+                  enterButton
+                  onSearch={(val) => setSearchText(val)}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  value={searchText}
+                />
 
-              {/* 정렬 */}
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600">
-                  총{" "}
-                  <span className="font-semibold text-[#0A3D91]">
-                    {filteredStays.length}
-                  </span>{" "}
-                  개
-                </span>
+                {/* 총 개수 */}
+                <div className="flex items-center justify-between text-sm mt-3">
+                  <span className="text-gray-600">
+                    총{" "}
+                    <span className="font-semibold text-[#0A3D91]">
+                      {filteredStays.length.toLocaleString()}
+                    </span>{" "}
+                    개
+                  </span>
+                </div>
               </div>
 
-              {/* ✅ 숙소 리스트 */}
-              <div className="pb-4">
+              {/* ✅ 숙소 리스트는 스크롤 가능 */}
+              <div ref={listContainerRef} className="flex-1 overflow-y-auto px-4 pb-4 custom-scroll">
                 <List
                   dataSource={pagedStays}
                   locale={{
@@ -279,10 +282,9 @@ export default function StaySelectDrawer({
               </div>
             </div>
           )}
-
           {/* ✅ 나의 숙소 탭 */}
           {activeTab === "my" && (
-            <div className="px-4 pb-4">
+            <div className="px-4 pb-4 ">
               <List
                 dataSource={myBookmarks}
                 locale={{
@@ -323,7 +325,7 @@ export default function StaySelectDrawer({
         </div>
 
         {/* ✅ 숙소 요약 스크롤 영역 */}
-        <div className="flex-1 overflow-y-auto custom-scroll p-5">
+        <div className="flex-1 overflow-y-auto custom-scroll p-5  w-[400px]">
           {(selectedStays?.length ?? 0) > 0 || hasNights ? (
             <div className="space-y-6">
               {(days || [])
@@ -348,7 +350,7 @@ export default function StaySelectDrawer({
                   return (
                     <div
                       key={d.format("YYYY-MM-DD")}
-                      className="border border-gray-200 rounded-xl p-4 bg-[#FAFAFA]  w-[320px]"
+                      className="border border-gray-200 rounded-xl p-4 bg-[#FAFAFA] "
                     >
                       <div className="text-sm font-semibold text-[#2F3E46] mb-3">
                         {rangeText}
@@ -402,7 +404,7 @@ export default function StaySelectDrawer({
                           </div>
 
                           {/* ✅ 이미지 영역 고정폭 */}
-                          <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 shadow-md ring-1 ring-gray-200">
+                          <div className="w-20 h-16 rounded-xl overflow-hidden flex-shrink-0 shadow-md ring-1 ring-gray-200">
                             <img
                               src={
                                 displayStay.accImage?.trim()

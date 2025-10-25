@@ -1,6 +1,7 @@
 package com.navi.planner.dto;
 
 import lombok.*;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -65,7 +66,8 @@ public class TravelPlanRequestDTO {
         private String startTime;
         private String endTime;
 
-        /** ✅ 추가: 프론트에서 제외시킬 항목 여부 */
+
         private boolean deleted = false;
+
     }
 }

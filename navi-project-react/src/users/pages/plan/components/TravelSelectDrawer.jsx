@@ -6,7 +6,6 @@ import { API_SERVER_HOST } from "@/common/api/naviApi";
 import api from "@/common/api/naviApi";
 
 const { Search } = Input;
-const { TabPane } = Tabs;
 
 export default function TravelSelectDrawer({
   travels = [],
@@ -18,10 +17,8 @@ export default function TravelSelectDrawer({
 }) {
   const [activeTab, setActiveTab] = useState("search");
   const [searchText, setSearchText] = useState("");
-  const [sortType, setSortType] = useState("latest");
+  const [categoryFilter, setCategoryFilter] = useState("전체");
   const [myBookmarks, setMyBookmarks] = useState([]);
-
-  // ✅ 페이지 관련 상태
   const [pageSize] = useState(20);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageResult, setPageResult] = useState({
@@ -33,63 +30,71 @@ export default function TravelSelectDrawer({
     pageList: [],
   });
 
+  const listContainerRef = useRef(null);
+
+  // ✅ 카테고리 목록 (원하는 항목 추가 가능)
+  const categories = ["전체", "관광지", "음식점", "쇼핑"];
+
   /** ✅ 북마크 여행지 불러오기 */
   useEffect(() => {
     if (activeTab !== "my") return;
+
     const fetchBookmarks = async () => {
       try {
         const token = localStorage.getItem("accessToken");
-        if (!token) {
+        const userNo = localStorage.getItem("userNo");
+
+        if (!token || !userNo) {
           message.warning("로그인 후 이용 가능합니다.");
           return;
         }
-        const res = await api.get("/travel/bookmarks", {
+
+        const res = await api.get(`/activity/bookmarks?userNo=${userNo}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        const data = Array.isArray(res.data)
-          ? res.data
-          : Array.isArray(res.data?.data)
-            ? res.data.data
-            : [];
-        setMyBookmarks(data);
+
+        const bookmarks = Array.isArray(res.data?.data)
+          ? res.data.data
+          : [];
+        setMyBookmarks(bookmarks);
+        console.log("✅ 나의 북마크 여행지 불러오기 성공:", bookmarks.length);
       } catch (err) {
         console.error("❌ 북마크 여행지 불러오기 실패:", err);
         message.error("나의 여행지를 불러오지 못했습니다.");
       }
     };
+
     fetchBookmarks();
   }, [activeTab]);
 
-  /** ✅ 검색 + 정렬 */
+  /** ✅ 검색 + 카테고리 필터링 */
   const filteredTravels = useMemo(() => {
     let list = [...travels];
     const keyword = searchText.trim().toLowerCase();
 
+    // 🔍 검색어 필터링
     if (keyword) {
-      // ✅ 검색어 공백 제거 + 소문자 처리
       const normalizedKeyword = keyword.replace(/\s+/g, "").toLowerCase();
-
       list = list.filter((t) => {
-        // ✅ 여행지명 + 지역명 전체를 하나의 문자열로 합쳐서 비교
-        const normalizedText = `${t.title || ""} ${t.region1Name || ""} ${t.region2Name || ""}`
+        const normalizedText = `${t.title || ""} ${t.region1Name || ""} ${t.region2Name || ""
+          }`
           .replace(/\s+/g, "")
           .toLowerCase();
-
-        // ✅ 부분 일치 허용 (공백 무시)
         return normalizedText.includes(normalizedKeyword);
       });
     }
 
-
-    switch (sortType) {
-      case "likes":
-        return list.sort((a, b) => (b.likesCount || 0) - (a.likesCount || 0));
-      case "views":
-        return list.sort((a, b) => (b.views || 0) - (a.views || 0));
-      default:
-        return list.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+    // 🎯 카테고리 필터링
+    if (categoryFilter !== "전체") {
+      list = list.filter(
+        (t) =>
+          t.categoryName &&
+          t.categoryName.toLowerCase().includes(categoryFilter.toLowerCase())
+      );
     }
-  }, [travels, searchText, sortType]);
+
+    return list;
+  }, [travels, searchText, categoryFilter]);
 
   /** ✅ 페이지네이션 계산 */
   useEffect(() => {
@@ -97,7 +102,10 @@ export default function TravelSelectDrawer({
     const totalPages = Math.ceil(totalElements / pageSize);
     const startBlock = Math.floor((currentPage - 1) / 10) * 10 + 1;
     const endBlock = Math.min(startBlock + 9, totalPages);
-    const pageList = Array.from({ length: endBlock - startBlock + 1 }, (_, i) => startBlock + i);
+    const pageList = Array.from(
+      { length: endBlock - startBlock + 1 },
+      (_, i) => startBlock + i
+    );
 
     setPageResult({
       page: currentPage,
@@ -109,26 +117,23 @@ export default function TravelSelectDrawer({
     });
   }, [filteredTravels, currentPage, pageSize]);
 
-  /** ✅ 현재 페이지 slice */
+  /** ✅ 현재 페이지 데이터 */
   const pagedTravels = useMemo(() => {
     const startIdx = (currentPage - 1) * pageSize;
     return filteredTravels.slice(startIdx, startIdx + pageSize);
   }, [filteredTravels, currentPage, pageSize]);
 
-  const listContainerRef = useRef(null);
-
+  /** ✅ 리스트 클릭시 페이지 맨 위로 */
   const handlePageClick = (page) => {
     if (page >= 1 && page <= pageResult.totalPages) {
       setCurrentPage(page);
-
-      // ✅ 리스트 스크롤을 맨 위로 이동
       if (listContainerRef.current) {
         listContainerRef.current.scrollTo({ top: 0, behavior: "smooth" });
       }
     }
   };
 
-  /** ✅ 선택 toggle */
+  /** ✅ 여행지 선택/해제 */
   const handleToggleSelect = (item) => {
     setSelectedTravels((prev) => {
       const exists = prev.some((v) => v.travelId === item.travelId);
@@ -138,9 +143,11 @@ export default function TravelSelectDrawer({
     });
   };
 
-  /** ✅ 카드 렌더러 */
+  /** ✅ 공통 렌더링 함수 */
   const renderTravelItem = (item) => {
-    const isSelected = selectedTravels.some((v) => v.travelId === item.travelId);
+    const isSelected = selectedTravels.some(
+      (v) => v.travelId === item.travelId
+    );
     const imageSrc =
       item.img?.trim() ||
       item.thumbnailPath?.trim() ||
@@ -154,26 +161,29 @@ export default function TravelSelectDrawer({
         onClick={() => handleToggleSelect(item)}
       >
         <div
-          className={`flex justify-between w-full items-center bg-white px-4 py-3 rounded-lg shadow-sm transition-all hover:shadow-md ${isSelected ? "ring-2 ring-[#0A3D91] ring-offset-1" : "border border-gray-200"
+          className={`flex justify-between w-full items-center bg-white px-4 py-3 rounded-lg shadow-sm transition-all hover:shadow-md ${isSelected
+            ? "ring-2 ring-[#0A3D91] ring-offset-1"
+            : "border border-gray-200"
             }`}
         >
           <div className="flex items-center gap-3">
             <img
               src={imageSrc}
               alt={item.title}
-              className="w-16 h-16 rounded-md object-cover"
+              className="w-20 h-16 rounded-xl object-cover"
               onError={(e) =>
                 (e.target.src = "https://placehold.co/150x150?text=No+Image")
               }
             />
             <div className="min-w-0">
-              <p className="font-semibold text-[#2F3E46] text-sm truncate">{item.title}</p>
+              <p className="font-semibold text-[#2F3E46] text-sm truncate">
+                {item.title}
+              </p>
               <p className="text-xs text-gray-500 truncate">
-                {item.region1Name || "-"} {`>`} {item.region2Name || "-"}
+                {item.region1Name || "-"} &gt; {item.region2Name || "-"}
               </p>
               <div className="flex items-center gap-3 text-xs text-gray-400">
-                <span>❤️ {item.likesCount?.toLocaleString?.() || 0}</span>
-                <span>👁️ {item.views?.toLocaleString?.() || 0}</span>
+                <span>🏷️ {item.categoryName || "기타"}</span>
               </div>
             </div>
           </div>
@@ -189,8 +199,8 @@ export default function TravelSelectDrawer({
 
   return (
     <div className="flex h-full w-full bg-white overflow-hidden">
-      {/* 왼쪽: 탭 + 여행지 목록 */}
-      <div className="w-1/2 border-r border-gray-200 flex flex-col overflow-hidden">
+      {/* 왼쪽 패널 */}
+      <div className="w-1/2 border-r border-gray-200 flex flex-col overflow-hidden bg-[#FDFCF9] ">
         <TitleDateDisplay title={title} dateRange={dateRange} />
 
         <Tabs
@@ -203,56 +213,57 @@ export default function TravelSelectDrawer({
           ]}
         />
 
-        {/* ✅ 왼쪽 탭별 콘텐츠는 별도 스크롤 */}
         <div ref={listContainerRef} className="flex-1 overflow-y-auto custom-scroll">
           {activeTab === "search" && (
-            <div className="flex flex-col gap-3 px-4 mt-1 mb-2">
-              <Search
-                placeholder="장소명을 입력하세요"
-                allowClear
-                enterButton
-                onSearch={(val) => setSearchText(val)}
-                onChange={(e) => setSearchText(e.target.value)}
-                value={searchText}
-              />
+            <div className="flex flex-col h-full">
+              {/* ✅ 고정 영역 (검색 + 카테고리 + 개수) */}
+              <div className="sticky top-0 z-10 px-4 pt-2 pb-3 border-b border-gray-200 shadow-sm ">
+                {/* 🔍 검색 입력 */}
+                <Search
+                  placeholder="장소명을 입력하세요"
+                  allowClear
+                  enterButton
+                  onSearch={(val) => setSearchText(val)}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  value={searchText}
+                />
 
-              {/* 정렬 영역 */}
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600">
-                  총{" "}
-                  <span className="font-semibold text-[#0A3D91]">
-                    {filteredTravels.length}
-                  </span>{" "}
-                  개
-                </span>
-                <div className="space-x-2">
-                  {[
-                    { key: "latest", label: "최신순" },
-                    { key: "likes", label: "인기순" },
-                    { key: "views", label: "조회순" },
-                  ].map((btn) => (
+                {/* 🎯 카테고리 필터 */}
+                <div className="flex flex-wrap gap-2 my-2">
+                  {categories.map((cat) => (
                     <Button
-                      key={btn.key}
-                      type={sortType === btn.key ? "primary" : "default"}
+                      key={cat}
                       size="small"
+                      type={categoryFilter === cat ? "primary" : "default"}
                       className={
-                        sortType === btn.key
+                        categoryFilter === cat
                           ? "bg-[#0A3D91] border-none text-white"
                           : "text-gray-600"
                       }
-                      onClick={() => setSortType(btn.key)}
+                      onClick={() => setCategoryFilter(cat)}
                     >
-                      {btn.label}
+                      {cat}
                     </Button>
                   ))}
                 </div>
+
+                {/* ✅ 총 개수 고정 */}
+                <div className="text-gray-600 text-sm">
+                  총{" "}
+                  <span className="font-semibold text-[#0A3D91]">
+                    {filteredTravels.length.toLocaleString()}
+                  </span>{" "}
+                  개
+                </div>
               </div>
 
-              {/* ✅ 여행지 리스트 */}
-              <div className="flex-1 overflow-y-auto custom-scroll w-[300px] pb-4">
+              {/* ✅ 리스트만 스크롤 */}
+              <div className="flex-1 overflow-y-auto custom-scroll  px-4 pb-4">
                 <List
                   dataSource={pagedTravels}
-                  locale={{ emptyText: <Empty description="검색 결과가 없습니다." /> }}
+                  locale={{
+                    emptyText: <Empty description="검색 결과가 없습니다." />,
+                  }}
                   renderItem={renderTravelItem}
                 />
                 {pageResult.totalPages > 1 && (
@@ -266,16 +277,25 @@ export default function TravelSelectDrawer({
             </div>
           )}
 
-          {/* 나의 여행지 탭 */}
+          {/* ✅ 나의 여행지 탭 */}
           {activeTab === "my" && (
-            <div className="px-4 pb-4">
-              <List
-                dataSource={myBookmarks}
-                locale={{
-                  emptyText: <Empty description="북마크한 여행지가 없습니다." />,
-                }}
-                renderItem={renderTravelItem}
-              />
+            <div className="flex flex-col gap-3 px-4 mt-1 mb-2">
+              <div className="text-gray-600 text-sm mb-2">
+                총{" "}
+                <span className="font-semibold text-[#0A3D91]">
+                  {myBookmarks.length.toLocaleString()}
+                </span>{" "}
+                개
+              </div>
+              <div className="flex-1 overflow-y-auto custom-scroll  pb-4">
+                <List
+                  dataSource={myBookmarks}
+                  locale={{
+                    emptyText: <Empty description="북마크한 여행지가 없습니다." />,
+                  }}
+                  renderItem={renderTravelItem}
+                />
+              </div>
             </div>
           )}
         </div>
@@ -285,13 +305,8 @@ export default function TravelSelectDrawer({
       <div className="p-5 flex-shrink-0 border-b border-gray-200">
         <div className="flex justify-between items-center">
           <div>
-            <h3 className="text-lg font-semibold text-[#2F3E46]">
-              📍 선택한 여행지
-            </h3>
-            <p className="text-sm text-gray-500">
-              총 {selectedTravels.length}개
-            </p>
-
+            <h3 className="text-lg font-semibold text-[#2F3E46]">📍 선택한 여행지</h3>
+            <p className="text-sm text-gray-500">총 {selectedTravels.length}개</p>
           </div>
           <Button
             type="text"
@@ -302,10 +317,7 @@ export default function TravelSelectDrawer({
           </Button>
         </div>
 
-
-
-        {/* ✅ 이 부분만 따로 스크롤 */}
-        <div className="flex-1 overflow-y-auto custom-scroll p-5 truncate w-[300px]">
+        <div className="flex-1 overflow-y-auto custom-scroll pt-5 truncate w-[350px]">
           <List
             dataSource={selectedTravels}
             locale={{
@@ -314,7 +326,7 @@ export default function TravelSelectDrawer({
             renderItem={(item) => (
               <List.Item>
                 <div className="flex justify-between items-center w-full bg-white px-4 py-3 rounded-lg shadow-sm">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 ">
                     <img
                       src={
                         item.img?.trim() ||
@@ -323,15 +335,12 @@ export default function TravelSelectDrawer({
                         "https://placehold.co/150x150?text=No+Image"
                       }
                       alt={item.title}
-                      className="w-14 h-14 rounded-md object-cover"
+                      className="w-20 h-16 rounded-xl object-cover"
                     />
                     <div>
-                      <p className="font-semibold text-sm text-[#2F3E46]">
-                        {item.title}
-                      </p>
+                      <p className="font-semibold text-sm text-[#2F3E46]">{item.title}</p>
                       <p className="text-xs text-gray-500">
-                        {item.region1Name || "-"} {`>`}{" "}
-                        {item.region2Name || "-"}
+                        {item.region1Name || "-"} &gt; {item.region2Name || "-"}
                       </p>
                     </div>
                   </div>
@@ -348,6 +357,7 @@ export default function TravelSelectDrawer({
             )}
           />
         </div>
-      </div> </div>
+      </div>
+    </div>
   );
 }

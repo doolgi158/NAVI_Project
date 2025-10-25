@@ -18,12 +18,14 @@ public class TravelSimpleResponseDTO {
     private Double lat;     // 위도
     private Double lng;     // 경도
     private Long likes;      // 좋아요 수
+    private String categoryName;     //카테고리이름
 
     // ✅ 엔티티 → DTO 변환자
     public TravelSimpleResponseDTO(Travel entity) {
         this.travelId = entity.getTravelId();
         this.region1Name = entity.getRegion1Name();
         this.region2Name = entity.getRegion2Name();
+        this.categoryName = entity.getCategoryName();
         this.title = entity.getTitle();
         this.img = entity.getImagePath();
         this.lat = entity.getLatitude();

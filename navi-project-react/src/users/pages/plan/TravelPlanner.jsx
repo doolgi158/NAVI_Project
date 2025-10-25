@@ -409,8 +409,8 @@ export default function TravelPlanner() {
               <div
                 className="h-full overflow-y-auto border-r border-[#eee]"
                 style={{
-                  flexBasis: step <= 2 ? "82%" : "40%",
-                  minWidth: "400px",
+                  flexBasis: step <= 2 ? "18%" : "20%",
+                  minWidth: "300px",
                 }}
               >
                 {step === 3 && (

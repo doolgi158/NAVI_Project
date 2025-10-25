@@ -737,7 +737,7 @@ export default function PlanScheduler() {
                         height: "100%",
                     }}
                     min="30%"
-                    max="70%"
+                    max="80%"
                     size={splitSize}
                     onChange={setSplitSize}
                 >
@@ -870,6 +870,9 @@ export default function PlanScheduler() {
                             background: "#fafafa",
                             position: "relative",
                             overflow: "hidden",
+                            minWidth: "200px",     // ✅ 최소 너비 고정
+                            maxWidth: "100%",    // ✅ 너무 넓어지지 않게 제한
+                            flex: "1 1 30%",
                         }}
                     >
                         <TravelMap markers={markers} step={6} />
