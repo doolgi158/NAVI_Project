@@ -8,14 +8,14 @@ import com.navi.accommodation.dto.response.AccDetailResponseDTO;
 import com.navi.accommodation.dto.response.AccListResponseDTO;
 
 import java.util.List;
+import java.util.Map;
 
 public interface AccService {
     /* === 관리자 전용 CRUD (View) === */
     Acc createAcc(AdminAccListDTO dto);
     Acc updateAcc(Long accNo, AccRequestDTO dto);
     void deleteAcc(Long accNo);
-
-    List<AdminAccListDTO> getAllAccList(String keyword);
+    Map<String, Object> getAllAccList(String keyword, Integer sourceType, String activeFilter, int page, int size);
     List<Acc> getAllAcc();
 
     /* === 사용자 전용 조회 (View) === */

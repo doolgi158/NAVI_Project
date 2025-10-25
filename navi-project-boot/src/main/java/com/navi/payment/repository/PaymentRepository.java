@@ -19,7 +19,7 @@ public interface PaymentRepository extends JpaRepository<PaymentMaster, Long> {
     // 2. PG 승인번호(impUid)로 단건 조회 (중복 결제 검증 시 사용)
     Optional<PaymentMaster> findByImpUid(String impUid);
     // 3. paymentId 생성
-    @Query(value = "SELECT PAYMENT_SEQ.NEXTVAL FROM DUAL", nativeQuery = true)
+    @Query(value = "SELECT PAYMENT_MASTER_SEQ.NEXTVAL FROM DUAL", nativeQuery = true)
     Long getNextSeqVal();
 
     /* === [관리자용 결제 조회] === */

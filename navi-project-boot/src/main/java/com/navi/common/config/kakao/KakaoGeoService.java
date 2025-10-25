@@ -48,7 +48,7 @@ public class KakaoGeoService {
                 .trim();
     }
 
-    /* 주소 -> 좌표 + 읍면동 변환 */
+    /* 주소 -> 좌표 + 읍면동 + 카테고리 변환 */
     public GeoResult getCoordinatesAndTownship(String address, String title) {
         // 숙소명 기반 검색 (keyword API)
         if (title != null && !title.isBlank()) {

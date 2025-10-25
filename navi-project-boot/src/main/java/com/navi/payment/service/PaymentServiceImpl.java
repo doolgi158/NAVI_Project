@@ -11,6 +11,9 @@ import com.navi.payment.dto.response.PaymentPrepareResponseDTO;
 import com.navi.payment.dto.response.PaymentResultResponseDTO;
 import com.navi.payment.repository.PaymentDetailRepository;
 import com.navi.payment.repository.PaymentRepository;
+import com.navi.user.domain.User;
+import com.navi.user.dto.users.UserSecurityDTO;
+import com.navi.user.repository.UserRepository;
 import com.siot.IamportRestClient.IamportClient;
 import com.siot.IamportRestClient.exception.IamportResponseException;
 import com.siot.IamportRestClient.request.CancelData;
@@ -18,6 +21,8 @@ import com.siot.IamportRestClient.response.IamportResponse;
 import com.siot.IamportRestClient.response.Payment;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,21 +41,34 @@ public class PaymentServiceImpl implements PaymentService {
     private final IamportClient iamportClient; // PortOne(아임포트) API 클라이언트
     private final PaymentRepository paymentRepository;
     private final PaymentDetailRepository paymentDetailRepository;
+    private final UserRepository userRepository;
 
     /* 결제 준비 */
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)  // ✅ 트랜잭션 분리
     public PaymentPrepareResponseDTO preparePayment(PaymentPrepareRequestDTO dto) {
-        // Oracle 시퀀스 직접 조회
-        Long nextSeq = paymentRepository.getNextSeqVal();
+        log.info("✅ 결제 준비 요청 수신 - {}", dto);
+
+        // 로그인 사용자 가져오기
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("로그인이 필요한 서비스입니다.");
+        }
+        UserSecurityDTO loginUser = (UserSecurityDTO) authentication.getPrincipal();
+
+        // 로그인 사용자 엔티티 조회
+        User user = userRepository.findByNo(loginUser.getNo())
+                .orElseThrow(() -> new IllegalArgumentException("❌ 사용자 정보를 찾을 수 없습니다."));
 
         // merchantId 생성
         String today = LocalDate.now(ZoneId.of("Asia/Seoul"))
                 .format(DateTimeFormatter.BASIC_ISO_DATE);
+        Long nextSeq = paymentRepository.getNextSeqVal();
         String merchantId = String.format("PAY%s-%04d", today, nextSeq);
 
         // 엔티티 생성 (ID, merchantId 모두 세팅 후 저장)
         PaymentMaster payment = PaymentMaster.builder()
+                .user(user)
                 .no(nextSeq)
                 .merchantId(merchantId)
                 .totalAmount(dto.getTotalAmount())

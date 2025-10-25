@@ -25,8 +25,8 @@ public class AccDetailResponseDTO {
     private String category;                // 숙소 유형
     private String tel;                     // 문의 전화번호
     private String address;                 // 전체 주소
-    private BigDecimal mapx;
-    private BigDecimal mapy;
+    private BigDecimal mapx;                // 경도
+    private BigDecimal mapy;                // 위도
     private String overview;                // 숙소 설명
     private String checkInTime;             // 체크인 시간
     private String checkOutTime;            // 체크아웃 시간

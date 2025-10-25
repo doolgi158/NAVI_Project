@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useOutletContext, useNavigate } from "react-router-dom";
+import { useOutletContext } from "react-router-dom";
 import {
   Card,
   Table,
@@ -28,7 +28,6 @@ const { Text } = Typography;
 
 const AdminPaymentListPage = () => {
   const { rsvType, filter, keyword } = useOutletContext();
-  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
   const [payments, setPayments] = useState([]);
