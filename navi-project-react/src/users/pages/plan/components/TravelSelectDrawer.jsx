@@ -65,13 +65,20 @@ export default function TravelSelectDrawer({
     const keyword = searchText.trim().toLowerCase();
 
     if (keyword) {
-      list = list.filter(
-        (t) =>
-          t.title?.toLowerCase().includes(keyword) ||
-          t.region1Name?.toLowerCase().includes(keyword) ||
-          t.region2Name?.toLowerCase().includes(keyword)
-      );
+      // ✅ 검색어 공백 제거 + 소문자 처리
+      const normalizedKeyword = keyword.replace(/\s+/g, "").toLowerCase();
+
+      list = list.filter((t) => {
+        // ✅ 여행지명 + 지역명 전체를 하나의 문자열로 합쳐서 비교
+        const normalizedText = `${t.title || ""} ${t.region1Name || ""} ${t.region2Name || ""}`
+          .replace(/\s+/g, "")
+          .toLowerCase();
+
+        // ✅ 부분 일치 허용 (공백 무시)
+        return normalizedText.includes(normalizedKeyword);
+      });
     }
+
 
     switch (sortType) {
       case "likes":
@@ -274,71 +281,77 @@ export default function TravelSelectDrawer({
       </div>
 
       {/* ✅ 오른쪽: 선택된 여행지 요약 (독립 스크롤) */}
-      <div className="w-1/2 bg-[#FDFCF9] flex flex-col overflow-hidden">
-        <div className="p-5 flex-shrink-0 border-b border-gray-200">
-          <div className="flex justify-between items-center">
-            <div>
-              <h3 className="text-lg font-semibold text-[#2F3E46]">
-                📍 선택한 여행지
-              </h3>
-              <p className="text-sm text-gray-500">
-                총 {selectedTravels.length}개
-              </p>
-            </div>
-            <Button
-              type="text"
-              className="text-red-500 hover:text-red-600 font-semibold"
-              onClick={() => setSelectedTravels([])}
-            >
-              초기화
-            </Button>
-          </div>
-        </div>
+      <div className="p-5 flex-shrink-0 border-b border-gray-200">
+        <div className="flex justify-between items-center">
+          <div>
+            <h3 className="text-lg font-semibold text-[#2F3E46]">
+              📍 선택한 여행지
+            </h3>
+            <p className="text-sm text-gray-500">
+              총 {selectedTravels.length}개
+            </p>
 
-        {/* ✅ 이 부분만 따로 스크롤 */}
-        <div className="flex-1 overflow-y-auto custom-scroll p-5">
-          <List
-            dataSource={selectedTravels}
-            locale={{
-              emptyText: <Empty description="선택된 여행지가 없습니다." />,
-            }}
-            renderItem={(item) => (
-              <List.Item>
-                <div className="flex justify-between items-center w-full bg-white px-4 py-3 rounded-lg shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={
-                        item.img?.trim() ||
-                        item.thumbnailPath?.trim() ||
-                        item.imagePath?.trim() ||
-                        "https://placehold.co/150x150?text=No+Image"
-                      }
-                      alt={item.title}
-                      className="w-14 h-14 rounded-md object-cover"
-                    />
-                    <div>
-                      <p className="font-semibold text-sm text-[#2F3E46]">
-                        {item.title}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {item.region1Name || "-"} {`>`}{" "}
-                        {item.region2Name || "-"}
-                      </p>
-                    </div>
-                  </div>
-                  <i
-                    className="bi bi-dash-square-fill text-red-500 text-xl cursor-pointer"
-                    onClick={() =>
-                      setSelectedTravels((prev) =>
-                        prev.filter((v) => v.travelId !== item.travelId)
-                      )
-                    }
-                  ></i>
-                </div>
-              </List.Item>
+            {/* ✅ 여행일수보다 적을 때 경고 */}
+            {days.length > 0 && selectedTravels.length < days.length && (
+              <p className="text-xs text-red-500 mt-1 font-medium">
+                ⚠️ 여행일수({days.length}일)에 비해 선택된 여행지가 부족합니다.
+              </p>
             )}
-          />
+          </div>
+          <Button
+            type="text"
+            className="text-red-500 hover:text-red-600 font-semibold"
+            onClick={() => setSelectedTravels([])}
+          >
+            초기화
+          </Button>
         </div>
+      </div>
+
+
+      {/* ✅ 이 부분만 따로 스크롤 */}
+      <div className="flex-1 overflow-y-auto custom-scroll p-5">
+        <List
+          dataSource={selectedTravels}
+          locale={{
+            emptyText: <Empty description="선택된 여행지가 없습니다." />,
+          }}
+          renderItem={(item) => (
+            <List.Item>
+              <div className="flex justify-between items-center w-full bg-white px-4 py-3 rounded-lg shadow-sm">
+                <div className="flex items-center gap-3">
+                  <img
+                    src={
+                      item.img?.trim() ||
+                      item.thumbnailPath?.trim() ||
+                      item.imagePath?.trim() ||
+                      "https://placehold.co/150x150?text=No+Image"
+                    }
+                    alt={item.title}
+                    className="w-14 h-14 rounded-md object-cover"
+                  />
+                  <div>
+                    <p className="font-semibold text-sm text-[#2F3E46]">
+                      {item.title}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {item.region1Name || "-"} {`>`}{" "}
+                      {item.region2Name || "-"}
+                    </p>
+                  </div>
+                </div>
+                <i
+                  className="bi bi-dash-square-fill text-red-500 text-xl cursor-pointer"
+                  onClick={() =>
+                    setSelectedTravels((prev) =>
+                      prev.filter((v) => v.travelId !== item.travelId)
+                    )
+                  }
+                ></i>
+              </div>
+            </List.Item>
+          )}
+        />
       </div>
     </div>
   );

@@ -24,11 +24,10 @@ export default function StaySelectDrawer({
 }) {
   const [activeTab, setActiveTab] = useState("search");
   const [searchText, setSearchText] = useState("");
-  const [sortType, setSortType] = useState("latest");
   const [myBookmarks, setMyBookmarks] = useState([]);
   const [imageMap, setImageMap] = useState({});
 
-  const FALLBACK_IMG = `${API_SERVER_HOST}/images/common/default_acc.jpg`;
+  const FALLBACK_IMG = `${API_SERVER_HOST}/images/acc/default_hotel.jpg`;
 
   // ✅ 페이지 관련 상태
   const [pageSize] = useState(20);
@@ -105,22 +104,22 @@ export default function StaySelectDrawer({
     const keyword = searchText.trim().toLowerCase();
 
     if (keyword) {
-      list = list.filter(
-        (s) =>
-          s.title?.toLowerCase().includes(keyword) ||
-          s.address?.toLowerCase().includes(keyword)
-      );
+      // ✅ 검색어의 공백 제거 + 소문자 처리
+      const normalizedKeyword = keyword.replace(/\s+/g, "").toLowerCase();
+
+      list = list.filter((s) => {
+        // ✅ 숙소명 + 주소의 공백 제거 후 비교
+        const normalizedText = `${s.title || ""} ${s.address || ""}`
+          .replace(/\s+/g, "")
+          .toLowerCase();
+
+        // ✅ 부분일치 허용
+        return normalizedText.includes(normalizedKeyword);
+      });
     }
 
-    switch (sortType) {
-      case "likes":
-        return list.sort((a, b) => (b.likesCount || 0) - (a.likesCount || 0));
-      case "views":
-        return list.sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0));
-      default:
-        return list.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
-    }
-  }, [stays, searchText, sortType]);
+    return list;
+  }, [stays, searchText]);
 
   /** ✅ 페이지 계산 */
   useEffect(() => {
@@ -172,9 +171,10 @@ export default function StaySelectDrawer({
     const imgSrc =
       item.accImage?.trim() ||
       item.imagePath?.trim() ||
-      `${API_SERVER_HOST}/images/acc/default_hotel.jpg`;
+      FALLBACK_IMG;
 
     const assigned = Object.keys(stayPlans).includes(item.accId);
+
     return (
       <List.Item
         key={item.accId}
@@ -188,21 +188,28 @@ export default function StaySelectDrawer({
             }`}
         >
           <div className="flex items-center gap-3">
-            <img
-              src={imgSrc}
-              alt={item.title}
-              className="w-16 h-16 rounded-md object-cover"
-              onError={(e) => (e.target.src = FALLBACK_IMG)}
-            />
-            <div>
-              <p className="font-semibold text-sm text-[#2F3E46] mb-0">
+            {/* ✅ 둥근 이미지 썸네일 */}
+            <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 shadow-sm ring-1 ring-gray-200">
+              <img
+                src={imgSrc}
+                alt={item.title}
+                className="w-full h-full object-cover rounded-xl"
+                onError={(e) => (e.target.src = FALLBACK_IMG)}
+              />
+            </div>
+
+            {/* ✅ 텍스트 정보 */}
+            <div className="flex flex-col justify-center min-w-[140px]">
+              <p className="font-semibold text-sm text-[#2F3E46] mb-0 truncate max-w-[140px]" title={item.title}>
                 {item.title}
               </p>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 line-clamp-1 truncate max-w-[140px]" title={item.address}>
                 {item.address || "주소 정보 없음"}
               </p>
             </div>
           </div>
+
+          {/* ✅ 선택 아이콘 */}
           {assigned ? (
             <i className="bi bi-check-circle-fill text-[#6846FF] text-xl"></i>
           ) : (
@@ -251,27 +258,6 @@ export default function StaySelectDrawer({
                   </span>{" "}
                   개
                 </span>
-                <div className="space-x-2">
-                  {[
-                    { key: "latest", label: "최신순" },
-                    { key: "likes", label: "인기순" },
-                    { key: "views", label: "조회순" },
-                  ].map((btn) => (
-                    <Button
-                      key={btn.key}
-                      type={sortType === btn.key ? "primary" : "default"}
-                      size="small"
-                      className={
-                        sortType === btn.key
-                          ? "bg-[#0A3D91] border-none text-white"
-                          : "text-gray-600"
-                      }
-                      onClick={() => setSortType(btn.key)}
-                    >
-                      {btn.label}
-                    </Button>
-                  ))}
-                </div>
               </div>
 
               {/* ✅ 숙소 리스트 */}
@@ -362,7 +348,7 @@ export default function StaySelectDrawer({
                   return (
                     <div
                       key={d.format("YYYY-MM-DD")}
-                      className="border border-gray-200 rounded-xl p-4 bg-[#FAFAFA]"
+                      className="border border-gray-200 rounded-xl p-4 bg-[#FAFAFA]  w-[320px]"
                     >
                       <div className="text-sm font-semibold text-[#2F3E46] mb-3">
                         {rangeText}
@@ -388,9 +374,9 @@ export default function StaySelectDrawer({
                               centered: true,
                               onOk: () => {
                                 const updated = { ...stayPlans };
-                                updated[assignedStayId] = updated[
-                                  assignedStayId
-                                ].filter((d) => d !== dateStr);
+                                updated[assignedStayId] = updated[assignedStayId].filter(
+                                  (d) => d !== dateStr
+                                );
                                 if (updated[assignedStayId].length === 0)
                                   delete updated[assignedStayId];
                                 setStayPlans(updated);
@@ -410,34 +396,49 @@ export default function StaySelectDrawer({
                           setShowStayModal(true);
                         }}
                       >
-                        <div className="flex items-center gap-4 flex-1">
+                        <div className="flex items-center gap-4 flex-1 overflow-hidden">
                           <div className="w-7 h-7 rounded-full bg-[#EAEAEA] text-center text-xs font-semibold text-gray-700 leading-[28px]">
                             {idx + 1}
                           </div>
-                          <div className="w-16 h-16 rounded-md overflow-hidden flex-shrink-0">
+
+                          {/* ✅ 이미지 영역 고정폭 */}
+                          <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 shadow-md ring-1 ring-gray-200">
                             <img
-                              src={displayStay.accImage || FALLBACK_IMG}
+                              src={
+                                displayStay.accImage?.trim()
+                                  ? displayStay.accImage.startsWith("http")
+                                    ? displayStay.accImage
+                                    : `${API_SERVER_HOST}${displayStay.accImage}`
+                                  : FALLBACK_IMG
+                              }
                               alt={displayStay.title}
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-cover rounded-xl"
                               onError={(e) => (e.target.src = FALLBACK_IMG)}
                             />
                           </div>
-                          <div className="flex flex-col ml-3 min-w-[140px]">
+
+                          {/* ✅ 텍스트 컨테이너 (오버플로 방지 핵심) */}
+                          <div className="flex flex-col ml-3 flex-1 min-w-0 overflow-hidden">
                             <p
-                              className={`text-sm font-semibold ${displayStay.title === "숙소 미정"
+                              className={`text-sm font-semibold truncate ${displayStay.title === "숙소 미정"
                                 ? "text-gray-500 italic"
                                 : "text-[#2F3E46]"
                                 }`}
+                              title={displayStay.title}
                             >
                               {displayStay.title}
                             </p>
-                            <p className="text-xs text-gray-500">
+                            <p
+                              className="text-xs text-gray-500 truncate"
+                              title={displayStay.address}
+                            >
                               {displayStay.address}
                             </p>
                           </div>
                         </div>
+
                         {displayStay.title !== "숙소 미정" && (
-                          <i className="bi bi-pencil-square text-xl text-[#2F3E46]"></i>
+                          <i className="bi bi-dash-square text-xl text-[#dc2626] ml-3"></i>
                         )}
                       </div>
                     </div>

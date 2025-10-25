@@ -28,6 +28,8 @@ export default function DateModal({
   useEffect(() => {
     if (meta?.startDate && meta?.endDate) {
       setRange([dayjs(meta.startDate), dayjs(meta.endDate)]);
+    } else {
+      setRange([null, null]);
     }
   }, [meta]);
 
@@ -41,7 +43,9 @@ export default function DateModal({
     }
 
     if (onDateChange) {
-      onDateChange(range[0], range[1]);
+      const start = dayjs(range[0]);
+      const end = dayjs(range[1]);
+      onDateChange(start, end);
     }
   };
 
@@ -80,7 +84,7 @@ export default function DateModal({
       <DatePicker.RangePicker
         locale={dayjs.locale("ko")}
         value={range}
-        onChange={setRange}
+        onChange={(dates) => setRange(dates?.map((d) => (d ? dayjs(d) : null)))}
         disabledDate={disabledDate}
         style={{
           width: "80%",

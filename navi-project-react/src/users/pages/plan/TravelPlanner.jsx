@@ -167,11 +167,16 @@ export default function TravelPlanner() {
   /** ========================== 날짜 계산 ========================== */
   const days = useMemo(() => {
     if (!dateRange.length) return [];
-    const [start, end] = dateRange;
+
+    // ✅ 문자열 or dayjs 객체 구분 없이 안전하게 변환
+    const start = dayjs(dateRange[0]);
+    const end = dayjs(dateRange[1]);
+
+    if (!start.isValid() || !end.isValid()) return [];
+
     const diff = end.diff(start, "day") + 1;
     return Array.from({ length: diff }, (_, i) => start.add(i, "day"));
   }, [dateRange]);
-  const hasNights = days.length > 1;
 
   /** ========================== 일정 구성 ========================== */
   const buildInitialSchedule = () => {
