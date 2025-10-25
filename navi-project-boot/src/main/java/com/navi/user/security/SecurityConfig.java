@@ -60,7 +60,7 @@ public class SecurityConfig {
                         "/api/auth/**", "/api/accommodations/**", "/api/townships/**", "/api/rooms/**", "/api/reservation/**",
                         "/api/activity", "/api/payment/**", "/uploads/**", "/images/**")
                 .permitAll()
-                .requestMatchers("/api/plans/**").authenticated()
+                .requestMatchers("/api/plans/**", "/api/room/reserve/**").authenticated()
                 .requestMatchers("/api/users/detail/**", "/api/delivery/**").hasAnyRole(UserRole.USER.name())
                 .anyRequest().permitAll()
         );

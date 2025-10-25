@@ -17,7 +17,6 @@ import java.time.LocalDate;
 public class RoomRsvRequestDTO {
     /* === 예약 기본정보 === */
     private String reserveId;     // 공통 예약 ID (예: RSV20251020-0001)
-    private Long userNo;          // 사용자 번호 (회원 테이블 user_no)
     private String roomId;        // 객실 ID (예: ROM001)
 
     /* === 예약 기간 === */

@@ -99,7 +99,6 @@ public class RoomRsv extends BaseEntity{
     public void prePersist() {
         // 기본 상태 설정
         if (rsvStatus == null) { rsvStatus = RsvStatus.PENDING; }
-
         // 수량 유효성
         if (quantity <= 0) { throw new IllegalStateException("예약 수량은 1개 이상이어야 합니다."); }
     }

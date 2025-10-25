@@ -16,10 +16,9 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/api/room/reserve")
 public class RoomRsvController {
-
     private final RoomRsvService roomRsvService;
 
-    /** ✅ 결제 전 예약 임시 생성 (재고 선점용) */
+    /* 결제 전 예약 임시 생성 (재고 선점용) */
     @PostMapping("/pending")
     public ResponseEntity<RoomPreRsvResponseDTO> createPendingReservation(@RequestBody List<RoomRsvRequestDTO> dtoList) {
         if (dtoList.isEmpty()) {
@@ -30,45 +29,36 @@ public class RoomRsvController {
                             .build());
         }
 
-        String reserveId = dtoList.get(0).getReserveId();
-        Long userNo = dtoList.get(0).getUserNo();
-
         try {
             if (dtoList.size() == 1) {
-                RoomRsvRequestDTO singleDto = dtoList.get(0);
-                roomRsvService.createRoomReservation(singleDto);
-
-                return ResponseEntity.ok(RoomPreRsvResponseDTO.builder()
-                        .success(true)
-                        .reserveId(singleDto.getReserveId())
-                        .message("✅ 단일 객실 예약 임시 생성 완료")
-                        .build());
+                // 단일 객실 예약
+                RoomRsvRequestDTO singleDto = dtoList.getFirst();
+                RoomPreRsvResponseDTO created = roomRsvService.createRoomReservation(singleDto);
+                return ResponseEntity.ok(created);
             } else {
-                roomRsvService.createMultipleRoomReservations(reserveId, userNo, dtoList);
-                return ResponseEntity.ok(RoomPreRsvResponseDTO.builder()
-                        .success(true)
-                        .reserveId(reserveId)
-                        .message("✅ 다중 객실 예약 임시 생성 완료")
-                        .build());
+                // 다중 객실 예약
+                RoomPreRsvResponseDTO created = roomRsvService.createMultipleRoomReservations(dtoList);
+                return ResponseEntity.ok(created);
             }
 
         } catch (Exception e) {
+            log.error("❌ 예약 생성 중 오류 발생: {}", e.getMessage());
             return ResponseEntity.internalServerError()
                     .body(RoomPreRsvResponseDTO.builder()
                             .success(false)
-                            .message("❌ 예약 생성 중 오류: " + e.getMessage())
+                            .message("❌ 예약 생성 실패: " + e.getMessage())
                             .build());
         }
     }
 
-    /** ✅ 결제 완료 후 예약 확정 */
+    /*  결제 완료 후 예약 확정 */
     @PutMapping("/{reserveId}/confirm")
     public ResponseEntity<String> confirmReservation(@PathVariable String reserveId) {
         roomRsvService.updateStatus(reserveId, "PAID");
         return ResponseEntity.ok("✅ 객실 예약 확정 완료");
     }
 
-    /** ✅ 결제 취소 시 예약 취소 */
+    /*  결제 취소 시 예약 취소 */
     @PutMapping("/{reserveId}/cancel")
     public ResponseEntity<String> cancelReservation(@PathVariable String reserveId) {
         roomRsvService.updateStatus(reserveId, "CANCELLED");

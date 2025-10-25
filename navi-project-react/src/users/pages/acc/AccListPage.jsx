@@ -399,7 +399,7 @@ const AccListPage = () => {
                       key={acc.accId || `acc-${index}`}
                       hoverable
                       className="rounded-xl shadow-sm cursor-pointer transition-transform transform hover:scale-[1.02] duration-200"
-                      onClick={() => handleCardClick(acc)} // ✅ acc 객체 전체 전달
+                      onClick={() => handleCardClick(acc)}
                       cover={
                         acc.mainImage ? (
                           <img
