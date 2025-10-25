@@ -58,9 +58,9 @@ public class SecurityConfig {
                 .requestMatchers("/api/adm/**", "/api/admin/**").hasRole(UserRole.ADMIN.name())
                 .requestMatchers("/api/users/**", "/api/seats/**", "/api/travel/**", "/api/flight/**",
                         "/api/auth/**", "/api/accommodations/**", "/api/townships/**", "/api/rooms/**", "/api/reservation/**",
-                        "/api/activity", "/api/payment/**", "/uploads/**", "/images/**")
+                        "/api/activity", "/uploads/**", "/images/**")
                 .permitAll()
-                .requestMatchers("/api/plans/**", "/api/room/reserve/**").authenticated()
+                .requestMatchers("/api/plans/**", "/api/room/reserve/**", "/api/payment/**").authenticated()
                 .requestMatchers("/api/users/detail/**", "/api/delivery/**").hasAnyRole(UserRole.USER.name())
                 .anyRequest().permitAll()
         );

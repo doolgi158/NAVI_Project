@@ -4,31 +4,42 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.navi.payment.domain.enums.PaymentMethod;
 import com.navi.common.entity.BaseEntity;
 import com.navi.payment.domain.enums.PaymentStatus;
+import com.navi.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-
-/* ===========[NAVI_PAYMENT]===========
-             결제 마스터 테이블
-   ==================================== */
 
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "NAVI_PAYMENT")   // Todo: indexes 추후 추가 예정
+@Table(
+        name = "NAVI_PAYMENT",
+        indexes = {
+                @Index(name = "IDX_PAYMENT_USER", columnList = "user_no"),
+                @Index(name = "IDX_PAYMENT_MERCHANT", columnList = "merchant_id")
+        }
+)
+@SequenceGenerator(
+        name = "payment_master_generator",
+        sequenceName = "PAYMENT_MASTER_SEQ",
+        initialValue = 1,
+        allocationSize = 1
+)
 public class PaymentMaster extends BaseEntity {
     /* === COLUMN 정의 === */
     // 내부 식별번호 (예: 1)
     @Id @Column(name = "no")
     private Long no;
+
+    /* 연관관계 설정 */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_no", nullable = false)
+    private User user;
 
     // 결제 고유번호 (예: PAY20251007-0001)
     @Column(name = "merchant_id", length = 30, nullable = false, unique = true)
@@ -63,9 +74,7 @@ public class PaymentMaster extends BaseEntity {
     @Column(name = "reason", length = 200)
     private String reason;
 
-    // 결제 생성일, 결제상태 수정일 자동 생성
-
-    /** === 기본값 보정 === */
+    /* === 기본값 보정 === */
     @PrePersist
     public void prePersist() {
         if (paymentStatus == null) paymentStatus = PaymentStatus.READY;
@@ -132,7 +141,7 @@ public class PaymentMaster extends BaseEntity {
         this.totalFeeAmount = totalFeeAmount != null ? totalFeeAmount : BigDecimal.ZERO;
     }
 
-    /* 결제 금액 변경 */
+    /* === 결제 금액 변경 === */
     public void updateTotalAmount(BigDecimal totalAmount) {
         if (totalAmount == null || totalAmount.compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("총 결제 금액은 0 이상이어야 합니다.");
@@ -140,7 +149,7 @@ public class PaymentMaster extends BaseEntity {
         this.totalAmount = totalAmount;
     }
 
-    /* impUid 선 할당 */
+    /* === impUid 선 할당 === */
     public void assignImpUid(String impUid) {
         if (this.impUid == null || this.impUid.isBlank()) {
             this.impUid = impUid;

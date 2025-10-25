@@ -3,7 +3,6 @@ import { Card, Typography, Divider } from "antd";
 import { CalendarOutlined, TeamOutlined, HomeOutlined } from "@ant-design/icons";
 import { API_SERVER_HOST } from "../../../common/api/naviApi";
 
-
 const { Title, Text } = Typography;
 
 const AccRsvSumCard = ({ accData, formData, totalAmount }) => {
@@ -16,14 +15,14 @@ const AccRsvSumCard = ({ accData, formData, totalAmount }) => {
 
   const { accName, address, thumbnail, room } = accData;
   const { checkIn, checkOut, guestCount, roomCount, nights } = formData;
-
+    console.log(thumbnail);
   return (
     <Card
       className="rounded-2xl shadow-md border border-gray-100 bg-white"
       cover={
         thumbnail && (
           <img
-            src={`${API_SERVER_HOST}thumbnail`}
+            src={`${API_SERVER_HOST}${thumbnail}`}
             alt={accName}
             className="h-[200px] w-full object-cover rounded-t-2xl"
           />
@@ -58,11 +57,14 @@ const AccRsvSumCard = ({ accData, formData, totalAmount }) => {
         </div>
 
         <Divider className="my-3" />
-
+        
         <div className="text-right">
-          <Text className="text-gray-600">총 결제 금액</Text>
-          <Title level={3} className="text-blue-600 font-extrabold leading-none mt-1">
-            {totalAmount?.toLocaleString()}원
+          <Text className="text-gray-600">총 금액</Text>
+          <Title
+            level={4}
+            style={{ margin: 0, color: "#1677ff", fontWeight: 700 }}
+          >
+            ₩{Number(totalAmount ?? 0).toLocaleString()}원
           </Title>
         </div>
       </div>

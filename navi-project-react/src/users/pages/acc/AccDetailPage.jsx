@@ -1,7 +1,16 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { Typography, Divider, Button, message, Spin, Row, Col, Carousel, DatePicker, InputNumber } from "antd";
+import { Typography, Divider, Button, message, Spin, Row, Col, Carousel, DatePicker, InputNumber, Descriptions } from "antd";
+import {
+  PhoneOutlined,
+  ClockCircleOutlined,
+  CarOutlined,
+  FireOutlined,
+  EyeOutlined,
+  EnvironmentOutlined,
+  HomeOutlined,
+} from "@ant-design/icons";
 import { useKakaoMap } from "../../../common/hooks/useKakaoMap";
 import { setSelectedAcc } from "../../../common/slice/accSlice";
 import { API_SERVER_HOST } from "../../../common/api/naviApi";
@@ -14,12 +23,12 @@ const { Title, Text, Paragraph } = Typography;
 const { RangePicker } = DatePicker;
 
 const AccDetailPage = () => {
-	const navigate = useNavigate();
+  const navigate = useNavigate();
 	const dispatch = useDispatch();
 	
 	/* Redux */
 	//const selectedAcc = useSelector((state) => state.acc.selectedAcc);      // 숙소 객체
-  	const selectedAccId = useSelector((state) => state.acc.selectedAccId);  // 숙소 ID (문자열)
+  const selectedAccId = useSelector((state) => state.acc.selectedAccId);  // 숙소 ID (문자열)
 
 
 	/* 로컬 상태 */
@@ -320,7 +329,7 @@ const AccDetailPage = () => {
 								/>
 							</Col>
 						</Row>
-
+            
 						{/* 숙소 소개 */}
 						<div className="mb-6">
 							<Title level={5} className="text-gray-800 mb-2 font-semibold">
@@ -330,6 +339,71 @@ const AccDetailPage = () => {
 								{accData.overview || "숙소 소개 정보가 없습니다."}
 							</Paragraph>
 						</div>
+
+						{/* 숙소 기본 정보 */}
+						<div className="mb-8">
+						<Title level={5} className="text-gray-800 mb-8 font-semibold">
+							숙소 기본 정보
+						</Title>
+
+						<Descriptions
+							bordered
+							column={{ xs: 1, sm: 2, md: 3 }}
+							labelStyle={{
+							width: "180px",
+							fontWeight: 600,
+							textAlign: "left",
+							color: "#444",
+							backgroundColor: "#fafafa",
+							padding: "12px 16px",
+							}}
+							contentStyle={{
+							backgroundColor: "#fff",
+							color: "#222",
+							fontWeight: 500,
+							padding: "12px 16px",
+							}}
+							className="rounded-xl overflow-hidden shadow-sm"
+						>
+							<Descriptions.Item
+							label={<><PhoneOutlined className="mr-2 text-gray-500" />문의전화</>}
+							>
+							{accData.tel || "정보 없음"}
+							</Descriptions.Item>
+
+							<Descriptions.Item
+							label={<><ClockCircleOutlined className="mr-2 text-gray-500" />체크인 시간</>}
+							>
+							{accData.checkInTime || "-"}
+							</Descriptions.Item>
+
+							<Descriptions.Item
+							label={<><ClockCircleOutlined className="mr-2 text-gray-500" />체크아웃 시간</>}
+							>
+							{accData.checkOutTime || "-"}
+							</Descriptions.Item>
+
+							<Descriptions.Item
+							label={<><CarOutlined className="mr-2 text-gray-500" />주차 가능 여부</>}
+							>
+							{accData.hasParking ? "가능" : "불가"}
+							</Descriptions.Item>
+
+							<Descriptions.Item
+							label={<><FireOutlined className="mr-2 text-gray-500" />취사 가능 여부</>}
+							>
+							{accData.hasCooking ? "가능" : "불가"}
+							</Descriptions.Item>
+
+							<Descriptions.Item
+							label={<><EnvironmentOutlined className="mr-2 text-gray-500" />운영 상태</>}
+							>
+							{accData.active ? "운영 중" : "운영 중단"}
+							</Descriptions.Item>
+						</Descriptions>
+						</div>
+
+
 
 						{/* 숙박 조건 선택 */}
 						<Divider />

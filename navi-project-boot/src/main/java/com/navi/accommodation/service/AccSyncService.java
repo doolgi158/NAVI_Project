@@ -161,7 +161,7 @@ public class AccSyncService {
 
         for (Acc acc : accList) {
             try {
-                // 읍면동 매핑 + 좌표 갱신
+                // 읍면동 매핑 + 좌표 + 카테고리 갱신
                 GeoResult geo = kakaoGeoService.getCoordinatesAndTownship(acc.getAddress(), acc.getTitle());
                 if (geo == null) {
                     log.warn("[SYNC] {} → KakaoGeo 결과 없음", acc.getTitle());
@@ -187,7 +187,7 @@ public class AccSyncService {
         }
     }
 
-    private Township matchTownshipByGeoResult(String townshipName) {
+    public Township matchTownshipByGeoResult(String townshipName) {
         if (townshipName == null || townshipName.isBlank()) {
             return null;
         }
@@ -198,7 +198,7 @@ public class AccSyncService {
         // township_name 컬럼 기준 LIKE 검색
         return townshipRepository.findByTownshipName(trimmed)
                 .orElseGet(() -> {
-                    log.warn("[SYNC] 읍면동 매핑 실패 → {}", townshipName);
+                    log.warn("[SYNC] 읍면 매핑 실패 → {}", townshipName);
                     return null;
                 });
     }

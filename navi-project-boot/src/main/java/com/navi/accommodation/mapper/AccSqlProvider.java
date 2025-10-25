@@ -4,26 +4,21 @@ import org.apache.ibatis.jdbc.SQL;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /* SQLProvider : 자바 코드로 SQL을 동적으로 조립하는 역할 */
 public class AccSqlProvider {
 
     public String buildSearchQuery(Map<String, Object> params) {
         /* 프론트에서 전달되는 파라미터와 정확히 매칭 */
-        String city = (String) params.get("city");                      // 💡 행정시
-        String townshipName = (String) params.get("townshipName");      // 💡 읍면동
-        String title = (String) params.get("title");                    // 💡 숙소명
-        Object checkInObj = params.get("checkIn");                      // 💡 체크인
-        String checkIn = (checkInObj instanceof java.time.LocalDate)
-                ? ((java.time.LocalDate) checkInObj).toString()
-                : (String) checkInObj;
-        Object checkOutObj = params.get("checkOut");                    // 💡 체크아웃
-        String checkOut = (checkOutObj instanceof java.time.LocalDate)
-                ? ((java.time.LocalDate) checkOutObj).toString()
-                : (String) checkOutObj;
-        Integer guestCount = (Integer) params.get("guestCount");        // 💡 투숙 인원
-        Integer roomCount = (Integer) params.get("roomCount");          // 💡 객실 수
-        String sort = (String) params.get("sort");                      // 💡 정렬 기준
+        String city = (String) params.get("city");                      // 행정시
+        String townshipName = (String) params.get("townshipName");      // 읍면동
+        String title = (String) params.get("title");                    // 숙소명
+        String checkIn = (String) params.get("checkIn");                // 체크인
+        String checkOut = (String) params.get("checkOut");              // 체크아웃
+        Integer guestCount = (Integer) params.get("guestCount");        // 투숙 인원
+        Integer roomCount = (Integer) params.get("roomCount");          // 객실 수
+        String sort = (String) params.get("sort");                      // 정렬 기준
 
         /* categoryList 안전 캐스팅 처리 */
         Object rawCategoryList = params.get("categoryList");
@@ -48,10 +43,11 @@ public class AccSqlProvider {
         if (title != null && !title.isBlank()
                 && (city == null || city.isBlank())
                 && (townshipName == null || townshipName.isBlank())) {
-            // 👉 숙소명 검색 탭 (title만 있을 때)
+            // 숙소명 검색 탭 (title만 있을 때)
             sql.WHERE("LOWER(a.TITLE) LIKE '%' || LOWER(#{title}) || '%'");
-        } else if ((city != null && !city.isBlank()) || (townshipName != null && !townshipName.isBlank())) {
-            // 👉 지역별 검색 탭 (city 또는 township 있을 때)
+        }
+        else if ((city != null && !city.isBlank()) || (townshipName != null && !townshipName.isBlank())) {
+            // 지역별 검색 탭 (city 또는 township 있을 때)
             if (city != null && !city.isBlank() && townshipName != null && !townshipName.isBlank()) {
                 sql.WHERE("(t.SIGUNGU_NAME = #{city} OR t.TOWNSHIP_NAME = #{townshipName})");
             } else if (city != null && !city.isBlank()) {
@@ -74,16 +70,11 @@ public class AccSqlProvider {
 
         // 객실 조건: 재고, 인원, 날짜
         if (checkIn != null && checkOut != null) {
-            sql.WHERE("""
-                        EXISTS (
-                            SELECT 1
-                            FROM NAVI_ROOM r
-                            JOIN NAVI_ROOM_STOCK s ON r.ROOM_NO = s.ROOM_NO
-                            WHERE r.ACC_NO = a.ACC_NO
-                              AND s.STOCK_DATE BETWEEN TRUNC(#{checkIn}) AND TRUNC(#{checkOut}) - 1
-                              AND s.REMAIN_COUNT > 0
-                        )
-                    """);
+            sql.WHERE("EXISTS (SELECT 1 FROM NAVI_ROOM r " +
+                    "JOIN NAVI_ROOM_STOCK s ON r.ROOM_NO = s.ROOM_NO " +
+                    "WHERE r.ACC_NO = a.ACC_NO " +
+                    "AND s.STOCK_DATE BETWEEN #{checkIn} AND #{checkOut} " +
+                    "AND s.REMAIN_COUNT > 0)");
         }
         if (guestCount != null) {
             sql.WHERE("EXISTS (SELECT 1 FROM NAVI_ROOM r WHERE r.ACC_NO = a.ACC_NO AND r.MAX_CNT >= #{guestCount})");
@@ -94,11 +85,87 @@ public class AccSqlProvider {
 
         /* 정렬 조건 */
         switch (sort == null ? "" : sort.toLowerCase()) {
-            case "minprice" -> sql.ORDER_BY("MIN_PRICE ASC");          // 낮은가격순
-            case "maxprice" -> sql.ORDER_BY("MAX_PRICE DESC");         // 높은가격순
-            case "view" -> sql.ORDER_BY("a.VIEW_COUNT DESC");          // 조회순
-            case "recent" -> sql.ORDER_BY("a.CREATED_TIME DESC");      // 최신순
-            default -> sql.ORDER_BY("a.TITLE ASC");                    // 제목순
+            case "minprice" -> sql.ORDER_BY("minPrice ASC");            // 낮은가격순
+            case "maxprice" -> sql.ORDER_BY("maxPrice DESC");           // 높은가격순
+            case "view" -> sql.ORDER_BY("a.VIEW_COUNT DESC");           // 조회순
+            case "recent" -> sql.ORDER_BY("a.CREATED_TIME DESC");       // 최신순
+            default -> sql.ORDER_BY("a.TITLE ASC");                     // 제목순
+        }
+
+        return sql.toString();
+    }
+
+    public String buildAdminListQuery(Map<String, Object> params) {
+        String keyword = (String) params.get("keyword");
+        Integer sourceType = (Integer) params.get("sourceType");
+        String activeFilter = (String) params.get("activeFilter");
+        Integer offset = (Integer) params.get("offset");
+        Integer pageSize = (Integer) params.get("pageSize");
+
+        SQL sql = new SQL()
+                .SELECT("""
+                    ACC_NO AS accNo,
+                    ACC_ID AS accId,
+                    CONTENT_ID AS contentId,
+                    TITLE AS title,
+                    CATEGORY AS category,
+                    TEL AS tel,
+                    ADDRESS AS address,
+                    HAS_COOKING AS hasCooking,
+                    HAS_PARKING AS hasParking,
+                    IS_ACTIVE AS isActive,
+                    CHECKIN_TIME AS checkInTime,
+                    CHECKOUT_TIME AS checkOutTime,
+                    VIEW_COUNT AS viewCount,
+                    TO_CHAR(CREATED_TIME, 'YYYY-MM-DD HH24:MI') AS createdTime,
+                    TO_CHAR(MODIFIED_TIME, 'YYYY-MM-DD HH24:MI') AS modifiedTime
+                """)
+                .FROM("NAVI_ACCOMMODATION")
+                .WHERE("1=1");
+
+        if (keyword != null && !keyword.isBlank()) {
+            sql.WHERE("(LOWER(TITLE) LIKE '%' || LOWER(#{keyword}) || '%' OR LOWER(ADDRESS) LIKE '%' || LOWER(#{keyword}) || '%')");
+        }
+        if (sourceType != null) {
+            if (sourceType == 0) sql.WHERE("CONTENT_ID IS NULL");
+            else if (sourceType == 1) sql.WHERE("CONTENT_ID IS NOT NULL");
+        }
+        if (activeFilter != null && !"ALL".equalsIgnoreCase(activeFilter)) {
+            if ("ACTIVE".equalsIgnoreCase(activeFilter)) sql.WHERE("IS_ACTIVE = 1");
+            else if ("INACTIVE".equalsIgnoreCase(activeFilter)) sql.WHERE("IS_ACTIVE = 0");
+        }
+
+        sql.ORDER_BY("ACC_NO DESC");
+
+        String baseQuery = sql.toString();
+        if (offset != null && pageSize != null) {
+            // offset 번째 행부터 pageSize 만큼 조회
+            baseQuery += " OFFSET #{offset} ROWS FETCH NEXT #{pageSize} ROWS ONLY";
+        }
+
+        return baseQuery;
+    }
+
+    public String buildAdminCountQuery(Map<String, Object> params) {
+        String keyword = (String) params.get("keyword");
+        Integer sourceType = (Integer) params.get("sourceType");
+        String activeFilter = (String) params.get("activeFilter");
+
+        SQL sql = new SQL()
+                .SELECT("COUNT(*)")
+                .FROM("NAVI_ACCOMMODATION")
+                .WHERE("1=1");
+
+        if (keyword != null && !keyword.isBlank()) {
+            sql.WHERE("(LOWER(TITLE) LIKE '%' || LOWER(#{keyword}) || '%' OR LOWER(ADDRESS) LIKE '%' || LOWER(#{keyword}) || '%')");
+        }
+        if (sourceType != null) {
+            if (sourceType == 0) sql.WHERE("CONTENT_ID IS NULL");
+            else if (sourceType == 1) sql.WHERE("CONTENT_ID IS NOT NULL");
+        }
+        if (activeFilter != null && !"ALL".equalsIgnoreCase(activeFilter)) {
+            if ("ACTIVE".equalsIgnoreCase(activeFilter)) sql.WHERE("IS_ACTIVE = 1");
+            else if ("INACTIVE".equalsIgnoreCase(activeFilter)) sql.WHERE("IS_ACTIVE = 0");
         }
 
         return sql.toString();

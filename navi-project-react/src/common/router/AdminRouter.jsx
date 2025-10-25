@@ -1,6 +1,6 @@
 import { Suspense, lazy } from "react";
 import ProtectedRoute from "./ProtectedRoute.jsx";
-import AdminAccommodation from "./AdminAccommodationRouter.jsx"
+import AdminAccommodation from "./AdminAccRouter.jsx"
 import AdminFlightRouter from "./AdminFlightRouter.jsx";
 import AdminDeliveryRouter from "./AdminDeliveryRouter.jsx";
 import AdminRoomyRouter from "./AdminRoomRouter.jsx"
