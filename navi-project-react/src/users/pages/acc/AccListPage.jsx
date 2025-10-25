@@ -99,23 +99,33 @@ const AccListPage = () => {
   /* === 숙소 검색 === */
   const handleSearch = useCallback(async () => {
     if (isTownshipLoading) {
-      message.warning("읍면동 데이터를 로딩 중입니다.");
+      message.warning("읍면동 데이터를 로딩 중입니다. 잠시만 기다려주세요.");
       return;
     }
     if (townshipError) {
-      message.error("읍면동 데이터 로드 실패");
+      message.error("읍면동 데이터 로드 실패. 다시 시도해주세요.");
       return;
     }
-    if (!dateRange || dateRange.length !== 2) {
-      message.warning("체크인/체크아웃 날짜를 선택해주세요.");
-      return;
+
+    const missingFields = [];
+
+    if (!dateRange || dateRange.length !== 2) missingFields.push("체크인/체크아웃 날짜");
+    if (!guestCount || guestCount <= 0) missingFields.push("투숙 인원");
+    if (!roomCount || roomCount <= 0) missingFields.push("객실 수");
+
+    if (searchType === "region") {
+      if (!city) missingFields.push("행정시");
+      if (!township) missingFields.push("읍면");
+    } else if (searchType === "keyword" && !keyword?.trim()) {
+      missingFields.push("숙소명");
     }
-    if (!guestCount || guestCount <= 0) {
-      message.warning("투숙 인원을 입력해주세요.");
-      return;
-    }
-    if (!roomCount || roomCount <= 0) {
-      message.warning("객실 수를 입력해주세요.");
+
+    if (missingFields.length > 0) {
+      message.warning(
+        `${missingFields.join(", ")} ${
+          missingFields.length > 1 ? "항목들을" : "항목을"
+        } 입력해주세요.`
+      );
       return;
     }
 
@@ -129,17 +139,13 @@ const AccListPage = () => {
         checkOut: dateRange[1].format("YYYY-MM-DD"),
         guestCount,
         roomCount,
+        categoryList: selectedCategories,
         sort: sortOption,
       };
 
       const res = await axios.get(`${API_SERVER_HOST}/api/accommodations`, { params });
       let resultData = res.data || [];
       console.log(resultData);
-      if (selectedCategories.length > 0) {
-        resultData = resultData.filter((acc) =>
-          selectedCategories.includes(acc.category)
-        );
-      }
 
       setAccommodations(resultData);
       setIsSearched(true);
@@ -150,12 +156,12 @@ const AccListPage = () => {
         city,
         township,
         keyword,
-        spot,
         guestCount,
         roomCount,
         dateRange: [params.checkIn, params.checkOut],
         isSearched: true,
         accommodations: resultData,
+        selectedCategories,
       };
 
       dispatch(setSearchState(newSearchState));
@@ -284,16 +290,6 @@ const AccListPage = () => {
                 </>
               )}
 
-              {searchType === "spot" && (
-                <Input
-                  placeholder="관광명소를 입력하세요"
-                  className="min-w-[300px] w-[400px] flex-shrink-0"
-                  size="large"
-                  value={spot}
-                  onChange={(e) => setSpot(e.target.value)}
-                />
-              )}
-
               {searchType === "keyword" && (
                 <Input
                   placeholder="숙소명을 입력하세요"
@@ -369,7 +365,7 @@ const AccListPage = () => {
               </div>
 
               <div className="flex items-center gap-3 flex-wrap">
-                <span className="font-semibold text-gray-700">카테고리:</span>
+                <span className="font-semibold text-gray-700">숙소 종류:</span>
                 <Checkbox.Group
                   options={["호텔", "리조트/콘도", "모텔", "펜션", "게스트하우스/민박"]}
                   value={selectedCategories}

@@ -20,6 +20,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -164,12 +165,31 @@ public class AccServiceImpl implements AccService {
     public List<AccListResponseDTO> searchAccommodations(AccSearchRequestDTO dto) {
         log.info("🔍 [ACC_SEARCH] 요청 수신 - {}", dto);
 
+        // 프론트 카테고리 → DB 카테고리 변환
+        List<String> categories = new ArrayList<>();
+        if (dto.getCategoryList() != null) {
+            for (String c : dto.getCategoryList()) {
+                switch (c) {
+                    case "호텔" -> categories.add("호텔");
+                    case "리조트/콘도" -> categories.add("콘도, 리조트");
+                    case "모텔" -> categories.add("여관, 모텔");
+                    case "펜션" -> categories.add("펜션");
+                    case "게스트하우스/민박" -> categories.addAll(
+                            List.of("게스트하우스", "유스호스텔", "민박", "일반숙박업", "산장,별장", "한옥숙소", "생활숙박업")
+                    );
+                    case "기타" -> categories.addAll(
+                            List.of("숙박", "야영,캠핑장")
+                    );
+                }
+            }
+        }
+
         // Mapper 기반 DB 검색 수행
-        List<Acc> accList = accMapper.searchAccommodations(
+        List<AccListResponseDTO> accList = accMapper.searchAccommodations(
                 dto.getCity(),
                 dto.getTownshipName(),
                 dto.getTitle(),
-                dto.getCategoryList(),
+                categories,
                 dto.getCheckIn() != null ? dto.getCheckIn().toString() : null,
                 dto.getCheckOut() != null ? dto.getCheckOut().toString() : null,
                 dto.getGuestCount(),
@@ -179,18 +199,7 @@ public class AccServiceImpl implements AccService {
 
         log.debug("✅ [ACC_SEARCH] 결과 {}건", accList.size());
 
-        return accList.stream()
-                .map(acc -> AccListResponseDTO.builder()
-                        .accId(acc.getAccId())
-                        .title(acc.getTitle())
-                        .address(acc.getAddress())
-                        .mainImage(
-                                (acc.getMainImage() != null && !acc.getMainImage().isBlank())
-                                        ? acc.getMainImage()
-                                        : "/images/acc/default_hotel.jpg"
-                        )
-                        .build())
-                .toList();
+        return accList;
     }
 
 

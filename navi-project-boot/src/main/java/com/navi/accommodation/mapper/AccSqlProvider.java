@@ -32,9 +32,9 @@ public class AccSqlProvider {
 
         /* SQL 빌더 생성 */
         SQL sql = new SQL()
-                .SELECT("a.ACC_NO, a.ACC_ID AS accId, a.TITLE, a.ADDRESS, a.MAIN_IMAGE, " +
-                        "(SELECT MIN(r2.WEEKDAY_FEE) FROM NAVI_ROOM r2 WHERE r2.ACC_NO = a.ACC_NO) AS MIN_PRICE, " +
-                        "(SELECT MAX(r3.WEEKDAY_FEE) FROM NAVI_ROOM r3 WHERE r3.ACC_NO = a.ACC_NO) AS MAX_PRICE")
+                .SELECT("a.ACC_NO, a.ACC_ID AS accId, a.TITLE, a.ADDRESS, a.MAIN_IMAGE AS mainImage, " +
+                        "(SELECT MIN(r2.WEEKDAY_FEE) FROM NAVI_ROOM r2 WHERE r2.ACC_NO = a.ACC_NO) AS minPrice, " +
+                        "(SELECT MAX(r3.WEEKDAY_FEE) FROM NAVI_ROOM r3 WHERE r3.ACC_NO = a.ACC_NO) AS maxPrice")
                 .FROM("NAVI_ACCOMMODATION a")
                 .JOIN("NAVI_TOWNSHIP t ON a.TOWNSHIP_ID = t.TOWNSHIP_ID")
                 .WHERE("a.IS_ACTIVE = 1");
