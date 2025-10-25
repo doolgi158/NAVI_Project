@@ -4,33 +4,28 @@ import com.navi.core.admin.service.AdminNoticeService;
 import com.navi.core.dto.NoticeDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/adm/notice")
+@RequestMapping("/adm/notice")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173")
-@PreAuthorize("hasRole('ADMIN')")
 public class AdminNoticeController {
 
     private final AdminNoticeService adminNoticeService;
 
-    @Value("${file.upload-dir:./uploads}")
-    private String uploadDir;
+    // 파일 저장 경로 설정
+    private final String UPLOAD_DIR = "uploads/notice/";
 
     /**
      * 전체 공지사항 조회
@@ -38,17 +33,6 @@ public class AdminNoticeController {
     @GetMapping
     public ResponseEntity<List<NoticeDTO>> getAllNotices() {
         List<NoticeDTO> notices = adminNoticeService.getAllNotices();
-        log.info("[관리자] 공지사항 목록 조회: {} 건", notices.size());
-        return ResponseEntity.ok(notices);
-    }
-
-    /**
-     * 공지사항 검색
-     */
-    @GetMapping("/search")
-    public ResponseEntity<List<NoticeDTO>> searchNotices(@RequestParam String keyword) {
-        List<NoticeDTO> notices = adminNoticeService.searchNotices(keyword);
-        log.info("[관리자] 공지사항 검색: '{}' → {} 건", keyword, notices.size());
         return ResponseEntity.ok(notices);
     }
 
@@ -62,64 +46,43 @@ public class AdminNoticeController {
     }
 
     /**
-     * 공지사항 작성
+     * 공지사항 검색
      */
-    @PostMapping
-    public ResponseEntity<NoticeDTO> createNotice(@RequestBody NoticeDTO noticeDTO) {
-        NoticeDTO createdNotice = adminNoticeService.createNotice(noticeDTO);
-        log.info("[관리자] 공지사항 작성 완료: {}", createdNotice.getNoticeNo());
-        return ResponseEntity.ok(createdNotice);
+    @GetMapping("/search")
+    public ResponseEntity<List<NoticeDTO>> searchNotices(@RequestParam String keyword) {
+        List<NoticeDTO> notices = adminNoticeService.searchNotices(keyword);
+        return ResponseEntity.ok(notices);
     }
 
     /**
-     * 파일 업로드
+     * 공지사항 작성 (이미지 업로드 포함)
      */
-    @PostMapping("/upload")
-    public ResponseEntity<Map<String, String>> uploadFile(@RequestParam("file") MultipartFile file) {
+    @PostMapping
+    public ResponseEntity<NoticeDTO> createNotice(@RequestBody NoticeDTO noticeDTO) {
         try {
-            Path uploadPath = Paths.get(uploadDir);
-            if (!Files.exists(uploadPath)) {
-                Files.createDirectories(uploadPath);
-            }
-
-            String originalFilename = file.getOriginalFilename();
-            String extension = "";
-            if (originalFilename != null && originalFilename.contains(".")) {
-                extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-            }
-            String savedFilename = UUID.randomUUID().toString() + extension;
-
-            Path filePath = uploadPath.resolve(savedFilename);
-            Files.copy(file.getInputStream(), filePath);
-
-            String fileUrl = "http://localhost:8080/uploads/" + savedFilename;
-
-            Map<String, String> response = new HashMap<>();
-            response.put("fileUrl", fileUrl);
-            response.put("originalFilename", originalFilename);
-            response.put("savedFilename", savedFilename);
-
-            log.info("[관리자] 파일 업로드 완료: {}", savedFilename);
-            return ResponseEntity.ok(response);
-
-        } catch (IOException e) {
-            log.error("[관리자] 파일 업로드 실패", e);
-            Map<String, String> error = new HashMap<>();
-            error.put("error", "파일 업로드 실패: " + e.getMessage());
-            return ResponseEntity.status(500).body(error);
+            NoticeDTO created = adminNoticeService.createNotice(noticeDTO);
+            return ResponseEntity.ok(created);
+        } catch (Exception e) {
+            log.error("공지사항 작성 실패", e);
+            return ResponseEntity.badRequest().build();
         }
     }
 
     /**
-     * 공지사항 수정
+     * 공지사항 수정 (이미지 업로드 포함)
      */
     @PutMapping("/{noticeNo}")
     public ResponseEntity<NoticeDTO> updateNotice(
             @PathVariable Integer noticeNo,
-            @RequestBody NoticeDTO noticeDTO) {
-        NoticeDTO updatedNotice = adminNoticeService.updateNotice(noticeNo, noticeDTO);
-        log.info("[관리자] 공지사항 수정 완료: {}", noticeNo);
-        return ResponseEntity.ok(updatedNotice);
+            @RequestBody NoticeDTO noticeDTO
+    ) {
+        try {
+            NoticeDTO updated = adminNoticeService.updateNotice(noticeNo, noticeDTO);
+            return ResponseEntity.ok(updated);
+        } catch (Exception e) {
+            log.error("공지사항 수정 실패", e);
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     /**
@@ -128,7 +91,34 @@ public class AdminNoticeController {
     @DeleteMapping("/{noticeNo}")
     public ResponseEntity<Void> deleteNotice(@PathVariable Integer noticeNo) {
         adminNoticeService.deleteNotice(noticeNo);
-        log.info("[관리자] 공지사항 삭제 완료: {}", noticeNo);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 파일 저장 메서드
+     */
+    private String saveFile(MultipartFile file, String type) throws IOException {
+        // 업로드 디렉토리 생성
+        File uploadDir = new File(UPLOAD_DIR);
+        if (!uploadDir.exists()) {
+            uploadDir.mkdirs();
+        }
+
+        // 고유한 파일명 생성 (UUID 사용)
+        String originalFilename = file.getOriginalFilename();
+        String extension = "";
+        if (originalFilename != null && originalFilename.contains(".")) {
+            extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        }
+        String savedFilename = UUID.randomUUID().toString() + extension;
+
+        // 파일 저장
+        Path filePath = Paths.get(UPLOAD_DIR + savedFilename);
+        Files.write(filePath, file.getBytes());
+
+        log.info("파일 저장 완료: {}", filePath);
+
+        // 웹에서 접근 가능한 경로 반환
+        return "/" + UPLOAD_DIR + savedFilename;
     }
 }

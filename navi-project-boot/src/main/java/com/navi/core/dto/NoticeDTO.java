@@ -14,7 +14,7 @@ public class NoticeDTO {
     private String noticeTitle;
     private String noticeContent;
     private String noticeImage;
-    private String noticeAttachFile;
+    private String noticeFile;
     private LocalDateTime noticeStartDate;
     private LocalDateTime noticeEndDate;
     private Integer noticeViewCount;
@@ -34,7 +34,7 @@ public class NoticeDTO {
                 .noticeTitle(notice.getNoticeTitle())
                 .noticeContent(notice.getNoticeContent())
                 .noticeImage(notice.getNoticeImage())
-                .noticeAttachFile(notice.getNoticeFile())
+                .noticeFile(notice.getNoticeFile())
                 .noticeStartDate(notice.getNoticeStartDate())
                 .noticeEndDate(notice.getNoticeEndDate())
                 .noticeViewCount(notice.getNoticeViewCount())
@@ -52,7 +52,7 @@ public class NoticeDTO {
                 .noticeTitle(this.noticeTitle)
                 .noticeContent(this.noticeContent)
                 .noticeImage(this.noticeImage)
-                .noticeFile(this.noticeAttachFile)
+                .noticeFile(this.noticeFile)
                 .noticeStartDate(this.noticeStartDate)
                 .noticeEndDate(this.noticeEndDate)
                 .noticeViewCount(this.noticeViewCount)

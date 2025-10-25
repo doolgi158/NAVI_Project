@@ -45,12 +45,13 @@ function BoardWrite() {
       return;
     }
 
-    // 5MB 제한
-    if (file.size > 5 * 1024 * 1024) {
-      alert('파일 크기는 5MB 이하여야 합니다.');
-      return;
-    }
-
+  // 확장자 검사 (추가 안전장치)
+  const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+  const fileExtension = file.name.split('.').pop().toLowerCase();
+  if (!allowedExtensions.includes(fileExtension)) {
+    alert('허용되지 않은 이미지 형식입니다.');
+    return;
+  }
     setImage(file);
 
     // 미리보기
@@ -90,8 +91,8 @@ function BoardWrite() {
       // 게시글 저장
       const response = await fetch('/api/board', {
         method: 'POST',
-        credentials: 'include',  // ✅ 쿠키 전송
-        body: formData  // FormData 전송 (Content-Type 자동 설정)
+        credentials: 'include',  // 쿠키 전송
+        body: formData  // F
       });
 
       if (response.ok) {
@@ -170,12 +171,11 @@ function BoardWrite() {
           <input
             id="fileInput"
             type="file"
-            accept="image/*"
+            accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
             onChange={handleFileSelect}
             style={{ display: 'none' }}
           />
         </div>
-
         <div className="button-group">
           <button type="button" onClick={() => navigate('/board')}>
             취소

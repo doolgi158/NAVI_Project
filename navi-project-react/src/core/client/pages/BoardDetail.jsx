@@ -249,7 +249,7 @@ function BoardDetail() {
     if (editImage) {
       formData.append('image', editImage);
     }
-    // ✅ 이미지 삭제 플래그
+    // 이미지 삭제 플래그
     else if (removeImage) {
       formData.append('removeImage', 'true');
     }
@@ -300,7 +300,7 @@ function BoardDetail() {
 
   // 댓글을 계층 구조로 정렬
   const organizeComments = (commentsList) => {
-    // ✅ 배열 체크
+  
     if (!Array.isArray(commentsList)) {
       return [];
     }
@@ -343,12 +343,14 @@ const renderComment = (comment, depth = 0) => (
     </div>
 
     <div className="comment-item-actions">
-      <button 
-        className="comment-action-btn"
-        onClick={() => setReplyTo(comment.commentNo)}
-      >
-        답글
-      </button>
+      {depth === 0 && (
+        <button 
+          className="comment-action-btn"
+          onClick={() => setReplyTo(comment.commentNo)}
+        >
+          답글
+        </button>
+      )}
       <button 
         className="comment-action-btn"
         onClick={() => {
@@ -378,7 +380,7 @@ const renderComment = (comment, depth = 0) => (
     </div>
 
     {/* 답글 작성 폼 */}
-    {replyTo === comment.commentNo && (
+    {replyTo === comment.commentNo && depth === 0 && (
       <div className="reply-form">
         <textarea
           value={replyContent}

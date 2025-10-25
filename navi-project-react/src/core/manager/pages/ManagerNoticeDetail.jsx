@@ -41,7 +41,7 @@ function NoticeDetail() {
     try {
       await deleteNotice(noticeNo);
       alert('삭제되었습니다.');
-      navigate('/manager/notice');
+      navigate('/adm/notice');
     } catch (error) {
       console.error('삭제에 실패했습니다:', error);
       alert('삭제에 실패했습니다.');
@@ -93,18 +93,34 @@ function NoticeDetail() {
         )}
       </div>
 
+      {/* 이미지 표시 영역 추가 */}
+      {notice.noticeImage && (
+        <div className="notice-image">
+          <img 
+            src={notice.noticeImage}
+            alt={notice.noticeTitle}
+            onError={(e) => {
+              console.error('이미지 로딩 실패:', e.target.src);
+              e.target.style.display = 'none';
+            }}
+            onLoad={(e) => {
+              console.log('이미지 로딩 성공:', e.target.src);
+            }}
+          />
+        </div>
+      )}
       <div className="notice-content">
-        <h3>내용</h3>
+        <h3></h3>
         <div className="content-text">
           {notice.noticeContent}
         </div>
       </div>
 
-      {notice.noticeAttachFile && (
+      {notice.noticeFile && (
         <div className="notice-attachment">
           <span className="label">첨부파일:</span>
-          <a href={notice.noticeAttachFile} download>
-            {notice.noticeAttachFile}
+          <a href={notice.noticeFile} download>
+            {notice.noticeFile.split('/').pop()}  {/* ✅ 파일명만 표시 */}
           </a>
         </div>
       )}

@@ -1,5 +1,5 @@
 // 관리자용 공지사항 API 서비스
-const API_URL = '/api/adm/notice';
+const API_URL = '/adm/notice';  // ✅ 상대 경로로 통일
 
 // 토큰 가져오기
 const getToken = () => {
@@ -7,7 +7,7 @@ const getToken = () => {
          sessionStorage.getItem('accessToken');
 };
 
-// 공통 헤더 (includeJson: true -> adds Content-Type, false -> omit for FormData)
+// 공통 헤더
 const getHeaders = (includeJson = true) => {
   const token = getToken();
   const headers = {};
@@ -35,7 +35,7 @@ export const getAllNotices = async () => {
 export const createNotice = async (noticeData) => {
   const token = localStorage.getItem('accessToken');
   
-  const response = await fetch('/api/adm/notice', {
+  const response = await fetch('/adm/notice', {
     method: 'POST',
     headers: {
       'Authorization': token ? `Bearer ${token}` : '',
@@ -54,12 +54,11 @@ export const createNotice = async (noticeData) => {
   return await response.json();
 };
 
-
 // 공지사항 수정
 export const updateNotice = async (noticeNo, noticeData) => {
   const token = localStorage.getItem('accessToken');
   
-  const response = await fetch(`/api/adm/notice/${noticeNo}`, {
+  const response = await fetch(`/adm/notice/${noticeNo}`, {
     method: 'PUT',
     headers: {
       'Authorization': token ? `Bearer ${token}` : '',
@@ -78,10 +77,11 @@ export const updateNotice = async (noticeNo, noticeData) => {
   return await response.json();
 };
 
+// 공지사항 조회
 export const getNoticeById = async (noticeNo) => {
   const token = localStorage.getItem('accessToken');
   
-  const response = await fetch(`/api/adm/notice/${noticeNo}`, {
+  const response = await fetch(`/adm/notice/${noticeNo}`, {
     headers: {
       'Authorization': token ? `Bearer ${token}` : '',
     },

@@ -6,10 +6,15 @@ import com.navi.core.user.service.BoardService;
 import com.navi.core.user.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,34 +35,57 @@ public class BoardApiController {
         // ✅ 개발 중에는 임시로 1 반환
         return 1;
 
-    /* 나중에 실제 로그인 구현 후 사용
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-    if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
-        throw new RuntimeException("로그인이 필요합니다.");
-    }
-
-    User user = (User) auth.getPrincipal();
-    return user.getUserNo();
-    */
+//        //나중에 실제 로그인 구현 후 사용
+//    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+//
+//    if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+//        throw new RuntimeException("로그인이 필요합니다.");
+//    }
+//
+//    User user = (User) auth.getPrincipal();
+//    return user.getUserNo();
+//
     }
 
     /**
      * 전체 게시글 조회
      */
     @GetMapping
-    public ResponseEntity<List<Board>> getAllBoards() {
-        List<Board> boards = boardService.getAllBoards();
-        return ResponseEntity.ok(boards);
+    public ResponseEntity<Map<String, Object>> getAllBoards(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createDate").descending());
+        Page<Board> boardPage = boardService.getAllBoards(pageable);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("boards", boardPage.getContent());
+        response.put("currentPage", boardPage.getNumber());
+        response.put("totalItems", boardPage.getTotalElements());
+        response.put("totalPages", boardPage.getTotalPages());
+
+        return ResponseEntity.ok(response);
     }
 
     /**
      * 게시글 검색
      */
     @GetMapping("/search")
-    public ResponseEntity<List<Board>> searchBoards(@RequestParam String keyword) {
-        List<Board> boards = boardService.searchBoards(keyword);
-        return ResponseEntity.ok(boards);
+    public ResponseEntity<Map<String, Object>> searchBoards(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createDate").descending());
+        Page<Board> boardPage = boardService.searchBoards(keyword, pageable);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("boards", boardPage.getContent());
+        response.put("currentPage", boardPage.getNumber());
+        response.put("totalItems", boardPage.getTotalElements());
+        response.put("totalPages", boardPage.getTotalPages());
+
+        return ResponseEntity.ok(response);
     }
 
     /**

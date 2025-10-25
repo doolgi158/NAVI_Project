@@ -1,12 +1,12 @@
 .notice-list-container {
-  max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 30px 20px;  /* ✅ 상단 여백 증가 */
+  max-width: 1400px;   /* ✅ 최대 너비 추가 */
 }
 
 /* 헤더 */
 .notice-header {
-  margin-bottom: 20px;
+  margin-bottom: 25px;  /* ✅ 여백 증가 */
   padding-bottom: 15px;
   border-bottom: 2px solid #e0e0e0;
 }
@@ -24,6 +24,7 @@
   color: #666;
   text-decoration: none;
   transition: color 0.2s;
+  padding: 5px 0;  /* ✅ 클릭 영역 증가 */
 }
 
 .nav-link:hover {
@@ -40,66 +41,135 @@
   font-size: 16px;
 }
 
+/* 검색 박스 */
 .search-box {
   display: flex;
   gap: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 25px;  /* ✅ 여백 증가 */
 }
 
 .search-box input {
   flex: 1;
-  padding: 10px;
+  padding: 12px 15px;  /* ✅ 패딩 증가 */
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 14px;
 }
 
+.search-box input:focus {  /* ✅ 포커스 효과 추가 */
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+}
+
 .search-box button {
-  padding: 10px 20px;
+  padding: 12px 24px;  /* ✅ 패딩 증가 */
   background-color: #007bff;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
+  font-weight: 500;  /* ✅ 글씨 두께 */
+  transition: background-color 0.2s;  /* ✅ 부드러운 전환 */
 }
 
 .search-box button:hover {
   background-color: #0056b3;
 }
 
+/* 테이블 */
 .notice-table {
   width: 100%;
   border-collapse: collapse;
   background-color: white;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);  /* ✅ 그림자 약하게 */
+  border-radius: 8px;  /* ✅ 모서리 둥글게 */
+  overflow: hidden;    /* ✅ 둥근 모서리 적용 */
 }
 
 .notice-table th,
 .notice-table td {
-  padding: 15px;
+  padding: 16px;  /* ✅ 패딩 증가 */
   text-align: center;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #f0f0f0;  /* ✅ 선 더 연하게 */
 }
 
 .notice-table th {
   background-color: #f8f9fa;
-  font-weight: bold;
+  font-weight: 600;  /* ✅ 글씨 두께 */
   color: #333;
 }
 
-.notice-table .notice-title {
+.notice-table tbody tr:hover {  /* ✅ 호버 효과 추가 */
+  background-color: #f8f9fa;
+}
+
+.notice-table .title-cell {  /* ✅ 클래스명 통일 */
   cursor: pointer;
   color: #007bff;
   text-align: left;
+  font-weight: 500;  /* ✅ 글씨 두께 */
 }
 
-.notice-table .notice-title:hover {
+.notice-table .title-cell:hover {
   text-decoration: underline;
+}
+
+.no-notices {  /* ✅ 추가 */
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+  font-size: 16px;
 }
 
 .loading {
   text-align: center;
-  padding: 50px;
+  padding: 60px;  /* ✅ 패딩 증가 */
   font-size: 18px;
   color: #666;
+}
+
+/* 페이지네이션 */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 40px;  /* ✅ 여백 증가 */
+}
+
+.page-btn {
+  min-width: 36px;  /* ✅ 최소 너비 */
+  padding: 10px 14px;  /* ✅ 패딩 증가 */
+  border: 1px solid #ddd;
+  background-color: white;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.page-btn:hover:not(:disabled) {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.page-btn.active {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+  font-weight: 600;  /* ✅ 글씨 두께 */
+}
+
+.page-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;  /* ✅ 더 흐리게 */
+  background-color: #f5f5f5;
+}
+
+.pagination-info {
+  text-align: center;
+  margin-top: 15px;  /* 여백 증가 */
+  color: #666;
+  font-size: 14px;
 }
