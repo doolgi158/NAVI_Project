@@ -27,13 +27,12 @@ public class AccListResponseDTO {
     private Integer remainingRooms;     // Todo: 예약 가능 잔여 객실 수
 
     /* Entity → DTO 변환 */
-    public static AccListResponseDTO fromEntity(Acc acc, BigDecimal minPrice) {
+    public static AccListResponseDTO fromEntity(Acc acc) {
         return AccListResponseDTO.builder()
                 .accId(acc.getAccId())           // 숙소 ID
                 .title(acc.getTitle())           // 숙소명
                 .address(acc.getAddress())       // 주소
                 .mainImage(acc.getMainImage())   // 대표 이미지
-                .minPrice(minPrice)              // 최저가 객실 가격
                 .build();
     }
 }

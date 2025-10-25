@@ -32,7 +32,7 @@ public class AccUserController {
     @GetMapping("/stay/list")
     public ResponseEntity<List<AccListResponseDTO>> getStayList() {
         List<AccListResponseDTO> list = accService.getAllAcc().stream()
-                .map(acc -> AccListResponseDTO.fromEntity(acc, null))
+                .map(AccListResponseDTO::fromEntity)
                 .toList();
         return ResponseEntity.ok(list);
     }
