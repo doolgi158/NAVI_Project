@@ -25,7 +25,7 @@ export const useLogin = () => {
 
       // 상태 코드별 처리
       if (response.status === 200) {
-        const { accessToken, refreshToken, username, roles, ip, userNo, id } = response.data;
+        const { accessToken, refreshToken, username, roles, ip, userNo, id } = response.data.data;
 
         // JWT 토큰 저장
         setAuthTokens(accessToken, refreshToken);
@@ -33,6 +33,7 @@ export const useLogin = () => {
         localStorage.setItem("username", username);
         localStorage.setItem("userNo", userNo);
         localStorage.setItem("userId", id);
+
 
         // Redux 상태 갱신
         dispatch(setlogin({ username, accessToken, refreshToken, role: roles, ip, userNo }));

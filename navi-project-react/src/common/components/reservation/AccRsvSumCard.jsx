@@ -1,6 +1,8 @@
 import React from "react";
 import { Card, Typography, Divider } from "antd";
 import { CalendarOutlined, TeamOutlined, HomeOutlined } from "@ant-design/icons";
+import { API_SERVER_HOST } from "../../../common/api/naviApi";
+
 
 const { Title, Text } = Typography;
 
@@ -21,7 +23,7 @@ const AccRsvSumCard = ({ accData, formData, totalAmount }) => {
       cover={
         thumbnail && (
           <img
-            src={thumbnail}
+            src={`${API_SERVER_HOST}thumbnail`}
             alt={accName}
             className="h-[200px] w-full object-cover rounded-t-2xl"
           />

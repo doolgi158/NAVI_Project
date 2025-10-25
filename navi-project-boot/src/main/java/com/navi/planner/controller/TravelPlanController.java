@@ -6,8 +6,8 @@ import com.navi.planner.dto.TravelPlanListResponseDTO;
 import com.navi.planner.dto.TravelPlanRequestDTO;
 import com.navi.planner.service.TravelPlanQueryService;
 import com.navi.planner.service.TravelPlanService;
-import com.navi.user.dto.JWTClaimDTO;
-import com.navi.user.security.util.JWTUtil;
+import com.navi.security.util.JWTUtil;
+import com.navi.user.dto.auth.JWTClaimDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +30,9 @@ public class TravelPlanController {
     private final TravelPlanQueryService travelPlanQueryService;
     private final JWTUtil jwtUtil;
 
-    /** ✅ [GET] 내 여행계획 목록 */
+    /**
+     * ✅ [GET] 내 여행계획 목록
+     */
     @GetMapping
     public ResponseEntity<ApiResponse<List<TravelPlanListResponseDTO>>> getMyPlans(HttpServletRequest request) {
         String userId = extractUserId(request);
@@ -40,7 +42,9 @@ public class TravelPlanController {
         return ResponseEntity.ok(ApiResponse.success(plans));
     }
 
-    /** ✅ [GET] 단일 여행계획 상세 */
+    /**
+     * ✅ [GET] 단일 여행계획 상세
+     */
     @GetMapping("/{planId}")
     public ResponseEntity<ApiResponse<TravelPlanDetailResponseDTO>> getPlanDetail(
             @PathVariable Long planId,
@@ -53,7 +57,9 @@ public class TravelPlanController {
         return ResponseEntity.ok(ApiResponse.success(detail));
     }
 
-    /** ✅ [POST] 새 여행계획 저장 */
+    /**
+     * ✅ [POST] 새 여행계획 저장
+     */
     @PostMapping
     public ResponseEntity<ApiResponse<Long>> savePlan(
             HttpServletRequest request,
@@ -66,7 +72,9 @@ public class TravelPlanController {
         return ResponseEntity.ok(ApiResponse.success(planId));
     }
 
-    /** ✅ [PUT] 여행계획 수정 */
+    /**
+     * ✅ [PUT] 여행계획 수정
+     */
     @PutMapping("/{planId}")
     public ResponseEntity<ApiResponse<String>> updatePlan(
             @PathVariable Long planId,
@@ -80,7 +88,9 @@ public class TravelPlanController {
         return ResponseEntity.ok(ApiResponse.success("수정 완료"));
     }
 
-    /** ✅ [DELETE] 여행계획 삭제 */
+    /**
+     * ✅ [DELETE] 여행계획 삭제
+     */
     @DeleteMapping("/{planId}")
     public ResponseEntity<ApiResponse<String>> deletePlan(@PathVariable Long planId) {
         log.info("🗑️ 여행계획 삭제 요청: planId={}", planId);
@@ -88,7 +98,9 @@ public class TravelPlanController {
         return ResponseEntity.ok(ApiResponse.success("삭제 완료"));
     }
 
-    /** ✅ JWT 토큰에서 userId 추출 */
+    /**
+     * ✅ JWT 토큰에서 userId 추출
+     */
     private String extractUserId(HttpServletRequest request) {
         String header = request.getHeader("Authorization");
         if (header == null || !header.startsWith("Bearer ")) {

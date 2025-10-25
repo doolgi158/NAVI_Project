@@ -175,6 +175,29 @@ const AdminSeatPage = () => {
             render: (v) => <div style={cellStyle}>{v}</div>,
         },
         {
+            title: "출발시간",
+            dataIndex: "depTime",
+            align: "center",
+            sorter: (a, b) => dayjs(a.depTime).unix() - dayjs(b.depTime).unix(),
+            render: (v) => (
+                <div style={cellStyle}>{dayjs(v).format("YYYY-MM-DD HH:mm")}</div>
+            ),
+        },
+        {
+            title: "출발 공항",
+            dataIndex: "depAirportNm",
+            align: "center",
+            sorter: (a, b) => a.depAirportNm.localeCompare(b.depAirportNm),
+            render: (v) => <div style={cellStyle}>{v}</div>,
+        },
+        {
+            title: "도착 공항",
+            dataIndex: "arrAirportNm",
+            align: "center",
+            sorter: (a, b) => a.arrAirportNm.localeCompare(b.arrAirportNm),
+            render: (v) => <div style={cellStyle}>{v}</div>,
+        },
+        {
             title: "좌석번호",
             dataIndex: "seatNo",
             align: "center",
@@ -206,15 +229,6 @@ const AdminSeatPage = () => {
             align: "center",
             sorter: (a, b) => a.extraPrice - b.extraPrice,
             render: (v) => <div style={cellStyle}>{v?.toLocaleString()}원</div>,
-        },
-        {
-            title: "출발시간",
-            dataIndex: "depTime",
-            align: "center",
-            sorter: (a, b) => dayjs(a.depTime).unix() - dayjs(b.depTime).unix(),
-            render: (v) => (
-                <div style={cellStyle}>{dayjs(v).format("YYYY-MM-DD HH:mm")}</div>
-            ),
         },
         {
             title: "관리",

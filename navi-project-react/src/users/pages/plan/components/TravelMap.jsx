@@ -262,7 +262,7 @@ export default function TravelMap({ markers = [], step }) {
       id={containerId}
       style={{
         width: "100%",
-        height: "calc(100vh - 100px)",
+        height: "calc(100vh )",
         minHeight: "400px",
         background: "#f8fafc",
       }}

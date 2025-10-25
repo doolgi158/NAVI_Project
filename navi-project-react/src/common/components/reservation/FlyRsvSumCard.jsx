@@ -107,7 +107,7 @@ const FlyRsvSumCard = ({ selectedOutbound, selectedInbound }) => {
             level={4}
             style={{ margin: 0, color: "#1677ff", fontWeight: 700 }}
           >
-            ₩{totalPrice.toLocaleString()}
+            ₩{FormData.totalPrice.toLocaleString()}
           </Title>
         </>
       )}

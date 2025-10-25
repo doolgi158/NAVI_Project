@@ -1,7 +1,7 @@
 package com.navi.user.service.user;
 
-import com.navi.user.dto.users.UserRequestDTO;
-import com.navi.user.dto.users.UserResponseDTO;
+import com.navi.user.dto.request.UserRequestDTO;
+import com.navi.user.dto.response.UserResponseDTO;
 
 public interface UserService {
     // DB에서 직접 조회

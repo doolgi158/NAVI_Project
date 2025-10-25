@@ -78,8 +78,8 @@ const AccDetailPage = () => {
 		if (isMapLoaded && accData?.mapx && accData?.mapy) {
 			updateMap({
 				title: accData.title,
-				latitude: accData.mapx,
-				longitude: accData.mapy,
+				latitude: accData.mapy,
+				longitude: accData.mapx,
 			});
 		}
 	}, [isMapLoaded, accData, updateMap]);

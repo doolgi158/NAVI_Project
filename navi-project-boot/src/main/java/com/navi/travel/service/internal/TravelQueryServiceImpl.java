@@ -6,7 +6,6 @@ import com.navi.travel.dto.TravelListResponseDTO;
 import com.navi.travel.repository.BookmarkRepository;
 import com.navi.travel.repository.LikeRepository;
 import com.navi.travel.repository.TravelRepository;
-import com.navi.user.dto.JWTClaimDTO;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
