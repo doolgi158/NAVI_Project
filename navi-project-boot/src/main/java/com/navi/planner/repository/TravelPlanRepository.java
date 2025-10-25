@@ -1,6 +1,8 @@
 package com.navi.planner.repository;
 
 import com.navi.planner.domain.TravelPlan;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -28,5 +30,15 @@ public interface TravelPlanRepository extends JpaRepository<TravelPlan, Long> {
     where p.planId = :planId
     """)
     Optional<TravelPlan> findByIdWithDaysAndItems(@Param("planId") Long planId);
+
+    /** ✅ 전체 유저의 여행계획 목록 (관리자용) */
+    Page<TravelPlan> findAll(Pageable pageable);
+
+
+    Page<TravelPlan> findByTitleContainingIgnoreCaseOrUser_NameContainingIgnoreCase(
+            String title,
+            String name,
+            Pageable pageable
+    );
 
 }

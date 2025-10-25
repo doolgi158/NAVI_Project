@@ -7,6 +7,7 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 import { getAllTravels, getAllStays } from "../../../common/api/planApi";
 import dayjs from "dayjs";
 import { getCookie } from "@/common/util/cookie";
+import { API_SERVER_HOST } from "@/common/api/naviApi";
 
 import TravelMap from "./components/TravelMap";
 import StepDrawer from "./components/StepDrawer";
@@ -62,6 +63,7 @@ export default function TravelPlanner() {
 
   useEffect(() => {
     const loadData = async () => {
+
       setLoading(true);
       try {
         const allTravels = await getAllTravels();
@@ -410,7 +412,7 @@ export default function TravelPlanner() {
                 className="h-full overflow-y-auto border-r border-[#eee]"
                 style={{
                   flexBasis: step <= 2 ? "18%" : "20%",
-                  minWidth: "300px",
+                  minWidth: "350px",
                 }}
               >
                 {step === 3 && (

@@ -15,8 +15,8 @@ export default function PlanDayList({
     setDays = () => { },
     dayColors = [],
     fallbackImg = "https://placehold.co/150x150?text=No+Image",
+    paginated = false, // ✅ 추가
 }) {
-
     const handleDeleteItem = (dayIdx, itemIdx, item) => {
         const target = item || days[dayIdx]?.items[itemIdx];
         if (!target) return;
@@ -47,7 +47,6 @@ export default function PlanDayList({
                     message.success(`"${target.title}" 일정이 삭제되었습니다.`);
 
                     if (onAfterDelete) {
-
                         if (target.travelId) onAfterDelete(target.travelId, "travel");
                         else if (target.stayId) onAfterDelete(target.stayId, "stay");
                     }
@@ -62,12 +61,20 @@ export default function PlanDayList({
     return (
         <DragDropContext onDragEnd={onDragEnd}>
             {activeDayIdx === -1 ? (
-                // 전체 보기 (기존 코드 유지)
+                // ✅ 전체 보기 모드에서 페이지 적용
                 <div className="flex gap-12 overflow-x-auto px-4 custom-scroll">
                     {days.map((d, dayIdx) => (
-                        <Droppable key={d.dateISO} droppableId={`day-${dayIdx}`} isDropDisabled={isViewMode} >
+                        <Droppable
+                            key={d.dateISO}
+                            droppableId={`day-${dayIdx}`}
+                            isDropDisabled={isViewMode}
+                        >
                             {(provided) => (
-                                <div ref={provided.innerRef} {...provided.droppableProps} className="w-[300px] flex-shrink-0">
+                                <div
+                                    ref={provided.innerRef}
+                                    {...provided.droppableProps}
+                                    className="w-[300px] flex-shrink-0"
+                                >
                                     <h2
                                         className="text-lg font-bold text-center sticky top-0 z-10 py-2 mb-4"
                                         style={{ backgroundColor: "#fff" }}
@@ -102,15 +109,24 @@ export default function PlanDayList({
                     ))}
                 </div>
             ) : (
-                // 개별 날짜 보기 (기존 코드 유지)
-                <Droppable droppableId={`day-${activeDayIdx}`} isDropDisabled={isViewMode}>
+                // ✅ 특정 일차 보기
+                <Droppable
+                    droppableId={`day-${activeDayIdx}`}
+                    isDropDisabled={isViewMode}
+                >
                     {(provided) => (
-                        <div ref={provided.innerRef} {...provided.droppableProps} className="px-4 w-[350px] ">
+                        <div
+                            ref={provided.innerRef}
+                            {...provided.droppableProps}
+                            className="px-4 w-[350px]"
+                        >
                             <h2
                                 className="text-xl font-bold text-center sticky top-0 z-10 py-2 mb-4"
                                 style={{ backgroundColor: "#fff" }}
                             >
-                                <span style={{ color: dayColors[activeDayIdx % dayColors.length] }}>
+                                <span
+                                    style={{ color: dayColors[activeDayIdx % dayColors.length] }}
+                                >
                                     DAY {days[activeDayIdx]?.orderNo || activeDayIdx + 1}
                                 </span>{" "}
                                 <span className="text-gray-500 text-sm">
@@ -142,8 +158,7 @@ export default function PlanDayList({
                         </div>
                     )}
                 </Droppable>
-            )
-            }
-        </DragDropContext >
+            )}
+        </DragDropContext>
     );
 }

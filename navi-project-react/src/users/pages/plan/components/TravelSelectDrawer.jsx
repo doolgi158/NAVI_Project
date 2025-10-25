@@ -128,7 +128,7 @@ export default function TravelSelectDrawer({
     if (page >= 1 && page <= pageResult.totalPages) {
       setCurrentPage(page);
       if (listContainerRef.current) {
-        listContainerRef.current.scrollTo({ top: 0, behavior: "smooth" });
+        listContainerRef.current.scrollTo({ top: 0, behavior: "auto" });
       }
     }
   };
@@ -213,7 +213,7 @@ export default function TravelSelectDrawer({
           ]}
         />
 
-        <div ref={listContainerRef} className="flex-1 overflow-y-auto custom-scroll">
+        <div className="flex-1 overflow-y-auto custom-scroll">
           {activeTab === "search" && (
             <div className="flex flex-col h-full">
               {/* ✅ 고정 영역 (검색 + 카테고리 + 개수) */}
@@ -258,7 +258,7 @@ export default function TravelSelectDrawer({
               </div>
 
               {/* ✅ 리스트만 스크롤 */}
-              <div className="flex-1 overflow-y-auto custom-scroll  px-4 pb-4">
+              <div ref={listContainerRef} className="flex-1 overflow-y-auto custom-scroll px-4 pb-4">
                 <List
                   dataSource={pagedTravels}
                   locale={{

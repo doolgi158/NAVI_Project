@@ -10,6 +10,7 @@ import com.navi.travel.service.AdminTravelService;
 import com.navi.travel.service.TravelService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -18,10 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Objects;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/adm")
@@ -37,12 +35,31 @@ public class TravelAdminController {
 
     /** ✅ 1. 여행지 관리 목록 조회 */
     @GetMapping("/travel")
-    public Page<AdminTravelListResponseDTO> getAdminList(
-            @PageableDefault(size = 10, sort = "travelId", direction = Sort.Direction.DESC)
-            Pageable pageable,
-            @RequestParam(value = "search", required = false) String search
+    public ResponseEntity<Map<String, Object>> getAdminList(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "travelId") String sortField,
+            @RequestParam(defaultValue = "descend") String sortOrder
     ) {
-        return adminTravelService.getAdminTravelList(pageable, search);
+        // ✅ 프론트에서 받은 정렬 방향 처리
+        Sort sort = "descend".equalsIgnoreCase(sortOrder)
+                ? Sort.by(sortField).descending()
+                : Sort.by(sortField).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<AdminTravelListResponseDTO> travelPage =
+                adminTravelService.getAdminTravelList(pageable, search);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("content", travelPage.getContent());
+        result.put("totalPages", travelPage.getTotalPages());
+        result.put("totalElements", travelPage.getTotalElements());
+        result.put("number", travelPage.getNumber());
+        result.put("size", travelPage.getSize());
+
+        return ResponseEntity.ok(result);
     }
 
     /** ✅ 2. 여행지 상세 조회 (관리자용) */

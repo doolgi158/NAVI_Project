@@ -1,12 +1,17 @@
 package com.navi.planner.domain;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.navi.common.entity.BaseEntityNoAudit;
+import com.navi.common.listener.TravelEntityListener;
 import com.navi.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.LinkedHashSet;
 import java.util.Objects;
@@ -18,6 +23,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@EntityListeners(TravelEntityListener.class)
 @DynamicUpdate
 @Table(name = "NAVI_TRAVEL_PLAN")
 @SequenceGenerator(
@@ -26,7 +32,7 @@ import java.util.Set;
         initialValue = 1,
         allocationSize = 1
 )
-public class TravelPlan {
+public class TravelPlan extends BaseEntityNoAudit {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "travel_plan_seq_gen")
@@ -59,6 +65,15 @@ public class TravelPlan {
 
     @Column(name = "thumbnail_path", length = 1000)
     private String thumbnailPath;
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
 
     /* ===== 편의 메서드 ===== */
 

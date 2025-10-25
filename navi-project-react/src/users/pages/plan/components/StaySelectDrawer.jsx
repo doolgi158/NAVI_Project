@@ -153,7 +153,7 @@ export default function StaySelectDrawer({
     if (page >= 1 && page <= pageResult.totalPages) {
       setCurrentPage(page);
       if (listContainerRef.current) {
-        listContainerRef.current.scrollTo({ top: 0, behavior: "smooth" });
+        listContainerRef.current.scrollTo({ top: 0, behavior: "auto" });
       }
     }
   };
@@ -237,7 +237,7 @@ export default function StaySelectDrawer({
         />
 
         {/* ✅ 왼쪽 콘텐츠 스크롤 */}
-        <div ref={listContainerRef} className="flex-1 overflow-y-auto custom-scroll">
+        <div className="flex-1 overflow-y-auto custom-scroll">
           {activeTab === "search" && (
             <div className="flex flex-col h-full">
               {/* ✅ 상단 검색 + 정렬 영역 sticky 고정 */}

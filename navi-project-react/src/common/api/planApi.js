@@ -6,8 +6,11 @@ export { API_SERVER_HOST };
 /** ✅ 여행계획 저장 */
 export const savePlan = async (planData) => {
   try {
+    const token = localStorage.getItem("accessToken");
+
     const res = await api.post(`${host}`, planData, {
       headers: { "Content-Type": "application/json" },
+      Authorization: `Bearer ${token}`,
     });
     return res.data;
   } catch (err) {
@@ -57,8 +60,11 @@ export const updatePlan = async (planId, planData) => {
   }
 
   try {
+    const token = localStorage.getItem("accessToken");
+
     const res = await api.put(`${host}/${planId}`, planData, {
       headers: { "Content-Type": "application/json" },
+      Authorization: `Bearer ${token}`,
     });
     return res.data;
   } catch (err) {

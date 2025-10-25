@@ -690,6 +690,7 @@ export default function PlanScheduler() {
         };
 
         try {
+
             if (isEditMode && planId) {
                 await updatePlan(planId, requestData);
                 Modal.success({ title: "수정 완료", content: "여행 계획이 성공적으로 수정되었습니다.", centered: true });
@@ -766,7 +767,6 @@ export default function PlanScheduler() {
                                 setActiveDayIdx={setActiveDayIdx}
                                 isViewMode={isViewMode}
                                 isEditMode={isEditMode}
-                                navigate={navigate}
                                 meta={meta}
                                 handleConfirm={handleConfirm}
                                 setMode={setMode}

@@ -37,10 +37,11 @@ public class TravelPlanDay {
     @Column(name = "day_date", nullable = false)
     private LocalDate dayDate;
 
+    /** ✅ 여행 일차 순서 (1일차, 2일차 등) */
     @Column(name = "order_no", nullable = false)
     private Integer orderNo;
 
-    /** ✅ 하위 아이템 관계  */
+    /** ✅ 하위 아이템 관계 */
     @OneToMany(mappedBy = "day", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     @OrderBy("startTime ASC")
@@ -62,8 +63,7 @@ public class TravelPlanDay {
         }
     }
 
-    /* ✅ 삭제 관련 메서드 제거 (JPA orphanRemoval이 자동 처리) */
-
+    /* ✅ equals/hashCode */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -75,5 +75,14 @@ public class TravelPlanDay {
     @Override
     public int hashCode() {
         return 31;
+    }
+
+    /* ✅ 일차 순서 반환 메서드 (DTO 변환 시 사용) */
+    public Integer getDayOrder() {
+        return this.orderNo;
+    }
+
+    public LocalDate getDate() {
+        return this.dayDate;
     }
 }
