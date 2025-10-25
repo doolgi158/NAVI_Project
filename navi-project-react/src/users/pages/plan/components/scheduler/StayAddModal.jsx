@@ -32,7 +32,7 @@ export default function StayAddModal({ open, onClose, onAdd, days = [] }) {
             footer={null}
             width={960}
             centered
-            destroyOnClose
+            destroyOnHidden
         >
             {/* DAY 선택 */}
             <div className="flex justify-between items-center mb-4">
@@ -61,8 +61,8 @@ export default function StayAddModal({ open, onClose, onAdd, days = [] }) {
                         <Col key={item.accId} xs={12} sm={8} md={4} lg={4} xl={4}>
                             <div
                                 className={`relative rounded-xl overflow-hidden cursor-pointer border transition-all ${isSelected
-                                        ? "border-[#0A3D91] scale-[1.03]"
-                                        : "border-gray-200 hover:border-[#0A3D91]/40"
+                                    ? "border-[#0A3D91] scale-[1.03]"
+                                    : "border-gray-200 hover:border-[#0A3D91]/40"
                                     }`}
                                 onClick={() => toggleSelect(item)}
                             >

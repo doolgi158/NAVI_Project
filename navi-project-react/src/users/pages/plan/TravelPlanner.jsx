@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Layout, Modal, message } from "antd";
+import { Layout, Modal, message, Splitter } from "antd";
 import { useLocation, useNavigate } from "react-router-dom";
 import HeaderLayout from "../../layout/HeaderLayout";
 import FooterLayout from "../../layout/FooterLayout";
@@ -24,7 +24,6 @@ export default function TravelPlanner() {
   const location = useLocation();
   const state = location.state;
 
-  /** ========================== 상태 ========================== */
   const [travels, setTravels] = useState([]);
   const [stays, setStays] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -40,13 +39,12 @@ export default function TravelPlanner() {
   const [showStayModal, setShowStayModal] = useState(false);
   const [selectedStayTarget, setSelectedStayTarget] = useState(null);
   const [modalResetTrigger, setModalResetTrigger] = useState(0);
+  const [splitSize, setSplitSize] = useState(40); // ✅ Splitter 비율 상태
 
-  /** ========================== 사용자 ========================== */
   const cookie = getCookie("userCookie");
   const user = typeof cookie === "string" ? JSON.parse(cookie) : cookie;
   if (!user) return <div>로그인 후 이용해주세요.</div>;
 
-  /** ========================== 여행지 삭제 ========================== */
   const handleDeleteItem = (travelId, title) => {
     Modal.confirm({
       title: "여행지 삭제 확인",
@@ -62,7 +60,6 @@ export default function TravelPlanner() {
     });
   };
 
-  /** ========================== PlanScheduler → Planner 갱신 ========================== */
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
@@ -102,7 +99,6 @@ export default function TravelPlanner() {
     loadData();
   }, [location.state]);
 
-  /** ========================== PlanScheduler → 복원 ========================== */
   useEffect(() => {
     if (location.state?.from === "scheduler" && location.state?.restoreData) {
       const restoreData = location.state.restoreData;
@@ -112,7 +108,6 @@ export default function TravelPlanner() {
     }
   }, [location.state]);
 
-  /** ========================== 데이터 불러오기 (초기 여행지만) ========================== */
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
@@ -127,10 +122,9 @@ export default function TravelPlanner() {
     fetchInitialData();
   }, []);
 
-  /** ========================== 숙소 Lazy Loading (Step 5 진입 시) ========================== */
   useEffect(() => {
     const fetchStays = async () => {
-      if (stays.length > 0 || step !== 5) return; // 이미 로드된 경우 재요청 방지
+      if (stays.length > 0 || step !== 5) return;
       setLoading(true);
       try {
         const stayData = await getAllStays();
@@ -144,13 +138,10 @@ export default function TravelPlanner() {
     fetchStays();
   }, [step]);
 
-  /** ========================== 숙소 관련 ========================== */
   const handleStaySelect = (stay, dates) => {
     setStayPlans((prev) => {
       const updated = { ...prev };
-      Object.keys(updated).forEach(
-        (k) => (updated[k] = updated[k].filter((d) => !dates.includes(d)))
-      );
+      Object.keys(updated).forEach((k) => (updated[k] = updated[k].filter((d) => !dates.includes(d))));
       if (dates.length) updated[stay.accId] = dates.sort();
       else delete updated[stay.accId];
       const active = Object.keys(updated).filter((k) => updated[k].length);
@@ -164,29 +155,23 @@ export default function TravelPlanner() {
     setSelectedStays([]);
   };
 
-  /** ========================== 날짜 계산 ========================== */
   const days = useMemo(() => {
     if (!dateRange.length) return [];
-
-    // ✅ 문자열 or dayjs 객체 구분 없이 안전하게 변환
     const start = dayjs(dateRange[0]);
     const end = dayjs(dateRange[1]);
-
     if (!start.isValid() || !end.isValid()) return [];
-
     const diff = end.diff(start, "day") + 1;
     return Array.from({ length: diff }, (_, i) => start.add(i, "day"));
   }, [dateRange]);
 
-  /** ========================== 일정 구성 ========================== */
+  const hasNights = days.length > 1;
+
   const buildInitialSchedule = () => {
     const start = dateRange?.[0];
     const end = dateRange?.[1];
     if (!start || !end) return null;
-
     const dcount = end.diff(start, "day") + 1;
     const buckets = Array.from({ length: dcount }, () => []);
-
     selectedTravels.forEach((t, idx) => {
       const lat = parseFloat(t.latitude ?? t.mapy ?? t.lat);
       const lng = parseFloat(t.longitude ?? t.mapx ?? t.lng);
@@ -204,17 +189,17 @@ export default function TravelPlanner() {
         lng,
       });
     });
-
     const stayByDate = {};
     Object.entries(stayPlans).forEach(([accId, dates]) => {
       const stay = selectedStays.find((s) => s.accId === accId);
       if (!stay) return;
       const stayImg =
+        stay.accImage?.trim() ||
         stay.img?.trim() ||
-        stay.thumbnailPath?.trim() ||
         stay.imagePath?.trim() ||
-        stay.accImages?.[0] ||
-        "https://via.placeholder.com/150x150.png?text=No+Image";
+        stay.thumbnailPath?.trim() ||
+        `${API_SERVER_HOST}/images/acc/default_hotel.jpg`;
+
       dates.forEach((dateStr) => {
         const parsed = dayjs(dateStr.includes("-") ? dateStr : `${dateRange[0].year()}-${dateStr}`);
         stayByDate[parsed.format("YYYY-MM-DD")] = {
@@ -227,7 +212,6 @@ export default function TravelPlanner() {
         };
       });
     });
-
     const scheduleDays = [];
     for (let i = 0; i < dcount; i++) {
       const date = start.add(i, "day");
@@ -236,7 +220,6 @@ export default function TravelPlanner() {
       const stayItem = stayByDate[dateKey] || null;
       const defaultStart = "10:00";
       const defaultEnd = "22:00";
-
       if (i === 0)
         items.push({
           type: "poi",
@@ -249,10 +232,8 @@ export default function TravelPlanner() {
           startTime: defaultStart,
           endTime: defaultEnd,
         });
-
       if (stayItem) items.push({ ...stayItem, startTime: defaultStart, endTime: defaultEnd });
       buckets[i].forEach((it) => items.push({ ...it, startTime: defaultStart, endTime: defaultEnd }));
-
       if (i === dcount - 1)
         items.push({
           type: "poi",
@@ -265,10 +246,8 @@ export default function TravelPlanner() {
           startTime: defaultStart,
           endTime: defaultEnd,
         });
-
       scheduleDays.push({ dateISO: dateKey, items });
     }
-
     return {
       meta: {
         title,
@@ -280,8 +259,18 @@ export default function TravelPlanner() {
     };
   };
 
-  /** ========================== 다음 단계 이동 ========================== */
   const handleConfirm = () => {
+    if (step === 4 || step === 5) {
+      if (days.length > 0 && selectedTravels.length < days.length) {
+        Modal.warning({
+          title: "여행지 선택 부족",
+          content: `여행일수(${days.length}일)에 비해 선택된 여행지가 부족합니다.`,
+          centered: true,
+          onOk: () => setStep(4),
+        });
+        return;
+      }
+    }
     const data = buildInitialSchedule();
     if (data?.days)
       data.days.forEach(
@@ -304,7 +293,6 @@ export default function TravelPlanner() {
     });
   };
 
-  /** ========================== 마커 구성 ========================== */
   const markers = useMemo(() => {
     const travelMarkers = selectedTravels
       .map((t, i) => ({
@@ -315,7 +303,6 @@ export default function TravelPlanner() {
         order: i + 1,
       }))
       .filter((m) => !isNaN(m.latitude) && !isNaN(m.longitude));
-
     const stayMarkers = selectedStays
       .map((s, i) => ({
         ...s,
@@ -325,11 +312,9 @@ export default function TravelPlanner() {
         order: i + 1,
       }))
       .filter((m) => !isNaN(m.latitude) && !isNaN(m.longitude));
-
     return [...travelMarkers, ...stayMarkers];
   }, [selectedTravels, selectedStays]);
 
-  /** ========================== 렌더링 ========================== */
   return (
     <Layout style={{ minHeight: "100vh", overflowX: "hidden" }}>
       <HeaderLayout />
@@ -339,84 +324,105 @@ export default function TravelPlanner() {
         </div>
       ) : (
         <Content style={{ width: "100vw", overflowX: "hidden" }}>
-          {/* 기존 레이아웃/로직 절대 변경 없음 */}
-          <div className="shadow-xl bg-white rounded-lg transition-all duration-500 h-[calc(100vh-100px)] flex">
-            <div
-              className="flex-shrink-0 border-r border-gray-200 transition-all duration-500"
-              style={{ flexBasis: "18%", minWidth: "150px", maxWidth: "200px" }}
+          {/* ✅ Splitter 추가 (4,5단계만 적용) */}
+          {step === 4 || step === 5 ? (
+            <Splitter
+              style={{ height: "calc(100vh - 100px)", borderTop: "1px solid #eee" }}
+              min="20%"
+              max="80%"
+              size={splitSize}
+              onChange={setSplitSize}
             >
-              <StepDrawer
-                step={step}
-                setStep={setStep}
-                title={title}
-                selectedTravels={selectedTravels}
-                dateRange={dateRange}
-                stayPlans={stayPlans}
-                stays={stays}
-                onSaveSchedule={handleConfirm}
-              />
-            </div>
-
-            <div
-              className={`h-full overflow-y-auto border-r border-[#eee] transition-all duration-500 ${step === 4 || step === 5 ? "flex" : "block"
-                }`}
-              style={{
-                flexBasis: step <= 2 ? "82%" : step === 3 ? "20%" : "40%",
-                minWidth: step === 3 ? "340px" : "400px",
-                maxWidth: step === 3 ? "400px" : "unset",
-              }}
-            >
-              {step === 3 ? (
-                <TimeDrawer days={days} times={times} setTimes={setTimes} title={title} dateRange={dateRange} />
-              ) : step === 4 ? (
-                <TravelSelectDrawer
-                  travels={travels}
-                  title={title}
-                  dateRange={dateRange}
-                  selectedTravels={selectedTravels}
-                  setSelectedTravels={setSelectedTravels}
-                  onDeleteTravel={handleDeleteItem}
-                />
-              ) : step === 5 ? (
-                <StaySelectDrawer
-                  stays={stays}
-                  title={title}
-                  dateRange={dateRange}
-                  days={days}
-                  hasNights={hasNights}
-                  stayPlans={stayPlans}
-                  setStayPlans={setStayPlans}
-                  selectedStays={selectedStays}
-                  setSelectedStays={setSelectedStays}
-                  setSelectedStayTarget={setSelectedStayTarget}
-                  setShowStayModal={setShowStayModal}
-                  setModalResetTrigger={setModalResetTrigger}
-                  resetAllStays={resetAllStays}
-                />
-              ) : null}
-            </div>
-
-            <div
-              className="relative transition-all duration-500"
-              style={{
-                flexBasis: step <= 3 ? "0%" : "60%",
-                opacity: step <= 3 ? 0 : 1,
-                minWidth: step <= 3 ? 0 : "300px",
-              }}
-            >
-              {step > 3 && (
-                <div className="absolute inset-0">
-                  <TravelMap markers={markers} step={step} />
+              <Splitter.Panel>
+                <div className="shadow-xl bg-white rounded-lg h-full flex">
+                  <div
+                    className="flex-shrink-0 border-r border-gray-200 transition-all duration-500"
+                    style={{ flexBasis: "18%", minWidth: "150px", maxWidth: "200px" }}
+                  >
+                    <StepDrawer
+                      step={step}
+                      setStep={setStep}
+                      title={title}
+                      selectedTravels={selectedTravels}
+                      dateRange={dateRange}
+                      stayPlans={stayPlans}
+                      stays={stays}
+                      onSaveSchedule={handleConfirm}
+                      days={days}
+                    />
+                  </div>
+                  <div className="flex-1 border-r border-[#eee] overflow-y-auto">
+                    {step === 4 ? (
+                      <TravelSelectDrawer
+                        travels={travels}
+                        title={title}
+                        dateRange={dateRange}
+                        selectedTravels={selectedTravels}
+                        setSelectedTravels={setSelectedTravels}
+                        onDeleteTravel={handleDeleteItem}
+                        days={days}
+                      />
+                    ) : (
+                      <StaySelectDrawer
+                        stays={stays}
+                        title={title}
+                        dateRange={dateRange}
+                        days={days}
+                        hasNights={hasNights}
+                        stayPlans={stayPlans}
+                        setStayPlans={setStayPlans}
+                        selectedStays={selectedStays}
+                        setSelectedStays={setSelectedStays}
+                        setSelectedStayTarget={setSelectedStayTarget}
+                        setShowStayModal={setShowStayModal}
+                        setModalResetTrigger={setModalResetTrigger}
+                        resetAllStays={resetAllStays}
+                      />
+                    )}
+                  </div>
                 </div>
-              )}
+              </Splitter.Panel>
+
+              <Splitter.Panel style={{ background: "#fafafa", position: "relative" }}>
+                <TravelMap markers={markers} step={step} />
+              </Splitter.Panel>
+            </Splitter>
+          ) : (
+            // ✅ 기존 Step 1~3는 그대로 유지
+            <div className="shadow-xl bg-white rounded-lg transition-all duration-500 h-[calc(100vh-100px)] flex">
+              <div
+                className="flex-shrink-0 border-r border-gray-200 transition-all duration-500"
+                style={{ flexBasis: "18%", minWidth: "150px", maxWidth: "200px" }}
+              >
+                <StepDrawer
+                  step={step}
+                  setStep={setStep}
+                  title={title}
+                  selectedTravels={selectedTravels}
+                  dateRange={dateRange}
+                  stayPlans={stayPlans}
+                  stays={stays}
+                  onSaveSchedule={handleConfirm}
+                  days={days}
+                />
+              </div>
+              <div
+                className="h-full overflow-y-auto border-r border-[#eee]"
+                style={{
+                  flexBasis: step <= 2 ? "82%" : "40%",
+                  minWidth: "400px",
+                }}
+              >
+                {step === 3 && (
+                  <TimeDrawer days={days} times={times} setTimes={setTimes} title={title} dateRange={dateRange} />
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </Content>
       )}
-
       <FooterLayout />
 
-      {/* 모달 영역 (변경 없음) */}
       <DateModal
         open={step === 1 || step === 99}
         isEditMode={step === 99}

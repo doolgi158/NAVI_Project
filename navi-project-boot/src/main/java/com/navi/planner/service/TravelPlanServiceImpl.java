@@ -240,15 +240,16 @@ public class TravelPlanServiceImpl implements TravelPlanService {
     /** ✅ 여행계획 삭제 */
     @Override
     @Transactional
-    public void deletePlan(Long planId) {
-        log.info("🗑️ 여행계획 삭제 요청: planId={}", planId);
+    public void deletePlan(Long planId, String userId) {
+        TravelPlan plan = travelPlanRepository.findById(planId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 여행계획이 존재하지 않습니다."));
 
-        TravelPlan plan = travelPlanRepository.findByIdWithDaysAndItems(planId)
-                .orElseThrow(() -> new EntityNotFoundException("삭제할 여행계획을 찾을 수 없습니다."));
+        if (!plan.getUser().getId().equals(userId)) {
+            throw new SecurityException("삭제 권한이 없습니다.");
+        }
 
         travelPlanRepository.delete(plan);
-        em.flush(); // ✅ 삭제 순서 강제 반영
-        log.info("✅ 여행계획 및 하위 일정 삭제 완료: planId={}", planId);
+        log.info("✅ 여행계획 삭제 완료: planId={}, userId={}", planId, userId);
     }
 
     /** ✅ 개별 일정(여행지/숙소 등) 삭제 */

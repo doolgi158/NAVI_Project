@@ -6,9 +6,8 @@ import TitleDateDisplay from "./TitleDateDisplay";
 
 export default function TimeDrawer({ days, times, setTimes, title, dateRange }) {
   const [openKey, setOpenKey] = useState(null);
-  const [selectedPart, setSelectedPart] = useState(null);
 
-  /** 기본 시간 자동 설정 */
+  /** ✅ 기본 시간 자동 설정 */
   useEffect(() => {
     if (!days?.length) return;
     setTimes((prev) => {
@@ -23,7 +22,7 @@ export default function TimeDrawer({ days, times, setTimes, title, dateRange }) 
     });
   }, [days, setTimes]);
 
-  /** 시간 변경 핸들러 */
+  /** ✅ 시간 변경 핸들러 */
   const handleChange = (date, field, value) => {
     setTimes((prev) => {
       const updated = { ...(prev[date.format("YYYY-MM-DD")] || {}) };
@@ -32,7 +31,7 @@ export default function TimeDrawer({ days, times, setTimes, title, dateRange }) 
     });
   };
 
-  /** 종료시간 제한 */
+  /** ✅ 종료시간 제한 */
   const getDisabledEndTime = (date) => {
     const start = times[date.format("YYYY-MM-DD")]?.start;
     if (!start) return {};
@@ -47,7 +46,7 @@ export default function TimeDrawer({ days, times, setTimes, title, dateRange }) 
     };
   };
 
-  /** TimePicker 공통 렌더러 */
+  /** ✅ TimePicker 공통 렌더러 (경고 제거 버전) */
   const renderTimePicker = (d, type, defaultValue) => {
     const dayKey = d.format("YYYY-MM-DD");
     const dayTimes = times[dayKey] || {};
@@ -64,25 +63,8 @@ export default function TimeDrawer({ days, times, setTimes, title, dateRange }) 
         showNow={false}
         needConfirm={false}
         open={openKey === `${dayKey}-${type}`}
-        onOpenChange={(open) => {
-          if (open) {
-            setSelectedPart(null);
-            setOpenKey(`${dayKey}-${type}`);
-          } else {
-            setOpenKey(null);
-          }
-        }}
-        onSelect={(v) => {
-          if (selectedPart === null) {
-            setSelectedPart("hour");
-            handleChange(d, type, v);
-          } else if (selectedPart === "hour") {
-            handleChange(d, type, v);
-            setOpenKey(null);
-            setSelectedPart(null);
-          }
-        }}
-        onChange={(v) => handleChange(d, type, v)}
+        onOpenChange={(open) => setOpenKey(open ? `${dayKey}-${type}` : null)}
+        onChange={(v) => handleChange(d, type, v)} // ✅ onSelect → onChange로 통일
         disabledTime={type === "end" ? () => getDisabledEndTime(d) : undefined}
         className="!w-[85px]"
       />
@@ -95,7 +77,7 @@ export default function TimeDrawer({ days, times, setTimes, title, dateRange }) 
       style={{
         minWidth: "340px",
         padding: "24px 28px 36px",
-        height: "100%", // ✅ 강제 높이 지정
+        height: "100%",
       }}
     >
       {/* ✅ 제목 + 날짜 표시 */}
@@ -126,7 +108,7 @@ export default function TimeDrawer({ days, times, setTimes, title, dateRange }) 
                 key={d.format("YYYY-MM-DD")}
                 className="rounded shadow-sm px-5 py-3 mb-3 hover:bg-[#ffbf231f] transition "
               >
-                <div className="flex items-center justify-between w-full ">
+                <div className="flex items-center justify-between w-full">
                   <div className="w-24 font-medium text-[#2F3E46]">
                     {d.format("MM/DD (ddd)")}
                   </div>

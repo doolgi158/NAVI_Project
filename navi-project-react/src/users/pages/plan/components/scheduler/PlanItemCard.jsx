@@ -18,7 +18,24 @@ export default function PlanItemCard({
     onEditTime = () => { },
     onDeleteItem = () => { }, // ✅ 부모 상태(days) 갱신용
 }) {
-    const imageSrc = item.img || fallbackImg;
+    /** ✅ 타입별 이미지 경로 계산 */
+    const getImageSrc = (item) => {
+        // 1️⃣ 공항(poi)은 서버 이미지로 고정
+        if (item.type === "poi") {
+            return "http://localhost:8080/images/travel/airport.jpg";
+        }
+
+        // 2️⃣ 숙소/여행지는 서버 경로 or 절대경로 우선
+        if (item.img) {
+            if (item.img.startsWith("http")) return item.img;
+            if (item.img.startsWith("/")) return `http://localhost:8080${item.img}`;
+        }
+
+        // 3️⃣ fallback
+        return fallbackImg;
+    };
+
+    const imageSrc = getImageSrc(item);
 
     /** ✅ 삭제 요청 (confirm은 부모에서 처리) */
     const handleDelete = () => {
@@ -41,7 +58,8 @@ export default function PlanItemCard({
                     ref={prov.innerRef}
                     {...prov.draggableProps}
                     {...prov.dragHandleProps}
-                    className={`relative pl-8 pb-6 transition-all ${snapshot.isDragging ? "scale-[1.02]" : ""}`}
+                    className={`relative pl-8 pb-6 transition-all ${snapshot.isDragging ? "scale-[1.02]" : ""
+                        }`}
                 >
                     {!isLast && (
                         <div
@@ -83,17 +101,21 @@ export default function PlanItemCard({
 
                             <span
                                 className={`text-xs font-semibold ${item.type === "stay"
-                                    ? "text-[#6846FF]"
-                                    : item.type === "travel"
-                                        ? "text-[#0088CC]"
-                                        : "text-gray-400"
+                                        ? "text-[#6846FF]"
+                                        : item.type === "travel"
+                                            ? "text-[#0088CC]"
+                                            : item.type === "poi"
+                                                ? "text-[#FF6B00]"
+                                                : "text-gray-400"
                                     }`}
                             >
                                 {item.type === "stay"
                                     ? "숙소"
                                     : item.type === "travel"
                                         ? "여행지"
-                                        : "기타"}
+                                        : item.type === "poi"
+                                            ? "공항"
+                                            : "기타"}
                             </span>
 
                             <span
@@ -110,24 +132,26 @@ export default function PlanItemCard({
                                 <img
                                     src={imageSrc}
                                     alt={item.title}
-                                    className="w-full h-full object-cover"
+                                    className="w-full h-full object-cover rounded-xl"
                                     onError={(e) => {
-                                        if (!e.target.dataset.fallback) {
-                                            e.target.dataset.fallback = "true";
-                                            e.target.src = fallbackImg;
-                                        }
+                                        e.target.onerror = null;
+                                        e.target.src =
+                                            item.type === "poi"
+                                                ? "http://localhost:8080/images/travel/airport.jpg"
+                                                : fallbackImg;
                                     }}
                                 />
                             </div>
 
                             {!isViewMode &&
                                 !(item.type === "poi" &&
-                                    (item.title?.includes("제주공항 도착") || item.title?.includes("제주공항 출발"))) && (
-                                    < Button
+                                    (item.title?.includes("제주공항 도착") ||
+                                        item.title?.includes("제주공항 출발"))) && (
+                                    <Button
                                         type="text"
                                         danger
                                         size="small"
-                                        icon={< MinusCircleOutlined />}
+                                        icon={<MinusCircleOutlined />}
                                         onClick={handleDelete}
                                         className="mt-1 text-xs"
                                     >
@@ -137,8 +161,7 @@ export default function PlanItemCard({
                         </div>
                     </div>
                 </div>
-            )
-            }
-        </Draggable >
+            )}
+        </Draggable>
     );
 }

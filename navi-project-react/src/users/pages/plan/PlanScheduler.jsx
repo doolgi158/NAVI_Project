@@ -3,6 +3,8 @@ import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Button, Splitter, Modal, message } from "antd";
 import { EditOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
+import { API_SERVER_HOST } from "@/common/api/naviApi";
+
 
 import HeaderLayout from "@/users/layout/HeaderLayout";
 import FooterLayout from "@/users/layout/FooterLayout";
@@ -16,10 +18,7 @@ import PlanSidebar from "@/users/pages/plan/components/scheduler/PlanSidebar";
 import PlanDayList from "@/users/pages/plan/components/scheduler/PlanDayList";
 import TimeEditModal from "@/users/pages/plan/components/scheduler/TimeEditModal";
 
-/**
- * 기대 입력 (플래너에서 전달):
- * state?.dayTimes = { '2025-10-24': { start: '10:00', end: '22:00' }, ... }
- */
+
 export default function PlanScheduler() {
     const { state } = useLocation();
     const [searchParams] = useSearchParams();
@@ -36,13 +35,9 @@ export default function PlanScheduler() {
     const [titleModalOpen, setTitleModalOpen] = useState(false);
     const [dateModalOpen, setDateModalOpen] = useState(false);
 
-    const [stayPlans, setStayPlans] = useState({});
-    const [selectedStays, setSelectedStays] = useState([]);
-
     const initialDayTimes = state?.dayTimes || {};
 
     const [days, setDays] = useState(state?.days || []);
-    const [myPlans, setMyPlans] = useState([]);
 
     const [deletedTravelIds, setDeletedTravelIds] = useState([]);
     const [deletedStayIds, setDeletedStayIds] = useState([]);
@@ -124,7 +119,15 @@ export default function PlanScheduler() {
                 const loaded = (data.days || []).map((d) => ({
                     dateISO: d.dayDate,
                     orderNo: d.orderNo,
-                    items: d.items || [],
+                    items: (d.items || []).map((it) => ({
+                        ...it,
+                        img:
+                            it.img?.trim() ||
+                            it.accImage?.trim() ||
+                            it.imagePath?.trim() ||
+                            it.thumbnailPath?.trim() ||
+                            `${API_SERVER_HOST}/images/acc/default_hotel.jpg`,
+                    })),
                 }));
                 setDays(applyEdgeTimes(loaded));
             } catch (err) {
@@ -932,8 +935,7 @@ export default function PlanScheduler() {
                             fixed: true,
                             lat: 33.50684612635678,
                             lng: 126.49271493655533,
-                            img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTtda-mfQ8IclFL2JOrafNwY_03skX839tZ60IPclmkut3tH4r7xDFySp8ZOt6tSUaHFvA&usqp=CAU",
-                            startTime: "10:00",
+                            img: `${API_SERVER_HOST}/images/travel/airport.jpg`,
                             endTime: "22:00",
                         };
 
@@ -945,8 +947,7 @@ export default function PlanScheduler() {
                             fixed: true,
                             lat: 33.50684612635678,
                             lng: 126.49271493655533,
-                            img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTtda-mfQ8IclFL2JOrafNwY_03skX839tZ60IPclmkut3tH4r7xDFySp8ZOt6tSUaHFvA&usqp=CAU",
-                            startTime: "10:00",
+                            img: `${API_SERVER_HOST}/images/travel/airport.jpg`,
                             endTime: "22:00",
                         };
 

@@ -80,6 +80,19 @@ public class TravelPlanController {
         return ResponseEntity.ok(ApiResponse.success("수정 완료"));
     }
 
+    /** 여행계획 전체 삭제 */
+    @DeleteMapping("/{planId}")
+    public ResponseEntity<ApiResponse<String>> deletePlan(
+            @PathVariable Long planId,
+            HttpServletRequest request
+    ) {
+        String userId = extractUserId(request);
+        log.info("🗑️ 여행계획 삭제 요청: planId={}, userId={}", planId, userId);
+
+        travelPlanService.deletePlan(planId, userId);
+        return ResponseEntity.ok(ApiResponse.success("삭제 완료"));
+    }
+
     /** ✅ [DELETE] 단일 일정(여행지/숙소 등) 삭제 */
     @DeleteMapping("/items/{itemId}")
     public ResponseEntity<ApiResponse<String>> deletePlanItem(

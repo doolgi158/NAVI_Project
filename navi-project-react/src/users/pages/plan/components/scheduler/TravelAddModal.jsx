@@ -64,7 +64,7 @@ export default function TravelAddModal({ open, onClose, onAdd, days = [] }) {
             footer={null}
             width={950}
             centered
-            destroyOnClose
+            destroyOnHidden
         >
             <Row gutter={[12, 12]} className="max-h-[520px] overflow-y-auto p-1 custom-scroll">
                 {travels.map((item) => {

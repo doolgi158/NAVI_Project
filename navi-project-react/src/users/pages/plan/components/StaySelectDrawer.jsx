@@ -27,7 +27,7 @@ export default function StaySelectDrawer({
   const [myBookmarks, setMyBookmarks] = useState([]);
   const [imageMap, setImageMap] = useState({});
 
-  const FALLBACK_IMG = `${API_SERVER_HOST}/images/acc/default_hotel.jpg`;
+  const FALLBACK_IMG = `${API_SERVER_HOST}/images/acc/default_hotel.jpg`;;
 
   // ✅ 페이지 관련 상태
   const [pageSize] = useState(20);

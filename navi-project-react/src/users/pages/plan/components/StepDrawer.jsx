@@ -1,9 +1,10 @@
 import React from "react";
-import { Button } from "antd";
+import { Button, Modal } from "antd";
 import { useNavigate } from "react-router-dom";
 import { LeftOutlined } from "@ant-design/icons";
 
-export default function StepDrawer({ step, setStep, onSaveSchedule }) {
+
+export default function StepDrawer({ step, setStep, selectedTravels, onSaveSchedule, days, }) {
   const navigate = useNavigate();
   const steps = ["날짜 선택", "여행 제목", "시간 설정", "여행지 선택", "숙소 선택"];
 
@@ -73,7 +74,18 @@ export default function StepDrawer({ step, setStep, onSaveSchedule }) {
               type="primary"
               className="w-full"
               style={{ background: "#2F3E46", border: "none" }}
-              onClick={() => setStep(step + 1)}
+              onClick={() => {
+                // ✅ 여행지 선택 부족 검사 (4단계에서만)
+                if (step === 4 && days.length > 0 && selectedTravels.length < days.length) {
+                  Modal.warning({
+                    title: "여행지 선택 부족",
+                    content: `여행일수(${days.length}일)에 비해 선택된 여행지가 부족합니다.\n\n최소 ${days.length}개 이상의 여행지를 선택해주세요.`,
+                    centered: true,
+                  });
+                  return;
+                }
+                setStep(step + 1);
+              }}
             >
               다음
             </Button>

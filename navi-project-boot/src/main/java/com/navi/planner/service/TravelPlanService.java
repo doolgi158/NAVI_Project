@@ -17,7 +17,7 @@ public interface TravelPlanService {
     void updatePlan(Long planId, String userId, TravelPlanRequestDTO dto);
 
     /** 여행계획 삭제 */
-    void deletePlan(Long planId);
+    void deletePlan(Long planId,String userId);
 
     /** ✅ 단일 일정(여행지/숙소 등) 삭제 */
     void deleteItem(Long itemId);

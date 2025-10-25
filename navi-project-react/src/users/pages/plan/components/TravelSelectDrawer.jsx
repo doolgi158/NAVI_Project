@@ -14,6 +14,7 @@ export default function TravelSelectDrawer({
   dateRange = [],
   selectedTravels = [],
   setSelectedTravels = () => { },
+  days = [],
 }) {
   const [activeTab, setActiveTab] = useState("search");
   const [searchText, setSearchText] = useState("");
@@ -248,7 +249,7 @@ export default function TravelSelectDrawer({
               </div>
 
               {/* ✅ 여행지 리스트 */}
-              <div className="flex-1 overflow-y-auto custom-scroll pb-4">
+              <div className="flex-1 overflow-y-auto custom-scroll w-[300px] pb-4">
                 <List
                   dataSource={pagedTravels}
                   locale={{ emptyText: <Empty description="검색 결과가 없습니다." /> }}
@@ -291,12 +292,6 @@ export default function TravelSelectDrawer({
               총 {selectedTravels.length}개
             </p>
 
-            {/* ✅ 여행일수보다 적을 때 경고 */}
-            {days.length > 0 && selectedTravels.length < days.length && (
-              <p className="text-xs text-red-500 mt-1 font-medium">
-                ⚠️ 여행일수({days.length}일)에 비해 선택된 여행지가 부족합니다.
-              </p>
-            )}
           </div>
           <Button
             type="text"
@@ -306,53 +301,53 @@ export default function TravelSelectDrawer({
             초기화
           </Button>
         </div>
-      </div>
 
 
-      {/* ✅ 이 부분만 따로 스크롤 */}
-      <div className="flex-1 overflow-y-auto custom-scroll p-5">
-        <List
-          dataSource={selectedTravels}
-          locale={{
-            emptyText: <Empty description="선택된 여행지가 없습니다." />,
-          }}
-          renderItem={(item) => (
-            <List.Item>
-              <div className="flex justify-between items-center w-full bg-white px-4 py-3 rounded-lg shadow-sm">
-                <div className="flex items-center gap-3">
-                  <img
-                    src={
-                      item.img?.trim() ||
-                      item.thumbnailPath?.trim() ||
-                      item.imagePath?.trim() ||
-                      "https://placehold.co/150x150?text=No+Image"
-                    }
-                    alt={item.title}
-                    className="w-14 h-14 rounded-md object-cover"
-                  />
-                  <div>
-                    <p className="font-semibold text-sm text-[#2F3E46]">
-                      {item.title}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {item.region1Name || "-"} {`>`}{" "}
-                      {item.region2Name || "-"}
-                    </p>
+
+        {/* ✅ 이 부분만 따로 스크롤 */}
+        <div className="flex-1 overflow-y-auto custom-scroll p-5 truncate w-[300px]">
+          <List
+            dataSource={selectedTravels}
+            locale={{
+              emptyText: <Empty description="선택된 여행지가 없습니다." />,
+            }}
+            renderItem={(item) => (
+              <List.Item>
+                <div className="flex justify-between items-center w-full bg-white px-4 py-3 rounded-lg shadow-sm">
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={
+                        item.img?.trim() ||
+                        item.thumbnailPath?.trim() ||
+                        item.imagePath?.trim() ||
+                        "https://placehold.co/150x150?text=No+Image"
+                      }
+                      alt={item.title}
+                      className="w-14 h-14 rounded-md object-cover"
+                    />
+                    <div>
+                      <p className="font-semibold text-sm text-[#2F3E46]">
+                        {item.title}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {item.region1Name || "-"} {`>`}{" "}
+                        {item.region2Name || "-"}
+                      </p>
+                    </div>
                   </div>
+                  <i
+                    className="bi bi-dash-square-fill text-red-500 text-xl cursor-pointer"
+                    onClick={() =>
+                      setSelectedTravels((prev) =>
+                        prev.filter((v) => v.travelId !== item.travelId)
+                      )
+                    }
+                  ></i>
                 </div>
-                <i
-                  className="bi bi-dash-square-fill text-red-500 text-xl cursor-pointer"
-                  onClick={() =>
-                    setSelectedTravels((prev) =>
-                      prev.filter((v) => v.travelId !== item.travelId)
-                    )
-                  }
-                ></i>
-              </div>
-            </List.Item>
-          )}
-        />
-      </div>
-    </div>
+              </List.Item>
+            )}
+          />
+        </div>
+      </div> </div>
   );
 }
