@@ -5,13 +5,12 @@ import com.navi.common.entity.BaseEntity;
 import com.navi.common.enums.RsvStatus;
 import com.navi.user.domain.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 /* ============================================================
    [RoomRsv]
@@ -30,11 +29,11 @@ import java.time.LocalDate;
         uniqueConstraints = {
                 @UniqueConstraint(
                         name = "UK_ROOM_RSV_UNIQUE",
-                        columnNames = {"room_rsv_id", "room_id"}
+                        columnNames = {"reserve_id", "room_id"}
                 )
         },
         indexes = {
-                @Index(name = "IDX_ROOM_RSV_RSVID", columnList = "room_rsv_id"),
+                @Index(name = "IDX_ROOM_RSV_RSVID", columnList = "reserve_id"),
                 @Index(name = "IDX_ROOM_RSV_USER", columnList = "user_no"),
         }
 )
@@ -44,7 +43,7 @@ import java.time.LocalDate;
         initialValue = 1,
         allocationSize = 1
 )
-public class RoomRsv extends BaseEntity {
+public class RoomRsv extends BaseEntity{
     /* === 기본 키 === */
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "room_rsv_seq_generator")
@@ -84,54 +83,59 @@ public class RoomRsv extends BaseEntity {
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
 
-    @Column(name = "nights", nullable = false)
+    // 숙박 인원수
+    @Column(name = "guest_count", nullable = false)
+    private int guestCount;
+
+    // 숙박일수
+    @Column(name="nights", nullable = false)
     private int nights;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "rsv_status", length = 20, nullable = false)
     private RsvStatus rsvStatus;
 
+    /* === 예약자 정보 === */
+    @Column(name = "reserver_name", length = 50)
+    private String reserverName;
+
+    @Column(name = "reserver_tel", length = 20)
+    private String reserverTel;
+
+    @Column(name = "reserver_email", length = 100)
+    private String reserverEmail;
+
     @Version
     @Column(name = "version", nullable = false)
     private Long version;
-
-    @Column(name = "guestCount", nullable = false)
-    private int guestCount;
 
     /* === 기본값 처리 === */
     @PrePersist
     public void prePersist() {
         // 기본 상태 설정
-        if (rsvStatus == null) {
-            rsvStatus = RsvStatus.PENDING;
-        }
+        if (rsvStatus == null) { rsvStatus = RsvStatus.PENDING; }
         // 수량 유효성
-        if (quantity <= 0) {
-            throw new IllegalStateException("예약 수량은 1개 이상이어야 합니다.");
-        }
+        if (quantity <= 0)  throw new IllegalStateException("예약 수량은 1개 이상이어야 합니다.");
+        if (guestCount <= 0) throw new IllegalStateException("숙박 인원은 1명 이상이어야 합니다.");
     }
 
     /* === 상태 변경 메서드 === */
-    public void markPaid() {
-        this.rsvStatus = RsvStatus.PAID;
-    }
-
-    public void markCancelled() {
-        this.rsvStatus = RsvStatus.CANCELLED;
-    }
-
-    public void markRefunded() {
-        this.rsvStatus = RsvStatus.REFUNDED;
-    }
-
-    public void markFailed() {
-        this.rsvStatus = RsvStatus.FAILED;
-    }
+    public void markPaid()       { this.rsvStatus = RsvStatus.PAID; }
+    public void markCancelled()  { this.rsvStatus = RsvStatus.CANCELLED; }
+    public void markRefunded()   { this.rsvStatus = RsvStatus.REFUNDED; }
+    public void markFailed()     { this.rsvStatus = RsvStatus.FAILED; }
 
     /* === 가격 수정 === */
     public void updatePrice(BigDecimal newPrice) {
         if (newPrice != null && newPrice.compareTo(BigDecimal.ZERO) >= 0) {
             this.price = newPrice;
         }
+    }
+
+    /* === 예약자 정보 갱신 === */
+    public void updateReserverInfo(String name, String tel, String email) {
+        if (name != null && !name.isBlank()) this.reserverName = name;
+        if (tel != null && !tel.isBlank()) this.reserverTel = tel;
+        if (email != null && !email.isBlank()) this.reserverEmail = email;
     }
 }

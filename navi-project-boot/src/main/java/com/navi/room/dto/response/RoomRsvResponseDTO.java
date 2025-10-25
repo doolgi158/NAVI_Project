@@ -25,24 +25,30 @@ public class RoomRsvResponseDTO {
     private LocalDate startDate;  // 체크인
     private LocalDate endDate;    // 체크아웃
     private int nights;           // 숙박일수
+    private int guestCount;       // 숙박인원
     private Integer quantity;     // 객실 수량
     private BigDecimal price;     // 객실 단가
     private RsvStatus rsvStatus;  // 예약 상태
-    private int guestCount;       // 투숙인원
-    private String accTitle;      // 숙소명
-    private String roomName;      // 객실명
+    private String reserverName;    // 대표 예약자 이름
+    private String reserverTel;     // 대표 예약자 연락처
+    private String reserverEmail;   // 대표 예약자 이메일
+    private String accTitle;
+    private String roomName;
 
     public static RoomRsvResponseDTO fromEntity(RoomRsv entity) {
         return RoomRsvResponseDTO.builder()
                 .reserveId(entity.getReserveId())
                 .roomId(entity.getRoom().getRoomId())
+                .reserverName(entity.getReserverName())
+                .reserverTel(entity.getReserverTel())
+                .reserverEmail(entity.getReserverEmail())
+                .guestCount(entity.getGuestCount())
+                .quantity(entity.getQuantity())
+                .price(entity.getPrice())
                 .startDate(entity.getStartDate())
                 .endDate(entity.getEndDate())
                 .nights(entity.getNights())
-                .quantity(entity.getQuantity())
-                .price(entity.getPrice())
                 .rsvStatus(entity.getRsvStatus())
-                .guestCount(entity.getGuestCount())
                 .build();
     }
 }

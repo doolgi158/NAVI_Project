@@ -27,4 +27,10 @@ public class RoomRsvRequestDTO {
     /* === 예약 상세 정보 === */
     private Integer quantity;     // 객실 수량
     private BigDecimal price;     // 객실 단가
+    private int guestCount;       // 숙박 인원수
+
+    /* === 예약자 정보 === */
+    //private String reserverName;    // 대표 예약자 이름
+    //private String reserverTel;     // 대표 예약자 연락처
+    //private String reserverEmail;   // 대표 예약자 이메일
 }

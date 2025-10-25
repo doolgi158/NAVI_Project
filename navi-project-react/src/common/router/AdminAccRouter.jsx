@@ -3,6 +3,7 @@ import ProtectedRoute from "./ProtectedRoute.jsx";
 
 const AdminAccRoot = lazy(() => import("../../admin/pages/acc/AdminAccRoot.jsx"));
 const AdminAccListPage = lazy(() => import("../../admin/pages/acc/AdminAccListPage.jsx"))
+const AdminAccRsvPage = lazy(() => import("../../admin/pages/acc/AdminAccRsvPage.jsx"))
 const AdminAccForm = lazy(() => import("../../admin/pages/acc/AdminAccFormPage.jsx"))
 
 const AdminAccommodationRouter = () => {
