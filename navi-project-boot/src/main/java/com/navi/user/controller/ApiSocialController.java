@@ -49,7 +49,7 @@ public class ApiSocialController {
 
         // JWT 발급
         Map<String, Object> claims = Map.of("id", username, "provider", providerType.name());
-        String accessToken = jwtUtil.generateToken(claims, 10);
+        String accessToken = jwtUtil.generateToken(claims, 60 * 24);
         String refreshToken = jwtUtil.generateToken(claims, 60 * 24);
 
         Map<String, Object> data = Map.of(

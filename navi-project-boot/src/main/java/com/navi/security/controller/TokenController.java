@@ -72,7 +72,7 @@ public class TokenController {
                     .build();
 
             // 새 AccessToken 발급 (테스트용 10초 or 정상 10분)
-            String newAccessToken = jwtUtil.generateToken(claimDTO, 60); // 단위: 초 or 분은 JWTUtil 설정에 맞게
+            String newAccessToken = jwtUtil.generateToken(claimDTO, 60 * 24); // 단위: 초 or 분은 JWTUtil 설정에 맞게
 
             UserResponseDTO userResponse = UserResponseDTO.builder()
                     .no(claimDTO.getNo())
