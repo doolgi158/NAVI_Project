@@ -23,6 +23,7 @@ const UserMyPaymentsPage = () => {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
+            console.log(res);
             if (res.data.status === 200) {
                 setPayments(res.data.data || []);
             } else {
@@ -44,6 +45,36 @@ const UserMyPaymentsPage = () => {
         setSelectedPayment(payment);
     };
 
+    // 환불 요청
+    const handleRefundRequest = async (merchantId) => {
+        Modal.confirm({
+            title: "환불 요청",
+            content: "정말 이 결제를 환불하시겠습니까?",
+            okText: "예, 환불합니다",
+            cancelText: "취소",
+            centered: true,
+            async onOk() {
+                try {
+                    const res = await axios.post(
+                        `${API_SERVER_HOST}/api/payment/refund/${merchantId}`,
+                        {},
+                        { headers: { Authorization: `Bearer ${token}` } }
+                    );
+
+                    if (res.data.status === 200) {
+                        message.success("환불 요청이 완료되었습니다.");
+                        fetchPayments(); // 새로고침
+                    } else {
+                        message.error("환불 요청 처리에 실패했습니다.");
+                    }
+                } catch (err) {
+                    console.error("❌ [handleRefundRequest] 오류:", err);
+                    message.error("서버 통신 중 오류가 발생했습니다.");
+                }
+            },
+        });
+    };
+
     return (
         <MainLayout>
             <div className="max-w-6xl mx-auto mt-12 px-4 pb-24">
@@ -61,31 +92,31 @@ const UserMyPaymentsPage = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {payments.map((p) => (
                             <Card
-                                key={p.paymentId}
+                                key={p.merchantId}
                                 className="border border-gray-200 shadow-md rounded-2xl hover:shadow-lg transition-all"
                                 title={
                                     <div className="flex justify-between items-center">
                                         <span className="font-semibold text-blue-600">
-                                            {p.type === "ACCOMMODATION" ? "🏨 숙소" : "✈️ 항공"} 결제
+                                            {p.rsvType === "ACC" ? "🏨 숙소" : "✈️ 항공"} 결제
                                         </span>
-                                        <Tag color="purple">{p.paymentId}</Tag>
+                                        <Tag color="purple">{p.merchantId}</Tag>
                                     </div>
                                 }
                             >
                                 <div className="mb-2">
-                                    <p className="text-gray-500 text-sm">결제 항목</p>
-                                    <p className="font-semibold">{p.title}</p>
+                                    <p className="text-gray-500 text-sm">결제 수단</p>
+                                    <p className="font-semibold">{p.paymentMethod}</p>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4 mb-3">
                                     <div>
                                         <p className="text-gray-500 text-sm">결제 금액</p>
-                                        <p className="font-semibold">₩ {p.amount?.toLocaleString()}</p>
+                                        <p className="font-semibold">₩ {p.totalAmount?.toLocaleString()}</p>
                                     </div>
                                     <div>
                                         <p className="text-gray-500 text-sm">결제일</p>
                                         <p className="font-semibold">
-                                            {p.paidAt ? dayjs(p.paidAt).format("YYYY-MM-DD HH:mm") : "-"}
+                                            {p.createdAt ? dayjs(p.createdAt).format("YYYY-MM-DD HH:mm") : "-"}
                                         </p>
                                     </div>
                                 </div>
@@ -93,61 +124,45 @@ const UserMyPaymentsPage = () => {
                                 <div className="flex justify-between items-center mt-2">
                                     <Tag
                                         color={
-                                            p.status === "PAID"
+                                            p.paymentStatus === "PAID"
                                                 ? "blue"
-                                                : p.status === "REFUNDED"
+                                                : p.paymentStatus === "REFUNDED"
                                                     ? "green"
-                                                    : p.status === "CANCELLED"
+                                                    : p.paymentStatus === "CANCELLED"
                                                         ? "red"
                                                         : "gray"
                                         }
                                     >
-                                        {p.status === "PAID"
+                                        {p.paymentStatus === "PAID"
                                             ? "결제 완료"
-                                            : p.status === "REFUNDED"
+                                            : p.paymentStatus === "REFUNDED"
                                                 ? "환불 완료"
-                                                : p.status === "CANCELLED"
+                                                : p.paymentStatus === "CANCELLED"
                                                     ? "취소됨"
-                                                    : p.status}
+                                                    : p.paymentStatus}
                                     </Tag>
 
-                                    <Button size="small" onClick={() => handleViewDetails(p)}>
-                                        상세보기
-                                    </Button>
+                                    {p.paymentStatus === "PAID" ? (
+                                        <Button
+                                            type="primary"
+                                            danger
+                                            size="small"
+                                            onClick={() => handleRefundRequest(p.merchantId)}
+                                        >
+                                            환불 요청
+                                        </Button>
+                                    ) : p.paymentStatus === "REFUNDED" ? (
+                                        <Tag color="green">환불 완료</Tag>
+                                    ) : (
+                                        <Tag color="gray">변경 불가</Tag>
+                                    )}
+
                                 </div>
                             </Card>
                         ))}
                     </div>
                 )}
             </div>
-
-            {/* 상세 모달 */}
-            <Modal
-                open={!!selectedPayment}
-                title="결제 상세 정보"
-                footer={null}
-                onCancel={() => setSelectedPayment(null)}
-            >
-                {selectedPayment ? (
-                    <Descriptions bordered column={1} size="small">
-                        <Descriptions.Item label="결제 ID">{selectedPayment.paymentId}</Descriptions.Item>
-                        <Descriptions.Item label="결제 유형">
-                            {selectedPayment.type === "ACCOMMODATION" ? "숙소" : "항공"}
-                        </Descriptions.Item>
-                        <Descriptions.Item label="결제 항목">{selectedPayment.title}</Descriptions.Item>
-                        <Descriptions.Item label="결제 금액">
-                            ₩ {selectedPayment.amount?.toLocaleString()}
-                        </Descriptions.Item>
-                        <Descriptions.Item label="결제 상태">{selectedPayment.status}</Descriptions.Item>
-                        <Descriptions.Item label="결제 수단">{selectedPayment.method || "-"}</Descriptions.Item>
-                        <Descriptions.Item label="결제 일시">
-                            {selectedPayment.paidAt ? dayjs(selectedPayment.paidAt).format("YYYY-MM-DD HH:mm") : "-"}
-                        </Descriptions.Item>
-                    </Descriptions>
-                ) : (
-                    <p>결제 정보를 불러올 수 없습니다.</p>
-                )}
-            </Modal>
         </MainLayout>
     );
 };

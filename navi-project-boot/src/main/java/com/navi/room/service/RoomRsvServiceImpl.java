@@ -217,8 +217,12 @@ public class RoomRsvServiceImpl implements RoomRsvService {
                             .guestCount(r.getGuestCount())
                             .price(r.getPrice())
                             .rsvStatus(r.getRsvStatus())
+                            .quantity(r.getQuantity())
                             .accTitle(acc != null ? acc.getTitle() : null)
                             .roomName(room != null ? room.getRoomName() : null)
+                            .reserverName(user.getName())
+                            .reserverEmail(user.getEmail())
+                            .reserverTel(user.getPhone())
                             .build();
                 })
                 .collect(Collectors.toList());

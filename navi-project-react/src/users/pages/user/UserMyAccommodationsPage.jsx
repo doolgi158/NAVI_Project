@@ -9,6 +9,7 @@ const UserMyAccommodationsPage = () => {
     const [loading, setLoading] = useState(true);
     const [bookingList, setBookingList] = useState([]);
     const [selectedGuests, setSelectedGuests] = useState(null);
+    const [openModals, setOpenModals] = useState({});
 
     const token = localStorage.getItem("accessToken");
 
@@ -41,22 +42,13 @@ const UserMyAccommodationsPage = () => {
         fetchBookings();
     }, []);
 
-    // 투숙객 정보 보기
-    const handleGuestsView = (guestsJson) => {
-        if (!guestsJson) {
-            message.info("등록된 투숙객 정보가 없습니다.");
-            return;
-        }
-        try {
-            const guests = JSON.parse(guestsJson);
-            if (Array.isArray(guests) && guests.length > 0) {
-                setSelectedGuests(guests);
-            } else {
-                message.info("투숙객 정보가 비어 있습니다.");
-            }
-        } catch (err) {
-            message.error("투숙객 정보를 불러올 수 없습니다.");
-        }
+    // 모달 열기/닫기
+    const handleOpenModal = (reserveId) => {
+        setOpenModals((prev) => ({ ...prev, [reserveId]: true }));
+    };
+
+    const handleCloseModal = (reserveId) => {
+        setOpenModals((prev) => ({ ...prev, [reserveId]: false }));
     };
 
     // 예약 취소
@@ -109,9 +101,9 @@ const UserMyAccommodationsPage = () => {
                                 title={
                                     <div className="flex justify-between items-center">
                                         <span className="font-semibold text-blue-600">
-                                            {b.accName || "숙소명 미등록"}
+                                            {b.accTitle || "숙소명 미등록"}
                                         </span>
-                                        <Tag color="purple">{b.rsvId}</Tag>
+                                        <Tag color="purple">{b.reserveId}</Tag>
                                     </div>
                                 }
                             >
@@ -120,14 +112,31 @@ const UserMyAccommodationsPage = () => {
                                     <div>
                                         <p className="text-sm text-gray-500">체크인</p>
                                         <p className="font-semibold">
-                                            {b.checkIn ? dayjs(b.checkIn).format("YYYY-MM-DD") : "-"}
+                                            {b.startDate ? dayjs(b.startDate).format("YYYY-MM-DD") : "-"}
                                         </p>
                                     </div>
                                     <div>
                                         <p className="text-sm text-gray-500">체크아웃</p>
                                         <p className="font-semibold">
-                                            {b.checkOut ? dayjs(b.checkOut).format("YYYY-MM-DD") : "-"}
+                                            {b.endDate ? dayjs(b.endDate).format("YYYY-MM-DD") : "-"}
                                         </p>
+                                    </div>
+                                </div>
+
+                                {/* 숙박일 및 인원 */}
+                                <div className="grid grid-cols-2 gap-4 mb-3">
+                                    <div>
+                                        <p className="text-sm text-gray-500">숙박일</p>
+                                        <p className="font-semibold">
+                                            {b.startDate && b.endDate
+                                                ? `${dayjs(b.endDate).diff(dayjs(b.startDate), "day")}박 ${dayjs(b.endDate).diff(dayjs(b.startDate), "day") + 1
+                                                }일`
+                                                : "-"}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-500">인원</p>
+                                        <p className="font-semibold">{b.guestCount || 1}명</p>
                                     </div>
                                 </div>
 
@@ -138,8 +147,8 @@ const UserMyAccommodationsPage = () => {
                                         <p className="font-semibold">{b.roomName || "-"}</p>
                                     </div>
                                     <div>
-                                        <p className="text-sm text-gray-500">인원</p>
-                                        <p className="font-semibold">{b.guestCount || 1}명</p>
+                                        <p className="text-sm text-gray-500">객실 수</p>
+                                        <p className="font-semibold">{b.quantity || 1}개</p>
                                     </div>
                                 </div>
 
@@ -148,29 +157,29 @@ const UserMyAccommodationsPage = () => {
                                     <div>
                                         <p className="text-sm text-gray-500">결제금액</p>
                                         <p className="font-semibold">
-                                            ₩ {b.totalPrice?.toLocaleString() || "-"}
+                                            ₩ {b.price?.toLocaleString() || "-"}
                                         </p>
                                     </div>
                                     <div>
                                         <p className="text-sm text-gray-500">상태</p>
                                         <Tag
                                             color={
-                                                b.status === "PAID"
+                                                b.rsvStatus === "PAID"
                                                     ? "blue"
-                                                    : b.status === "REFUNDED"
+                                                    : b.rsvStatus === "REFUNDED"
                                                         ? "green"
-                                                        : b.status === "CANCELLED"
+                                                        : b.rsvStatus === "CANCELLED"
                                                             ? "red"
                                                             : "gray"
                                             }
                                         >
-                                            {b.status === "PAID"
+                                            {b.rsvStatus === "PAID"
                                                 ? "결제 완료"
-                                                : b.status === "REFUNDED"
+                                                : b.rsvStatus === "REFUNDED"
                                                     ? "환불 완료"
-                                                    : b.status === "CANCELLED"
+                                                    : b.rsvStatus === "CANCELLED"
                                                         ? "취소됨"
-                                                        : b.status || "알 수 없음"}
+                                                        : b.rsvStatus || "알 수 없음"}
                                         </Tag>
                                     </div>
                                 </div>
@@ -179,25 +188,48 @@ const UserMyAccommodationsPage = () => {
                                 <div className="flex justify-end items-center mt-2 gap-2">
                                     <Button
                                         size="small"
-                                        onClick={() => handleGuestsView(b.guestsJson)}
+                                        onClick={() => handleOpenModal(b.reserveId)} // ✅ 모달 열기
                                     >
                                         투숙객
                                     </Button>
-                                    {b.status === "PAID" ? (
+                                    {b.rsvStatus === "PAID" ? (
                                         <Button
                                             type="primary"
                                             danger
                                             size="small"
-                                            onClick={() => handleCancel(b.rsvId)}
+                                            onClick={() => handleCancel(b.reserveId)}
                                         >
                                             예약 취소
                                         </Button>
-                                    ) : b.status === "REFUNDED" ? (
+                                    ) : b.rsvStatus === "REFUNDED" ? (
                                         <Tag color="green">환불 완료</Tag>
                                     ) : (
                                         <Tag color="gray">변경 불가</Tag>
                                     )}
                                 </div>
+
+                                {/* 각 예약별 모달 */}
+                                <Modal
+                                    open={openModals[b.reserveId] || false}
+                                    title={
+                                        <div>
+                                            <div className="text-lg font-bold text-blue-700">
+                                                🛏 {b.accTitle || "숙소명 미등록"}
+                                            </div>
+                                            <div className="text-gray-500 text-sm mt-1">
+                                                {b.roomName || "객실명 미등록"}
+                                            </div>
+                                        </div>
+                                    }
+                                    footer={null}
+                                    onCancel={() => handleCloseModal(b.reserveId)}
+                                >
+                                    <Descriptions bordered size="small" column={1}>
+                                        <Descriptions.Item label="이름">{b.reserverName || "-"}</Descriptions.Item>
+                                        <Descriptions.Item label="이메일">{b.reserverEmail || "-"}</Descriptions.Item>
+                                        <Descriptions.Item label="연락처">{b.reserverTel || "-"}</Descriptions.Item>
+                                    </Descriptions>
+                                </Modal>
                             </Card>
                         ))}
                     </div>
@@ -215,7 +247,7 @@ const UserMyAccommodationsPage = () => {
                     <Descriptions bordered size="small" column={1}>
                         {selectedGuests.map((g, i) => (
                             <Descriptions.Item key={i} label={`투숙객 ${i + 1}`}>
-                                {g.name} / {g.gender} / {g.birth}
+                                {g.reserverName} / {g.reserverEmail} / {g.reserverTel}
                             </Descriptions.Item>
                         ))}
                     </Descriptions>
