@@ -21,8 +21,7 @@ public class StockScheduler {
     private final StockRepository stockRepository;
 
     /* 매일 자정마다 실행 (과거 재고 삭제 + 신규 재고 생성) */
-    //@Scheduled(cron = "0 0 0 * * *")
-    //@Scheduled(initialDelay = 60000, fixedDelay = Long.MAX_VALUE)
+    @Scheduled(cron = "0 0 0 * * *")
     @Transactional
     public void rollRoomStock() {
         LocalDate today = LocalDate.now();
@@ -32,7 +31,7 @@ public class StockScheduler {
         log.info("🧹 지난 재고 {}건 삭제 완료 ({} 이전)", deleted, today);
 
         // 신규 재고 생성 (오늘 기준 +6일 → 항상 7일치 유지)
-        LocalDate newDate = today.plusDays(6);
+        LocalDate newDate = today.plusDays(13);
 
         // 0원 또는 0개 객실 제외된 유효한 Room만 조회
         List<Room> rooms = roomRepository.findValidRooms();
