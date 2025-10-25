@@ -241,7 +241,9 @@ public class Travel extends BaseEntityNoAudit {
         this.bookmarkCount = (this.bookmarkCount == null || this.bookmarkCount == 0) ? 0L : this.bookmarkCount - 1;
     }
 
+    @Override
     public void setUpdatedAt(LocalDateTime now) {
+        super.setUpdatedAt(now);
     }
 
 }

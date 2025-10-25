@@ -44,6 +44,7 @@ public class TravelPlanDay {
     @OneToMany(mappedBy = "day", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     @OrderBy("startTime ASC")
+    @Builder.Default
     private Set<TravelPlanItem> items = new LinkedHashSet<>();
 
     /* ===== 편의 메서드 ===== */

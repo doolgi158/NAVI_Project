@@ -5,9 +5,11 @@ import com.navi.travel.dto.TravelListResponseDTO;
 import com.navi.travel.dto.TravelRankDTO;
 import com.navi.travel.dto.TravelSimpleResponseDTO;
 import com.navi.travel.service.TravelService;
+import com.navi.travel.service.internal.TravelQueryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -27,6 +29,7 @@ import java.util.stream.Collectors;
 public class TravelController {
 
     private final TravelService travelService;
+    private final TravelQueryService travelQueryService;
 
     /**
      * ✅ SecurityContext에서 로그인 사용자 ID 추출
@@ -83,6 +86,18 @@ public class TravelController {
         );
 
         return ResponseEntity.ok(list);
+    }
+
+    @GetMapping("/popular")
+    public ResponseEntity<Page<TravelListResponseDTO>> getPopularTravels(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<TravelListResponseDTO> result = travelQueryService.getTravelList(
+                pageable, null, null, null, true
+        );
+        return ResponseEntity.ok(result);
     }
 
     /**

@@ -4,8 +4,10 @@ import path from "path";
 
 export default defineConfig({
   plugins: [react()],
+
   resolve: {
     alias: {
+      "react-quill": path.resolve(__dirname, "node_modules/react-quill/lib/index.js"),
       "@": path.resolve(__dirname, "./src"), // ✅ '@/...' → 'src/...'
     },
   },
@@ -21,5 +23,8 @@ export default defineConfig({
         changeOrigin: true,
       },
     },
+  },
+  optimizeDeps: {
+    include: ["react-quill"],
   },
 });

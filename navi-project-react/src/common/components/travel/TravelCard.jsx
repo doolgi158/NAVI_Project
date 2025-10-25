@@ -80,7 +80,7 @@ const TravelCard = ({ item, onClick, isSelected, onMouseEnter, onMouseLeave }) =
 
   return (
     <div
-      className={`bg-white rounded-xl shadow-lg border-2 p-4 cursor-pointer transition duration-300 transform hover:shadow-xl hover:-translate-y-1 ${isSelected ? 'border-blue-500 shadow-blue-300/50 scale-[1.01]' : 'border-gray-200'
+      className={`w-[500px] bg-white rounded-xl shadow-lg border-2 p-4 cursor-pointer transition duration-300 transform hover:shadow-xl hover:-translate-y-1 ${isSelected ? 'border-blue-500 shadow-blue-300/50 scale-[1.01]' : 'border-gray-200'
         } flex space-x-4`}
       onClick={() => onClick(item)}
       onMouseEnter={onMouseEnter}
@@ -90,8 +90,8 @@ const TravelCard = ({ item, onClick, isSelected, onMouseEnter, onMouseLeave }) =
       <div className="flex-shrink-0 w-36 h-24 sm:w-40 sm:h-28">
         <img
           src={
-            item.thumbnailPath ||
             item.imagePath ||
+            item.thumbnailPath ||
             'https://placehold.co/112x112/cccccc/333333?text=No+Image'
           }
           alt={item.title}

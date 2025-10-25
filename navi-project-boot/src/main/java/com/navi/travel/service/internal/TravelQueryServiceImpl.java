@@ -75,20 +75,20 @@ public class TravelQueryServiceImpl implements TravelQueryService {
         if (sortByLikes && noRegionFilter && noCategoryFilter && noSearchFilter) {
             log.info("🔥 [인기순 정렬] likes_count DESC 정렬 실행");
 
-            // ⚠️ 정렬 정보 제거된 Pageable 생성
             Pageable plainPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
 
             Page<Object[]> nativePage = travelRepository.findAllOrderByLikesCountNative(plainPageable);
-            Page<TravelListResponseDTO> resultPage = nativePage.map(row -> {
-                Travel travel = new Travel();
-                travel.setTravelId(((Number) row[0]).longValue());
-                travel.setTitle((String) row[1]);
-                travel.setRegion1Name((String) row[2]);
-                travel.setRegion2Name((String) row[3]);
-                travel.setThumbnailPath((String) row[4]);
-                travel.setLikesCount(((Number) row[5]).longValue());
-                return TravelListResponseDTO.of(travel);
-            });
+            Page<TravelListResponseDTO> resultPage = nativePage.map(row ->
+                    new TravelListResponseDTO(
+                            ((Number) row[0]).longValue(),  // travel_id
+                            (String) row[1],                // title
+                            (String) row[2],                // region1
+                            (String) row[3],                // region2
+                            (String) row[4],                // image_path
+                            (String) row[5],                // thumbnail_path
+                            ((Number) row[6]).longValue()   // likes_count
+                    )
+            );
 
             return attachLikesAndBookmarks(resultPage);
         }
