@@ -6,6 +6,7 @@ import com.navi.room.dto.response.RoomRsvResponseDTO;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 public interface RoomRsvService {
     // 1. 단일 예약 생성 (결제 전)
@@ -23,4 +24,7 @@ public interface RoomRsvService {
     boolean verifyTotalAmount(String reserveId, BigDecimal paidAmount);
     // 7. 예약 ID별 객실 총 금액 합산 (결제 검증용)
     BigDecimal getTotalAmountByReserveId(String reserveId);
+
+    // 8. 관리자 예약 목록 조회
+    Map<String, Object> getAdminReservationList(int page, int size, String status, String keyword);
 }

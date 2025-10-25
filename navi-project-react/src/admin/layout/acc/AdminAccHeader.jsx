@@ -1,14 +1,32 @@
-import React, { useState } from "react";
-import { Tabs, Space, Input, DatePicker, Select, Typography, Button } from "antd";
-import { SearchOutlined, CalendarOutlined, ReloadOutlined, HomeOutlined } from "@ant-design/icons";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { Tabs, Space, Input, Select, Typography } from "antd";
+import { SearchOutlined } from "@ant-design/icons";
 
-const { RangePicker } = DatePicker;
 const { Title } = Typography;
 
+/* ==========================================================
+   [AdminAccHeader]
+   - 숙소 관리 페이지 상단 Header
+   - 숙소/예약 탭 이동, 검색, 필터링 제어
+========================================================== */
 const AdminAccHeader = ({ onTabChange, onSearch, onFilter }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [activeTab, setActiveTab] = useState("API");
   const [searchValue, setSearchValue] = useState("");
   const [filterValue, setFilterValue] = useState("ALL");
+
+  // ✅ 현재 URL에 따라 초기 탭 상태 동기화
+  useEffect(() => {
+    if (location.pathname.includes("/accommodations/reservations")) {
+      setActiveTab("RSV");
+    } else if (location.pathname.includes("/accommodations")) {
+      // 기본은 숙소 목록 (type 상태로 구분됨)
+      setActiveTab("API");
+    }
+  }, [location.pathname]);
 
   // ✅ 검색 실행
   const handleSearch = () => {
@@ -24,7 +42,15 @@ const AdminAccHeader = ({ onTabChange, onSearch, onFilter }) => {
   // ✅ 탭 변경
   const handleTabChange = (key) => {
     setActiveTab(key);
-    onTabChange?.(key);
+
+    if (key === "RSV") {
+      // ✅ 숙소 예약 관리 탭 클릭 → 예약 페이지로 이동
+      navigate("/adm/accommodations/reservations");
+    } else {
+      // ✅ 숙소 탭 클릭 → 숙소 목록 페이지로 이동
+      onTabChange?.(key);
+      navigate("/adm/accommodations/list");
+    }
   };
 
   return (
