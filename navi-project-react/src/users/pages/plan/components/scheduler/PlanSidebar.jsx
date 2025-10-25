@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "antd";
-import { LeftOutlined, EditOutlined } from "@ant-design/icons";
+import { LeftOutlined, EditOutlined, PlusOutlined, HomeOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
+import TravelAddModal from "./TravelAddModal";
+import StayAddModal from "./StayAddModal";
 
 export default function PlanSidebar({
     days = [],
@@ -19,7 +21,13 @@ export default function PlanSidebar({
     stageStayPlans = {},
     deletedTravelIds = [],
     deletedStayIds = [],
+    handleAddTravel = () => { },
+    handleAddStay = () => { },
+
 }) {
+    const [showTravelModal, setShowTravelModal] = useState(false);
+    const [showStayModal, setShowStayModal] = useState(false);
+
     return (
         <div
             className="flex flex-col bg-white h-full border-r border-gray-200 transition-all duration-500"
@@ -89,7 +97,7 @@ export default function PlanSidebar({
                             수정하기
                         </Button>
                     ) : (
-                        <>
+                        <>{!isEditMode && (
                             <Button
                                 block
                                 className="bg-gray-200 hover:bg-gray-300 text-gray-700 border-none"
@@ -121,18 +129,52 @@ export default function PlanSidebar({
                             >
                                 이전
                             </Button>
+                        )}
 
+                            {isEditMode && (
+                                <>
+                                    <Button
+                                        block
+                                        icon={<PlusOutlined />}
+                                        className="bg-[#FFF5B7] hover:bg-[#FFE98A] text-[#2F3E46] border-none"
+                                        onClick={() => setShowTravelModal(true)}
+                                    >
+                                        여행지 추가
+                                    </Button>
+                                    <Button
+                                        block
+                                        icon={<HomeOutlined />}
+                                        className="bg-[#DCEFFF] hover:bg-[#B8E0FF] text-[#2F3E46] border-none"
+                                        onClick={() => setShowStayModal(true)}
+                                    >
+                                        숙소 추가
+                                    </Button>
+                                </>
+                            )}
                             <Button
                                 block
                                 type="primary"
                                 className="bg-[#2F3E46] hover:bg-[#1E2E32] border-none"
                                 onClick={handleConfirm}
                             >
-                                {isEditMode ? "수정" : "저장"}
+                                {isEditMode ? "수정 완료" : "저장"}
                             </Button>
                         </>
                     )}
                 </div>
+
+                <TravelAddModal
+                    open={showTravelModal}
+                    onClose={() => setShowTravelModal(false)}
+                    days={days}
+                    onAdd={handleAddTravel}
+                />
+                <StayAddModal
+                    open={showStayModal}
+                    onClose={() => setShowStayModal(false)}
+                    days={days}
+                    onAdd={handleAddStay}
+                />
             </div>
         </div>
     );

@@ -1,6 +1,7 @@
-import api, { API_SERVER_HOST } from "./naviApi"
+import api, { API_SERVER_HOST } from "./naviApi";
 
 const host = `${API_SERVER_HOST}/api/plans`;
+export { API_SERVER_HOST };
 
 /** ✅ 여행계획 저장 */
 export const savePlan = async (planData) => {

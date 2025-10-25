@@ -576,6 +576,82 @@ export default function PlanScheduler() {
         };
     };
 
+    /** ✅ 여행지 추가 처리 */
+    const handleAddTravel = (grouped) => {
+        console.log("✅ grouped:", grouped);
+        setDays((prev) => {
+            const updated = [...prev];
+            Object.entries(grouped).forEach(([dayIdx, travels]) => {
+                const idx = parseInt(dayIdx, 10);
+                if (isNaN(idx) || !updated[idx]) {
+                    console.warn("❌ 잘못된 dayIdx:", dayIdx);
+                    return;
+                }
+
+                console.log("✅ grouped:", grouped);
+                console.log("✅ typeof dayIdx:", typeof dayIdx);
+                console.log("✅ updated length:", updated.length);
+
+                const newItems = travels.map((t) => ({
+                    type: "travel",
+                    title: t.title,
+                    travelId: t.travelId,
+                    lat: parseFloat(t.lat ?? t.latitude ?? t.mapy),
+                    lng: parseFloat(t.lng ?? t.longitude ?? t.mapx),
+                    img:
+                        t.img?.trim() ||
+                        t.thumbnailPath?.trim() ||
+                        t.imagePath?.trim() ||
+                        "https://placehold.co/150x150?text=No+Image",
+                    startTime: "--:--",
+                    endTime: "--:--",
+                }));
+
+                updated[idx].items = [...(updated[idx].items || []), ...newItems];
+            });
+
+            console.log("✅ updated days:", updated);
+            return [...updated];
+        });
+    };
+
+
+    /** ✅ 숙소 추가 처리 */
+    const handleAddStay = (selectedStays, targetDayIdx) => {
+        setDays((prev) => {
+            const updated = [...prev];
+            if (!updated[targetDayIdx]) return prev;
+
+            const newItems = selectedStays.map((s) => ({
+                type: "stay",
+                title: s.title,
+                stayId: s.accId,
+                lat: parseFloat(s.mapy ?? s.lat),
+                lng: parseFloat(s.mapx ?? s.lng),
+                img:
+                    s.accImage?.trim() ||
+                    s.img?.trim() ||
+                    "https://placehold.co/150x150?text=No+Image",
+                startTime: "--:--",
+                endTime: "--:--",
+                __manual__: false,
+            }));
+
+            updated[targetDayIdx].items = [
+                ...updated[targetDayIdx].items,
+                ...newItems,
+            ];
+
+            return [...updated];
+        });
+
+        message.success(`${selectedStays.length}개의 숙소가 ${targetDayIdx + 1}일차에 추가되었습니다.`);
+    };
+
+
+
+
+
     /** 저장/수정 */
     const handleConfirm = async () => {
         if (isViewMode) return;
@@ -704,12 +780,14 @@ export default function PlanScheduler() {
                                 stageStayPlans={stageStayPlans}
                                 deletedTravelIds={deletedTravelIds}
                                 deletedStayIds={deletedStayIds}
+                                handleAddTravel={handleAddTravel}
+                                handleAddStay={handleAddStay}
                             />
 
                             {/* 일정 리스트(스크롤 영역) */}
                             <div className="overflow-y-auto custom-scroll px-10 py-8 ">
-                                <div className="border-b-2 mb-10">
-                                    <div className="flex items-center gap-2">
+                                <div className="border-b-2 mb-10 max-w-[600px]" >
+                                    <div className="flex items-center gap-2" >
                                         <h2 className="text-2xl font-semibold text-[#2F3E46] ">
                                             {meta.title || "여행 제목 없음"}
                                         </h2>
