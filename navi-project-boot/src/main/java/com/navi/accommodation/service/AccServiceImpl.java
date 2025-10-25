@@ -6,25 +6,21 @@ import com.navi.accommodation.dto.request.AccRequestDTO;
 import com.navi.accommodation.dto.request.AccSearchRequestDTO;
 import com.navi.accommodation.dto.response.AccDetailResponseDTO;
 import com.navi.accommodation.dto.response.AccListResponseDTO;
+import com.navi.accommodation.mapper.AccMapper;
 import com.navi.accommodation.repository.AccRepository;
 import com.navi.image.domain.Image;
 import com.navi.image.repository.ImageRepository;
 import com.navi.location.repository.TownshipRepository;
-import com.navi.user.domain.Log;
-import com.navi.user.dto.users.UserSecurityDTO;
-import com.navi.user.enums.ActionType;
+import com.navi.room.repository.RoomRepository;
 import com.navi.user.repository.LogRepository;
 import com.navi.user.repository.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,20 +30,28 @@ import java.util.stream.Collectors;
 @Transactional
 public class AccServiceImpl implements AccService {
     private final AccRepository accRepository;
+    private final RoomRepository roomRepository;
     private final TownshipRepository townshipRepository;
     private final ImageRepository imageRepository;
     private final UserRepository userRepository;
     private final LogRepository logRepository;
 
+    private final AccMapper accMapper;
+
     /* === 관리자 전용 CRUD === */
+    // 1. 숙소 생성
     @Override
     public Acc createAcc(AdminAccListDTO dto) {
+        Long nextSeq = accRepository.getNextSeqVal();
+        String accId = String.format("ACC%03d", nextSeq);
+
         // Township 조회 (필수)
         var township = townshipRepository.findById(dto.getTownshipId())
                 .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 지역 정보입니다."));
 
         // 엔티티 생성 및 값 주입
         Acc acc = Acc.builder()
+                .accId(accId)
                 .title(dto.getTitle())
                 .category(dto.getCategory())
                 .tel(dto.getTel())
@@ -82,6 +86,7 @@ public class AccServiceImpl implements AccService {
         return acc;
     }
 
+    // 2. 숙소 수정
     @Override
     public Acc updateAcc(Long accNo, AccRequestDTO dto) {
         Acc acc = accRepository.findById(accNo)
@@ -95,6 +100,7 @@ public class AccServiceImpl implements AccService {
         return accRepository.save(acc);
     }
 
+    // 3. 숙소 삭제
     @Override
     public void deleteAcc(Long accNo) {
         Acc acc = accRepository.findById(accNo)
@@ -105,21 +111,30 @@ public class AccServiceImpl implements AccService {
             throw new IllegalStateException("API로 받아온 숙소는 삭제할 수 없습니다.");
         }
         // 예약사항이 있으면 삭제 불가
-        if (!acc.isDeletable()) {
-            throw new IllegalStateException("삭제 불가 상태의 숙소입니다.");
+        if (!roomRepository.findByAcc_AccNo(accNo).isEmpty()) {
+            throw new IllegalStateException("해당 숙소에 예약된 객실이 존재합니다.");
         }
 
         accRepository.delete(acc);
     }
 
+    // 3. 대표 이미지 변경
     @Override
-    public List<AccListResponseDTO> searchByName(String name) {
-        List<Acc> accList = accRepository.findByTitleContainingIgnoreCase(name);
+    public void updateMainImage(String accId) {
+        log.info("🖼️ [ACC] 대표 이미지 갱신 요청 - accId={}", accId);
 
-        return accRepository.findByTitleContainingIgnoreCase(name)
-                .stream()
-                .map(AccListResponseDTO::fromEntity)
-                .toList();
+        Acc acc = accRepository.findByAccId(accId)
+                .orElseThrow(() -> new IllegalArgumentException("숙소를 찾을 수 없습니다: " + accId));
+
+        String imagePath = imageRepository
+                .findTopByTargetTypeAndTargetIdOrderByNoAsc("ACC", accId)
+                .map(Image::getPath)
+                .orElse(null); // 기본 이미지
+
+        acc.updateMainImage(imagePath);
+        accRepository.save(acc);
+
+        log.info("✅ [ACC] 대표 이미지 갱신 완료 - accId={}, mainImage={}", accId, imagePath);
     }
 
     @Override
@@ -146,53 +161,55 @@ public class AccServiceImpl implements AccService {
 
     /* === 사용자 전용 조회 === */
     @Override
+    @Transactional(readOnly = true)
     public List<AccListResponseDTO> searchAccommodations(AccSearchRequestDTO dto) {
-        List<Acc> accList = accRepository.findAll();
+        log.info("🔍 [ACC_SEARCH] 요청 수신 - {}", dto);
 
-        // 검색 조건 분기
-        if (dto.getTownshipName() != null && !dto.getTownshipName().isBlank()) {
-            accList = accList.stream()
-                    .filter(a -> a.getTownship() != null &&
-                            a.getTownship().getTownshipName().contains(dto.getTownshipName()))
-                    .toList();
-        } else if (dto.getTitle() != null && !dto.getTitle().isBlank()) {
-            String lowerKeyword = dto.getTitle().toLowerCase();
-            accList = accList.stream()
-                    .filter(a -> a.getTitle() != null && a.getTitle().toLowerCase().contains(lowerKeyword))
-                    .toList();
-        } else {
-            // Todo: 임시방편 (이거 말고 관광지 기반 만들어야 함)
-            accList = accRepository.findAll();
+        // 프론트 카테고리 → DB 카테고리 변환
+        List<String> categories = new ArrayList<>();
+        if (dto.getCategoryList() != null) {
+            for (String c : dto.getCategoryList()) {
+                switch (c) {
+                    case "호텔" -> categories.add("호텔");
+                    case "리조트/콘도" -> categories.add("콘도, 리조트");
+                    case "모텔" -> categories.add("여관, 모텔");
+                    case "펜션" -> categories.add("펜션");
+                    case "게스트하우스/민박" -> categories.addAll(
+                            List.of("게스트하우스", "유스호스텔", "민박", "일반숙박업", "산장,별장", "한옥숙소", "생활숙박업")
+                    );
+                    case "기타" -> categories.addAll(
+                            List.of("숙박", "야영,캠핑장")
+                    );
+                }
+            }
         }
 
-        /* 숙소 + 이미지 DTO 조합 */
-        return accList.stream().map(acc -> {
-            // ✅ 대표 이미지 경로 (/images/acc/uuid.jpg)
-            String accImagePath = imageRepository
-                    .findTopByTargetTypeAndTargetIdOrderByNoAsc("ACC", acc.getAccId().trim())
-                    .map(Image::getPath)
-                    .orElse("/images/acc/default_hotel.jpg"); // ✅ 기본 이미지도 동일 구조로 변경
+        // Mapper 기반 DB 검색 수행
+        List<AccListResponseDTO> accList = accMapper.searchAccommodations(
+                dto.getCity(),
+                dto.getTownshipName(),
+                dto.getTitle(),
+                categories,
+                dto.getCheckIn() != null ? dto.getCheckIn().toString() : null,
+                dto.getCheckOut() != null ? dto.getCheckOut().toString() : null,
+                dto.getGuestCount(),
+                dto.getRoomCount(),
+                dto.getSort()
+        );
 
-            // ✅ 로그로 실제 반환 확인
-            log.debug("[ACC_IMAGE] {} → {}", acc.getAccId(), accImagePath);
+        log.debug("✅ [ACC_SEARCH] 결과 {}건", accList.size());
 
-            return AccListResponseDTO.builder()
-                    .accId(acc.getAccId())
-                    .title(acc.getTitle())
-                    .address(acc.getAddress())
-                    .accImage(accImagePath)
-                    .viewCount(acc.getViewCount())
-                    .build();
-        }).toList();
+        return accList;
     }
 
+
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public AccDetailResponseDTO getAccDetail(String accId) {
         Acc acc = accRepository.findByAccId(accId)
                 .orElseThrow(() -> new IllegalArgumentException("숙소를 찾을 수 없습니다."));
 
-        // ✅ 숙소 이미지 리스트
+        // 숙소 이미지 리스트
         List<String> accImages = imageRepository
                 .findAllByTargetTypeAndTargetId("ACC", acc.getAccId())
                 .stream()
@@ -221,54 +238,14 @@ public class AccServiceImpl implements AccService {
         return AccDetailResponseDTO.fromEntity(acc);
     }
 
+
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public Acc increaseViewCount(String accId) {
-        // 숙소 조회 및 조회수 증가
-        Acc acc = accRepository.findByAccId(accId)
-                .map(accList -> {
-                    Acc updatedAcc = accList.increaseViewCount();
-                    accRepository.save(updatedAcc);
-                    return updatedAcc;
-                })
-                .orElseThrow(() -> new EntityNotFoundException("숙소를 찾을 수 없습니다. (AccId: " + accId + ")"));
-
-        // SecurityContext 인증 정보 확인
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        if (auth == null) {
-            log.warn("⚠️ Authentication 객체가 null입니다. (로그인 안됨)");
-            return acc;
-        }
-
-        if (!auth.isAuthenticated()) {
-            log.warn("⚠️ Authentication은 존재하지만 인증되지 않은 상태입니다.");
-            return acc;
-        }
-
-        // Principal이 UserSecurityDTO인지 확인
-        Object principal = auth.getPrincipal();
-
-        if (principal instanceof UserSecurityDTO userDTO) {
-            // DB에서 User 조회
-            userRepository.findById(userDTO.getNo()).ifPresentOrElse(user -> {
-                // 로그 엔티티 생성
-                Log newLog = Log.builder()
-                        .user(user)
-                        .actionType(ActionType.VIEW_ACCOMMODATION)
-                        .targetId(acc.getAccNo())
-                        .targetName(acc.getTitle())
-                        .build();
-
-                try {
-                    logRepository.save(newLog);
-                } catch (Exception e) {
-                    log.error("🚨 [ERROR] 로그 저장 중 예외 발생: {}", e.getMessage(), e);
-                }
-
-            }, () -> log.warn("⚠️ [USER-NOT-FOUND] userRepository.findById({}) 결과 없음", userDTO.getNo()));
-        }
-
-        return acc;
+    @Transactional
+    public void increaseViewCount(String accId) {
+        accRepository.findByAccId(accId).ifPresent(acc -> {
+            acc.increaseViewCount();
+            accRepository.save(acc);
+            log.info("[ACC] 조회수 증가 - accId={}, title={}", accId, acc.getTitle());
+        });
     }
 }

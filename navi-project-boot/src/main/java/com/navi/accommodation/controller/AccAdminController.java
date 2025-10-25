@@ -3,7 +3,6 @@ package com.navi.accommodation.controller;
 import com.navi.accommodation.dto.api.AdminAccListDTO;
 import com.navi.accommodation.dto.request.AccRequestDTO;
 import com.navi.accommodation.dto.response.AccDetailResponseDTO;
-import com.navi.accommodation.dto.response.AccListResponseDTO;
 import com.navi.accommodation.service.AccService;
 import com.navi.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -49,11 +48,5 @@ public class AccAdminController {
     public ApiResponse<?> deleteAccData(@PathVariable Long accNo) {
         accService.deleteAcc(accNo);
         return ApiResponse.success("숙소 삭제 완료");
-    }
-
-    // 객실 관리 페이지에서 숙소 이름으로 초기 검색
-    @GetMapping("/accommodations/search")
-    public ApiResponse<List<AccListResponseDTO>> searchAccommodationsByName(@RequestParam String name) {
-        return ApiResponse.success(accService.searchByName(name));
     }
 }

@@ -47,6 +47,7 @@ public class AccSyncService {
     public void loadApiFromJsonFile() throws IOException {
         processJson(listFile, AccApiDTO.class, true);
     }
+
     // 최초 적재(acc_basic.json & acc_extra.json) : UPDATE 전용 (insertOnly = false)
     public void updateApiFromJsonFile() throws IOException {
         processJson(basicFile, AccApiDTO.class, false);
@@ -57,7 +58,6 @@ public class AccSyncService {
     // 최초 적재(acc_add.json) : INSERT 전용 (insertOnly = true)
     public void loadFromAdminJsonFile() throws IOException {
         processJson(addFile, AccRequestDTO.class, true);
-        // Todo: 위에 한번에 몰아서 해도 될것 같은데...?
     }
 
     /* JSON 파일 처리 - DB 적재 (공용 메서드) */
@@ -68,7 +68,7 @@ public class AccSyncService {
         JsonNode items = root.path("response").path("body").path("items");
 
         // items는 배열(ArrayNode)이므로, for 문으로 반복 탐색 가능
-        for(JsonNode wrapper : items){
+        for (JsonNode wrapper : items) {
             JsonNode item = wrapper.path("item");
             // JSON의 item 내용을 AccApiDTO에 매핑
             T dto = objectMapper.treeToValue(item, dtoClass);
@@ -82,13 +82,13 @@ public class AccSyncService {
     }
 
     private void handleApiDto(AccApiDTO apiDto, boolean insertOnly) {
-        if(apiDto.getContentId() == null || apiDto.getContentId().isBlank()) {
+        if (apiDto.getContentId() == null || apiDto.getContentId().isBlank()) {
             log.warn("[API] contentId 없음 -> SKIP: {}", apiDto);
             return;
         }
 
         Long contentId = Long.parseLong(apiDto.getContentId());
-        if(insertOnly) {
+        if (insertOnly) {
             accRepository.findByContentId(contentId)
                     .ifPresentOrElse(
                             acc -> log.warn("[API] 이미 존재 -> SKIP: {}", contentId),
@@ -122,6 +122,7 @@ public class AccSyncService {
         log.info("[API] INSERT 성공 (contentId = {}, accId = {})", acc.getContentId(), accId);
 
     }
+
     // 기존 데이터 갱신 (acc_basic.json & acc_extra.json)
     public void updateInitialFromApi(Acc acc, AccApiDTO dto) {
         Township townshipId = acc.getTownship();
@@ -158,7 +159,7 @@ public class AccSyncService {
         List<Acc> accList = accRepository.findAll();
         Random random = new Random();
 
-        for(Acc acc : accList) {
+        for (Acc acc : accList) {
             try {
                 // 읍면동 매핑 + 좌표 갱신
                 GeoResult geo = kakaoGeoService.getCoordinatesAndTownship(acc.getAddress(), acc.getTitle());
@@ -170,6 +171,7 @@ public class AccSyncService {
 
                 acc.changeTownship(township);
                 acc.changeLocation(geo.getMapx(), geo.getMapy());
+                acc.changeCategory(geo.getCategory());
 
                 // 랜덤 필드 설정
                 AccRequestDTO dto = AccRequestDTO.builder()

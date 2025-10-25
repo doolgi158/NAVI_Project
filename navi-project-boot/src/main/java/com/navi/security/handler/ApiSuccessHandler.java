@@ -56,7 +56,7 @@ public class ApiSuccessHandler implements AuthenticationSuccessHandler {
         claim.setAccessToken(accessToken);
         claim.setRefreshToken(refreshToken);
         claim.setIp(ip);
-        log.info("+++++++++++++++++++++++++++++++++++++++++++ 토큰 생성: " + accessToken);
+
         // 유저 정보 DTO 생성
         UserResponseDTO userResponse = UserResponseDTO.from(user);
         userResponse.setToken(accessToken); // 선택적으로 현재 액세스 토큰 포함

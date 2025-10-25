@@ -89,7 +89,7 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
     List<Seat> findByFlightAndDepTime(@Param("flightId") String flightId,
                                       @Param("depTime") LocalDateTime depTime);
 
-    // ✅ 추가: 자동배정용 (해당 항공편의 예약되지 않은 좌석 전체)
+    // ✅ 기존: 단순 조회용 (락 없음)
     @Query("""
         SELECT s
           FROM Seat s
@@ -104,4 +104,19 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
             LocalDateTime depTime
     );
 
+    // ✅ 추가: 자동배정용 (락 걸린 안전 조회)
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+        SELECT s
+          FROM Seat s
+         WHERE s.flight.flightId.flightId = :flightId
+           AND s.flight.flightId.depTime BETWEEN :start AND :end
+           AND s.isReserved = false
+         ORDER BY s.seatNo ASC
+    """)
+    List<Seat> findAvailableSeatsForUpdate(
+            @Param("flightId") String flightId,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
 }
