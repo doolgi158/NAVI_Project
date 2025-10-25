@@ -4,7 +4,6 @@ import org.apache.ibatis.jdbc.SQL;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /* SQLProvider : 자바 코드로 SQL을 동적으로 조립하는 역할 */
 public class AccSqlProvider {
@@ -45,8 +44,7 @@ public class AccSqlProvider {
                 && (townshipName == null || townshipName.isBlank())) {
             // 숙소명 검색 탭 (title만 있을 때)
             sql.WHERE("LOWER(a.TITLE) LIKE '%' || LOWER(#{title}) || '%'");
-        }
-        else if ((city != null && !city.isBlank()) || (townshipName != null && !townshipName.isBlank())) {
+        } else if ((city != null && !city.isBlank()) || (townshipName != null && !townshipName.isBlank())) {
             // 지역별 검색 탭 (city 또는 township 있을 때)
             if (city != null && !city.isBlank() && townshipName != null && !townshipName.isBlank()) {
                 sql.WHERE("(t.SIGUNGU_NAME = #{city} OR t.TOWNSHIP_NAME = #{townshipName})");
@@ -104,22 +102,22 @@ public class AccSqlProvider {
 
         SQL sql = new SQL()
                 .SELECT("""
-                    ACC_NO AS accNo,
-                    ACC_ID AS accId,
-                    CONTENT_ID AS contentId,
-                    TITLE AS title,
-                    CATEGORY AS category,
-                    TEL AS tel,
-                    ADDRESS AS address,
-                    HAS_COOKING AS hasCooking,
-                    HAS_PARKING AS hasParking,
-                    IS_ACTIVE AS isActive,
-                    CHECKIN_TIME AS checkInTime,
-                    CHECKOUT_TIME AS checkOutTime,
-                    VIEW_COUNT AS viewCount,
-                    TO_CHAR(CREATED_TIME, 'YYYY-MM-DD HH24:MI') AS createdTime,
-                    TO_CHAR(MODIFIED_TIME, 'YYYY-MM-DD HH24:MI') AS modifiedTime
-                """)
+                            ACC_NO AS accNo,
+                            ACC_ID AS accId,
+                            CONTENT_ID AS contentId,
+                            TITLE AS title,
+                            CATEGORY AS category,
+                            TEL AS tel,
+                            ADDRESS AS address,
+                            HAS_COOKING AS hasCooking,
+                            HAS_PARKING AS hasParking,
+                            IS_ACTIVE AS isActive,
+                            CHECKIN_TIME AS checkInTime,
+                            CHECKOUT_TIME AS checkOutTime,
+                            VIEW_COUNT AS viewCount,
+                            TO_CHAR(CREATED_TIME, 'YYYY-MM-DD HH24:MI') AS createdTime,
+                            TO_CHAR(MODIFIED_TIME, 'YYYY-MM-DD HH24:MI') AS modifiedTime
+                        """)
                 .FROM("NAVI_ACCOMMODATION")
                 .WHERE("1=1");
 

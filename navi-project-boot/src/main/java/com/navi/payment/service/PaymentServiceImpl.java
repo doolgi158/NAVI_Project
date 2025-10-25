@@ -1,20 +1,18 @@
 package com.navi.payment.service;
 
 import com.navi.common.enums.RsvStatus;
-import com.navi.common.enums.RsvType;
 import com.navi.payment.domain.PaymentDetail;
 import com.navi.payment.domain.PaymentMaster;
 import com.navi.payment.domain.enums.PaymentStatus;
 import com.navi.payment.dto.request.PaymentConfirmRequestDTO;
 import com.navi.payment.dto.request.PaymentPrepareRequestDTO;
 import com.navi.payment.dto.request.PaymentVerifyRequestDTO;
-import com.navi.payment.dto.response.PaymentAdminListResponseDTO;
 import com.navi.payment.dto.response.PaymentPrepareResponseDTO;
 import com.navi.payment.dto.response.PaymentResultResponseDTO;
 import com.navi.payment.repository.PaymentDetailRepository;
 import com.navi.payment.repository.PaymentRepository;
 import com.navi.user.domain.User;
-import com.navi.user.dto.users.UserSecurityDTO;
+import com.navi.user.dto.auth.UserSecurityDTO;
 import com.navi.user.repository.UserRepository;
 import com.siot.IamportRestClient.IamportClient;
 import com.siot.IamportRestClient.exception.IamportResponseException;
@@ -34,10 +32,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
