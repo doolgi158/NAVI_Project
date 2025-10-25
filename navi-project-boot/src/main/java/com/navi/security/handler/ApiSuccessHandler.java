@@ -49,7 +49,7 @@ public class ApiSuccessHandler implements AuthenticationSuccessHandler {
         JWTClaimDTO claim = JWTClaimDTO.fromUser(user);
 
         // JWT 토큰 생성
-        String accessToken = jwtUtil.generateToken(claim, 10);
+        String accessToken = jwtUtil.generateToken(claim, 60 * 24);
         String refreshToken = jwtUtil.generateToken(claim, 60 * 24);
 
         // Claim 보강
