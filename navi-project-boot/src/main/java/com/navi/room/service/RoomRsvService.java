@@ -14,12 +14,13 @@ public interface RoomRsvService {
     RoomPreRsvResponseDTO createMultipleRoomReservations(List<RoomRsvRequestDTO> roomList);
     // 3. 예약 상태 변경
     void updateStatus(String reserveId, String status);
-    // 4. 예약 조회
-    //List<RoomRsvResponseDTO> findAll();
+    // 4. 예약 정보 갱신
+    void updateReserverInfo(String reserveId, String name, String tel, String email);
+    // 5. 예약 조회
     List<RoomRsvResponseDTO> findAllByUserId(String userId);
-    RoomRsvResponseDTO findByRoomRsvId(String roomRsvId);
-    // 5. 결제 검증용: 총 결제 금액 확인
+    RoomRsvResponseDTO findByReserveId(String roomRsvId);
+    // 6. 결제 검증용: 총 결제 금액 확인
     boolean verifyTotalAmount(String reserveId, BigDecimal paidAmount);
-    // 6. 예약 ID별 객실 총 금액 합산 (결제 검증용)
+    // 7. 예약 ID별 객실 총 금액 합산 (결제 검증용)
     BigDecimal getTotalAmountByReserveId(String reserveId);
 }

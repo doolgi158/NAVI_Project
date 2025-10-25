@@ -3,8 +3,10 @@ import { useDispatch } from "react-redux";
 import { Card, Typography, Form, Input, Button, Steps, Divider, Space, message } from "antd";
 import { CalendarOutlined, TeamOutlined, HomeOutlined, DollarOutlined } from "@ant-design/icons";
 import { setReserveData } from "../../../common/slice/paymentSlice";
-import MainLayout from "../../layout/MainLayout";
+import { API_SERVER_HOST } from "../../../common/api/naviApi";
 import { useEffect } from "react";
+import MainLayout from "../../layout/MainLayout";
+import axios from "axios";
 
 const { Title, Text } = Typography;
 
@@ -33,34 +35,51 @@ const AccReservationPage = () => {
 	}
 
 	/* 결제 페이지 이동 */
-	const onFinish = (values) => {
-		// [ TODO ] : 현재 해당 항목들 저장할 컬럼 없음 - @CLOB 예정
-		const updatedFormData = {
+	const onFinish = async (values) => {
+		try {
+			// 예약자 정보 통합
+			const updatedFormData = {
 			...formData,
-			name: values.name,		// 대표 예약자 이름
-			phone: values.phone,	// 전화번호
-			email: values.email,	// 이메일
-		};
+			name: values.name,
+			phone: values.phone,
+			email: values.email,
+			};
 
-		dispatch(
+			// ✅ 예약자 정보 업데이트 요청
+			await axios.put(`${API_SERVER_HOST}/api/room/reserve/${formData.reserveId}/reserver`, {
+			reserverName: values.name,
+			reserverTel: values.phone,
+			reserverEmail: values.email,
+			});
+
+			message.success("예약자 정보가 저장되었습니다.");
+
+			// ✅ Redux 상태 갱신
+			dispatch(
 			setReserveData({
-				rsvType,   								// ACC        			
-				reserveId: formData.reserveId,         	// 예약 ID
-				itemData: itemData,   					// 숙소 + 객실 정보
-				items: items,							// reserveId + amount
-				formData: updatedFormData, 				// 예약자 정보까시 새롭게 포함한 formData
+				rsvType,
+				reserveId: formData.reserveId,
+				itemData,
+				items,
+				formData: updatedFormData,
 			})
-		);
-		
-		navigate("/payment", {
+			);
+
+			// ✅ 결제 페이지로 이동
+			navigate("/payment", {
 			state: {
 				rsvType: "ACC",
-				itemData,	
+				itemData,
 				items,
-				formData : updatedFormData,
+				formData: updatedFormData,
 			},
-		});
-	};
+			});
+		} catch (err) {
+			console.error("❌ 예약자 정보 업데이트 실패:", err);
+			message.error("예약자 정보 저장 중 오류가 발생했습니다. 다시 시도해주세요.");
+		}
+		};
+
 
 	return (
 		<MainLayout>

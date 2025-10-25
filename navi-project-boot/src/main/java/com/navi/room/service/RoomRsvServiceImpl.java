@@ -90,6 +90,7 @@ public class RoomRsvServiceImpl implements RoomRsvService {
                 .endDate(end)
                 .nights(serverNights)
                 .rsvStatus(RsvStatus.PENDING)
+                .guestCount(dto.getGuestCount())
                 .build();
 
         roomRsvRepository.save(rsv);
@@ -130,6 +131,21 @@ public class RoomRsvServiceImpl implements RoomRsvService {
                 .message("✅ 다중 객실 임시 예약 생성 완료")
                 .build();
     }
+
+    @Override
+    @Transactional
+    public void updateReserverInfo(String reserveId, String name, String tel, String email) {
+        List<RoomRsv> rsvList = roomRsvRepository.findAllByReserveId(reserveId);
+        if (rsvList.isEmpty()) throw new IllegalArgumentException("❌ 예약 정보를 찾을 수 없습니다.");
+
+        for (RoomRsv rsv : rsvList) {
+            rsv.updateReserverInfo(name, tel, email);
+        }
+
+        log.info("🪪 예약자 정보 업데이트 완료 → reserveId={}, name={}, tel={}, email={}",
+                reserveId, name, tel, email);
+    }
+
 
     /* 예약 상태 변경 + 재고 복구 */
     @Override
@@ -177,15 +193,6 @@ public class RoomRsvServiceImpl implements RoomRsvService {
         return valid;
     }
 
-    /* 조회 기능
-    @Override
-    @Transactional(readOnly = true)
-    public List<RoomRsvResponseDTO> findAll() {
-        return roomRsvRepository.findAll().stream()
-                .map(RoomRsvResponseDTO::fromEntity)
-                .collect(Collectors.toList());
-    }*/
-
     @Override
     @Transactional(readOnly = true)
     public List<RoomRsvResponseDTO> findAllByUserId(String userId) {
@@ -203,8 +210,8 @@ public class RoomRsvServiceImpl implements RoomRsvService {
 
     @Override
     @Transactional(readOnly = true)
-    public RoomRsvResponseDTO findByRoomRsvId(String roomRsvId) {
-        RoomRsv rsv = roomRsvRepository.findByReserveId(roomRsvId)
+    public RoomRsvResponseDTO findByReserveId(String reserveId) {
+        RoomRsv rsv = roomRsvRepository.findByReserveId(reserveId)
                 .orElseThrow(() -> new IllegalArgumentException("예약 정보를 찾을 수 없습니다."));
         return RoomRsvResponseDTO.fromEntity(rsv);
     }
