@@ -21,7 +21,7 @@ public class StockTimeoutScheduler {
     private final StockService stockService;
 
 
-    @Scheduled(initialDelay = 60000, fixedRate = 60000) // (1분 마다 실행)
+    @Scheduled(initialDelay = 600000, fixedRate = 600000) // (1분 마다 실행)
     @Transactional
     public void cancelExpiredReservations() {
         LocalDateTime now = LocalDateTime.now();

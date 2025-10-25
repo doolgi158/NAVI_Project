@@ -22,16 +22,17 @@ public class AccUserController {
 
     /* === 숙소 리스트 조회 === */
     @GetMapping("/accommodations")
-    public List<AccListResponseDTO> getAccommodationList(@ModelAttribute AccSearchRequestDTO dto) {
+    public ResponseEntity<List<AccListResponseDTO>> getAccommodationList(@ModelAttribute AccSearchRequestDTO dto) {
         log.info("[USER] 숙소 리스트 조회 요청 - 조건: {}", dto);
-        return accService.searchAccommodations(dto);
+        List<AccListResponseDTO> result = accService.searchAccommodations(dto);
+        return ResponseEntity.ok(result);
     }
 
     /* 추가: /stay/list 도 동일한 응답을 반환하도록 (호환용) */
     @GetMapping("/stay/list")
     public ResponseEntity<List<AccListResponseDTO>> getStayList() {
         List<AccListResponseDTO> list = accService.getAllAcc().stream()
-                .map(acc -> AccListResponseDTO.fromEntity(acc, null))
+                .map(AccListResponseDTO::fromEntity)
                 .toList();
         return ResponseEntity.ok(list);
     }

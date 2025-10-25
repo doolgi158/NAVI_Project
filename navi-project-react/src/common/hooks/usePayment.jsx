@@ -16,15 +16,10 @@ export const usePayment = () => {
 	const navigate = useNavigate();
 
 	const payment = useSelector((state) => state.payment);
-	const { items = [], formData = {}, rsvType = "", totalAmount = 0, paymentMethod = "" } = payment || {};
+	const { items, rsvType, formData, totalAmount, paymentMethod } = payment;
+	console.log("************************", paymentMethod, rsvType);
+	console.log("************************", items);
 
-	// ✅ payment가 undefined면 홈으로 리다이렉트
-	useEffect(() => {
-		if (!payment || Object.keys(payment).length === 0) {
-			console.warn("⚠️ 결제 데이터 없음 → 홈으로 이동");
-			navigate("/", { replace: true });
-		}
-	}, [payment, navigate]);
 
 	const isProcessingRef = useRef(false);
 
@@ -87,6 +82,7 @@ export const usePayment = () => {
 					pg = "kakaopay.TC0ONETIME";
 			}
 
+			console.log("**************************", pg);
 			const payData = {
 				pg,
 				pay_method: "card",
@@ -100,7 +96,22 @@ export const usePayment = () => {
 
 			/* 결제 요청 */
 			IMP.request_pay(payData, async (rsp) => {
+				console.log("💬 [PortOne 응답]", rsp);
+
 				if (!rsp.success) {
+					// 결제창을 사용자가 직접 닫은 경우
+					if (
+						rsp.error_code === "CANCEL" ||
+						rsp.error_msg?.includes("취소") ||
+						rsp.error_msg?.includes("닫기") ||
+						rsp.error_msg?.includes("cancel")
+					) {
+						message.info("결제가 취소되었습니다. 다른 결제수단을 선택할 수 있습니다.");
+						isProcessingRef.current = false;
+						return; // 페이지 이동 X
+					}
+
+					// 기타 결제 실패(네트워크/금액 오류 등)
 					message.error(`❌ 결제 실패: ${rsp.error_msg || "알 수 없는 오류"}`);
 					navigate("/payment/result", { state: { error: rsp.error_msg } });
 					isProcessingRef.current = false;
