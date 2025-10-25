@@ -52,33 +52,13 @@ public class PaymentUserController {
 
     /* === [4. 환불 요청] === */
     @PostMapping("/refund")
-    public ResponseEntity<Void> refundPayment(@RequestBody RefundRequestDTO dto) throws Exception {
-        log.info("🔁 [USER] 환불 요청 수신 - {}", dto);
-
-        switch (dto.getRsvType()) {
-            case ACC, DLV -> {
-                log.info("🏨 [USER] 숙소/배송 전체 환불 요청 - merchantId={}", dto.getMerchantId());
-                paymentRouterService.refundByMerchantId(dto.getMerchantId(), dto.getReason());
-            }
-            case FLY -> {
-                if (dto.getReserveId() != null) {
-                    log.info("✈️ [USER] 항공 부분 환불 요청 - reserveId={}, merchantId={}",
-                            dto.getReserveId(), dto.getMerchantId());
-                    paymentRouterService.refundByReserveId(
-                            dto.getReserveId(),
-                            dto.getRsvType(),
-                            dto.getMerchantId(),
-                            dto.getReason()
-                    );
-                } else {
-                    log.info("✈️ [USER] 항공 전체 환불 요청 - merchantId={}", dto.getMerchantId());
-                    paymentRouterService.refundByMerchantId(dto.getMerchantId(), dto.getReason());
-                }
-            }
-            default -> throw new IllegalArgumentException("지원되지 않는 결제 유형입니다.");
-        }
-
-        log.info("✅ [USER] 환불 요청 처리 완료 - type={}, merchantId={}", dto.getRsvType(), dto.getMerchantId());
+    public ResponseEntity<Void> refundPayment(
+            @RequestParam String merchantId,
+            @RequestParam BigDecimal refundAmount,
+            @RequestParam(required = false) String reason
+    ) throws IamportResponseException, IOException {
+        log.info("🔁 환불 요청 수신 - merchantId={}, amount={}, reason={}", merchantId, refundAmount, reason);
+        paymentRouterService.refundPayment(merchantId, refundAmount, reason);
         return ResponseEntity.ok().build();
     }
 }

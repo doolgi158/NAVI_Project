@@ -1,12 +1,14 @@
 package com.navi.payment.service;
 
 import com.navi.common.enums.RsvStatus;
+import com.navi.common.enums.RsvType;
 import com.navi.payment.domain.PaymentDetail;
 import com.navi.payment.domain.PaymentMaster;
 import com.navi.payment.domain.enums.PaymentStatus;
 import com.navi.payment.dto.request.PaymentConfirmRequestDTO;
 import com.navi.payment.dto.request.PaymentPrepareRequestDTO;
 import com.navi.payment.dto.request.PaymentVerifyRequestDTO;
+import com.navi.payment.dto.response.PaymentAdminListResponseDTO;
 import com.navi.payment.dto.response.PaymentPrepareResponseDTO;
 import com.navi.payment.dto.response.PaymentResultResponseDTO;
 import com.navi.payment.repository.PaymentDetailRepository;
@@ -27,7 +29,10 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -223,6 +228,11 @@ public class PaymentServiceImpl implements PaymentService {
 
         PaymentMaster master = paymentRepository.findByMerchantId(merchantId)
                 .orElseThrow(() -> new IllegalArgumentException("결제 정보를 찾을 수 없습니다."));
+
+        if (master.getPaymentStatus() != PaymentStatus.PAID &&
+                master.getPaymentStatus() != PaymentStatus.PARTIAL_REFUNDED) {
+            throw new IllegalStateException("환불할 수 없는 상태입니다. 현재 상태=" + master.getPaymentStatus());
+        }
 
         // PortOne 서버에서 실제 결제 상태 조회
         IamportResponse<Payment> paymentResponse = iamportClient.paymentByImpUid(master.getImpUid());

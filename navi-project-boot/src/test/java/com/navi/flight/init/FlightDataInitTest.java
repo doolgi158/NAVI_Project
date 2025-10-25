@@ -68,15 +68,15 @@ class FlightDataInitTest {
         }
     }
 
-    /* 2) 항공편 초기 데이터 삽입 (flightData_1010_1108.json) */
+    /* 2) 항공편 초기 데이터 삽입 (flightData.json) */
     private void insertFlightsIfEmpty() throws Exception {
         if (flightRepository.count() > 0) {
             log.info("항공편 이미 존재: {}건 → 초기화 스킵", flightRepository.count());
             return;
         }
 
-        try (InputStream in = getClass().getResourceAsStream("/mockData/flightData_1010_1108.json")) {
-            if (in == null) throw new IllegalStateException("/mockData/flightData_1010_1108.json not found");
+        try (InputStream in = getClass().getResourceAsStream("/mockData/flightData.json")) {
+            if (in == null) throw new IllegalStateException("/mockData/flightData.json not found");
             JsonNode root = mapper.readTree(in);
             JsonNode items = root.path("response").path("body").path("items").path("item");
 

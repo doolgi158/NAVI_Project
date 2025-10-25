@@ -29,35 +29,18 @@ public interface PaymentRepository extends JpaRepository<PaymentMaster, Long> {
     // 결제 상태별 상세 내역 조회
     @Query("SELECT pm FROM PaymentMaster pm WHERE pm.paymentStatus = :status ORDER BY pm.createdAt DESC")
     List<PaymentMaster> findAllMastersByStatus(@Param("status") PaymentStatus status);
-    /** === [관리자 조회 통합 쿼리] === */
+    // 결제 유형별 조회 (숙소, 항공, 짐배송)
     @Query("""
-        SELECT DISTINCT pm
+        SELECT pm
         FROM PaymentMaster pm
-        WHERE (
-            (:rsvType IS NULL OR EXISTS (
-                SELECT pd FROM PaymentDetail pd
-                WHERE pd.paymentMaster = pm
-                AND pd.rsvType = :rsvType
-            ))
-            AND (:paymentStatus IS NULL OR pm.paymentStatus = :paymentStatus)
-            AND (
-                :keyword IS NULL 
-                OR pm.merchantId LIKE %:keyword%
-                OR EXISTS (
-                    SELECT pd2 FROM PaymentDetail pd2
-                    WHERE pd2.paymentMaster = pm
-                    AND pd2.reserveId LIKE %:keyword%
-                )
-            )
+        WHERE EXISTS (
+            SELECT 1
+            FROM PaymentDetail pd
+            WHERE pd.paymentMaster = pm AND pd.rsvType = :rsvType
         )
         ORDER BY pm.createdAt DESC
     """)
-    List<PaymentMaster> findAllMastersDynamic(
-            @Param("rsvType") RsvType rsvType,
-            @Param("paymentStatus") PaymentStatus paymentStatus,
-            @Param("keyword") String keyword
-    );
-
+    List<PaymentMaster> findAllMastersByRsvType(@Param("rsvType") RsvType rsvType);
     // merchantId 단건 조회
     Optional<PaymentMaster> findOneByMerchantId(String merchantId);
 }

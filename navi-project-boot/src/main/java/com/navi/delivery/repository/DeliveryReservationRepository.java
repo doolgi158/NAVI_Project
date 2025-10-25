@@ -19,5 +19,6 @@ public interface DeliveryReservationRepository extends JpaRepository<DeliveryRes
 
     List<DeliveryReservation> findByGroup_GroupId(String groupId);
 
-    long countByStatusAndCreatedAtBetween(RsvStatus rsvStatus, LocalDateTime start, LocalDateTime end);
+    // 관리자 대시보드용 설정 기간 사이의 데이터 가져오기
+    long countByStatusAndCreatedAtBetween(RsvStatus status, LocalDateTime start, LocalDateTime end);
 }
