@@ -1,4 +1,3 @@
-
 package com.navi.accommodation.domain;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -121,6 +120,10 @@ public class Acc {
     @Column(name = "modified_time", nullable = false)
     private LocalDateTime modifiedTime;
 
+    // 대표 이미지
+    @Column(name = "main_image", length = 255)
+    private String mainImage;
+
     // 조회수
     @Builder.Default
     @Column(name = "view_count", nullable = false)
@@ -215,14 +218,29 @@ public class Acc {
     }
 
     public void changeTownship(Township township) {
-        if (township != null) { this.township = township; }
+        if (township != null) {
+            this.township = township;
+        }
+    }
+
+    public void updateMainImage(String mainImage) {
+        this.mainImage = mainImage;
     }
 
     public void changeLocation(BigDecimal mapx, BigDecimal mapy) {
-        if (mapx != null) { this.mapx = mapx; }
-        if (mapy != null) { this.mapy = mapy; }
+        if (mapx != null) {
+            this.mapx = mapx;
+        }
+        if (mapy != null) {
+            this.mapy = mapy;
+        }
     }
-    public void changeCategory(String category){ if (category != null) { this.category = category; } }
+
+    public void changeCategory(String category) {
+        if (category != null) {
+            this.category = category;
+        }
+    }
 
     /* === 문자열 유효성 검증용 유틸 메서드 === */
     private String nonEmptyOrNull(String value) {
