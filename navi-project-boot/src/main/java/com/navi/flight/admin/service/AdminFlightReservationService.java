@@ -1,6 +1,7 @@
 package com.navi.flight.admin.service;
 
 import com.navi.flight.admin.dto.AdminFlightReservationDTO;
+
 import java.util.List;
 
 public interface AdminFlightReservationService {

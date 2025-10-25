@@ -1,5 +1,6 @@
 package com.navi.delivery.repository;
 
+import com.navi.common.enums.RsvStatus;
 import com.navi.delivery.domain.DeliveryReservation;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -15,4 +16,8 @@ public interface DeliveryReservationRepository extends JpaRepository<DeliveryRes
     long countByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
 
     int countByGroup_GroupId(String groupId);
+
+    List<DeliveryReservation> findByGroup_GroupId(String groupId);
+
+    long countByStatusAndCreatedAtBetween(RsvStatus rsvStatus, LocalDateTime start, LocalDateTime end);
 }

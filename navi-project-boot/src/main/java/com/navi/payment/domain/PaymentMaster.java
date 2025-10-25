@@ -126,6 +126,11 @@ public class PaymentMaster extends BaseEntity {
         this.paymentStatus = PaymentStatus.REFUNDED;
         this.totalFeeAmount = totalFeeAmount != null ? totalFeeAmount : BigDecimal.ZERO;
     }
+    // 6. 부분 환불 완료 처리
+    public void markAsPartialRefunded(BigDecimal totalFeeAmount) {
+        this.paymentStatus = PaymentStatus.PARTIAL_REFUNDED;
+        this.totalFeeAmount = totalFeeAmount != null ? totalFeeAmount : BigDecimal.ZERO;
+    }
 
     /* 결제 금액 변경 */
     public void updateTotalAmount(BigDecimal totalAmount) {
@@ -133,5 +138,14 @@ public class PaymentMaster extends BaseEntity {
             throw new IllegalArgumentException("총 결제 금액은 0 이상이어야 합니다.");
         }
         this.totalAmount = totalAmount;
+    }
+
+    /* impUid 선 할당 */
+    public void assignImpUid(String impUid) {
+        if (this.impUid == null || this.impUid.isBlank()) {
+            this.impUid = impUid;
+        } else {
+            throw new IllegalArgumentException("이미 impUid가 존재합니다.");
+        }
     }
 }

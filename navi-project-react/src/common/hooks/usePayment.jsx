@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { setVerifyData, clearPaymentData } from "../slice/paymentSlice";
 import { preparePayment, verifyPayment } from "../api/paymentService";
 import { initIamport } from "../util/iamport";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 
 /* =================================================================
 	[usePayment Hook]
@@ -14,9 +14,17 @@ import { useRef } from "react";
 export const usePayment = () => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
-	
+
 	const payment = useSelector((state) => state.payment);
-	const { items, rsvType, formData, totalAmount, paymentMethod } = payment;
+	const { items = [], formData = {}, rsvType = "", totalAmount = 0, paymentMethod = "" } = payment || {};
+
+	// ✅ payment가 undefined면 홈으로 리다이렉트
+	useEffect(() => {
+		if (!payment || Object.keys(payment).length === 0) {
+			console.warn("⚠️ 결제 데이터 없음 → 홈으로 이동");
+			navigate("/", { replace: true });
+		}
+	}, [payment, navigate]);
 
 	const isProcessingRef = useRef(false);
 
@@ -50,6 +58,10 @@ export const usePayment = () => {
 			// 결제 ID 생성
 			const pgMethod = paymentMethod || "KAKAOPAY";
 			const reserveIds = items?.map((item) => item.reserveId) || [];
+			
+			console.log("🧩 rsvType:", rsvType);
+			console.log("🧩 items:", items);
+			console.log("🧩 reserveIds:", reserveIds);
 
 			const prepareRes = await preparePayment({
 				rsvType: rsvType?.toUpperCase(),
@@ -57,7 +69,7 @@ export const usePayment = () => {
 				totalAmount: amount,
 				paymentMethod: pgMethod,
 			});
-			const merchantId = prepareRes.merchantId;
+			const merchantId = prepareRes?.merchantId;
 
 			// === 2️⃣ PG 설정 ===
 			let pg;
@@ -77,13 +89,13 @@ export const usePayment = () => {
 
 			const payData = {
 				pg,
-				pay_method: pgMethod,
+				pay_method: "card",
 				merchant_uid: merchantId,
 				name: `${rsvType} 예약 결제`,
 				amount,
-				buyer_name: formData?.name || formData?.senderName,
-				buyer_tel: formData?.phone,
-				buyer_email: formData?.email,
+				//buyer_name: formData?.name || formData?.senderName,
+				//buyer_tel: formData?.phone,
+				//buyer_email: formData?.email,
 			};
 
 			/* 결제 요청 */

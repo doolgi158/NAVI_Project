@@ -17,7 +17,7 @@ const RoomAdminPage = () => {
     const location = useLocation();
     const [form] = Form.useForm();
 
-    // ✅ 안전한 초기값 설정
+    // 안전한 초기값 설정
     const [searchName, setSearchName] = useState(savedState?.searchName || "");
     const [selectedAccNo, setSelectedAccNo] = useState(savedState?.selectedAccNo || null);
     const [expandedRowKeys, setExpandedRowKeys] = useState(savedState?.expandedRowKeys || []);
@@ -27,7 +27,7 @@ const RoomAdminPage = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingRoom, setEditingRoom] = useState(null);
 
-    // ✅ Redux 초기 상태 저장 방어
+    // Redux 초기 상태 저장 방어
     useEffect(() => {
         dispatch(
             setRoomSearchState({

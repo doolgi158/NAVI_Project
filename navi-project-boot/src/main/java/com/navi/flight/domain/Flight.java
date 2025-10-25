@@ -1,9 +1,13 @@
 package com.navi.flight.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.navi.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "navi_flight")
@@ -44,4 +48,14 @@ public class Flight extends BaseEntity {
     @Builder.Default
     @Column(name = "seat_initialized", nullable = false)
     private boolean seatInitialized = false;
+
+    @OneToMany(mappedBy = "flight", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @JsonIgnore
+    @Builder.Default
+    private List<Seat> seats = new ArrayList<>();
+
+    @OneToMany(mappedBy = "flight", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @JsonIgnore
+    @Builder.Default
+    private List<FlightReservation> reservations = new ArrayList<>();
 }

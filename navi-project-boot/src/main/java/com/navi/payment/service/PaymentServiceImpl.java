@@ -88,6 +88,16 @@ public class PaymentServiceImpl implements PaymentService {
                     .build();
         }
 
+        // impUid를 PaymentMaster에 미리 저장 (결제 실패 대비)
+        paymentRepository.findByMerchantId(dto.getMerchantId()).ifPresent(master -> {
+            if (master.getImpUid() == null || master.getImpUid().isBlank()) {
+                master.assignImpUid(dto.getImpUid());
+                paymentRepository.save(master);
+                log.info("🟢 [impUid 저장 완료] merchantId={}, impUid={}",
+                        dto.getMerchantId(), dto.getImpUid());
+            }
+        });
+
         // PortOne 결제 상태 확인 (PG 서버 기준)
         boolean validStatus = "paid".equalsIgnoreCase(paymentInfo.getStatus());
         if (!validStatus) {
@@ -214,19 +224,30 @@ public class PaymentServiceImpl implements PaymentService {
         PaymentMaster master = paymentRepository.findByMerchantId(merchantId)
                 .orElseThrow(() -> new IllegalArgumentException("결제 정보를 찾을 수 없습니다."));
 
-        if (master.getPaymentStatus() != PaymentStatus.PAID &&
+        // PortOne 서버에서 실제 결제 상태 조회
+        IamportResponse<Payment> paymentResponse = iamportClient.paymentByImpUid(master.getImpUid());
+        Payment paymentInfo = paymentResponse.getResponse();
+
+        if (paymentInfo == null) {
+            throw new IllegalStateException("PG 서버에서 결제 정보를 찾을 수 없습니다. (impUid=" + master.getImpUid() + ")");
+        }
+
+        // 실제 결제 금액 확보 (반드시 포함)
+        BigDecimal actualAmount = (paymentInfo.getAmount() != null)
+                ? paymentInfo.getAmount()
+                : refundAmount;
+
+        boolean isActuallyPaid = "paid".equalsIgnoreCase(paymentInfo.getStatus());
+
+        // READY 상태라도 PG가 paid 면 환불 허용
+        if (master.getPaymentStatus() == PaymentStatus.READY && isActuallyPaid) {
+            log.warn("⚠️ [예외 환불] DB 상태는 READY이지만, PG는 paid 상태 → 강제 환불 수행");
+        } else if (master.getPaymentStatus() != PaymentStatus.PAID &&
                 master.getPaymentStatus() != PaymentStatus.PARTIAL_REFUNDED) {
             throw new IllegalStateException("환불할 수 없는 상태입니다. 현재 상태=" + master.getPaymentStatus());
         }
 
-        // ✅ 실제 결제 금액을 PortOne 서버에서 다시 확인
-        IamportResponse<Payment> paymentResponse = iamportClient.paymentByImpUid(master.getImpUid());
-        Payment paymentInfo = paymentResponse.getResponse();
-
-        BigDecimal actualAmount = (paymentInfo != null && paymentInfo.getAmount() != null)
-                ? paymentInfo.getAmount() : refundAmount;
-
-        // ✅ PG 서버에 환불 요청
+        // PG 서버에 환불 요청
         IamportResponse<Payment> cancelResponse =
                 iamportClient.cancelPaymentByImpUid(new CancelData(master.getImpUid(), true, actualAmount));
 
@@ -234,12 +255,13 @@ public class PaymentServiceImpl implements PaymentService {
             throw new IllegalStateException("포트원 환불 요청 실패 (impUid=" + master.getImpUid() + ")");
         }
 
-        // ✅ DB 상태 동기화
+        // DB 상태 동기화 (상세)
         List<PaymentDetail> details = paymentDetailRepository.findAllByPaymentMasterMerchantId(merchantId);
         if (!details.isEmpty()) {
             details.forEach(detail -> detail.markAsRefunded(reason));
         }
 
+        // 마스터 상태 갱신
         master.markAsRefunded(actualAmount);
         paymentRepository.save(master);
 

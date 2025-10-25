@@ -75,19 +75,17 @@ public class RoomRsvController {
         return ResponseEntity.ok("❌ 객실 예약 취소 완료");
     }
 
-    /** ✅ 전체 or 사용자별 예약 목록 조회 */
+    /* 사용자별 예약 목록 조회 */
     @GetMapping
     public ResponseEntity<List<RoomRsvResponseDTO>> getReservations(
             @RequestParam(required = false) String userId) {
 
-        List<RoomRsvResponseDTO> list = (userId != null)
-                ? roomRsvService.findAllByUserId(userId)
-                : roomRsvService.findAll();
+        List<RoomRsvResponseDTO> list = roomRsvService.findAllByUserId(userId);
 
         return ResponseEntity.ok(list);
     }
 
-    /** ✅ 단일 예약 상세 조회 */
+    /* 단일 예약 상세 조회 */
     @GetMapping("/{reserveId}")
     public ResponseEntity<RoomRsvResponseDTO> getReservationDetail(@PathVariable String reserveId) {
         return ResponseEntity.ok(roomRsvService.findByRoomRsvId(reserveId));

@@ -29,8 +29,11 @@ public class AccUserController {
 
     /* 추가: /stay/list 도 동일한 응답을 반환하도록 (호환용) */
     @GetMapping("/stay/list")
-    public ResponseEntity<List<AccListResponseDTO>> getStayList(@ModelAttribute AccSearchRequestDTO dto) {
-        return ResponseEntity.ok(getAccommodationList(dto));
+    public ResponseEntity<List<AccListResponseDTO>> getStayList() {
+        List<AccListResponseDTO> list = accService.getAllAcc().stream()
+                .map(acc -> AccListResponseDTO.fromEntity(acc, null))
+                .toList();
+        return ResponseEntity.ok(list);
     }
 
     /* === 숙소 상세 조회 === */

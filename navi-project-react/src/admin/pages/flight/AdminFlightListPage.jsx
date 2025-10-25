@@ -58,7 +58,7 @@ const AdminFlightListPage = () => {
       message.success("삭제되었습니다.");
       fetchFlights();
     } catch {
-      message.error("삭제 중 오류가 발생했습니다.");
+      message.error("예약이 있는 항공편은 삭제할 수 없습니다.");
     }
   };
 

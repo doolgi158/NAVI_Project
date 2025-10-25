@@ -9,6 +9,7 @@ const getAuthHeader = () => {
 
 /* 결제 마스터 테이블 INSERT - 결제 ID 생성 */
 export const preparePayment = async (data) => {
+	console.log("🟢 preparePayment data:", data);
 	const res = await axios.post(
 		`${API_SERVER_HOST}/api/payment/prepare`,
 		data,

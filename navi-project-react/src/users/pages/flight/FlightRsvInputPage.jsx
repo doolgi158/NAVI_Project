@@ -1,5 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
+import { setReserveData } from "../../../common/slice/paymentSlice";
+import { useDispatch } from "react-redux";
 import {
   Card,
   Input,
@@ -23,12 +25,14 @@ import MainLayout from "../../layout/MainLayout";
 import dayjs from "dayjs";
 import axios from "axios";
 
+
 const API_SERVER_HOST = "http://localhost:8080";
 const { Title, Text } = Typography;
 
 const FlightRsvInputPage = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const selectedOutbound = state?.selectedOutbound;
   const selectedInbound = state?.selectedInbound;
@@ -197,17 +201,52 @@ const FlightRsvInputPage = () => {
 
       message.success("항공편 예약이 완료되었습니다!");
 
+      // 결제용 items 배열 구성
+      const totalPrice = (selectedOutbound.price + (selectedInbound?.price || 0)) * passengerCount;
+
+      const items = [];
+      if (resOut?.data?.data?.frsvId) {
+        items.push({
+          reserveId: resOut.data.data.frsvId,
+          amount: selectedOutbound.price || 0,
+        });
+      }
+      if (resIn?.data?.data?.frsvId) {
+        items.push({
+          reserveId: resIn.data.data.frsvId,
+          amount: selectedInbound?.price || 0,
+        });
+      }
+
+      dispatch(setReserveData({
+        rsvType: "FLY",
+        items,
+        itemData: {
+          selectedOutbound,
+          selectedInbound,
+        },
+        formData: {
+          passengers,
+          passengerCount,
+          totalPrice,
+        },
+      }));
+
       navigate(`/payment`, {
         state: {
           reservation: [resOut.data.data, resIn?.data?.data].filter(Boolean),
           rsvType: "FLY",
           items,
-          passengerCount,
-          passengers,
-          totalPrice:
-            (selectedOutbound.price + (selectedInbound?.price || 0)) *
+          itemData: {
+            selectedOutbound,
+            selectedInbound,
+          },
+          formData: {
+            passengers,
             passengerCount,
-          autoAssign: true,
+            totalPrice,
+            autoAssign: true,
+          },
         },
       });
     } catch (error) {

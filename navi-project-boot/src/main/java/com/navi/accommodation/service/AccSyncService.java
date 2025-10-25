@@ -57,7 +57,6 @@ public class AccSyncService {
     // 최초 적재(acc_add.json) : INSERT 전용 (insertOnly = true)
     public void loadFromAdminJsonFile() throws IOException {
         processJson(addFile, AccRequestDTO.class, true);
-        // Todo: 위에 한번에 몰아서 해도 될것 같은데...?
     }
 
     /* JSON 파일 처리 - DB 적재 (공용 메서드) */

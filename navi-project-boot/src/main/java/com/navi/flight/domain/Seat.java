@@ -1,5 +1,6 @@
 package com.navi.flight.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -30,6 +31,7 @@ public class Seat {
             @JoinColumn(name = "flight_id", referencedColumnName = "flight_id"),
             @JoinColumn(name = "dep_time", referencedColumnName = "dep_time")
     })
+    @JsonIgnore
     private Flight flight;
 
     @Column(name = "seat_no", length = 5, nullable = false)

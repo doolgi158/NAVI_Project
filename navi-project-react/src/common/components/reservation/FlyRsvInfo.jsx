@@ -1,16 +1,20 @@
 import React from "react";
-import { Typography, Divider, Card, Space } from "antd";
+import { Typography, Divider, Card, Space, Tag, Row, Col } from "antd";
 
 const { Title, Text } = Typography;
 
 /**
- * ✈️ 항공 예약 정보 컴포넌트 (탑승객 + 좌석 자동 배정 안내만 표시)
- * - 항공 일정(출발/귀국)은 제거됨 → FlySummaryCard에서 처리
+ * ✈️ 항공 예약 정보 컴포넌트 (탑승객 + 좌석 정보 표시)
+ * - 선택 좌석이 있을 경우: 좌석 정보 표시
+ * - autoAssign=true인 경우: 자동 배정 안내
  */
-const FlyRsvInfo = ({ data, formData }) => {
-  if (!data || !formData) return null;
+const FlyRsvInfo = ({ formData }) => {
+  if (!formData) return null;
 
-  const { passengers, passengerCount, autoAssign } = formData;
+  const { passengers, passengerCount, autoAssign, selectedSeats = [] } = formData;
+
+  // ✅ 좌석 정보가 있는지 판별
+  const hasSeatInfo = Array.isArray(selectedSeats) && selectedSeats.length > 0;
 
   return (
     <div className="space-y-6 mt-4">
@@ -56,8 +60,49 @@ const FlyRsvInfo = ({ data, formData }) => {
         <Text type="secondary">탑승객 정보 없음</Text>
       )}
 
-      {/* ✅ 좌석 자동 배정 안내 */}
-      {autoAssign && (
+      {/* ✅ 좌석 정보 */}
+      <Divider
+        orientation="left"
+        style={{
+          fontWeight: 600,
+          borderColor: "#e5e7eb",
+          margin: "24px 0 10px",
+        }}
+      >
+        좌석 정보
+      </Divider>
+
+      {hasSeatInfo ? (
+        <div className="space-y-2">
+          {selectedSeats.map((s, idx) => (
+            <Card
+              key={s.seatNo || idx}
+              size="small"
+              style={{
+                borderRadius: 10,
+                border: "1px solid #dcfce7",
+                backgroundColor: "#f0fdf4",
+              }}
+            >
+              <Row justify="space-between" align="middle">
+                <Col>
+                  <Tag color={s.seatClass === "PRESTIGE" ? "blue" : "green"}>
+                    {s.seatNo}
+                  </Tag>
+                  <Text strong className="ml-2">
+                    {s.seatClass === "PRESTIGE" ? "비즈니스석" : "일반석"}
+                  </Text>
+                </Col>
+                <Col>
+                  <Text strong style={{ color: "#2563eb" }}>
+                    ₩{(s.totalPrice || 0).toLocaleString()}
+                  </Text>
+                </Col>
+              </Row>
+            </Card>
+          ))}
+        </div>
+      ) : autoAssign ? (
         <div
           style={{
             backgroundColor: "#fff7e6",
@@ -71,6 +116,8 @@ const FlyRsvInfo = ({ data, formData }) => {
             ⚙️ 좌석 자동 배정 예정
           </Text>
         </div>
+      ) : (
+        <Text type="secondary">좌석 정보 없음</Text>
       )}
     </div>
   );

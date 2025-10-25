@@ -5,10 +5,6 @@ import MainLayout from "../../layout/MainLayout";
 
 const { Title, Text } = Typography;
 
-/**
- * ✅ PaymentResult.jsx
- * 결제 완료 후 결과 표시 페이지
- */
 const PaymentResultPage = () => {
   const location = useLocation();
   const navigate = useNavigate();

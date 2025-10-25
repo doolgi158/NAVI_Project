@@ -35,6 +35,7 @@ public class AccServiceImpl implements AccService {
     private final LogRepository logRepository;
 
     /* === 관리자 전용 CRUD === */
+    // 1. 숙소 생성
     @Override
     public Acc createAcc(AdminAccListDTO dto) {
         // Township 조회 (필수)
@@ -77,6 +78,7 @@ public class AccServiceImpl implements AccService {
         return acc;
     }
 
+    // 2. 숙소 수정
     @Override
     public Acc updateAcc(Long accNo, AccRequestDTO dto) {
         Acc acc = accRepository.findById(accNo)
@@ -90,6 +92,7 @@ public class AccServiceImpl implements AccService {
         return accRepository.save(acc);
     }
 
+    // 3. 숙소 삭제
     @Override
     public void deleteAcc(Long accNo) {
         Acc acc = accRepository.findById(accNo)
@@ -107,14 +110,23 @@ public class AccServiceImpl implements AccService {
         accRepository.delete(acc);
     }
 
+    // 3. 대표 이미지 변경
     @Override
-    public List<AccListResponseDTO> searchByName(String name) {
-        List<Acc> accList = accRepository.findByTitleContainingIgnoreCase(name);
+    public void updateMainImage(String accId) {
+        log.info("🖼️ [ACC] 대표 이미지 갱신 요청 - accId={}", accId);
 
-        return accRepository.findByTitleContainingIgnoreCase(name)
-                .stream()
-                .map(AccListResponseDTO::fromEntity)
-                .toList();
+        Acc acc = accRepository.findByAccId(accId)
+                .orElseThrow(() -> new IllegalArgumentException("숙소를 찾을 수 없습니다: " + accId));
+
+        String imagePath = imageRepository
+                .findTopByTargetTypeAndTargetIdOrderByNoAsc("ACC", accId)
+                .map(Image::getPath)
+                .orElse(null); // 기본 이미지
+
+        acc.updateMainImage(imagePath);
+        accRepository.save(acc);
+
+        log.info("✅ [ACC] 대표 이미지 갱신 완료 - accId={}, mainImage={}", accId, imagePath);
     }
 
     @Override
@@ -175,8 +187,7 @@ public class AccServiceImpl implements AccService {
                     .accId(acc.getAccId())
                     .title(acc.getTitle())
                     .address(acc.getAddress())
-                    .accImage(accImagePath)
-                    .viewCount(acc.getViewCount())
+                    .mainImage(accImagePath)
                     .build();
         }).toList();
     }
@@ -216,16 +227,14 @@ public class AccServiceImpl implements AccService {
         return AccDetailResponseDTO.fromEntity(acc);
     }
 
+
     @Override
     @Transactional
-    public Acc increaseViewCount(String accId) {
-        return accRepository.findByAccId(accId)
-                .map(acc -> {
-                    Acc updatedAcc = acc.increaseViewCount();
-                    accRepository.save(updatedAcc);
-                    log.info("👁️ 숙소 [{}] 조회수 증가 → {}", accId, updatedAcc.getViewCount());
-                    return updatedAcc;
-                })
-                .orElseThrow(() -> new IllegalArgumentException("숙소를 찾을 수 없습니다."));
+    public void increaseViewCount(String accId) {
+        accRepository.findByAccId(accId).ifPresent(acc -> {
+            acc.increaseViewCount();
+            accRepository.save(acc);
+            log.info("============================== 조회수 증가!!!!!!!");
+        });
     }
 }

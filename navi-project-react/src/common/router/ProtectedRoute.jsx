@@ -1,9 +1,11 @@
 import { useSelector } from "react-redux";
 import { Navigate, useLocation } from "react-router-dom";
+import { useModal } from "@/common/components/login/ModalProvider";
 
 const ProtectedRoute = ({ children, requiredRole }) => {
   const { accessToken, role } = useSelector((state) => state.login);
   const location = useLocation();
+  const { showModal } = useModal();
 
   // 관리자 페이지 접근 시 항상 검사
   const isAdminRoute = location.pathname.startsWith("/adm");
@@ -26,7 +28,10 @@ const ProtectedRoute = ({ children, requiredRole }) => {
   }
 
   // 로그인하지 않은 경우
-  if (!accessToken) return <Navigate to="/" replace />;
+  if (!accessToken) {
+    showModal("login");
+    return <Navigate to="/" replace />;
+  }
 
   // 명시된 권한(requiredRole)에 해당하지 않고 관리자도 아닐 경우
   if (!hasRequiredRole && !hasAdminRole) {

@@ -5,6 +5,7 @@ import AdminFlightRouter from "./AdminFlightRouter.jsx";
 import AdminDeliveryRouter from "./AdminDeliveryRouter.jsx";
 import AdminRoomyRouter from "./AdminRoomRouter.jsx"
 import ManagerRouter from "./ManagerRouter.jsx";
+import AdminPaymentRouter from "./AdminPaymentRouter.jsx"
 
 const AdminUsers = lazy(() => import("../../admin/pages/user/AdminUsersPage.jsx"));
 const AdminDashboard = lazy(() => import("../../admin/pages/AdminDashboardPage.jsx"));
@@ -84,6 +85,9 @@ const AdminRouter = () => {
 
     // 짐배송 라우터
     ...AdminDeliveryRouter(),
+
+    // 결제 라우터
+    ...AdminPaymentRouter(),
   ];
 };
 
