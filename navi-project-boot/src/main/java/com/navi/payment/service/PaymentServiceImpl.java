@@ -7,6 +7,7 @@ import com.navi.payment.domain.enums.PaymentStatus;
 import com.navi.payment.dto.request.PaymentConfirmRequestDTO;
 import com.navi.payment.dto.request.PaymentPrepareRequestDTO;
 import com.navi.payment.dto.request.PaymentVerifyRequestDTO;
+import com.navi.payment.dto.response.PaymentAdminListResponseDTO;
 import com.navi.payment.dto.response.PaymentPrepareResponseDTO;
 import com.navi.payment.dto.response.PaymentResultResponseDTO;
 import com.navi.payment.repository.PaymentDetailRepository;
@@ -33,6 +34,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -289,5 +291,19 @@ public class PaymentServiceImpl implements PaymentService {
         paymentRepository.save(master);
 
         log.info("✅ [환불 처리 완료] merchantId={}, refundAmount={}", merchantId, actualAmount);
+    }
+
+    @Override
+    public List<PaymentAdminListResponseDTO> getMyPayments(String userId) {
+        log.info("🔍 [PaymentService] 결제 내역 조회 요청: {}", userId);
+
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("❌ 사용자 정보를 찾을 수 없습니다."));
+
+        List<PaymentMaster> payments = paymentRepository.findAllByUser_No(user.getNo());
+
+        return payments.stream()
+                .map(PaymentAdminListResponseDTO::fromEntity)
+                .collect(Collectors.toList());
     }
 }

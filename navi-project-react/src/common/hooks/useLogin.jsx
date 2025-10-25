@@ -25,7 +25,8 @@ export const useLogin = () => {
 
       // 상태 코드별 처리
       if (response.status === 200) {
-        const { accessToken, refreshToken, username, roles, ip, userNo, id } = response.data.data;
+        const { accessToken, refreshToken, user } = response.data.data;
+        const { id, name, no: userNo, role, email, phone } = user;
 
         // JWT 토큰 저장
         setAuthTokens(accessToken, refreshToken);
@@ -33,10 +34,19 @@ export const useLogin = () => {
         localStorage.setItem("username", username);
         localStorage.setItem("userNo", userNo);
         localStorage.setItem("userId", id);
-
+        localStorage.setItem("userRole", role?.[0] || "USER");
 
         // Redux 상태 갱신
-        dispatch(setlogin({ username, accessToken, refreshToken, role: roles, ip, userNo }));
+        dispatch(
+          setlogin({
+            username: name,
+            userId: id,
+            userNo,
+            role,
+            accessToken,
+            refreshToken,
+          })
+        );
 
         await new Promise((resolve) => setTimeout(resolve, 100));
 
@@ -44,7 +54,7 @@ export const useLogin = () => {
         const redirectPath = localStorage.getItem("redirectAfterLogin") || "/";
         localStorage.removeItem("redirectAfterLogin");
 
-        navigate(Array.isArray(roles) && roles.includes("ADMIN") ? "/adm/dashboard" : redirectPath);
+        navigate(Array.isArray(role) && role.includes("ADMIN") ? "/adm/dashboard" : redirectPath);
 
         return { success: true, message: "로그인 성공" };
       }
@@ -102,6 +112,10 @@ export const useLogin = () => {
   const logoutUser = () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
+    localStorage.removeItem("userRole");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("userNo");
+    localStorage.removeItem("username");
     delete api.defaults.headers.common["Authorization"];
     dispatch(setlogout());
   };

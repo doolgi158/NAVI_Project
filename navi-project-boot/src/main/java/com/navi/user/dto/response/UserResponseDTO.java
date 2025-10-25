@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @AllArgsConstructor
@@ -26,6 +28,7 @@ public class UserResponseDTO {
     private String signUp;          // 가입일
     private String token;           // 토큰
     private String profile;         // 프로필 경로
+    private List<String> role;      // 권한
 
     public static UserResponseDTO from(User user) {
         if (user == null) return null;
@@ -55,6 +58,9 @@ public class UserResponseDTO {
                 .local(user.getLocal())
                 .userState(user.getUserState())
                 .signUp(user.getSignUp() != null ? user.getSignUp().format(formatter) : null)
+                .role(user.getUserRoleList().stream()
+                        .map(Enum::name)
+                        .collect(Collectors.toList()))
                 .build();
     }
 }
