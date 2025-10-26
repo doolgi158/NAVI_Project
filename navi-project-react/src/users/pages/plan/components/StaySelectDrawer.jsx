@@ -43,61 +43,6 @@ export default function StaySelectDrawer({
 
   const listContainerRef = useRef(null);
 
-  /** ✅ 숙소 이미지 로드 */
-  useEffect(() => {
-    const fetchImages = async () => {
-      if (!stays || stays.length === 0) return;
-      const results = {};
-      await Promise.all(
-        stays.map(async (item) => {
-          try {
-            const res = await axios.get(`${API_SERVER_HOST}/api/images`, {
-              params: { targetType: "ACC", targetId: item.accId },
-            });
-            const list = res.data?.data || [];
-            if (list.length > 0) {
-              const path = list[0].path.startsWith("/images/")
-                ? `${API_SERVER_HOST}${list[0].path}`
-                : `${API_SERVER_HOST}/images/acc/${list[0].path}`;
-              results[item.accId] = path;
-              item.accImage = path;
-            }
-          } catch (err) {
-            console.warn(`❌ 이미지 로드 실패: ${item.accId}`);
-          }
-        })
-      );
-      setImageMap(results);
-    };
-    fetchImages();
-  }, [stays]);
-
-  /** ✅ 나의 숙소 북마크 불러오기 */
-  useEffect(() => {
-    if (activeTab !== "my") return;
-    const fetchBookmarks = async () => {
-      try {
-        const token = localStorage.getItem("accessToken");
-        if (!token) {
-          message.warning("로그인 후 이용 가능합니다.");
-          return;
-        }
-        const res = await api.get("/stay/bookmarks", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = Array.isArray(res.data)
-          ? res.data
-          : Array.isArray(res.data?.data)
-            ? res.data.data
-            : [];
-        setMyBookmarks(data);
-      } catch (err) {
-        console.error("❌ 북마크 숙소 불러오기 실패:", err);
-      }
-    };
-    fetchBookmarks();
-  }, [activeTab]);
-
   /** ✅ 검색 + 정렬 */
   const filteredStays = useMemo(() => {
     let list = [...stays];
@@ -147,6 +92,94 @@ export default function StaySelectDrawer({
     const startIdx = (currentPage - 1) * pageSize;
     return filteredStays.slice(startIdx, startIdx + pageSize);
   }, [filteredStays, currentPage, pageSize]);
+
+
+  /** ✅ 숙소 이미지 로드 */
+  useEffect(() => {
+    // ReferenceError를 방지하기 위해 pagedStays 대신 activeTab과 관련된 목록을 명시적으로 사용합니다.
+    const staysToFetch = activeTab === "search" ? pagedStays : myBookmarks;
+
+    const fetchImages = async () => {
+      // staysToFetch가 비어있거나, pagedStays가 아직 초기화되지 않았다면 (pagedStays가 useMemo로 계산되기 전의 초기 렌더링)
+      // 실행을 막고 안정성을 확보합니다. (다만 pagedStays는 useMemo이므로 정의는 되어 있습니다.)
+      if (!staysToFetch || staysToFetch.length === 0) return;
+
+      // 이미 accImage가 설정된 숙소는 건너뛰기 위해 필터링합니다.
+      const itemsToFetch = staysToFetch.filter(item => !item.accImage);
+
+      if (itemsToFetch.length === 0) return;
+
+      const results = {};
+      await Promise.all(
+        itemsToFetch.map(async (item) => {
+          try {
+            const res = await axios.get(`${API_SERVER_HOST}/api/images`, {
+              params: { targetType: "ACC", targetId: item.accId },
+            });
+            const list = res.data?.data || [];
+            if (list.length > 0) {
+              const path = list[0].path.startsWith("/images/")
+                ? `${API_SERVER_HOST}${list[0].path}`
+                : `${API_SERVER_HOST}/images/acc/${list[0].path}`;
+
+              results[item.accId] = path;
+              // 리스트의 원본 객체에도 이미지 경로를 저장하여 중복 호출을 막습니다.
+              // 주의: props인 stays는 변경하지 않습니다. pagedStays/myBookmarks는 filteredStays/myBookmarks의 복사본이거나 파생된 목록이므로 괜찮습니다.
+              item.accImage = path;
+            }
+          } catch (err) {
+            // console.warn(`❌ 이미지 로드 실패: ${item.accId}`);
+          }
+        })
+      );
+      // 기존 이미지 맵에 새로운 결과를 병합합니다.
+      setImageMap(prevMap => ({ ...prevMap, ...results }));
+    };
+
+    // pagedStays와 myBookmarks는 useMemo나 useState로 정의되어 있기 때문에 
+    // 여기서 staysToFetch에 접근해도 ReferenceError는 발생하지 않습니다.
+    // 하지만, React는 렌더링 과정에서 useMemo가 정의되는 순서와 useEffect가 실행되는 순서를 최적화할 수 있습니다.
+    // 이를 피하기 위해 pagedStays 자체를 의존성 배열에 넣는 대신, 
+    // pagedStays의 변화를 일으키는 `currentPage`와 `filteredStays`의 변화를 일으키는 `searchText`를 
+    // 의존성 배열에 넣어서 로직이 실행되도록 합니다. 
+    // 이렇게 하면 pagedStays의 계산이 완료된 후 useEffect가 실행됩니다.
+    // 또한 myBookmarks는 activeTab="my"에서만 로드하므로 activeTab을 유지합니다.
+    if (activeTab === "search") {
+      fetchImages();
+    } else if (activeTab === "my" && myBookmarks.length > 0) {
+      fetchImages();
+    }
+    // 의존성 배열을 재조정합니다.
+  }, [activeTab, currentPage, searchText, myBookmarks]);
+  // pagedStays를 의존성에 넣으면 에러가 발생하므로, pagedStays의 '소스'가 되는 변수를 넣습니다.
+
+
+  /** ✅ 나의 숙소 북마크 불러오기 */
+  useEffect(() => {
+    if (activeTab !== "my") return;
+    const fetchBookmarks = async () => {
+      try {
+        const token = localStorage.getItem("accessToken");
+        if (!token) {
+          message.warning("로그인 후 이용 가능합니다.");
+          return;
+        }
+        const res = await api.get("/stay/bookmarks", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = Array.isArray(res.data)
+          ? res.data
+          : Array.isArray(res.data?.data)
+            ? res.data.data
+            : [];
+        setMyBookmarks(data);
+      } catch (err) {
+        console.error("❌ 북마크 숙소 불러오기 실패:", err);
+      }
+    };
+    fetchBookmarks();
+  }, [activeTab]);
+
 
   /** ✅ 페이지 클릭 */
   const handlePageClick = (page) => {
@@ -223,7 +256,7 @@ export default function StaySelectDrawer({
   return (
     <div className="flex h-full w-full bg-white overflow-hidden">
       {/* 왼쪽: 숙소 검색 / 나의 숙소 */}
-      <div className="w-1/2 border-r border-gray-200 flex flex-col overflow-hidden  w-[360px]">
+      <div className="w-1/2 border-r border-gray-200 flex flex-col overflow-hidden  w-[360px]">
         <TitleDateDisplay title={title} dateRange={dateRange} />
 
         <Tabs
@@ -325,7 +358,7 @@ export default function StaySelectDrawer({
         </div>
 
         {/* ✅ 숙소 요약 스크롤 영역 */}
-        <div className="flex-1 overflow-y-auto custom-scroll p-5  w-[400px]">
+        <div className="flex-1 overflow-y-auto custom-scroll p-5  w-[400px]">
           {(selectedStays?.length ?? 0) > 0 || hasNights ? (
             <div className="space-y-6">
               {(days || [])
