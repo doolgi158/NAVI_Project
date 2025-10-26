@@ -20,7 +20,7 @@ public interface AccService {
 
     /* === 사용자 전용 조회 (View) === */
     // 숙소 리스트 조회 (검색 조건 필터링)
-    List<AccListResponseDTO> searchAccommodations(AccSearchRequestDTO dto);
+    Map<String, Object> searchAccommodations(AccSearchRequestDTO dto);
     // 숙소 상세 조회
     AccDetailResponseDTO getAccDetail(String accId);
     AccDetailResponseDTO getAccDetailByNo(Long accNo);

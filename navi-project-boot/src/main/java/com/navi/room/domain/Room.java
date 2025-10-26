@@ -89,6 +89,9 @@ public class Room {
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
 
+    @Column(name = "main_image", length = 255)
+    private String mainImage;
+
     /* === 기본값 보정 === */
     @PrePersist
     public void prePersist() {
@@ -129,11 +132,12 @@ public class Room {
         if (dto.getIsActive() != null) this.isActive = dto.getIsActive();
     }
 
-    /* === 가격 변경 === */
+    /* === 변경 메서드 === */
     public void changePrice(Integer weekdayFee, Integer weekendFee) {
         if (weekdayFee != null) this.weekdayFee = weekdayFee;
         if (weekendFee != null) this.weekendFee = weekendFee;
     }
+    public void updateMainImage(String mainImage) { this.mainImage = mainImage; }
 
     /* 유효성 검증용 유틸 메서드 */
     private String nonEmptyOrNull(String value) {

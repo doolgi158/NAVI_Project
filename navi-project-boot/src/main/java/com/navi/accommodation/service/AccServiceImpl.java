@@ -208,7 +208,7 @@ public class AccServiceImpl implements AccService {
     /* === 사용자 전용 조회 === */
     @Override
     @Transactional(readOnly = true)
-    public List<AccListResponseDTO> searchAccommodations(AccSearchRequestDTO dto) {
+    public Map<String, Object> searchAccommodations(AccSearchRequestDTO dto) {
         log.info("🔍 [ACC_SEARCH] 요청 수신 - {}", dto);
 
         // 프론트 카테고리 → DB 카테고리 변환
@@ -230,8 +230,13 @@ public class AccServiceImpl implements AccService {
             }
         }
 
-        // Mapper 기반 DB 검색 수행
-        List<AccListResponseDTO> accList = accMapper.searchAccommodations(
+        // 페이지네이션 계산
+        int page = dto.getPage() != null ? dto.getPage() : 1;
+        int size = dto.getSize() != null ? dto.getSize() : 6;
+        int offset = (page - 1) * size;
+
+        //  DB 데이터 조회
+        List<AccListResponseDTO> list = accMapper.searchAccommodations(
                 dto.getCity(),
                 dto.getTownshipName(),
                 dto.getTitle(),
@@ -240,13 +245,35 @@ public class AccServiceImpl implements AccService {
                 dto.getCheckOut() != null ? dto.getCheckOut().toString() : null,
                 dto.getGuestCount(),
                 dto.getRoomCount(),
-                dto.getSort()
+                dto.getSort(),
+                offset,
+                size
         );
 
-        log.debug("✅ [ACC_SEARCH] 결과 {}건", accList.size());
+        // 총 개수 조회
+        int total = accMapper.countAccommodations(
+                dto.getCity(),
+                dto.getTownshipName(),
+                dto.getTitle(),
+                categories,
+                dto.getCheckIn() != null ? dto.getCheckIn().toString() : null,
+                dto.getCheckOut() != null ? dto.getCheckOut().toString() : null,
+                dto.getGuestCount(),
+                dto.getRoomCount()
+        );
 
-        return accList;
+        log.debug("✅ [ACC_SEARCH] 결과 {}건 / 총 {}", list.size(), total);
+
+        // 응답 포맷 통일 (React 쪽에서 data + total 받도록)
+        Map<String, Object> result = new HashMap<>();
+        result.put("data", list);
+        result.put("total", total);
+        result.put("page", page);
+        result.put("size", size);
+
+        return result;
     }
+
 
 
     @Override
