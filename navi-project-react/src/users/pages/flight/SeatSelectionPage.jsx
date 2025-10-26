@@ -28,7 +28,6 @@ const SeatSelectPage = () => {
   const { state } = useLocation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
   const {
     isRoundTrip = false,
