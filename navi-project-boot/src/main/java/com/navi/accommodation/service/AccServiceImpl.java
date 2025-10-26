@@ -16,13 +16,17 @@ import com.navi.image.repository.ImageRepository;
 import com.navi.location.domain.Township;
 import com.navi.location.repository.TownshipRepository;
 import com.navi.room.repository.RoomRepository;
+import com.navi.room.repository.RoomRsvRepository;
+import com.navi.room.repository.StockRepository;
 import com.navi.user.repository.LogRepository;
 import com.navi.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,6 +44,8 @@ public class AccServiceImpl implements AccService {
     private final ImageRepository imageRepository;
     private final UserRepository userRepository;
     private final LogRepository logRepository;
+    private final RoomRsvRepository roomRsvRepository;
+    private final StockRepository stockRepository;
 
     private final KakaoGeoService kakaoGeoService;
     private final AccSyncService accSyncService;
@@ -140,12 +146,20 @@ public class AccServiceImpl implements AccService {
         if (acc.getContentId() != null) {
             throw new IllegalStateException("API로 받아온 숙소는 삭제할 수 없습니다.");
         }
-        // 예약사항이 있으면 삭제 불가
-        if (!roomRepository.findByAcc_AccNo(accNo).isEmpty()) {
-            throw new IllegalStateException("해당 숙소에 예약된 객실이 존재합니다.");
+        // 진행 중인 예약 존재 건수 확인
+        long activeCount = roomRsvRepository.countByRoom_Acc_AccNoAndEndDateGreaterThanEqual(accNo, LocalDate.now());
+        if (activeCount > 0) {
+            throw new IllegalStateException("❌ 진행 중이거나 예정된 예약 " + activeCount + "건이 존재하여 숙소를 삭제할 수 없습니다.");
         }
 
+        // 객실 재고(RoomStock) 일괄 삭제
+        stockRepository.deleteAllByRoom_Acc_AccNo(accNo);
+        // 객실(Room) 일괄 삭제
+        roomRepository.deleteAllByAcc_AccNo(accNo);
+        // 숙소(Acc) 삭제
         accRepository.delete(acc);
+
+        log.info("✅ 숙소 및 관련 데이터 삭제 완료 → accNo={}", accNo);
     }
 
     // 3. 대표 이미지 변경
@@ -194,7 +208,7 @@ public class AccServiceImpl implements AccService {
     /* === 사용자 전용 조회 === */
     @Override
     @Transactional(readOnly = true)
-    public List<AccListResponseDTO> searchAccommodations(AccSearchRequestDTO dto) {
+    public Map<String, Object> searchAccommodations(AccSearchRequestDTO dto) {
         log.info("🔍 [ACC_SEARCH] 요청 수신 - {}", dto);
 
         // 프론트 카테고리 → DB 카테고리 변환
@@ -216,8 +230,13 @@ public class AccServiceImpl implements AccService {
             }
         }
 
-        // Mapper 기반 DB 검색 수행
-        List<AccListResponseDTO> accList = accMapper.searchAccommodations(
+        // 페이지네이션 계산
+        int page = dto.getPage() != null ? dto.getPage() : 1;
+        int size = dto.getSize() != null ? dto.getSize() : 6;
+        int offset = (page - 1) * size;
+
+        //  DB 데이터 조회
+        List<AccListResponseDTO> list = accMapper.searchAccommodations(
                 dto.getCity(),
                 dto.getTownshipName(),
                 dto.getTitle(),
@@ -226,13 +245,35 @@ public class AccServiceImpl implements AccService {
                 dto.getCheckOut() != null ? dto.getCheckOut() : null,
                 dto.getGuestCount(),
                 dto.getRoomCount(),
-                dto.getSort()
+                dto.getSort(),
+                offset,
+                size
         );
 
-        log.debug("✅ [ACC_SEARCH] 결과 {}건", accList.size());
+        // 총 개수 조회
+        int total = accMapper.countAccommodations(
+                dto.getCity(),
+                dto.getTownshipName(),
+                dto.getTitle(),
+                categories,
+                dto.getCheckIn() != null ? dto.getCheckIn().toString() : null,
+                dto.getCheckOut() != null ? dto.getCheckOut().toString() : null,
+                dto.getGuestCount(),
+                dto.getRoomCount()
+        );
 
-        return accList;
+        log.debug("✅ [ACC_SEARCH] 결과 {}건 / 총 {}", list.size(), total);
+
+        // 응답 포맷 통일 (React 쪽에서 data + total 받도록)
+        Map<String, Object> result = new HashMap<>();
+        result.put("data", list);
+        result.put("total", total);
+        result.put("page", page);
+        result.put("size", size);
+
+        return result;
     }
+
 
 
     @Override
@@ -240,6 +281,8 @@ public class AccServiceImpl implements AccService {
     public AccDetailResponseDTO getAccDetail(String accId) {
         Acc acc = accRepository.findByAccId(accId)
                 .orElseThrow(() -> new IllegalArgumentException("숙소를 찾을 수 없습니다."));
+
+        increaseViewCount(accId);   // 조회수 증가
 
         // 숙소 이미지 리스트
         List<String> accImages = imageRepository
@@ -256,7 +299,6 @@ public class AccServiceImpl implements AccService {
 
         AccDetailResponseDTO dto = AccDetailResponseDTO.fromEntity(acc);
         dto.setAccImages(accImages);
-        //dto.setRooms(roomList);
 
         return dto;
     }
@@ -272,7 +314,7 @@ public class AccServiceImpl implements AccService {
 
 
     @Override
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void increaseViewCount(String accId) {
         accRepository.findByAccId(accId).ifPresent(acc -> {
             acc.increaseViewCount();

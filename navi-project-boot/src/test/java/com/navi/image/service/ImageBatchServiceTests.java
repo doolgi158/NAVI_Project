@@ -22,4 +22,18 @@ class ImageBatchServiceTests {
     void testInsertOnlyNonUUID() {
         imageBatchService.insertAccImagesOnlyNonUUID();
     }
+
+    /* 숙소 mainImage 랜덤 배정 (호텔/펜션/일반) */
+    @Test
+    void assignAccMainImages() {
+        imageBatchService.assignAccMainImages();
+        log.info("=== ✅ 숙소 mainImage 랜덤 배정 완료 ===");
+    }
+
+    /* 객실 thumbnailImage 랜덤 배정 (room 폴더) */
+    @Test
+    void assignRoomThumbnails() {
+        imageBatchService.assignRoomThumbnails();
+        log.info("=== ✅ 객실 thumbnailImage 랜덤 배정 완료 ===");
+    }
 }

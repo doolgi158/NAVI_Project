@@ -15,7 +15,7 @@ public class RoomListResponseDTO {
     private Integer maxCnt;
     private Boolean hasWifi;
     private Integer remainCount;    // 잔여 객실 수 추가
-    private String thumbnailImage;  // Todo: 대표 이미지 1장 정도
+    private String mainImage;       // 대표 이미지
 
     public static RoomListResponseDTO fromEntity(Room room, Integer remainCount) {
         return RoomListResponseDTO.builder()
@@ -26,7 +26,7 @@ public class RoomListResponseDTO {
                 .maxCnt(room.getMaxCnt())
                 .hasWifi(room.getHasWifi())
                 .remainCount(remainCount)
-                //.thumbnailImage(room.getThumbnailImageUrl()) // Todo: 이미지
+                .mainImage(room.getMainImage())
                 .build();
     }
 }

@@ -186,7 +186,7 @@ public class RoomServiceImpl implements RoomService {
             return List.of();
         }
 
-        // 3️⃣ 날짜 없으면 전체 반환
+        // 3️날짜 없으면 전체 반환
         if (checkIn == null || checkOut == null) {
             log.info("[USER] 날짜 미선택 → 전체 객실 반환");
             return allRooms.stream()
@@ -194,7 +194,7 @@ public class RoomServiceImpl implements RoomService {
                     .toList();
         }
 
-        // 4️⃣ 재고 확인
+        // 4️재고 확인
         List<RoomListResponseDTO> availableRooms = allRooms.stream()
                 .filter(room -> stockService.hasAvailableStock(room.getRoomId(), checkIn, checkOut, roomCount))
                 .filter(room -> guestCount == null || room.getMaxCnt() >= guestCount)
