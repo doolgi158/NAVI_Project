@@ -10,9 +10,9 @@ import {
   Typography,
   Row,
   Col,
-  Modal
+  Modal,
 } from "antd";
-import { ArrowLeftOutlined, } from "@ant-design/icons";
+import { ArrowLeftOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -85,13 +85,10 @@ const DeliveryPage = () => {
   useEffect(() => {
     if (!isMapReady || !mapRef.current) return;
 
-    // 기본 배송 방향이 공항 → 숙소일 경우
     if (form.deliveryType === "AIRPORT_TO_HOTEL" && !form.fromAddress) {
       const marker = setAirportMarker("fromAddress");
       markersRef.current.fromAddress = marker;
-    }
-    // 기본 배송 방향이 숙소 → 공항일 경우
-    else if (form.deliveryType === "HOTEL_TO_AIRPORT" && !form.toAddress) {
+    } else if (form.deliveryType === "HOTEL_TO_AIRPORT" && !form.toAddress) {
       const marker = setAirportMarker("toAddress");
       markersRef.current.toAddress = marker;
     }
@@ -221,7 +218,7 @@ const DeliveryPage = () => {
     }).open();
   };
 
-  /** ✅ 배송 타입 변경 (공항 자동 세팅 포함) */
+  /** ✅ 배송 타입 변경 */
   const handleDeliveryTypeChange = (v) => {
     handleChange("deliveryType", v);
     setForm((p) => ({ ...p, fromAddress: "", toAddress: "" }));
@@ -242,6 +239,7 @@ const DeliveryPage = () => {
       );
     }
   };
+
   /** ✅ 예약 전 확인 모달 */
   const showConfirmModal = () => {
     const required = [
@@ -277,9 +275,10 @@ const DeliveryPage = () => {
       ),
       okText: "확인",
       cancelText: "취소",
-      onOk: handleSubmit, // ✅ 확인 시 실제 예약 처리
+      onOk: handleSubmit,
     });
   };
+
   /** ✅ 예약 처리 */
   const handleSubmit = async () => {
     const required = [
@@ -458,26 +457,36 @@ const DeliveryPage = () => {
                 </Radio.Group>
               </div>
 
+              {/* ✅ 가방 정보 (설명 추가됨) */}
               <Text strong>가방 정보</Text>
               <Row gutter={[8, 8]} style={{ margin: "8px 0 10px" }}>
-                {["S", "M", "L"].map((size) => (
-                  <Col span={8} key={size} style={{ textAlign: "center" }}>
-                    <Text strong>{size}</Text>
-                    <div style={{ color: "#666", fontSize: 12 }}>
-                      {BAG_PRICE_TABLE[size].toLocaleString()}원
-                    </div>
-                    <Input
-                      size="small"
-                      type="number"
-                      min="0"
-                      value={bags[size]}
-                      onChange={(e) =>
-                        handleBagChange(size, e.target.value)
-                      }
-                      style={{ width: 60, marginTop: 4 }}
-                    />
-                  </Col>
-                ))}
+                {["S", "M", "L"].map((size) => {
+                  const sizeInfo = {
+                    S: "기내 휴대용 (20인치 이하)",
+                    M: "중형 수하물 (24인치)",
+                    L: "대형 수하물 (28인치 이상)",
+                  };
+
+                  return (
+                    <Col span={8} key={size} style={{ textAlign: "center" }}>
+                      <Text strong>{size}</Text>
+                      <div style={{ color: "#999", fontSize: 11, marginBottom: 2 }}>
+                        {sizeInfo[size]}
+                      </div>
+                      <div style={{ color: "#666", fontSize: 12 }}>
+                        {BAG_PRICE_TABLE[size].toLocaleString()}원
+                      </div>
+                      <Input
+                        size="small"
+                        type="number"
+                        min="0"
+                        value={bags[size]}
+                        onChange={(e) => handleBagChange(size, e.target.value)}
+                        style={{ width: 60, marginTop: 4 }}
+                      />
+                    </Col>
+                  );
+                })}
               </Row>
 
               <Text strong>요청사항(선택)</Text>
@@ -525,7 +534,7 @@ const DeliveryPage = () => {
                 borderRadius: 12,
                 boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
               }}
-              styles={{ body: { padding: 0 } }} // ✅ v5 대응 완료
+              styles={{ body: { padding: 0 } }}
             >
               <div
                 id={MAP_CONTAINER_ID}

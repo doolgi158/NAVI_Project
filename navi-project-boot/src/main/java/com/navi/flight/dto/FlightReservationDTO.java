@@ -14,6 +14,7 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -37,6 +38,7 @@ public class FlightReservationDTO {
 
     private Long seatId; // 예약 좌석 ID (nullable)
     private String seatNo; // 좌석 번호
+    private List<Long> selectedSeatIds;
 
     @PositiveOrZero
     private BigDecimal totalPrice; // 결제 금액 (BigDecimal로 수정)
