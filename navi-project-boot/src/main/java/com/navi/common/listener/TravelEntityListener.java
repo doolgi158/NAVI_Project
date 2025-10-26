@@ -14,7 +14,7 @@ public class TravelEntityListener {
     private static final AtomicInteger COUNTER = new AtomicInteger(0);
 
     @PrePersist
-    public void onCreate(Travel travel) {
+    public void prePersist(Travel travel) {
         // 등록 시 생성일/수정일 모두 초기화
         travel.setCreatedAt(LocalDateTime.now());
         travel.setUpdatedAt(LocalDateTime.now());
@@ -24,7 +24,7 @@ public class TravelEntityListener {
     }
 
     @PreUpdate
-    public void onUpdate(Travel travel) {
+    public void preUpdate(Travel travel) {
         // ✅ 좋아요/북마크/조회수만 바뀐 경우 updatedAt 갱신하지 않음
         if (!travel.isCounterOnlyChanged()) {
             travel.setUpdatedAt(LocalDateTime.now());
@@ -34,7 +34,9 @@ public class TravelEntityListener {
         generatePhotoIdIfNeeded(travel);
     }
 
-    /** ✅ photoId 자동 생성 로직 */
+    /**
+     * ✅ photoId 자동 생성 로직
+     */
     private void generatePhotoIdIfNeeded(Travel travel) {
         boolean hasImage = travel.getImagePath() != null && !travel.getImagePath().isBlank();
         boolean hasThumb = travel.getThumbnailPath() != null && !travel.getThumbnailPath().isBlank();
