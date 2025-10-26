@@ -38,6 +38,7 @@ const UserMainPage = () => {
         const res = await fetch(`${API_SERVER_HOST}/api/accommodation/rank`);
         if (!res.ok) throw new Error("데이터 로드 실패");
         const data = await res.json();
+        console.log(data);
         // ✅ ApiResponse 구조 대응
         const list = data?.data || [];
         setAccommodations(Array.isArray(list) ? list : []);
