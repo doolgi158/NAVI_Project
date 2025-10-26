@@ -105,6 +105,8 @@ dependencies {
 
     // Lombok과 함께 쓴다면 추가로 필요
     annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+    
+    implementation 'net.coobird:thumbnailator:0.4.20'
 }
 
 tasks.named('test') {

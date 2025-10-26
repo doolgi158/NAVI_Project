@@ -154,6 +154,7 @@ const AccListPage = () => {
 
         const res = await axios.get(`${API_SERVER_HOST}/api/accommodations`, { params });
         const { data = [], total = 0, page: current, size: pageSizeFromServer } = res.data;
+  console.log(data);
 
         setAccommodations(data);
         setIsSearched(true);
@@ -229,7 +230,6 @@ const AccListPage = () => {
     handleSearch(page, size);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-
   return (
     <MainLayout>
       <div className="min-h-screen flex flex-col items-center pt-6 pb-8 px-6">
