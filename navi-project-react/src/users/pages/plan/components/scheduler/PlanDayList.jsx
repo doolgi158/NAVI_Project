@@ -76,13 +76,13 @@ export default function PlanDayList({
                                     className="w-[300px] flex-shrink-0"
                                 >
                                     <h2
-                                        className="text-lg font-bold text-center sticky top-0 z-10 py-2 mb-4"
-                                        style={{ backgroundColor: "#fff" }}
+                                        className="text-lg font-bold text-center sticky top-0 z-10 py-2 mb-5 "
+                                        style={{ backgroundColor: `${dayColors[dayIdx % dayColors.length]}cc`, borderRadius: '20px' }}
                                     >
-                                        <span style={{ color: dayColors[dayIdx % dayColors.length] }}>
+                                        <span style={{ color: "white" }}>
                                             DAY {d.orderNo || dayIdx + 1}
                                         </span>{" "}
-                                        <span className="text-gray-500 text-sm">
+                                        <span className="text-white text-sm">
                                             ({dayjs(d.dateISO).format("YYYY.MM.DD")})
                                         </span>
                                     </h2>
@@ -122,13 +122,14 @@ export default function PlanDayList({
                         >
                             <h2
                                 className="text-xl font-bold text-center sticky top-0 z-10 py-2 mb-4"
+                                style={{ backgroundColor: `${dayColors[activeDayIdx % dayColors.length]}cc`, borderRadius: '20px' }}
                             >
                                 <span
-                                    style={{ color: dayColors[activeDayIdx % dayColors.length] }}
+                                    style={{ color: 'white' }}
                                 >
                                     DAY {days[activeDayIdx]?.orderNo || activeDayIdx + 1}
                                 </span>{" "}
-                                <span className="text-gray-500 text-sm">
+                                <span className="text-white text-sm">
                                     (
                                     {days[activeDayIdx]?.dateISO
                                         ? dayjs(days[activeDayIdx].dateISO).format("YYYY.MM.DD")

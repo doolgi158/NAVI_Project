@@ -36,7 +36,7 @@ export default function AdminPlanDetail() {
 
             // 날짜별 아이템 구성
             const mapped = (data.days || []).map((d, idx) => ({
-                dateISO: d.dayDate,
+                dateISO: d.date,
                 orderNo: idx + 1,
                 items: (d.items || []).map((it) => ({
                     ...it,
@@ -129,12 +129,14 @@ export default function AdminPlanDetail() {
                             여행계획 상세보기 (관리자)
                         </h2>
                         <div className=" mt-2 flex flex-col">
+                            {/* 🟢 수정: plan?.createdAt 옵셔널 체이닝 적용 */}
                             <p className="text-gray-500 text-sm mb-2">
-                                등록일: {plan.createdAt?.replace("T", " ").substring(0, 16)}
+                                등록일: {plan?.createdAt?.replace("T", " ").substring(0, 16) || '-'}
                             </p>
+                            {/* 🟢 수정: plan?.updatedAt 옵셔널 체이닝 적용 */}
                             <p className="text-gray-500 text-sm mb-2">
                                 수정일:{" "}
-                                {plan.updatedAt
+                                {plan?.updatedAt
                                     ? plan.updatedAt.replace("T", " ").substring(0, 16)
                                     : "-"}
                             </p>
@@ -188,11 +190,13 @@ export default function AdminPlanDetail() {
                                 style={{ height: "100%", background: "#fafafa" }}
                             >
                                 <div className="border-b-2 mb-8">
+                                    {/* 🟢 수정: plan?.title 옵셔널 체이닝 적용 */}
                                     <h3 className="text-2xl font-semibold text-[#2F3E46] mb-1">
-                                        {plan.title || "제목 없음"}
+                                        {plan?.title || "제목 없음"}
                                     </h3>
+                                    {/* 🟢 수정: plan?.name, plan?.id, plan?.startDate, plan?.endDate 옵셔널 체이닝 적용 */}
                                     <p className="text-gray-600 text-sm mt-4 mb-2">
-                                        작성자: {plan.name} ({plan.id}) | 여행일정: {plan.startDate} ~ {plan.endDate}
+                                        작성자: {plan?.name} ({plan?.id}) | 여행일정: {plan?.startDate} ~ {plan?.endDate}
                                     </p>
                                 </div>
 

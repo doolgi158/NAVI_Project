@@ -19,7 +19,7 @@ export default function AdminPlanList() {
     const fetchPlans = async (page = 1, size = pageSize, keyword = search) => {
         setLoading(true);
         try {
-            const res = await api.get(`/adm/plan?page=${page - 1}&size=${size}&search=${encodeURIComponent(keyword)}`);
+            const res = await api.get(`/adm/plan?page=${page - 1}&size=${size}&search=${encodeURIComponent(keyword)}&sort=planId&direction=desc`);
             const data = res.data;
             setPlans(data.content || []);
             setTotalElements(data.totalElements || 0);
@@ -62,7 +62,7 @@ export default function AdminPlanList() {
             // ✅ 현재 페이지 기준으로 번호 계산
             render: (_, __, index) => (currentPage - 1) * pageSize + (index + 1),
         },
-        { title: "Plan ID", dataIndex: "planId", key: "planId", width: 100, align: "center", sorter: (a, b) => a.planId - b.planId },
+        { title: "Plan ID", dataIndex: "planId", key: "planId", width: 100, align: "center", sorter: (a, b) => a.planId - b.planId, defaultSortOrder: 'descend', },
         {
             title: "제목",
             dataIndex: "title",
@@ -173,14 +173,6 @@ export default function AdminPlanList() {
                                     <Select.Option value="50">50개씩 보기</Select.Option>
                                 </Select>
 
-                                <Button
-                                    type="primary"
-                                    icon={<PlusOutlined />}
-                                    style={{ background: "#0A3D91" }}
-                                    onClick={() => navigate("/adm/plan/register")}
-                                >
-                                    새 여행계획 등록
-                                </Button>
                             </Space>
                         </div>
 
