@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,6 +16,9 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class AdminTravelPlanDetailResponseDTO {
 
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+
     private Long planId;
     private String title;
     private String name;
@@ -22,8 +26,9 @@ public class AdminTravelPlanDetailResponseDTO {
     private LocalDate startDate;
     private LocalDate endDate;
     private String thumbnailPath;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String createdAt;
+    private String updatedAt;
+
     private List<DayDetailDTO> days;
 
     @Getter
@@ -54,6 +59,12 @@ public class AdminTravelPlanDetailResponseDTO {
     }
 
     public static AdminTravelPlanDetailResponseDTO of(TravelPlan plan) {
+
+        String formattedCreatedAt = plan.getCreatedAt() != null ?
+                plan.getCreatedAt().format(DATE_TIME_FORMATTER) : null;
+        String formattedUpdatedAt = plan.getUpdatedAt() != null ?
+                plan.getUpdatedAt().format(DATE_TIME_FORMATTER) : null;
+
         return AdminTravelPlanDetailResponseDTO.builder()
                 .planId(plan.getPlanId())
                 .title(plan.getTitle())
@@ -62,8 +73,8 @@ public class AdminTravelPlanDetailResponseDTO {
                 .startDate(plan.getStartDate())
                 .endDate(plan.getEndDate())
                 .thumbnailPath(plan.getThumbnailPath())
-                .createdAt(plan.getCreatedAt())
-                .updatedAt(plan.getUpdatedAt())
+                .createdAt(formattedCreatedAt)
+                .updatedAt(formattedUpdatedAt)
                 .days(plan.getDays().stream()
                         .sorted((a, b) -> a.getDayOrder().compareTo(b.getDayOrder()))
                         .map(d -> DayDetailDTO.builder()
@@ -78,7 +89,7 @@ public class AdminTravelPlanDetailResponseDTO {
                                                 .lng(i.getLng())
                                                 .startTime(i.getStartTime() != null ? i.getStartTime() : "")
                                                 .endTime(i.getEndTime() != null ? i.getEndTime() : "")
-                                                .img(i.getImg()) // ✅ 실제 엔티티의 img 필드 매핑
+                                                .img(i.getImg())
                                                 .build())
                                         .collect(Collectors.toList()))
                                 .build())

@@ -77,6 +77,19 @@ public class TravelPlan extends BaseEntityNoAudit {
 
 
     /* ===== 편의 메서드 ===== */
+    // @CreationTimestamp, @UpdateTimestamp를 사용하고 있으므로 @PrePersist/@PreUpdate는 제거하거나 내용 변경
+    @PrePersist
+    public void onCreate() {
+        if (this.createdAt == null) {
+            this.createdAt = LocalDateTime.now();
+        }
+        this.updatedAt = LocalDateTime.now(); // UpdatedAt은 항상 갱신
+    }
+
+    @PreUpdate
+    public void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 
     /**
      * ✅ 하루 추가
@@ -99,18 +112,17 @@ public class TravelPlan extends BaseEntityNoAudit {
     }
 
     /**
-     * ✅ 계획 기본정보 수정
+     * ✅ 계획 기본정보 수정 (createdAt, updatedAt 필드 제거)
      */
     public void updatePlanInfo(String title, LocalDate startDate, LocalDate endDate,
-                               LocalTime startTime, LocalTime endTime, String thumbnailPath,LocalDateTime createdAt,LocalDateTime updatedAt) {
+                               LocalTime startTime, LocalTime endTime, String thumbnailPath) {
         if (title != null) this.title = title;
         if (startDate != null) this.startDate = startDate;
         if (endDate != null) this.endDate = endDate;
         if (startTime != null) this.startTime = startTime;
         if (endTime != null) this.endTime = endTime;
         if (thumbnailPath != null) this.thumbnailPath = thumbnailPath;
-        if (createdAt != null) this.createdAt = createdAt;
-        if (updatedAt != null) this.updatedAt = updatedAt;
+
     }
 
     /* ✅ 삭제 관련 메서드 불필요 → removeAllDays() 제거 (JPA cascade가 처리) */
