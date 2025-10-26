@@ -77,14 +77,20 @@ export default function PlanList({
                                     key: "edit",
                                     icon: <EditOutlined />,
                                     label: "수정",
-                                    onClick: () => onEdit(plan),
+                                    onClick: ({ domEvent }) => {
+                                        domEvent.stopPropagation(); // ✅ 상세 페이지 이동 방지
+                                        onEdit(plan);
+                                    },
                                 },
                                 {
                                     key: "delete",
                                     icon: <DeleteOutlined />,
                                     danger: true,
                                     label: "삭제",
-                                    onClick: () => onDelete(plan.id),
+                                    onClick: ({ domEvent }) => {
+                                        domEvent.stopPropagation(); // ✅ 상세 페이지 이동 방지
+                                        onDelete(plan.planId);
+                                    },
                                 },
                             ].filter(Boolean);
 
@@ -97,12 +103,20 @@ export default function PlanList({
                                     {/* ✅ 썸네일 */}
                                     <img
                                         src={
-                                            plan.thumbnailPath ||
-                                            "https://placehold.co/100x100?text=No+Image"
+                                            plan.thumbnailPath && plan.thumbnailPath.startsWith("http")
+                                                ? plan.thumbnailPath
+                                                : `https://api.cdn.visitjeju.net/photomng/imgpath/${plan.thumbnailPath}`
                                         }
                                         alt="썸네일"
                                         className="w-24 h-24 rounded-lg object-cover flex-shrink-0 cursor-pointer"
-                                        onClick={() => onDetail(plan)}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onDetail(plan);
+                                        }}
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.src = "https://placehold.co/400x300?text=No+Image";
+                                        }}
                                     />
 
                                     {/* ✅ 텍스트 정보 */}
@@ -127,15 +141,55 @@ export default function PlanList({
                                             {formatDate(plan.startDate)} ~ {formatDate(plan.endDate)}
                                         </p>
                                         <p className="text-gray-500 text-sm mt-1 line-clamp-1">
-                                            {plan.travels?.length > 0
-                                                ? plan.travels
-                                                    .slice(0, 3)
-                                                    .map((t) => t.travelName || t)
-                                                    .join(", ") +
-                                                (plan.travels.length > 3
-                                                    ? ` 외 ${plan.travels.length - 3}곳`
-                                                    : "")
-                                                : "등록된 여행지가 없습니다."}
+                                            {(() => {
+                                                // ✅ 1️⃣ travelTitles 배열 우선 사용
+                                                if (Array.isArray(plan.travelTitles) && plan.travelTitles.length > 0) {
+                                                    const validTitles = plan.travelTitles.filter(Boolean);
+                                                    const total = validTitles.length;
+
+                                                    if (total <= 3) {
+                                                        return validTitles.join(", ");
+                                                    }
+
+                                                    // ✅ 3개까지만 표시하고 나머지 정확히 계산
+                                                    const names = validTitles.slice(0, 3).join(", ");
+                                                    return `${names} 외 ${total - 3}곳`;
+                                                }
+
+                                                // ✅ 2️⃣ travels 배열
+                                                if (plan.travels?.length > 0) {
+                                                    const validTravels = plan.travels
+                                                        .map((t) => t.travelName || t)
+                                                        .filter(Boolean);
+                                                    const total = validTravels.length;
+
+                                                    if (total <= 3) {
+                                                        return validTravels.join(", ");
+                                                    }
+
+                                                    const names = validTravels.slice(0, 3).join(", ");
+                                                    return `${names} 외 ${total - 3}곳`;
+                                                }
+
+                                                // ✅ 3️⃣ days[].items 구조
+                                                const allItems =
+                                                    plan.days?.flatMap((d) => d.items || [])?.filter(
+                                                        (it) => it.type === "travel" || it.type === "stay"
+                                                    ) || [];
+
+                                                if (allItems.length > 0) {
+                                                    const total = allItems.length;
+                                                    if (total <= 3) {
+                                                        return allItems.map((it) => it.title).join(", ");
+                                                    }
+
+                                                    const names = allItems.slice(0, 3).map((it) => it.title).join(", ");
+                                                    return `${names} 외 ${total - 3}곳`;
+                                                }
+
+                                                // ✅ 4️⃣ 아무 일정도 없을 때
+                                                return "등록된 여행지가 없습니다.";
+                                            })()}
                                         </p>
                                     </div>
 

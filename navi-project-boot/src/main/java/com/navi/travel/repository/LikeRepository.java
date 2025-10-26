@@ -32,7 +32,8 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
     Page<Like> findAllByUser(User user, Pageable pageable);
 
     // 좋아요한 유저의 데이터 검색
-    List<Like> findByUser_No(Long userNo);
+    @Query("SELECT l FROM Like l JOIN FETCH l.travel WHERE l.user.no = :userNo")
+    List<Like> findWithTravelByUserNo(@Param("userNo") Long userNo);
 
     // 유저가 클릭한 좋아요 삭제
     @Modifying

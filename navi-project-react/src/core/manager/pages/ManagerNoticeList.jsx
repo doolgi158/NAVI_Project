@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getAllNotices, deleteNotice, searchNotice } from "./ManagerNoticeService";
 import { useNavigate } from 'react-router-dom';
-import "../css/ManagerNoticeList.css";
+import "../css/NoticeList.css";
 
 function NoticeList() {
   const [notices, setNotices] = useState([]);
@@ -111,7 +111,7 @@ const handleSearch = async () => {
       <div className="button-area">
         <button 
           className="create-button"
-          onClick={() => navigate('/adm/notice/write')}
+          onClick={() => navigate('/manager/notice/write')}
         >
           공지사항 작성
         </button>
@@ -139,7 +139,7 @@ const handleSearch = async () => {
                 <td>{notice.noticeNo}</td>
                 <td 
                   className="notice-title"
-                  onClick={() => navigate(`/adm/notice/detail?noticeNo=${notice.noticeNo}`)}
+                  onClick={() => navigate(`/manager/notice/detail?noticeNo=${notice.noticeNo}`)}
                   style={{ cursor: 'pointer' }}
                 >
                   {notice.noticeTitle}
@@ -149,7 +149,7 @@ const handleSearch = async () => {
                 <td>
                   <button 
                     className="edit-button"
-                    onClick={() => navigate(`/adm/notice/write?noticeNo=${notice.noticeNo}`)}
+                    onClick={() => navigate(`/manager/notice/write?noticeNo=${notice.noticeNo}`)}
                   >
                     수정
                   </button>

@@ -10,6 +10,20 @@ function BoardWrite() {
   const [imagePreview, setImagePreview] = useState('');
   const [isDragging, setIsDragging] = useState(false);
 
+  // 이미지 업로드
+  const uploadImage = async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch('/api/board/upload', {
+      method: 'POST',
+      body: formData
+    });
+
+    const data = await response.json();
+    return data.imageUrl;
+  };
+
   // 파일 선택
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
@@ -45,13 +59,12 @@ function BoardWrite() {
       return;
     }
 
-  // 확장자 검사 (추가 안전장치)
-  const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-  const fileExtension = file.name.split('.').pop().toLowerCase();
-  if (!allowedExtensions.includes(fileExtension)) {
-    alert('허용되지 않은 이미지 형식입니다.');
-    return;
-  }
+    // 5MB 제한
+    if (file.size > 5 * 1024 * 1024) {
+      alert('파일 크기는 5MB 이하여야 합니다.');
+      return;
+    }
+
     setImage(file);
 
     // 미리보기
@@ -78,32 +91,26 @@ function BoardWrite() {
     }
 
     try {
-      // FormData 생성
-      const formData = new FormData();
-      formData.append('title', title);
-      formData.append('content', content);
+      let imageUrl = '';
       
-      // 이미지가 있으면 추가
+      // 이미지가 있으면 업로드
       if (image) {
-        formData.append('image', image);
+        imageUrl = await uploadImage(image);
       }
 
       // 게시글 저장
-      const response = await fetch('/api/board', {
+      await fetch('/api/board', {
         method: 'POST',
-        credentials: 'include',  // 쿠키 전송
-        body: formData  // F
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: title,
+          content: content,
+          image: imageUrl
+        })
       });
 
-      if (response.ok) {
-        alert('작성되었습니다!');
-        navigate('/board');
-      } else if (response.status === 401) {
-        alert('로그인이 필요합니다.');
-        navigate('/users/login');
-      } else {
-        throw new Error('작성 실패');
-      }
+      alert('작성되었습니다!');
+      navigate('/client/board');
     } catch (error) {
       console.error('작성 실패:', error);
       alert('작성에 실패했습니다.');
@@ -122,7 +129,7 @@ function BoardWrite() {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="제목을 입력하세요"
-            maxLength="100"
+            maxLength="30"
           />
         </div>
 
@@ -138,7 +145,7 @@ function BoardWrite() {
 
         {/* 이미지 업로드 영역 */}
         <div className="form-group">
-          <label>이미지 (선택)</label>
+          <label>이미지</label>
           
           <div
             className={`image-upload-area ${isDragging ? 'dragging' : ''}`}
@@ -164,6 +171,7 @@ function BoardWrite() {
             ) : (
               <div className="upload-placeholder">
                 <p>이미지를 드래그하거나 클릭하여 업로드</p>
+                <p className="upload-hint">(JPG, PNG, GIF - 최대 5MB)</p>
               </div>
             )}
           </div>
@@ -171,13 +179,14 @@ function BoardWrite() {
           <input
             id="fileInput"
             type="file"
-            accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
+            accept="image/*"
             onChange={handleFileSelect}
             style={{ display: 'none' }}
           />
         </div>
+
         <div className="button-group">
-          <button type="button" onClick={() => navigate('/board')}>
+          <button type="button" onClick={() => navigate('/client/board')}>
             취소
           </button>
           <button type="submit">작성</button>

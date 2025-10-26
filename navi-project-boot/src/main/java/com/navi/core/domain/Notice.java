@@ -1,6 +1,5 @@
 package com.navi.core.domain;
 
-import com.navi.core.dto.NoticeDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -50,9 +49,8 @@ public class Notice {
     private LocalDateTime updateDate;
 
     //조회수
-    @Column(name = "notice_view_Count")
+    @Column(name = "notice_viewCount")
     @ColumnDefault("0")
-    @Builder.Default
     private Integer noticeViewCount = 0;
 
     //시작일
@@ -63,8 +61,5 @@ public class Notice {
     @Column(name = "notice_endDate")
     private LocalDateTime noticeEndDate;
 
-    //게시글 이미지
-    @Column(name = "notice_image")
-    private String noticeImage;
 
 }

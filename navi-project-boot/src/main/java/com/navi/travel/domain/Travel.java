@@ -42,12 +42,16 @@ public class Travel extends BaseEntityNoAudit {
     @Column(name = "TITLE", nullable = false, length = 500)
     private String title;
 
-    /** ✅ 간단 소개 (요약) */
+    /**
+     * ✅ 간단 소개 (요약)
+     */
     @Lob
     @Column(name = "INTRODUCTION", columnDefinition = "CLOB")
     private String introduction;
 
-    /** ✅ 본문 (리치 텍스트 / react-quill HTML 저장용) */
+    /**
+     * ✅ 본문 (리치 텍스트 / react-quill HTML 저장용)
+     */
     @Lob
     @Column(name = "DESCRIPTION", columnDefinition = "CLOB")
     private String description;
@@ -114,9 +118,12 @@ public class Travel extends BaseEntityNoAudit {
 
     // ✅ 내부 체크용
     @Transient
+    @Builder.Default
     private boolean counterOnlyChanged = false;
 
-    /** ✅ 연관관계: Travel ↔ Like, Bookmark **/
+    /**
+     * ✅ 연관관계: Travel ↔ Like, Bookmark
+     **/
     @Builder.Default
     @OneToMany(mappedBy = "travel", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Like> likes = new ArrayList<>();
@@ -126,7 +133,9 @@ public class Travel extends BaseEntityNoAudit {
     private List<Bookmark> bookmarks = new ArrayList<>();
 
 
-    /** ✅ 관계 편의 메서드 **/
+    /**
+     * ✅ 관계 편의 메서드
+     **/
     public void addLike(Like like) {
         likes.add(like);
         like.setTravel(this);
@@ -156,9 +165,9 @@ public class Travel extends BaseEntityNoAudit {
     }
 
 
-
-
-    /** ✅ API 기반 업데이트 **/
+    /**
+     * ✅ API 기반 업데이트
+     **/
     public void updateFromApi(Travel newTravel) {
         this.title = newTravel.title;
         this.introduction = newTravel.introduction;
@@ -183,7 +192,9 @@ public class Travel extends BaseEntityNoAudit {
         this.hours = newTravel.hours;
     }
 
-    /** ✅ Request DTO 기반 업데이트 */
+    /**
+     * ✅ Request DTO 기반 업데이트
+     */
     public void updateFromRequest(TravelRequestDTO dto) {
         if (StringUtils.hasText(dto.getContentsCd())) this.contentsCd = dto.getContentsCd();
         if (StringUtils.hasText(dto.getTitle())) this.title = dto.getTitle();
@@ -200,7 +211,9 @@ public class Travel extends BaseEntityNoAudit {
         if (StringUtils.hasText(dto.getRegion2Name())) this.region2Name = dto.getRegion2Name();
         this.imagePath = dto.getImagePath();
         this.thumbnailPath = dto.getThumbnailPath();
-        if (dto.getThumbnailPath() != null) { this.thumbnailPath = dto.getThumbnailPath(); }
+        if (dto.getThumbnailPath() != null) {
+            this.thumbnailPath = dto.getThumbnailPath();
+        }
         this.state = dto.getState();
         if (StringUtils.hasText(dto.getHomepage())) this.homepage = dto.getHomepage();
         if (StringUtils.hasText(dto.getParking())) this.parking = dto.getParking();
@@ -208,14 +221,29 @@ public class Travel extends BaseEntityNoAudit {
         if (StringUtils.hasText(dto.getHours())) this.hours = dto.getHours();
     }
 
-    public void incrementViews() { this.views = (this.views == null) ? 1L : this.views + 1; }
+    public void incrementViews() {
+        this.views = (this.views == null) ? 1L : this.views + 1;
+    }
 
-    public void incrementLikesCount() { this.likesCount = (this.likesCount == null) ? 1L : this.likesCount + 1; }
-    public void decrementLikesCount() {this.likesCount = (this.likesCount == null || this.likesCount == 0) ? 0L : this.likesCount - 1;}
+    public void incrementLikesCount() {
+        this.likesCount = (this.likesCount == null) ? 1L : this.likesCount + 1;
+    }
 
-    public void incrementBookmarkCount() { this.bookmarkCount = (this.bookmarkCount == null) ? 1L : this.bookmarkCount + 1; }
-    public void decrementBookmarkCount() {this.bookmarkCount = (this.bookmarkCount == null || this.bookmarkCount == 0) ? 0L : this.bookmarkCount - 1;}
+    public void decrementLikesCount() {
+        this.likesCount = (this.likesCount == null || this.likesCount == 0) ? 0L : this.likesCount - 1;
+    }
 
-    public void setUpdatedAt(LocalDateTime now) { }
+    public void incrementBookmarkCount() {
+        this.bookmarkCount = (this.bookmarkCount == null) ? 1L : this.bookmarkCount + 1;
+    }
+
+    public void decrementBookmarkCount() {
+        this.bookmarkCount = (this.bookmarkCount == null || this.bookmarkCount == 0) ? 0L : this.bookmarkCount - 1;
+    }
+
+    @Override
+    public void setUpdatedAt(LocalDateTime now) {
+        super.setUpdatedAt(now);
+    }
 
 }

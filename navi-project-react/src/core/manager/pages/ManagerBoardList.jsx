@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import '../css/ManagerBoardList.css';
+import '../css/BoardList.css';
 import MainLayout from '@/users/layout/MainLayout';
 
 function BoardList() {
@@ -56,11 +56,7 @@ function BoardList() {
       <div className="board-list-wrapper">
         {/* 헤더 */}
         <div className="board-list-header">
-          <div className="board-nav">
-            <Link to="/board" className="nav-link active">일반 게시판</Link>
-            <span className="nav-divider">|</span>
-            <Link to="/adm/notice" className="nav-link">공지사항</Link>
-          </div>
+          <div className="board-list-title">일반 게시판</div>
         </div>
 
         {/* 검색 박스 */}
@@ -89,7 +85,7 @@ function BoardList() {
             boards.map(board => (
               <Link
                 key={board.boardNo}
-                to={`/adm/board/detail?id=${board.boardNo}`}
+                to={`/manager/board/detail?id=${board.boardNo}`}
                 className="board-item"
               >
                 <div className="board-item-title">

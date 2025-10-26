@@ -2,6 +2,8 @@ package com.navi.planner.repository;
 
 import com.navi.planner.domain.TravelPlanDay;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -17,4 +19,12 @@ public interface TravelPlanDayRepository extends JpaRepository<TravelPlanDay, Lo
 
     /** ✅ 사용자 + 날짜 조합으로 필터링 (예: 특정 날짜의 일정 조회) */
     List<TravelPlanDay> findByTravelPlan_User_IdAndDayDate(String userId, java.time.LocalDate dayDate);
+
+    /** planId 기준으로 모든 day 제거 */
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+        delete from TravelPlanDay d 
+        where d.travelPlan.planId = :planId
+    """)
+    void deleteDaysByPlanId(Long planId);
 }

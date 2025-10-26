@@ -1,7 +1,7 @@
 import { PieChart, Pie, Cell, Tooltip, Legend } from "recharts";
 import ChartCard from "./ChartCard";
 
-const DashboardPaymentPie = ({ data }) => {
+const PaymentPie = ({ data }) => {
     const colors = ["#60a5fa", "#34d399", "#a78bfa", "#f59e0b"];
     return (
         <ChartCard title="결제 수단 비율">
@@ -18,4 +18,4 @@ const DashboardPaymentPie = ({ data }) => {
     );
 };
 
-export default DashboardPaymentPie;
+export default PaymentPie;

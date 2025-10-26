@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { getNoticeById, deleteNotice } from "./ManagerNoticeService";
-import "../css/ManagerNoticeDetail.css";
+import "../css/NoticeDetail.css";
 
 function NoticeDetail() {
   const [searchParams] = useSearchParams();
@@ -19,7 +19,7 @@ function NoticeDetail() {
       } catch (error) {
         console.error('공지사항을 불러오는데 실패했습니다:', error);
         alert('공지사항을 불러오는데 실패했습니다.');
-        navigate('/adm/notice');
+        navigate('/manager/notice');
       } finally {
         setLoading(false);
       }
@@ -29,7 +29,7 @@ function NoticeDetail() {
       fetchNotice();
     } else {
       alert('잘못된 접근입니다.');
-      navigate('/adm/notice');
+      navigate('/manager/notice');
     }
   }, [noticeNo, navigate]);
 
@@ -41,7 +41,7 @@ function NoticeDetail() {
     try {
       await deleteNotice(noticeNo);
       alert('삭제되었습니다.');
-      navigate('/adm/notice');
+      navigate('/manager/notice');
     } catch (error) {
       console.error('삭제에 실패했습니다:', error);
       alert('삭제에 실패했습니다.');
@@ -93,41 +93,25 @@ function NoticeDetail() {
         )}
       </div>
 
-      {/* 이미지 표시 영역 추가 */}
-      {notice.noticeImage && (
-        <div className="notice-image">
-          <img 
-            src={notice.noticeImage}
-            alt={notice.noticeTitle}
-            onError={(e) => {
-              console.error('이미지 로딩 실패:', e.target.src);
-              e.target.style.display = 'none';
-            }}
-            onLoad={(e) => {
-              console.log('이미지 로딩 성공:', e.target.src);
-            }}
-          />
-        </div>
-      )}
       <div className="notice-content">
-        <h3></h3>
+        <h3>내용</h3>
         <div className="content-text">
           {notice.noticeContent}
         </div>
       </div>
 
-      {notice.noticeFile && (
+      {notice.noticeAttachFile && (
         <div className="notice-attachment">
           <span className="label">첨부파일:</span>
-          <a href={notice.noticeFile} download>
-            {notice.noticeFile.split('/').pop()}  {/* ✅ 파일명만 표시 */}
+          <a href={notice.noticeAttachFile} download>
+            {notice.noticeAttachFile}
           </a>
         </div>
       )}
 
       <div className="button-group">
-        <button onClick={() => navigate('/adm/notice')}>목록</button>
-        <button onClick={() => navigate(`/adm/notice/write?noticeNo=${noticeNo}`)}>수정</button>
+        <button onClick={() => navigate('/manager/notice')}>목록</button>
+        <button onClick={() => navigate(`/manager/notice/write?noticeNo=${noticeNo}`)}>수정</button>
         <button className="delete-button" onClick={handleDelete}>삭제</button>
       </div>
     </div>

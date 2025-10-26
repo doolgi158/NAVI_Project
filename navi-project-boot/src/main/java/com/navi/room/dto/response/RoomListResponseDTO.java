@@ -14,7 +14,7 @@ public class RoomListResponseDTO {
     private Integer weekendFee;
     private Integer maxCnt;
     private Boolean hasWifi;
-    private Integer remainCount;    // ✅ 잔여 객실 수 추가
+    private Integer remainCount;    // 잔여 객실 수 추가
     private String thumbnailImage;  // Todo: 대표 이미지 1장 정도
 
     public static RoomListResponseDTO fromEntity(Room room, Integer remainCount) {

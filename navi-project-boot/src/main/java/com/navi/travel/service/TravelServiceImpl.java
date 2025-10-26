@@ -36,7 +36,8 @@ public class TravelServiceImpl implements TravelService {
             TravelSyncService travelSyncService,
             TravelActionService travelActionService,
             TravelQueryService travelQueryService,
-            TravelAdminService travelAdminService, TravelRepository travelRepository
+            TravelAdminService travelAdminService,
+            TravelRepository travelRepository
     ) {
         this.travelSyncService = travelSyncService;
         this.travelActionService = travelActionService;

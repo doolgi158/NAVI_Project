@@ -1,4 +1,3 @@
-
 package com.navi.accommodation.domain;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -104,14 +103,14 @@ public class Acc {
     private Boolean hasParking = false;
 
     // 삭제 가능 여부
-    @Builder.Default
-    @Column(name = "is_deletable", nullable = false)
-    private boolean isDeletable = false;
+    //@Builder.Default
+    //@Column(name = "is_deletable", nullable = false)
+    //private Boolean deletable = false;
 
     // 운영 여부
     @Builder.Default
     @Column(name = "is_active", nullable = false)
-    private boolean active = true;
+    private Boolean active = true;
 
     // 등록일시
     @Column(name = "created_time", nullable = false, updatable = false)
@@ -120,6 +119,10 @@ public class Acc {
     // 수정일시
     @Column(name = "modified_time", nullable = false)
     private LocalDateTime modifiedTime;
+
+    // 대표 이미지
+    @Column(name = "main_image", length = 255)
+    private String mainImage;
 
     // 조회수
     @Builder.Default
@@ -140,16 +143,15 @@ public class Acc {
     // 따라서, INSERT 직전에 null을 기본값으로 보정하는 작업 (for not null column)
     @PrePersist
     public void prePersist() {
-        if (category == null) category = "미확인";
+        if (category == null) category = "숙박시설";
         if (checkInTime == null) checkInTime = "15:00";
         if (checkOutTime == null) checkOutTime = "11:00";
         if (hasCooking == null) hasCooking = false;
         if (hasParking == null) hasParking = false;
-        if (!this.active) this.active = true;
-        if (createdTime == null) {
-            createdTime = LocalDateTime.now();
-            modifiedTime = LocalDateTime.now();
-        }
+        if (active == null) active = true;
+        //if (deletable == null) deletable = false;
+        if (createdTime == null) createdTime = LocalDateTime.now();
+        if (modifiedTime == null) modifiedTime = LocalDateTime.now();
     }
 
     /* === 수정일 자동 갱신 === */
@@ -216,12 +218,28 @@ public class Acc {
     }
 
     public void changeTownship(Township township) {
-        if (township != null) { this.township = township; }
+        if (township != null) {
+            this.township = township;
+        }
+    }
+
+    public void updateMainImage(String mainImage) {
+        this.mainImage = mainImage;
     }
 
     public void changeLocation(BigDecimal mapx, BigDecimal mapy) {
-        if (mapx != null) { this.mapx = mapx; }
-        if (mapy != null) { this.mapy = mapy; }
+        if (mapx != null) {
+            this.mapx = mapx;
+        }
+        if (mapy != null) {
+            this.mapy = mapy;
+        }
+    }
+
+    public void changeCategory(String category) {
+        if (category != null) {
+            this.category = category;
+        }
     }
 
     /* === 문자열 유효성 검증용 유틸 메서드 === */
@@ -229,7 +247,7 @@ public class Acc {
         return (value != null && !value.isBlank()) ? value : null;
     }
 
-    // === 조회수 증가 메서드 ===
+    /* === 조회수 증가 메서드 === */
     public void increaseViewCount() {
         if (this.viewCount == null) this.viewCount = 0L;
         this.viewCount++;

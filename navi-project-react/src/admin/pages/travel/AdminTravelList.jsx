@@ -162,6 +162,13 @@ export default function AdminTravelList() {
 
   /** ✅ 컬럼 정의 (정렬 추가됨) */
   const columns = [
+    {
+      title: "No",
+      key: "no",
+      align: "center",
+      width: 70,
+      render: (_, __, index) => page * pageSize + (index + 1),
+    },
     { title: "ID", dataIndex: "travelId", key: "travelId", align: "center", sorter: true },
     {
       title: "제목",

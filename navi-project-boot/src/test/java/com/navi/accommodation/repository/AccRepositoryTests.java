@@ -2,24 +2,25 @@ package com.navi.accommodation.repository;
 
 import com.navi.accommodation.domain.Acc;
 import com.navi.accommodation.dto.request.AccRequestDTO;
-import com.navi.accommodation.service.AccService;
 import com.navi.accommodation.service.AccSyncService;
 import com.navi.location.domain.Township;
 import com.navi.location.repository.TownshipRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @Slf4j
 public class AccRepositoryTests {
-    @Autowired private AccRepository accRepository;
-    @Autowired private AccService accService;
-    @Autowired private AccSyncService accSyncService;
-    @Autowired private TownshipRepository townshipRepository;
+    @Autowired
+    private AccRepository accRepository;
+    @Autowired
+    private AccService accService;
+    @Autowired
+    private AccSyncService accSyncService;
+    @Autowired
+    private TownshipRepository townshipRepository;
 
     /* === API 데이터 적재 === */
     @Test
@@ -27,11 +28,13 @@ public class AccRepositoryTests {
         accSyncService.loadApiFromJsonFile();
         log.info("API 데이터 DB 초기 적재 완료");
     }
+
     @Test
     public void updateAccData() throws Exception {
         accSyncService.updateApiFromJsonFile();
         log.info("API 데이터 DB 초기 업데이트 완료");
     }
+
     @Test
     public void loadAdminAccData() throws Exception {
         accSyncService.loadFromAdminJsonFile();

@@ -18,10 +18,7 @@ function BoardDetail() {
   const [editTitle, setEditTitle] = useState(''); //제목
   const [editContent, setEditContent] = useState(''); //내용
   const [replyTo, setReplyTo] = useState(null); // 답글 달 댓글 번호
-  const [editImage, setEditImage] = useState(null);  // 새 이미지
-  const [editImagePreview, setEditImagePreview] = useState('');  // 미리보기
-  const [removeImage, setRemoveImage] = useState(false);  // 이미지 삭제 여부
-  const [replyContent, setReplyContent] = useState(''); //대댓글
+  const [replyContent, setReplyContent] = useState('');
   
   const fetchBoard = useCallback(() => {
     if (!id) {
@@ -49,20 +46,10 @@ function BoardDetail() {
     fetch(`/api/board/${id}/comments`)
       .then(response => response.json())
       .then(data => {
-        //  배열 체크 추가
-        if (Array.isArray(data)) {
-          setComments(data);
-          setCommentCount(data.length);
-        } else {
-          setComments([]);
-          setCommentCount(0);
-        }
+        setComments(data);
+        setCommentCount(data.length);
       })
-      .catch(error => {
-        console.error('댓글 로드 에러:', error);
-        setComments([]);
-        setCommentCount(0);
-      });
+      .catch(error => console.error('댓글 로드 에러:', error));
   }, [id]);
 
   useEffect(() => {
@@ -83,21 +70,17 @@ function BoardDetail() {
       return;
     }
 
-    fetch(`/api/board/${id}/comment`, {
+    fetch(`/api/board/${id}/comments`, {
       method: 'POST',
-      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ content: newComment })
     })
-    .then(response => {
-      console.log('댓글 작성 응답:', response);
-      if (response.ok) {
+      .then(() => {
         setNewComment('');
         fetchComments();
-      }
-    })
-    .catch(error => console.error('댓글 작성 에러:', error));
-};
+      })
+      .catch(error => console.error('댓글 작성 에러:', error));
+  };
 
   // 대댓글 작성
   const handleReplySubmit = (parentCommentNo) => {
@@ -136,7 +119,7 @@ function BoardDetail() {
         .then(response => response.text())
         .then(result => {
           if (result === 'success') {
-            // 신고한 댓글 목록에 추가
+            // 신고 기록 저장
             reportedComments.push(commentNo);
             sessionStorage.setItem('reportedComments', JSON.stringify(reportedComments));
             
@@ -149,27 +132,18 @@ function BoardDetail() {
   };
   
   const handleLike = () => {
-    if (isLiked) {
-      // 좋아요 취소
-      fetch(`/api/board/${id}/like`, {
-        method: 'DELETE'  // ✅ DELETE 사용
-      })
-        .then(() => {
-          setIsLiked(false);
+    const endpoint = isLiked ? 'unlike' : 'like';
+    fetch(`/api/board/${id}/${endpoint}`, {
+      method: 'POST'
+    })
+      .then(response => response.text())
+      .then(result => {
+        if (result === 'success') {
+          setIsLiked(!isLiked);
           fetchBoard();
-        })
-        .catch(error => console.error('좋아요 취소 에러:', error));
-    } else {
-      // 좋아요
-      fetch(`/api/board/${id}/like`, {
-        method: 'POST'
+        }
       })
-        .then(() => {
-          setIsLiked(true);
-          fetchBoard();
-        })
-        .catch(error => console.error('좋아요 에러:', error));
-    }
+      .catch(error => console.error('좋아요 에러:', error));
   };
 
   const handleReport = () => {
@@ -188,108 +162,81 @@ function BoardDetail() {
         .then(response => response.text())
         .then(result => {
           if (result === 'success') {
-            // 신고한 게시글 목록에 추가
+            // 신고 기록 저장
             reportedBoards.push(parseInt(id));
             sessionStorage.setItem('reportedBoards', JSON.stringify(reportedBoards));
             
             alert('신고가 접수되었습니다.');
+            setShowMenu(false);
           }
         })
         .catch(error => console.error('신고 에러:', error));
     }
   };
 
+  // 수정 모드
   const handleEditMode = () => {
     setIsEditing(true);
     setShowMenu(false);
-    setEditImagePreview(board.boardImage || '');  // 기존 이미지 표시
-    setRemoveImage(false);
-    setEditImage(null);
   };
 
-  // 이미지 파일 선택
-  const handleEditImageChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    setEditImage(file);
-    setRemoveImage(false);
-
-    // 미리보기
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setEditImagePreview(reader.result);
-    };
-    reader.readAsDataURL(file);
-  };
-    // 이미지 제거
-    const handleRemoveEditImage = () => {
-      setEditImage(null);
-      setEditImagePreview('');
-      setRemoveImage(true);
-    };
-
+  // 수정 취소
   const handleCancelEdit = () => {
     setIsEditing(false);
     setEditTitle(board.boardTitle);
     setEditContent(board.boardContent);
   };
 
+  // 수정 저장
   const handleSaveEdit = () => {
     if (!editTitle.trim() || !editContent.trim()) {
-      alert('제목과 내용을 입력하세요.');
+      alert('제목과 내용을 모두 입력해주세요.');
       return;
-    }
-
-    const formData = new FormData();
-    formData.append('title', editTitle);
-    formData.append('content', editContent);
-    
-    // ✅ 새 이미지가 있으면 추가
-    if (editImage) {
-      formData.append('image', editImage);
-    }
-    // 이미지 삭제 플래그
-    else if (removeImage) {
-      formData.append('removeImage', 'true');
     }
 
     fetch(`/api/board/${id}`, {
       method: 'PUT',
-      credentials: 'include',
-      body: formData
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        title: editTitle, 
+        content: editContent 
+      })
     })
-      .then(response => {
-        if (response.ok) {
+      .then(response => response.text())
+      .then(result => {
+        if (result === 'success') {
           alert('수정되었습니다.');
           setIsEditing(false);
           fetchBoard();
-        } else {
-          throw new Error('수정 실패');
         }
       })
       .catch(error => {
-        console.error('수정 실패:', error);
+        console.error('수정 에러:', error);
         alert('수정에 실패했습니다.');
       });
   };
 
+  // 삭제
   const handleDelete = () => {
     if (window.confirm('정말 삭제하시겠습니까?')) {
       fetch(`/api/board/${id}`, {
         method: 'DELETE'
       })
-        .then(() => {
-          alert('삭제되었습니다.');
-          navigate('/board');
+        .then(response => response.text())
+        .then(result => {
+          if (result === 'success') {
+            alert('삭제되었습니다.');
+            navigate('/client/board')
+          }
         })
         .catch(error => {
-          console.error('삭제 실패:', error);
+          console.error('삭제 에러:', error);
           alert('삭제에 실패했습니다.');
         });
     }
   };
 
+  // 공유하기
   const handleShare = () => {
     const url = window.location.href;
     navigator.clipboard.writeText(url).then(() => {
@@ -299,22 +246,17 @@ function BoardDetail() {
   };
 
   // 댓글을 계층 구조로 정렬
-  const organizeComments = (commentsList) => {
-  
-    if (!Array.isArray(commentsList)) {
-      return [];
-    }
-
+  const organizeComments = (comments) => {
     const organized = [];
     const commentMap = {};
 
     // 먼저 모든 댓글을 맵에 저장
-    commentsList.forEach(comment => {
+    comments.forEach(comment => {
       commentMap[comment.commentNo] = { ...comment, replies: [] };
     });
 
     // 부모-자식 관계 설정
-    commentsList.forEach(comment => {
+    comments.forEach(comment => {
       if (comment.parentComment === null || comment.parentComment === undefined) {
         organized.push(commentMap[comment.commentNo]);
       } else {
@@ -337,49 +279,42 @@ const renderComment = (comment, depth = 0) => (
         {new Date(comment.createDate).toLocaleDateString('ko-KR')} {new Date(comment.createDate).toLocaleTimeString('ko-KR', {hour: '2-digit', minute: '2-digit'})}
       </span>
     </div>
-    
-    <div className="comment-item-content">
+    <div className="comment-content">
       {comment.commentContent}
     </div>
-
-    <div className="comment-item-actions">
+    <div className="comment-actions">
+      {/* depth가 0일 때만 답글 버튼 표시 */}
       {depth === 0 && (
-        <button 
-          className="comment-action-btn"
+        <button
           onClick={() => setReplyTo(comment.commentNo)}
+          className="btn-reply"
         >
           답글
         </button>
       )}
-      <button 
-        className="comment-action-btn"
+      <button
+        onClick={() => handleReportComment(comment.commentNo)}
+        className="btn-comment-report"
+      >
+        신고
+      </button>
+      <button
         onClick={() => {
           if (window.confirm('댓글을 삭제하시겠습니까?')) {
             fetch(`/api/board/comment/${comment.commentNo}`, {
               method: 'DELETE'
             })
-              .then(() => {
-                alert('삭제되었습니다.');
-                fetchComments();
-              })
-              .catch(error => {
-                console.error('삭제 에러:', error);
-                alert('삭제에 실패했습니다.');
-              });
+              .then(() => fetchComments())
+              .catch(error => console.error('댓글 삭제 에러:', error));
           }
         }}
+        className="btn-comment-delete"
       >
         삭제
       </button>
-      <button 
-        className="comment-action-btn"
-        onClick={() => handleReportComment(comment.commentNo)}
-      >
-        🚨 신고
-      </button>
     </div>
 
-    {/* 답글 작성 폼 */}
+    {/* 답글 입력창도 depth 0일 때만 */}
     {replyTo === comment.commentNo && depth === 0 && (
       <div className="reply-form">
         <textarea
@@ -388,19 +323,9 @@ const renderComment = (comment, depth = 0) => (
           placeholder="답글을 입력하세요"
           className="reply-textarea"
         />
-        <div className="reply-form-buttons">
-          <button 
-            onClick={() => handleReplySubmit(comment.commentNo)}
-            className="btn-reply-submit"
-          >
-            작성
-          </button>
-          <button 
-            onClick={() => setReplyTo(null)}
-            className="btn-reply-cancel"
-          >
-            취소
-          </button>
+        <div className="reply-buttons">
+          <button onClick={() => setReplyTo(null)} className="btn-cancel-reply">취소</button>
+          <button onClick={() => handleReplySubmit(comment.commentNo)} className="btn-submit-reply">답글 작성</button>
         </div>
       </div>
     )}
@@ -471,45 +396,12 @@ const renderComment = (comment, depth = 0) => (
         {/* 게시글 내용 */}
         <div className="board-content">
           {isEditing ? (
-            <>
-              <textarea
-                value={editContent}
-                onChange={(e) => setEditContent(e.target.value)}
-                className="edit-content-textarea"
-                placeholder="내용을 입력하세요"
-              />
-              
-              {/* 이미지 편집 영역 */}
-              <div className="edit-image-section">
-                
-                {editImagePreview ? (
-                  <div className="image-preview-container">
-                    <img 
-                      src={editImagePreview} 
-                      alt="이미지 미리보기" 
-                      className="board-image"
-                      
-                    />
-                    <button
-                      type="button"
-                      className="remove-image-btn"
-                      onClick={handleRemoveEditImage}
-                    >
-                      ✕
-                    </button>
-                  </div>
-                ) : (
-                  <div className="no-image">이미지 없음</div>
-                )}
-                
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleEditImageChange}
-                  className="image-upload-input"
-                />
-              </div>
-            </>
+            <textarea
+              value={editContent}
+              onChange={(e) => setEditContent(e.target.value)}
+              className="edit-content-textarea"
+              placeholder="내용을 입력하세요"
+            />
           ) : (
             <>
               <p className="board-content-text">{board.boardContent}</p>
@@ -537,7 +429,7 @@ const renderComment = (comment, depth = 0) => (
             </div>
           ) : (
             <>
-              <Link to="/board" className="btn-list">
+              <Link to="/client/board" className="btn-list">
                 목록으로
               </Link>
               

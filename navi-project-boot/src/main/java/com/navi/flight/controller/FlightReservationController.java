@@ -4,7 +4,7 @@ import com.navi.common.response.ApiResponse;
 import com.navi.flight.domain.FlightReservation;
 import com.navi.flight.dto.FlightReservationDTO;
 import com.navi.flight.service.FlightReservationService;
-import com.navi.user.dto.users.UserSecurityDTO;
+import com.navi.user.dto.auth.UserSecurityDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -49,6 +49,15 @@ public class FlightReservationController {
         return ResponseEntity.ok(ApiResponse.success(
                 reservationService.getReservationsByUser(userNo)
         ));
+    }
+
+    /* 마이페이지용 사용자별 예약 조회 */
+    @GetMapping("/my")
+    public ResponseEntity<ApiResponse<List<FlightReservationDTO>>> getMyReservations(
+            @AuthenticationPrincipal UserSecurityDTO user
+    ) {
+        List<FlightReservationDTO> list = reservationService.getReservationsByUserDTO(user.getNo());
+        return ResponseEntity.ok(ApiResponse.success(list));
     }
 
     /* 단일 예약 조회 */

@@ -1,3 +1,4 @@
+import axios from 'axios';
 import api from './naviApi';
 
 /**
@@ -60,7 +61,7 @@ export const fetchAdminTravelDetail = async (travelId) => {
   };
 
   // ✅ 기존 엔드포인트 유지
-  const response = await api.get(`/api/adm/travel/detail/${travelId}`, config);
+  const response = await api.get(`/adm/travel/detail/${travelId}`, config);
   return response;
 };
 
@@ -78,7 +79,7 @@ export const saveAdminTravel = async (travelData) => {
   };
 
   // ✅ 기존 엔드포인트 유지
-  const response = await api.post('/api/adm/travel', travelData, config);
+  const response = await api.post('/adm/travel', travelData, config);
   return response;
 };
 

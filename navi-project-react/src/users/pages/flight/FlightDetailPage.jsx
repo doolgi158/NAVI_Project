@@ -13,8 +13,6 @@ import {
   Divider,
 } from "antd";
 import {
-  ArrowRightOutlined,
-  ArrowLeftOutlined,
   LeftOutlined,
 } from "@ant-design/icons";
 
@@ -170,7 +168,7 @@ const FlightDetailPage = () => {
     if (step === "outbound") {
       if (!selectedOutbound) return message.warning("출발편을 선택해주세요.");
       if (!arrDate) {
-          navigate(`/flight/rsv/${selectedOutbound.flightNo}`, {
+        navigate(`/flight/rsv/${selectedOutbound.flightNo}`, {
           state: { selectedOutbound, passengerCount },
         });
       } else {
@@ -178,7 +176,7 @@ const FlightDetailPage = () => {
       }
     } else {
       if (!selectedInbound) return message.warning("귀국편을 선택해주세요.");
-        navigate(`/flight/rsv/${selectedOutbound.flightNo}`, {
+      navigate(`/flight/rsv/${selectedOutbound.flightNo}`, {
         state: { selectedOutbound, selectedInbound, passengerCount },
       });
     }
@@ -191,7 +189,7 @@ const FlightDetailPage = () => {
     <MainLayout>
       <div
         style={{
-          background: "#f6f8fb",
+          background: "linear-gradient(180deg, #ffffff 0%, #ffffff 100%)",
           minHeight: "100vh",
           padding: "48px 0",
           display: "flex",
@@ -283,6 +281,8 @@ const FlightDetailPage = () => {
                     <Text strong>출발편</Text>
                     <div style={{ marginTop: 6 }}>
                       <Text>{selectedOutbound.airlineNm}</Text>
+                      <br />
+                      <Text>{selectedOutbound.flightNo}</Text>
                       <br />
                       <Text type="secondary" style={{ fontSize: 13 }}>
                         {fmtTime(selectedOutbound.depTime)} {selectedOutbound.depAirportName} →{" "}

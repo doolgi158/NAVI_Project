@@ -29,50 +29,37 @@ public class Board {
     @Column(name = "board_no")
     private Integer boardNo;
 
-    //제목
-    @Column(name = "board_title", nullable = false)
+    @Column(name = "board_title")
     private String boardTitle;
 
-    //좋아요수
     @Column(name = "board_good")
     @Builder.Default
     private Integer boardGood = 0;
 
-    //신고수
     @Column(name = "report_count")
     @Builder.Default
     private Integer reportCount = 0;
 
-    //조회수
-    @Column(name = "board_view_count")
+    @Column(name = "board_viewCount")
+    @ColumnDefault("0")
     @Builder.Default
     private Integer boardViewCount = 0;
 
-    //게시글내용
     @Lob
-    @Column(name = "board_content", nullable = false)
+    @Column(name = "board_content")
     private String boardContent;
 
-    //작성자 번호
-    @Column(name = "user_no", nullable = false)
+    @Column(name = "user_no")
     private Integer userNo;
 
-    //등록일
     @CreationTimestamp
-    @Column(name = "create_date", updatable = false)
+    @Column(name = "create_date")
     private LocalDateTime createDate;
 
-    //수정일
     @UpdateTimestamp
     @Column(name = "update_date")
     private LocalDateTime updateDate;
 
-    //이미지 URL
     @Column(name = "board_image")
     private String boardImage;
-
-    //게시글 작성자 확인
-    public boolean isAuthor(Integer currentUserNo) {
-        return this.userNo.equals(currentUserNo);
-    }
 }

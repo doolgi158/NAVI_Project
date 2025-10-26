@@ -4,8 +4,10 @@ import path from "path";
 
 export default defineConfig({
   plugins: [react()],
+
   resolve: {
     alias: {
+      "react-quill": path.resolve(__dirname, "node_modules/react-quill/lib/index.js"),
       "@": path.resolve(__dirname, "./src"), // ✅ '@/...' → 'src/...'
     },
   },
@@ -16,18 +18,13 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      '/api': {
-        target: 'http://localhost:8080',
-        changeOrigin: true
+      "/api": {
+        target: "http://localhost:8080",
+        changeOrigin: true,
       },
-      '/adm': {  // 이거 추가!
-        target: 'http://localhost:8080',
-        changeOrigin: true
-      },
-      '/images': {  // 이미지 프록시 추가
-        target: 'http://localhost:8080',
-        changeOrigin: true
-      }
-    }
-  }
-})
+    },
+  },
+  optimizeDeps: {
+    include: ["react-quill"],
+  },
+});

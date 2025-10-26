@@ -87,10 +87,10 @@ const HeaderLayout = () => {
   const items = [
     { key: "1", label: <Link to="/travel">여행지</Link> },
     { key: "2", label: <Link to="/accommodations">숙소</Link> },
-    { key: "3", label: <Link to="/flight">교통</Link> },
+    { key: "3", label: <Link to="/flight">항공편</Link> },
     { key: "4", label: <Link to="/plans">여행계획</Link> },
     { key: "5", label: <Link to="/delivery">짐 배송</Link> },
-    { key: "6", label: <Link to="/board">게시판</Link> },
+    { key: "6", label: <Link to="/client/board">게시판</Link> },
   ];
 
   return (

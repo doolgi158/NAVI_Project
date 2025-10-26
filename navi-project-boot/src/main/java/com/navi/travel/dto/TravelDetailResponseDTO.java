@@ -70,7 +70,6 @@ public class TravelDetailResponseDTO {
         return TravelDetailResponseDTO.builder()
                 .travelId(travel.getTravelId())
                 .contentId(travel.getContentId())
-                .contentsCd(travel.getContentsCd())
                 .categoryName(travel.getCategoryName())
                 .title(travel.getTitle())
                 .introduction(travel.getIntroduction())
@@ -107,8 +106,20 @@ public class TravelDetailResponseDTO {
                 .updatedAt(updatedAtLDT != null ? updatedAtLDT.toLocalDate() : null)
                 .build();
     }
-    
+
     public static TravelDetailResponseDTO of(Travel travel) {
         return of(travel, 0L, 0L, false, false);
+    }
+
+    // 마이페이지 출력용 단순 DTO 변환작업
+    public static TravelDetailResponseDTO ofSimple(Travel travel) {
+        return TravelDetailResponseDTO.builder()
+                .travelId(travel.getTravelId())
+                .title(travel.getTitle())
+                .region1Name(travel.getRegion1Name())
+                .region2Name(travel.getRegion2Name())
+                .thumbnailPath(travel.getThumbnailPath())
+                .likesCount(travel.getLikesCount() != null ? travel.getLikesCount() : 0L)
+                .build();
     }
 }

@@ -23,34 +23,26 @@ public class AdminBoardService {
     private final BoardRepository boardRepository;
     private final ImageService imageService;
 
-    /**
-     * 전체 게시글 조회 (관리자)
-     */
+    // 전체 게시글 조회 (관리자)
     @Transactional(readOnly = true)
     public List<Board> getAllBoards() {
         return boardRepository.findAllByOrderByCreateDateDesc();
     }
 
-    /**
-     * 게시글 검색 (관리자)
-     */
+    // 게시글 상세 조회 (관리자)
     @Transactional(readOnly = true)
     public List<Board> searchBoards(String keyword) {
         return boardRepository.searchByKeyword(keyword);
     }
 
-    /**
-     * 게시글 상세 조회 (관리자 - 조회수 증가 없음)
-     */
+    //게시글 상세 조회 (관리자 - 조회수 증가 없음)
     @Transactional(readOnly = true)
     public Board getBoard(Integer id) {
         return boardRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다. ID: " + id));
     }
 
-    /**
-     * 게시글 삭제 (관리자 - 모든 게시글 삭제 가능)
-     */
+    // 게시글 삭제 (관리자 - 모든 게시글 삭제 가능)
     public void deleteBoard(Integer id) {
         if (!boardRepository.existsById(id)) {
             throw new RuntimeException("게시글을 찾을 수 없습니다. ID: " + id);
@@ -69,9 +61,7 @@ public class AdminBoardService {
         log.info("[관리자] 게시글 삭제 완료. ID: {}", id);
     }
 
-    /**
-     * 신고된 게시글 목록 조회 (신고 횟수 1 이상)
-     */
+    // 신고된 게시글 목록 조회 (신고 횟수 1 이상)
     @Transactional(readOnly = true)
     public List<Board> getReportedBoards() {
         return boardRepository.findAllByOrderByCreateDateDesc()
@@ -81,9 +71,7 @@ public class AdminBoardService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * 게시글 통계 조회
-     */
+    // 게시글 통계 조회
     @Transactional(readOnly = true)
     public BoardStatistics getStatistics() {
         List<Board> allBoards = boardRepository.findAll();

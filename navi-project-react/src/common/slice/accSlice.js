@@ -6,6 +6,7 @@ const accSlice = createSlice({
     initialState: {
         searchState: {},
         selectedAcc: null,
+        selectedAccId: null,
     },
     reducers: {
         // 검색 조건 및 검색 결과 전체 저장 (뒤로 가기 시 복원용) 
@@ -14,7 +15,9 @@ const accSlice = createSlice({
         },
         // 특정 숙소를 선택할 때 호출되는 reducer
         setSelectedAcc: (state, action) => {
-            state.selectedAcc = action.payload;      // payload = 선택한 숙소 객체
+            const acc = action.payload;         // payload = 선택한 숙소 객체
+            state.selectedAcc = acc;
+            state.selectedAccId = acc?.accId || null;
         },
         resetAccState: (state) => {
             state.selectedAcc = null;

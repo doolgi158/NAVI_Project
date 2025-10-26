@@ -39,7 +39,7 @@ public class AdminBoardController {
         return ResponseEntity.ok(boards);
     }
 
-    // 게시글 상세 조회 (관리자 - 조회수 증가 없음)
+    // 게시글 상세 조회 (관리자)
     @GetMapping("/{id}")
     public ResponseEntity<Board> getBoard(@PathVariable Integer id) {
         Board board = adminBoardService.getBoard(id);

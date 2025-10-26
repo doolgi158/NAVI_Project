@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Avatar } from "antd";
-import { UserOutlined } from "@ant-design/icons";
+import { DownOutlined, UpOutlined, UserOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
 import { setlogout } from "../slice/loginSlice";
 import { useNavigate } from "react-router-dom";
@@ -12,8 +12,9 @@ const UserMenuDropdown = () => {
   const menuRef = useRef(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [openGroup, setOpenGroup] = useState(false);
 
-  // ✅ loginstate 기본값 방어
+  // loginstate 기본값 방어
   const loginstate = useSelector((state) => state.login) || {};
   const user = loginstate?.user || {};
 
@@ -100,31 +101,65 @@ const UserMenuDropdown = () => {
           <ul className="text-gray-700 py-1 divide-y divide-gray-100">
             <li
               className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-              onClick={() => handleMenuClick("/users/mypage")}
+              onClick={() => handleMenuClick("/users/detail")}
             >
               마이페이지
             </li>
-
-            <li
-              className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-              onClick={() => handleMenuClick("/users/my-plans")}
-            >
-              나의 여행계획
-            </li>
-
             <div className="py-1">
-              <li
-                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                onClick={() => handleMenuClick("/users/my-accommodations")}
+              <div className="py-1">
+                <div className="px-4 py-2 font-semibold text-gray-800">내 활동</div>
+                <div className="border-t border-gray-300 border-dashed mx-4 my-1"></div>
+
+                <ul>
+                  <li
+                    className="pl-8 py-2 hover:bg-gray-100 cursor-pointer"
+                    onClick={() => handleMenuClick("/users/bookmarks")}
+                  >
+                    북마크
+                  </li>
+                  <li
+                    className="pl-8 py-2 hover:bg-gray-100 cursor-pointer"
+                    onClick={() => handleMenuClick("/users/likes")}
+                  >
+                    좋아요
+                  </li>
+                  <li
+                    className="pl-8 py-2 hover:bg-gray-100 cursor-pointer"
+                    onClick={() => handleMenuClick("/users/my-plans")}
+                  >
+                    여행계획
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div className="py-1">
+              <div
+                className="px-4 py-2 font-semibold flex items-center justify-between"
+                onClick={() => setOpenGroup(!openGroup)}
               >
-                숙소 예약 현황
-              </li>
-              <li
-                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                onClick={() => handleMenuClick("/users/my-deliveries")}
-              >
-                짐 배송 예약 현황
-              </li>
+                <span>예약 현황</span>
+              </div>
+              <div className="border-t border-gray-300 border-dashed mx-4 my-1"></div>
+              <div className="transition-all">
+                <li
+                  className="pl-8 py-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => handleMenuClick("/users/my-accommodations")}
+                >
+                  숙소 예약
+                </li>
+                <li
+                  className="pl-8 py-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => handleMenuClick("/users/my-flights")}
+                >
+                  항공편 예약
+                </li>
+                <li
+                  className="pl-8 py-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => handleMenuClick("/users/my-deliveries")}
+                >
+                  짐 배송 예약
+                </li>
+              </div>
             </div>
 
             <li

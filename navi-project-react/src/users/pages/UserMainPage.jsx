@@ -8,14 +8,16 @@ import MainLayout from "../layout/MainLayout";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import HeroSection from "@/common/components/HeroSection";
 
 const UserMainPage = () => {
   const navigate = useNavigate();
   const [destinations, setDestinations] = useState([]);
   const [accommodations, setAccommodations] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingTravel, setLoadingTravel] = useState(true);
+  const [loadingAcc, setLoadingAcc] = useState(true);
 
-  // 여행지 fetch
+  // 인기 여행지, 숙소
   useEffect(() => {
     const fetchDestinations = async () => {
       try {
@@ -27,24 +29,28 @@ const UserMainPage = () => {
         console.error("🚨 여행지 목록 불러오기 실패:", err);
         setDestinations([]);
       } finally {
-        setLoading(false);
+        setLoadingTravel(false);
       }
     };
-    fetchDestinations();
 
-    // 숙소 목데이터
-    setAccommodations([
-      { id: 1, name: "서울 한남호텔", image: "/img/hotel1.jpg", views: 8200, likes: 540, bookmarks: 300 },
-      { id: 2, name: "제주 블루힐 리조트", image: "/img/hotel2.jpg", views: 9500, likes: 670, bookmarks: 410 },
-      { id: 3, name: "부산 해운대 호텔", image: "/img/hotel3.jpg", views: 8700, likes: 530, bookmarks: 320 },
-      { id: 4, name: "강릉 씨사이드 펜션", image: "/img/hotel4.jpg", views: 6000, likes: 430, bookmarks: 260 },
-      { id: 5, name: "여수 오션뷰 리조트", image: "/img/hotel5.jpg", views: 7800, likes: 490, bookmarks: 310 },
-      { id: 6, name: "전주 한옥 스테이", image: "/img/hotel6.jpg", views: 5500, likes: 370, bookmarks: 190 },
-      { id: 7, name: "경주 클래식 호텔", image: "/img/hotel7.jpg", views: 7100, likes: 460, bookmarks: 250 },
-      { id: 8, name: "속초 설악 리조트", image: "/img/hotel8.jpg", views: 9900, likes: 690, bookmarks: 500 },
-      { id: 9, name: "통영 힐링하우스", image: "/img/hotel9.jpg", views: 5200, likes: 330, bookmarks: 160 },
-      { id: 10, name: "가평 별빛펜션", image: "/img/hotel10.jpg", views: 4800, likes: 310, bookmarks: 150 },
-    ]);
+    const fetchAccommodations = async () => {
+      try {
+        const res = await fetch(`${API_SERVER_HOST}/api/accommodation/rank`);
+        if (!res.ok) throw new Error("데이터 로드 실패");
+        const data = await res.json();
+        // ✅ ApiResponse 구조 대응
+        const list = data?.data || [];
+        setAccommodations(Array.isArray(list) ? list : []);
+      } catch (err) {
+        console.error("🚨 숙소 목록 불러오기 실패:", err);
+        setAccommodations([]);
+      } finally {
+        setLoadingAcc(false);
+      }
+    };
+
+    fetchDestinations();
+    fetchAccommodations();
   }, []);
 
   // 랭킹 계산 함수
@@ -80,20 +86,7 @@ const UserMainPage = () => {
   return (
     <MainLayout>
       {/* Hero */}
-      <div
-        className="w-full h-[360px] rounded-2xl mb-10 relative overflow-hidden flex items-center justify-center"
-        style={{
-          backgroundImage: `url('/img/hero-travel.jpg')`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        <div className="absolute inset-0 bg-black/30" />
-        <div className="relative z-10 text-center text-white">
-          <div className="text-4xl md:text-5xl font-extrabold drop-shadow">여행의 시작, NAVI ✈️</div>
-          <p className="mt-2 text-lg opacity-90">당신의 다음 여정을 지금 찾아보세요</p>
-        </div>
-      </div>
+      <HeroSection />
 
       {/* 여행지 섹션 */}
       <SectionSwiper
@@ -101,7 +94,7 @@ const UserMainPage = () => {
         data={travelSlides}
         type="travel"
         navigate={navigate}
-        loading={loading}
+        loading={loadingTravel}
       />
 
       {/* 숙소 섹션 */}
@@ -110,7 +103,7 @@ const UserMainPage = () => {
         data={hotelSlides}
         type="accommodation"
         navigate={navigate}
-        loading={false}
+        loading={loadingAcc}
       />
     </MainLayout>
   );
@@ -171,19 +164,23 @@ const SectionSwiper = ({ title, data, type, navigate, loading }) => {
               {data.map((d) => (
                 <SwiperSlide key={d.id || d.travelId}>
                   <div
-                    onClick={() =>
-                      navigate(
-                        type === "travel"
-                          ? `/travel/detail/${d.travelId}`
-                          : `/accommodation/detail/${d.id}`
-                      )
-                    }
+                    onClick={() => {
+                      if (type === "travel") {
+                        navigate(`/travel/detail/${d.travelId}`);
+                      } else if (type === "accommodation") {
+                        navigate(`/accommodations/detail?accId=${d.id}`);
+                      }
+                    }}
                     className="cursor-pointer border rounded-xl overflow-hidden hover:shadow-lg hover:-translate-y-1 transition bg-white"
                   >
                     <div
                       className="h-40 w-full bg-gray-100"
                       style={{
-                        backgroundImage: `url('${d.thumbnailPath || d.imagePath || d.image || "/img/placeholder.jpg"
+                        backgroundImage: `url('${d.thumbnailPath
+                          ? d.thumbnailPath.startsWith("/images")
+                            ? `${API_SERVER_HOST}${d.thumbnailPath}`
+                            : d.thumbnailPath
+                          : d.imagePath || d.image || d.mainImage || "/img/placeholder.jpg"
                           }')`,
                         backgroundSize: "cover",
                         backgroundPosition: "center",
@@ -199,9 +196,16 @@ const SectionSwiper = ({ title, data, type, navigate, loading }) => {
                         </Tag>
                       </div>
                       <div className="flex flex-wrap gap-2 text-xs">
-                        <Tag>조회 {(d.views ?? d.viewsCount ?? 0).toLocaleString()}</Tag>
-                        <Tag>좋아요 {(d.likes ?? d.likesCount ?? 0).toLocaleString()}</Tag>
-                        <Tag>북마크 {(d.bookmarks ?? d.bookmarkCount ?? 0).toLocaleString()}</Tag>
+                        <Tag>
+                          조회 {(d.views ?? d.viewsCount ?? 0).toLocaleString()}
+                        </Tag>
+                        <Tag>
+                          좋아요 {(d.likes ?? d.likesCount ?? 0).toLocaleString()}
+                        </Tag>
+                        <Tag>
+                          북마크{" "}
+                          {(d.bookmarks ?? d.bookmarkCount ?? 0).toLocaleString()}
+                        </Tag>
                       </div>
                     </div>
                   </div>
@@ -209,8 +213,9 @@ const SectionSwiper = ({ title, data, type, navigate, loading }) => {
               ))}
             </Swiper>
 
-            {/* 하단 점 페이지네이션 */}
-            <div className={`custom-pagination-${type} mt-6 flex justify-center`} />
+            <div
+              className={`custom-pagination-${type} mt-6 flex justify-center`}
+            />
           </>
         )}
       </Card>

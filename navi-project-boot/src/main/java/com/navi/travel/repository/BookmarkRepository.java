@@ -33,4 +33,8 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
 
     // 북마크한 유저의 데이터 검색
     List<Bookmark> findByUser_No(Long userNo);
+
+    @Modifying
+    @Query("DELETE FROM Like l WHERE l.user.no = :userNo AND l.travel.travelId = :travelId")
+    void deleteByUser_NoAndTravel_TravelId(@Param("userNo") Long userNo, @Param("travelId") Long travelId);
 }

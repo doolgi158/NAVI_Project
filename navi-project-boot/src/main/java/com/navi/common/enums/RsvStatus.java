@@ -6,4 +6,5 @@ public enum RsvStatus {
     CANCELLED,      // 예약 취소
     REFUNDED,       // 환불 완료
     FAILED,         // 예약 또는 결제 실패
+    COMPLETE,       // 이용 완료
 }

@@ -10,14 +10,13 @@ function NoticeDetail() {
   const navigate = useNavigate();
   const [notice, setNotice] = useState(null);
   const [loading, setLoading] = useState(true);
-  const API_BASE_URL = 'http://localhost:8080';
 
   useEffect(() => {
     if (noticeNo) {
       fetchNotice();
     } else {
       alert('잘못된 접근입니다.');
-      navigate('/notice');
+      navigate('/client/notice');
     }
   }, [noticeNo, navigate]);
 
@@ -25,13 +24,11 @@ function NoticeDetail() {
     try {
       setLoading(true);
       const data = await getNoticeById(noticeNo);
-      console.log('공지사항 데이터:', data);
-      console.log('이미지 경로:', data.noticeImage);
       setNotice(data);
     } catch (error) {
       console.error('공지사항을 불러오는데 실패했습니다:', error);
       alert('공지사항을 불러오는데 실패했습니다.');
-      navigate('/notice');
+      navigate('/client/notice');
     } finally {
       setLoading(false);
     }
@@ -91,41 +88,24 @@ function NoticeDetail() {
         )}
       </div>
 
-      {/* 이미지 표시 영역 */}
-      {notice.noticeImage && (
-        <div className="notice-image">
-          <img 
-            src={notice.noticeImage}
-            alt={notice.noticeTitle}
-            onError={(e) => {
-              console.error('이미지 로딩 실패:', e.target.src);
-              e.target.style.display = 'none';
-            }}
-            onLoad={(e) => {
-              console.log('이미지 로딩 성공:', e.target.src);
-            }}
-          />
-        </div>
-      )}
-
       <div className="notice-content">
-        <h3></h3>
+        <h3>내용</h3>
         <div className="content-text">
           {notice.noticeContent}
         </div>
       </div>
 
-      {notice.noticeFile && (
+      {notice.noticeAttachFile && (
         <div className="notice-attachment">
           <span className="label">첨부파일:</span>
-          <a href={notice.noticeFile} download>
-            {notice.noticeFile.split('/').pop()}
+          <a href={notice.noticeAttachFile} download>
+            {notice.noticeAttachFile}
           </a>
         </div>
       )}
 
       <div className="button-group">
-        <button onClick={() => navigate('/notice')}>목록</button>
+        <button onClick={() => navigate('/client/notice')}>목록</button>
       </div>
     </div>
     </MainLayout>

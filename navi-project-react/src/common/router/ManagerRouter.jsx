@@ -1,4 +1,5 @@
 import { lazy, Suspense } from "react";
+import ProtectedRoute from "./ProtectedRoute.jsx";
 
 const Loading = <div>로딩 중...</div>;
 
@@ -16,7 +17,7 @@ const ManagerRouter = () => {
     // 관리자 - 공지사항
     {
       key: "manager-notice-list",
-      path: "notice",  // ✅ /adm/notice
+      path: "notice",
       element: (
         <Suspense fallback={Loading}>
           <ManagerNoticeList />
@@ -25,7 +26,7 @@ const ManagerRouter = () => {
     },
     {
       key: "manager-notice-write",
-      path: "notice/write",  // ✅ /adm/notice/write
+      path: "notice/write",
       element: (
         <Suspense fallback={Loading}>
           <ManagerNoticeWrite />
@@ -34,7 +35,7 @@ const ManagerRouter = () => {
     },
     {
       key: "manager-notice-detail",
-      path: "notice/detail",  // ✅ /adm/notice/detail
+      path: "notice/detail",
       element: (
         <Suspense fallback={Loading}>
           <ManagerNoticeDetail />
@@ -45,16 +46,18 @@ const ManagerRouter = () => {
     // 관리자 - 게시판
     {
       key: "manager-board-list",
-      path: "board",  // ✅ /adm/board (adm 제거!)
+      path: "board",
       element: (
         <Suspense fallback={Loading}>
-          <ManagerBoardList />
+          <ProtectedRoute requiredRole="ADMIN">
+            <ManagerBoardList />
+          </ProtectedRoute>
         </Suspense>
       ),
     },
     {
       key: "manager-board-detail",
-      path: "board/detail",  // ✅ /adm/board/detail (adm 제거!)
+      path: "board/detail",
       element: (
         <Suspense fallback={Loading}>
           <ManagerBoardDetail />

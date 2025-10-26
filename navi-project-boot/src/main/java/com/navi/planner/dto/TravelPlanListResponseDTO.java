@@ -5,14 +5,16 @@ import com.navi.planner.domain.TravelPlanDay;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-@Data
+@Getter
+@Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class TravelPlanListResponseDTO {
 
     private Long planId;
@@ -21,21 +23,10 @@ public class TravelPlanListResponseDTO {
     private LocalDate startDate;
     private LocalDate endDate;
     private String thumbnailPath;
-    private LocalTime startTime;
-    private LocalTime endTime;
-    private List<String> travels;
+    private int totalDays;
+    private Set<String> travelTitles; // 여행지 이름 요약용
 
-    public static TravelPlanListResponseDTO of(TravelPlan plan) {
-
-
-        List<String> travelTitles = plan.getDays() != null
-                ? plan.getDays().stream()
-                .map(TravelPlanDay::getPlanTitle)
-                .filter(title -> title != null && !title.isBlank())
-                .limit(5) // 최대 5개만 요약으로
-                .collect(Collectors.toList())
-                : List.of();
-
+    public static TravelPlanListResponseDTO fromEntity(TravelPlan plan) {
         return TravelPlanListResponseDTO.builder()
                 .planId(plan.getPlanId())
                 .title(plan.getTitle())
@@ -43,9 +34,19 @@ public class TravelPlanListResponseDTO {
                 .startDate(plan.getStartDate())
                 .endDate(plan.getEndDate())
                 .thumbnailPath(plan.getThumbnailPath())
-                .startTime(plan.getStartTime())
-                .endTime(plan.getEndTime())
-                .travels(travelTitles)
+                .totalDays(plan.getDays() != null ? plan.getDays().size() : 0)
+                .travelTitles(plan.getDays() != null
+                        ? plan.getDays().stream()
+                        .sorted((d1, d2) -> Integer.compare(d1.getOrderNo(), d2.getOrderNo()))
+                        .flatMap(day -> day.getItems().stream())
+                        .filter(item ->
+                                "travel".equals(item.getType()) ||
+                                        "stay".equals(item.getType()))
+                        .map(item -> item.getTitle())
+                        .filter(title -> title != null && !title.isBlank())
+                        .distinct() // 중복 제거
+                        .collect(Collectors.toCollection(LinkedHashSet::new))
+                        : Collections.emptySet())
                 .build();
     }
 }

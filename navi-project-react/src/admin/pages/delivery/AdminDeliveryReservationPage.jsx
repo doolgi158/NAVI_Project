@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
     Table,
     Typography,
@@ -17,6 +17,7 @@ import {
     ReloadOutlined,
     EditOutlined,
     DeleteOutlined,
+    SearchOutlined,
 } from "@ant-design/icons";
 import axios from "axios";
 import dayjs from "dayjs";
@@ -33,19 +34,85 @@ const AdminDeliveryReservationPage = () => {
     const [modalVisible, setModalVisible] = useState(false);
     const [bags, setBags] = useState({ S: 0, M: 0, L: 0 });
 
-    /** ✅ JSON 문자열을 보기 좋은 텍스트로 변환 */
-    const formatBagsJson = (jsonString) => {
-        if (!jsonString) return "-";
-        try {
-            const bags = JSON.parse(jsonString);
-            const labels = { S: "소형", M: "중형", L: "대형" };
-            return Object.entries(bags)
-                .filter(([_, count]) => count > 0)
-                .map(([k, v]) => `${labels[k]} ${v}개`)
-                .join(" / ") || "-";
-        } catch {
-            return jsonString;
+    // ✅ 검색 관련 상태
+    const [searchText, setSearchText] = useState("");
+    const [searchedColumn, setSearchedColumn] = useState("");
+    const searchInput = useRef(null);
+
+    /** ✅ 카카오 주소검색 스크립트 로드 */
+    useEffect(() => {
+        if (!window.daum || !window.daum.Postcode) {
+            const script = document.createElement("script");
+            script.src = "//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+            script.async = true;
+            document.body.appendChild(script);
         }
+        fetchReservations();
+    }, []);
+
+    /** ✅ 검색 필터 설정 */
+    const getColumnSearchProps = (dataIndex, placeholder) => ({
+        filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+            <div style={{ padding: 8 }}>
+                <Input
+                    ref={searchInput}
+                    placeholder={placeholder || `${dataIndex} 검색`}
+                    value={selectedKeys[0]}
+                    onChange={(e) =>
+                        setSelectedKeys(e.target.value ? [e.target.value] : [])
+                    }
+                    onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+                    style={{ marginBottom: 8, display: "block" }}
+                />
+                <Space>
+                    <Button
+                        type="primary"
+                        onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
+                        icon={<SearchOutlined />}
+                        size="small"
+                        style={{ width: 90 }}
+                    >
+                        검색
+                    </Button>
+                    <Button
+                        onClick={() => handleReset(clearFilters)}
+                        size="small"
+                        style={{ width: 90 }}
+                    >
+                        초기화
+                    </Button>
+                </Space>
+            </div>
+        ),
+        filterIcon: (filtered) => (
+            <SearchOutlined style={{ color: filtered ? "#1677ff" : undefined }} />
+        ),
+        onFilter: (value, record) =>
+            record[dataIndex]
+                ? record[dataIndex].toString().toLowerCase().includes(value.toLowerCase())
+                : "",
+        onFilterDropdownOpenChange: (visible) => {
+            if (visible) {
+                setTimeout(() => searchInput.current?.select(), 100);
+            }
+        },
+        render: (text) =>
+            searchedColumn === dataIndex ? (
+                <span style={{ backgroundColor: "#ffc069", padding: 0 }}>{text}</span>
+            ) : (
+                text
+            ),
+    });
+
+    const handleSearch = (selectedKeys, confirm, dataIndex) => {
+        confirm();
+        setSearchText(selectedKeys[0]);
+        setSearchedColumn(dataIndex);
+    };
+
+    const handleReset = (clearFilters) => {
+        clearFilters();
+        setSearchText("");
     };
 
     /** ✅ 예약 목록 불러오기 */
@@ -62,284 +129,201 @@ const AdminDeliveryReservationPage = () => {
         }
     };
 
-    useEffect(() => {
-        fetchReservations();
-    }, []);
+    /** ✅ 카카오 주소검색 핸들러 */
+    const handleAddressSearch = (fieldName) => {
+        new window.daum.Postcode({
+            oncomplete: function (data) {
+                const fullAddress = data.address;
+                form.setFieldValue(fieldName, fullAddress);
+            },
+        }).open();
+    };
 
-    /** ✅ 수정 모달 열기 */
-    const openModal = (record) => {
+    /** ✅ 수정 버튼 클릭 시 모달 열기 */
+    const handleEdit = (record) => {
         setEditing(record);
-        form.setFieldsValue({
-            ...record,
-            deliveryDate: record.deliveryDate ? dayjs(record.deliveryDate) : null,
-        });
+
+        // ✅ bagsJson 파싱
+        let parsedBags = { S: 0, M: 0, L: 0 };
         try {
-            const parsed = record?.bagsJson
-                ? JSON.parse(record.bagsJson)
-                : { S: 0, M: 0, L: 0 };
-            setBags({
-                S: parsed.S || 0,
-                M: parsed.M || 0,
-                L: parsed.L || 0,
-            });
-        } catch {
-            setBags({ S: 0, M: 0, L: 0 });
+            if (record.bagsJson) {
+                parsedBags = JSON.parse(record.bagsJson);
+            }
+        } catch (e) {
+            console.error("bagsJson 파싱 오류:", e);
         }
+        setBags(parsedBags);
+
+        form.setFieldsValue({
+            startAddr: record.startAddr,
+            endAddr: record.endAddr,
+            deliveryDate: record.deliveryDate ? dayjs(record.deliveryDate) : null,
+            totalPrice: record.totalPrice,
+            status: record.status,
+        });
         setModalVisible(true);
     };
 
-    /** ✅ 수정 요청 */
-    const handleSubmit = async () => {
+    /** ✅ 수정 확정 */
+    const handleUpdate = async () => {
         try {
             const values = await form.validateFields();
             const payload = {
-                ...values,
-                deliveryDate: values.deliveryDate
-                    ? dayjs(values.deliveryDate).format("YYYY-MM-DD")
-                    : null,
+                ...editing,
+                startAddr: values.startAddr,
+                endAddr: values.endAddr,
+                status: values.status,
                 bagsJson: JSON.stringify(bags),
             };
-
             await axios.put(`${API}/${editing.drsvId}`, payload);
             message.success("예약 정보가 수정되었습니다.");
-
-            // ✅ 목록 즉시 갱신 (fetch 없이 상태 업데이트)
-            setReservations((prev) =>
-                prev.map((r) =>
-                    r.drsvId === editing.drsvId ? { ...r, ...payload } : r
-                )
-            );
-
             setModalVisible(false);
-            setEditing(null);
+            fetchReservations();
         } catch (err) {
-            console.error(err);
-            message.error("처리 중 오류가 발생했습니다.");
+            message.error("수정 실패");
         }
     };
 
-    /** ✅ 예약 삭제 */
-    const handleDelete = async (drsvId) => {
+    /** ✅ 삭제 */
+    const handleDelete = async (record) => {
         Modal.confirm({
-            title: "예약 삭제",
-            content: "정말로 이 예약을 삭제하시겠습니까?",
+            title: "예약 삭제 확인",
+            content: `예약 ID ${record.drsvId}를 정말 삭제하시겠습니까?`,
             okText: "삭제",
+            okType: "danger",
             cancelText: "취소",
-            okButtonProps: { danger: true },
-            onOk: async () => {
+            async onOk() {
                 try {
-                    await axios.delete(`${API}/${drsvId}`);
-                    message.success("예약이 삭제되었습니다.");
-                    setReservations((prev) => prev.filter((r) => r.drsvId !== drsvId));
+                    await axios.delete(`${API}/${record.drsvId}`);
+                    message.success("삭제 완료");
+                    fetchReservations();
                 } catch {
-                    message.error("삭제 중 오류가 발생했습니다.");
+                    message.error("삭제 실패");
                 }
             },
         });
     };
 
-    /** ✅ 카카오 주소검색 (모달 대응 버전) */
-    const handleAddressSearch = (field) => {
-        setTimeout(() => {
-            new window.daum.Postcode({
-                oncomplete: (data) => {
-                    const fullAddress = data.address;
-                    setTimeout(() => {
-                        form.setFieldsValue({ [field]: fullAddress });
-                    }, 100);
-                },
-            }).open();
-        }, 0);
-    };
-
-    /** ✅ 수정 모달 내부 Form */
-    const renderModalForm = () => (
-        <Form form={form} layout="vertical">
-            <Form.Item label="회원 번호" name="userNo">
-                <InputNumber disabled style={{ width: "100%" }} />
-            </Form.Item>
-
-            <Form.Item label="회원명" name="userName">
-                <Input disabled />
-            </Form.Item>
-
-            {/* ✅ 가방 수량 수정 */}
-            <Form.Item label="가방 수량 수정">
-                <div className="grid grid-cols-3 gap-3">
-                    {["S", "M", "L"].map((size) => (
-                        <div
-                            key={size}
-                            className="flex flex-col items-center border rounded-md p-2"
-                        >
-                            <Typography.Text strong>
-                                {size === "S"
-                                    ? "소형"
-                                    : size === "M"
-                                        ? "중형"
-                                        : "대형"}
-                            </Typography.Text>
-                            <InputNumber
-                                min={0}
-                                value={bags[size]}
-                                onChange={(val) =>
-                                    setBags((prev) => ({ ...prev, [size]: val ?? 0 }))
-                                }
-                            />
-                        </div>
-                    ))}
-                </div>
-            </Form.Item>
-
-            {/* ✅ 주소 입력 */}
-            <Form.Item label="출발지 주소" required>
-                <Space.Compact style={{ width: "100%" }}>
-                    <Form.Item
-                        name="startAddr"
-                        noStyle
-                        rules={[{ required: true, message: "출발지 주소를 입력하세요." }]}
-                    >
-                        <Input readOnly placeholder="주소를 검색하세요" />
-                    </Form.Item>
-                    <Button
-                        type="default"
-                        onClick={() => handleAddressSearch("startAddr")}
-                        style={{ minWidth: 70 }}
-                    >
-                        검색
-                    </Button>
-                </Space.Compact>
-            </Form.Item>
-
-            <Form.Item label="도착지 주소" required>
-                <Space.Compact style={{ width: "100%" }}>
-                    <Form.Item
-                        name="endAddr"
-                        noStyle
-                        rules={[{ required: true, message: "도착지 주소를 입력하세요." }]}
-                    >
-                        <Input readOnly placeholder="주소를 검색하세요" />
-                    </Form.Item>
-                    <Button
-                        type="default"
-                        onClick={() => handleAddressSearch("endAddr")}
-                        style={{ minWidth: 70 }}
-                    >
-                        검색
-                    </Button>
-                </Space.Compact>
-            </Form.Item>
-
-            <Form.Item
-                label="배송일"
-                name="deliveryDate"
-                rules={[{ required: true, message: "배송일을 선택하세요." }]}
-            >
-                <DatePicker
-                    style={{ width: "100%" }}
-                    disabledDate={(current) =>
-                        current && current < dayjs().startOf("day")
-                    }
-                />
-            </Form.Item>
-
-            <Form.Item
-                label="총 금액"
-                name="totalPrice"
-                rules={[{ required: true, message: "총 금액을 입력하세요." }]}
-            >
-                <InputNumber style={{ width: "100%" }} />
-            </Form.Item>
-
-            <Form.Item
-                label="상태"
-                name="status"
-                rules={[{ required: true, message: "상태를 선택하세요." }]}
-            >
-                <Select>
-                    <Option value="PENDING">PENDING</Option>
-                    <Option value="PAID">PAID</Option>
-                    <Option value="CANCELLED">CANCELLED</Option>
-                    <Option value="FAILED">FAILED</Option>
-                </Select>
-            </Form.Item>
-        </Form>
-    );
-
     /** ✅ 테이블 컬럼 정의 */
     const columns = [
-        { title: "예약 ID", dataIndex: "drsvId", key: "drsvId", width: 160, align: "center" },
-        { title: "회원명", dataIndex: "userName", key: "userName", width: 120, align: "center" },
+        {
+            title: "예약 ID",
+            dataIndex: "drsvId",
+            key: "drsvId",
+            width: 160,
+            align: "center",
+            sorter: (a, b) => a.drsvId.localeCompare(b.drsvId),
+            ...getColumnSearchProps("drsvId", "예약 ID 검색"),
+        },
+        {
+            title: "회원명",
+            dataIndex: "userName",
+            key: "userName",
+            align: "center",
+            sorter: (a, b) => a.userName.localeCompare(b.userName),
+            ...getColumnSearchProps("userName", "회원명 검색"),
+        },
         {
             title: "출발지",
             dataIndex: "startAddr",
             key: "startAddr",
+            align: "center",
             width: 200,
             ellipsis: true,
-            align: "center",
+            sorter: (a, b) => a.startAddr.localeCompare(b.startAddr),
+            ...getColumnSearchProps("startAddr", "출발지 검색"),
         },
         {
             title: "도착지",
             dataIndex: "endAddr",
             key: "endAddr",
+            align: "center",
             width: 200,
             ellipsis: true,
-            align: "center",
-        },
-        {
-            title: "가방 정보",
-            dataIndex: "bagsJson",
-            key: "bagsJson",
-            width: 180,
-            align: "center",
-            render: (v) => formatBagsJson(v),
-        },
-        {
-            title: "총 금액",
-            dataIndex: "totalPrice",
-            key: "totalPrice",
-            width: 120,
-            align: "center",
-            render: (v) => (v ? v.toLocaleString() + "원" : "-"),
-        },
-        {
-            title: "배송일",
-            dataIndex: "deliveryDate",
-            key: "deliveryDate",
-            width: 140,
-            align: "center",
-            render: (v) => (v ? dayjs(v).format("YYYY-MM-DD") : "-"),
+            sorter: (a, b) => a.endAddr.localeCompare(b.endAddr),
+            ...getColumnSearchProps("endAddr", "도착지 검색"),
         },
         {
             title: "상태",
             dataIndex: "status",
             key: "status",
-            width: 120,
             align: "center",
+            sorter: (a, b) => a.status.localeCompare(b.status),
+            filters: [
+                { text: "PENDING", value: "PENDING" },
+                { text: "PAID", value: "PAID" },
+                { text: "CANCELLED", value: "CANCELLED" },
+                { text: "FAILED", value: "FAILED" },
+                { text: "COMPLETE", value: "COMPLETE" },
+            ],
+            onFilter: (value, record) => record.status === value,
             render: (value) => {
-                const statusColors = {
+                const colors = {
                     PENDING: "default",
                     PAID: "blue",
                     CANCELLED: "volcano",
                     FAILED: "red",
+                    COMPLETE: "green",
                 };
-                return <Tag color={statusColors[value]}>{value}</Tag>;
+                return <Tag color={colors[value]}>{value}</Tag>;
             },
+        },
+        {
+            title: "가방 정보",
+            dataIndex: "bagsJson",
+            align: "center",
+            render: (v) => {
+                if (!v) return "-";
+                try {
+                    const b = JSON.parse(v);
+                    return `S : ${b.S || 0} / M : ${b.M || 0} / L : ${b.L || 0}`;
+                } catch {
+                    return "-";
+                }
+            },
+        },
+        {
+            title: "배송일",
+            dataIndex: "deliveryDate",
+            align: "center",
+            sorter: (a, b) => new Date(a.deliveryDate) - new Date(b.deliveryDate),
+            render: (v) => (v ? dayjs(v).format("YYYY-MM-DD") : "-"),
+        },
+        {
+            title: "총 금액",
+            dataIndex: "totalPrice",
+            align: "center",
+            sorter: (a, b) => a.totalPrice - b.totalPrice,
+            render: (v) => (v ? v.toLocaleString() + "원" : "-"),
+        },
+        {
+            title: "등록일",
+            dataIndex: "createdAt",
+            align: "center",
+            sorter: (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
+            render: (t) => (t ? dayjs(t).format("YYYY-MM-DD HH:mm") : "-"),
+        },
+        {
+            title: "수정일",
+            dataIndex: "updatedAt",
+            align: "center",
+            sorter: (a, b) => new Date(a.updatedAt) - new Date(b.updatedAt),
+            render: (t) => (t ? dayjs(t).format("YYYY-MM-DD HH:mm") : "-"),
         },
         {
             title: "관리",
             key: "action",
-            width: 180,
             align: "center",
             fixed: "right",
             render: (_, record) => (
                 <Space>
-                    <Button icon={<EditOutlined />} onClick={() => openModal(record)}>
+                    <Button icon={<EditOutlined />} onClick={() => handleEdit(record)}>
                         수정
                     </Button>
                     <Button
                         icon={<DeleteOutlined />}
                         danger
-                        onClick={() => handleDelete(record.drsvId)}
+                        onClick={() => handleDelete(record)}
                     >
                         삭제
                     </Button>
@@ -365,21 +349,198 @@ const AdminDeliveryReservationPage = () => {
                 bordered
                 style={{
                     minWidth: "100%",
-                    tableLayout: "auto",  // ✅ 자동 폭 계산
-                    whiteSpace: "nowrap", // ✅ 줄바꿈 방지
+                    tableLayout: "auto",
+                    whiteSpace: "nowrap",
                 }}
                 scroll={{ x: "max-content" }}
             />
 
+            {/* ✅ 수정 모달 */}
+            {/* ✅ 배송 예약 수정 모달 */}
             <Modal
+                title="배송 예약 수정"
                 open={modalVisible}
-                title="예약 수정"
                 onCancel={() => setModalVisible(false)}
-                onOk={handleSubmit}
-                okText="수정"
+                onOk={handleUpdate}
+                okText="변경 완료"
+                cancelText="취소"
+                centered
+                width={500}
             >
-                {renderModalForm()}
+                <Form form={form} layout="vertical" style={{ marginTop: 8 }}>
+                    {/* ✅ 출발지 주소 */}
+                    <Form.Item label="출발지 주소">
+                        <div
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                background: "#f9f9f9",
+                                borderRadius: 8,
+                                boxShadow: "inset 0 1px 2px rgba(0,0,0,0.08)",
+                                border: "1px solid #ddd",
+                                overflow: "hidden",
+                            }}
+                        >
+                            {/* 바인딩은 이 안쪽 Form.Item이 담당 */}
+                            <Form.Item name="startAddr" noStyle>
+                                <Input
+                                    readOnly
+                                    style={{
+                                        flex: 1,
+                                        border: "none",
+                                        background: "transparent",
+                                        padding: "10px 12px",
+                                        fontSize: 14,
+                                    }}
+                                />
+                            </Form.Item>
+
+                            <Button
+                                onClick={() => handleAddressSearch("startAddr")}
+                                style={{
+                                    border: "none",
+                                    borderLeft: "1px solid #ddd",
+                                    borderRadius: 0,
+                                    background: "#f9f9f9",
+                                    height: "100%",
+                                    fontWeight: 500,
+                                }}
+                                onMouseEnter={(e) => (e.currentTarget.style.background = "#efefef")}
+                                onMouseLeave={(e) => (e.currentTarget.style.background = "#f9f9f9")}
+                            >
+                                주소검색
+                            </Button>
+                        </div>
+                    </Form.Item>
+
+                    {/* ✅ 도착지 주소 */}
+                    <Form.Item label="도착지 주소">
+                        <div
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                background: "#f9f9f9",
+                                borderRadius: 8,
+                                boxShadow: "inset 0 1px 2px rgba(0,0,0,0.08)",
+                                border: "1px solid #ddd",
+                                overflow: "hidden",
+                            }}
+                        >
+                            <Form.Item name="endAddr" noStyle>
+                                <Input
+                                    readOnly
+                                    style={{
+                                        flex: 1,
+                                        border: "none",
+                                        background: "transparent",
+                                        padding: "10px 12px",
+                                        fontSize: 14,
+                                    }}
+                                />
+                            </Form.Item>
+
+                            <Button
+                                onClick={() => handleAddressSearch("endAddr")}
+                                style={{
+                                    border: "none",
+                                    borderLeft: "1px solid #ddd",
+                                    borderRadius: 0,
+                                    background: "#f9f9f9",
+                                    height: "100%",
+                                    fontWeight: 500,
+                                }}
+                                onMouseEnter={(e) => (e.currentTarget.style.background = "#efefef")}
+                                onMouseLeave={(e) => (e.currentTarget.style.background = "#f9f9f9")}
+                            >
+                                주소검색
+                            </Button>
+                        </div>
+                    </Form.Item>
+
+                    {/* ✅ 배송일 */}
+                    <Form.Item label="배송일" name="deliveryDate">
+                        <DatePicker style={{ width: "100%" }} disabled />
+                    </Form.Item>
+
+                    {/* ✅ 총 금액 */}
+                    <Form.Item label="총 금액" name="totalPrice">
+                        <InputNumber
+                            style={{
+                                width: "100%",
+                                background: "#f9f9f9",
+                                borderRadius: 8,
+                            }}
+                            disabled
+                        />
+                    </Form.Item>
+
+                    {/* ✅ 가방 개수 */}
+                    <Form.Item label="가방 개수">
+                        <div
+                            style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                gap: 8,
+                            }}
+                        >
+                            {["S", "M", "L"].map((size) => (
+                                <div
+                                    key={size}
+                                    style={{
+                                        flex: 1,
+                                        background: "#f9f9f9",
+                                        borderRadius: 8,
+                                        border: "1px solid #ddd",
+                                        boxShadow: "inset 0 1px 2px rgba(0,0,0,0.08)",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        padding: "4px 8px",
+                                    }}
+                                >
+                                    <span
+                                        style={{
+                                            width: 20,
+                                            fontWeight: 600,
+                                            color: "#666",
+                                            marginRight: 8,
+                                        }}
+                                    >
+                                        {size}
+                                    </span>
+                                    <InputNumber
+                                        min={0}
+                                        value={bags[size]}
+                                        onChange={(v) => setBags({ ...bags, [size]: v || 0 })}
+                                        style={{
+                                            width: "100%",
+                                            border: "none",
+                                            background: "transparent",
+                                        }}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    </Form.Item>
+
+                    {/* ✅ 상태 */}
+                    <Form.Item name="status" label="상태">
+                        <Select
+                            style={{
+                                width: "100%",
+                                borderRadius: 8,
+                            }}
+                            options={[
+                                { value: "PENDING", label: "PENDING" },
+                                { value: "PAID", label: "PAID" },
+                                { value: "CANCELLED", label: "CANCELLED" },
+                                { value: "FAILED", label: "FAILED" },
+                                { value: "COMPLETE", label: "COMPLETE" },
+                            ]}
+                        />
+                    </Form.Item>
+                </Form>
             </Modal>
+
         </AdminSectionCard>
     );
 };

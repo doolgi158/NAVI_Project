@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { setVerifyData, clearPaymentData } from "../slice/paymentSlice";
 import { preparePayment, verifyPayment } from "../api/paymentService";
 import { initIamport } from "../util/iamport";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 
 /* =================================================================
 	[usePayment Hook]
@@ -14,9 +14,12 @@ import { useRef } from "react";
 export const usePayment = () => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
-	
+
 	const payment = useSelector((state) => state.payment);
 	const { items, rsvType, formData, totalAmount, paymentMethod } = payment;
+	console.log("************************", paymentMethod, rsvType);
+	console.log("************************", items);
+
 
 	const isProcessingRef = useRef(false);
 
@@ -50,6 +53,10 @@ export const usePayment = () => {
 			// 결제 ID 생성
 			const pgMethod = paymentMethod || "KAKAOPAY";
 			const reserveIds = items?.map((item) => item.reserveId) || [];
+			
+			console.log("🧩 rsvType:", rsvType);
+			console.log("🧩 items:", items);
+			console.log("🧩 reserveIds:", reserveIds);
 
 			const prepareRes = await preparePayment({
 				rsvType: rsvType?.toUpperCase(),
@@ -57,7 +64,7 @@ export const usePayment = () => {
 				totalAmount: amount,
 				paymentMethod: pgMethod,
 			});
-			const merchantId = prepareRes.merchantId;
+			const merchantId = prepareRes?.merchantId;
 
 			// === 2️⃣ PG 설정 ===
 			let pg;
@@ -75,20 +82,36 @@ export const usePayment = () => {
 					pg = "kakaopay.TC0ONETIME";
 			}
 
+			console.log("**************************", pg);
 			const payData = {
 				pg,
-				pay_method: pgMethod,
+				pay_method: "card",
 				merchant_uid: merchantId,
 				name: `${rsvType} 예약 결제`,
 				amount,
-				buyer_name: formData?.name || formData?.senderName,
-				buyer_tel: formData?.phone,
-				buyer_email: formData?.email,
+				//buyer_name: formData?.name || formData?.senderName,
+				//buyer_tel: formData?.phone,
+				//buyer_email: formData?.email,
 			};
 
 			/* 결제 요청 */
 			IMP.request_pay(payData, async (rsp) => {
+				console.log("💬 [PortOne 응답]", rsp);
+
 				if (!rsp.success) {
+					// 결제창을 사용자가 직접 닫은 경우
+					if (
+						rsp.error_code === "CANCEL" ||
+						rsp.error_msg?.includes("취소") ||
+						rsp.error_msg?.includes("닫기") ||
+						rsp.error_msg?.includes("cancel")
+					) {
+						message.info("결제가 취소되었습니다. 다른 결제수단을 선택할 수 있습니다.");
+						isProcessingRef.current = false;
+						return; // 페이지 이동 X
+					}
+
+					// 기타 결제 실패(네트워크/금액 오류 등)
 					message.error(`❌ 결제 실패: ${rsp.error_msg || "알 수 없는 오류"}`);
 					navigate("/payment/result", { state: { error: rsp.error_msg } });
 					isProcessingRef.current = false;

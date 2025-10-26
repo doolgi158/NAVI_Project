@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import { setlogin, setlogout } from "../slice/loginSlice";
 import { useNavigate } from "react-router-dom";
 import { message, Modal } from "antd";
-import { API_SERVER_HOST } from "../api/naviApi";
+import { API_SERVER_HOST, setAuthTokens } from "../api/naviApi";
 
 export const useLogin = () => {
   const dispatch = useDispatch();
@@ -25,22 +25,28 @@ export const useLogin = () => {
 
       // 상태 코드별 처리
       if (response.status === 200) {
-        const { accessToken, refreshToken, username, roles, ip, userNo, id } = response.data;
+        const { accessToken, refreshToken, user } = response.data.data;
+        const { id, name, no: userNo, role, email, phone } = user;
 
         // JWT 토큰 저장
-        localStorage.setItem("accessToken", accessToken);
-        localStorage.setItem("refreshToken", refreshToken);
-        localStorage.setItem("username", username);
+        setAuthTokens(accessToken, refreshToken);
+
+        localStorage.setItem("username", name);
         localStorage.setItem("userNo", userNo);
         localStorage.setItem("userId", id);
-
-        axios.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
+        localStorage.setItem("userRole", role?.[0] || "USER");
 
         // Redux 상태 갱신
-        dispatch(setlogin({
-          username: username, accessToken: accessToken, refreshToken: refreshToken,
-          role: roles, ip: ip, userNo: userNo
-        }));
+        dispatch(
+          setlogin({
+            username: name,
+            userId: id,
+            userNo,
+            role,
+            accessToken,
+            refreshToken,
+          })
+        );
 
         await new Promise((resolve) => setTimeout(resolve, 100));
 
@@ -48,12 +54,7 @@ export const useLogin = () => {
         const redirectPath = localStorage.getItem("redirectAfterLogin") || "/";
         localStorage.removeItem("redirectAfterLogin");
 
-        // 관리자 전용 페이지 분기
-        if (Array.isArray(roles) && roles.includes("ADMIN")) {
-          navigate("/adm/dashboard");
-        } else {
-          navigate(redirectPath);
-        }
+        navigate(Array.isArray(role) && role.includes("ADMIN") ? "/adm/dashboard" : redirectPath);
 
         return { success: true, message: "로그인 성공" };
       }
@@ -111,6 +112,11 @@ export const useLogin = () => {
   const logoutUser = () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
+    localStorage.removeItem("userRole");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("userNo");
+    localStorage.removeItem("username");
+    delete api.defaults.headers.common["Authorization"];
     dispatch(setlogout());
   };
 

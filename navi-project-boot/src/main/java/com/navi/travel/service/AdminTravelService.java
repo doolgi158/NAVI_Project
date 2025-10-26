@@ -1,7 +1,9 @@
 package com.navi.travel.service;
 
+import com.navi.travel.domain.Travel;
 import com.navi.travel.dto.admin.AdminTravelDetailResponseDTO;
 import com.navi.travel.dto.admin.AdminTravelListResponseDTO;
+import com.navi.travel.dto.admin.AdminTravelRequestDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -15,5 +17,8 @@ public interface AdminTravelService {
     AdminTravelDetailResponseDTO getAdminTravelDetail(Long travelId);
 
     /** ✅ 상태 일괄 변경 */
-    void updateState(List<Integer> ids, Integer state);
+    void updateState(List<Long> ids, Integer state);
+
+    /** ✅ 등록, 수정 */
+    Travel saveOrUpdateTravel(AdminTravelRequestDTO dto);
 }

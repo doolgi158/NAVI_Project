@@ -25,14 +25,14 @@ export const getNoticeById = async (noticeNo) => {
   return text ? JSON.parse(text) : null;
 };
 
-// 공지사항 검색 (페이징)
-export const searchNotice = async (keyword, page = 0, size = 10) => {
-  const response = await fetch(`${API_URL}/search?keyword=${encodeURIComponent(keyword)}&page=${page}&size=${size}`);
+// 공지사항 검색
+export const searchNotice = async (keyword) => {
+  const response = await fetch(`${API_URL}/search?keyword=${encodeURIComponent(keyword)}`);
   
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
   
   const text = await response.text();
-  return text ? JSON.parse(text) : { notices: [], currentPage: 0, totalPages: 0, totalItems: 0 };
+  return text ? JSON.parse(text) : [];
 };

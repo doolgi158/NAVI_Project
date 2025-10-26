@@ -31,7 +31,6 @@ public class PaymentConfirmRequestDTO {
     @AllArgsConstructor
     @Builder
     public static class ReservePaymentItem {
-        /* ACC, DLV는 1행, FLY는 2행 삽입 */
         private String reserveId;               // 예약 ID (예: 20251012ACC001)
         private BigDecimal amount;              // 결제 금액 (예: 85000)
     }

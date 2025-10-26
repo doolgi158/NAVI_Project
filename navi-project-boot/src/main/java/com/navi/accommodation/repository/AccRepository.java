@@ -12,6 +12,7 @@ import java.util.Optional;
 @Repository
 public interface AccRepository extends JpaRepository<Acc, Long> {
     Optional<Acc> findByContentId(Long contentId);
+
     Optional<Acc> findByAccId(String accId);
 
     /* 전체 숙소 조회 (운영중 + 객실 존재) */
@@ -35,4 +36,7 @@ public interface AccRepository extends JpaRepository<Acc, Long> {
     /* accId 시퀀스 기반 생성용 */
     @Query(value = "SELECT ACC_SEQ.NEXTVAL FROM DUAL", nativeQuery = true)
     Long getNextSeqVal();
+
+    // 조회수 기준 상위 10개 숙소
+    List<Acc> findTop10ByOrderByViewCountDesc();
 }

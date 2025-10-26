@@ -12,11 +12,6 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
-/* ======================[NAVI_PAYMENT_DETAIL]======================
-                            결제 상세 테이블
-    EX) 결제 1건(PaymentMaster)에 속하는 여러 예약 항목별 결제 내역을 관리
-   ================================================================= */
-
 @Getter
 @Builder
 @NoArgsConstructor

@@ -6,8 +6,7 @@ import { Button, Modal, message } from "antd";
 import PlanList from "../plan/components/PlanList";
 import { PlusOutlined } from "@ant-design/icons";
 import { startOfDay, isAfter, isBefore, isSameDay } from "date-fns";
-import api from '../../../common/api/naviApi.js';
-
+import { getCookie } from "@/common/util/cookie";
 
 export default function TravelPlanMain() {
   const [plans, setPlans] = useState([]);
@@ -17,13 +16,25 @@ export default function TravelPlanMain() {
   const pageSize = 5;
   const navigate = useNavigate();
 
+  /** ✅ 여행계획 목록 불러오기 */
   useEffect(() => {
     const fetchPlans = async () => {
       try {
-        const data = await getMyPlans();
-        setPlans(data || []);
+        const res = await getMyPlans();
+
+        // ✅ ApiResponse 구조 대비
+        const planList = Array.isArray(res)
+          ? res
+          : Array.isArray(res?.data)
+            ? res.data
+            : Array.isArray(res?.data?.data)
+              ? res.data.data
+              : [];
+
+        setPlans(planList);
       } catch (err) {
-        console.error("🚨 여행 계획 불러오기 실패:", err);
+        console.error("❌ 여행계획 불러오기 실패:", err);
+        setPlans([]);
       } finally {
         setLoading(false);
       }
@@ -31,6 +42,7 @@ export default function TravelPlanMain() {
     fetchPlans();
   }, []);
 
+  /** ✅ 삭제 기능 */
   const handleDelete = (id) =>
     Modal.confirm({
       title: "여행 삭제",
@@ -41,33 +53,67 @@ export default function TravelPlanMain() {
       onOk: async () => {
         try {
           await deletePlan(id);
-          setPlans((prev) => prev.filter((p) => p.id !== id));
+          setPlans((prev) => prev.filter((p) => p.planId !== id));
           message.success("여행이 삭제되었습니다.");
         } catch {
-          Modal.error({ title: "삭제 실패", content: "삭제 중 오류가 발생했습니다." });
+          Modal.error({
+            title: "삭제 실패",
+            content: "삭제 중 오류가 발생했습니다.",
+          });
         }
       },
     });
 
-  /** ✅ 리스트 클릭 → 상세보기 페이지로 이동 (view 모드) */
+  /** ✅ 상세보기 / 수정 / 새 계획 이동 */
   const handleDetail = (plan) =>
-    navigate(`/plans/planner/detail?planId=${plan.id}&mode=view`);
-
-  /** ✅ 수정 버튼 클릭 → 수정 모드 페이지로 이동 */
+    navigate(`/plans/planner/detail?planId=${plan.planId}&mode=view`);
   const handleEdit = (plan) =>
-    navigate(`/plans/planner/detail?planId=${plan.id}&mode=edit`);
-
-  /** ✅ 상세보기 이동 */
-  const handlePlanClick = (planId) => {
-    navigate(`/plan/detail/${planId}`);
-  };
-
-  /** ✅ 새 계획 생성 */
+    navigate(`/plans/planner/detail?planId=${plan.planId}&mode=edit`);
   const handleCreatePlan = () => navigate("/plans/planner");
+  // const handleCreatePlan = () => {
+  //   try {
+  //     const cookie = getCookie("userCookie");
+  //     if (!cookie) {
+  //       Modal.warning({
+  //         title: "로그인이 필요합니다",
+  //         content: "여행 계획을 세우기 위해서는 로그인이 필요합니다.",
+  //         okText: "확인",
+  //         centered: true,
+  //         onOk: () => navigate("/plans"),
+  //       });
+  //       return;
+  //     }
 
+  //     const user = typeof cookie === "string" ? JSON.parse(cookie) : cookie;
+  //     if (!user?.userId) {
+  //       Modal.warning({
+  //         title: "로그인 정보가 유효하지 않습니다",
+  //         content: "세션이 만료되었거나 로그인 정보가 손상되었습니다.\n다시 로그인해주세요.",
+  //         okText: "확인",
+  //         centered: true,
+  //         onOk: () => navigate("/plans"),
+  //       });
+  //       return;
+  //     }
+
+  // ✅ 로그인된 사용자만 플래너로 이동
+  //   navigate("/plans/planner");
+  // } catch (err) {
+  //   console.error("❌ 로그인 확인 오류:", err);
+  //   Modal.error({
+  //     title: "로그인 오류",
+  //     content: "로그인 정보를 확인하는 중 문제가 발생했습니다.",
+  //     okText: "확인",
+  //     centered: true,
+  //   });
+  // }
+  //   };
+
+  /** ✅ 탭, 페이지네이션 */
   const handlePageChange = (newPage) =>
     setPage((prev) => ({ ...prev, [activeTab]: newPage }));
 
+  /** ✅ 일정 분류 */
   const today = startOfDay(new Date());
 
   const upcomingPlans = plans
@@ -86,6 +132,7 @@ export default function TravelPlanMain() {
 
   const currentList = activeTab === "upcoming" ? upcomingPlans : completedPlans;
 
+  /** ✅ 렌더링 */
   return (
     <MainLayout>
       {/* 상단 배너 */}
@@ -100,7 +147,9 @@ export default function TravelPlanMain() {
           <h2 className="text-3xl font-semibold text-[#1D4E89] mb-2 drop-shadow-sm">
             나를 위한 여행 준비
           </h2>
-          <p className="text-gray-700 text-sm">설렘 가득한 순간이 기다리고 있어요 ✈️</p>
+          <p className="text-gray-700 text-sm">
+            설렘 가득한 순간이 기다리고 있어요 ✈️
+          </p>
         </div>
         <div className="absolute bottom-10 right-16 z-20">
           <Button
@@ -141,7 +190,7 @@ export default function TravelPlanMain() {
           currentPage={page[activeTab]}
           pageSize={pageSize}
           onPageChange={handlePageChange}
-          onDetail={handleDetail}  // ✅ view 모드로 이동
+          onDetail={handleDetail}
           onEdit={handleEdit}
           onDelete={handleDelete}
         />

@@ -82,9 +82,17 @@ public class AdminSeatServiceImpl implements AdminSeatService {
     @Override
     @Transactional
     public void deleteOne(Long seatId) {
-        log.info("[ADMIN] deleteOne() 호출 - seatId={}", seatId);
-        seatRepository.deleteById(seatId);
+        Seat seat = seatRepository.findById(seatId)
+                .orElseThrow(() -> new EntityNotFoundException("좌석을 찾을 수 없습니다: " + seatId));
+
+        if (seat.isReserved()) {
+            throw new IllegalStateException("예약된 좌석은 삭제할 수 없습니다.");
+        }
+
+        seatRepository.delete(seat);
+        log.info("[ADMIN] 좌석 삭제 완료 - seatId={}", seatId);
     }
+
 
     /**
      * ✅ 새 좌석 추가 (빈 번호 자동 탐색)
@@ -131,9 +139,17 @@ public class AdminSeatServiceImpl implements AdminSeatService {
         FlightId id = new FlightId(flightId, depTime);
         Flight flight = flightRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("항공편을 찾을 수 없습니다."));
+
+        boolean hasReservedSeats = flight.getSeats().stream().anyMatch(Seat::isReserved);
+        if (hasReservedSeats) {
+            throw new IllegalStateException("예약된 좌석이 있는 항공편은 초기화할 수 없습니다.");
+        }
+
         seatRepository.deleteByFlight(flight);
         seatInitializer.createSeatsForFlight(flight);
+        log.info("[ADMIN] 좌석 초기화 완료 - flightId={}", flightId);
     }
+
 
     @Override
     @Transactional
@@ -141,8 +157,16 @@ public class AdminSeatServiceImpl implements AdminSeatService {
         FlightId id = new FlightId(flightId, depTime);
         Flight flight = flightRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("항공편을 찾을 수 없습니다."));
+
+        boolean hasReservedSeats = flight.getSeats().stream().anyMatch(Seat::isReserved);
+        if (hasReservedSeats) {
+            throw new IllegalStateException("예약된 좌석이 있는 항공편은 전체 삭제가 불가능합니다.");
+        }
+
         seatRepository.deleteByFlight(flight);
+        log.info("[ADMIN] 좌석 전체 삭제 완료 - flightId={}", flightId);
     }
+
 
     @Override
     public List<AdminSeatDTO> getAllSeats() {

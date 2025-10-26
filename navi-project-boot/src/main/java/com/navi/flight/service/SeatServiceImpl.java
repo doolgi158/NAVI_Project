@@ -8,6 +8,7 @@ import com.navi.flight.repository.FlightRepository;
 import com.navi.flight.repository.SeatRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -126,7 +127,7 @@ public class SeatServiceImpl implements SeatService {
         }
 
         // 3) 해당 날짜 범위 내 좌석 조회 → 예약 가능 좌석만
-        List<Seat> availableSeats = seatRepository.findByFlightAndDepTimeRange(
+        List<Seat> availableSeats = seatRepository.findAvailableSeatsForUpdate(
                         flightId, startOfDay, endOfDay
                 ).stream()
                 .filter(s -> !s.isReserved())
@@ -174,9 +175,10 @@ public class SeatServiceImpl implements SeatService {
     }
 
 
-    /** ✅ 좌석 초기화 보장 */
     @Override
-    public boolean ensureSeatsInitialized(String flightId, LocalDateTime depTime) {
+    @Transactional
+    public synchronized boolean ensureSeatsInitialized(String flightId, LocalDateTime depTime) {
+        // 1️⃣ 항공편 조회 (lock 모드로 안전하게)
         Optional<Flight> opt = flightRepository.findByFlightIdAndDepDate(flightId, depTime);
         if (opt.isEmpty()) {
             log.warn("[WARN] Flight not found — {} / {}", flightId, depTime);
@@ -184,19 +186,45 @@ public class SeatServiceImpl implements SeatService {
         }
 
         Flight flight = opt.get();
-        if (flight.isSeatInitialized()) return true;
 
-        long count = seatRepository.countByFlightIdAndDepTimeRange(
-                flightId, depTime.minusMinutes(5), depTime.plusMinutes(5)
-        );
+        // 2️⃣ 이미 초기화된 경우 즉시 반환
+        if (flight.isSeatInitialized()) {
+            log.debug("[SKIP] 이미 초기화된 항공편 — {}", flightId);
+            return true;
+        }
+
+        // 3️⃣ depTime ±5분 범위 내 좌석 존재 여부 확인
+        LocalDateTime start = depTime.minusMinutes(5);
+        LocalDateTime end = depTime.plusMinutes(5);
+        long count = seatRepository.countByFlightIdAndDepTimeRange(flightId, start, end);
         boolean exists = count > 0;
 
-        if (!exists) {
+        // 4️⃣ 좌석이 이미 있다면 초기화 플래그만 true로 세팅
+        if (exists) {
+            log.info("[INIT] 좌석 이미 존재 — {} ({}개)", flightId, count);
+            flight.setSeatInitialized(true);
+            flightRepository.saveAndFlush(flight);
+            return true;
+        }
+
+        // 5️⃣ 좌석 생성 시도
+        try {
+            log.info("[INIT] 좌석 초기화 시작 — {}", flightId);
             createSeatsForFlight(flight);
             flight.setSeatInitialized(true);
             flightRepository.saveAndFlush(flight);
+            log.info("[INIT] 좌석 초기화 완료 — {}", flightId);
+        } catch (DataIntegrityViolationException e) {
+            // ✅ 동시에 초기화 시도 중이면 예외 무시하고 플래그 true로 처리
+            log.warn("[SKIP] 중복 좌석 생성 시도 감지 — {}", flightId);
+            flight.setSeatInitialized(true);
+            flightRepository.saveAndFlush(flight);
+        } catch (Exception e) {
+            log.error("[ERROR] 좌석 초기화 중 오류 발생 — {}", flightId, e);
+            return false;
         }
 
         return true;
     }
+
 }

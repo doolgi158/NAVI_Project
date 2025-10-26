@@ -29,11 +29,11 @@ import java.time.format.DateTimeFormatter;
         uniqueConstraints = {
                 @UniqueConstraint(
                         name = "UK_ROOM_RSV_UNIQUE",
-                        columnNames = {"room_rsv_id", "room_id"}
+                        columnNames = {"reserve_id", "room_id"}
                 )
         },
         indexes = {
-                @Index(name = "IDX_ROOM_RSV_RSVID", columnList = "room_rsv_id"),
+                @Index(name = "IDX_ROOM_RSV_RSVID", columnList = "reserve_id"),
                 @Index(name = "IDX_ROOM_RSV_USER", columnList = "user_no"),
         }
 )
@@ -63,6 +63,7 @@ public class RoomRsv extends BaseEntity{
     // 객실 (Room) */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_no", nullable = false)
+    @JsonBackReference
     private Room room;
 
     /* === 예약 기본 정보 === */
@@ -82,12 +83,27 @@ public class RoomRsv extends BaseEntity{
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
 
+    // 숙박 인원수
+    @Column(name = "guest_count", nullable = false)
+    private int guestCount;
+
+    // 숙박일수
     @Column(name="nights", nullable = false)
     private int nights;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "rsv_status", length = 20, nullable = false)
     private RsvStatus rsvStatus;
+
+    /* === 예약자 정보 === */
+    @Column(name = "reserver_name", length = 50)
+    private String reserverName;
+
+    @Column(name = "reserver_tel", length = 20)
+    private String reserverTel;
+
+    @Column(name = "reserver_email", length = 100)
+    private String reserverEmail;
 
     @Version
     @Column(name = "version", nullable = false)
@@ -98,9 +114,9 @@ public class RoomRsv extends BaseEntity{
     public void prePersist() {
         // 기본 상태 설정
         if (rsvStatus == null) { rsvStatus = RsvStatus.PENDING; }
-
         // 수량 유효성
-        if (quantity <= 0) { throw new IllegalStateException("예약 수량은 1개 이상이어야 합니다."); }
+        if (quantity <= 0)  throw new IllegalStateException("예약 수량은 1개 이상이어야 합니다.");
+        if (guestCount <= 0) throw new IllegalStateException("숙박 인원은 1명 이상이어야 합니다.");
     }
 
     /* === 상태 변경 메서드 === */
@@ -114,5 +130,12 @@ public class RoomRsv extends BaseEntity{
         if (newPrice != null && newPrice.compareTo(BigDecimal.ZERO) >= 0) {
             this.price = newPrice;
         }
+    }
+
+    /* === 예약자 정보 갱신 === */
+    public void updateReserverInfo(String name, String tel, String email) {
+        if (name != null && !name.isBlank()) this.reserverName = name;
+        if (tel != null && !tel.isBlank()) this.reserverTel = tel;
+        if (email != null && !email.isBlank()) this.reserverEmail = email;
     }
 }

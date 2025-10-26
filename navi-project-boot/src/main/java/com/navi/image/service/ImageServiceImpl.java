@@ -4,6 +4,7 @@ import com.navi.image.domain.Image;
 import com.navi.image.dto.ImageDTO;
 import com.navi.image.repository.ImageRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -36,7 +38,10 @@ public class ImageServiceImpl implements ImageService {
 
             // 파일명 구성
             String originalName = file.getOriginalFilename();
-            String ext = originalName.substring(originalName.lastIndexOf("."));
+            String ext = "";
+            if (originalName != null && originalName.contains(".")) {
+                ext = originalName.substring(originalName.lastIndexOf("."));
+            }
             String uuidName = UUID.randomUUID() + ext;
             String savePath = uploadPath.resolve(uuidName).toString();
 
@@ -49,9 +54,8 @@ public class ImageServiceImpl implements ImageService {
             if (existing != null) {
                 // 기존 파일 삭제
                 try {
-                    Files.deleteIfExists(
-                            Paths.get(BASE_DIR).resolve(existing.getPath().replace("/images/", ""))
-                    );
+                    Path oldFile = Paths.get(BASE_DIR, existing.getPath().replaceFirst("^/images/", ""));
+                    Files.deleteIfExists(oldFile);
                 } catch (IOException ignored) {
                 }
 
@@ -105,6 +109,7 @@ public class ImageServiceImpl implements ImageService {
                         Files.deleteIfExists(Paths.get(BASE_DIR)
                                 .resolve(image.getPath().replace("/images/", "")));
                     } catch (IOException ignored) {
+                        log.warn("⚠️ 이미지 파일 삭제 실패: {}", image.getPath(), ignored);
                     }
                     imageRepository.delete(image);
                 });

@@ -1,13 +1,14 @@
 package com.navi.accommodation.dto.api;
 
 import com.navi.accommodation.domain.Acc;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.time.format.DateTimeFormatter;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class AdminAccListDTO {
     private Long accNo;            // 내부 식별번호
     private String accId;          // 숙소 코드 (ACC001)
@@ -16,18 +17,18 @@ public class AdminAccListDTO {
     private String category;       // 숙소 유형
     private String tel;            // 전화번호
     private String address;        // 전체 주소
-    private String townshipName;   // 지역명
+    //private String townshipName;   // 지역명
     private boolean hasCooking;    // 취사 가능
     private boolean hasParking;    // 주차 가능
     private boolean isActive;      // 운영 여부
-    private boolean isDeletable;   // 삭제 가능 여부
+    //private boolean isDeletable;   // 삭제 가능 여부
     private String checkInTime;    // 체크인 시간
     private String checkOutTime;   // 체크아웃 시간
     private Long viewCount;        // 조회수
-    private String createdDate;    // 등록일
-    private String modifiedDate;   // 수정일
-    private Long townshipId;       // 지역 ID (필수)
-    private String localImagePath;
+    private String createdTime;    // 등록일
+    private String modifiedTime;   // 수정일
+    //private Long townshipId;       // 지역 ID
+    private transient String localImagePath;
 
     public static AdminAccListDTO fromEntity(Acc acc) {
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
@@ -40,18 +41,14 @@ public class AdminAccListDTO {
                 .category(acc.getCategory())
                 .tel(acc.getTel())
                 .address(acc.getAddress())
-                .townshipName(acc.getTownship() != null
-                        ? acc.getTownship().getSigunguName() + " " + acc.getTownship().getTownshipName()
-                        : "(미등록 지역)")
                 .hasCooking(acc.getHasCooking())
                 .hasParking(acc.getHasParking())
-                .isActive(acc.isActive())
-                .isDeletable(acc.isDeletable())
+                .isActive(acc.getActive())
                 .checkInTime(acc.getCheckInTime())
                 .checkOutTime(acc.getCheckOutTime())
                 .viewCount(acc.getViewCount())
-                .createdDate(acc.getCreatedTime() != null ? acc.getCreatedTime().format(fmt) : null)
-                .modifiedDate(acc.getModifiedTime() != null ? acc.getModifiedTime().format(fmt) : null)
+                .createdTime(acc.getCreatedTime() != null ? acc.getCreatedTime().format(fmt) : null)
+                .modifiedTime(acc.getModifiedTime() != null ? acc.getModifiedTime().format(fmt) : null)
                 .build();
     }
 }
