@@ -66,7 +66,7 @@ public class TravelPlanRequestDTO {
         private String startTime;
         private String endTime;
 
-
+        @Builder.Default
         private boolean deleted = false;
 
     }

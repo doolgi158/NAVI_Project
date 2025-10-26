@@ -16,9 +16,12 @@ public interface AdminTravelService {
     /** ✅ 관리자용 상세 조회 */
     AdminTravelDetailResponseDTO getAdminTravelDetail(Long travelId);
 
+
+
     /** ✅ 상태 일괄 변경 */
     void updateState(List<Long> ids, Integer state);
 
     /** ✅ 등록, 수정 */
     Travel saveOrUpdateTravel(AdminTravelRequestDTO dto);
+
 }

@@ -51,4 +51,6 @@ public interface TravelRepository extends JpaRepository<Travel, Long>, JpaSpecif
     )
     Page<Object[]> findAllOrderByLikesCountNative(Pageable pageable);
 
+    @Query("SELECT MAX(t.contentId) FROM Travel t WHERE t.contentId LIKE 'CONT_%'")
+    String findMaxAdminContentId();
 }
