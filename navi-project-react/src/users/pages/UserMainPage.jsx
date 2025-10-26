@@ -191,21 +191,6 @@ const SectionSwiper = ({ title, data, type, navigate, loading }) => {
                         <h3 className="text-lg font-semibold truncate">
                           {d.title || d.name}
                         </h3>
-                        <Tag color="gold" className="font-bold">
-                          #{d.rank}
-                        </Tag>
-                      </div>
-                      <div className="flex flex-wrap gap-2 text-xs">
-                        <Tag>
-                          조회 {(d.views ?? d.viewsCount ?? 0).toLocaleString()}
-                        </Tag>
-                        <Tag>
-                          좋아요 {(d.likes ?? d.likesCount ?? 0).toLocaleString()}
-                        </Tag>
-                        <Tag>
-                          북마크{" "}
-                          {(d.bookmarks ?? d.bookmarkCount ?? 0).toLocaleString()}
-                        </Tag>
                       </div>
                     </div>
                   </div>
