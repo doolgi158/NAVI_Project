@@ -5,7 +5,7 @@ import {
   DashboardOutlined, BankOutlined, KeyOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { setlogout } from "../../common/slice/loginSlice";
 
@@ -17,6 +17,32 @@ const AdminSiderLayout = () => {
 
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("accessToken"));
   const [adminName, setAdminName] = useState(localStorage.getItem("username") || "관리자");
+
+  // 토큰 decode 함수
+  const parseJwt = (token) => {
+    try {
+      return JSON.parse(atob(token.split(".")[1]));
+    } catch {
+      return null;
+    }
+  };
+
+  /* 로그인 정보 복원 */
+  useEffect(() => {
+    const storedName = localStorage.getItem("username");
+    if (storedName) {
+      setAdminName(storedName);
+      return;
+    }
+
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      const decoded = parseJwt(token);
+      if (decoded?.name || decoded?.sub || decoded?.username) {
+        setAdminName(decoded.name || decoded.username || decoded.sub);
+      }
+    }
+  }, []);
 
   /* 로그아웃 처리 */
   const handleLogout = () => {

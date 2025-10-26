@@ -1,9 +1,11 @@
 package com.navi.accommodation.controller;
 
+import com.navi.accommodation.dto.api.AccRankDTO;
 import com.navi.accommodation.dto.request.AccSearchRequestDTO;
 import com.navi.accommodation.dto.response.AccDetailResponseDTO;
 import com.navi.accommodation.dto.response.AccListResponseDTO;
 import com.navi.accommodation.service.AccService;
+import com.navi.common.response.ApiResponse;
 import com.navi.room.service.RoomService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,4 +46,8 @@ public class AccUserController {
         return accService.getAccDetail(accId);
     }
 
+    @GetMapping("/accommodation/rank")
+    public ApiResponse<List<AccRankDTO>> getAccRank() {
+        return ApiResponse.success(accService.getTop10ByViews());
+    }
 }

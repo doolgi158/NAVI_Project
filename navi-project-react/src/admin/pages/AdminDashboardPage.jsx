@@ -29,6 +29,9 @@ const AdminDashboard = () => {
       `${API_SERVER_HOST}/api/adm/accommodation/dashboard`,
       `${API_SERVER_HOST}/api/adm/accommodation/ranking`,
       `${API_SERVER_HOST}/api/adm/usageDashboard`,
+      `${API_SERVER_HOST}/api/adm/userTrend`,
+      `${API_SERVER_HOST}/api/adm/paymentDashboard`,
+      `${API_SERVER_HOST}/api/adm/paymentShare`,
     ];
   }, []);
 
@@ -132,7 +135,7 @@ const AdminDashboard = () => {
             />
           </Col>
           <Col xs={24} lg={12}>
-            <SalesChart data={data?.salesTrend || MOCK_TREND_MONTHLY.salesTrend} />
+            <SalesChart data={data?.paymentsTrend || []} />
           </Col>
         </Row>
 

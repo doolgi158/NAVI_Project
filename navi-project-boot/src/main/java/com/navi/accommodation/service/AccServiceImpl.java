@@ -1,6 +1,7 @@
 package com.navi.accommodation.service;
 
 import com.navi.accommodation.domain.Acc;
+import com.navi.accommodation.dto.api.AccRankDTO;
 import com.navi.accommodation.dto.api.AdminAccListDTO;
 import com.navi.accommodation.dto.request.AccRequestDTO;
 import com.navi.accommodation.dto.request.AccSearchRequestDTO;
@@ -19,7 +20,6 @@ import com.navi.user.repository.LogRepository;
 import com.navi.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -279,5 +279,20 @@ public class AccServiceImpl implements AccService {
             accRepository.save(acc);
             log.info("[ACC] 조회수 증가 - accId={}, title={}", accId, acc.getTitle());
         });
+    }
+
+    @Override
+    public List<AccRankDTO> getTop10ByViews() {
+        List<Acc> accList = accRepository.findTop10ByOrderByViewCountDesc();
+
+        return accList.stream()
+                .map(acc -> AccRankDTO.builder()
+                        .id(acc.getAccId())                 // 예: ACC001
+                        .name(acc.getTitle())               // 숙소명
+                        .region(acc.getTownship().getTownshipName())// 지역명
+                        .views(acc.getViewCount())          // 조회수
+                        .thumbnailPath(acc.getMainImage())  // 대표 이미지 바로 사용
+                        .build())
+                .collect(Collectors.toList());
     }
 }

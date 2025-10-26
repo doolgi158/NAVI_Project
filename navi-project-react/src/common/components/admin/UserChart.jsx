@@ -23,7 +23,6 @@ const UserChart = ({ data = [] }) => {
                             const labels = {
                                 join: "신규가입",
                                 leave: "탈퇴",
-                                active: "활성 사용자",
                             };
                             return [`${v.toLocaleString()}명`, labels[name] || name];
                         }}
@@ -31,7 +30,6 @@ const UserChart = ({ data = [] }) => {
                     <Legend />
                     <Bar dataKey="join" name="신규가입" barSize={18} fill={COLORS[0]} />
                     <Bar dataKey="leave" name="탈퇴" barSize={18} fill={COLORS[4]} />
-                    <Line type="monotone" dataKey="active" name="활성" stroke={COLORS[1]} strokeWidth={2} />
                 </ComposedChart>
             </ResponsiveContainer>
         </ChartCard>

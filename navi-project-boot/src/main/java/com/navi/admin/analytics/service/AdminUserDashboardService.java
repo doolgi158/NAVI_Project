@@ -8,5 +8,5 @@ import java.util.List;
 public interface AdminUserDashboardService {
     AdminDashboardDTO getUserStatistics(String range);
 
-    List<UserTrendDTO> findUserTrend(String range);
+    List<UserTrendDTO> findUserTrend(int months);
 }

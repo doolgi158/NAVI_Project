@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import {
   Typography,
@@ -35,6 +35,7 @@ const { RangePicker } = DatePicker;
 const AccDetailPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const location = useLocation();
 
   // Redux
   const selectedAccId = useSelector((state) => state.acc.selectedAccId);
@@ -45,6 +46,17 @@ const AccDetailPage = () => {
   const [accData, setAccData] = useState(null);
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // URL 파라미터로 accId 받기
+  useEffect(() => {
+    const query = new URLSearchParams(location.search);
+    const urlAccId = query.get("accId");
+    if (urlAccId && urlAccId !== accId) {
+      setAccId(urlAccId);
+      dispatch(setSelectedAcc(urlAccId));
+      localStorage.setItem("selectedAccId", urlAccId);
+    }
+  }, [location.search, accId, dispatch]);
 
   // 검색 조건 상태
   const [dateRange, setDateRange] = useState(
@@ -389,11 +401,10 @@ const AccDetailPage = () => {
                       <div className="flex justify-between items-end">
                         {room.remainCount !== null && (
                           <Text
-                            className={`font-medium ${
-                              room.remainCount <= 3
-                                ? "text-red-500 font-semibold"
-                                : "text-gray-600"
-                            }`}
+                            className={`font-medium ${room.remainCount <= 3
+                              ? "text-red-500 font-semibold"
+                              : "text-gray-600"
+                              }`}
                           >
                             잔여 객실 {room.remainCount}개
                           </Text>

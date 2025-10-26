@@ -31,7 +31,7 @@ export const useLogin = () => {
         // JWT 토큰 저장
         setAuthTokens(accessToken, refreshToken);
 
-        localStorage.setItem("username", username);
+        localStorage.setItem("username", name);
         localStorage.setItem("userNo", userNo);
         localStorage.setItem("userId", id);
         localStorage.setItem("userRole", role?.[0] || "USER");

@@ -76,8 +76,11 @@ public class AdminDashboardDTO {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Payments {
-        private long count;
-        private BigDecimal amount;
+        private String month;          // 월 (예: 2025-10)
+        private long paymentCount;     // 결제건수
+        private long refundCount;      // 환불건수
+        private BigDecimal salesAmount; // 매출금액
+        private BigDecimal refundAmount; // 환불금액
         private double changedPct;
     }
 

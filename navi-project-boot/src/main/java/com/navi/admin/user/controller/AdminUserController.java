@@ -28,4 +28,9 @@ public class AdminUserController {
         adminUserService.deleteUser(userNo);
         return ApiResponse.success("삭제 완료");
     }
+
+    @GetMapping("/userDashboard")
+    public ApiResponse<?> getUserDashboard() {
+        return ApiResponse.success(adminUserService.getUserDashboard());
+    }
 }

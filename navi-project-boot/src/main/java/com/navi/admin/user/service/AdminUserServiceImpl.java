@@ -2,6 +2,7 @@ package com.navi.admin.user.service;
 
 import com.navi.admin.payment.service.AdminPaymentDashboardService;
 import com.navi.admin.user.dto.AdminUserDTO;
+import com.navi.admin.user.repository.AdminUserRepository;
 import com.navi.admin.user.repository.HistoryRepository;
 import com.navi.user.domain.History;
 import com.navi.user.domain.User;
@@ -12,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -24,6 +27,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     private final UserRepository userRepository;
     private final HistoryRepository historyRepository;
     private final AdminPaymentDashboardService paymentDashboardService;
+    private final AdminUserRepository AdminUserRepository;
 
     @Override
     public Page<AdminUserDTO> getPagedUsers(int page, int size, String keyword, String field) {
@@ -68,5 +72,17 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Override
     public void deleteUser(Long userNo) {
         userRepository.deleteById(userNo);
+    }
+
+    @Override
+    public Map<String, Object> getUserDashboard() {
+        LocalDateTime cutoff = LocalDateTime.now().minusDays(30);
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("total", AdminUserRepository.countAllUsers());
+        map.put("recentJoin", AdminUserRepository.countRecentJoin(cutoff));
+        map.put("recentLeave", AdminUserRepository.countRecentLeave(cutoff));
+        map.put("activeUsers", AdminUserRepository.countActiveUsers());
+        return map;
     }
 }
