@@ -187,7 +187,10 @@ const SeatSelectPage = () => {
             selectedInbound,
             passengerCount,
             passengers,
-            outboundDto: res.data.data, // ✅ 출발편 insert 결과 저장
+            outboundDto: {
+              ...res.data.data,
+              selectedSeats: selectedSeats,
+            },
             outboundTotalPrice: totalPrice, // ✅ 출발편 총 금액 전달
           },
         });
@@ -323,7 +326,7 @@ const SeatSelectPage = () => {
   // ✅ 렌더링 전체
   return (
     <MainLayout>
-      <div style={{ background: "#f9fafb", minHeight: "100vh", padding: "50px 0" }}>
+      <div style={{ background: "#ffffff", minHeight: "100vh", padding: "50px 0" }}>
         <Row justify="center" gutter={[24, 24]}>
           <Col xs={23} lg={16} xl={14}>
             <Card

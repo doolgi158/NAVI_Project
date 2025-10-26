@@ -264,8 +264,7 @@ const FlightRsvInputPage = () => {
     <MainLayout>
       <div
         style={{
-          background:
-            "linear-gradient(160deg, #eaf1fb 0%, #fdfdff 35%, #edf4fe 100%)",
+          background: "linear-gradient(180deg, #ffffff 0%, #ffffff 100%)",
           minHeight: "100vh",
           padding: "70px 0",
           display: "flex",
