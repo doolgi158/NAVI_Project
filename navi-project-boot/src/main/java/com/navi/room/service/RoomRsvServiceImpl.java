@@ -7,6 +7,7 @@ import com.navi.room.domain.RoomRsv;
 import com.navi.room.dto.request.RoomRsvRequestDTO;
 import com.navi.room.dto.response.RoomPreRsvResponseDTO;
 import com.navi.room.dto.response.RoomRsvResponseDTO;
+import com.navi.room.mapper.RoomRsvMapper;
 import com.navi.room.repository.RoomRepository;
 import com.navi.room.repository.RoomRsvRepository;
 import com.navi.user.domain.User;
@@ -14,17 +15,23 @@ import com.navi.user.dto.auth.UserSecurityDTO;
 import com.navi.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.awt.print.Pageable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -36,6 +43,8 @@ public class RoomRsvServiceImpl implements RoomRsvService {
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
     private final StockService stockService;
+
+    private final RoomRsvMapper roomRsvMapper;
 
     /* 단일 객실 예약 생성 (결제 전) */
     @Override
@@ -147,7 +156,6 @@ public class RoomRsvServiceImpl implements RoomRsvService {
                 reserveId, name, tel, email);
     }
 
-
     /* 예약 상태 변경 + 재고 복구 */
     @Override
     @Transactional
@@ -182,6 +190,31 @@ public class RoomRsvServiceImpl implements RoomRsvService {
         BigDecimal total = roomRsvRepository.sumTotalAmountByReserveId(reserveId);
         return total != null ? total : BigDecimal.ZERO;
     }
+
+    // 관리자용 객실 예약 목록 조회
+    @Override
+    @Transactional(readOnly = true)
+    public Map<String, Object> getAdminReservationList(int page, int size, String status, String keyword) {
+        log.info("📋 [ADMIN] 객실 예약 목록 조회 - page={}, size={}, status={}, keyword={}",
+                page, size, status, keyword);
+
+        int offset = (page - 1) * size;
+
+        List<RoomRsvResponseDTO> list = roomRsvMapper.selectAdminRoomRsvList(
+                offset, size, status, keyword, "RSV_STATUS", "ASC"
+        );
+
+        int total = roomRsvMapper.countAdminRoomRsvList(status, keyword);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("data", list);
+        result.put("total", total);
+
+        return result;
+    }
+
+
+
 
     @Override
     @Transactional(readOnly = true)

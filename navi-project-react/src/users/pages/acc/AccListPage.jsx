@@ -416,11 +416,11 @@ const AccListPage = () => {
 
 
           {/* ✅ 검색 결과 */}
-          <div className="bg-white shadow-md rounded-2xl p-8 mb-10">
+          <div className="bg-white/90 shadow-lg rounded-2xl p-8 mb-10 border border-gray-100 backdrop-blur-sm transition-all duration-300">
             <h2 className="text-2xl font-bold mb-6">검색 결과</h2>
 
             {!isSearched ? (
-              <div className="bg-white/90 shadow-lg rounded-2xl p-8 mb-10 border border-gray-100 backdrop-blur-sm transition-all duration-300">
+              <div className="text-center text-gray-500 min-h-[300px] flex items-center justify-center border border-dashed border-gray-300 rounded-lg p-4">
                 <p className="text-lg">
                   원하는 숙소를 찾아보세요! 🚀
                   <br />

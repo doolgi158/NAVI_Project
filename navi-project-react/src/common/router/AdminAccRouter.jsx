@@ -3,7 +3,7 @@ import ProtectedRoute from "./ProtectedRoute.jsx";
 
 const AdminAccRoot = lazy(() => import("../../admin/pages/acc/AdminAccRoot.jsx"));
 const AdminAccListPage = lazy(() => import("../../admin/pages/acc/AdminAccListPage.jsx"))
-const AdminAccRsvPage = lazy(() => import("../../admin/pages/acc/AdminAccRsvPage.jsx"))
+const AdminRoomRsvListPage = lazy(() => import("../../admin/pages/acc/AdminRoomRsvListPage.jsx"))
 const AdminAccForm = lazy(() => import("../../admin/pages/acc/AdminAccFormPage.jsx"))
 
 const AdminAccommodationRouter = () => {
@@ -20,6 +20,7 @@ const AdminAccommodationRouter = () => {
             children: [
                 { index: true, element: <AdminAccListPage /> },
                 { path: "list", element: <AdminAccListPage /> },
+                { path: "reservations", element: <AdminRoomRsvListPage /> },
             ],
         },
         {
