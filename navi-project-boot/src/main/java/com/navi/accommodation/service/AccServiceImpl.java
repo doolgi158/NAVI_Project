@@ -241,8 +241,8 @@ public class AccServiceImpl implements AccService {
                 dto.getTownshipName(),
                 dto.getTitle(),
                 categories,
-                dto.getCheckIn() != null ? dto.getCheckIn() : null,
-                dto.getCheckOut() != null ? dto.getCheckOut() : null,
+                dto.getCheckIn() != null ? dto.getCheckIn().toString() : null,
+                dto.getCheckOut() != null ? dto.getCheckOut().toString() : null,
                 dto.getGuestCount(),
                 dto.getRoomCount(),
                 dto.getSort(),
@@ -273,7 +273,6 @@ public class AccServiceImpl implements AccService {
 
         return result;
     }
-
 
 
     @Override
