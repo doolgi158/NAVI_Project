@@ -168,7 +168,7 @@ export const useTravelList = (userId) => {
       if (!showLoading && pageNumber > 0 && pageNumber <= pageResult.totalPages) {
         sessionStorage.setItem('travelListPage', pageNumber);
         setPageParam((prev) => ({ ...prev, page: pageNumber }));
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({ top: 0, behavior: 'auto' });
       }
     },
     [showLoading, pageResult.totalPages]
