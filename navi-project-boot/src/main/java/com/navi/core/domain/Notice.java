@@ -50,7 +50,7 @@ public class Notice {
     private LocalDateTime updateDate;
 
     //조회수
-    @Column(name = "notice_viewCount")
+    @Column(name = "notice_view_Count")
     @ColumnDefault("0")
     @Builder.Default
     private Integer noticeViewCount = 0;
@@ -63,6 +63,7 @@ public class Notice {
     @Column(name = "notice_endDate")
     private LocalDateTime noticeEndDate;
 
+    //게시글 이미지
     @Column(name = "notice_image")
     private String noticeImage;
 
