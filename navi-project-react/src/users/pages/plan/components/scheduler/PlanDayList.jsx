@@ -1,30 +1,71 @@
-// components/plan/scheduler/PlanDayList.jsx
 import React from "react";
 import { DragDropContext, Droppable } from "@hello-pangea/dnd";
+import { Modal, message } from "antd";
 import PlanItemCard from "./PlanItemCard";
+import dayjs from "dayjs";
+import { deletePlanItem } from "@/common/api/planApi";
 
-/**
- * PlanDayList
- * - 전체 보기(모든 일차) + 특정 일차 보기 모두 처리
- * - DnD 핸들링은 상위 PlanScheduler에서 담당
- */
 export default function PlanDayList({
     days = [],
     activeDayIdx = -1,
     isViewMode = false,
     onDragEnd = () => { },
     onEditTime = () => { },
+    onAfterDelete = () => { },
+    setDays = () => { },
     dayColors = [],
     fallbackImg = "https://placehold.co/150x150?text=No+Image",
+    paginated = false, // ✅ 추가
 }) {
+    const handleDeleteItem = (dayIdx, itemIdx, item) => {
+        const target = item || days[dayIdx]?.items[itemIdx];
+        if (!target) return;
+
+        Modal.confirm({
+            title: "일정 삭제 확인",
+            content: (
+                <>
+                    <b>{target.title}</b> 일정을 정말로 삭제하시겠습니까?
+                </>
+            ),
+            okText: "삭제",
+            cancelText: "취소",
+            okButtonProps: { danger: true },
+            centered: true,
+            async onOk() {
+                try {
+                    if (target.itemId) {
+                        await deletePlanItem(target.itemId);
+                    }
+                    setDays((prev) =>
+                        prev.map((day, i) =>
+                            i === dayIdx
+                                ? { ...day, items: day.items.filter((_, j) => j !== itemIdx) }
+                                : day
+                        )
+                    );
+                    message.success(`"${target.title}" 일정이 삭제되었습니다.`);
+
+                    if (onAfterDelete) {
+                        if (target.travelId) onAfterDelete(target.travelId, "travel");
+                        else if (target.stayId) onAfterDelete(target.stayId, "stay");
+                    }
+                } catch (err) {
+                    console.error("❌ 일정 삭제 실패:", err);
+                    message.error("삭제 실패. 다시 시도해주세요.");
+                }
+            },
+        });
+    };
+
     return (
         <DragDropContext onDragEnd={onDragEnd}>
             {activeDayIdx === -1 ? (
-                // ✅ 전체 보기 (여러 일차 가로로 나열)
+                // ✅ 전체 보기 모드에서 페이지 적용
                 <div className="flex gap-12 overflow-x-auto px-4 custom-scroll">
                     {days.map((d, dayIdx) => (
                         <Droppable
-                            key={dayIdx}
+                            key={d.dateISO}
                             droppableId={`day-${dayIdx}`}
                             isDropDisabled={isViewMode}
                         >
@@ -32,13 +73,20 @@ export default function PlanDayList({
                                 <div
                                     ref={provided.innerRef}
                                     {...provided.droppableProps}
-                                    className="flex flex-col min-w-[300px] relative"
+                                    className="w-[300px] flex-shrink-0"
                                 >
-                                    <h3 className="text-lg font-semibold text-[#2F3E46] mb-4 border-b pb-1">
-                                        {dayIdx + 1}일차{" "}
-                                        <span className="text-gray-400 text-sm">{d.dateISO}</span>
-                                    </h3>
-                                    <div className="relative">
+                                    <h2
+                                        className="text-lg font-bold text-center sticky top-0 z-10 py-2 mb-4"
+                                        style={{ backgroundColor: "#fff" }}
+                                    >
+                                        <span style={{ color: dayColors[dayIdx % dayColors.length] }}>
+                                            DAY {d.orderNo || dayIdx + 1}
+                                        </span>{" "}
+                                        <span className="text-gray-500 text-sm">
+                                            ({dayjs(d.dateISO).format("YYYY.MM.DD")})
+                                        </span>
+                                    </h2>
+                                    <div className="relative min-h-[550px]">
                                         {d.items.map((it, i) => (
                                             <PlanItemCard
                                                 key={`${dayIdx}-${i}-${it.title}-${i}`}
@@ -50,17 +98,18 @@ export default function PlanDayList({
                                                 color={dayColors[dayIdx % dayColors.length]}
                                                 fallbackImg={fallbackImg}
                                                 onEditTime={onEditTime}
+                                                onDeleteItem={handleDeleteItem}
                                             />
                                         ))}
+                                        {provided.placeholder}
                                     </div>
-                                    {provided.placeholder}
                                 </div>
                             )}
                         </Droppable>
                     ))}
                 </div>
             ) : (
-                // ✅ 단일 일차 보기
+                // ✅ 특정 일차 보기
                 <Droppable
                     droppableId={`day-${activeDayIdx}`}
                     isDropDisabled={isViewMode}
@@ -69,22 +118,43 @@ export default function PlanDayList({
                         <div
                             ref={provided.innerRef}
                             {...provided.droppableProps}
-                            className="flex flex-col gap-5 p-3 w-[380px]"
+                            className="px-4 w-[350px]"
                         >
-                            {days[activeDayIdx]?.items.map((it, i) => (
-                                <PlanItemCard
-                                    key={`${activeDayIdx}-${i}-${it.title}-${i}`}
-                                    item={it}
-                                    index={i}
-                                    dayIdx={activeDayIdx}
-                                    isLast={i === days[activeDayIdx].items.length - 1}
-                                    isViewMode={isViewMode}
-                                    color={dayColors[activeDayIdx % dayColors.length]}
-                                    fallbackImg={fallbackImg}
-                                    onEditTime={onEditTime}
-                                />
-                            ))}
-                            {provided.placeholder}
+                            <h2
+                                className="text-xl font-bold text-center sticky top-0 z-10 py-2 mb-4"
+                                style={{ backgroundColor: "#fff" }}
+                            >
+                                <span
+                                    style={{ color: dayColors[activeDayIdx % dayColors.length] }}
+                                >
+                                    DAY {days[activeDayIdx]?.orderNo || activeDayIdx + 1}
+                                </span>{" "}
+                                <span className="text-gray-500 text-sm">
+                                    (
+                                    {days[activeDayIdx]?.dateISO
+                                        ? dayjs(days[activeDayIdx].dateISO).format("YYYY.MM.DD")
+                                        : ""}
+                                    )
+                                </span>
+                            </h2>
+
+                            <div className="relative min-h-[550px]">
+                                {days[activeDayIdx]?.items.map((it, i) => (
+                                    <PlanItemCard
+                                        key={`${activeDayIdx}-${i}-${it.title}-${i}`}
+                                        item={it}
+                                        index={i}
+                                        dayIdx={activeDayIdx}
+                                        isLast={i === days[activeDayIdx].items.length - 1}
+                                        isViewMode={isViewMode}
+                                        color={dayColors[activeDayIdx % dayColors.length]}
+                                        fallbackImg={fallbackImg}
+                                        onEditTime={onEditTime}
+                                        onDeleteItem={handleDeleteItem}
+                                    />
+                                ))}
+                                {provided.placeholder}
+                            </div>
                         </div>
                     )}
                 </Droppable>

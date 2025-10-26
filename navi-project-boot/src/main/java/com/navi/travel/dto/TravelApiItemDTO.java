@@ -101,7 +101,6 @@ public class TravelApiItemDTO {
                 .tag(this.tag)
                 .latitude(this.latitude)
                 .longitude(this.longitude)
-                .contentsCd(this.contentscd != null ? this.contentscd.getValue() : null)
                 .categoryName(this.contentscd != null ? this.contentscd.getLabel() : null)
 
                 // ✅ region1cd.label, region2cd.label만 DB에 저장

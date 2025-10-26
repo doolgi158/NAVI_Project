@@ -89,13 +89,30 @@ public class TravelPlanController {
     }
 
     /**
-     * ✅ [DELETE] 여행계획 삭제
+     * 여행계획 전체 삭제
      */
     @DeleteMapping("/{planId}")
-    public ResponseEntity<ApiResponse<String>> deletePlan(@PathVariable Long planId) {
-        log.info("🗑️ 여행계획 삭제 요청: planId={}", planId);
-        travelPlanService.deletePlan(planId);
+    public ResponseEntity<ApiResponse<String>> deletePlan(
+            @PathVariable Long planId,
+            HttpServletRequest request
+    ) {
+        String userId = extractUserId(request);
+        log.info("🗑️ 여행계획 삭제 요청: planId={}, userId={}", planId, userId);
+
+        travelPlanService.deletePlan(planId, userId);
         return ResponseEntity.ok(ApiResponse.success("삭제 완료"));
+    }
+
+    /**
+     * ✅ [DELETE] 단일 일정(여행지/숙소 등) 삭제
+     */
+    @DeleteMapping("/items/{itemId}")
+    public ResponseEntity<ApiResponse<String>> deletePlanItem(
+            @PathVariable Long itemId
+    ) {
+        log.info("🗑️ 여행계획 내 일정(아이템) 삭제 요청: itemId={}", itemId);
+        travelPlanService.deleteItem(itemId);
+        return ResponseEntity.ok(ApiResponse.success("일정 아이템 삭제 완료"));
     }
 
     /**

@@ -70,7 +70,6 @@ public class TravelDetailResponseDTO {
         return TravelDetailResponseDTO.builder()
                 .travelId(travel.getTravelId())
                 .contentId(travel.getContentId())
-                .contentsCd(travel.getContentsCd())
                 .categoryName(travel.getCategoryName())
                 .title(travel.getTitle())
                 .introduction(travel.getIntroduction())

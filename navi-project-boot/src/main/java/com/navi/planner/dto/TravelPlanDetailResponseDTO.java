@@ -25,6 +25,7 @@ public class TravelPlanDetailResponseDTO {
     private String thumbnailPath;
     private List<TravelPlanDayDTO> days;
 
+
     /** 하루별 DTO */
     @Getter
     @Setter

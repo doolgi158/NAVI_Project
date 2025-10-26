@@ -3,23 +3,13 @@ import { Modal, DatePicker, Button, message } from "antd";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
 
-/**
- * NAVI 스타일 날짜 선택 모달
- * @param {Object} props
- * @param {boolean} open - 모달 열림 상태
- * @param {function} onClose - 닫기 콜백
- * @param {Object} meta - 일정 메타정보 ({ startDate, endDate })
- * @param {boolean} isEditMode - 수정 모드 여부
- * @param {function} onDateChange - 날짜 변경 시 콜백
- */
 export default function DateModal({
   open,
   onClose,
-  meta = {}, // ✅ undefined 방지
+  meta = {},
   isEditMode = false,
   onDateChange,
 }) {
-  // ✅ meta가 비어있어도 절대 오류 안남
   const start = meta?.startDate ? dayjs(meta.startDate) : null;
   const end = meta?.endDate ? dayjs(meta.endDate) : null;
 
@@ -28,6 +18,8 @@ export default function DateModal({
   useEffect(() => {
     if (meta?.startDate && meta?.endDate) {
       setRange([dayjs(meta.startDate), dayjs(meta.endDate)]);
+    } else {
+      setRange([null, null]);
     }
   }, [meta]);
 
@@ -41,7 +33,9 @@ export default function DateModal({
     }
 
     if (onDateChange) {
-      onDateChange(range[0], range[1]);
+      const start = dayjs(range[0]);
+      const end = dayjs(range[1]);
+      onDateChange(start, end);
     }
   };
 
@@ -80,7 +74,7 @@ export default function DateModal({
       <DatePicker.RangePicker
         locale={dayjs.locale("ko")}
         value={range}
-        onChange={setRange}
+        onChange={(dates) => setRange(dates?.map((d) => (d ? dayjs(d) : null)))}
         disabledDate={disabledDate}
         style={{
           width: "80%",
@@ -89,7 +83,11 @@ export default function DateModal({
           borderRadius: 10,
           border: "1px solid #dcdcdc",
         }}
-        popupClassName="navi-date-picker-popup"
+        classNames={{
+          popup: {
+            root: "navi-date-picker-popup", // ✅ 변경 완료
+          },
+        }}
       />
 
       {/* ✅ 하단 버튼 영역 */}
@@ -102,7 +100,7 @@ export default function DateModal({
             borderRadius: 10,
             fontWeight: 500,
           }}
-          onClick={onClose} // ✅ 단순 닫기
+          onClick={onClose}
         >
           취소
         </Button>

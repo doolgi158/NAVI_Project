@@ -30,11 +30,12 @@ public interface TravelRepository extends JpaRepository<Travel, Long>, JpaSpecif
                 t.title AS title,
                 t.region1_name AS region1_name,
                 t.region2_name AS region2_name,
+                t.image_path AS image_path,
                 t.thumbnail_path AS thumbnail_path,
                 COUNT(l.like_id) AS likes_count
             FROM navi_travel t
             LEFT JOIN navi_like l ON t.travel_id = l.travel_id
-            GROUP BY t.travel_id, t.title, t.region1_name, t.region2_name, t.thumbnail_path
+            GROUP BY t.travel_id, t.title, t.region1_name, t.region2_name, t.thumbnail_path, t.image_path,
             ORDER BY likes_count DESC
         """,
             countQuery = """

@@ -5,6 +5,11 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+/**
+ * 여행지 목록 응답 DTO
+ * - 일반 목록 (엔티티 변환용)
+ * - 인기순 목록 (Native Query 매핑용)
+ */
 @Getter
 @Setter
 @Builder
@@ -32,12 +37,12 @@ public class TravelListResponseDTO {
     private LocalDateTime updatedAt;
     private LocalDateTime createdAt;
 
-    // ✅ 프론트에서 좋아요/북마크 상태 표시용
+    // ✅ 프론트 표시용
     private boolean likedByUser;
     private boolean bookmarkedByUser;
 
     /**
-     * ✅ 일반 Entity → DTO 변환
+     * ✅ 기본 Entity → DTO 변환
      */
     public static TravelListResponseDTO of(Travel travel) {
         return TravelListResponseDTO.builder()
@@ -66,19 +71,23 @@ public class TravelListResponseDTO {
     }
 
     /**
-     * ✅ Native Query (인기순 정렬 결과) 전용 생성자
-     *    → Object[] 매핑용
+     * ✅ Native Query 전용 생성자
+     *    (좋아요순 / 인기순 전용)
      */
-    public TravelListResponseDTO(Long travelId,
-         String title,
-         String region1,
-         String region2,
-         String thumbnailPath,
-         Long likesCount) {
+    public TravelListResponseDTO(
+            Long travelId,
+            String title,
+            String region1,
+            String region2,
+            String imagePath,
+            String thumbnailPath,
+            Long likesCount
+    ) {
         this.travelId = travelId;
         this.title = title;
         this.region1 = region1;
         this.region2 = region2;
+        this.imagePath = imagePath;
         this.thumbnailPath = thumbnailPath;
         this.likesCount = likesCount;
     }

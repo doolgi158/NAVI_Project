@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { List, TimePicker, Empty, Button } from "antd";
+import { List, TimePicker, Empty } from "antd";
 import dayjs from "dayjs";
 import { ClockCircleOutlined } from "@ant-design/icons";
 import TitleDateDisplay from "./TitleDateDisplay";
 
 export default function TimeDrawer({ days, times, setTimes, title, dateRange }) {
   const [openKey, setOpenKey] = useState(null);
-  const [selectedPart, setSelectedPart] = useState(null); // ✅ 현재 시/분 선택 상태 추적
 
-  /** 기본 시간 자동 설정 */
+  /** ✅ 기본 시간 자동 설정 */
   useEffect(() => {
     if (!days?.length) return;
     setTimes((prev) => {
@@ -23,7 +22,7 @@ export default function TimeDrawer({ days, times, setTimes, title, dateRange }) 
     });
   }, [days, setTimes]);
 
-  /** 시간 변경 핸들러 */
+  /** ✅ 시간 변경 핸들러 */
   const handleChange = (date, field, value) => {
     setTimes((prev) => {
       const updated = { ...(prev[date.format("YYYY-MM-DD")] || {}) };
@@ -32,7 +31,7 @@ export default function TimeDrawer({ days, times, setTimes, title, dateRange }) 
     });
   };
 
-  /** 종료시간 제한 */
+  /** ✅ 종료시간 제한 */
   const getDisabledEndTime = (date) => {
     const start = times[date.format("YYYY-MM-DD")]?.start;
     if (!start) return {};
@@ -47,7 +46,7 @@ export default function TimeDrawer({ days, times, setTimes, title, dateRange }) 
     };
   };
 
-  /** TimePicker 공통 렌더러 */
+  /** ✅ TimePicker 공통 렌더러 (경고 제거 버전) */
   const renderTimePicker = (d, type, defaultValue) => {
     const dayKey = d.format("YYYY-MM-DD");
     const dayTimes = times[dayKey] || {};
@@ -64,40 +63,29 @@ export default function TimeDrawer({ days, times, setTimes, title, dateRange }) 
         showNow={false}
         needConfirm={false}
         open={openKey === `${dayKey}-${type}`}
-        onOpenChange={(open) => {
-          if (open) {
-            setSelectedPart(null);
-            setOpenKey(`${dayKey}-${type}`);
-          } else {
-            setOpenKey(null);
-          }
-        }}
-        onSelect={(v) => {
-          // ✅ 시/분 클릭 이벤트 추적
-          if (selectedPart === null) {
-            // 처음 선택 (시)
-            setSelectedPart("hour");
-            handleChange(d, type, v);
-          } else if (selectedPart === "hour") {
-            // 두 번째 선택 (분)
-            handleChange(d, type, v);
-            setOpenKey(null); // ✅ 시+분 모두 선택 후 닫기
-            setSelectedPart(null);
-          }
-        }}
-        onChange={(v) => handleChange(d, type, v)}
+        onOpenChange={(open) => setOpenKey(open ? `${dayKey}-${type}` : null)}
+        onChange={(v) => handleChange(d, type, v)} // ✅ onSelect → onChange로 통일
         disabledTime={type === "end" ? () => getDisabledEndTime(d) : undefined}
+        className="!w-[85px]"
       />
     );
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#FDFCF9] w-[25%] ">
+    <div
+      className="flex flex-col flex-1 bg-[#FDFCF9] overflow-auto custom-scroll"
+      style={{
+        minWidth: "340px",
+        padding: "24px 28px 36px",
+        height: "100%",
+      }}
+    >
+      {/* ✅ 제목 + 날짜 표시 */}
       <TitleDateDisplay title={title} dateRange={dateRange} />
 
-
-      <div className="px-6 mt-4 mb-3 text-sm text-gray-700 leading-relaxed">
-        <p className="font-semibold text-[#2F3E46] mb-1">
+      {/* ✅ 안내 문구 */}
+      <div className="mt-5 mb-4 text-sm text-gray-700 leading-relaxed">
+        <p className="font-semibold text-[#2F3E46] mb-1 flex items-center">
           <ClockCircleOutlined className="mr-1 text-[#2F3E46]" />
           여행시간 설정
         </p>
@@ -108,7 +96,8 @@ export default function TimeDrawer({ days, times, setTimes, title, dateRange }) 
         </p>
       </div>
 
-      <div className="flex-1 overflow-y-auto custom-scroll px-6 pb-6">
+      {/* ✅ 리스트 */}
+      <div className="pb-10">
         {days.length === 0 ? (
           <Empty description="여행 날짜를 먼저 선택해주세요" />
         ) : (
@@ -117,7 +106,7 @@ export default function TimeDrawer({ days, times, setTimes, title, dateRange }) 
             renderItem={(d) => (
               <List.Item
                 key={d.format("YYYY-MM-DD")}
-                className="rounded shadow-sm px-4 py-3 mb-3 hover:bg-[#ffBf231f] transition"
+                className="rounded shadow-sm px-5 py-3 mb-3 hover:bg-[#ffbf231f] transition "
               >
                 <div className="flex items-center justify-between w-full">
                   <div className="w-24 font-medium text-[#2F3E46]">

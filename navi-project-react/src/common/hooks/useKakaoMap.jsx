@@ -99,7 +99,22 @@ export const useKakaoMap = (containerId) => {
   /** ✅ 단일 아이템 지도 표시 (상세용 등) */
   const updateMap = useCallback(
     (item) => {
-      const { title, latitude, longitude, thumbnailPath } = item || {};
+      const { title, latitude, longitude } = item || {};
+
+      // ✅ 썸네일 URL 정제
+      const rawThumb = item?.thumbnailPath || "";
+      const firstImage =
+        Array.isArray(rawThumb)
+          ? rawThumb[0]
+          : typeof rawThumb === "string"
+            ? rawThumb.split(",")[0].trim()
+            : "";
+
+      const imageSrc =
+        firstImage && firstImage.startsWith("http")
+          ? firstImage
+          : "https://placehold.co/220x140/cccccc/333333?text=No+Image"; // ✅ 반드시 정의되어야 함
+
       if (!isMapLoaded) {
         console.warn("[KakaoMap] SDK not ready, skipping updateMap");
         return;
@@ -130,38 +145,24 @@ export const useKakaoMap = (containerId) => {
       const marker = new kakao.maps.Marker({ map, position: coords });
       markerRef.current = marker;
 
-      const shouldShowOverlay = containerId !== HIDE_OVERLAY_ID;
-      if (shouldShowOverlay) {
-        const imageSrc =
-          thumbnailPath ||
-          "https://placehold.co/220x140/cccccc/333333?text=No+Image";
-        const content = `
-          <div style="
-            width: 220px; background: white; border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15); overflow: hidden;
-          ">
-            <img src="${imageSrc}" style="width:100%; height:140px; object-fit:cover;" 
-              onerror="this.src='https://placehold.co/220x140/cccccc/333333?text=No+Image'"/>
-            <div style="padding:8px 10px; font-weight:600; color:#222;">
-              ${title || ""}
-            </div>
-          </div>
-        `;
-        const overlay = new kakao.maps.CustomOverlay({
-          map,
-          position: coords,
-          content,
-          yAnchor: 1,
-          zIndex: 3,
-        });
-        customOverlayRef.current = overlay;
-      }
+      const content = `
+      <div style="width: 220px; background: white; border-radius: 12px;
+                  box-shadow: 0 4px 12px rgba(0,0,0,0.15); overflow: hidden;">
+        <img src="${imageSrc}" style="width:100%; height:140px; object-fit:cover;"
+          onerror="this.src='https://placehold.co/220x140/cccccc/333333?text=No+Image'"/>
+        <div style="padding:8px 10px; font-weight:600; color:#222;">${title || ""}</div>
+      </div>
+    `;
+      const overlay = new kakao.maps.CustomOverlay({
+        map,
+        position: coords,
+        content,
+        yAnchor: 1.3,
+        zIndex: 2,
+      });
+      customOverlayRef.current = overlay;
 
-      try {
-        map.panTo(coords);
-      } catch (err) {
-        console.warn("[KakaoMap] panTo failed:", err);
-      }
+      map.panTo(coords);
     },
     [isMapLoaded, containerId]
   );

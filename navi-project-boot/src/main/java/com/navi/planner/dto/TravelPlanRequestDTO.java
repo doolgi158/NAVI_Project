@@ -67,5 +67,7 @@ public class TravelPlanRequestDTO {
         private String endTime;
 
 
+        private boolean deleted = false;
+
     }
 }

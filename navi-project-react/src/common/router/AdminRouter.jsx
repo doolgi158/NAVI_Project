@@ -6,11 +6,11 @@ import AdminDeliveryRouter from "./AdminDeliveryRouter.jsx";
 import AdminRoomyRouter from "./AdminRoomRouter.jsx"
 import ManagerRouter from "./ManagerRouter.jsx";
 import AdminPaymentRouter from "./AdminPaymentRouter.jsx"
+import AdminTravelRouter from "./AdminTravelRouter.jsx"
+import AdminPlanRouter from "./AdminPlanRouter.jsx"
 
 const AdminUsers = lazy(() => import("../../admin/pages/user/AdminUsersPage.jsx"));
 const AdminDashboard = lazy(() => import("../../admin/pages/AdminDashboardPage.jsx"));
-const AdminTravelList = lazy(() => import("../../admin/pages/travel/AdminTravelList.jsx"));
-const AdminTravelForm = lazy(() => import("../../admin/pages/travel/AdminTravelForm.jsx"));
 
 const AdminRouter = () => {
   return [
@@ -34,44 +34,21 @@ const AdminRouter = () => {
         </Suspense>
       )
     },
-    //travel 관리자 페이지 라우팅
-    {
-      path: "travel",
-      element: (
-        <Suspense fallback={<div></div>}>
-          <ProtectedRoute requiredRole="ADMIN">
-            <AdminTravelList />
-          </ProtectedRoute>
-        </Suspense>
-      )
-    },
-    //travel 등록 페이지 라우팅
-    {
-      path: "travel/register",
-      element: (
-        <Suspense fallback={<div></div>}>
-          <ProtectedRoute requiredRole="ADMIN">
-            <AdminTravelForm />
-          </ProtectedRoute>
-        </Suspense>
-      )
-    },
-    //travel 수정 페이지 라우팅
-    {
-      path: "travel/edit/:travelId",
-      element: (
-        <Suspense fallback={<div></div>}>
-          <ProtectedRoute requiredRole="ADMIN">
-            <AdminTravelForm />
-          </ProtectedRoute>
-        </Suspense>
-      ),
-    },
-
     // 게시판 관리자
     {
       path: "manager",
       children: [...ManagerRouter()],
+    },
+
+    //여행지 관리자
+    {
+      path: "travel",
+      children: [...AdminTravelRouter()]
+    },
+    //여행계획 관리자
+    {
+      path: "plan",
+      children: [...AdminPlanRouter()]
     },
 
     // 항공 관리자 라우터 통합

@@ -1,13 +1,11 @@
-// components/plan/scheduler/PlanItemCard.jsx
 import React from "react";
-import { Button } from "antd";
-import { EditOutlined } from "@ant-design/icons";
+import { Button, message } from "antd";
+import { EditOutlined, MinusCircleOutlined } from "@ant-design/icons";
 import { Draggable } from "@hello-pangea/dnd";
 
 /**
  * PlanItemCard
- * - 기존 PlanScheduler.renderStepItem() 를 그대로 컴포넌트로 분리
- * - DnD 래핑(Draggable)과 UI/스타일 완전 동일
+ * - DnD 가능 + 시간 수정 + 개별 일정 삭제
  */
 export default function PlanItemCard({
     item,
@@ -18,8 +16,35 @@ export default function PlanItemCard({
     color = "#3498DB",
     fallbackImg = "https://placehold.co/150x150?text=No+Image",
     onEditTime = () => { },
+    onDeleteItem = () => { }, // ✅ 부모 상태(days) 갱신용
 }) {
-    const imageSrc = item.img || fallbackImg;
+    /** ✅ 타입별 이미지 경로 계산 */
+    const getImageSrc = (item) => {
+        // 1️⃣ 공항(poi)은 서버 이미지로 고정
+        if (item.type === "poi") {
+            return "http://localhost:8080/images/travel/airport.jpg";
+        }
+
+        // 2️⃣ 숙소/여행지는 서버 경로 or 절대경로 우선
+        if (item.img) {
+            if (item.img.startsWith("http")) return item.img;
+            if (item.img.startsWith("/")) return `http://localhost:8080${item.img}`;
+        }
+
+        // 3️⃣ fallback
+        return fallbackImg;
+    };
+
+    const imageSrc = getImageSrc(item);
+
+    /** ✅ 삭제 요청 (confirm은 부모에서 처리) */
+    const handleDelete = () => {
+        if (!item.itemId && !item.travelId && !item.title) {
+            message.warning("삭제할 대상이 올바르지 않습니다.");
+            return;
+        }
+        onDeleteItem(dayIdx, index, item);
+    };
 
     return (
         <Draggable
@@ -76,17 +101,21 @@ export default function PlanItemCard({
 
                             <span
                                 className={`text-xs font-semibold ${item.type === "stay"
-                                    ? "text-[#6846FF]"
-                                    : item.type === "travel"
-                                        ? "text-[#0088CC]"
-                                        : "text-gray-400"
+                                        ? "text-[#6846FF]"
+                                        : item.type === "travel"
+                                            ? "text-[#0088CC]"
+                                            : item.type === "poi"
+                                                ? "text-[#FF6B00]"
+                                                : "text-gray-400"
                                     }`}
                             >
                                 {item.type === "stay"
                                     ? "숙소"
                                     : item.type === "travel"
                                         ? "여행지"
-                                        : "기타"}
+                                        : item.type === "poi"
+                                            ? "공항"
+                                            : "기타"}
                             </span>
 
                             <span
@@ -97,19 +126,38 @@ export default function PlanItemCard({
                             </span>
                         </div>
 
-                        {/* 썸네일 */}
-                        <div className="w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
-                            <img
-                                src={imageSrc}
-                                alt={item.title}
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                    if (!e.target.dataset.fallback) {
-                                        e.target.dataset.fallback = "true";
-                                        e.target.src = fallbackImg;
-                                    }
-                                }}
-                            />
+                        {/* 썸네일 + 삭제버튼 */}
+                        <div className="flex flex-col items-center">
+                            <div className="w-20 h-16 flex-shrink-0 rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
+                                <img
+                                    src={imageSrc}
+                                    alt={item.title}
+                                    className="w-full h-full object-cover rounded-xl"
+                                    onError={(e) => {
+                                        e.target.onerror = null;
+                                        e.target.src =
+                                            item.type === "poi"
+                                                ? "http://localhost:8080/images/travel/airport.jpg"
+                                                : fallbackImg;
+                                    }}
+                                />
+                            </div>
+
+                            {!isViewMode &&
+                                !(item.type === "poi" &&
+                                    (item.title?.includes("제주공항 도착") ||
+                                        item.title?.includes("제주공항 출발"))) && (
+                                    <Button
+                                        type="text"
+                                        danger
+                                        size="small"
+                                        icon={<MinusCircleOutlined />}
+                                        onClick={handleDelete}
+                                        className="mt-1 text-xs"
+                                    >
+                                        삭제
+                                    </Button>
+                                )}
                         </div>
                     </div>
                 </div>

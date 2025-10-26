@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -36,11 +37,15 @@ public class TravelPlanListResponseDTO {
                 .totalDays(plan.getDays() != null ? plan.getDays().size() : 0)
                 .travelTitles(plan.getDays() != null
                         ? plan.getDays().stream()
+                        .sorted((d1, d2) -> Integer.compare(d1.getOrderNo(), d2.getOrderNo()))
                         .flatMap(day -> day.getItems().stream())
-                        .filter(item -> "travel".equals(item.getType()))
+                        .filter(item ->
+                                "travel".equals(item.getType()) ||
+                                        "stay".equals(item.getType()))
                         .map(item -> item.getTitle())
-                        .limit(3)
-                        .collect(Collectors.toSet())
+                        .filter(title -> title != null && !title.isBlank())
+                        .distinct() // 중복 제거
+                        .collect(Collectors.toCollection(LinkedHashSet::new))
                         : Collections.emptySet())
                 .build();
     }
