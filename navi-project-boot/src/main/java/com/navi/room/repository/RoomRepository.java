@@ -31,4 +31,6 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     Long getNextSeqVal();
     // 5. 숙소 기본키(accNo)로 객실 목록 조회 (숙소 삭제 시 사용)
     List<Room> findByAcc_AccNo(Long accNo);
+    // 6. 특정 숙소의 객실 일괄 삭제
+    void deleteAllByAcc_AccNo(Long accNo);
 }

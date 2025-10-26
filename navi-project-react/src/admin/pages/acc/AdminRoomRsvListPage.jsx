@@ -10,20 +10,23 @@ import {
   Spin,
   Tag,
   Modal,
+  Descriptions,
 } from "antd";
 import {
   ReloadOutlined,
-  EyeOutlined,
   DeleteOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
-import axios from "axios";
 import { API_SERVER_HOST } from "@/common/api/naviApi";
 import dayjs from "dayjs";
+import axios from "axios";
 
 const { Title } = Typography;
 
 const AdminRoomRsvListPage = () => {
-  const { filter, keyword } = useOutletContext(); // ✅ 상위 탭에서 넘어오는 값
+  const navigate = useNavigate();
+  const { filter, keyword } = useOutletContext();
+
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
@@ -32,9 +35,16 @@ const AdminRoomRsvListPage = () => {
     total: 0,
   });
 
-  const navigate = useNavigate();
+  const [reserverModal, setReserverModal] = useState({
+    visible: false,
+    data: null,
+  });
 
-  /* === 관리자용 객실 예약 목록 조회 === */
+  /* === 목록 조회 === */
+  useEffect(() => {
+    fetchList(1, pagination.pageSize);
+  }, [filter, keyword]);
+
   const fetchList = async (page = pagination.current, size = pagination.pageSize) => {
     setLoading(true);
     try {
@@ -65,12 +75,6 @@ const AdminRoomRsvListPage = () => {
     }
   };
 
-  /* ✅ 필터 / 검색어 변경 시 자동 재조회 */
-  useEffect(() => {
-    fetchList(1, pagination.pageSize);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter, keyword]);
-
   /* === 예약 삭제 === */
   const handleDelete = (reserveId, reserverName) => {
     Modal.confirm({
@@ -95,15 +99,47 @@ const AdminRoomRsvListPage = () => {
     });
   };
 
-  /* === 페이지네이션 === */
-  const handlePageChange = (page, pageSize) => {
-    fetchList(page, pageSize);
+  /* === 대표 예약자 정보 보기 === */
+  const showReserverDetail = (record) => {
+    setReserverModal({ visible: true, data: record });
   };
 
   /* === 컬럼 구성 === */
   const columns = [
     { title: "예약 ID", dataIndex: "reserveId", align: "center", width: 160 },
-    { title: "객실 ID", dataIndex: "roomId", align: "center", width: 120 },
+    { title: "숙소명", dataIndex: "title", align: "center", width: 200 },
+    { title: "객실명", dataIndex: "roomName", align: "center", width: 180 },
+    {
+      title: "상태",
+      dataIndex: "rsvStatus",
+      align: "center",
+      width: 120,
+      render: (status) => {
+        const colorMap = {
+          PENDING: "orange",
+          PAID: "green",
+          CANCELLED: "red",
+          REFUNDED: "purple",
+          FAILED: "volcano"
+        };
+        return <Tag color={colorMap[status] || "default"}>{status}</Tag>;
+      },
+    },
+    {
+      title: "대표 예약자",
+      dataIndex: "reserverName",
+      align: "center",
+      width: 160,
+      render: (_, record) => (
+        <Button
+          type="link"
+          icon={<UserOutlined />}
+          onClick={() => showReserverDetail(record)}
+        >
+          {record.reserverName}
+        </Button>
+      ),
+    },
     {
       title: "체크인",
       dataIndex: "startDate",
@@ -118,56 +154,43 @@ const AdminRoomRsvListPage = () => {
       width: 120,
       render: (v) => (v ? dayjs(v).format("YYYY-MM-DD") : "-"),
     },
-    { title: "숙박일수", dataIndex: "nights", align: "center", width: 90 },
+    { title: "숙박일수", dataIndex: "nights", align: "center", width: 100 },
     { title: "인원", dataIndex: "guestCount", align: "center", width: 80 },
-    { title: "객실 수", dataIndex: "quantity", align: "center", width: 90 },
+    { title: "객실 수", dataIndex: "quantity", align: "center", width: 100 },
     {
       title: "금액",
       dataIndex: "price",
-      align: "right",
+      align: "center",
       width: 120,
       render: (v) => (v ? `${Number(v).toLocaleString()}원` : "-"),
     },
     {
-      title: "상태",
-      dataIndex: "rsvStatus",
+      title: "생성일",
+      dataIndex: "createdAt",
       align: "center",
-      width: 120,
-      render: (status) => {
-        const colorMap = {
-          PENDING: "orange",
-          PAID: "green",
-          CANCELLED: "red",
-          REFUNDED: "default",
-        };
-        return <Tag color={colorMap[status] || "default"}>{status}</Tag>;
-      },
+      width: 180,
+      render: (v) => (v ? dayjs(v).format("YYYY-MM-DD HH:mm") : "-"),
     },
-    { title: "예약자명", dataIndex: "reserverName", align: "center", width: 130 },
-    { title: "연락처", dataIndex: "reserverTel", align: "center", width: 150 },
-    { title: "이메일", dataIndex: "reserverEmail", align: "center", width: 220 },
+    {
+      title: "수정일",
+      dataIndex: "updatedAt",
+      align: "center",
+      width: 180,
+      render: (v) => (v ? dayjs(v).format("YYYY-MM-DD HH:mm") : "-"),
+    },
     {
       title: "관리",
       align: "center",
-      width: 180,
+      width: 120,
       fixed: "right",
       render: (_, record) => (
-        <Space>
-          <Button
-            type="primary"
-            icon={<EyeOutlined />}
-            onClick={() => navigate(`/adm/room/reserve/detail/${record.reserveId}`)}
-          >
-            상세
-          </Button>
-          <Button
-            danger
-            icon={<DeleteOutlined />}
-            onClick={() => handleDelete(record.reserveId, record.reserverName)}
-          >
-            삭제
-          </Button>
-        </Space>
+        <Button
+          danger
+          icon={<DeleteOutlined />}
+          onClick={() => handleDelete(record.reserveId, record.reserverName)}
+        >
+          삭제
+        </Button>
       ),
     },
   ];
@@ -203,19 +226,44 @@ const AdminRoomRsvListPage = () => {
             columns={columns}
             dataSource={rows}
             bordered
-            scroll={{ x: 1500 }}
+            scroll={{ x: 1700 }}
             pagination={{
               current: pagination.current,
               pageSize: pagination.pageSize,
               total: pagination.total,
               showSizeChanger: true,
-              onChange: handlePageChange,
-              onShowSizeChange: handlePageChange,
-              showTotal: (total) => `총 ${total.toLocaleString()} 건`,
+              onChange: (p, s) => fetchList(p, s),
+              onShowSizeChange: (p, s) => fetchList(p, s),
+              showTotal: (t) => `총 ${t.toLocaleString()} 건`,
             }}
           />
         )}
       </Card>
+
+      {/* ✅ 대표 예약자 모달 */}
+      <Modal
+        title="대표 예약자 정보"
+        open={reserverModal.visible}
+        onCancel={() => setReserverModal({ visible: false, data: null })}
+        footer={null}
+        centered
+      >
+        {reserverModal.data ? (
+          <Descriptions bordered column={1} size="middle">
+            <Descriptions.Item label="이름">
+              {reserverModal.data.reserverName}
+            </Descriptions.Item>
+            <Descriptions.Item label="전화번호">
+              {reserverModal.data.reserverTel}
+            </Descriptions.Item>
+            <Descriptions.Item label="이메일">
+              {reserverModal.data.reserverEmail}
+            </Descriptions.Item>
+          </Descriptions>
+        ) : (
+          <p style={{ textAlign: "center", color: "#999" }}>정보 없음</p>
+        )}
+      </Modal>
     </div>
   );
 };

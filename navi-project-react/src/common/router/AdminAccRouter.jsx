@@ -21,28 +21,30 @@ const AdminAccommodationRouter = () => {
                 { index: true, element: <AdminAccListPage /> },
                 { path: "list", element: <AdminAccListPage /> },
                 { path: "reservations", element: <AdminRoomRsvListPage /> },
+                { path: "reservations", element: <AdminRoomRsvListPage /> },
+                { path: "edit/:accNo", element: <AdminAccForm /> },
             ],
         },
-        {
-            path: "accommodations/new",
-            element: (
-                <Suspense fallback={<div></div>}>
-                    <ProtectedRoute requiredRole="ADMIN">
-                        <AdminAccForm />
-                    </ProtectedRoute>
-                </Suspense>
-            )
-        },
-        {
-            path: "accommodations/edit/:accNo",
-            element: (
-                <Suspense fallback={<div></div>}>
-                    <ProtectedRoute requiredRole="ADMIN">
-                        <AdminAccForm />
-                    </ProtectedRoute>
-                </Suspense>
-            )
-        },
+        // {
+        //     path: "accommodations/new",
+        //     element: (
+        //         <Suspense fallback={<div></div>}>
+        //             <ProtectedRoute requiredRole="ADMIN">
+        //                 <AdminAccForm />
+        //             </ProtectedRoute>
+        //         </Suspense>
+        //     )
+        // },
+        // {
+        //     path: "accommodations/edit/:accNo",
+        //     element: (
+        //         <Suspense fallback={<div></div>}>
+        //             <ProtectedRoute requiredRole="ADMIN">
+        //                 <AdminAccForm />
+        //             </ProtectedRoute>
+        //         </Suspense>
+        //     )
+        // },
     ];
 };
 

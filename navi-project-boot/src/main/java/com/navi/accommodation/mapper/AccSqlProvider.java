@@ -111,11 +111,14 @@ public class AccSqlProvider {
                     CATEGORY AS category,
                     TEL AS tel,
                     ADDRESS AS address,
+                    MAPX, MAPY,
+                    OVERVIEW AS overview,
+                    MAIN_IMAGE AS mainImage,
+                    CHECKIN_TIME AS checkInTime,
+                    CHECKOUT_TIME AS checkOutTime,
                     HAS_COOKING AS hasCooking,
                     HAS_PARKING AS hasParking,
                     IS_ACTIVE AS isActive,
-                    CHECKIN_TIME AS checkInTime,
-                    CHECKOUT_TIME AS checkOutTime,
                     VIEW_COUNT AS viewCount,
                     TO_CHAR(CREATED_TIME, 'YYYY-MM-DD HH24:MI') AS createdTime,
                     TO_CHAR(MODIFIED_TIME, 'YYYY-MM-DD HH24:MI') AS modifiedTime
@@ -123,6 +126,7 @@ public class AccSqlProvider {
                 .FROM("NAVI_ACCOMMODATION")
                 .WHERE("1=1");
 
+        // 필터링
         if (keyword != null && !keyword.isBlank()) {
             sql.WHERE("(LOWER(TITLE) LIKE '%' || LOWER(#{keyword}) || '%' OR LOWER(ADDRESS) LIKE '%' || LOWER(#{keyword}) || '%')");
         }
@@ -139,13 +143,15 @@ public class AccSqlProvider {
 
         String baseQuery = sql.toString();
         if (offset != null && pageSize != null) {
-            // offset 번째 행부터 pageSize 만큼 조회
             baseQuery += " OFFSET #{offset} ROWS FETCH NEXT #{pageSize} ROWS ONLY";
         }
 
         return baseQuery;
     }
 
+    /* =============================================================
+       [3] 관리자 숙소 개수 조회
+       ============================================================= */
     public String buildAdminCountQuery(Map<String, Object> params) {
         String keyword = (String) params.get("keyword");
         Integer sourceType = (Integer) params.get("sourceType");
