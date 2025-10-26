@@ -17,14 +17,17 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @SpringBootTest
 class FlightDataInitTest {
 
-    @Autowired private AirportRepository airportRepository;
-    @Autowired private FlightRepository flightRepository;
+    @Autowired
+    private AirportRepository airportRepository;
+    @Autowired
+    private FlightRepository flightRepository;
 
     private final ObjectMapper mapper = new ObjectMapper();
 
@@ -75,8 +78,8 @@ class FlightDataInitTest {
             return;
         }
 
-        try (InputStream in = getClass().getResourceAsStream("/mockData/flightData_1010_1108.json")) {
-            if (in == null) throw new IllegalStateException("/mockData/flightData_1010_1108.json not found");
+        try (InputStream in = getClass().getResourceAsStream("/mockData/flightData_1026_1125.json")) {
+            if (in == null) throw new IllegalStateException("/mockData/flightData_1026_1125.json not found");
             JsonNode root = mapper.readTree(in);
             JsonNode items = root.path("response").path("body").path("items").path("item");
 
