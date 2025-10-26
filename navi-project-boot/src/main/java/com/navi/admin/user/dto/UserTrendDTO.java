@@ -12,5 +12,4 @@ public class UserTrendDTO {
     private long join;
     private long leave;
     private long active;
-
 }

@@ -1,4 +1,3 @@
-
 package com.navi.accommodation.domain;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -53,7 +52,8 @@ public class Acc {
 
     // 숙소 유형 (호텔, 펜션 등)
     @Builder.Default
-    @Nationalized @Column(length = 10)
+    @Nationalized
+    @Column(length = 10)
     private String category = "미확인";
 
     // 문의 전화번호
@@ -218,14 +218,29 @@ public class Acc {
     }
 
     public void changeTownship(Township township) {
-        if (township != null) { this.township = township; }
+        if (township != null) {
+            this.township = township;
+        }
     }
-    public void updateMainImage(String mainImage) { this.mainImage = mainImage; }
+
+    public void updateMainImage(String mainImage) {
+        this.mainImage = mainImage;
+    }
+
     public void changeLocation(BigDecimal mapx, BigDecimal mapy) {
-        if (mapx != null) { this.mapx = mapx; }
-        if (mapy != null) { this.mapy = mapy; }
+        if (mapx != null) {
+            this.mapx = mapx;
+        }
+        if (mapy != null) {
+            this.mapy = mapy;
+        }
     }
-    public void changeCategory(String category){ if (category != null) { this.category = category; } }
+
+    public void changeCategory(String category) {
+        if (category != null) {
+            this.category = category;
+        }
+    }
 
     /* === 문자열 유효성 검증용 유틸 메서드 === */
     private String nonEmptyOrNull(String value) {

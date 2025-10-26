@@ -1,6 +1,8 @@
 package com.navi.common.config.kakao;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
 import java.math.BigDecimal;
 
 @Data

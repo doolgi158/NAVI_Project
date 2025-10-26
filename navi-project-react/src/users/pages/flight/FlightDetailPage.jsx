@@ -189,7 +189,7 @@ const FlightDetailPage = () => {
     <MainLayout>
       <div
         style={{
-          background: "#f6f8fb",
+          background: "linear-gradient(180deg, #ffffff 0%, #ffffff 100%)",
           minHeight: "100vh",
           padding: "48px 0",
           display: "flex",

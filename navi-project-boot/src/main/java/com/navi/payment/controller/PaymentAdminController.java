@@ -1,11 +1,12 @@
 package com.navi.payment.controller;
 
-import com.navi.common.enums.RsvType;
-import com.navi.payment.domain.enums.PaymentStatus;
-import com.navi.payment.dto.request.RefundRequestDTO;
+import com.navi.common.response.ApiResponse;
 import com.navi.payment.dto.response.PaymentAdminDetailResponseDTO;
 import com.navi.payment.dto.response.PaymentAdminListResponseDTO;
 import com.navi.payment.service.PaymentAdminService;
+import com.navi.payment.service.PaymentService;
+import com.navi.security.util.JWTUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -19,20 +20,28 @@ import java.util.List;
 @RequestMapping("/api/adm/payment")
 public class PaymentAdminController {
     private final PaymentAdminService paymentAdminService;
+    private final PaymentService paymentService;
+    private final JWTUtil jwtUtil;
 
     @GetMapping("/list")
-    public ResponseEntity<List<PaymentAdminListResponseDTO>> getAdminPayments(
-            @RequestParam(required = false) RsvType rsvType,
-            @RequestParam(required = false) PaymentStatus paymentStatus,
-            @RequestParam(required = false) String keyword
-    ) {
-        List<PaymentAdminListResponseDTO> payments = paymentAdminService.getAllPaymentsForAdmin(rsvType, paymentStatus, keyword);
-
-        if (payments.isEmpty()) {
-            return ResponseEntity.noContent().build(); // 204 응답 (데이터 없음)
+    public ApiResponse<List<PaymentAdminListResponseDTO>> getMyPayments(HttpServletRequest request) {
+        // 1헤더에서 토큰 추출
+        String bearer = request.getHeader("Authorization");
+        if (bearer == null || !bearer.startsWith("Bearer ")) {
+            log.warn("🚫 Authorization 헤더가 비어 있음");
+            return ApiResponse.error("인증 토큰이 없습니다.", 401, null);
         }
 
-        return ResponseEntity.ok(payments);
+        String token = bearer.substring(7);
+
+        // JWT에서 userId 추출
+        String userId = jwtUtil.getUserIdFromToken(token);
+        log.info("💳 [PaymentController] 결제 내역 요청 - userId: {}", userId);
+
+        // 서비스 호출
+        List<PaymentAdminListResponseDTO> payments = paymentService.getMyPayments(userId);
+
+        return ApiResponse.success(payments);
     }
 
     @GetMapping("/details/{merchantId}")
@@ -47,17 +56,16 @@ public class PaymentAdminController {
         return ResponseEntity.ok(details);
     }
 
-    @PostMapping("/refund/master")
-    public ResponseEntity<String> refundMaster(@RequestBody RefundRequestDTO dto) throws Exception {
-        log.info("💰 [ADMIN API] 전체 환불 요청 수신 - {}", dto);
-        paymentAdminService.refundPaymentByMerchantId(dto);
-        return ResponseEntity.ok("전체 환불이 완료되었습니다.");
-    }
-
     @PostMapping("/refund/detail")
-    public ResponseEntity<String> refundDetail(@RequestBody RefundRequestDTO dto) throws Exception {
-        log.info("💰 [ADMIN API] 부분 환불 요청 수신 - {}", dto);
-        paymentAdminService.refundPaymentByReserveId(dto);
-        return ResponseEntity.ok("부분 환불이 완료되었습니다.");
+    public ResponseEntity<PaymentAdminListResponseDTO> refundByMerchantId(
+            @RequestParam String merchantId,
+            @RequestParam(defaultValue = "관리자 전체 환불") String reason
+    ) throws Exception {
+        log.info("💰 [ADMIN API] 전체 환불 요청 - merchantId={}, reason={}", merchantId, reason);
+
+        PaymentAdminListResponseDTO refunded =
+                paymentAdminService.refundPaymentByMerchantId(merchantId, reason);
+
+        return ResponseEntity.ok(refunded);
     }
 }

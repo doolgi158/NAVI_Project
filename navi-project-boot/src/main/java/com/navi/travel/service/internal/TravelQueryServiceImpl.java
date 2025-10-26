@@ -6,7 +6,7 @@ import com.navi.travel.dto.TravelListResponseDTO;
 import com.navi.travel.repository.BookmarkRepository;
 import com.navi.travel.repository.LikeRepository;
 import com.navi.travel.repository.TravelRepository;
-import com.navi.user.dto.JWTClaimDTO;
+import com.navi.user.dto.auth.UserSecurityDTO;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -185,7 +185,7 @@ public class TravelQueryServiceImpl implements TravelQueryService {
         String currentUserId = null;
         try {
             var auth = SecurityContextHolder.getContext().getAuthentication();
-            if (auth != null && auth.getPrincipal() instanceof com.navi.user.dto.users.UserSecurityDTO user) {
+            if (auth != null && auth.getPrincipal() instanceof UserSecurityDTO user) {
                 currentUserId = user.getId();
             } else if (auth != null && auth.getPrincipal() instanceof String str && !"anonymousUser".equals(str)) {
                 currentUserId = str;

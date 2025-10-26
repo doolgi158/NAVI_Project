@@ -36,4 +36,7 @@ public interface AccRepository extends JpaRepository<Acc, Long> {
     /* accId 시퀀스 기반 생성용 */
     @Query(value = "SELECT ACC_SEQ.NEXTVAL FROM DUAL", nativeQuery = true)
     Long getNextSeqVal();
+
+    // 조회수 기준 상위 10개 숙소
+    List<Acc> findTop10ByOrderByViewCountDesc();
 }

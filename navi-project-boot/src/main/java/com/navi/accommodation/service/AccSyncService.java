@@ -47,6 +47,7 @@ public class AccSyncService {
     public void loadApiFromJsonFile() throws IOException {
         processJson(listFile, AccApiDTO.class, true);
     }
+
     // 최초 적재(acc_basic.json & acc_extra.json) : UPDATE 전용 (insertOnly = false)
     public void updateApiFromJsonFile() throws IOException {
         processJson(basicFile, AccApiDTO.class, false);
@@ -67,7 +68,7 @@ public class AccSyncService {
         JsonNode items = root.path("response").path("body").path("items");
 
         // items는 배열(ArrayNode)이므로, for 문으로 반복 탐색 가능
-        for(JsonNode wrapper : items){
+        for (JsonNode wrapper : items) {
             JsonNode item = wrapper.path("item");
             // JSON의 item 내용을 AccApiDTO에 매핑
             T dto = objectMapper.treeToValue(item, dtoClass);
@@ -81,13 +82,13 @@ public class AccSyncService {
     }
 
     private void handleApiDto(AccApiDTO apiDto, boolean insertOnly) {
-        if(apiDto.getContentId() == null || apiDto.getContentId().isBlank()) {
+        if (apiDto.getContentId() == null || apiDto.getContentId().isBlank()) {
             log.warn("[API] contentId 없음 -> SKIP: {}", apiDto);
             return;
         }
 
         Long contentId = Long.parseLong(apiDto.getContentId());
-        if(insertOnly) {
+        if (insertOnly) {
             accRepository.findByContentId(contentId)
                     .ifPresentOrElse(
                             acc -> log.warn("[API] 이미 존재 -> SKIP: {}", contentId),
@@ -121,6 +122,7 @@ public class AccSyncService {
         log.info("[API] INSERT 성공 (contentId = {}, accId = {})", acc.getContentId(), accId);
 
     }
+
     // 기존 데이터 갱신 (acc_basic.json & acc_extra.json)
     public void updateInitialFromApi(Acc acc, AccApiDTO dto) {
         Township townshipId = acc.getTownship();
@@ -157,9 +159,9 @@ public class AccSyncService {
         List<Acc> accList = accRepository.findAll();
         Random random = new Random();
 
-        for(Acc acc : accList) {
+        for (Acc acc : accList) {
             try {
-                // 읍면동 매핑 + 좌표 갱신
+                // 읍면동 매핑 + 좌표 + 카테고리 갱신
                 GeoResult geo = kakaoGeoService.getCoordinatesAndTownship(acc.getAddress(), acc.getTitle());
                 if (geo == null) {
                     log.warn("[SYNC] {} → KakaoGeo 결과 없음", acc.getTitle());
@@ -185,7 +187,7 @@ public class AccSyncService {
         }
     }
 
-    private Township matchTownshipByGeoResult(String townshipName) {
+    public Township matchTownshipByGeoResult(String townshipName) {
         if (townshipName == null || townshipName.isBlank()) {
             return null;
         }
@@ -196,7 +198,7 @@ public class AccSyncService {
         // township_name 컬럼 기준 LIKE 검색
         return townshipRepository.findByTownshipName(trimmed)
                 .orElseGet(() -> {
-                    log.warn("[SYNC] 읍면동 매핑 실패 → {}", townshipName);
+                    log.warn("[SYNC] 읍면 매핑 실패 → {}", townshipName);
                     return null;
                 });
     }

@@ -1,6 +1,7 @@
 package com.navi.accommodation.service;
 
 import com.navi.accommodation.domain.Acc;
+import com.navi.accommodation.dto.api.AccRankDTO;
 import com.navi.accommodation.dto.api.AdminAccListDTO;
 import com.navi.accommodation.dto.request.AccRequestDTO;
 import com.navi.accommodation.dto.request.AccSearchRequestDTO;
@@ -8,20 +9,24 @@ import com.navi.accommodation.dto.response.AccDetailResponseDTO;
 import com.navi.accommodation.dto.response.AccListResponseDTO;
 import com.navi.accommodation.mapper.AccMapper;
 import com.navi.accommodation.repository.AccRepository;
+import com.navi.common.config.kakao.GeoResult;
+import com.navi.common.config.kakao.KakaoGeoService;
 import com.navi.image.domain.Image;
 import com.navi.image.repository.ImageRepository;
+import com.navi.location.domain.Township;
 import com.navi.location.repository.TownshipRepository;
 import com.navi.room.repository.RoomRepository;
 import com.navi.user.repository.LogRepository;
 import com.navi.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,6 +41,9 @@ public class AccServiceImpl implements AccService {
     private final UserRepository userRepository;
     private final LogRepository logRepository;
 
+    private final KakaoGeoService kakaoGeoService;
+    private final AccSyncService accSyncService;
+
     private final AccMapper accMapper;
 
     /* === 관리자 전용 CRUD === */
@@ -45,45 +53,67 @@ public class AccServiceImpl implements AccService {
         Long nextSeq = accRepository.getNextSeqVal();
         String accId = String.format("ACC%03d", nextSeq);
 
-        // Township 조회 (필수)
-        var township = townshipRepository.findById(dto.getTownshipId())
-                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 지역 정보입니다."));
+        try {
+            // KakaoGeoService 호출 (주소 + 숙소명 기반 자동 보정)
+            GeoResult geo = kakaoGeoService.getCoordinatesAndTownship(dto.getAddress(), dto.getTitle());
+            if (geo == null) {
+                log.warn("[CREATE_ACC] KakaoGeo 결과 없음 → {}", dto.getTitle());
+                throw new IllegalStateException("Kakao API를 통한 주소 변환에 실패했습니다.");
+            }
 
-        // 엔티티 생성 및 값 주입
-        Acc acc = Acc.builder()
-                .accId(accId)
-                .title(dto.getTitle())
-                .category(dto.getCategory())
-                .tel(dto.getTel())
-                .address(dto.getAddress())
-                .checkInTime(dto.getCheckInTime() != null ? dto.getCheckInTime() : "15:00")
-                .checkOutTime(dto.getCheckOutTime() != null ? dto.getCheckOutTime() : "11:00")
-                .hasCooking(dto.isHasCooking())
-                .hasParking(dto.isHasParking())
-                .active(dto.isActive())
-                .township(township)
-                .createdTime(java.time.LocalDateTime.now())
-                .modifiedTime(java.time.LocalDateTime.now())
-                .build();
+            // 읍면동 매핑
+            Township township = accSyncService.matchTownshipByGeoResult(geo.getTownshipName());
+            if (township == null) {
+                log.warn("[CREATE_ACC] 읍면동 매핑 실패 → {}", geo.getTownshipName());
+            }
 
-        // 숙소 저장 (1차 저장 — accNo 생성)
-        acc = accRepository.save(acc);
-
-        // 로컬 이미지 경로가 있을 경우 이미지 엔티티로 저장
-        if (dto.getLocalImagePath() != null && !dto.getLocalImagePath().isBlank()) {
-            Image image = Image.builder()
-                    .targetType("ACC") // 숙소 이미지
-                    .targetId(acc.getAccId())
-                    .path(dto.getLocalImagePath()) // 로컬 이미지 경로
-                    .uuidName(dto.getLocalImagePath()) // 필요 시 uuidName 필드에 동일하게 저장
+            // 숙소 엔티티 생성 (입력값 + 보정값 반영)
+            Acc acc = Acc.builder()
+                    .accId(accId)
+                    .title(dto.getTitle())
+                    .category(geo.getCategory() != null ? geo.getCategory() : dto.getCategory())
+                    .tel(dto.getTel())
+                    .address(dto.getAddress())
+                    .hasCooking(dto.isHasCooking())
+                    .hasParking(dto.isHasParking())
+                    .checkInTime(dto.getCheckInTime() != null ? dto.getCheckInTime() : "15:00")
+                    .checkOutTime(dto.getCheckOutTime() != null ? dto.getCheckOutTime() : "11:00")
+                    .active(dto.isActive())
+                    .viewCount(0L)
+                    .mapx(geo.getMapx())
+                    .mapy(geo.getMapy())
+                    .township(township)
+                    .createdTime(java.time.LocalDateTime.now())
+                    .modifiedTime(java.time.LocalDateTime.now())
                     .build();
 
-            imageRepository.save(image);
-            log.info("[ADMIN] 숙소 이미지 등록 완료 - {}", dto.getLocalImagePath());
-        }
+            acc = accRepository.save(acc);
 
-        log.info("[ADMIN] 숙소 등록 완료 - {}", acc.getTitle());
-        return acc;
+            if (dto.getLocalImagePath() != null && !dto.getLocalImagePath().isBlank()) {
+                Image image = Image.builder()
+                        .targetType("ACC")
+                        .targetId(acc.getAccId())
+                        .path(dto.getLocalImagePath())
+                        .uuidName(dto.getLocalImagePath())
+                        .build();
+                imageRepository.save(image);
+                log.info("[CREATE_ACC] 숙소 이미지 등록 완료 - {}", dto.getLocalImagePath());
+            }
+
+            // 로그 출력
+            log.info("🏨 [CREATE_ACC] 숙소 등록 완료 - {} (읍면동: {}, 카테고리: {}, 좌표: {}, {})",
+                    acc.getTitle(),
+                    geo.getTownshipName(),
+                    geo.getCategory(),
+                    geo.getMapx(),
+                    geo.getMapy());
+
+            return acc;
+
+        } catch (Exception e) {
+            log.error("[CREATE_ACC] {} 등록 실패: {}", dto.getTitle(), e.getMessage());
+            throw new RuntimeException("숙소 등록 중 오류가 발생했습니다.", e);
+        }
     }
 
     // 2. 숙소 수정
@@ -138,18 +168,20 @@ public class AccServiceImpl implements AccService {
     }
 
     @Override
-    public List<AdminAccListDTO> getAllAccList(String keyword) {
-        List<Acc> accList;
+    public Map<String, Object> getAllAccList(String keyword, Integer sourceType, String activeFilter, int page, int size) {
+        log.info("📋 [ADMIN] 숙소 목록 조회 - keyword={}, sourceType={}, activeFilter={}, page={}, size={}",
+                keyword, sourceType, activeFilter, page, size);
 
-        if (keyword != null && !keyword.isBlank()) {
-            accList = accRepository.findByTitleContainingIgnoreCase(keyword);
-        } else {
-            accList = accRepository.findAll(Sort.by(Sort.Direction.DESC, "accNo"));
-        }
+        int offset = (page - 1) * size;
 
-        return accList.stream()
-                .map(AdminAccListDTO::fromEntity)
-                .toList();
+        List<AdminAccListDTO> list = accMapper.findAllWithFilters(keyword, sourceType, activeFilter, offset, size);
+        int total = accMapper.countAllWithFilters(keyword, sourceType, activeFilter);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("data", list);
+        result.put("total", total);
+
+        return result;
     }
 
     /* === 공통 조회 === */
@@ -190,8 +222,8 @@ public class AccServiceImpl implements AccService {
                 dto.getTownshipName(),
                 dto.getTitle(),
                 categories,
-                dto.getCheckIn() != null ? dto.getCheckIn().toString() : null,
-                dto.getCheckOut() != null ? dto.getCheckOut().toString() : null,
+                dto.getCheckIn() != null ? dto.getCheckIn() : null,
+                dto.getCheckOut() != null ? dto.getCheckOut() : null,
                 dto.getGuestCount(),
                 dto.getRoomCount(),
                 dto.getSort()
@@ -247,5 +279,20 @@ public class AccServiceImpl implements AccService {
             accRepository.save(acc);
             log.info("[ACC] 조회수 증가 - accId={}, title={}", accId, acc.getTitle());
         });
+    }
+
+    @Override
+    public List<AccRankDTO> getTop10ByViews() {
+        List<Acc> accList = accRepository.findTop10ByOrderByViewCountDesc();
+
+        return accList.stream()
+                .map(acc -> AccRankDTO.builder()
+                        .id(acc.getAccId())                 // 예: ACC001
+                        .name(acc.getTitle())               // 숙소명
+                        .region(acc.getTownship().getTownshipName())// 지역명
+                        .views(acc.getViewCount())          // 조회수
+                        .thumbnailPath(acc.getMainImage())  // 대표 이미지 바로 사용
+                        .build())
+                .collect(Collectors.toList());
     }
 }

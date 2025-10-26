@@ -3,12 +3,14 @@ package com.navi.payment.service;
 import com.navi.payment.dto.request.PaymentConfirmRequestDTO;
 import com.navi.payment.dto.request.PaymentPrepareRequestDTO;
 import com.navi.payment.dto.request.PaymentVerifyRequestDTO;
+import com.navi.payment.dto.response.PaymentAdminListResponseDTO;
 import com.navi.payment.dto.response.PaymentPrepareResponseDTO;
 import com.navi.payment.dto.response.PaymentResultResponseDTO;
 import com.siot.IamportRestClient.exception.IamportResponseException;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.List;
 
 public interface PaymentService {
     /* == 결제 플로우 == */
@@ -28,4 +30,7 @@ public interface PaymentService {
     // 5. 환불 요청 및 상태 변경
     void refundPayment(String merchantId, BigDecimal refundAmount, String reason)
             throws IamportResponseException, IOException;
+
+    // 결제 내역 출력
+    List<PaymentAdminListResponseDTO> getMyPayments(String userId);
 }

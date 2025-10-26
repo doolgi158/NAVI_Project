@@ -11,7 +11,6 @@ export const useDashboardData = (endpoints) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // endpoints를 useCallback의 의존성에 추가
     const fetchData = useCallback(async () => {
         if (!endpoints || endpoints.length === 0) return;
 
@@ -31,9 +30,19 @@ export const useDashboardData = (endpoints) => {
 
             console.log("📦 Dashboard responses:", responses);
 
+            // ✅ 백엔드에서 받은 결제 추세 데이터 (배열)
+            const paymentsTrend = responses[8]?.data?.data ?? [];
+
+            // ✅ 가장 최신 달 데이터 (마지막 인덱스)
+            const latestPayment =
+                paymentsTrend.length > 0
+                    ? paymentsTrend[paymentsTrend.length - 1]
+                    : null;
+
+            // ✅ 전체 데이터 병합
             const merged = {
                 users: responses[0]?.data?.data?.users ?? responses[0]?.data?.data,
-                userTrend: responses[0]?.data?.data?.userTrend ?? [],
+                userTrend: responses[7]?.data?.data ?? [],
                 travels: responses[1]?.data?.data,
                 ranking: responses[2]?.data?.data,
                 flights: responses[3]?.data?.data,
@@ -44,7 +53,28 @@ export const useDashboardData = (endpoints) => {
                         0,
                 },
                 accommodationRanking: responses[5]?.data?.data ?? [],
-                usageTrend: responses[6]?.data?.usageTrend ?? [],
+                usageTrend: responses[6]?.data?.data?.usageTrend ?? [],
+
+                // ✅ 결제/환불 데이터
+                paymentsTrend,
+                payments: latestPayment
+                    ? {
+                        month: latestPayment.month ?? "",
+                        paymentCount: latestPayment.paymentCount ?? 0,
+                        refundCount: latestPayment.refundCount ?? 0,
+                        salesAmount: latestPayment.salesAmount ?? 0,
+                        refundAmount: latestPayment.refundAmount ?? 0,
+                        changedPct: latestPayment.changedPct ?? 0,
+                    }
+                    : {
+                        month: "",
+                        paymentCount: 0,
+                        refundCount: 0,
+                        salesAmount: 0,
+                        refundAmount: 0,
+                        changedPct: 0,
+                    },
+                paymentShare: responses[9]?.data?.data ?? [],
             };
 
             setData(merged);
@@ -56,7 +86,6 @@ export const useDashboardData = (endpoints) => {
         }
     }, [endpoints]);
 
-    // endpoints가 바뀌면 자동으로 재호출
     useEffect(() => {
         fetchData();
     }, [fetchData]);

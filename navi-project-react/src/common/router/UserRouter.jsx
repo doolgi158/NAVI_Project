@@ -5,13 +5,14 @@ const Signup = lazy(() => import("../../users/pages/user/UserSignupPage"));
 const Redirect = lazy(() => import("../../users/pages/user/SocialRedirectPage"));
 const FindID = lazy(() => import("../../users/pages/user/FindUserIdPage"));
 const FindPw = lazy(() => import("../../users/pages/user/FindUserPwPage"));
-const Mypage = lazy(() => import("../../users/pages/user/UserMyPage"));
 const Detail = lazy(() => import("../../users/pages/user/UserDetailPage"));
 const EditProfile = lazy(() => import("../../users/pages/user/UserProfileEditPage"));
 const LikedTravelsPage = lazy(() => import("../../users/pages/user/UserLikedTravelsPage"));
 const BookmarkedTravelsPage = lazy(() => import("../../users/pages/user/UserBookmarkedTravelsPage"));
 const UserMyFlight = lazy(() => import("../../users/pages/user/UserMyFlightsPage"));
 const UserMyDelivery = lazy(() => import("../../users/pages/user/UserMyDeliveriesPage"))
+const UserAccommodation = lazy(() => import("../../users/pages/user/UserMyAccommodationsPage"))
+const UserPayments = lazy(() => import("../../users/pages/user/UserMyPaymentsPage"))
 
 const UserRouter = () => {
     return [
@@ -44,14 +45,6 @@ const UserRouter = () => {
             element: (
                 <Suspense fallback={Loading}>
                     <FindPw />
-                </Suspense>
-            )
-        },
-        {
-            path: "mypage",
-            element: (
-                <Suspense fallback={Loading}>
-                    <Mypage />
                 </Suspense>
             )
         },
@@ -94,6 +87,14 @@ const UserRouter = () => {
         {
             path: "/users/my-deliveries",
             element: <UserMyDelivery />,
+        },
+        {
+            path: "/users/my-accommodations",
+            element: <UserAccommodation />,
+        },
+        {
+            path: "/users/my-payments",
+            element: <UserPayments />,
         },
     ]
 }

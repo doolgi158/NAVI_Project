@@ -101,17 +101,37 @@ const UserMenuDropdown = () => {
           <ul className="text-gray-700 py-1 divide-y divide-gray-100">
             <li
               className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-              onClick={() => handleMenuClick("/users/mypage")}
+              onClick={() => handleMenuClick("/users/detail")}
             >
               마이페이지
             </li>
+            <div className="py-1">
+              <div className="py-1">
+                <div className="px-4 py-2 font-semibold text-gray-800">내 활동</div>
+                <div className="border-t border-gray-300 border-dashed mx-4 my-1"></div>
 
-            <li
-              className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-              onClick={() => handleMenuClick("/users/my-plans")}
-            >
-              나의 여행계획
-            </li>
+                <ul>
+                  <li
+                    className="pl-8 py-2 hover:bg-gray-100 cursor-pointer"
+                    onClick={() => handleMenuClick("/users/bookmarks")}
+                  >
+                    북마크
+                  </li>
+                  <li
+                    className="pl-8 py-2 hover:bg-gray-100 cursor-pointer"
+                    onClick={() => handleMenuClick("/users/likes")}
+                  >
+                    좋아요
+                  </li>
+                  <li
+                    className="pl-8 py-2 hover:bg-gray-100 cursor-pointer"
+                    onClick={() => handleMenuClick("/users/my-plans")}
+                  >
+                    여행계획
+                  </li>
+                </ul>
+              </div>
+            </div>
             <div className="py-1">
               <div
                 className="px-4 py-2 font-semibold flex items-center justify-between"

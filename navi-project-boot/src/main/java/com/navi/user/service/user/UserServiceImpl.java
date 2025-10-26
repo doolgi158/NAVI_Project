@@ -2,15 +2,15 @@ package com.navi.user.service.user;
 
 import com.navi.common.util.CustomException;
 import com.navi.image.repository.ImageRepository;
+import com.navi.security.util.JWTUtil;
 import com.navi.user.domain.User;
 import com.navi.user.domain.Withdraw;
-import com.navi.user.dto.users.UserRequestDTO;
-import com.navi.user.dto.users.UserResponseDTO;
+import com.navi.user.dto.request.UserRequestDTO;
+import com.navi.user.dto.response.UserResponseDTO;
 import com.navi.user.enums.UserRole;
 import com.navi.user.enums.UserState;
 import com.navi.user.repository.UserRepository;
 import com.navi.user.repository.WithdrawRepository;
-import com.navi.user.security.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;

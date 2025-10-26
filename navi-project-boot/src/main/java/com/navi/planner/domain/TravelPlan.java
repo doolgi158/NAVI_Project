@@ -2,7 +2,6 @@ package com.navi.planner.domain;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.navi.common.entity.BaseEntityNoAudit;
-import com.navi.common.listener.TravelEntityListener;
 import com.navi.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -23,7 +22,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@EntityListeners(TravelEntityListener.class)
+//@EntityListeners(TravelEntityListener.class)
 @DynamicUpdate
 @Table(name = "NAVI_TRAVEL_PLAN")
 @SequenceGenerator(
@@ -42,7 +41,9 @@ public class TravelPlan extends BaseEntityNoAudit {
     @JoinColumn(name = "user_no", nullable = false)
     private User user;
 
-    /** ✅ 하루 일정들 (Day) */
+    /**
+     * ✅ 하루 일정들 (Day)
+     */
     @OneToMany(mappedBy = "travelPlan", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     @Builder.Default
@@ -77,14 +78,18 @@ public class TravelPlan extends BaseEntityNoAudit {
 
     /* ===== 편의 메서드 ===== */
 
-    /** ✅ 하루 추가 */
+    /**
+     * ✅ 하루 추가
+     */
     public void addDay(TravelPlanDay day) {
         if (day == null) return;
         day.setTravelPlan(this);
         this.days.add(day);
     }
 
-    /** ✅ 전체 교체 */
+    /**
+     * ✅ 전체 교체
+     */
     public void replaceDays(Set<TravelPlanDay> newDays) {
         this.days.clear();
         if (newDays != null) {
@@ -93,7 +98,9 @@ public class TravelPlan extends BaseEntityNoAudit {
         }
     }
 
-    /** ✅ 계획 기본정보 수정 */
+    /**
+     * ✅ 계획 기본정보 수정
+     */
     public void updatePlanInfo(String title, LocalDate startDate, LocalDate endDate,
                                LocalTime startTime, LocalTime endTime, String thumbnailPath,LocalDateTime createdAt,LocalDateTime updatedAt) {
         if (title != null) this.title = title;

@@ -8,6 +8,7 @@ import com.navi.travel.repository.LikeRepository;
 import com.navi.travel.repository.TravelRepository;
 import com.navi.user.domain.Log;
 import com.navi.user.domain.User;
+import com.navi.user.dto.auth.UserSecurityDTO;
 import com.navi.user.enums.ActionType;
 import com.navi.user.repository.LogRepository;
 import com.navi.user.repository.UserRepository;
@@ -47,7 +48,7 @@ public class TravelActionServiceImpl implements TravelActionService {
         if (auth == null || !auth.isAuthenticated()) return;
 
         Object principal = auth.getPrincipal();
-        if (principal instanceof com.navi.user.dto.users.UserSecurityDTO userDTO) {
+        if (principal instanceof UserSecurityDTO userDTO) {
             userRepository.findById(userDTO.getId()).ifPresent(user -> {
                 Log log = Log.builder()
                         .user(user)

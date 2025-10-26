@@ -1,9 +1,5 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
-import {
-  Radio,
-  Input,
-  DatePicker,
-  Select,
+import { Radio, Input, DatePicker, Select, Typography,
   Button,
   Card,
   message,
@@ -11,7 +7,6 @@ import {
   Pagination,
   Checkbox,
 } from "antd";
-import { EyeOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setSearchState, setSelectedAcc } from "../../../common/slice/accSlice";
@@ -21,6 +16,7 @@ import MainLayout from "@/users/layout/MainLayout";
 import axios from "axios";
 import dayjs from "dayjs";
 
+const { Text } = Typography;
 const { Meta } = Card;
 const { RangePicker } = DatePicker;
 
@@ -29,10 +25,21 @@ const AccListPage = () => {
   const navigate = useNavigate();
   const savedSearch = useSelector((state) => state.acc.searchState) || {};
 
-  const { townshipList, isLoading: isTownshipLoading, error: townshipError } =
-    useTownshipData();
+  const { townshipList, isLoading: isTownshipLoading, error: townshipError } = useTownshipData();
 
-  // ✅ 검색조건 복원
+  // 첫 방문 시 초기화
+  useEffect(() => {
+    const isFirstVisit = !sessionStorage.getItem("visited_acc_list");
+    if (isFirstVisit) {
+      sessionStorage.setItem("visited_acc_list", "true");
+
+      dispatch(setSearchState({}));              // Redux 초기화
+      localStorage.removeItem("searchState");    // 저장된 조건 삭제
+      console.log("🌱 첫 방문 - 검색조건 초기화 완료");
+    }
+  }, [dispatch]);
+
+  // 검색조건 복원
   useEffect(() => {
     const storedState = localStorage.getItem("searchState");
     if (storedState) {
@@ -70,7 +77,7 @@ const AccListPage = () => {
   const [roomCount, setRoomCount] = useState(savedSearch.roomCount);
   const [isSearched, setIsSearched] = useState(savedSearch.isSearched || false);
   const [accommodations, setAccommodations] = useState(savedSearch.accommodations || []);
-  const [sortOption, setSortOption] = useState("view");
+  const [sortOption, setSortOption] = useState("title");
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [dateRange, setDateRange] = useState(
     savedSearch.dateRange && savedSearch.dateRange.length === 2
@@ -235,41 +242,42 @@ const AccListPage = () => {
       <div className="min-h-screen flex flex-col items-center pt-10 pb-12 px-8">
         <div className="w-full max-w-7xl">
           {/* 🔍 검색 폼 + 필터 통합 */}
-          <div className="bg-white/70 shadow-md rounded-2xl p-8 mb-8">
-            <h1 className="text-2xl font-bold mb-2">숙소를 찾아보세요 🏖️</h1>
-            <p className="text-gray-600 mb-6">여행 스타일에 맞게 검색해보세요!</p>
+          <div className="bg-white/90 shadow-lg rounded-2xl p-8 mb-10 border border-gray-100 backdrop-blur-sm transition-all duration-300">
+          <h1 className="text-2xl font-bold mb-2 text-gray-800">숙소를 찾아보세요 🏖️</h1>
+          <p className="text-gray-500 mb-6">여행 스타일에 맞게 검색해보세요!</p>
 
-            <Radio.Group
-              value={searchType}
-              onChange={(e) => {
-                const type = e.target.value;
-                setSearchType(type);
+          {/* 검색 타입 */}
+          <Radio.Group
+            value={searchType}
+            onChange={(e) => {
+              const type = e.target.value;
+              setSearchType(type);
+              if (type === "region") {
+                setKeyword("");
+                setSpot("");
+              } else if (type === "keyword") {
+                setCity("");
+                setTownship("");
+                setSpot("");
+              }
+            }}
+            className="mb-8"
+            size="large"
+            buttonStyle="solid"
+          >
+            <Radio.Button value="region">지역별 찾기</Radio.Button>
+            <Radio.Button value="keyword">숙소명 검색</Radio.Button>
+          </Radio.Group>
 
-                // 탭 전환 시 불필요한 값 초기화
-                if (type === "region") {
-                  setKeyword("");
-                  setSpot("");
-                } else if (type === "keyword") {
-                  setCity("");
-                  setTownship("");
-                  setSpot("");
-                }
-              }}
-              className="mb-6"
-              size="large"
-            >
-              <Radio.Button value="region">지역별 찾기</Radio.Button>
-              <Radio.Button value="keyword">숙소명 검색</Radio.Button>
-            </Radio.Group>
-
-            
-
-            <div className="flex flex-wrap gap-2 items-center justify-start mb-6">
-              {searchType === "region" && (
-                <>
+          {/* 검색 폼 */}
+          <div className="flex flex-wrap gap-6 items-end justify-start mb-8">
+            {searchType === "region" && (
+              <>
+                <div className="flex flex-col">
+                  <Text className="text-gray-700 mb-2 font-semibold">행정시</Text>
                   <Select
                     placeholder="행정시 선택"
-                    className="min-w-[150px]"
+                    className="min-w-[150px] shadow-sm hover:shadow-md transition"
                     value={city || undefined}
                     onChange={(c) => {
                       setCity(c);
@@ -278,105 +286,137 @@ const AccListPage = () => {
                     options={cityOptions}
                     size="large"
                   />
+                </div>
+
+                <div className="flex flex-col">
+                  <Text className="text-gray-700 mb-2 font-semibold">읍면</Text>
                   <Select
                     placeholder="읍면 선택"
-                    className="min-w-[150px]"
+                    className="min-w-[150px] shadow-sm hover:shadow-md transition"
                     value={township || undefined}
                     onChange={setTownship}
                     options={townshipOptions}
                     disabled={!city}
                     size="large"
                   />
-                </>
-              )}
+                </div>
+              </>
+            )}
 
-              {searchType === "keyword" && (
+            {searchType === "keyword" && (
+              <div className="flex flex-col">
+                <Text className="text-gray-700 mb-2 font-semibold">숙소명</Text>
                 <Input
                   placeholder="숙소명을 입력하세요"
-                  className="min-w-[300px] w-[400px] flex-shrink-0"
+                  className="min-w-[320px] w-[420px] shadow-sm hover:shadow-md transition"
                   size="large"
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
                 />
-              )}
+              </div>
+            )}
 
+            <div className="flex flex-col">
+              <Text className="text-gray-700 mb-2 font-semibold">숙박 일정</Text>
               <RangePicker
                 format="YYYY-MM-DD"
                 placeholder={["체크인", "체크아웃"]}
                 value={dateRange}
                 size="large"
+                className="shadow-sm hover:shadow-md transition"
                 onChange={(v) => setDateRange(v)}
                 disabledDate={(current) => {
                   const today = dayjs().startOf("day");
                   return current && current < today;
                 }}
+                onCalendarChange={(dates) => {
+                  if (dates && dates[0] && dates[1]) {
+                    const diff = dayjs(dates[1]).diff(dayjs(dates[0]), "day");
+                    if (diff > 7) {
+                      message.warning("최대 7박까지만 예약할 수 있습니다.");
+                      setDateRange(null);
+                    }
+                  }
+                }}
               />
+            </div>
 
+            <div className="flex flex-col">
+              <Text className="text-gray-700 mb-2 font-semibold">인원 수</Text>
               <InputNumber
                 min={1}
                 max={30}
                 value={guestCount}
                 onChange={(v) => setGuestCount(v)}
-                className="min-w-[80px]"
+                className="min-w-[100px] shadow-sm hover:shadow-md transition"
                 placeholder="인원수"
                 size="large"
               />
+            </div>
+
+            <div className="flex flex-col">
+              <Text className="text-gray-700 mb-2 font-semibold">객실 수</Text>
               <InputNumber
                 min={1}
-                max={30}
+                max={10}
                 value={roomCount}
                 onChange={(v) => setRoomCount(v)}
-                className="min-w-[80px]"
+                className="min-w-[100px] shadow-sm hover:shadow-md transition"
                 placeholder="객실수"
                 size="large"
               />
-
-              <div className="ml-auto flex-shrink-0">
-                <Button
-                  type="primary"
-                  className="h-10 px-8 text-base font-semibold"
-                  onClick={handleSearch}
-                  size="large"
-                >
-                  검색
-                </Button>
-              </div>
             </div>
 
-            {/* 🔸 정렬/카테고리 구분선 */}
-            <div className="border-t border-gray-200 my-4"></div>
-
-            {/* 🔹 정렬 + 카테고리 필터 */}
-            <div className="flex flex-wrap justify-between items-center gap-4">
-              <div className="flex items-center gap-3">
-                <span className="font-semibold text-gray-700">정렬 기준:</span>
-                <Select
-                  value={sortOption}
-                  onChange={(value) => setSortOption(value)}
-                  style={{ width: 180 }}
-                  options={[
-                    { value: "view", label: "조회순" },
-                    { value: "minPrice", label: "낮은가격순" },
-                    { value: "maxPrice", label: "높은가격순" },
-                    { value: "recent", label: "최신등록순" },
-                    { value: "title", label: "이름순" },
-                  ]}
-                />
-              </div>
-
-              <div className="flex items-center gap-3 flex-wrap">
-                <span className="font-semibold text-gray-700">숙소 종류:</span>
-                <Checkbox.Group
-                  options={["호텔", "리조트/콘도", "모텔", "펜션", "게스트하우스/민박"]}
-                  value={selectedCategories}
-                  onChange={(values) => setSelectedCategories(values)}
-                />
-              </div>
+            {/* ✅ 검색 버튼 (라인 맞춤 + gradient) */}
+            <div className="ml-auto flex-shrink-0 self-end">
+              <Button
+                type="primary"
+                className="h-12 px-10 text-base font-semibold rounded-xl border-0 
+                          bg-[#1677ff] text-white
+                          shadow-md hover:shadow-lg 
+                          transition-all duration-300 ease-in-out"
+                onClick={handleSearch}
+                size="large"
+              >
+                검색
+              </Button>
             </div>
           </div>
 
+          {/* 🔸 정렬/카테고리 */}
+          <div className="border-t border-gray-200 my-5"></div>
+
+          <div className="flex flex-wrap justify-between items-center gap-4">
+            <div className="flex items-center gap-3">
+              <span className="font-semibold text-gray-700">정렬 기준:</span>
+              <Select
+                value={sortOption}
+                onChange={(value) => setSortOption(value)}
+                style={{ width: 180 }}
+                options={[
+                  { value: "title", label: "이름순" },
+                  { value: "view", label: "조회순" },
+                  { value: "minPrice", label: "낮은가격순" },
+                  { value: "maxPrice", label: "높은가격순" },
+                  { value: "recent", label: "최신등록순" },
+                ]}
+              />
+            </div>
+
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="font-semibold text-gray-700">숙소 종류:</span>
+              <Checkbox.Group
+                options={["호텔", "리조트/콘도", "모텔", "펜션", "게스트하우스/민박"]}
+                value={selectedCategories}
+                onChange={(values) => setSelectedCategories(values)}
+              />
+            </div>
+          </div>
+        </div>
+
+
           {/* ✅ 검색 결과 */}
-          <div className="bg-white shadow-md rounded-2xl p-8 mb-10">
+          <div className="bg-white/90 shadow-lg rounded-2xl p-8 mb-10 border border-gray-100 backdrop-blur-sm transition-all duration-300">
             <h2 className="text-2xl font-bold mb-6">검색 결과</h2>
 
             {!isSearched ? (
@@ -399,7 +439,7 @@ const AccListPage = () => {
                       key={acc.accId || `acc-${index}`}
                       hoverable
                       className="rounded-xl shadow-sm cursor-pointer transition-transform transform hover:scale-[1.02] duration-200"
-                      onClick={() => handleCardClick(acc)} // ✅ acc 객체 전체 전달
+                      onClick={() => handleCardClick(acc)}
                       cover={
                         acc.mainImage ? (
                           <img
@@ -423,25 +463,41 @@ const AccListPage = () => {
                       }
                     >
                       <Meta
-                        title={<span className="text-lg font-bold">{acc.title}</span>}
-                        description={
-                          <div className="text-gray-600 mt-2">
-                            <p className="font-semibold text-base mt-1 flex items-center gap-2">
-                              {acc.minPrice
-                                ? `${acc.minPrice.toLocaleString()}원`
-                                : "가격 미정"}{" "}
-                              / 1박
-                              {acc.viewCount !== undefined && (
-                                <span className="flex items-center text-gray-500 text-sm ml-2">
-                                  <EyeOutlined style={{ marginRight: 4 }} />{" "}
-                                  {acc.viewCount.toLocaleString()}
-                                </span>
-                              )}
-                            </p>
-                            <p>{acc.address}</p>
-                          </div>
-                        }
-                      />
+  title={<span className="text-lg font-bold">{acc.title}</span>}
+  description={
+    <div className="text-gray-600 mt-2">
+      <p className="font-semibold text-base mt-1 flex items-center gap-2 text-[#006D77]">
+        {sortOption === "minPrice"
+          ? acc.minPrice
+            ? `${acc.minPrice.toLocaleString()}원 (최저가)`
+            : "가격 미정"
+          : sortOption === "maxPrice"
+          ? acc.maxPrice
+            ? `${acc.maxPrice.toLocaleString()}원 (최고가)`
+            : "가격 미정"
+          : acc.minPrice
+          ? `${acc.minPrice.toLocaleString()}원`
+          : "가격 미정"}{" "}
+        / 1박
+      </p>
+
+      <p
+        className={`text-sm mt-1 ${
+          acc.remainingRooms === 0
+            ? "text-red-500 font-semibold"
+            : "text-gray-500"
+        }`}
+      >
+        {acc.remainingRooms === 0
+          ? "예약 마감"
+          : `잔여 객실 ${acc.remainingRooms || 0}개`}
+      </p>
+
+      <p>{acc.address}</p>
+    </div>
+  }
+/>
+
                     </Card>
                   ))}
                 </div>

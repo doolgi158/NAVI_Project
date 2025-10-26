@@ -1,9 +1,16 @@
 package com.navi.payment.controller;
 
-import com.navi.payment.dto.request.*;
-import com.navi.payment.dto.response.*;
+import com.navi.common.response.ApiResponse;
+import com.navi.payment.dto.request.PaymentPrepareRequestDTO;
+import com.navi.payment.dto.request.PaymentVerifyRequestDTO;
+import com.navi.payment.dto.response.PaymentAdminListResponseDTO;
+import com.navi.payment.dto.response.PaymentPrepareResponseDTO;
+import com.navi.payment.dto.response.PaymentResultResponseDTO;
 import com.navi.payment.service.PaymentRouterService;
+import com.navi.payment.service.PaymentService;
+import com.navi.security.util.JWTUtil;
 import com.siot.IamportRestClient.exception.IamportResponseException;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -18,6 +26,8 @@ import java.math.BigDecimal;
 @RequestMapping("/api/payment")
 public class PaymentUserController {
     private final PaymentRouterService paymentRouterService;
+    private final JWTUtil jwtUtil;
+    private final PaymentService paymentService;
 
     /* === [1. 결제 준비] === */
     @PostMapping("/prepare")
@@ -52,33 +62,34 @@ public class PaymentUserController {
 
     /* === [4. 환불 요청] === */
     @PostMapping("/refund")
-    public ResponseEntity<Void> refundPayment(@RequestBody RefundRequestDTO dto) throws Exception {
-        log.info("🔁 [USER] 환불 요청 수신 - {}", dto);
+    public ResponseEntity<Void> refundPayment(
+            @RequestParam String merchantId,
+            @RequestParam BigDecimal refundAmount,
+            @RequestParam(required = false) String reason
+    ) throws IamportResponseException, IOException {
+        log.info("🔁 환불 요청 수신 - merchantId={}, amount={}, reason={}", merchantId, refundAmount, reason);
+        paymentRouterService.refundPayment(merchantId, refundAmount, reason);
+        return ResponseEntity.ok().build();
+    }
 
-        switch (dto.getRsvType()) {
-            case ACC, DLV -> {
-                log.info("🏨 [USER] 숙소/배송 전체 환불 요청 - merchantId={}", dto.getMerchantId());
-                paymentRouterService.refundByMerchantId(dto.getMerchantId(), dto.getReason());
-            }
-            case FLY -> {
-                if (dto.getReserveId() != null) {
-                    log.info("✈️ [USER] 항공 부분 환불 요청 - reserveId={}, merchantId={}",
-                            dto.getReserveId(), dto.getMerchantId());
-                    paymentRouterService.refundByReserveId(
-                            dto.getReserveId(),
-                            dto.getRsvType(),
-                            dto.getMerchantId(),
-                            dto.getReason()
-                    );
-                } else {
-                    log.info("✈️ [USER] 항공 전체 환불 요청 - merchantId={}", dto.getMerchantId());
-                    paymentRouterService.refundByMerchantId(dto.getMerchantId(), dto.getReason());
-                }
-            }
-            default -> throw new IllegalArgumentException("지원되지 않는 결제 유형입니다.");
+    @GetMapping("/my")
+    public ApiResponse<List<PaymentAdminListResponseDTO>> getMyPayments(HttpServletRequest request) {
+        // 1헤더에서 토큰 추출
+        String bearer = request.getHeader("Authorization");
+        if (bearer == null || !bearer.startsWith("Bearer ")) {
+            log.warn("🚫 Authorization 헤더가 비어 있음");
+            return ApiResponse.error("인증 토큰이 없습니다.", 401, null);
         }
 
-        log.info("✅ [USER] 환불 요청 처리 완료 - type={}, merchantId={}", dto.getRsvType(), dto.getMerchantId());
-        return ResponseEntity.ok().build();
+        String token = bearer.substring(7);
+
+        // JWT에서 userId 추출
+        String userId = jwtUtil.getUserIdFromToken(token);
+        log.info("💳 [PaymentController] 결제 내역 요청 - userId: {}", userId);
+
+        // 서비스 호출
+        List<PaymentAdminListResponseDTO> payments = paymentService.getMyPayments(userId);
+
+        return ApiResponse.success(payments);
     }
 }
