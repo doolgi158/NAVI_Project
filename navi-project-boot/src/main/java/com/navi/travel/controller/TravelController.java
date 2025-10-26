@@ -89,17 +89,22 @@ public class TravelController {
         return ResponseEntity.ok(list);
     }
 
+    // TravelController.java
     @GetMapping("/popular")
     public ResponseEntity<Page<TravelListResponseDTO>> getPopularTravels(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        Pageable pageable = PageRequest.of(page, size);
+        // ✅ 인기순 분기 트리거용 정렬 플래그
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc("likesCount")));
+
         Page<TravelListResponseDTO> result = travelQueryService.getTravelList(
                 pageable, null, null, null, true
         );
         return ResponseEntity.ok(result);
     }
+
+
 
     /**
      * ✅ 2. 여행지 상세 조회

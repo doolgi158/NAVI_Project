@@ -25,31 +25,31 @@ public interface TravelRepository extends JpaRepository<Travel, Long>, JpaSpecif
      */
     @Query(
             value = """
-            SELECT 
-                t.travel_id AS travel_id,
-                t.title AS title,
-                t.region1_name AS region1_name,
-                t.region2_name AS region2_name,
-                t.image_path AS image_path,
-                t.thumbnail_path AS thumbnail_path,
-                COUNT(l.like_id) AS likes_count
-            FROM navi_travel t
-            LEFT JOIN navi_like l ON t.travel_id = l.travel_id
-            GROUP BY t.travel_id, t.title, t.region1_name, t.region2_name, t.thumbnail_path, t.image_path,
-            ORDER BY likes_count DESC
+        SELECT 
+            t.travel_id AS travel_id,
+            t.title AS title,
+            t.region1_name AS region1_name,
+            t.region2_name AS region2_name,
+            t.image_path AS image_path,
+            t.thumbnail_path AS thumbnail_path,
+            NVL(t.views_count, 0) AS views_count,
+            COUNT(DISTINCT l.like_id) AS likes_count,
+            COUNT(DISTINCT b.bookmark_id) AS bookmarks_count
+        FROM navi_travel t
+        LEFT JOIN navi_like l ON t.travel_id = l.travel_id
+        LEFT JOIN navi_bookmark b ON t.travel_id = b.travel_id
+        GROUP BY 
+            t.travel_id, t.title, t.region1_name, t.region2_name, 
+            t.thumbnail_path, t.image_path, t.views_count
+        ORDER BY 
+            COUNT(DISTINCT l.like_id) DESC,
+            NVL(t.views_count, 0) DESC,
+            t.travel_id DESC
         """,
-            countQuery = """
-            SELECT COUNT(*) 
-            FROM (
-                SELECT t.travel_id
-                FROM navi_travel t
-                LEFT JOIN navi_like l ON t.travel_id = l.travel_id
-                GROUP BY t.travel_id
-            ) sub
-        """,
+            countQuery = "SELECT COUNT(*) FROM navi_travel",
             nativeQuery = true
     )
-    Page<Object[]> findAllOrderByLikesCountNative(Pageable pageable);
+    Page<Object[]> findAllOrderByPopularityNative(Pageable pageable);
 
     @Query("SELECT MAX(t.contentId) FROM Travel t WHERE t.contentId LIKE 'CONT_%'")
     String findMaxAdminContentId();
