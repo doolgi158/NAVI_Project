@@ -115,7 +115,7 @@ const FlightPage = () => {
       <div
         style={{
           minHeight: "100vh",
-          background: "linear-gradient(180deg, #ffffff 0%, #f4f6fa 100%)",
+          background: "linear-gradient(180deg, #ffffff 0%, #ffffff 100%)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",

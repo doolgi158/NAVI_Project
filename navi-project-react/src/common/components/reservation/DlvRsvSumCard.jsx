@@ -8,7 +8,7 @@ const { Title, Text } = Typography;
  * 📦 짐배송 요약 카드 (우측 결제 요약)
  * - 출발지, 도착지, 배송일, 가방 크기·개수, 예상 요금 표시
  */
-const DlvRsvSumCard = ({ formData, bags, totalAmount }) => {
+const DlvRsvSumCard = ({ formData, totalAmount }) => {
   if (!formData) {
     return (
       <Card
@@ -25,6 +25,8 @@ const DlvRsvSumCard = ({ formData, bags, totalAmount }) => {
     );
   }
 
+  const bags = formData.bags;
+
   const fromAddress = formData.fromAddress || "출발지 미지정";
   const toAddress = formData.toAddress || "도착지 미지정";
 
@@ -39,9 +41,9 @@ const DlvRsvSumCard = ({ formData, bags, totalAmount }) => {
   const bagSummary =
     bags && Object.values(bags).some((v) => v > 0)
       ? Object.entries(bags)
-          .filter(([_, count]) => count > 0)
-          .map(([size, count]) => `${size}(${count}개)`)
-          .join(", ")
+        .filter(([_, count]) => count > 0)
+        .map(([size, count]) => `${size}(${count}개)`)
+        .join(", ")
       : "없음";
 
   return (

@@ -28,7 +28,6 @@ const SeatSelectPage = () => {
   const { state } = useLocation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
   const {
     isRoundTrip = false,
@@ -161,11 +160,15 @@ const SeatSelectPage = () => {
         "Content-Type": "application/json",
       };
 
+      // 💡 [수정] 선택된 모든 좌석의 ID를 서버로 보냅니다. (selectedSeatIds)
+      const selectedSeatIds = selectedSeats.map((s) => s.seatId);
+
       // ✅ 예약 DTO 구성
       const currentDto = {
         flightId: flightIdValue,
         depTime: flight?.depTime?.split("T")[0],
-        seatId: selectedSeats[0]?.seatId,
+        // seatId 대신 selectedSeatIds 목록을 사용합니다.
+        selectedSeatIds: selectedSeatIds,
         passengersJson: JSON.stringify(passengers),
         totalPrice,
         status: "PENDING",
@@ -188,7 +191,10 @@ const SeatSelectPage = () => {
             selectedInbound,
             passengerCount,
             passengers,
-            outboundDto: res.data.data, // ✅ 출발편 insert 결과 저장
+            outboundDto: {
+              ...res.data.data,
+              selectedSeats: selectedSeats,
+            },
             outboundTotalPrice: totalPrice, // ✅ 출발편 총 금액 전달
           },
         });
@@ -253,7 +259,7 @@ const SeatSelectPage = () => {
             totalPrice: finalTotalPrice,
             selectedSeats: combinedSeats, // ✅ 두 편 좌석 모두 전달
             outboundSeats: outboundDto?.selectedSeats || selectedSeats, // ✅ 출발편 좌석
-            inboundSeats: step === "inbound" ? selectedSeats : [],      // ✅ 귀국편 좌석
+            inboundSeats: step === "inbound" ? selectedSeats : [],      // ✅ 귀국편 좌석
           },
           itemData: {
             selectedOutbound,
@@ -324,7 +330,7 @@ const SeatSelectPage = () => {
   // ✅ 렌더링 전체
   return (
     <MainLayout>
-      <div style={{ background: "#f9fafb", minHeight: "100vh", padding: "50px 0" }}>
+      <div style={{ background: "#ffffff", minHeight: "100vh", padding: "50px 0" }}>
         <Row justify="center" gutter={[24, 24]}>
           <Col xs={23} lg={16} xl={14}>
             <Card
