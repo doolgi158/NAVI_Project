@@ -8,8 +8,10 @@ const { Text } = Typography;
  * 📋 짐배송 결제 정보 상세 (좌측 영역)
  * - 사용자가 입력한 정보(formData)를 기반으로 표시
  */
-const DlvRsvInfo = ({ formData, bags }) => {
+const DlvRsvInfo = ({ formData }) => {
   if (!formData) return null;
+
+  const { bags } = formData;
 
   const fromAddress = formData.fromAddress || "출발지 미지정";
   const toAddress = formData.toAddress || "도착지 미지정";
@@ -27,16 +29,16 @@ const DlvRsvInfo = ({ formData, bags }) => {
     formData.deliveryType === "AIRPORT_TO_HOTEL"
       ? "공항 → 숙소"
       : formData.deliveryType === "HOTEL_TO_AIRPORT"
-      ? "숙소 → 공항"
-      : "숙소 ↔ 숙소";
+        ? "숙소 → 공항"
+        : "숙소 ↔ 숙소";
 
   // ✅ 가방 정보 요약
   const bagSummary =
-    bags && Object.values(bags).some((v) => v > 0)
+    bags && Object.values(bags).some((v) => v > 0) // bags가 formData 안에 들어있으므로, bags 변수를 그대로 사용
       ? Object.entries(bags)
-          .filter(([_, count]) => count > 0)
-          .map(([size, count]) => `${size}(${count}개)`)
-          .join(", ")
+        .filter(([_, count]) => count > 0)
+        .map(([size, count]) => `${size}(${count}개)`)
+        .join(", ")
       : "없음";
 
   return (

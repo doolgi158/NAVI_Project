@@ -268,7 +268,7 @@ const DeliveryPage = () => {
           <p><b>도착지:</b> {form.toAddress}</p>
           <p><b>날짜:</b> {form.deliveryDate?.format("YYYY-MM-DD")}</p>
           <p><b>시간대:</b> {form.timeSlot || "미선택"}</p>
-          <p><b>가방:</b> S({bags.S}) / M({bags.M}) / L({bags.L})</p>
+          <p><b>가방:</b> S: {bags.S}개 / M:{bags.M}개 / L: {bags.L}개</p>
           <p><b>예상 요금:</b> {estimatedFare.toLocaleString()}원</p>
           {form.memo && <p><b>요청사항:</b> {form.memo}</p>}
         </div>
@@ -336,7 +336,7 @@ const DeliveryPage = () => {
               amount: estimatedFare,
             },
           ],
-          formData: form,
+          formData: { ...form, bags },
           totalPrice: estimatedFare,
         },
       });
