@@ -15,9 +15,8 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
     // 대상별 이미지 여러 개 (예: 객실, 숙소 등)
     List<Image> findAllByTargetTypeAndTargetId(String targetType, String targetId);
 
-    // 임시
-    @Query("SELECT i FROM Image i WHERE UPPER(i.targetType) = UPPER(:targetType) AND i.targetId = :targetId")
-    List<Image> findAllByTargetTypeAndTargetIdIgnoreCase(@Param("targetType") String targetType, @Param("targetId") String targetId);
+    // 파일 중복 복사 방지
+    boolean existsByPath(String path);
 
     @Query("""
             SELECT i FROM Image i

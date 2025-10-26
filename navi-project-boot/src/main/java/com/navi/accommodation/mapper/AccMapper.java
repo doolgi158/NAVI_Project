@@ -22,7 +22,21 @@ public interface AccMapper {
             @Param("checkOut") String checkOut,
             @Param("guestCount") int guestCount,
             @Param("roomCount") Integer roomCount,
-            @Param("sort") String sort
+            @Param("sort") String sort,
+            @Param("offset") int offset,
+            @Param("pageSize") int pageSize
+    );
+
+    @SelectProvider(type = AccSqlProvider.class, method = "buildSearchCountQuery")
+    int countAccommodations(
+            @Param("city") String city,
+            @Param("townshipName") String townshipName,
+            @Param("title") String title,
+            @Param("categoryList") List<String> categoryList,
+            @Param("checkIn") String checkIn,
+            @Param("checkOut") String checkOut,
+            @Param("guestCount") int guestCount,
+            @Param("roomCount") Integer roomCount
     );
 
     /* 관리자용: 숙소 목록 필터 조회 */

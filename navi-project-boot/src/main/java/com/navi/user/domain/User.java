@@ -115,4 +115,8 @@ public class User {
     public List<UserRole> getRoleList() {
         return this.userRoleList;
     }
+
+    public Integer getUserNo() {
+        return 0;
+    }
 }

@@ -19,7 +19,6 @@ import { useNavigate } from "react-router-dom";
 import { setReserveData } from "../../../common/slice/paymentSlice";
 import { useDispatch } from "react-redux";
 
-const token = localStorage.getItem("accessToken");
 const { Title, Text } = Typography;
 
 const API_SERVER_HOST = "http://localhost:8080";
@@ -295,6 +294,12 @@ const DeliveryPage = () => {
     if (totalBags === 0)
       return message.warning("가방 개수를 1개 이상 입력해주세요.");
 
+    const currentToken = localStorage.getItem("accessToken");
+    if (!currentToken) {
+      message.error("로그인 정보가 유효하지 않습니다. 다시 로그인해주세요.");
+      navigate("/login"); // 로그인 페이지로 리다이렉트 (필요하다면)
+      return;
+    }
     const dto = {
       startAddr: form.fromAddress,
       endAddr: form.toAddress,
@@ -308,7 +313,7 @@ const DeliveryPage = () => {
 
     try {
       const res = await axios.post(`${API_SERVER_HOST}/api/delivery/rsv`, dto, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${currentToken}` },
       });
       console.log("============");
       console.log("drsvID: ", res.data.drsvId);

@@ -38,6 +38,7 @@ const UserMainPage = () => {
         const res = await fetch(`${API_SERVER_HOST}/api/accommodation/rank`);
         if (!res.ok) throw new Error("데이터 로드 실패");
         const data = await res.json();
+        console.log(data);
         // ✅ ApiResponse 구조 대응
         const list = data?.data || [];
         setAccommodations(Array.isArray(list) ? list : []);
@@ -191,21 +192,6 @@ const SectionSwiper = ({ title, data, type, navigate, loading }) => {
                         <h3 className="text-lg font-semibold truncate">
                           {d.title || d.name}
                         </h3>
-                        <Tag color="gold" className="font-bold">
-                          #{d.rank}
-                        </Tag>
-                      </div>
-                      <div className="flex flex-wrap gap-2 text-xs">
-                        <Tag>
-                          조회 {(d.views ?? d.viewsCount ?? 0).toLocaleString()}
-                        </Tag>
-                        <Tag>
-                          좋아요 {(d.likes ?? d.likesCount ?? 0).toLocaleString()}
-                        </Tag>
-                        <Tag>
-                          북마크{" "}
-                          {(d.bookmarks ?? d.bookmarkCount ?? 0).toLocaleString()}
-                        </Tag>
                       </div>
                     </div>
                   </div>

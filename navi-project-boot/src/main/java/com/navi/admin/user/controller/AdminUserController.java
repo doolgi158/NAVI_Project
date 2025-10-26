@@ -1,8 +1,10 @@
 package com.navi.admin.user.controller;
 
+import com.navi.admin.user.dto.AdminUserDTO;
 import com.navi.admin.user.service.AdminUserService;
 import com.navi.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,7 +21,8 @@ public class AdminUserController {
             @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "all") String field
     ) {
-        return ApiResponse.success(adminUserService.getPagedUsers(page, size, keyword, field));
+        Page<AdminUserDTO> userPage = adminUserService.getPagedUsers(page, size, keyword, field);
+        return ApiResponse.success(userPage);
     }
 
     // 사용자 삭제 (관리자용)

@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,9 +25,9 @@ public class AccUserController {
 
     /* === 숙소 리스트 조회 === */
     @GetMapping("/accommodations")
-    public ResponseEntity<List<AccListResponseDTO>> getAccommodationList(@ModelAttribute AccSearchRequestDTO dto) {
+    public ResponseEntity<Map<String, Object>> getAccommodationList(@ModelAttribute AccSearchRequestDTO dto) {
         log.info("[USER] 숙소 리스트 조회 요청 - 조건: {}", dto);
-        List<AccListResponseDTO> result = accService.searchAccommodations(dto);
+        Map<String, Object> result = accService.searchAccommodations(dto);
         return ResponseEntity.ok(result);
     }
 
