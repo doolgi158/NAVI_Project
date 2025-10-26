@@ -53,6 +53,8 @@ public class TravelPlanServiceImpl implements TravelPlanService {
                 .startTime(dto.getStartTime())
                 .endTime(dto.getEndTime())
                 .thumbnailPath(dto.getThumbnailPath())
+                .createdAt(dto.getCreatedAt())
+                .updatedAt(dto.getUpdatedAt())
                 .build();
 
         // 2️⃣ days + items 매핑
@@ -160,7 +162,9 @@ public class TravelPlanServiceImpl implements TravelPlanService {
                 dto.getEndDate(),
                 dto.getStartTime(),
                 dto.getEndTime(),
-                dto.getThumbnailPath()
+                dto.getThumbnailPath(),
+                dto.getCreatedAt(),
+                dto.getUpdatedAt()
         );
 
         // ✅ 기존 일정과 아이템 완전 삭제 (DB 반영 포함)

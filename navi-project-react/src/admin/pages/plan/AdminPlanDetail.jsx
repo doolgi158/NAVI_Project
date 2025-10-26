@@ -14,7 +14,7 @@ import TravelMap from "@/users/pages/plan/components/TravelMap";
 
 const { Content } = Layout;
 
-export default function AdminPlanDetailView() {
+export default function AdminPlanDetail() {
     const { planId } = useParams();
     const navigate = useNavigate();
     const [plan, setPlan] = useState(null);
@@ -128,9 +128,17 @@ export default function AdminPlanDetailView() {
                         <h2 className="text-2xl font-bold text-[#0A3D91]">
                             여행계획 상세보기 (관리자)
                         </h2>
-                        <p className="text-gray-600 text-sm mt-1">
-                            작성자: {plan.name} ({plan.id}) | 여행일정: {plan.startDate} ~ {plan.endDate}
-                        </p>
+                        <div className=" mt-2 flex flex-col">
+                            <p className="text-gray-500 text-sm mb-2">
+                                등록일: {plan.createdAt?.replace("T", " ").substring(0, 16)}
+                            </p>
+                            <p className="text-gray-500 text-sm mb-2">
+                                수정일:{" "}
+                                {plan.updatedAt
+                                    ? plan.updatedAt.replace("T", " ").substring(0, 16)
+                                    : "-"}
+                            </p>
+                        </div>
                     </div>
                 </div>
 
@@ -180,12 +188,11 @@ export default function AdminPlanDetailView() {
                                 style={{ height: "100%", background: "#fafafa" }}
                             >
                                 <div className="border-b-2 mb-8">
-                                    <h3 className="text-xl font-semibold text-[#2F3E46] mb-1">
+                                    <h3 className="text-2xl font-semibold text-[#2F3E46] mb-1">
                                         {plan.title || "제목 없음"}
                                     </h3>
-                                    <p className="text-gray-500 text-sm mb-2">
-                                        등록일: {plan.createdAt?.replace("T", " ").substring(0, 16)} | 수정일:{" "}
-                                        {plan.updatedAt?.replace("T", " ").substring(0, 16)}
+                                    <p className="text-gray-600 text-sm mt-4 mb-2">
+                                        작성자: {plan.name} ({plan.id}) | 여행일정: {plan.startDate} ~ {plan.endDate}
                                     </p>
                                 </div>
 
@@ -214,7 +221,7 @@ export default function AdminPlanDetailView() {
                         <TravelMap markers={markers} step={6} />
                     </Splitter.Panel>
                 </Splitter>
-            </div>
+            </div >
             <FooterLayout />
         </>
     );

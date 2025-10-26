@@ -81,7 +81,7 @@ export default function PlanSidebar({
 
                     {days.map((d, idx) => (
                         <Button
-                            key={d.dateISO}
+                            key={d.dayId || d.dateISO || idx}
                             block
                             type={idx === activeDayIdx ? "primary" : "default"}
                             onClick={() => setActiveDayIdx(idx)}

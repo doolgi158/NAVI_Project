@@ -49,8 +49,8 @@ public class TravelDetailResponseDTO {
     @JsonProperty("bookmarkedByUser")
     private boolean isBookmarkedByUser;
 
-    private LocalDate updatedAt;
-    private LocalDate createdAt;
+    private LocalDateTime updatedAt;
+    private LocalDateTime createdAt;
 
     /**
      * ✅ Travel 엔티티를 기반으로 DTO 생성
@@ -101,9 +101,6 @@ public class TravelDetailResponseDTO {
                 .isLikedByUser(isLikedByUser)
                 .isBookmarkedByUser(isBookmarkedByUser)
 
-                // ✅ LocalDate 변환
-                .createdAt(createdAtLDT != null ? createdAtLDT.toLocalDate() : null)
-                .updatedAt(updatedAtLDT != null ? updatedAtLDT.toLocalDate() : null)
                 .build();
     }
 

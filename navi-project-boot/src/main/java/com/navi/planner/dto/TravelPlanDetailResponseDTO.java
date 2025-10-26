@@ -6,6 +6,7 @@ import com.navi.planner.domain.TravelPlanItem;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,6 +24,8 @@ public class TravelPlanDetailResponseDTO {
     private LocalDate startDate;
     private LocalDate endDate;
     private String thumbnailPath;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private List<TravelPlanDayDTO> days;
 
 
@@ -57,6 +60,8 @@ public class TravelPlanDetailResponseDTO {
         private String stayName;
         private String startTime;
         private String endTime;
+
+
     }
 
     public static TravelPlanDetailResponseDTO fromEntity(TravelPlan plan) {

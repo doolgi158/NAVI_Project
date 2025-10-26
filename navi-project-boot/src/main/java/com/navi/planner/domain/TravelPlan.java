@@ -95,13 +95,15 @@ public class TravelPlan extends BaseEntityNoAudit {
 
     /** ✅ 계획 기본정보 수정 */
     public void updatePlanInfo(String title, LocalDate startDate, LocalDate endDate,
-                               LocalTime startTime, LocalTime endTime, String thumbnailPath) {
+                               LocalTime startTime, LocalTime endTime, String thumbnailPath,LocalDateTime createdAt,LocalDateTime updatedAt) {
         if (title != null) this.title = title;
         if (startDate != null) this.startDate = startDate;
         if (endDate != null) this.endDate = endDate;
         if (startTime != null) this.startTime = startTime;
         if (endTime != null) this.endTime = endTime;
         if (thumbnailPath != null) this.thumbnailPath = thumbnailPath;
+        if (createdAt != null) this.createdAt = createdAt;
+        if (updatedAt != null) this.updatedAt = updatedAt;
     }
 
     /* ✅ 삭제 관련 메서드 불필요 → removeAllDays() 제거 (JPA cascade가 처리) */

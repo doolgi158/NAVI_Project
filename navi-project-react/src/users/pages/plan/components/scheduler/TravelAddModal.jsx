@@ -128,7 +128,7 @@ export default function TravelAddModal({ open, onClose, onAdd, days = [] }) {
             footer={null}
             width={950}
             centered
-            destroyOnClose
+            destroyOnHidden
         >
             {/* 🔍 검색 + 카테고리 필터 */}
             <div className="mb-4 flex flex-col gap-3">
