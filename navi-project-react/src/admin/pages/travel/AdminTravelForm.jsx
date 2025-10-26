@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { saveAdminTravel, fetchAdminTravelDetail } from "../../../common/api/adminTravelApi";
-import { Form, Input, InputNumber, Checkbox, Button, Alert, Card, Row, Col, message, AutoComplete, Radio } from "antd";
+import { Form, Input, InputNumber, Checkbox, Button, Alert, Card, Row, Col, message, AutoComplete, Radio, Layout } from "antd";
 import AdminSiderLayout from "../../layout/AdminSiderLayout";
-import { Content, Header } from "antd/es/layout/layout";
-import Layout from "antd/es/layout/layout";
 import TravelEditor from "./TravelEditor";
 import dayjs from "dayjs";
 
+const { Content, Header } = Layout;
 
 /** ✅ 제주 하위 지역 목록 */
 const JEJU_SUBREGIONS = {
@@ -17,7 +16,6 @@ const JEJU_SUBREGIONS = {
 
 /** ✅ 카테고리 목록 */
 const CATEGORY_OPTIONS = ["관광지", "음식점", "쇼핑"];
-
 
 const initialForm = {
     travelId: null,
@@ -44,33 +42,60 @@ const initialForm = {
 
 /** ✅ Kakao SDK 준비 */
 function ensureKakaoReady() {
+    const KAKAO_MAP_KEY = import.meta.env.VITE_KAKAO_MAP_KEY;
+
     return new Promise((resolve, reject) => {
-        const hasScript = !!document.querySelector('script[src*="dapi.kakao.com/v2/maps/sdk.js"]');
-        if (!hasScript) {
-            const script = document.createElement("script");
-            script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${import.meta.env.VITE_KAKAOMAP_KEY
-                }&libraries=services&autoload=false`;
-            script.async = true;
-            script.onerror = () => reject(new Error("Kakao SDK load error"));
-            document.head.appendChild(script);
+        // services 객체와 load 함수가 모두 있는지 확인
+        if (window.kakao?.maps?.services && window.kakao.maps.load) {
+            console.log("✅ Kakao SDK (services) 이미 로드됨");
+            resolve();
+            return;
         }
 
-        const wait = () => {
-            if (window.kakao && window.kakao.maps) {
-                try {
-                    window.kakao.maps.load(() => {
-                        if (window.kakao.maps.services) resolve();
-                        else reject(new Error("Kakao services not available"));
-                    });
-                } catch {
-                    if (window.kakao.maps.services) resolve();
-                    else setTimeout(wait, 100);
-                }
+        const existingScript = document.querySelector('script[src*="dapi.kakao.com/v2/maps/sdk.js"]');
+        if (existingScript) {
+            // 이미 스크립트가 있다면 load 함수가 있는지 확인하고 실행 (경우의 수를 단순화)
+            if (window.kakao?.maps?.load) {
+                console.log("⏳ Kakao SDK 스크립트 존재. load 함수 실행 대기 중...");
+                window.kakao.maps.load(() => {
+                    if (window.kakao.maps.services) {
+                        console.log("✅ Kakao SDK load() 완료");
+                        resolve();
+                    } else {
+                        reject(new Error("Kakao SDK load() 후 services 객체 없음"));
+                    }
+                });
             } else {
-                setTimeout(wait, 100);
+                reject(new Error("Kakao SDK 스크립트는 있으나 load 함수가 준비되지 않음"));
             }
+            return;
+        }
+
+        const script = document.createElement("script");
+        // 🚨 핵심 수정: autoload=false 추가
+        script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_MAP_KEY}&libraries=services&autoload=false`;
+        // 🚨 수정: async 제거 (document.write 경고 방지 및 순서 보장)
+        // script.async = true; 
+
+        script.onload = () => {
+            console.log("✅ Kakao SDK 스크립트 로드 완료. load 함수 실행.");
+
+            // 로드가 완료되면 load 함수를 호출하여 Geocoder 서비스 초기화
+            window.kakao.maps.load(() => {
+                if (window.kakao.maps.services) {
+                    console.log("✅ Kakao SDK load() 완료. Geocoder 사용 준비됨.");
+                    resolve();
+                } else {
+                    console.error("❌ Kakao SDK load() 후 services 객체 생성 실패");
+                    reject(new Error("Kakao SDK load() 후 services 객체 생성 실패"));
+                }
+            });
         };
-        wait();
+        script.onerror = () => {
+            console.error("❌ Kakao SDK 로드 실패 (onerror)");
+            reject(new Error("Kakao SDK load error"));
+        };
+        document.head.appendChild(script);
     });
 }
 
@@ -98,19 +123,20 @@ export default function AdminTravelForm() {
         fetchAdminTravelDetail(travelId)
             .then((res) => {
                 const data = res.data;
-
-                const cleanedThumbnails = (data.thumbnailPath || "")
-                    .replace(/\n/g, "")  // 줄바꿈 제거
-                    .split(",")          // 콤마로 분리
-                    .map((s) => s.trim())// 공백 제거
-                    .filter(Boolean)     // 빈 항목 제거
-                    .join(",");          // 다시 문자열로 결합
+                const travel = data.travel || data;
+                const cleanedThumbnails = (travel.thumbnailPath || "")
+                    .replace(/\n/g, "")
+                    .split(",")
+                    .map((s) => s.trim())
+                    .filter(Boolean)
+                    .join(",");
 
                 setFormData({
-                    ...data,
-                    description: data.description || "",
-                    categoryName: data.categoryName || "",
-                    thumbnailPath: cleanedThumbnails, // ✅ 정제된 문자열로 저장
+                    ...initialForm,
+                    ...travel,
+                    description: travel.description || "",
+                    categoryName: travel.categoryName || "",
+                    thumbnailPath: cleanedThumbnails,
                 });
             })
             .catch((err) => {
@@ -138,39 +164,40 @@ export default function AdminTravelForm() {
 
     /** ✅ 주소검색 → 좌표 변환 */
     const handleAddressSearch = useCallback(() => {
+        console.log("📍 주소 검색 시작"); // **[디버깅 포인트 1]**
+
         if (!window.daum?.Postcode) {
             message.error("주소검색 모듈을 불러올 수 없습니다.");
+            console.error("❌ Daum Postcode 모듈 없음");
             return;
         }
 
         new window.daum.Postcode({
             oncomplete: async (data) => {
-                const fullAddr = data.address;
+                console.log("✅ Daum Postcode 완료, 데이터:", data); // **[디버깅 포인트 2]**
+
+                // ✅ 지번주소 → 도로명주소 → 기본주소 순서로 검색
+                const fullAddr = data.jibunAddress || data.roadAddress || data.address;
                 const roadAddr = data.roadAddress || "";
                 const jibunAddr = data.jibunAddress || "";
+                console.log("🎯 변환 대상 주소 (fullAddr):", fullAddr);
 
                 try {
                     await ensureKakaoReady();
+                    console.log("✅ Kakao SDK 준비 완료 (Geocoder 사용 가능)"); // **[디버깅 포인트 3]**
                 } catch (err) {
                     message.error("지도 모듈 로드 실패");
+                    console.error("❌ Kakao SDK 준비 실패:", err);
                     return;
                 }
 
                 const geocoder = new window.kakao.maps.services.Geocoder();
-                geocoder.addressSearch(fullAddr, (results, status) => {
-                    if (status !== window.kakao.maps.services.Status.OK || !results.length) {
-                        message.warning("주소 좌표 변환 실패");
-                        setFormData((prev) => ({
-                            ...prev,
-                            address: jibunAddr || fullAddr,
-                            roadAddress: roadAddr || fullAddr,
-                        }));
-                        return;
-                    }
 
-                    const r = results[0];
+                // ✅ 성공 처리
+                const handleSuccess = (r) => {
+                    console.log("✅ Geocoder 변환 결과 (Raw Result):", r); // **[디버깅 포인트 5]**
                     const { x, y } = r;
-                    const a = r.address;
+                    const a = r.road_address || r.address;
 
                     let region1 = a?.region_1depth_name || "";
                     let region2 = a?.region_2depth_name || "";
@@ -188,6 +215,13 @@ export default function AdminTravelForm() {
 
                     if (region1Name && region2Name && region1Name === region2Name) region2Name = "";
 
+                    console.log("📍 최종 변환 데이터:", { // **[디버깅 포인트 6]**
+                        region1Name,
+                        region2Name,
+                        longitude: parseFloat(x),
+                        latitude: parseFloat(y),
+                    });
+
                     setFormData((prev) => ({
                         ...prev,
                         address: jibunAddr || fullAddr,
@@ -203,7 +237,30 @@ export default function AdminTravelForm() {
                     else if (region1Name === "서귀포시")
                         setAutoOptions(JEJU_SUBREGIONS["서귀포시"].map((v) => ({ value: v })));
                     else setAutoOptions([]);
-                });
+                };
+
+                // ✅ 주소 변환 시도 (제주특별자치도 제거 재시도 포함)
+                const trySearch = (query, retried = false) => {
+                    console.log(`🔍 Geocoding 요청 시도 ${retried ? "(재시도)" : ""}:`, query); // **[디버깅 포인트 4]**
+
+                    geocoder.addressSearch(query, (results, status) => {
+                        console.log("🔍 Geocoder 응답 상태:", status);
+                        console.log("🔍 Geocoder 응답 결과:", results);
+
+                        if (status === window.kakao.maps.services.Status.OK && results.length) {
+                            handleSuccess(results[0]);
+                        } else if (!retried && query.includes("제주특별자치도")) {
+                            const shorter = query.replace("제주특별자치도", "").trim();
+                            console.warn("📍 재시도 (제주특별자치도 제거):", shorter);
+                            trySearch(shorter, true);
+                        } else {
+                            console.error("❌ 주소 좌표 변환 실패:", query, status);
+                            message.warning("주소 좌표 변환 실패");
+                        }
+                    });
+                };
+
+                trySearch(fullAddr);
             },
         }).open();
     }, []);
@@ -312,7 +369,6 @@ export default function AdminTravelForm() {
                                     </Col>
                                 </Row>
 
-                                {/* ✅ 카테고리 선택 */}
                                 <Form.Item label="카테고리 선택" required>
                                     <Radio.Group
                                         value={formData.categoryName}
@@ -327,8 +383,6 @@ export default function AdminTravelForm() {
                                     </Radio.Group>
                                 </Form.Item>
 
-
-
                                 <Form.Item label="소개">
                                     <Input.TextArea
                                         rows={4}
@@ -338,19 +392,15 @@ export default function AdminTravelForm() {
                                     />
                                 </Form.Item>
 
-                                {/* ✅ 여행지 본문 (ReactQuill 에디터) */}
                                 <Form.Item label="본문 (상세 소개 / 블로그 형식)">
                                     {formData.description !== undefined && (
                                         <TravelEditor
-                                            // key={formData.travelId || "new"} // ❌ key prop 제거: 컴포넌트 재마운트 방지
-                                            value={formData.description || ""} // ✅ value prop 사용
+                                            value={formData.description || ""}
                                             onChange={(val) => handleChange("description", val)}
                                         />
                                     )}
                                 </Form.Item>
 
-
-                                {/* ✅ 이하 부분 그대로 유지 */}
                                 <Card title="주소 / 지역" size="small" style={{ marginBottom: 20 }}>
                                     <Row gutter={16}>
                                         <Col span={12}>
@@ -406,7 +456,6 @@ export default function AdminTravelForm() {
                                     </Row>
                                 </Card>
 
-                                {/* ✅ 기타 필드 */}
                                 <Form.Item label="태그">
                                     <Input
                                         value={formData.tag}

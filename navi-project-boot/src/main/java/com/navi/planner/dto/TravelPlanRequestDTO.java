@@ -3,6 +3,7 @@ package com.navi.planner.dto;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -24,9 +25,14 @@ public class TravelPlanRequestDTO {
     private LocalTime startTime;
     private LocalTime endTime;
     private String thumbnailPath;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
 
     /** 일자별 일정 리스트 */
     private List<DayRequestDTO> days;
+
+
 
     /** 하루 단위 일정 DTO */
     @Getter
@@ -66,7 +72,7 @@ public class TravelPlanRequestDTO {
         private String startTime;
         private String endTime;
 
-
+        @Builder.Default
         private boolean deleted = false;
 
     }

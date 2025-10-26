@@ -72,8 +72,8 @@ export default function PlanSidebar({
                         type={activeDayIdx === -1 ? "primary" : "default"}
                         onClick={() => setActiveDayIdx(-1)}
                         className={`${activeDayIdx === -1
-                                ? "!bg-[#FFF5B7] !border-none !text-[#2F3E46] font-semibold"
-                                : "hover:!bg-[#FAF9F6]"
+                            ? "!bg-[#FFF5B7] !border-none !text-[#2F3E46] font-semibold"
+                            : "hover:!bg-[#FAF9F6]"
                             }`}
                     >
                         전체 일정
@@ -81,13 +81,13 @@ export default function PlanSidebar({
 
                     {days.map((d, idx) => (
                         <Button
-                            key={d.dateISO}
+                            key={d.dayId || d.dateISO || idx}
                             block
                             type={idx === activeDayIdx ? "primary" : "default"}
                             onClick={() => setActiveDayIdx(idx)}
                             className={`${idx === activeDayIdx
-                                    ? "!bg-[#FFF5B7] !border-none !text-[#2F3E46] font-semibold"
-                                    : "hover:!bg-[#FAF9F6]"
+                                ? "!bg-[#FFF5B7] !border-none !text-[#2F3E46] font-semibold"
+                                : "hover:!bg-[#FAF9F6]"
                                 }`}
                         >
                             {idx + 1}일차
@@ -186,12 +186,14 @@ export default function PlanSidebar({
                     onClose={() => setShowTravelModal(false)}
                     days={days}
                     onAdd={handleAddTravel}
+                    selectedTravels={stageTravels}
                 />
                 <StayAddModal
                     open={showStayModal}
                     onClose={() => setShowStayModal(false)}
                     days={days}
                     onAdd={handleAddStay}
+                    selectedStays={stageStays}
                 />
             </div>
         </div>

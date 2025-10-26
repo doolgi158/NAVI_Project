@@ -11,6 +11,7 @@ import lombok.*;
 public class AdminTravelRequestDTO {
 
     private Long travelId;
+    private String contentId;
     private String title;
     private String categoryName;
     private String introduction;
@@ -21,7 +22,7 @@ public class AdminTravelRequestDTO {
     private String roadAddress;
     private Double longitude;
     private Double latitude;
-    private String imagePath;      // ✅ 추가
+    private String imagePath;
     private String thumbnailPath;
     private String tag;
     private String phoneNo;
@@ -34,6 +35,7 @@ public class AdminTravelRequestDTO {
     public Travel toEntity() {
         return Travel.builder()
                 .travelId(travelId)
+                .contentId(contentId)
                 .title(title)
                 .categoryName(categoryName)
                 .introduction(introduction)
@@ -55,4 +57,5 @@ public class AdminTravelRequestDTO {
                 .state(state)
                 .build();
     }
+
 }

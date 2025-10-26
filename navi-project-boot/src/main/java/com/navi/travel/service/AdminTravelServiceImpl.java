@@ -80,6 +80,7 @@ public class AdminTravelServiceImpl implements AdminTravelService {
     public Travel saveOrUpdateTravel(AdminTravelRequestDTO dto) {
         Travel travel;
         if (dto.getTravelId() != null) {
+            System.out.println("🔵 수정모드: ID=" + dto.getTravelId());
             travel = travelRepository.findById(dto.getTravelId())
                     .orElseThrow(() -> new NoSuchElementException("해당 ID의 여행지를 찾을 수 없습니다."));
             // ✅ 기존 엔티티 업데이트
@@ -107,9 +108,41 @@ public class AdminTravelServiceImpl implements AdminTravelService {
             travel.setHours(dto.getHours());
             travel.setState(dto.getState());
         } else {
+            System.out.println("🟢 신규등록모드 (관리자)");
             // 신규 등록
             travel = dto.toEntity();
+
+            // ✅ contentId가 비어 있다면 → 관리자 등록이므로 자동 생성
+            if (travel.getContentId() == null || travel.getContentId().isBlank()) {
+                String newId = generateSequentialAdminContentId();
+                System.out.println("✅ 생성된 contentId = " + newId);
+                travel.setContentId(newId);
+            } else {
+                System.out.println("⚠️ contentId가 이미 있음 = " + travel.getContentId());
+            }
         }
-        return travelRepository.save(travel);
+
+        Travel saved = travelRepository.save(travel);
+        System.out.println("💾 저장된 contentId = " + saved.getContentId());
+        return saved;
+    }
+
+    /** ✅ 관리자 전용 contentId 생성 규칙 */
+    private String generateSequentialAdminContentId() {
+        String maxId = travelRepository.findMaxAdminContentId();
+        long nextNumber = 1L;
+
+        if (maxId != null && maxId.startsWith("CONT_")) {
+            try {
+                String numericPart = maxId.substring(5, maxId.length() - 1);
+                nextNumber = Long.parseLong(numericPart) + 1;
+            } catch (Exception e) {
+                System.out.println("⚠️ contentId 파싱 실패: " + e.getMessage());
+            }
+        }
+
+        String newId = String.format("CONT_%017dA", nextNumber);
+        System.out.println("🆕 새 contentId 생성됨: " + newId);
+        return newId;
     }
 }
