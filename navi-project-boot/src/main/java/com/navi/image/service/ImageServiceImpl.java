@@ -128,6 +128,10 @@ public class ImageServiceImpl implements ImageService {
                 return "travel";
             case "POST":
                 return "post";
+            case "BOARD":
+                return "board";
+            case "NOTICE":
+                return "notice";
             default:
                 return "etc";
         }

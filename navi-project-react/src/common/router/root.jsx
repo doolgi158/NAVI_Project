@@ -60,10 +60,7 @@ const root = createBrowserRouter([
                 path: "/payment",
                 children: [...PaymentRouter()]
             },
-            {
-                path: "/client",
-                children: [...ClientRouter()],
-            },
+            ...ClientRouter(),
             {
                 path: "*",
                 element: <Suspense fallback={Loading}><Main /></Suspense>

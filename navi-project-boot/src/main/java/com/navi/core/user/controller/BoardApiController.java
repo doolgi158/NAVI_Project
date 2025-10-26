@@ -4,182 +4,182 @@ import com.navi.core.domain.Board;
 import com.navi.core.domain.Comment;
 import com.navi.core.user.service.BoardService;
 import com.navi.core.user.service.CommentService;
-import lombok.Getter;
+import com.navi.user.domain.User;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/board")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:5173")
 public class BoardApiController {
 
-    @Value("${file.upload-dir:./uploads}")
-    private String uploadDir;
     private final BoardService boardService;
     private final CommentService commentService;
 
-    // 게시글 목록 조회
-    @GetMapping
-    public ResponseEntity<List<Board>> getAllBoards() {
-        return ResponseEntity.ok(boardService.getAllBoards());
+    //현재 로그인한 사용자 번호 가져오기
+    private Integer getCurrentUserNo() {
+
+        //나중에 실제 로그인 구현 후 사용
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+    if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+        throw new RuntimeException("로그인이 필요합니다.");
     }
 
-    // 게시글 검색
+    User user = (User) auth.getPrincipal();
+    return user.getUserNo();
+
+    }
+
+    //게시글 검색
     @GetMapping("/search")
-    public ResponseEntity<List<Board>> searchBoards(@RequestParam String keyword) {
-        return ResponseEntity.ok(boardService.searchBoards(keyword));
+    public ResponseEntity<Map<String, Object>> searchBoards(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createDate").descending());
+        Page<Board> boardPage = boardService.searchBoards(keyword, pageable);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("boards", boardPage.getContent());
+        response.put("currentPage", boardPage.getNumber());
+        response.put("totalItems", boardPage.getTotalElements());
+        response.put("totalPages", boardPage.getTotalPages());
+
+        return ResponseEntity.ok(response);
     }
 
-    // 게시글 상세 조회
+    //게시글 상세 조회
     @GetMapping("/{id}")
     public ResponseEntity<Board> getBoard(@PathVariable Integer id) {
-        return ResponseEntity.ok(boardService.getBoard(id));
+        Board board = boardService.getBoard(id);
+        return ResponseEntity.ok(board);
     }
 
-    // 게시글 작성 (로그인 필요 - 추후 구현)
+    //게시글 작성
     @PostMapping
-    public ResponseEntity<String> createBoard(@RequestBody BoardRequest request) {
-        boardService.createBoard(request.getTitle(), request.getContent(), request.getImage());
-        return ResponseEntity.ok("success");
+    public ResponseEntity<Board> createBoard(
+            @RequestParam String title,
+            @RequestParam String content,
+            @RequestParam(required = false) MultipartFile image) {
+
+        Integer userNo = getCurrentUserNo();
+        Board board = boardService.createBoard(title, content, userNo, image);
+        return ResponseEntity.ok(board);
     }
 
-    // 이미지 업로드
+    //이미지 업로드
     @PostMapping("/upload")
-    public ResponseEntity<Map<String, String>> uploadImage(@RequestParam("file") MultipartFile file) {
-        try {
-            File directory = new File(uploadDir);
-            if (!directory.exists()) {
-                directory.mkdirs();
-            }
-
-            String originalFilename = file.getOriginalFilename();
-            String extension = "";
-            if (originalFilename != null && originalFilename.contains(".")) {
-                extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-            }
-            String savedFilename = UUID.randomUUID().toString() + extension;
-
-            Path filePath = Paths.get(uploadDir, savedFilename);
-            Files.copy(file.getInputStream(), filePath);
-
-            String fileUrl = "http://localhost:8080/uploads/" + savedFilename;
-
-            Map<String, String> response = new HashMap<>();
-            response.put("imageUrl", fileUrl);
-            return ResponseEntity.ok(response);
-
-        } catch (IOException e) {
-            Map<String, String> error = new HashMap<>();
-            error.put("error", "업로드 실패");
-            return ResponseEntity.status(500).body(error);
-        }
+    public ResponseEntity<Map<String, String>> uploadImage(@RequestParam MultipartFile file) {
+        return ResponseEntity.ok(Map.of("imageUrl", "/images/temp/" + file.getOriginalFilename()));
     }
 
-    // 게시글 수정 (본인만 - 추후 구현)
+    //게시글 수정
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateBoard(
+    public ResponseEntity<Board> updateBoard(
             @PathVariable Integer id,
-            @RequestBody BoardRequest request) {
-        boardService.updateBoard(id, request.getTitle(), request.getContent(), request.getImage());
-        return ResponseEntity.ok("success");
+            @RequestParam String title,
+            @RequestParam String content,
+            @RequestParam(required = false) MultipartFile image) {
+
+        Integer userNo = getCurrentUserNo();
+        Board board = boardService.updateBoard(id, title, content, userNo, image);
+        return ResponseEntity.ok(board);
     }
 
-    // 게시글 삭제 (본인만 - 추후 구현)
+    //게시글 삭제
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteBoard(@PathVariable Integer id) {
-        boardService.deleteBoard(id);
-        return ResponseEntity.ok("success");
+    public ResponseEntity<Void> deleteBoard(@PathVariable Integer id) {
+        Integer userNo = getCurrentUserNo();
+        boardService.deleteBoard(id, userNo);
+        return ResponseEntity.noContent().build();
     }
 
-    // 좋아요
+    //게시글 좋아요
     @PostMapping("/{id}/like")
-    public ResponseEntity<String> likeBoard(@PathVariable Integer id) {
+    public ResponseEntity<Void> likeBoard(@PathVariable Integer id) {
         boardService.likeBoard(id);
-        return ResponseEntity.ok("success");
+        return ResponseEntity.ok().build();
     }
 
-    // 좋아요 취소
-    @PostMapping("/{id}/unlike")
-    public ResponseEntity<String> unlikeBoard(@PathVariable Integer id) {
+    //게시글 좋아요 취소
+    @DeleteMapping("/{id}/like")
+    public ResponseEntity<Void> unlikeBoard(@PathVariable Integer id) {
         boardService.unlikeBoard(id);
-        return ResponseEntity.ok("success");
+        return ResponseEntity.ok().build();
     }
 
-    // 게시글 신고
+    //게시글 신고
     @PostMapping("/{id}/report")
-    public ResponseEntity<String> reportBoard(@PathVariable Integer id) {
+    public ResponseEntity<Void> reportBoard(@PathVariable Integer id) {
         boardService.reportBoard(id);
-        return ResponseEntity.ok("success");
+        return ResponseEntity.ok().build();
     }
 
-    // 댓글 목록 조회
-    @GetMapping("/{id}/comments")
+    //게시글의 댓글 조회
+    @GetMapping("/{id}/comments")  // ✅ 이게 있나요?
     public ResponseEntity<List<Comment>> getComments(@PathVariable Integer id) {
-        return ResponseEntity.ok(commentService.getCommentsByBoardNo(id));
+        List<Comment> comments = commentService.getCommentsByBoardNo(id);
+        return ResponseEntity.ok(comments);
     }
 
-    // 댓글 작성 (로그인 필요 - 추후 구현)
+    //댓글 작성
     @PostMapping("/{id}/comment")
-    public ResponseEntity<String> createComment(
+    public ResponseEntity<Comment> createComment(
             @PathVariable Integer id,
-            @RequestBody CommentRequest request) {
-        commentService.createComment(id, request.getContent());
-        return ResponseEntity.ok("success");
+            @RequestBody Map<String, String> request) {
+
+        Integer userNo = getCurrentUserNo();
+        String content = request.get("content");
+
+        Comment comment = commentService.createComment(id, userNo, content);
+        return ResponseEntity.ok(comment);
     }
 
-    // 대댓글 작성 (로그인 필요 - 추후 구현)
+    //대댓글 작성
     @PostMapping("/{id}/comment/{parentCommentNo}/reply")
-    public ResponseEntity<String> createReply(
+    public ResponseEntity<?> createReply(
             @PathVariable Integer id,
             @PathVariable Integer parentCommentNo,
-            @RequestBody CommentRequest request) {
-        commentService.createReply(id, parentCommentNo, request.getContent());
-        return ResponseEntity.ok("success");
+            @RequestBody Map<String, String> request) {
+
+        Integer userNo = getCurrentUserNo();
+        String content = request.get("content");
+
+        Comment reply = commentService.createReply(id, parentCommentNo, userNo, content);
+        return ResponseEntity.ok(reply);
     }
 
-    // 댓글 삭제 (본인만 - 추후 구현)
-    @DeleteMapping("/comment/{commentId}")
-    public ResponseEntity<String> deleteComment(@PathVariable Integer commentId) {
-        commentService.deleteComment(commentId);
-        return ResponseEntity.ok("success");
+    //댓글 삭제
+    @DeleteMapping("/comment/{commentNo}")
+    public ResponseEntity<Void> deleteComment(@PathVariable Integer commentNo) {
+        Integer userNo = getCurrentUserNo();
+        commentService.deleteComment(commentNo, userNo);
+        return ResponseEntity.noContent().build();
     }
 
-    // 댓글 신고
-    @PostMapping("/comment/{commentId}/report")
-    public ResponseEntity<String> reportComment(@PathVariable Integer commentId) {
-        commentService.reportComment(commentId);
-        return ResponseEntity.ok("success");
+    //댓글 신고
+    @PostMapping("/comment/{commentNo}/report")
+    public ResponseEntity<Void> reportComment(@PathVariable Integer commentNo) {
+        commentService.reportComment(commentNo);
+        return ResponseEntity.ok().build();
     }
-}
 
-// DTO
-@Setter
-@Getter
-class BoardRequest {
-    private String title;
-    private String content;
-    private String image;
-
-}
-
-@Setter
-@Getter
-class CommentRequest {
-    private String content;
 
 }

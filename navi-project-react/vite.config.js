@@ -22,6 +22,14 @@ export default defineConfig({
         target: "http://localhost:8080",
         changeOrigin: true,
       },
+      '/adm': {
+        target: 'http://localhost:8080',
+        changeOrigin: true
+      },
+      '/images': {
+        target: 'http://localhost:8080',
+        changeOrigin: true
+      }
     },
   },
   optimizeDeps: {
