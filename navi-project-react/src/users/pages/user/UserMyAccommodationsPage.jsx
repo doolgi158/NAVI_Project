@@ -24,7 +24,6 @@ const UserMyAccommodationsPage = () => {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
-            console.log("✅ 숙소 예약 내역:", res.data);
             if (res.data.status === 200) {
                 setBookingList(res.data.data || []);
             } else {
@@ -101,7 +100,7 @@ const UserMyAccommodationsPage = () => {
                                 title={
                                     <div className="flex justify-between items-center">
                                         <span className="font-semibold text-blue-600">
-                                            {b.accTitle || "숙소명 미등록"}
+                                            {b.title || "숙소명 미등록"}
                                         </span>
                                         <Tag color="purple">{b.reserveId}</Tag>
                                     </div>
