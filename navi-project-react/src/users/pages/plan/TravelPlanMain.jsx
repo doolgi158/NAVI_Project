@@ -69,45 +69,44 @@ export default function TravelPlanMain() {
     navigate(`/plans/planner/detail?planId=${plan.planId}&mode=view`);
   const handleEdit = (plan) =>
     navigate(`/plans/planner/detail?planId=${plan.planId}&mode=edit`);
-  const handleCreatePlan = () => navigate("/plans/planner");
-  // const handleCreatePlan = () => {
-  //   try {
-  //     const cookie = getCookie("userCookie");
-  //     if (!cookie) {
-  //       Modal.warning({
-  //         title: "로그인이 필요합니다",
-  //         content: "여행 계획을 세우기 위해서는 로그인이 필요합니다.",
-  //         okText: "확인",
-  //         centered: true,
-  //         onOk: () => navigate("/plans"),
-  //       });
-  //       return;
-  //     }
+  const handleCreatePlan = () => {
+    try {
+      const cookie = getCookie("userCookie");
+      if (!cookie) {
+        Modal.warning({
+          title: "로그인이 필요합니다",
+          content: "여행 계획을 세우기 위해서는 로그인이 필요합니다.",
+          okText: "확인",
+          centered: true,
+          onOk: () => navigate("/plans"),
+        });
+        return;
+      }
 
-  //     const user = typeof cookie === "string" ? JSON.parse(cookie) : cookie;
-  //     if (!user?.userId) {
-  //       Modal.warning({
-  //         title: "로그인 정보가 유효하지 않습니다",
-  //         content: "세션이 만료되었거나 로그인 정보가 손상되었습니다.\n다시 로그인해주세요.",
-  //         okText: "확인",
-  //         centered: true,
-  //         onOk: () => navigate("/plans"),
-  //       });
-  //       return;
-  //     }
+      const user = typeof cookie === "string" ? JSON.parse(cookie) : cookie;
+      if (!user?.userId) {
+        Modal.warning({
+          title: "로그인 정보가 유효하지 않습니다",
+          content: "세션이 만료되었거나 로그인 정보가 손상되었습니다.\n다시 로그인해주세요.",
+          okText: "확인",
+          centered: true,
+          onOk: () => navigate("/plans"),
+        });
+        return;
+      }
 
-  // ✅ 로그인된 사용자만 플래너로 이동
-  //   navigate("/plans/planner");
-  // } catch (err) {
-  //   console.error("❌ 로그인 확인 오류:", err);
-  //   Modal.error({
-  //     title: "로그인 오류",
-  //     content: "로그인 정보를 확인하는 중 문제가 발생했습니다.",
-  //     okText: "확인",
-  //     centered: true,
-  //   });
-  // }
-  //   };
+      //✅ 로그인된 사용자만 플래너로 이동
+      navigate("/plans/planner");
+    } catch (err) {
+      console.error("❌ 로그인 확인 오류:", err);
+      Modal.error({
+        title: "로그인 오류",
+        content: "로그인 정보를 확인하는 중 문제가 발생했습니다.",
+        okText: "확인",
+        centered: true,
+      });
+    }
+  };
 
   /** ✅ 탭, 페이지네이션 */
   const handlePageChange = (newPage) =>

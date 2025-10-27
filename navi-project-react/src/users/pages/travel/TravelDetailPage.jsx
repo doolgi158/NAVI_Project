@@ -304,7 +304,7 @@ export default function TravelDetailPage() {
               </div>
 
               <Title level={4} style={{ borderLeft: '5px solid #58B5E9', paddingLeft: 10, marginTop: 50 }}>여행지 정보</Title>
-              <Descriptions column={2} bordered size="middle" style={{ marginTop: 20, backgroundColor: '#FFFFFF', borderRadius: 12 }}>
+              <Descriptions column={2} bordered size="middle" style={{ marginTop: 20, backgroundColor: '#FFFFFF', borderRadius: 12, marginBottom: 70 }}>
                 {infoData.map((item, i) => (
                   <Descriptions.Item
                     key={i}
