@@ -26,7 +26,6 @@ const { Title, Text } = Typography;
 
 const SeatSelectPage = () => {
   const { state } = useLocation();
-  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const {

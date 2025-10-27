@@ -62,7 +62,7 @@ const AccDetailPage = () => {
   const [dateRange, setDateRange] = useState(
     searchState?.dateRange?.length === 2
       ? [dayjs(searchState.dateRange[0]), dayjs(searchState.dateRange[1])]
-      : null
+      : [dayjs().startOf('day'), dayjs().add(1, 'day').startOf('day')]
   );
   const [guestCount, setGuestCount] = useState(searchState?.guestCount || 1);
   const [roomCount, setRoomCount] = useState(searchState?.roomCount || 1);
@@ -373,9 +373,9 @@ const AccDetailPage = () => {
                     key={room.roomId}
                     className="flex flex-col md:flex-row border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200"
                   >
-                    {room.thumbnailImage ? (
+                    {room.mainImage ? (
                       <img
-                        src={`${API_SERVER_HOST}${room.thumbnailImage}`}
+                        src={`${API_SERVER_HOST}${room.mainImage}`}
                         alt={room.roomName}
                         className="md:w-1/4 w-full h-40 object-cover"
                       />
