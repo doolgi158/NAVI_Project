@@ -39,10 +39,10 @@ const AdminSiderLayout = () => {
     "0": () => navigate("/adm/dashboard"),
     "1": () => navigate("/adm/users"),
     "2": () => navigate("/adm/travel"),
-    "3-1": () => navigate("/adm/accommodations"),
-    "3-2": () => navigate("/adm/rooms"),
-    "4": () => navigate("/adm/flight"),
-    "5": () => navigate("/adm/plan"),
+    "3": () => navigate("/adm/plan"),
+    "4-1": () => navigate("/adm/accommodations"),
+    "4-2": () => navigate("/adm/rooms"),
+    "5": () => navigate("/adm/flight"),
     "6": () => navigate("/adm/deliveries"),
     "7": () => navigate("/adm/payments"),
     "8": () => navigate("/adm/refunds"),
@@ -64,10 +64,10 @@ const AdminSiderLayout = () => {
     if (path.includes("/adm/dashboard")) setSelectedKeys(["0"]);
     else if (path.includes("/adm/users")) setSelectedKeys(["1"]);
     else if (path.includes("/adm/travel")) setSelectedKeys(["2"]);
-    else if (path.includes("/adm/accommodations")) setSelectedKeys(["3-1"]);
-    else if (path.includes("/adm/rooms")) setSelectedKeys(["3-2"]);
-    else if (path.includes("/adm/flight")) setSelectedKeys(["4"]);
-    else if (path.includes("/adm/plan")) setSelectedKeys(["5"]);
+    else if (path.includes("/adm/plan")) setSelectedKeys(["3"]);
+    else if (path.includes("/adm/accommodations")) setSelectedKeys(["4-1"]);
+    else if (path.includes("/adm/rooms")) setSelectedKeys(["4-2"]);
+    else if (path.includes("/adm/flight")) setSelectedKeys(["5"]);
     else if (path.includes("/adm/deliveries")) setSelectedKeys(["6"]);
     else if (path.includes("/adm/payments")) setSelectedKeys(["7"]);
     else if (path.includes("/adm/refunds")) setSelectedKeys(["8"]);
@@ -89,17 +89,18 @@ const AdminSiderLayout = () => {
             { key: "0", icon: <DashboardOutlined />, label: "대시보드" },
             { key: "1", icon: <UserOutlined />, label: "사용자 관리" },
             { key: "2", icon: <EnvironmentOutlined />, label: "여행지 관리" },
+            { key: "3", icon: <CalendarOutlined />, label: "여행 계획 관리" },
+
             {
-              key: "3",
+              key: "4",
               icon: <ApartmentOutlined />,
               label: "숙박 관리",
               children: [
-                { key: "3-1", icon: <BankOutlined />, label: "숙소 관리" },
-                { key: "3-2", icon: <KeyOutlined />, label: "객실 관리" },
+                { key: "4-1", icon: <BankOutlined />, label: "숙소 관리" },
+                { key: "4-2", icon: <KeyOutlined />, label: "객실 관리" },
               ],
             },
-            { key: "4", icon: <RocketOutlined />, label: "항공편 관리" },
-            { key: "5", icon: <CalendarOutlined />, label: "여행 계획 관리" },
+            { key: "5", icon: <RocketOutlined />, label: "항공편 관리" },
             { key: "6", icon: <DropboxOutlined />, label: "짐 배송 관리" },
             { key: "7", icon: <DollarOutlined />, label: "결제 관리" },
             { key: "8", icon: <UndoOutlined />, label: "환불 관리" },
