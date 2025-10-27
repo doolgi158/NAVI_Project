@@ -16,7 +16,7 @@ public interface RoomRsvService {
     // 3. 예약 상태 변경
     void updateStatus(String reserveId, String status);
     // 4. 예약 정보 갱신
-    void updateReserverInfo(String reserveId, String name, String tel, String email);
+    void updateReserverInfo(String reserveId, String name, String tel, String email, String birth);
     // 5. 예약 조회
     List<RoomRsvResponseDTO> findAllByUserId(String userId);
     RoomRsvResponseDTO findByReserveId(String roomRsvId);

@@ -338,12 +338,15 @@ const AccDetailPage = () => {
                 <Text>숙박 일정</Text>
                 <RangePicker
                   format="YYYY-MM-DD"
+                  placeholder={["체크인", "체크아웃"]}
                   value={dateRange}
                   size="large"
-                  onChange={setDateRange}
-                  disabledDate={(current) =>
-                    current && current < dayjs().startOf("day")
-                  }
+                  onChange={(v) => setDateRange(v)}
+                  disabledDate={(current) => {
+                    const today = dayjs().startOf("day");
+                    const twoWeeksLater = today.add(14, "day").endOf("day");
+                    return current < today || current > twoWeeksLater;
+                  }}
                 />
               </div>
 

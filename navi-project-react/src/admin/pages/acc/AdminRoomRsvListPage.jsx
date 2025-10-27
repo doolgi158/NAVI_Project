@@ -269,6 +269,9 @@ const AdminRoomRsvListPage = () => {
             <Descriptions.Item label="이메일">
               {reserverModal.data.reserverEmail}
             </Descriptions.Item>
+            <Descriptions.Item label="생년월일">
+              {reserverModal.data.reserverBirth}
+            </Descriptions.Item>
           </Descriptions>
         ) : (
           <p style={{ textAlign: "center", color: "#999" }}>정보 없음</p>

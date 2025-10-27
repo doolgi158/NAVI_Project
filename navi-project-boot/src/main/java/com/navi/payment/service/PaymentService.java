@@ -33,4 +33,5 @@ public interface PaymentService {
 
     // 결제 내역 출력
     List<PaymentAdminListResponseDTO> getMyPayments(String userId);
+
 }

@@ -34,4 +34,7 @@ public interface RoomRsvRepository extends JpaRepository<RoomRsv, Long> {
     /* 예약 ID 상태 조회 */
     @Query("SELECT r.rsvStatus FROM RoomRsv r WHERE r.reserveId = :reserveId")
     Optional<String> findStatusByReserveId(String reserveId);
+
+    @Query(value = "SELECT ROOM_RSV_SEQ.NEXTVAL FROM DUAL", nativeQuery = true)
+    Long getNextSeqVal();
 }

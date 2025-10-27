@@ -105,6 +105,9 @@ public class RoomRsv extends BaseEntity{
     @Column(name = "reserver_email", length = 100)
     private String reserverEmail;
 
+    @Column(name = "reserver_birth", length = 100)
+    private LocalDate reserverBirth;
+
     @Version
     @Column(name = "version", nullable = false)
     private Long version;
@@ -133,9 +136,10 @@ public class RoomRsv extends BaseEntity{
     }
 
     /* === 예약자 정보 갱신 === */
-    public void updateReserverInfo(String name, String tel, String email) {
+    public void updateReserverInfo(String name, String tel, String email, String birth) {
         if (name != null && !name.isBlank()) this.reserverName = name;
         if (tel != null && !tel.isBlank()) this.reserverTel = tel;
         if (email != null && !email.isBlank()) this.reserverEmail = email;
+        if (birth != null && !birth.isBlank()) this.reserverBirth = LocalDate.parse(birth);
     }
 }

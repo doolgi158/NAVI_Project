@@ -1,12 +1,13 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { Card, Typography, Form, Input, Button, Steps, Divider, Space, message } from "antd";
+import { Card, Typography, Form, Input, Button, Steps, Divider, Space, message, Row, Col, DatePicker } from "antd";
 import { CalendarOutlined, TeamOutlined, HomeOutlined, DollarOutlined } from "@ant-design/icons";
 import { setReserveData } from "../../../common/slice/paymentSlice";
 import { API_SERVER_HOST } from "../../../common/api/naviApi";
 import { useEffect, useState } from "react"; 
 import MainLayout from "../../layout/MainLayout";
 import axios from "axios";
+import dayjs from "dayjs";
 
 const { Title, Text } = Typography;
 
@@ -15,18 +16,10 @@ const formatPhoneNumber = (phoneNumber) => {
     const cleaned = cleanPhoneNumber(phoneNumber);
     const len = cleaned.length;
     
-    // 한국 휴대폰 번호 포맷팅 (010 기준)
-    if (len <= 3) {
-        return cleaned;
-    }
-    if (len <= 7) {
-        return `${cleaned.slice(0, 3)}-${cleaned.slice(3)}`;
-    }
-    // 11자리 (010-XXXX-XXXX)
-    if (len <= 11) {
-        return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 7)}-${cleaned.slice(7, 11)}`;
-    }
-    return cleaned.slice(0, 11); // 최대 11자리까지만 허용
+    if (len <= 3) return cleaned;
+    if (len <= 7) return `${cleaned.slice(0, 3)}-${cleaned.slice(3)}`;
+    if (len <= 11) return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 7)}-${cleaned.slice(7, 11)}`;
+    return cleaned.slice(0, 11);
 };
 
 const AccReservationPage = () => {
@@ -34,8 +27,6 @@ const AccReservationPage = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const [form] = Form.useForm();
-
-    // 전화번호 상태 추가
     const [phoneNumber, setPhoneNumber] = useState(""); 
 
     useEffect(() => {
@@ -46,56 +37,47 @@ const AccReservationPage = () => {
         }
     }, [navigate]);
 
-    /* location.state */
     const { rsvType, items, itemData, formData } = location.state || {};
 
-    // 유효성 검사
     if (!formData || !itemData) {
         message.error("예약 정보가 올바르지 않습니다. 다시 시도해주세요.");
         navigate("/accommodations");
         return null;
     }
 
-    // 전화번호 입력 핸들러: 자동 포맷팅 및 폼 상태 업데이트
     const handlePhoneChange = (e) => {
         const value = e.target.value;
         const formattedValue = formatPhoneNumber(value);
         setPhoneNumber(formattedValue);
-        // Ant Design Form의 유효성 검사를 위해 폼 필드에도 값을 설정
         form.setFieldsValue({ phone: formattedValue });
     };
 
-    /* 결제 페이지 이동 */
     const onFinish = async (values) => {
         const token = localStorage.getItem("accessToken");
-        
-        // 하이픈 제거된 순수 숫자 전화번호 (서버 전송용)
         const cleanedPhone = cleanPhoneNumber(values.phone); 
 
         try {
-            // 예약자 정보 통합
             const updatedFormData = {
                 ...formData,
                 name: values.name,
-                phone: cleanedPhone, // 클린한 전화번호 사용
+                birthday: values.birthday,
+                phone: cleanedPhone,
                 email: values.email,
+                birth: values.birth ? values.birth.format("YYYY-MM-DD") : null
             };
 
-            // ✅ 예약자 정보 업데이트 요청
             await axios.put(`${API_SERVER_HOST}/api/room/reserve/${formData.reserveId}/reserver`,
                 {
                     reserverName: values.name,
-                    reserverTel: cleanedPhone, // 클린한 전화번호 전송
+                    reserverTel: cleanedPhone,
                     reserverEmail: values.email,
+                    reserverBirth: values.birth ? values.birth.format("YYYY-MM-DD") : null
                 },
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                }
+                { headers: { Authorization: `Bearer ${token}` } }
             );
 
             message.success("예약자 정보가 저장되었습니다.");
 
-            // ✅ Redux 상태 갱신
             dispatch(
                 setReserveData({
                     rsvType,
@@ -106,7 +88,6 @@ const AccReservationPage = () => {
                 })
             );
 
-            // ✅ 결제 페이지로 이동
             navigate("/payment", {
                 state: {
                     rsvType: "ACC",
@@ -120,7 +101,6 @@ const AccReservationPage = () => {
             message.error("예약자 정보 저장 중 오류가 발생했습니다. 다시 시도해주세요.");
         }
     };
-
 
     return (
         <MainLayout>
@@ -151,24 +131,43 @@ const AccReservationPage = () => {
                         </Title>
 
                         <Form form={form} layout="vertical" onFinish={onFinish}>
-                            <Form.Item
-                                label="이름"
-                                name="name"
-                                rules={[{ required: true, message: "이름을 입력해주세요." }]}
-                            >
-                                <Input placeholder="홍길동" size="large" />
-                            </Form.Item>
+                            {/* 이름 + 생년월일 2열 */}
+                            <Row gutter={16}>
+                                <Col span={12}>
+                                    <Form.Item
+                                        label="이름"
+                                        name="name"
+                                        rules={[{ required: true, message: "이름을 입력해주세요." }]}
+                                    >
+                                        <Input placeholder="홍길동" size="large" />
+                                    </Form.Item>
+                                </Col>
+
+                                <Col span={12}>
+                                    <Form.Item
+                                        label="생년월일"
+                                        name="birth"
+                                        rules={[{ required: true, message: "생년월일을 입력해주세요." }]}
+                                        >
+                                        <DatePicker
+                                            size="large"
+                                            format="YYYY-MM-DD"
+                                            disabledDate={(current) => current && current > dayjs().endOf("day")}
+                                            style={{ width: "100%", borderRadius: 10 }}
+                                            placeholder="YYYY-MM-DD"
+                                        />
+                                    </Form.Item>
+                                </Col>
+                            </Row>
 
                             <Form.Item
                                 label="연락처"
                                 name="phone"
                                 rules={[
                                     { required: true, message: "연락처를 입력해주세요." },
-                                    // ⭐ 전화번호 유효성 검사 규칙 추가
                                     { 
                                         validator: (_, value) => {
                                             const cleaned = cleanPhoneNumber(value);
-                                            // 10자리 (구형 번호) 또는 11자리 (010)로 시작하며 0으로 시작하는지 확인
                                             if (!cleaned || (cleaned.length >= 10 && cleaned.length <= 11 && cleaned.startsWith('0'))) {
                                                 return Promise.resolve();
                                             }
@@ -177,11 +176,10 @@ const AccReservationPage = () => {
                                     }
                                 ]}
                             >
-                                {/* ⭐ value와 onChange 핸들러를 추가하여 자동 하이픈 기능 구현 */}
                                 <Input 
                                     placeholder="010-1234-5678" 
                                     size="large" 
-                                    maxLength={13} // 010-0000-0000은 13자리
+                                    maxLength={13}
                                     value={phoneNumber} 
                                     onChange={handlePhoneChange}
                                 />
@@ -268,7 +266,6 @@ const AccReservationPage = () => {
                                 </Text>
                             </div>
 
-                            {/* ✅ 하단 버튼 */}
                             <div className="mt-6">
                                 <Button
                                     type="primary"

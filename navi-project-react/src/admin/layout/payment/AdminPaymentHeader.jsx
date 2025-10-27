@@ -117,10 +117,6 @@ const AdminPaymentHeader = ({ onTabChange, onSearch, onFilter }) => {
           }}
         />
         <Space wrap>
-          <RangePicker
-            suffixIcon={<CalendarOutlined />}
-            style={{ height: 40, borderRadius: 8 }}
-          />
           <Select
             value={filterValue}
             style={{ width: 160, height: 40 }}

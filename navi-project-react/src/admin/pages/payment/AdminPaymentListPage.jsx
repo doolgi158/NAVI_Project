@@ -127,6 +127,7 @@ const AdminPaymentListPage = () => {
             rsvType,
             reason: `[관리자 전체 환불] ${rsvType}`,
           };
+          console.log(refundRequest);
 
           await axios.post(
             `${API_SERVER_HOST}/api/adm/payment/refund/master`,
@@ -146,6 +147,7 @@ const AdminPaymentListPage = () => {
   };
 
   const handleExpand = async (record) => {
+    console.log(record);
     const isExpanded = expandedRowKeys.includes(record.merchantId);
     if (isExpanded) setExpandedRowKeys([]);
     else {
@@ -251,19 +253,29 @@ const AdminPaymentListPage = () => {
       title: "관리",
       key: "actions",
       align: "center",
-      width: 180,
+      width: 250,
       fixed: "right",
       render: (_, record) => (
         <Space>
           <Tooltip title="결제 상세 보기">
             <Button
               icon={<EyeOutlined />}
-              style={{ backgroundColor: "#1677ff", borderColor: "#F8E473", color: "white" }}
+              style={{ backgroundColor: "#0A3D91", borderColor: "#F8E473", color: "white" }}
               onClick={() => handleExpand(record)}
             >
               상세보기
             </Button>
           </Tooltip>
+          <Button
+              danger
+              type="primary"
+              icon={<RollbackOutlined />}
+              onClick={() =>
+                handleFullRefund(record.merchantId, rsvType)
+              }
+            >
+              전체 환불
+          </Button>
         </Space>
       ),
     },
@@ -313,20 +325,10 @@ const AdminPaymentListPage = () => {
           <Button
             icon={<EyeOutlined />}
             onClick={() =>
-              handleViewReservation(record.rsvType, detail.reserveId)
+              handleViewReservation(rsvType, record.reserveId)
             }
           >
             예약 내역
-          </Button>
-          <Button
-            danger
-            type="primary"
-            icon={<RollbackOutlined />}
-            onClick={() =>
-              handleFullRefund(record.merchantId, record.rsvType)
-            }
-          >
-            전체 환불
           </Button>
         </Space>
       ),

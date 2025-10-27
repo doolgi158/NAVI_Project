@@ -1,9 +1,14 @@
 import React from "react";
-import { Card, Typography, Divider } from "antd";
+import { Card, Typography } from "antd";
+import dayjs from "dayjs";
+
 const { Title, Text } = Typography;
 
 const AccRsvInfo = ({ formData }) => {
-  const { name, email, phone } = formData || {};
+  const { name, email, phone, birth } = formData || {};
+
+  // birth를 안전하게 dayjs 객체로 변환
+  const displayBirth = birth ? dayjs(birth).format("YYYY-MM-DD") : "입력 정보 없음";
 
   return (
     <div className="space-y-5">
@@ -21,6 +26,9 @@ const AccRsvInfo = ({ formData }) => {
           </p>
           <p>
             <b>전화번호:</b> {phone || "입력 정보 없음"}
+          </p>
+          <p>
+            <b>생년월일:</b> {displayBirth}
           </p>
         </div>
       </Card>
