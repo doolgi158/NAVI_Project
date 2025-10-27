@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -58,29 +59,26 @@ public class AdminTravelServiceImpl implements AdminTravelService {
             throw new IllegalArgumentException("변경할 항목이 없습니다.");
         }
 
-        // Long 변환
         List<Long> longIds = ids.stream().map(Long::valueOf).toList();
-
-        // ID 목록으로 여행지 조회
         List<Travel> travels = adminTravelRepository.findAllById(longIds);
         if (travels.isEmpty()) {
             throw new NoSuchElementException("선택한 여행지를 찾을 수 없습니다.");
         }
 
-        // 상태 변경
         travels.forEach(t -> t.setState(state));
-
-        // 일괄 저장
         adminTravelRepository.saveAll(travels);
     }
 
-    /** 등록,수정 */
+    /** ✅ 등록 / 수정 */
     public Travel saveOrUpdateTravel(AdminTravelRequestDTO dto) {
         Travel travel;
+        LocalDateTime now = LocalDateTime.now();
+
         if (dto.getTravelId() != null) {
             System.out.println("🔵 수정모드: ID=" + dto.getTravelId());
             travel = travelRepository.findById(dto.getTravelId())
                     .orElseThrow(() -> new NoSuchElementException("해당 ID의 여행지를 찾을 수 없습니다."));
+
             // ✅ 기존 엔티티 업데이트
             travel.setTitle(dto.getTitle());
             travel.setCategoryName(dto.getCategoryName());
@@ -105,12 +103,16 @@ public class AdminTravelServiceImpl implements AdminTravelService {
             travel.setFee(dto.getFee());
             travel.setHours(dto.getHours());
             travel.setState(dto.getState());
+
+            // ✅ 수정 시 updatedAt만 변경
+            travel.setUpdatedAt(now);
+
         } else {
             System.out.println("🟢 신규등록모드 (관리자)");
             // 신규 등록
             travel = dto.toEntity();
 
-            // ✅ contentId가 비어 있다면 → 관리자 등록이므로 자동 생성
+            // ✅ contentId 자동 생성
             if (travel.getContentId() == null || travel.getContentId().isBlank()) {
                 String newId = generateSequentialAdminContentId();
                 System.out.println("✅ 생성된 contentId = " + newId);
@@ -118,6 +120,10 @@ public class AdminTravelServiceImpl implements AdminTravelService {
             } else {
                 System.out.println("⚠️ contentId가 이미 있음 = " + travel.getContentId());
             }
+
+            // ✅ 등록 시 createdAt / updatedAt 둘 다 설정
+            travel.setCreatedAt(now);
+            travel.setUpdatedAt(now);
         }
 
         Travel saved = travelRepository.save(travel);
