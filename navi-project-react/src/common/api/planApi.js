@@ -151,7 +151,10 @@ export const getAllStays = async () => {
       address: stay.address,
       mapx: stay.mapx,
       mapy: stay.mapy,
-      image: stay.image || null, // 필요하면 유지
+      image: stay.image || null,
+      accImage: stay.accImage || null,
+      imagePath: stay.imagePath || null,
+      mainImage: stay.mainImage || null,
     }));
 
     console.log("[getAllStays] stays loaded:", filtered.length);
@@ -162,5 +165,3 @@ export const getAllStays = async () => {
     return [];
   }
 };
-
-

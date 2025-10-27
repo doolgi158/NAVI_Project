@@ -27,7 +27,7 @@ export const fetchAdminTravelList = async (
   };
 
   // ✅ 기존 엔드포인트 그대로 유지
-  const response = await axios.get('/api/adm/travel', config);
+  const response = await api.get('/adm/travel', config);
   return response;
 };
 

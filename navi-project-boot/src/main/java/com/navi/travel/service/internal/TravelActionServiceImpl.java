@@ -54,7 +54,7 @@ public class TravelActionServiceImpl implements TravelActionService {
                         .user(user)
                         .actionType(ActionType.VIEW_TRAVEL)
                         .targetId(travelId)
-                        .targetName("Travel View") // 또는 travelRepository.findById(travelId).get().getTitle()
+                        .targetName("Travel View")
                         .build();
                 logRepository.save(log);
             });
@@ -62,7 +62,7 @@ public class TravelActionServiceImpl implements TravelActionService {
     }
 
     /**
-     * ✅ 좋아요 토글
+     * ✅ 좋아요 토글 (캐시 컬럼 기반)
      */
     @Transactional
     public boolean toggleLike(Long travelId, String userId) {
@@ -81,20 +81,19 @@ public class TravelActionServiceImpl implements TravelActionService {
 
         if (likedBefore) {
             likeRepository.deleteByTravelIdAndId(travelId, userId);
-            travel.decrementLikesCount(); // ✅ 감소
+            travelRepository.decrementLikes(travelId); // ✅ DB에서 바로 감소
         } else {
             Like like = new Like(travel, user);
             like.setUserId(userId);
             likeRepository.save(like);
-            travel.incrementLikesCount(); // ✅ 증가
+            travelRepository.incrementLikes(travelId); // ✅ DB에서 바로 증가
         }
-        travel.setCounterOnlyChanged(true);
 
         return !likedBefore;
     }
 
     /**
-     * ✅ 북마크 토글
+     * ✅ 북마크 토글 (캐시 컬럼 기반)
      */
     @Transactional
     public boolean toggleBookmark(Long travelId, String userId) {
@@ -113,14 +112,13 @@ public class TravelActionServiceImpl implements TravelActionService {
 
         if (bookmarkedBefore) {
             bookmarkRepository.deleteByTravelIdAndId(travelId, userId);
-            travel.decrementBookmarkCount(); // ✅ 감소
+            travelRepository.decrementBookmarks(travelId); // ✅ DB에서 바로 감소
         } else {
             Bookmark bookmark = new Bookmark(travel, user);
             bookmark.setUserId(userId);
             bookmarkRepository.save(bookmark);
-            travel.incrementBookmarkCount(); // ✅ 증가
+            travelRepository.incrementBookmarks(travelId); // ✅ DB에서 바로 증가
         }
-        travel.setCounterOnlyChanged(true);
 
         return !bookmarkedBefore;
     }

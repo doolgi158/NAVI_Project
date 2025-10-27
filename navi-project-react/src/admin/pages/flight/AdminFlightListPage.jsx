@@ -229,7 +229,6 @@ const AdminFlightListPage = () => {
             type="primary"
             onClick={() => navigate("/adm/flight/new")}
             style={{
-              background: "#2563eb",
               border: "none",
               borderRadius: 8,
               fontWeight: 600,

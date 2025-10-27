@@ -91,7 +91,7 @@ public class Travel extends BaseEntityNoAudit {
 
     @Builder.Default
     @Column(name = "VIEWS_COUNT", nullable = false, columnDefinition = "NUMBER default 0")
-    private Long views = 0L;
+    private Long views  = 0L;
 
     @Builder.Default
     @Column(name = "LIKES_COUNT", nullable = false, columnDefinition = "NUMBER default 0")
@@ -222,7 +222,7 @@ public class Travel extends BaseEntityNoAudit {
     }
 
     public void incrementViews() {
-        this.views = (this.views == null) ? 1L : this.views + 1;
+        this.views  = (this.views  == null) ? 1L : this.views  + 1;
     }
 
     public void incrementLikesCount() {

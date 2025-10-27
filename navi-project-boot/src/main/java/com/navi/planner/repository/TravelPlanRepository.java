@@ -3,7 +3,6 @@ package com.navi.planner.repository;
 import com.navi.planner.domain.TravelPlan;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -34,11 +33,14 @@ public interface TravelPlanRepository extends JpaRepository<TravelPlan, Long> {
     /** ✅ 전체 유저의 여행계획 목록 (관리자용) */
     Page<TravelPlan> findAll(Pageable pageable);
 
-
-    Page<TravelPlan> findByTitleContainingIgnoreCaseOrUser_NameContainingIgnoreCase(
-            String title,
-            String name,
-            Pageable pageable
-    );
-
+    /** ✅ 제목, 작성자명, 또는 ID(문자열 포함) 검색 */
+    @Query("""
+    SELECT p FROM TravelPlan p
+    WHERE 
+        LOWER(REPLACE(p.title, ' ', '')) LIKE LOWER(CONCAT('%', REPLACE(:keyword, ' ', ''), '%'))
+        OR LOWER(p.user.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+        OR LOWER(p.user.id) LIKE LOWER(CONCAT('%', :keyword, '%'))
+        OR TO_CHAR(p.planId) LIKE CONCAT('%', :keyword, '%')
+    """)
+    Page<TravelPlan> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
 }

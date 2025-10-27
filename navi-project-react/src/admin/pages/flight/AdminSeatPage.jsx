@@ -327,7 +327,7 @@ const AdminSeatPage = () => {
                             type="primary"
                             icon={<PlusOutlined />}
                             onClick={handleAdd}
-                            style={{ background: "#2563eb", border: "none" }}
+                            style={{ border: "none" }}
                             disabled={!flightInfo.flightId}
                         >
                             좌석 추가

@@ -125,7 +125,7 @@ const UserMenuDropdown = () => {
                   </li>
                   <li
                     className="pl-8 py-2 hover:bg-gray-100 cursor-pointer"
-                    onClick={() => handleMenuClick("/users/my-plans")}
+                    onClick={() => handleMenuClick("/plans")}
                   >
                     여행계획
                   </li>
