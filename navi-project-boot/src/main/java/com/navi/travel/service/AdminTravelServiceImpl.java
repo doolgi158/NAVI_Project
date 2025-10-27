@@ -30,14 +30,12 @@ public class AdminTravelServiceImpl implements AdminTravelService {
     public Page<AdminTravelListResponseDTO> getAdminTravelList(Pageable pageable, String search) {
         Page<Travel> page;
 
-        // 검색 조건이 있는 경우
         if (search != null && !search.trim().isEmpty()) {
-            String keyword = "%" + search.trim() + "%";
-            page = adminTravelRepository.findByTitleContainingIgnoreCaseOrRegion1NameContainingIgnoreCaseOrRegion2NameContainingIgnoreCaseOrTagContainingIgnoreCase(
-                    search, search, search, search, pageable
-            );
+            // ✅ 공백 무시 + 대소문자 무시 검색
+            String keyword = search.trim();
+            page = travelRepository.searchByTitleIgnoringSpaces(keyword, pageable);
         } else {
-            page = adminTravelRepository.findAll(pageable);
+            page = travelRepository.findAll(pageable);
         }
 
         return page.map(AdminTravelListResponseDTO::of);

@@ -1,6 +1,7 @@
 package com.navi.travel.repository;
 
 import com.navi.travel.domain.Like;
+import com.navi.travel.domain.Travel;
 import com.navi.user.domain.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -40,4 +41,12 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
     @Query("DELETE FROM Like l WHERE l.user.no = :userNo AND l.travel.travelId = :travelId")
     void deleteByUser_NoAndTravel_TravelId(@Param("userNo") Long userNo, @Param("travelId") Long travelId);
 
+    /**
+     * ✅ 좋아요 생성 헬퍼 (TravelActionServiceImpl에서 사용)
+     */
+    default Like saveLike(Travel travel, User user) {
+        Like like = new Like(travel, user);
+        like.setUserId(user.getId());
+        return save(like);
+    }
 }

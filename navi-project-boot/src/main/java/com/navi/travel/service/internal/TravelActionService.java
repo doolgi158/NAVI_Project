@@ -6,4 +6,6 @@ public interface TravelActionService {
     boolean toggleLike(Long travelId, String id);
 
     void incrementViews(Long travelId);
+
+
 }

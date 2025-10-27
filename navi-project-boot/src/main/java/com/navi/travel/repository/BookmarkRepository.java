@@ -1,6 +1,7 @@
 package com.navi.travel.repository;
 
 import com.navi.travel.domain.Bookmark;
+import com.navi.travel.domain.Travel;
 import com.navi.user.domain.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -37,4 +38,13 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
     @Modifying
     @Query("DELETE FROM Like l WHERE l.user.no = :userNo AND l.travel.travelId = :travelId")
     void deleteByUser_NoAndTravel_TravelId(@Param("userNo") Long userNo, @Param("travelId") Long travelId);
+
+    /**
+     * ✅ 북마크 생성 헬퍼 (TravelActionServiceImpl에서 사용)
+     */
+    default Bookmark saveBookmark(Travel travel, User user) {
+        Bookmark bookmark = new Bookmark(travel, user);
+        bookmark.setUserId(user.getId());
+        return save(bookmark);
+    }
 }

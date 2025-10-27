@@ -92,12 +92,20 @@ export default function AdminTravelList() {
   };
 
   useEffect(() => {
-    loadTravels(0, "", pageSize);
+    if (page === 0 && travelData.content.length === 0) {
+      loadTravels(0, "", pageSize);
+    }
   }, [pageSize]);
 
-  const handleSearch = (value) => loadTravels(0, value);
-  const handlePageChange = (pageNumber, newSize) =>
-    loadTravels(pageNumber - 1, searchKeyword, newSize || pageSize);
+  const handleSearch = (value) => {
+    const trimmed = value.replace(/\s+/g, ""); // 모든 공백 제거
+    loadTravels(0, trimmed);
+  };
+
+  const handlePageChange = (pageNumber) => {
+    loadTravels(pageNumber - 1, searchKeyword, pageSize, sortField, sortOrder);
+  };
+
   const handleTitleClick = (travelId) =>
     navigate(`/adm/travel/detail/${travelId}`);
 
@@ -299,7 +307,7 @@ export default function AdminTravelList() {
               }}
             >
               <Input.Search
-                placeholder="제목 또는 지역으로 검색"
+                placeholder="제목으로 검색"
                 enterButton="검색"
                 size="large"
                 onSearch={handleSearch}
@@ -358,12 +366,12 @@ export default function AdminTravelList() {
               }))}
               scroll={{ x: 1600 }}
               loading={loading}
-              onChange={handleTableChange}
+              onChange={handleTableChange}   // ← 정렬용
               pagination={{
                 current: page + 1,
                 pageSize: pageSize,
                 total: travelData.totalElements,
-                onChange: handlePageChange,
+                onChange: handlePageChange,  // ✅ 페이지 이동 담당
                 showSizeChanger: false,
                 showTotal: (total, range) =>
                   `${range[0]}-${range[1]} / 총 ${total}개`,
