@@ -31,4 +31,7 @@ public interface RoomRsvRepository extends JpaRepository<RoomRsv, Long> {
                                           @Param("threshold") LocalDateTime threshold);
     /* 삭제 시점(오늘) 이후의 예약이 있는지 개수 체크 */
     long countByRoom_Acc_AccNoAndEndDateGreaterThanEqual(Long accNo, LocalDate date);
+    /* 예약 ID 상태 조회 */
+    @Query("SELECT r.rsvStatus FROM RoomRsv r WHERE r.reserveId = :reserveId")
+    Optional<String> findStatusByReserveId(String reserveId);
 }

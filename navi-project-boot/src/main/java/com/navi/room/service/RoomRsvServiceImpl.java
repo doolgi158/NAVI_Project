@@ -209,6 +209,24 @@ public class RoomRsvServiceImpl implements RoomRsvService {
         return result;
     }
 
+    /* 예약 상태 조회 */
+    @Override
+    public String getReservationStatus(String reserveId) {
+        return roomRsvRepository.findStatusByReserveId(reserveId)
+                .orElseThrow(() -> new IllegalArgumentException("예약을 찾을 수 없습니다."));
+    }
+
+    /* 예약 삭제 */
+    @Transactional
+    public void deleteReservationByReserveId(String reserveId) {
+        RoomRsv rsv = roomRsvRepository.findByReserveId(reserveId)
+                .orElseThrow(() -> new IllegalArgumentException("예약을 찾을 수 없습니다."));
+        if (rsv.getRsvStatus() != RsvStatus.CANCELLED) {
+            throw new IllegalStateException("예약 취소 상태일 때만 삭제할 수 있습니다.");
+        }
+        roomRsvRepository.deleteById(rsv.getNo());
+    }
+
 
     @Override
     @Transactional(readOnly = true)

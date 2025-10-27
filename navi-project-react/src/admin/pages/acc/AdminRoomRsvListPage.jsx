@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useOutletContext } from "react-router-dom";
+import { useOutletContext } from "react-router-dom";
 import {
   Card,
   Table,
@@ -24,7 +24,6 @@ import axios from "axios";
 const { Title } = Typography;
 
 const AdminRoomRsvListPage = () => {
-  const navigate = useNavigate();
   const { filter, keyword } = useOutletContext();
 
   const [rows, setRows] = useState([]);
@@ -76,21 +75,31 @@ const AdminRoomRsvListPage = () => {
   };
 
   /* === 예약 삭제 === */
-  const handleDelete = (reserveId, reserverName) => {
+  const handleDelete = (reserveId, rsvStatus) => {
+    if (rsvStatus !== "CANCELLED") {
+      message.warning(`예약 취소 상태일 때만 삭제할 수 있습니다.`);
+      return;
+    }
+
     Modal.confirm({
       title: "예약 삭제 확인",
-      content: `정말 "${reserverName}" 예약을 삭제하시겠습니까?`,
+      content: `정말 예약을 삭제하시겠습니까?`,
       okText: "삭제",
       okType: "danger",
       cancelText: "취소",
       async onOk() {
         try {
           const token = localStorage.getItem("accessToken");
-          await axios.delete(`${API_SERVER_HOST}/api/adm/room/reserve/${reserveId}`, {
+          const res = await axios.delete(`${API_SERVER_HOST}/api/adm/room/reserve/${reserveId}`, {
             headers: { Authorization: `Bearer ${token}` },
           });
-          message.success("예약이 삭제되었습니다.");
-          fetchList(pagination.current, pagination.pageSize);
+
+          if (res.data?.status === 200) {
+            message.success("예약이 삭제되었습니다.");
+            fetchList(pagination.current, pagination.pageSize);
+          } else {
+            message.error(res.data?.message || "예약 삭제 중 오류가 발생했습니다.");
+          }
         } catch (err) {
           console.error("삭제 실패:", err);
           message.error("예약 삭제 중 오류가 발생했습니다.");
@@ -98,6 +107,7 @@ const AdminRoomRsvListPage = () => {
       },
     });
   };
+
 
   /* === 대표 예약자 정보 보기 === */
   const showReserverDetail = (record) => {
@@ -107,7 +117,7 @@ const AdminRoomRsvListPage = () => {
   /* === 컬럼 구성 === */
   const columns = [
     { title: "예약 ID", dataIndex: "reserveId", align: "center", width: 160 },
-    { title: "숙소명", dataIndex: "title", align: "center", width: 200 },
+    { title: "숙소명", dataIndex: "title", align: "center", width: 250 },
     { title: "객실명", dataIndex: "roomName", align: "center", width: 180 },
     {
       title: "상태",
@@ -187,7 +197,7 @@ const AdminRoomRsvListPage = () => {
         <Button
           danger
           icon={<DeleteOutlined />}
-          onClick={() => handleDelete(record.reserveId, record.reserverName)}
+          onClick={() => handleDelete(record.reserveId, record.rsvStatus)}
         >
           삭제
         </Button>
@@ -206,7 +216,7 @@ const AdminRoomRsvListPage = () => {
         title={
           <Space align="center">
             <Title level={4} style={{ margin: 0 }}>
-              객실 예약 목록
+              숙소 예약 목록
             </Title>
           </Space>
         }

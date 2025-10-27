@@ -27,4 +27,8 @@ public interface RoomRsvService {
 
     // 8. 관리자 예약 목록 조회
     Map<String, Object> getAdminReservationList(int page, int size, String status, String keyword);
+    // 9. 예약 상태 조회
+    String getReservationStatus(String reserveId);
+    // 10. 예약 삭제
+    void deleteReservationByReserveId(String reserveId);
 }

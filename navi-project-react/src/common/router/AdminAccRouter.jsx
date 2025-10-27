@@ -21,8 +21,8 @@ const AdminAccommodationRouter = () => {
                 { index: true, element: <AdminAccListPage /> },
                 { path: "list", element: <AdminAccListPage /> },
                 { path: "reservations", element: <AdminRoomRsvListPage /> },
-                { path: "reservations", element: <AdminRoomRsvListPage /> },
                 { path: "edit/:accNo", element: <AdminAccForm /> },
+                { path: "new", element: <AdminAccForm /> },
             ],
         },
     ];
