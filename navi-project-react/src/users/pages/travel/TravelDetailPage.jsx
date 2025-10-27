@@ -14,6 +14,7 @@ import {
 } from '@ant-design/icons';
 import MainLayout from '../../layout/MainLayout';
 import { useKakaoMap } from '../../../common/hooks/useKakaoMap.jsx';
+import AdminThemeProvider from "@/admin/theme/AdminThemeProvider.jsx";
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -27,7 +28,6 @@ export default function TravelDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // ❤️ 좋아요 & 📚 북마크 상태
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [isBookmarked, setIsBookmarked] = useState(false);
@@ -35,7 +35,6 @@ export default function TravelDetailPage() {
   const [loadingLike, setLoadingLike] = useState(false);
   const [loadingBookmark, setLoadingBookmark] = useState(false);
 
-  // 지도
   const MAP_CONTAINER_ID = 'kakao-detail-map-container';
   const { isMapLoaded, updateMap, relayoutMap } = useKakaoMap(MAP_CONTAINER_ID);
   const didMapInit = useRef(false);
@@ -52,14 +51,6 @@ export default function TravelDetailPage() {
   };
 
   useEffect(() => {
-    if (travelDetail) {
-      console.log("🧭 전체 travelDetail:", travelDetail);
-      console.log("🧭 description 내용:", travelDetail?.description);
-    }
-  }, [travelDetail]);
-
-  /** ✅ 상세정보 + 조회수 증가 */
-  useEffect(() => {
     const fetchTravelDetail = async () => {
       if (!travelId) {
         setError("여행지 ID가 없습니다.");
@@ -68,7 +59,7 @@ export default function TravelDetailPage() {
       }
       try {
         setLoading(true);
-        await api.post(`/travel/views/${travelId}`); // 조회수 증가
+        await api.post(`/travel/views/${travelId}`);
         const res = await api.get(`/travel/detail/${travelId}`);
         const data = res.data;
         setTravelDetail(data);
@@ -87,7 +78,6 @@ export default function TravelDetailPage() {
     fetchTravelDetail();
   }, [travelId, userId]);
 
-  /** ✅ 지도 표시 */
   useEffect(() => {
     if (didMapInit.current) return;
     if (isMapLoaded && travelDetail) {
@@ -100,19 +90,15 @@ export default function TravelDetailPage() {
     }
   }, [isMapLoaded, travelDetail]);
 
-  /** ❤️ 좋아요 처리 */
   const handleLikeClick = async () => {
     if (!token) return message.warning('로그인 후 이용 가능합니다.');
     if (loadingLike) return;
     setLoadingLike(true);
-
     try {
       const res = await api.post(`/travel/like/${travelId}`, null, {
-        headers: { Authorization: `Bearer ${token}`, },
+        headers: { Authorization: `Bearer ${token}` },
       });
-
       const { success, liked, message: serverMessage } = res.data;
-
       if (success) {
         setIsLiked(liked);
         setLikeCount((prev) => (liked ? prev + 1 : Math.max(0, prev - 1)));
@@ -120,27 +106,22 @@ export default function TravelDetailPage() {
       } else {
         message.warning(serverMessage || '좋아요 처리 실패');
       }
-    } catch (err) {
-      console.error("❌ 좋아요 실패:", err);
+    } catch {
       message.error('좋아요 처리 중 오류가 발생했습니다.');
     } finally {
       setLoadingLike(false);
     }
   };
 
-  /** 📚 북마크 처리 */
   const handleBookmarkClick = async () => {
     if (!userId || !token) return message.warning('로그인 후 이용 가능합니다.');
     if (loadingBookmark) return;
     setLoadingBookmark(true);
-
     try {
       const res = await api.post(`/travel/bookmark/${travelId}`, null, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       const { success, bookmarked, message: serverMessage } = res.data;
-
       if (success) {
         setIsBookmarked(bookmarked);
         setBookmarkCount((prev) => (bookmarked ? prev + 1 : Math.max(0, prev - 1)));
@@ -148,22 +129,19 @@ export default function TravelDetailPage() {
       } else {
         message.warning(serverMessage || '북마크 처리 실패');
       }
-    } catch (err) {
-      console.error("❌ 북마크 실패:", err);
+    } catch {
       message.error('북마크 처리 중 오류가 발생했습니다.');
     } finally {
       setLoadingBookmark(false);
     }
   };
 
-  /** 🔗 공유하기 */
   const handleShareClick = async () => {
     try {
       const url = window.location.href;
       await navigator.clipboard.writeText(url);
       message.success('URL이 복사되었습니다.');
-    } catch (err) {
-      console.error("공유 실패:", err);
+    } catch {
       message.error('URL 복사에 실패했습니다.');
     }
   };
@@ -202,140 +180,147 @@ export default function TravelDetailPage() {
   ];
 
   return (
-    <MainLayout>
-      <Row justify="center" style={{ backgroundColor: '#fff', minHeight: '100%' }}>
-        <Col span={24} style={{ padding: '0 24px', maxWidth: 1200, width: '100%' }}>
-          {/* 제목 */}
-          <div style={{ textAlign: 'center', margin: '40px 0 20px' }}>
-            <Text type="secondary" style={{ fontSize: '1.1em' }}>
-              {data.categoryName || '여행지'}
-            </Text>
-            <Title level={1}>{data.title}</Title>
+    <AdminThemeProvider>
+      <MainLayout>
+        {/* ✅ 헤더 높이 확보 */}
+        <div style={{ paddingTop: 30, background: "#fff" }}>
+          <Row justify="center">
+            <Col span={24} style={{ padding: '0 24px', maxWidth: 1200, width: '100%' }}>
 
-            <div style={{ position: 'absolute', top: 20, left: 0 }}>
-              <Button
-                type="primary"
-                style={{
-                  color: '#676767ff',
-                  borderRadius: '8px',
-                  fontWeight: 600,
-                }}
-                onClick={() => window.history.back()}
-              >
-                {'< 목록으로'}
-              </Button>
-            </div>
+              {/* ✅ 상단 버튼 */}
+              <Row justify="start" style={{ marginBottom: 20 }}>
+                <Button
+                  type="primary"
+                  style={{
+                    backgroundColor: "#0A3D91",
+                    borderColor: "#0A3D91",
+                    color: "#fff",
+                    borderRadius: 8,
+                    padding: "6px 16px",
+                    fontWeight: 600,
+                    boxShadow: "0 2px 4px rgba(0,0,0,0.15)"
+                  }}
+                  onClick={() => window.history.back()}
+                >
+                  &lt; 목록으로
+                </Button>
+              </Row>
 
-            {/* ❤️ 북마크 공유 */}
-            <Row justify="end" style={{ marginBottom: 20 }}>
-              <Space size={32}>
-                <Space direction="vertical" align="center">
-                  <Button
-                    type="text"
-                    onClick={handleLikeClick}
-                    icon={isLiked
-                      ? <HeartFilled style={{ fontSize: '2.3em', color: '#ff4d4f' }} />
-                      : <HeartOutlined style={{ fontSize: '2.3em', color: '#999' }} />}
-                  />
-                  <Text style={{ color: isLiked ? '#ff4d4f' : '#999' }}>{likeCount}</Text>
-                </Space>
+              {/* 제목 */}
+              <div style={{ textAlign: 'center', margin: '20px 0' }}>
+                <Text type="secondary" style={{ fontSize: '1.1em' }}>
+                  {data.categoryName || '여행지'}
+                </Text>
+                <Title level={1} style={{ marginTop: 10, color: "#0A3D91" }}>
+                  {data.title}
+                </Title>
 
-                <Space direction="vertical" align="center">
-                  <Button
-                    type="text"
-                    onClick={handleBookmarkClick}
-                    icon={isBookmarked
-                      ? <BookFilled style={{ fontSize: '2.3em', color: '#52c41a' }} />
-                      : <BookOutlined style={{ fontSize: '2.3em', color: '#999' }} />}
-                  />
-                  <Text style={{ color: isBookmarked ? '#52c41a' : '#999' }}>{bookmarkCount}</Text>
-                </Space>
+                <Row justify="end" style={{ marginTop: 20 }}>
+                  <Space size={32}>
+                    <Space direction="vertical" align="center">
+                      <Button type="text" onClick={handleLikeClick}>
+                        {isLiked
+                          ? <HeartFilled style={{ fontSize: '2.3em', color: '#ff4d4f' }} />
+                          : <HeartOutlined style={{ fontSize: '2.3em', color: '#C7C7C7' }} />}
+                      </Button>
+                      <Text style={{ color: isLiked ? '#ff4d4f' : '#999' }}>{likeCount}</Text>
+                    </Space>
 
-                <Space direction="vertical" align="center">
-                  <Button
-                    type="text"
-                    onClick={handleShareClick}
-                    icon={<ShareAltOutlined style={{ fontSize: '2.3em', color: '#999' }} />}
-                  />
-                  <Text style={{ color: '#999' }}>공유</Text>
-                </Space>
-              </Space>
-            </Row>
+                    <Space direction="vertical" align="center">
+                      <Button type="text" onClick={handleBookmarkClick}>
+                        {isBookmarked
+                          ? <BookFilled style={{ fontSize: '2.3em', color: '#57C785' }} />
+                          : <BookOutlined style={{ fontSize: '2.3em', color: '#C7C7C7' }} />}
+                      </Button>
+                      <Text style={{ color: isBookmarked ? '#57C785' : '#999' }}>{bookmarkCount}</Text>
+                    </Space>
 
-            <Divider />
-            <Text type="secondary" style={{ fontSize: '0.9em' }}>
-              조회수 {data.views || 0} &nbsp;|&nbsp;
-              등록일 {formatDate(data.createdAt)} &nbsp;|&nbsp;
-              수정일 {formatDate(data.updatedAt)}
-            </Text>
-          </div>
+                    <Space direction="vertical" align="center">
+                      <Button type="text" onClick={handleShareClick}>
+                        <ShareAltOutlined style={{ fontSize: '2.3em', color: '#C7C7C7' }} />
+                      </Button>
+                      <Text style={{ color: '#999' }}>공유</Text>
+                    </Space>
+                  </Space>
+                </Row>
 
-          {/* 이미지 */}
-          <div style={{ padding: '20px 0 40px' }}>
-            <div style={{ borderRadius: 8, overflow: 'hidden', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
-              <Carousel autoplay effect="fade">
-                {images.map((src, i) => (
-                  <div key={i}>
-                    <img
-                      src={src}
-                      alt={`${data.title}-${i + 1}`}
-                      style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover' }}
-                      onError={(e) => (e.target.src = "https://placehold.co/800x450/EAEAEA/333333?text=No+Image")}
-                    />
-                  </div>
-                ))}
-              </Carousel>
-            </div>
-          </div>
+                <Divider />
+                <Text style={{ fontSize: '0.9em', color: '#777' }}>
+                  조회수 {data.views || 0} &nbsp;|&nbsp; 등록일 {formatDate(data.createdAt)} &nbsp;|&nbsp; 수정일 {formatDate(data.updatedAt)}
+                </Text>
+              </div>
 
-          {/* 소개 */}
-          <Title level={4} style={{ borderLeft: '4px solid #1890ff', paddingLeft: 10 }}>소개</Title>
-          <Paragraph style={{ lineHeight: 1.8, whiteSpace: 'pre-line' }}>
-            {data.introduction || '제공된 소개 내용이 없습니다.'}
-          </Paragraph>
-          {tags.map((tag, i) => (
-            <Tag key={i} color="blue" style={{ marginBottom: 8 }}>#{tag}</Tag>
-          ))}
+              {/* 이미지 */}
+              <div style={{ borderRadius: 12, overflow: 'hidden', boxShadow: '0 4px 16px rgba(0,0,0,0.05)', marginBottom: 40 }}>
+                <Carousel autoplay effect="fade">
+                  {images.map((src, i) => (
+                    <div key={i}>
+                      <img
+                        src={src}
+                        alt={`${data.title}-${i + 1}`}
+                        style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover' }}
+                      />
+                    </div>
+                  ))}
+                </Carousel>
+              </div>
 
+              {/* 본문 */}
+              <Title level={4} style={{ borderLeft: '5px solid #58B5E9', paddingLeft: 10 }}>소개</Title>
+              <Paragraph style={{ lineHeight: 1.8 }}>{data.introduction || '제공된 소개 내용이 없습니다.'}</Paragraph>
 
-          {/* ✅ 본문(description) 추가 */}
-          {data.description && (
-            <div
-              className="travel-description"
-              style={{ marginTop: 30, lineHeight: 1.8, fontSize: 20 }}
-              dangerouslySetInnerHTML={{ __html: data.description }}
-            />
-          )}
+              {tags.map((tag, i) => (
+                <Tag key={i} color="blue" style={{ backgroundColor: '#E3F4F9', color: '#2A6F93', border: 'none', marginBottom: 8 }}>
+                  #{tag}
+                </Tag>
+              ))}
 
-          {/* 지도 */}
-          <Title level={4} style={{ borderLeft: '4px solid #1890ff', paddingLeft: 10, marginTop: 40 }}>위치</Title>
-          <div style={{ margin: '10px 0 20px', border: '1px solid #ccc', borderRadius: 8, position: 'relative', marginTop: 20 }}>
-            <div id={MAP_CONTAINER_ID} style={{ height: 350, width: '100%' }}>
-              {!isMapLoaded && (
-                <div className="absolute inset-0 flex items-center justify-center bg-gray-100 z-10">
-                  <Spin size="large" tip="지도 로딩 중..." />
-                </div>
+              {data.description && (
+                <div
+                  className="travel-description"
+                  style={{
+                    marginTop: 30,
+                    lineHeight: 1.8,
+                    fontSize: 18,
+                    color: '#333',
+                    background: '#FFFFFF',
+                    borderRadius: 12,
+                    padding: 24,
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.05)',
+                  }}
+                  dangerouslySetInnerHTML={{ __html: data.description }}
+                />
               )}
-            </div>
-          </div>
 
-          {/* 상세 정보 */}
-          <Title level={4} style={{ borderLeft: '4px solid #1890ff', paddingLeft: 10, marginTop: 30 }}>여행지 정보</Title>
-          <Descriptions column={2} bordered size="large" style={{ marginTop: 20, marginBottom: 50 }}>
-            {infoData.map((item, i) => (
-              <Descriptions.Item
-                key={i}
-                label={<Space>{item.icon}<Text strong>{item.label}</Text></Space>}
-              >
-                <div style={{ whiteSpace: 'pre-line', lineHeight: 1.6 }}>
-                  {item.value || '-'}
+              <Title level={4} style={{ borderLeft: '5px solid #58B5E9', paddingLeft: 10, marginTop: 50 }}>위치</Title>
+              <div style={{ marginTop: 20, border: '1px solid #B3E5FC', borderRadius: 12, overflow: 'hidden' }}>
+                <div id={MAP_CONTAINER_ID} style={{ height: 350, width: '100%' }}>
+                  {!isMapLoaded && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-gray-100 z-10">
+                      <Spin size="large" tip="지도 로딩 중..." />
+                    </div>
+                  )}
                 </div>
-              </Descriptions.Item>
-            ))}
-          </Descriptions>
-        </Col>
-      </Row>
-    </MainLayout>
-  );
-};
+              </div>
 
+              <Title level={4} style={{ borderLeft: '5px solid #58B5E9', paddingLeft: 10, marginTop: 50 }}>여행지 정보</Title>
+              <Descriptions column={2} bordered size="middle" style={{ marginTop: 20, backgroundColor: '#FFFFFF', borderRadius: 12 }}>
+                {infoData.map((item, i) => (
+                  <Descriptions.Item
+                    key={i}
+                    label={<Space>{item.icon}<Text strong>{item.label}</Text></Space>}
+                    labelStyle={{ background: '#FAFDFF' }}
+                  >
+                    <div style={{ whiteSpace: 'pre-line', lineHeight: 1.6, color: '#444' }}>
+                      {item.value || '-'}
+                    </div>
+                  </Descriptions.Item>
+                ))}
+              </Descriptions>
+            </Col>
+          </Row>
+        </div>
+      </MainLayout>
+    </AdminThemeProvider>
+  );
+}

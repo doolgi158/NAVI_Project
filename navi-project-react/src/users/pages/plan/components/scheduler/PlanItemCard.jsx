@@ -101,12 +101,12 @@ export default function PlanItemCard({
 
                             <span
                                 className={`text-xs font-semibold ${item.type === "stay"
-                                        ? "text-[#6846FF]"
-                                        : item.type === "travel"
-                                            ? "text-[#0088CC]"
-                                            : item.type === "poi"
-                                                ? "text-[#FF6B00]"
-                                                : "text-gray-400"
+                                    ? "text-[#6846FF]"
+                                    : item.type === "travel"
+                                        ? "text-[#0088CC]"
+                                        : item.type === "poi"
+                                            ? "text-[#FF6B00]"
+                                            : "text-gray-400"
                                     }`}
                             >
                                 {item.type === "stay"

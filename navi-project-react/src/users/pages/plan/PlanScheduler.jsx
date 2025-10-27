@@ -126,6 +126,7 @@ export default function PlanScheduler() {
                             it.accImage?.trim() ||
                             it.imagePath?.trim() ||
                             it.thumbnailPath?.trim() ||
+                            it.mainImage?.trim() ||
                             `${API_SERVER_HOST}/images/acc/default_hotel.jpg`,
                     })),
                 }));
