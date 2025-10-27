@@ -2,6 +2,7 @@ package com.navi.accommodation.repository;
 
 import com.navi.accommodation.domain.Acc;
 import com.navi.accommodation.dto.request.AccRequestDTO;
+import com.navi.accommodation.service.AccService;
 import com.navi.accommodation.service.AccSyncService;
 import com.navi.location.domain.Township;
 import com.navi.location.repository.TownshipRepository;
