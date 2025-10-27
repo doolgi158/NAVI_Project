@@ -15,6 +15,26 @@ function BoardList() {
   const [totalItems, setTotalItems] = useState(0);
   const pageSize = 10;
 
+  // 날짜 포맷 함수
+  const formatDate = (dateString) => {
+    if (!dateString) return '날짜 없음';
+    
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return '날짜 없음';
+      
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hour = String(date.getHours()).padStart(2, '0');
+      const minute = String(date.getMinutes()).padStart(2, '0');
+      
+      return `${year}.${month}.${day} ${hour}:${minute}`;
+    } catch {
+      return '날짜 없음';
+    }
+  };
+
   useEffect(() => {
     fetchBoards();
   }, [currentPage]);
@@ -24,7 +44,8 @@ function BoardList() {
     try {
       setLoading(true);
       const data = await getAllBoards(currentPage, pageSize);
-      setBoards(data.boards || []);
+      console.log('📦 서버 응답:', data);
+      setBoards(data.boards || data.content || []);
       setCurrentPage(data.currentPage || 0);
       setTotalPages(data.totalPages || 0);
       setTotalItems(data.totalItems || 0);
@@ -148,15 +169,28 @@ function BoardList() {
                   to={`/board/detail?id=${board.boardNo}`}
                   className="board-item"
                 >
-                  <div className="board-item-title">
-                    {board.boardTitle}
+                  <div className="board-item-header">
+                    <div className="board-item-title">
+                      {board.boardTitle}
+                    </div>
+                    <div className="board-item-stats">
+                      <span className="stat-item">
+                        <span className="stat-icon">❤️</span>
+                        <span className="stat-value">{board.boardGood || 0}</span>
+                      </span>
+                      <span className="stat-item">
+                        <span className="stat-icon">조회수</span>
+                        <span className="stat-value">{board.boardViewCount || 0}</span>
+                      </span>
+                      <span className="stat-item">
+                        <span className="stat-icon">댓글</span>
+                        <span className="stat-value">{board.commentCount || 0}</span>
+                      </span>
+                    </div>
                   </div>
                   <div className="board-item-meta">
-                    <span>
-                      {new Date(board.createDate).toLocaleDateString('ko-KR')} {new Date(board.createDate).toLocaleTimeString('ko-KR', {hour: '2-digit', minute: '2-digit'})}
-                    </span>
-                    <span>사용자 {board.userNo}</span>
-                    <span>❤️{board.boardGood}</span>
+                    <span className="meta-author">👤 사용자 {board.userNo}</span>
+                    <span className="meta-date">🕐 {formatDate(board.createDate)}</span>
                   </div>
                 </Link>
               ))
@@ -164,8 +198,8 @@ function BoardList() {
           </div>
 
           {/* 페이지네이션 */}
-          {boards.length > 0 && (
-            <>
+          {boards.length > 0 && totalPages > 0 && (
+            <div className="pagination-wrapper">
               <div className="pagination">
                 <button 
                   onClick={() => handlePageChange(0)}
@@ -213,7 +247,7 @@ function BoardList() {
               <div className="pagination-info">
                 총 {totalItems}개 | {currentPage + 1} / {totalPages} 페이지
               </div>
-            </>
+            </div>
           )}
 
           {/* 글쓰기 버튼 */}

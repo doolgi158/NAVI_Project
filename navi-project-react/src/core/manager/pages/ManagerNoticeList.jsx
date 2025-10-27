@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getAllNotices, deleteNotice, searchNotice } from "./ManagerNoticeService";
-import { useNavigate } from 'react-router-dom';
-import "../css/NoticeList.css";
+import { useNavigate, Link } from 'react-router-dom';
+import '../css/ManagerNoticeList.css';
 
 function NoticeList() {
   const [notices, setNotices] = useState([]);
@@ -92,8 +92,14 @@ const handleSearch = async () => {
 
   return (
     <div className="notice-list-container">
-      <h1>공지사항</h1>
-
+      {/* 헤더 */}
+      <div className="board-list-header">
+        <div className="board-nav">
+          <Link to="/adm/board" className="nav-link active">일반 게시판</Link>
+          <span className="nav-divider">|</span>
+          <Link to="/adm/notice" className="nav-link">공지사항</Link>
+        </div>
+      </div>
       {/* 검색 영역 */}
       <div className="search-box">
         <input
@@ -111,7 +117,7 @@ const handleSearch = async () => {
       <div className="button-area">
         <button 
           className="create-button"
-          onClick={() => navigate('/manager/notice/write')}
+          onClick={() => navigate('/adm/notice/write')}
         >
           공지사항 작성
         </button>
@@ -139,7 +145,7 @@ const handleSearch = async () => {
                 <td>{notice.noticeNo}</td>
                 <td 
                   className="notice-title"
-                  onClick={() => navigate(`/manager/notice/detail?noticeNo=${notice.noticeNo}`)}
+                  onClick={() => navigate(`/adm/notice/detail?noticeNo=${notice.noticeNo}`)}
                   style={{ cursor: 'pointer' }}
                 >
                   {notice.noticeTitle}
@@ -149,7 +155,7 @@ const handleSearch = async () => {
                 <td>
                   <button 
                     className="edit-button"
-                    onClick={() => navigate(`/manager/notice/write?noticeNo=${notice.noticeNo}`)}
+                    onClick={() => navigate(`/adm/notice/write?noticeNo=${notice.noticeNo}`)}
                   >
                     수정
                   </button>

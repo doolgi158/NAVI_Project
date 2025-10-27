@@ -2,6 +2,7 @@ package com.navi.core.user.controller;
 
 import com.navi.core.domain.Board;
 import com.navi.core.domain.Comment;
+import com.navi.core.user.dto.BoardDTO;
 import com.navi.core.user.service.BoardService;
 import com.navi.core.user.service.CommentService;
 import com.navi.user.domain.User;
@@ -12,14 +13,15 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+//import org.springframework.security.core.Authentication;
+//import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -33,17 +35,7 @@ public class BoardApiController {
 
     //현재 로그인한 사용자 번호 가져오기
     private Integer getCurrentUserNo() {
-
-        //나중에 실제 로그인 구현 후 사용
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-    if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
-        throw new RuntimeException("로그인이 필요합니다.");
-    }
-
-    User user = (User) auth.getPrincipal();
-    return user.getUserNo();
-
+        return 1; // 테스트용 (JWT 적용 시 복원)
     }
 
     //게시글 검색
@@ -56,6 +48,11 @@ public class BoardApiController {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createDate").descending());
         Page<Board> boardPage = boardService.searchBoards(keyword, pageable);
 
+        if (!boardPage.isEmpty()) {
+            Board firstBoard = boardPage.getContent().getFirst();
+            System.out.println("첫 번째 게시글 createDate: " + firstBoard.getCreateDate());
+        }
+
         Map<String, Object> response = new HashMap<>();
         response.put("boards", boardPage.getContent());
         response.put("currentPage", boardPage.getNumber());
@@ -65,10 +62,42 @@ public class BoardApiController {
         return ResponseEntity.ok(response);
     }
 
-    //게시글 상세 조회
+    // 목록 조회 (조회수 증가 없음)
+    @GetMapping
+    public ResponseEntity<?> getAllBoards(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<Board> boardPage = boardService.getAllBoards(page, size);
+
+        List<Map<String, Object>> boards = boardPage.getContent().stream()
+                .map(board -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("boardNo", board.getBoardNo());
+                    map.put("boardTitle", board.getBoardTitle());
+                    map.put("userNo", board.getUserNo());
+                    map.put("boardGood", board.getBoardGood() != null ? board.getBoardGood() : 0);
+                    map.put("boardViewCount", board.getBoardViewCount() != null ? board.getBoardViewCount() : 0);  // ✅
+                    map.put("commentCount", board.getCommentCount() != null ? board.getCommentCount() : 0);  // ✅
+                    map.put("createDate", board.getCreateDate());  // ✅
+                    map.put("boardImage", board.getBoardImage());
+                    return map;
+                })
+                .collect(Collectors.toList());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("boards", boards);
+        response.put("currentPage", boardPage.getNumber());
+        response.put("totalPages", boardPage.getTotalPages());
+        response.put("totalItems", boardPage.getTotalElements());
+
+        return ResponseEntity.ok(response);
+    }
+
+    // 상세 조회 (조회수 증가)
     @GetMapping("/{id}")
-    public ResponseEntity<Board> getBoard(@PathVariable Integer id) {
-        Board board = boardService.getBoard(id);
+    public ResponseEntity<Board> getBoardById(@PathVariable Integer id) {
+        Board board = boardService.getBoardById(id);  // ✅ 여기서 조회수 증가
         return ResponseEntity.ok(board);
     }
 
@@ -133,8 +162,8 @@ public class BoardApiController {
     }
 
     //게시글의 댓글 조회
-    @GetMapping("/{id}/comments")  // ✅ 이게 있나요?
-    public ResponseEntity<List<Comment>> getComments(@PathVariable Integer id) {
+    @GetMapping("/{id}/comment")
+    public ResponseEntity<List<Comment>> getComment(@PathVariable Integer id) {
         List<Comment> comments = commentService.getCommentsByBoardNo(id);
         return ResponseEntity.ok(comments);
     }
@@ -180,6 +209,4 @@ public class BoardApiController {
         commentService.reportComment(commentNo);
         return ResponseEntity.ok().build();
     }
-
-
 }

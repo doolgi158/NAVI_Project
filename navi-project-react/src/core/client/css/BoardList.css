@@ -1,259 +1,333 @@
-/* BoardList.css */
+/* BoardList.css - 개선된 버전 */
 
 /* 전체 컨테이너 */
 .board-list-container {
-  font-family: 'Malgun Gothic', sans-serif;
-  padding: 20px;
-  background-color: #f5f5f5;
-  padding-left: 100px;
-  padding-right: 100px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Malgun Gothic', sans-serif;
+  padding: 40px 100px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
 }
 
 .board-list-wrapper {
+  max-width: 1200px;
   margin: 0 auto;
   background-color: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 /* 로딩 메시지 */
 .loading-message {
-  padding: 20px;
+  padding: 60px 20px;
   text-align: center;
   color: #666;
+  font-size: 16px;
 }
 
 /* 헤더 */
 .board-list-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
-  padding-bottom: 15px;
-}
-
-/* 일반게시판 */
-.board-list-title {
-  font-size: 24px;
-  font-weight: bold;
-  color: #333;
-}
-
-/* 검색 박스 */
-.search-box {
-  display: flex;
-  gap: 5px;
-  align-items: center;
-}
-
-.search-input {
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  width: 300px;
-  font-size: 14px;
-  margin-left: auto;
-}
-
-.btn-search {
-  padding: 8px 15px;
-  background-color: white;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.2s;
-}
-
-.btn-search:hover {
-  background-color: #f8f8f8;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #f0f0f0;
 }
 
 /* 네비게이션 */
 .board-nav {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 20px;
 }
 
 .nav-link {
-  font-size: 18px;
-  font-weight: 500;
+  font-size: 20px;
+  font-weight: 600;
   color: #666;
   text-decoration: none;
-  transition: color 0.2s;
+  transition: all 0.3s ease;
+  padding: 5px 10px;
+  border-radius: 6px;
 }
 
 .nav-link:hover {
   color: #007bff;
+  background-color: #f8f9fa;
 }
 
 .nav-link.active {
   color: #007bff;
-  font-weight: bold;
+  font-weight: 700;
+  background-color: #e7f3ff;
 }
 
 .nav-divider {
   color: #ddd;
-  font-size: 16px;
+  font-size: 18px;
 }
 
 /* 검색 박스 */
 .search-box {
   display: flex;
-  gap: 5px;
+  gap: 8px;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
 }
 
 .search-input {
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  width: 300px;
-  font-size: 14px;
-  margin-left: auto;
+  flex: 1;
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 15px;
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.search-input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
 }
 
 .btn-search {
-  padding: 8px 15px;
+  padding: 12px 20px;
   background-color: white;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
-  transition: background-color 0.2s;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
 .btn-search:hover {
-  background-color: #f8f8f8;
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+  transform: translateY(-1px);
 }
 
 /* 게시글 목록 */
 .board-list {
-  /* border-top: 1px solid #333; */
-  min-height: 300px;
+  min-height: 400px;
 }
 
 .board-item {
   display: block;
-  padding: 20px;
-  border-bottom: 1px solid #eee;
+  padding: 24px;
+  border-bottom: 1px solid #f0f0f0;
   text-decoration: none;
   color: inherit;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  margin-bottom: 8px;
 }
 
 .board-item:hover {
-  background-color: #f9f9f9;
+  background-color: #f8f9fa;
+  transform: translateX(8px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.board-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  gap: 20px;
 }
 
 .board-item-title {
-  font-size: 16px;
-  font-weight: 500;
+  font-size: 17px;
+  font-weight: 600;
   color: #333;
-  margin-bottom: 10px;
+  line-height: 1.5;
+  flex: 1;
+}
+
+.board-item-stats {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  color: #666;
+  background-color: #f8f9fa;
+  padding: 6px 12px;
+  border-radius: 20px;
+  transition: all 0.2s ease;
+}
+
+.board-item:hover .stat-item {
+  background-color: #e9ecef;
+}
+
+.stat-icon {
+  font-size: 16px;
+}
+
+.stat-value {
+  font-weight: 600;
+  color: #495057;
 }
 
 .board-item-meta {
   display: flex;
   gap: 20px;
-  font-size: 13px;
+  font-size: 14px;
   color: #999;
+  align-items: center;
 }
 
-.board-item-meta span {
+.meta-author,
+.meta-date {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
 }
 
 /* 게시글 없을 때 */
 .empty-message {
-  padding: 80px 20px;
+  padding: 100px 20px;
   text-align: center;
   color: #999;
-  font-size: 15px;
-  line-height: 1.6;
+  font-size: 16px;
+  line-height: 1.8;
 }
 
-/* 푸터 */
-.board-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 30px;
-  padding-top: 20px;
-  position: relative;
-}
-
-/* 글쓰기 */
-.btn-write {
-  padding: 10px 25px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 14px;
-  cursor: pointer;
-  text-decoration: none;
-  transition: background-color 0.2s;
-  margin-left: auto;
-}
-
-.btn-write:hover {
-  background-color: #0056b3;
+/* 페이지네이션 래퍼 */
+.pagination-wrapper {
+  margin-top: 40px;
+  padding-top: 30px;
+  border-top: 2px solid #f0f0f0;
 }
 
 /* 페이지네이션 */
 .pagination {
   display: flex;
   justify-content: center;
-  gap: 5px;
-  margin-top: 30px;
+  gap: 6px;
+  margin-bottom: 15px;
 }
 
 .page-btn {
-  min-width: 36px;
-  padding: 10px 14px;
-  border: 1px solid #ddd;
+  min-width: 40px;
+  height: 40px;
+  padding: 0 12px;
+  border: 2px solid #e0e0e0;
   background-color: white;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 14px;
-  transition: all 0.2s;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  color: #495057;
 }
 
 .page-btn:hover:not(:disabled) {
   background-color: #007bff;
   color: white;
   border-color: #007bff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
 }
 
 .page-btn.active {
   background-color: #007bff;
   color: white;
   border-color: #007bff;
-  font-weight: 600;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
 }
 
 .page-btn:disabled {
   cursor: not-allowed;
   opacity: 0.4;
   background-color: #f5f5f5;
+  color: #999;
 }
 
 .pagination-info {
   text-align: center;
-  margin-top: 20px;
   color: #666;
   font-size: 14px;
+  font-weight: 500;
 }
 
+/* 푸터 */
 .board-footer {
   display: flex;
   justify-content: flex-end;
-  margin-top: 20px;
+  margin-top: 30px;
+  padding-top: 20px;
+}
+
+/* 글쓰기 버튼 */
+.btn-write {
+  padding: 14px 30px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-write:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-write:active {
+  transform: translateY(0);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .board-list-container {
+    padding: 20px;
+  }
+
+  .board-list-wrapper {
+    padding: 20px;
+  }
+
+  .board-item-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .board-item-stats {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .search-box {
+    flex-direction: column;
+  }
+
+  .search-input {
+    width: 100%;
+  }
+
+  .pagination {
+    flex-wrap: wrap;
+  }
 }

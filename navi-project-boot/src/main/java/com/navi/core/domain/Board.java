@@ -70,8 +70,23 @@ public class Board {
     @Column(name = "board_image")
     private String boardImage;
 
+    // 댓글 수는 계산해서 가져와야 함
+    @Transient  // DB 컬럼이 아님
+    private Integer commentCount;
+
+    // Getters and Setters
+    public Integer getBoardViewCount() {
+        return boardViewCount != null ? boardViewCount : 0;
+    }
+
+    public Integer getCommentCount() {
+        return commentCount != null ? commentCount : 0;
+    }
+
     //게시글 작성자 확인
     public boolean isAuthor(Integer currentUserNo) {
         return this.userNo.equals(currentUserNo);
+
+
     }
 }

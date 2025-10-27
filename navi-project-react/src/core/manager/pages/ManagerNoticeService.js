@@ -1,5 +1,5 @@
 // 관리자용 공지사항 API 서비스
-const API_URL = '/adm/notice';  // ✅ 상대 경로로 통일
+const API_URL = '/adm/notice';
 
 // 토큰 가져오기
 const getToken = () => {
@@ -23,33 +23,46 @@ const getHeaders = (includeJson = true) => {
   return headers;
 };
 
-// 공지사항 전체 목록 조회
-export const getAllNotices = async () => {
-  const response = await fetch(API_URL, {
-    headers: getHeaders()
+// 공지사항 전체 목록 조회 (페이징)
+export const getAllNotices = async (page = 0, size = 10) => {
+  const response = await fetch(`${API_URL}?page=${page}&size=${size}`, {
+    headers: getHeaders(),
+    credentials: 'include'
   });
-  return response.json();
+  
+  if (!response.ok) {
+    throw new Error('공지사항 목록 조회 실패');
+  }
+  
+  const text = await response.text();
+  return text ? JSON.parse(text) : { notices: [], currentPage: 0, totalPages: 0, totalItems: 0 };
 };
 
 // 공지사항 상세 조회 (조회수 증가 없음)
 export const getNoticeById = async (noticeNo) => {
   const response = await fetch(`${API_URL}/${noticeNo}`, {
-    headers: getHeaders()
+    headers: getHeaders(),
+    credentials: 'include'
   });
-  return response.json();
+
+  if (!response.ok) {
+    throw new Error('공지사항 조회 실패');
+  }
+
+  return await response.json();
 };
 
 // 공지사항 작성
 export const createNotice = async (noticeData) => {
-  const token = localStorage.getItem('accessToken');
-  
-  const response = await fetch('/adm/notice', {
+  const response = await fetch(API_URL, {
     method: 'POST',
     headers: getHeaders(),
+    credentials: 'include',
     body: JSON.stringify(noticeData)
   });
+  
   if (!response.ok) {
-    throw new Error('서버 오류');
+    throw new Error('공지사항 작성 실패');
   }
   
   const text = await response.text();
@@ -58,11 +71,10 @@ export const createNotice = async (noticeData) => {
 
 // 공지사항 수정
 export const updateNotice = async (noticeNo, noticeData) => {
-  const token = localStorage.getItem('accessToken');
-  
-  const response = await fetch(`/adm/notice/${noticeNo}`, {
+  const response = await fetch(`${API_URL}/${noticeNo}`, {
     method: 'PUT',
     headers: getHeaders(),
+    credentials: 'include',
     body: JSON.stringify(noticeData)
   });
 
@@ -75,51 +87,30 @@ export const updateNotice = async (noticeNo, noticeData) => {
   return await response.json();
 };
 
-// 공지사항 조회
-export const getNoticeById = async (noticeNo) => {
-  const token = localStorage.getItem('accessToken');
-  
-  const response = await fetch(`/adm/notice/${noticeNo}`, {
-    headers: {
-      'Authorization': token ? `Bearer ${token}` : '',
-    },
+// 공지사항 삭제
+export const deleteNotice = async (noticeNo) => {
+  const response = await fetch(`${API_URL}/${noticeNo}`, {
+    method: 'DELETE',
+    headers: getHeaders(),
     credentials: 'include'
   });
 
   if (!response.ok) {
-    throw new Error('공지사항 조회 실패');
+    throw new Error('공지사항 삭제 실패');
   }
-
-  return await response.json();
 };
 
-// 공지사항 삭제
-export const deleteNotice = async (noticeNo) => {
-  await fetch(`${API_URL}/${noticeNo}`, {
-    method: 'DELETE',
-    headers: getHeaders()
+// 공지사항 검색 (페이징)
+export const searchNotice = async (keyword, page = 0, size = 10) => {
+  const response = await fetch(`${API_URL}/search?keyword=${encodeURIComponent(keyword)}&page=${page}&size=${size}`, {
+    headers: getHeaders(),
+    credentials: 'include'
   });
-};
-
-// 공지사항 검색
-export const searchNotice = async (keyword) => {
-  const response = await fetch(`${API_URL}/search?keyword=${encodeURIComponent(keyword)}`, {
-    headers: getHeaders()
-  });
-  return response.json();
-};
-
-// 파일 업로드
-export const uploadFile = async (file) => {
-  const formData = new FormData();
-  formData.append('file', file);
-
-  const response = await fetch(`${API_URL}/upload`, {
-    method: 'POST',
-    headers: getHeaders(false),
-    body: formData
-  });
-
-  const data = await response.json();
-  return data.fileUrl;
+  
+  if (!response.ok) {
+    throw new Error('공지사항 검색 실패');
+  }
+  
+  const text = await response.text();
+  return text ? JSON.parse(text) : { notices: [], currentPage: 0, totalPages: 0, totalItems: 0 };
 };

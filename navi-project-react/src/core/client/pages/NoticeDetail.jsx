@@ -94,17 +94,19 @@ function NoticeDetail() {
       {/* 이미지 표시 영역 */}
       {notice.noticeImage && (
         <div className="notice-image">
-          <img 
-            src={notice.noticeImage}
-            alt={notice.noticeTitle}
-            onError={(e) => {
-              console.error('이미지 로딩 실패:', e.target.src);
-              e.target.style.display = 'none';
-            }}
-            onLoad={(e) => {
-              console.log('이미지 로딩 성공:', e.target.src);
-            }}
-          />
+         <img
+           src={
+             notice.noticeImage?.startsWith('http')
+              ? notice.noticeImage
+               : `${API_BASE_URL}${notice.noticeImage.startsWith('/') ? '' : '/'}${notice.noticeImage}`
+           }
+           alt={notice.noticeTitle}
+           className="notice-image-tag"
+           onError={(e) => {
+             console.error('이미지 로딩 실패:', e.target.src);
+             e.target.style.display = 'none';
+           }}
+         />
         </div>
       )}
 
@@ -125,7 +127,7 @@ function NoticeDetail() {
       )}
 
       <div className="button-group">
-        <button onClick={() => navigate('/client/notice')}>목록</button>
+        <button onClick={() => navigate('/notice')}>목록</button>
       </div>
     </div>
     </MainLayout>

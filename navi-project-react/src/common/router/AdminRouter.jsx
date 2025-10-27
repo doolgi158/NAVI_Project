@@ -35,10 +35,7 @@ const AdminRouter = () => {
       )
     },
     // 게시판 관리자
-    {
-      path: "manager",
-      children: [...ManagerRouter()],
-    },
+    ...ManagerRouter(),
 
     //여행지 관리자
     {

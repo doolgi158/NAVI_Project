@@ -9,6 +9,7 @@ import SalesChart from "../../common/components/admin/SalesChart";
 import UsageChart from "../../common/components/admin/UsageChart";
 import PaymentPie from "../../common/components/admin/PaymentPie";
 import Ranking from "../../common/components/admin/RankingTable";
+import BoardList from "@/core/manager/pages/ManagerBoardList";
 
 import { MOCK_SUMMARY, MOCK_TREND_MONTHLY, MOCK_RANKINGS } from "../mockdata/dashboardMockData";
 import { API_SERVER_HOST } from "@/common/api/naviApi";
@@ -32,6 +33,7 @@ const AdminDashboard = () => {
       `${API_SERVER_HOST}/api/adm/userTrend`,
       `${API_SERVER_HOST}/api/adm/paymentDashboard`,
       `${API_SERVER_HOST}/api/adm/paymentShare`,
+      `${API_SERVER_HOST}/api/adm/board`
     ];
   }, []);
 

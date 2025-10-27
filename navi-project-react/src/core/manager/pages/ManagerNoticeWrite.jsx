@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { createNotice, updateNotice, getNoticeById } from "./ManagerNoticeService";
-import "../css/NoticeWrite.css";
+import "../css/ManagerNoticeWrite.css";
 
 function NoticeWrite() {
   const [searchParams] = useSearchParams();
@@ -61,23 +61,13 @@ function NoticeWrite() {
     }
   }, [noticeNo]);
 
-useEffect(() => {
-  if (isEditMode) {
-    fetchNotice();
-  }
-}, [isEditMode, fetchNotice]);  //fetchNotice 함수가 필요할 때만 새로 생성됌.
+  useEffect(() => {
+    if (isEditMode) {
+      fetchNotice();
+    }
+  }, [isEditMode, fetchNotice]);
 
-  const formatDateForInput = (dateString) => {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
-  };
-
+  // 입력 변경 핸들러
   const handleChange = (e) => {
     const { name, value } = e.target;
     setWriteData(prev => ({
@@ -86,7 +76,28 @@ useEffect(() => {
     }));
   };
 
-  const handleFileChange = (e) => {
+  // 이미지 파일 처리
+  const handleFile = (file) => {
+    if (!file) return;
+
+    // 이미지 파일만 허용
+    if (!file.type.startsWith('image/')) {
+      alert('이미지 파일만 업로드 가능합니다.');
+      return;
+    }
+
+    setImage(file);
+
+    // 미리보기
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // 이미지 파일 선택
+  const handleImageSelect = (e) => {
     const file = e.target.files[0];
     handleFile(file);
   };
@@ -111,7 +122,7 @@ useEffect(() => {
   };
 
   // 이미지 제거
-  const handleRemoveImage = () => {  // ✅ removeImage → handleRemoveImage
+  const handleRemoveImage = () => {
     setImage(null);
     setImagePreview('');
     setRemoveImage(true);
@@ -124,30 +135,31 @@ useEffect(() => {
     formData.append('targetType', 'NOTICE');
     formData.append('targetId', noticeNo || 'temp');
 
-      try {
-        const token = localStorage.getItem('accessToken');
+    try {
+      const token = localStorage.getItem('accessToken');
 
-    const response = await fetch('/api/images/upload', {
-      method: 'POST',
-          credentials: 'include',
-      headers: {
-        'Authorization': token ? `Bearer ${token}` : '',
-      },
-      body: formData
-    });
+      const response = await fetch('/api/images/upload', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Authorization': token ? `Bearer ${token}` : '',
+        },
+        body: formData
+      });
 
-        if (!response.ok) {
-          throw new Error('이미지 업로드 실패');
-        }
-
-    const data = await response.json();
-    return data.data.path;
-      } catch (error) {
-        console.error('이미지 업로드 오류:', error);
-        throw error;
+      if (!response.ok) {
+        throw new Error('이미지 업로드 실패');
       }
+
+      const data = await response.json();
+      return data.data.path;
+    } catch (error) {
+      console.error('이미지 업로드 오류:', error);
+      throw error;
+    }
   };
 
+  // 첨부파일 업로드
   const uploadFile = async (file) => {
     const formData = new FormData();
     formData.append('file', file);
@@ -171,15 +183,15 @@ useEffect(() => {
       }
 
       const data = await response.json();
-      return data.data.path;  // ✅ 변경 (fileUrl → data.path)
+      return data.data.path;
     } catch (error) {
       console.error('파일 업로드 오류:', error);
       throw error;
     }
   };
 
-  // 첨부파일 변경 (크기 제한 없음)
-  const handleFileChange = (e) => {
+  // 첨부파일 변경
+  const handleAttachmentChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setSelectedFile(file);
@@ -187,7 +199,7 @@ useEffect(() => {
     }
   };
 
-  // 첨부파일 제거 함수 추가
+  // 첨부파일 제거
   const handleRemoveFile = () => {
     setSelectedFile(null);
     setRemoveFile(true);
@@ -217,11 +229,9 @@ useEffect(() => {
         imageUrl = await uploadImage(image);
         console.log('업로드된 이미지 경로:', imageUrl);
       } else if (removeImage) {
-        // ✅ 이미지 삭제 플래그가 true면 null 전송
         imageUrl = null;
         console.log('이미지 삭제 요청');
       } else if (isEditMode && imagePreview) {
-        // ✅ 수정 모드이고 기존 이미지가 있으면 유지
         imageUrl = imagePreview;
         console.log('기존 이미지 유지:', imageUrl);
       }
@@ -231,18 +241,18 @@ useEffect(() => {
       if (selectedFile) {
         fileUrl = await uploadFile(selectedFile);
         console.log('업로드된 파일 경로:', fileUrl);
-      } else if (removeFile) {  // ✅ 수정: removeFile 플래그 확인
+      } else if (removeFile) {
         fileUrl = null;
         console.log('첨부파일 삭제 요청');
       } else if (isEditMode && writeData.noticeFile) {
-        // 기존 파일 유지
         fileUrl = writeData.noticeFile;
         console.log('기존 파일 유지:', fileUrl);
       }
+
       const submitData = {
         ...writeData,
-        noticeImage: imageUrl,  // 이미지 경로
-        noticeFile: fileUrl  // 첨부파일 경로
+        noticeImage: imageUrl,
+        noticeFile: fileUrl
       };
 
       console.log('최종 전송 데이터:', submitData);
@@ -255,7 +265,7 @@ useEffect(() => {
         alert('작성되었습니다.');
       }
 
-      navigate('/manager/notice');
+      navigate('/adm/notice');
     } catch (error) {
       console.error('저장에 실패했습니다:', error);
       alert('저장에 실패했습니다.');
@@ -361,7 +371,7 @@ useEffect(() => {
           <label>첨부파일</label>
           <input
             type="file"
-            onChange={handleFileChange}
+            onChange={handleAttachmentChange}
             accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.zip"
           />
           {selectedFile && (
@@ -394,7 +404,7 @@ useEffect(() => {
         </div>
 
         <div className="button-group">
-          <button type="button" onClick={() => navigate('/manager/notice')}>
+          <button type="button" onClick={() => navigate('/adm/notice')}>
             취소
           </button>
           <button type="submit" disabled={loading}>

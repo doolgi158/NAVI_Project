@@ -1,7 +1,7 @@
 import { Layout, Menu, Button, Image, Space } from "antd";
 import naviLogo from "../images/navi_logo.png";
 import { useModal } from "../../common/components/login/ModalProvider";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import UserMenuDropdown from "../../common/components/UserMenuDropdown";
 import { useEffect, useState } from "react";
@@ -12,7 +12,6 @@ const { Header } = Layout;
 
 const HeaderLayout = () => {
   const { showModal } = useModal();
-  const navigate = useNavigate();
   const [userProfile, setUserProfile] = useState(null);
 
   // Redux 로그인 상태 가져오기
@@ -65,7 +64,7 @@ const HeaderLayout = () => {
   // 로그인 상태에서만 프로필 드롭다운, 없으면 로그인/회원가입 버튼
   const renderAuthButtons = () => {
     if (isLoggedIn) {
-      return <UserMenuDropdown />;
+      return <UserMenuDropdown userProfile={userProfile} />;
     }
     return (
       <Space>
@@ -90,7 +89,7 @@ const HeaderLayout = () => {
     { key: "3", label: <Link to="/flight">항공편</Link> },
     { key: "4", label: <Link to="/plans">여행계획</Link> },
     { key: "5", label: <Link to="/delivery">짐 배송</Link> },
-    { key: "6", label: <Link to="/client/board">게시판</Link> },
+    { key: "6", label: <Link to="/board">게시판</Link> },
   ];
 
   return (
