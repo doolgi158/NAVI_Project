@@ -104,8 +104,7 @@ const AdminAccListPage = () => {
         } catch (err) {
           console.error("삭제 실패:", err);
 
-          // ✅ 서버에서 전달한 메시지 출력
-          if (err.response && err.response.data && err.response.data.message) {
+          if (err.response?.data?.message) {
             message.error(err.response.data.message);
           } else {
             message.error("❌ 숙소 삭제 중 오류가 발생했습니다.");
@@ -114,8 +113,6 @@ const AdminAccListPage = () => {
       },
     });
   };
-
-
 
   /* === 숙소 상세 보기 === */
   const handleShowDetail = async (record) => {
@@ -135,16 +132,22 @@ const AdminAccListPage = () => {
   };
 
   /* === 이미지 보기 모달 === */
-  const handleShowImages = async (accId) => {
+  const handleShowImages = async (accId, mainImage) => {
     try {
       const res = await axios.get(`${API_SERVER_HOST}/api/images`, {
         params: { targetType: "ACC", targetId: accId },
       });
-      const imgs = res.data?.data || [];
+      let imgs = res.data?.data || [];
+
+      if (imgs.length === 0 && mainImage) {
+        imgs = [{ path: mainImage }];
+      }
+
       if (imgs.length === 0) {
         message.info("이미지가 없습니다.");
         return;
       }
+
       setImages(imgs);
       setImageModalVisible(true);
     } catch (err) {
@@ -152,6 +155,13 @@ const AdminAccListPage = () => {
       message.error("이미지를 불러오지 못했습니다.");
     }
   };
+
+  /* ✅ 모달 열릴 때 Carousel 초기화 */
+  useEffect(() => {
+    if (imageModalVisible && carouselRef.current) {
+      setTimeout(() => carouselRef.current.goTo(0), 150);
+    }
+  }, [imageModalVisible]);
 
   const columns = [
     { title: "번호", dataIndex: "accNo", align: "center", width: 80, fixed: "left" },
@@ -164,36 +174,56 @@ const AdminAccListPage = () => {
       dataIndex: "active",
       align: "center",
       width: 100,
-      render: (v) =>
-        v ? <Tag color="blue">운영중</Tag> : <Tag color="default">중단</Tag>,
+      render: (v) => (v ? <Tag color="blue">운영중</Tag> : <Tag color="default">중단</Tag>),
     },
     {
       title: "관리",
       align: "center",
       width: 240,
       fixed: "right",
-      render: (_, record) => (
-        <Space>
-          <Button icon={<EyeOutlined />} onClick={() => handleShowDetail(record)}>
-            상세보기
-          </Button>
-          <Button
-            type="primary"
-            icon={<EditOutlined />}
-            onClick={() => navigate(`/adm/accommodations/edit/${record.accNo}`)}
-          >
-            수정
-          </Button>
-          <Button
-            danger
-            icon={<DeleteOutlined />}
-            onClick={() => handleDelete(record.accNo, record.title)}
-          >
-            삭제
-          </Button>
-        </Space>
-      ),
-    },
+      render: (_, record) => {
+        const isApiData = !!record.contentId; // ✅ API 숙소 여부 체크
+        return (
+          <Space>
+            <Button
+              icon={<EyeOutlined />}
+              onClick={() => handleShowDetail(record)}
+            >
+              상세보기
+            </Button>
+
+            <Button
+              type="primary"
+              icon={<EditOutlined />}
+              onClick={() => {
+                if (isApiData) {
+                  message.warning("API로 등록된 숙소는 수정할 수 없습니다.");
+                  return;
+                }
+                navigate(`/adm/accommodations/edit/${record.accNo}`);
+              }}
+            >
+              수정
+            </Button>
+
+            <Button
+              danger
+              icon={<DeleteOutlined />}
+              onClick={() => {
+                if (isApiData) {
+                  message.warning("API로 등록된 숙소는 삭제할 수 없습니다.");
+                  return;
+                }
+                handleDelete(record.accNo, record.title);
+              }}
+            >
+              삭제
+            </Button>
+          </Space>
+        );
+      },
+    }
+
   ];
 
   return (
@@ -256,48 +286,26 @@ const AdminAccListPage = () => {
       >
         {detailData && (
           <>
-            <Descriptions
-              bordered
-              column={2}
-              size="middle"
-              labelStyle={{
-                width: "170px",
-                fontWeight: "600",
-                backgroundColor: "#fafafa",
-              }}
-              style={{ tableLayout: "auto", marginBottom: 16 }}
-            >
+            <Descriptions bordered column={2} size="middle" labelStyle={{ width: "170px", fontWeight: "600", backgroundColor: "#fafafa" }} style={{ tableLayout: "auto", marginBottom: 16 }}>
               <Descriptions.Item label="숙소명">{detailData.title}</Descriptions.Item>
               <Descriptions.Item label="유형">{detailData.category}</Descriptions.Item>
-              <Descriptions.Item label="주소" span={2}>
-                {detailData.address}
-              </Descriptions.Item>
+              <Descriptions.Item label="주소" span={2}>{detailData.address}</Descriptions.Item>
               <Descriptions.Item label="위도">{detailData.mapy}</Descriptions.Item>
               <Descriptions.Item label="경도">{detailData.mapx}</Descriptions.Item>
               <Descriptions.Item label="체크인">{detailData.checkInTime}</Descriptions.Item>
               <Descriptions.Item label="체크아웃">{detailData.checkOutTime}</Descriptions.Item>
-              <Descriptions.Item label="취사 가능">
-                {detailData.hasCooking ? "가능" : "불가"}
-              </Descriptions.Item>
-              <Descriptions.Item label="주차 가능">
-                {detailData.hasParking ? "가능" : "불가"}
-              </Descriptions.Item>
-              <Descriptions.Item label="운영 여부">
-                {detailData.active ? "운영중" : "중단"}
-              </Descriptions.Item>
+              <Descriptions.Item label="취사 가능">{detailData.hasCooking ? "가능" : "불가"}</Descriptions.Item>
+              <Descriptions.Item label="주차 가능">{detailData.hasParking ? "가능" : "불가"}</Descriptions.Item>
+              <Descriptions.Item label="운영 여부">{detailData.active ? "운영중" : "중단"}</Descriptions.Item>
               <Descriptions.Item label="전화번호">{detailData.tel}</Descriptions.Item>
-              <Descriptions.Item label="숙소 설명" span={2}>
-                {detailData.overview || "-"}
-              </Descriptions.Item>
+              <Descriptions.Item label="숙소 설명" span={2}>{detailData.overview || "-"}</Descriptions.Item>
             </Descriptions>
 
-            {/* ✅ 이미지 보기 버튼 */}
             <div className="text-right">
               <Button
                 icon={<PictureOutlined />}
                 type="default"
-                disabled={!images.length}
-                onClick={() => handleShowImages(detailData.accId)}
+                onClick={() => handleShowImages(detailData.accId, detailData.mainImage)}
               >
                 이미지 보기
               </Button>
@@ -310,54 +318,51 @@ const AdminAccListPage = () => {
       <Modal
         title="숙소 이미지"
         open={imageModalVisible}
-        onCancel={() => setImageModalVisible(false)}
+        onCancel={() => {
+          setImageModalVisible(false);
+          setTimeout(() => setImages([]), 300);
+        }}
         footer={null}
         width={600}
         centered
       >
         {images.length > 0 ? (
-          <div
-            style={{
-              position: "relative",
-              width: "100%",
-              height: 380,
-              overflow: "hidden",
-            }}
-          >
-            <Carousel
-              ref={carouselRef}
-              dots
-              autoplay={false}
-              style={{ height: "100%" }}
-            >
-              {images.map((img, idx) => (
-                <div
-                  key={idx}
-                  style={{
-                    height: 360,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    background: "#f8f8f8",
-                    borderRadius: 10,
-                  }}
-                >
-                  <Image
-                    src={`${API_SERVER_HOST}${img.path}`}
-                    alt={`이미지 ${idx + 1}`}
-                    preview={false}
+          <div style={{ position: "relative", width: "100%", height: 380, overflow: "hidden" }}>
+            <Carousel ref={carouselRef} dots autoplay={false} style={{ height: "100%" }}>
+              {images.map((img, idx) => {
+                const src = `${API_SERVER_HOST}${img.path}`;
+                return (
+                  <div
+                    key={idx}
                     style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
+                      height: 360,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      background: "#f8f8f8",
                       borderRadius: 10,
                     }}
-                  />
-                </div>
-              ))}
+                  >
+                    <Image
+                      src={src}
+                      alt={`이미지 ${idx + 1}`}
+                      crossOrigin="anonymous"
+                      preview={false}
+                      onLoad={() => console.log("✅ 이미지 로드 성공:", src)}
+                      onError={(e) => console.error("❌ 이미지 로드 실패:", e.target.src)}
+                      style={{
+                        maxWidth: "100%",
+                        maxHeight: "100%",
+                        objectFit: "contain",
+                        borderRadius: 10,
+                      }}
+                    />
+                  </div>
+                );
+              })}
             </Carousel>
 
-            {/* 🔹 좌우 이동 버튼 */}
+            {/* 좌우 이동 버튼 */}
             <Button
               type="text"
               shape="circle"
@@ -370,7 +375,7 @@ const AdminAccListPage = () => {
                 transform: "translateY(-50%)",
                 background: "rgba(255,255,255,0.8)",
                 boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
-                zIndex: 10, // ✅ 버튼이 이미지 위로
+                zIndex: 10,
               }}
             />
             <Button
@@ -393,7 +398,6 @@ const AdminAccListPage = () => {
           <p className="text-center text-gray-500 py-10">이미지가 없습니다.</p>
         )}
       </Modal>
-
     </div>
   );
 };

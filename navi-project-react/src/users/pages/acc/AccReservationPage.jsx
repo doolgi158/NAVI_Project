@@ -36,21 +36,27 @@ const AccReservationPage = () => {
 
 	/* 결제 페이지 이동 */
 	const onFinish = async (values) => {
+		const token = localStorage.getItem("accessToken");
 		try {
 			// 예약자 정보 통합
 			const updatedFormData = {
-			...formData,
-			name: values.name,
-			phone: values.phone,
-			email: values.email,
+				...formData,
+				name: values.name,
+				phone: values.phone,
+				email: values.email,
 			};
 
 			// ✅ 예약자 정보 업데이트 요청
-			await axios.put(`${API_SERVER_HOST}/api/room/reserve/${formData.reserveId}/reserver`, {
-			reserverName: values.name,
-			reserverTel: values.phone,
-			reserverEmail: values.email,
-			});
+			await axios.put(`${API_SERVER_HOST}/api/room/reserve/${formData.reserveId}/reserver`, 
+				{
+					reserverName: values.name,
+					reserverTel: values.phone,
+					reserverEmail: values.email,
+				},
+				{
+					headers: { Authorization: `Bearer ${token}` },
+				}
+			);
 
 			message.success("예약자 정보가 저장되었습니다.");
 
