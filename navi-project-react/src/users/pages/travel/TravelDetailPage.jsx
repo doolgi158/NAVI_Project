@@ -10,7 +10,7 @@ import {
 import {
   ShareAltOutlined, PhoneFilled, EnvironmentFilled,
   ClockCircleFilled, CarFilled, CreditCardFilled, HomeFilled,
-  HeartOutlined, HeartFilled, BookOutlined, BookFilled
+  HeartOutlined, HeartFilled, BookOutlined, BookFilled, LeftOutlined
 } from '@ant-design/icons';
 import MainLayout from '../../layout/MainLayout';
 import { useKakaoMap } from '../../../common/hooks/useKakaoMap.jsx';
@@ -183,7 +183,7 @@ export default function TravelDetailPage() {
     <AdminThemeProvider>
       <MainLayout>
         {/* ✅ 헤더 높이 확보 */}
-        <div style={{ paddingTop: 30, background: "#fff" }}>
+        <div style={{ paddingTop: 28, background: "#fff" }}>
           <Row justify="center">
             <Col span={24} style={{ padding: '0 24px', maxWidth: 1200, width: '100%' }}>
 
@@ -192,17 +192,17 @@ export default function TravelDetailPage() {
                 <Button
                   type="primary"
                   style={{
-                    backgroundColor: "#0A3D91",
-                    borderColor: "#0A3D91",
-                    color: "#fff",
+                    backgroundColor: "#ffffffff",
+                    borderColor: "#E5E7EB",
+                    color: "#1F2937",
                     borderRadius: 8,
                     padding: "6px 16px",
                     fontWeight: 600,
                     boxShadow: "0 2px 4px rgba(0,0,0,0.15)"
                   }}
                   onClick={() => window.history.back()}
-                >
-                  &lt; 목록으로
+
+                  icon={<LeftOutlined />}>
                 </Button>
               </Row>
 
