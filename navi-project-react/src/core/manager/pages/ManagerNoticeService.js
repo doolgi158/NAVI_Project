@@ -1,5 +1,5 @@
 // 관리자용 공지사항 API 서비스
-const API_URL = '/adm/notice';
+const API_URL = '/admin/api/notice';
 
 // 토큰 가져오기
 const getToken = () => {

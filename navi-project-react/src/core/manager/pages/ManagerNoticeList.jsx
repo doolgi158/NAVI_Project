@@ -9,61 +9,56 @@ function NoticeList() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // 컴포넌트가 처음 로드될 때 공지사항 목록 가져오기
   useEffect(() => {
     fetchNotice();
   }, []);
 
-// 공지사항 목록 가져오기
-const fetchNotice = async () => {
-  try {
-    setLoading(true);
-    const data = await getAllNotices();
-    
-    // ✅ 배열인지 확인 후 설정
-    console.log('API 응답:', data); // 디버깅용
-    
-    if (Array.isArray(data)) {
-      setNotices(data);
-    } else if (data && Array.isArray(data.notices)) {
-      setNotices(data.notices); // 객체 안에 배열이 있는 경우
-    } else {
-      setNotices([]); // 배열이 아니면 빈 배열
+  const fetchNotice = async () => {
+    try {
+      setLoading(true);
+      const data = await getAllNotices();
+      
+      console.log('API 응답:', data);
+      
+      if (Array.isArray(data)) {
+        setNotices(data);
+      } else if (data && Array.isArray(data.notices)) {
+        setNotices(data.notices);
+      } else {
+        setNotices([]);
+      }
+    } catch (error) {
+      console.error('공지사항 목록을 불러오는데 실패했습니다:', error);
+      alert('공지사항 목록을 불러오는데 실패했습니다.');
+      setNotices([]);
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error('공지사항 목록을 불러오는데 실패했습니다:', error);
-    alert('공지사항 목록을 불러오는데 실패했습니다.');
-    setNotices([]); // ← 에러 시에도 빈 배열
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
-// 검색도 동일하게
-const handleSearch = async () => {
-  if (!searchKeyword.trim()) {
-    fetchNotice();
-    return;
-  }
+  const handleSearch = async () => {
+    if (!searchKeyword.trim()) {
+      fetchNotice();
+      return;
+    }
 
-  try {
-    const data = await searchNotice(searchKeyword);
-    
-    if (Array.isArray(data)) {
-      setNotices(data);
-    } else if (data && Array.isArray(data.notices)) {
-      setNotices(data.notices);
-    } else {
+    try {
+      const data = await searchNotice(searchKeyword);
+      
+      if (Array.isArray(data)) {
+        setNotices(data);
+      } else if (data && Array.isArray(data.notices)) {
+        setNotices(data.notices);
+      } else {
+        setNotices([]);
+      }
+    } catch (error) {
+      console.error('검색에 실패했습니다:', error);
+      alert('검색에 실패했습니다.');
       setNotices([]);
     }
-  } catch (error) {
-    console.error('검색에 실패했습니다:', error);
-    alert('검색에 실패했습니다.');
-    setNotices([]); // ← 에러 시에도 빈 배열
-  }
-};
+  };
 
-  // 삭제
   const handleDelete = async (noticeNo) => {
     if (!window.confirm('정말 삭제하시겠습니까?')) {
       return;
@@ -72,14 +67,13 @@ const handleSearch = async () => {
     try {
       await deleteNotice(noticeNo);
       alert('삭제되었습니다.');
-      fetchNotice(); // 목록 새로고침
+      fetchNotice();
     } catch (error) {
       console.error('삭제에 실패했습니다:', error);
       alert('삭제에 실패했습니다.');
     }
   };
 
-  // 날짜 포맷 변환
   const formatDate = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);
@@ -92,14 +86,15 @@ const handleSearch = async () => {
 
   return (
     <div className="notice-list-container">
-      {/* 헤더 */}
+      {/* 헤더 - 탭 네비게이션 */}
       <div className="board-list-header">
         <div className="board-nav">
-          <Link to="/adm/board" className="nav-link active">일반 게시판</Link>
+          <Link to="/adm/board" className="nav-link">일반 게시판</Link>
           <span className="nav-divider">|</span>
-          <Link to="/adm/notice" className="nav-link">공지사항</Link>
+          <Link to="/adm/notice" className="nav-link active">공지사항</Link>
         </div>
       </div>
+
       {/* 검색 영역 */}
       <div className="search-box">
         <input
