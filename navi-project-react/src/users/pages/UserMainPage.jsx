@@ -1,212 +1,286 @@
-import { useEffect, useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Card, Tag } from "antd";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination } from "swiper/modules";
+import { Autoplay, EffectFade, Navigation, Pagination } from "swiper/modules";
+import { motion } from "framer-motion";
 import { API_SERVER_HOST } from "../../common/api/naviApi";
-import MainLayout from "../layout/MainLayout";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import HeroSection from "@/common/components/HeroSection";
+import "swiper/css/effect-fade";
+import FooterLayout from "@/layout/users/FooterLayout";
+import HeaderLayout from "@/layout/users/HeaderLayout";
 
-const UserMainPage = () => {
+export default function UserMainPage() {
   const navigate = useNavigate();
-  const [destinations, setDestinations] = useState([]);
+  const [travels, setTravels] = useState([]);
+  const [events, setEvents] = useState([]);
   const [accommodations, setAccommodations] = useState([]);
-  const [loadingTravel, setLoadingTravel] = useState(true);
-  const [loadingAcc, setLoadingAcc] = useState(true);
 
-  // 인기 여행지, 숙소
   useEffect(() => {
-    const fetchDestinations = async () => {
-      try {
-        const res = await fetch(`${API_SERVER_HOST}/api/travel/rank`);
-        if (!res.ok) throw new Error("데이터 로드 실패");
-        const data = await res.json();
-        setDestinations(Array.isArray(data) ? data : []);
-      } catch (err) {
-        console.error("🚨 여행지 목록 불러오기 실패:", err);
-        setDestinations([]);
-      } finally {
-        setLoadingTravel(false);
-      }
-    };
+    // 여행지
+    fetch(`${API_SERVER_HOST}/api/travel/rank`)
+      .then((r) => r.json())
+      .then((data) => setTravels(Array.isArray(data) ? data.slice(0, 10) : []))
+      .catch(() => setTravels([]));
 
-    const fetchAccommodations = async () => {
-      try {
-        const res = await fetch(`${API_SERVER_HOST}/api/accommodation/rank`);
-        if (!res.ok) throw new Error("데이터 로드 실패");
-        const data = await res.json();
-        console.log(data);
-        // ✅ ApiResponse 구조 대응
-        const list = data?.data || [];
-        setAccommodations(Array.isArray(list) ? list : []);
-      } catch (err) {
-        console.error("🚨 숙소 목록 불러오기 실패:", err);
-        setAccommodations([]);
-      } finally {
-        setLoadingAcc(false);
-      }
-    };
 
-    fetchDestinations();
-    fetchAccommodations();
+
+    // 숙소
+    fetch(`${API_SERVER_HOST}/api/accommodation/rank`)
+      .then((r) => r.json())
+      .then((data) => {
+        const list = data?.data || data;
+        setAccommodations(Array.isArray(list) ? list.slice(0, 10) : []);
+      })
+      .catch(() => setAccommodations([]));
   }, []);
 
-  // 랭킹 계산 함수
-  const getRankedSlides = (data, titleKey = "title") => {
-    if (!data.length) return [];
-
-    return [...data]
-      .map((d) => ({
-        ...d,
-        views: d.views ?? 0,
-        likes: d.likes ?? 0,
-        bookmarks: d.bookmarks ?? 0,
-        score: (d.views ?? 0) + (d.likes ?? 0) + (d.bookmarks ?? 0),
-      }))
-      .sort((a, b) => {
-        const byScore = b.score - a.score;
-        if (byScore !== 0) return byScore;
-        return (a[titleKey] ?? "").localeCompare(b[titleKey] ?? "", "ko");
-      })
-      .slice(0, 10)
-      .map((item, idx, arr) => ({
-        ...item,
-        rank:
-          idx > 0 && item.score === arr[idx - 1].score
-            ? arr[idx - 1].rank
-            : idx + 1,
-      }));
-  };
-
-  const travelSlides = getRankedSlides(destinations, "title");
-  const hotelSlides = getRankedSlides(accommodations, "name");
-
   return (
-    <MainLayout>
-      {/* Hero */}
-      <HeroSection />
+    <>
 
-      {/* 여행지 섹션 */}
-      <SectionSwiper
-        title="🏝️ 대표 여행지"
-        data={travelSlides}
+      <HeaderLayout />
+
+      <HeroBanner />
+
+
+      {/* 🏝️ 인기 여행지 */}
+      <CarouselSection
+        title="🏝️ 인기 여행지"
+        description="많은 여행자들이 찾는 대표 명소"
+        data={travels}
         type="travel"
         navigate={navigate}
-        loading={loadingTravel}
       />
 
-      {/* 숙소 섹션 */}
-      <SectionSwiper
+
+      {/* 🏨 인기 숙소 */}
+      <CarouselSection
         title="🏨 인기 숙소"
-        data={hotelSlides}
+        description="여행자들이 선호하는 편안한 숙소"
+        data={accommodations}
         type="accommodation"
         navigate={navigate}
-        loading={loadingAcc}
       />
-    </MainLayout>
-  );
-};
 
-// ✅ 공통 Swiper 섹션
-const SectionSwiper = ({ title, data, type, navigate, loading }) => {
+      <FooterLayout />
+    </>
+  );
+}
+
+/* -------------------------------------------
+ * Hero 배너
+ * ------------------------------------------- */
+function HeroBanner() {
+  const slides = [
+    {
+      image:
+        "https://images.unsplash.com/photo-1633838972793-b70c1d47f1a8?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1176",
+      title: "제주의 감성을 담은 여행",
+      subtitle: "자연이 선물한 풍경 속으로 떠나보세요",
+    },
+    {
+      image:
+        "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80",
+      title: "바다와 함께하는 하루",
+      subtitle: "파도 소리와 함께하는 감성 휴식",
+    },
+    {
+      image:
+        "https://cdn.pixabay.com/photo/2016/02/11/08/48/jeju-island-1193281_1280.jpg",
+      title: "여행의 시작, NAVI",
+      subtitle: "지금 당신의 다음 여정을 계획하세요",
+    },
+  ];
+
+  return (
+    <section className="relative h-[550px] overflow-hidden ">
+      <Swiper
+        modules={[Autoplay, EffectFade, Pagination]}
+        effect="fade"
+        loop
+        autoplay={{ delay: 6000, disableOnInteraction: false }}
+        pagination={{ clickable: true }}
+        className="w-full h-full"
+      >
+        {slides.map((s, i) => (
+          <SwiperSlide key={i}>
+            <div
+              className="relative w-full h-full bg-cover bg-center"
+              style={{ backgroundImage: `url(${s.image})` }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+            </div>
+
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white px-4">
+              <motion.h2
+                className="text-5xl md:text-6xl font-extrabold drop-shadow-lg mb-3"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+              >
+                {s.title}
+              </motion.h2>
+              <motion.p
+                className="text-lg md:text-xl mb-6 text-gray-100"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2, duration: 0.8 }}
+              >
+                {s.subtitle}
+              </motion.p>
+
+            </div>
+          </SwiperSlide>
+        ))}
+      </Swiper>
+    </section>
+  );
+}
+
+/* -------------------------------------------
+ * Carousel Section (좋아요/조회수/북마크 포함)
+ * ------------------------------------------- */
+function CarouselSection({ title, description, data, type, navigate }) {
   const prevRef = useRef(null);
   const nextRef = useRef(null);
 
+  // ✅ 이미지 URL 처리 함수
+  const getImageUrl = (item) => {
+    const candidates = [
+      item.thumbnailPath,
+      item.imagePath,
+      item.image,
+      item.mainImage,
+      item.photoUrl,
+    ].filter(Boolean);
+
+    if (candidates.length === 0) return "/img/placeholder.jpg";
+
+    const path = candidates[0];
+
+    if (path.startsWith("http")) return path;
+    if (path.startsWith("/")) return `${API_SERVER_HOST}${path}`;
+    return `${API_SERVER_HOST}/${path}`;
+  };
+
+  // ✅ 숫자 포맷 함수
+  const formatNum = (num) => {
+    if (num == null) return 0;
+    return Number(num).toLocaleString();
+  };
+
   return (
-    <section className="mb-20 relative">
-      <div className="flex items-end justify-between mb-4">
-        <h2 className="text-2xl font-bold">{title}</h2>
+    <motion.section
+      className="py-20 px-4 md:px-8 bg-[#F8FAFC] relative"
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8 }}
+      viewport={{ once: true }}
+    >
+      {/* 제목 */}
+      <div className="flex flex-col items-center text-center mb-10">
+        <h2 className="text-3xl font-extrabold text-[#0A3D91] mb-2">{title}</h2>
+        <p className="text-gray-600 text-base">{description}</p>
       </div>
 
-      {/* 개별 화살표 */}
-      <button
-        ref={prevRef}
-        className="absolute -left-8 top-1/2 -translate-y-1/2 z-10 bg-white/90 rounded-full shadow-md px-3 py-2 hover:bg-white"
-      >
-        ◀
-      </button>
-      <button
-        ref={nextRef}
-        className="absolute -right-8 top-1/2 -translate-y-1/2 z-10 bg-white/90 rounded-full shadow-md px-3 py-2 hover:bg-white"
-      >
-        ▶
-      </button>
+      {data?.length > 0 ? (
+        <div className="max-w-7xl mx-auto relative">
+          <Swiper
+            modules={[Autoplay, Navigation]}
+            slidesPerView={3}
+            spaceBetween={24}
+            loop
+            autoplay={{ delay: 4000, disableOnInteraction: false }}
+            onBeforeInit={(swiper) => {
+              swiper.params.navigation.prevEl = prevRef.current;
+              swiper.params.navigation.nextEl = nextRef.current;
+            }}
+            navigation={{
+              prevEl: prevRef.current,
+              nextEl: nextRef.current,
+            }}
+            breakpoints={{
+              0: { slidesPerView: 1 },
+              768: { slidesPerView: 2 },
+              1024: { slidesPerView: 3 },
+            }}
+            className="!px-2"
+          >
+            {data.map((item, i) => {
+              const imgUrl = getImageUrl(item);
 
-      <Card className="rounded-2xl shadow-sm">
-        {loading ? (
-          <div className="py-16 text-center text-gray-500">불러오는 중…</div>
-        ) : data.length === 0 ? (
-          <div className="py-16 text-center text-gray-500">데이터가 없습니다.</div>
-        ) : (
-          <>
-            <Swiper
-              modules={[Navigation, Pagination]}
-              navigation={{
-                prevEl: prevRef.current,
-                nextEl: nextRef.current,
-              }}
-              onBeforeInit={(swiper) => {
-                swiper.params.navigation.prevEl = prevRef.current;
-                swiper.params.navigation.nextEl = nextRef.current;
-              }}
-              pagination={{
-                el: `.custom-pagination-${type}`,
-                clickable: true,
-              }}
-              slidesPerView={3}
-              slidesPerGroup={1}
-              loop={true}
-              spaceBetween={20}
-              className="!px-2"
-            >
-              {data.map((d) => (
-                <SwiperSlide key={d.id || d.travelId}>
-                  <div
+              // ✅ 카운트 필드 처리 (백엔드 필드명 다양성 대응)
+              const views =
+                item.views ?? item.viewsCount ?? item.viewCount ?? 0;
+              const likes =
+                item.likes ?? item.likesCount ?? item.likeCount ?? 0;
+              const bookmarks =
+                item.bookmarks ?? item.bookmarkCount ?? item.bookmarksCount ?? 0;
+
+              return (
+                <SwiperSlide key={i}>
+                  <motion.div
+                    whileHover={{ scale: 1.03 }}
+                    transition={{ type: "spring", stiffness: 200 }}
                     onClick={() => {
-                      if (type === "travel") {
-                        navigate(`/travel/detail/${d.travelId}`);
-                      } else if (type === "accommodation") {
-                        navigate(`/accommodations/detail?accId=${d.id}`);
-                      }
+                      if (type === "travel")
+                        navigate(`/travel/detail/${item.travelId}`);
+                      if (type === "festival")
+                        navigate(`/festival/detail/${item.id}`);
+                      if (type === "accommodation")
+                        navigate(`/acc/detail/${item.id}`);
                     }}
-                    className="cursor-pointer border rounded-xl overflow-hidden hover:shadow-lg hover:-translate-y-1 transition bg-white"
+                    className="cursor-pointer bg-white rounded-2xl shadow-md hover:shadow-xl transition overflow-hidden"
                   >
+                    {/* 이미지 */}
                     <div
-                      className="h-40 w-full bg-gray-100"
-                      style={{
-                        backgroundImage: `url('${d.thumbnailPath
-                          ? d.thumbnailPath.startsWith("/images")
-                            ? `${API_SERVER_HOST}${d.thumbnailPath}`
-                            : d.thumbnailPath
-                          : d.imagePath || d.image || d.mainImage || "/img/placeholder.jpg"
-                          }')`,
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                      }}
+                      className="h-56 bg-cover bg-center"
+                      style={{ backgroundImage: `url('${imgUrl}')` }}
                     />
+
+                    {/* 본문 */}
                     <div className="p-4">
-                      <div className="flex items-center justify-between mb-1">
-                        <h3 className="text-lg font-semibold truncate">
-                          {d.title || d.name}
-                        </h3>
+                      <h3 className="text-lg font-semibold text-gray-800 truncate">
+                        {item.title || item.name}
+                      </h3>
+
+                      {/* 좋아요/조회수/북마크 */}
+                      <div className="flex items-center gap-4 text-xs text-gray-500 mt-3">
+                        <span>👁️ {formatNum(views)}</span>
+                        <span>❤️ {formatNum(likes)}</span>
+                        <span>🔖 {formatNum(bookmarks)}</span>
                       </div>
+
+                      {item.period && (
+                        <p className="text-sm text-gray-500 mt-2">
+                          {item.period}
+                        </p>
+                      )}
                     </div>
-                  </div>
+                  </motion.div>
                 </SwiperSlide>
-              ))}
-            </Swiper>
+              );
+            })}
+          </Swiper>
 
-            <div
-              className={`custom-pagination-${type} mt-6 flex justify-center`}
-            />
-          </>
-        )}
-      </Card>
-    </section>
+          {/* 화살표 */}
+          <button
+            ref={prevRef}
+            className="absolute -left-10 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white shadow-md rounded-full p-2"
+          >
+            ◀
+          </button>
+          <button
+            ref={nextRef}
+            className="absolute -right-10 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white shadow-md rounded-full p-2"
+          >
+            ▶
+          </button>
+        </div>
+      ) : (
+        <div className="text-center text-gray-400 py-12">데이터가 없습니다.</div>
+      )}
+    </motion.section>
   );
-};
-
-export default UserMainPage;
+}

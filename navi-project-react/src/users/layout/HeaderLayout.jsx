@@ -112,7 +112,7 @@ const HeaderLayout = () => {
         style={{
           display: "flex",
           alignItems: "center",
-          height: "100%",
+          height: "100%", // ✅ 부모 높이를 100%로 설정
           lineHeight: 0,
         }}
       >
@@ -122,7 +122,12 @@ const HeaderLayout = () => {
             alt="naviLogo"
             preview={false}
             width={130}
-            style={{ display: "block" }}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              objectFit: "contain",
+              // 기존 marginTop: "4px" 완전히 제거**
+            }}
           />
         </Link>
       </div>
@@ -143,7 +148,7 @@ const HeaderLayout = () => {
 
       {/* 로그인 or 프로필 */}
       {renderAuthButtons()}
-    </Header>
+    </Header >
   );
 };
 
