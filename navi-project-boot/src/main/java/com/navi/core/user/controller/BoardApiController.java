@@ -119,39 +119,30 @@ public class BoardApiController {
             @RequestParam("content") String content,
             @RequestParam(value = "image", required = false) MultipartFile image) {
 
-        try {
-            // 1. 게시글 저장
-            Board board = Board.builder()
-                    .boardTitle(title)
-                    .boardContent(content)
-                    .userNo(getCurrentUserNo())
-                    .build();
+        // 1. 게시글 저장
+        Board board = Board.builder()
+                .boardTitle(title)
+                .boardContent(content)
+                .userNo(getCurrentUserNo()) // ← 이 줄 추가!
+                .build();
 
-            Board savedBoard = boardService.save(board);
-            log.info("게시글 작성 완료 - boardNo: {}", savedBoard.getBoardNo());
+        Board savedBoard = boardService.save(board);
 
-            // 2. 이미지가 있으면 업로드
-            if (image != null && !image.isEmpty()) {
-                ImageDTO imageDTO = imageService.uploadImage(
-                        image,
-                        "BOARD",
-                        String.valueOf(savedBoard.getBoardNo())
-                );
+        // 2. 이미지 업로드
+        if (image != null && !image.isEmpty()) {
+            ImageDTO imageDTO = imageService.uploadImage(
+                    image,
+                    "BOARD",
+                    String.valueOf(savedBoard.getBoardNo())
+            );
 
-                // 3. 이미지 경로 저장
-                savedBoard.setBoardImage(imageDTO.getPath());
-                boardService.save(savedBoard);
-                log.info("이미지 업로드 완료 - path: {}", imageDTO.getPath());
-            }
-
-            return ResponseEntity.ok(savedBoard);
-
-        } catch (Exception e) {
-            log.error("게시글 작성 실패", e);
-            return ResponseEntity.badRequest().body("게시글 작성에 실패했습니다: " + e.getMessage());
+            // 3. 이미지 경로 저장
+            savedBoard.setBoardImage(imageDTO.getPath());
+            boardService.save(savedBoard);
         }
-    }
 
+        return ResponseEntity.ok(savedBoard);
+    }
     // 게시글 수정
     @PutMapping("/{id}")
     public ResponseEntity<?> updateBoard(
@@ -161,68 +152,48 @@ public class BoardApiController {
             @RequestParam(value = "image", required = false) MultipartFile image,
             @RequestParam(value = "removeImage", required = false) String removeImage) {
 
-        try {
-            Board board = boardService.findById(id);
+        Board board = boardService.findById(id);
 
-            // 권한 체크 (본인 글만 수정 가능)
-            if (!board.getUserNo().equals(getCurrentUserNo())) {
-                return ResponseEntity.status(403).body("본인의 게시글만 수정할 수 있습니다.");
-            }
-
-            board.setBoardTitle(title);
-            board.setBoardContent(content);
-
-            // 이미지 삭제 요청
-            if ("true".equals(removeImage)) {
-                imageService.deleteImage("BOARD", String.valueOf(id));
-                board.setBoardImage(null);
-                log.info("이미지 삭제 완료 - boardNo: {}", id);
-            }
-            // 새 이미지 업로드 (기존 이미지는 자동으로 교체됨)
-            else if (image != null && !image.isEmpty()) {
-                ImageDTO imageDTO = imageService.uploadImage(
-                        image,
-                        "BOARD",
-                        String.valueOf(id)
-                );
-                board.setBoardImage(imageDTO.getPath());
-                log.info("이미지 수정 완료 - boardNo: {}, path: {}", id, imageDTO.getPath());
-            }
-
-            Board updatedBoard = boardService.save(board);
-            return ResponseEntity.ok(updatedBoard);
-
-        } catch (Exception e) {
-            log.error("게시글 수정 실패 - boardNo: {}", id, e);
-            return ResponseEntity.badRequest().body("게시글 수정에 실패했습니다: " + e.getMessage());
+        // ✅ 권한 체크 추가
+        if (!board.getUserNo().equals(getCurrentUserNo())) {
+            return ResponseEntity.status(403).body("본인의 게시글만 수정할 수 있습니다.");
         }
+
+        board.setBoardTitle(title);
+        board.setBoardContent(content);
+
+        // 이미지 삭제
+        if ("true".equals(removeImage)) {
+            imageService.deleteImage("BOARD", String.valueOf(id));
+            board.setBoardImage(null);
+        }
+        // 새 이미지 업로드 (기존 이미지는 자동으로 교체됨)
+        else if (image != null && !image.isEmpty()) {
+            ImageDTO imageDTO = imageService.uploadImage(
+                    image,
+                    "BOARD",
+                    String.valueOf(id)
+            );
+            board.setBoardImage(imageDTO.getPath());
+        }
+
+        return ResponseEntity.ok(boardService.save(board));
     }
 
-    // 게시글 삭제 (본인 글만)
+    // 게시글 삭제
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteBoard(@PathVariable Long id) {
-        try {
-            Board board = boardService.findById(id);
+        Board board = boardService.findById(id);
 
-            // 권한 체크 (본인 글만 삭제 가능)
-            if (!board.getUserNo().equals(getCurrentUserNo())) {
-                return ResponseEntity.status(403).body("본인의 게시글만 삭제할 수 있습니다.");
-            }
-
-            // 1. 이미지 먼저 삭제
-            imageService.deleteImage("BOARD", String.valueOf(id));
-            log.info("이미지 삭제 완료 - boardNo: {}", id);
-
-            // 2. 게시글 삭제
-            boardService.delete(id);
-            log.info("게시글 삭제 완료 - boardNo: {}", id);
-
-            return ResponseEntity.ok().build();
-
-        } catch (Exception e) {
-            log.error("게시글 삭제 실패 - boardNo: {}", id, e);
-            return ResponseEntity.badRequest().body("게시글 삭제에 실패했습니다: " + e.getMessage());
+        // ✅ 권한 체크 추가
+        if (!board.getUserNo().equals(getCurrentUserNo())) {
+            return ResponseEntity.status(403).body("본인의 게시글만 삭제할 수 있습니다.");
         }
+
+        // 이미지 먼저 삭제
+        imageService.deleteImage("BOARD", String.valueOf(id));
+        boardService.delete(id);
+        return ResponseEntity.ok().build();
     }
 
     // ==================== 좋아요 / 신고 ====================
