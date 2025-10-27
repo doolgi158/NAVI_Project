@@ -26,7 +26,6 @@ import {
 } from "@ant-design/icons";
 import { API_SERVER_HOST } from "@/common/api/naviApi";
 import axios from "axios";
-import AdminThemeProvider from "@/admin/theme/AdminThemeProvider";
 
 const { Title } = Typography;
 
@@ -100,7 +99,7 @@ const AdminAccListPage = () => {
             headers: { Authorization: `Bearer ${token}` },
           });
 
-          message.success("✅ 숙소가 삭제되었습니다.");
+          message.success("숙소가 삭제되었습니다.");
           fetchList(pagination.current, pagination.pageSize);
         } catch (err) {
           console.error("삭제 실패:", err);
@@ -228,7 +227,6 @@ const AdminAccListPage = () => {
   ];
 
   return (
-    <AdminThemeProvider>
     <div style={{ paddingTop: 8 }}>
       <Card
         style={{ borderRadius: 16, boxShadow: "0 4px 12px rgba(0,0,0,0.05)" }}
@@ -401,7 +399,6 @@ const AdminAccListPage = () => {
         )}
       </Modal>
     </div>
-    </AdminThemeProvider>
   );
 };
 
