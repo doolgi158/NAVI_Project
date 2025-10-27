@@ -31,12 +31,11 @@ public class AdminTravelPlanServiceImpl implements AdminTravelPlanService {
         log.info("📋 [관리자] 여행계획 목록 조회 (page={}, size={}, search={})", page, size, search);
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-
         Page<TravelPlan> planPage;
 
         if (StringUtils.hasText(search)) {
-            // ✅ 제목 또는 작성자 이름으로 검색
-            planPage = travelPlanRepository.findByTitleContainingIgnoreCaseOrUser_NameContainingIgnoreCase(search, search, pageable);
+            // ✅ 제목, 작성자, ID, planId 모두 검색
+            planPage = travelPlanRepository.searchByKeyword(search.trim(), pageable);
         } else {
             // ✅ 전체 조회
             planPage = travelPlanRepository.findAll(pageable);

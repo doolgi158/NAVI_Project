@@ -1,5 +1,6 @@
 package com.navi.travel.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.navi.travel.domain.Travel;
 import lombok.Builder;
@@ -49,7 +50,10 @@ public class TravelDetailResponseDTO {
     @JsonProperty("bookmarkedByUser")
     private boolean isBookmarkedByUser;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private LocalDateTime updatedAt;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private LocalDateTime createdAt;
 
     /**
@@ -100,6 +104,9 @@ public class TravelDetailResponseDTO {
                 // ✅ 사용자별 상태
                 .isLikedByUser(isLikedByUser)
                 .isBookmarkedByUser(isBookmarkedByUser)
+
+                .createdAt(travel.getCreatedAt())
+                .updatedAt(travel.getUpdatedAt())
 
                 .build();
     }
