@@ -10,7 +10,6 @@ import DeliveryRouter from "./DeliveryRouter.jsx"
 import PaymentRouter from "./PaymentRouter.jsx";
 import ClientRouter from "./ClientRouter.jsx";
 import ProtectedRoute from "./ProtectedRoute.jsx";
-import ManagerRouter from "./ManagerRouter.jsx";
 
 const Loading = <div></div>
 const Main = lazy(() => import("../../users/pages/UserMainPage.jsx"))

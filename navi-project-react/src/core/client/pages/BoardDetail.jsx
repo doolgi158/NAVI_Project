@@ -22,6 +22,9 @@ function BoardDetail() {
   const [editImagePreview, setEditImagePreview] = useState('');  // 미리보기
   const [removeImage, setRemoveImage] = useState(false);  // 이미지 삭제 여부
   const [replyContent, setReplyContent] = useState(''); //대댓글
+  const [imageError, setImageError] = useState(false); // ✅ 추가: 이미지 에러 상태
+  
+  const API_BASE_URL = 'http://localhost:8080'; // ✅ 추가: 백엔드 URL
   
   const fetchBoard = useCallback(() => {
     if (!id) {
@@ -31,6 +34,8 @@ function BoardDetail() {
     fetch(`/api/board/${id}`)
       .then(response => response.json())
       .then(data => {
+        console.log('게시글 데이터:', data); // ✅ 추가: 디버깅용
+        console.log('이미지 경로:', data.boardImage); // ✅ 추가: 디버깅용
         setBoard(data);
         setEditTitle(data.boardTitle);
         setEditContent(data.boardContent);
@@ -49,7 +54,6 @@ function BoardDetail() {
     fetch(`/api/board/${id}/comment`)
       .then(response => response.json())
       .then(data => {
-        //  배열 체크 추가
         if (Array.isArray(data)) {
           setComments(data);
           setCommentCount(data.length);
@@ -122,7 +126,6 @@ function BoardDetail() {
 
   // 댓글 신고
   const handleReportComment = (commentNo) => {
-    // 이미 신고했는지 체크
     const reportedComments = JSON.parse(sessionStorage.getItem('reportedComments') || '[]');
     
     if (reportedComments.includes(commentNo)) {
@@ -137,7 +140,6 @@ function BoardDetail() {
         .then(response => response.text())
         .then(result => {
           if (result === 'success') {
-            // 신고한 댓글 목록에 추가
             reportedComments.push(commentNo);
             sessionStorage.setItem('reportedComments', JSON.stringify(reportedComments));
             
@@ -151,9 +153,8 @@ function BoardDetail() {
   
   const handleLike = () => {
     if (isLiked) {
-      // 좋아요 취소
       fetch(`/api/board/${id}/like`, {
-        method: 'DELETE'  // ✅ DELETE 사용
+        method: 'DELETE'
       })
         .then(() => {
           setIsLiked(false);
@@ -161,7 +162,6 @@ function BoardDetail() {
         })
         .catch(error => console.error('좋아요 취소 에러:', error));
     } else {
-      // 좋아요
       fetch(`/api/board/${id}/like`, {
         method: 'POST'
       })
@@ -174,7 +174,6 @@ function BoardDetail() {
   };
 
   const handleReport = () => {
-    // 이미 신고했는지 체크
     const reportedBoards = JSON.parse(sessionStorage.getItem('reportedBoards') || '[]');
     
     if (reportedBoards.includes(parseInt(id))) {
@@ -189,7 +188,6 @@ function BoardDetail() {
         .then(response => response.text())
         .then(result => {
           if (result === 'success') {
-            // 신고한 게시글 목록에 추가
             reportedBoards.push(parseInt(id));
             sessionStorage.setItem('reportedBoards', JSON.stringify(reportedBoards));
             
@@ -203,7 +201,17 @@ function BoardDetail() {
   const handleEditMode = () => {
     setIsEditing(true);
     setShowMenu(false);
-    setEditImagePreview(board.boardImage || '');  // 기존 이미지 표시
+    
+    // ✅ 수정: 기존 이미지 URL 처리
+    if (board.boardImage) {
+      const imageUrl = board.boardImage.startsWith('http')
+        ? board.boardImage
+        : `${API_BASE_URL}${board.boardImage.startsWith('/') ? '' : '/'}${board.boardImage}`;
+      setEditImagePreview(imageUrl);
+    } else {
+      setEditImagePreview('');
+    }
+    
     setRemoveImage(false);
     setEditImage(null);
   };
@@ -216,19 +224,19 @@ function BoardDetail() {
     setEditImage(file);
     setRemoveImage(false);
 
-    // 미리보기
     const reader = new FileReader();
     reader.onloadend = () => {
       setEditImagePreview(reader.result);
     };
     reader.readAsDataURL(file);
   };
-    // 이미지 제거
-    const handleRemoveEditImage = () => {
-      setEditImage(null);
-      setEditImagePreview('');
-      setRemoveImage(true);
-    };
+  
+  // 이미지 제거
+  const handleRemoveEditImage = () => {
+    setEditImage(null);
+    setEditImagePreview('');
+    setRemoveImage(true);
+  };
 
   const handleCancelEdit = () => {
     setIsEditing(false);
@@ -246,11 +254,9 @@ function BoardDetail() {
     formData.append('title', editTitle);
     formData.append('content', editContent);
     
-    // ✅ 새 이미지가 있으면 추가
     if (editImage) {
       formData.append('image', editImage);
     }
-    // 이미지 삭제 플래그
     else if (removeImage) {
       formData.append('removeImage', 'true');
     }
@@ -270,7 +276,7 @@ function BoardDetail() {
         }
       })
       .catch(error => {
-        console.error('수정 실패:', error);
+        console.error('수정 에러:', error);
         alert('수정에 실패했습니다.');
       });
   };
@@ -284,38 +290,33 @@ function BoardDetail() {
           alert('삭제되었습니다.');
           navigate('/board');
         })
-        .catch(error => {
-          console.error('삭제 실패:', error);
-          alert('삭제에 실패했습니다.');
-        });
+        .catch(error => console.error('삭제 에러:', error));
     }
   };
 
   const handleShare = () => {
-    const url = window.location.href;
-    navigator.clipboard.writeText(url).then(() => {
-      alert('링크가 복사되었습니다!');
-      setShowMenu(false);
-    });
+    const currentUrl = window.location.href;
+    navigator.clipboard.writeText(currentUrl)
+      .then(() => alert('링크가 복사되었습니다!'))
+      .catch(() => alert('링크 복사에 실패했습니다.'));
   };
 
-  // 댓글을 계층 구조로 정렬
-  const organizeComments = (commentsList) => {
-  
-    if (!Array.isArray(commentsList)) {
-      return [];
-    }
+  // ✅ 추가: 이미지 에러 핸들러
+  const handleImageError = (e) => {
+    console.error('이미지 로딩 실패:', e.target.src);
+    console.error('원본 이미지 경로:', board?.boardImage);
+    setImageError(true);
+  };
 
-    const organized = [];
+  const organizeComments = (commentList) => {
     const commentMap = {};
+    const organized = [];
 
-    // 먼저 모든 댓글을 맵에 저장
-    commentsList.forEach(comment => {
+    commentList.forEach(comment => {
       commentMap[comment.commentNo] = { ...comment, replies: [] };
     });
 
-    // 부모-자식 관계 설정
-    commentsList.forEach(comment => {
+    commentList.forEach(comment => {
       if (comment.parentComment === null || comment.parentComment === undefined) {
         organized.push(commentMap[comment.commentNo]);
       } else {
@@ -328,7 +329,6 @@ function BoardDetail() {
     return organized;
   };
 
-  // ✅ 여기 수정됨: depth 1까지만 답글 가능
   const renderComment = (comment, depth = 0) => (
     <div key={comment.commentNo} className={`comment-item depth-${depth}`}>
       <div className="comment-item-header">
@@ -342,7 +342,6 @@ function BoardDetail() {
       <div className="comment-content">{comment.commentContent}</div>
 
       <div className="comment-item-actions">
-        {/* ✅ depth 0인 댓글만 '답글' 버튼 표시 */}
         {depth === 0 && (
           <button
             className="comment-action-btn"
@@ -380,7 +379,6 @@ function BoardDetail() {
       </button>
     </div>
 
-    {/* 답글 작성 폼 */}
     {replyTo === comment.commentNo && depth === 0 && (
       <div className="reply-form">
         <textarea
@@ -406,7 +404,6 @@ function BoardDetail() {
       </div>
     )}
 
-    {/* 대댓글 렌더링 */}
     {comment.replies && comment.replies.length > 0 && (
       <div className="replies-container">
         {comment.replies.map(reply => renderComment(reply, depth + 1))}
@@ -442,7 +439,6 @@ function BoardDetail() {
             <h2 className="board-title">{board.boardTitle}</h2>
           )}
           
-          {/* 더보기 메뉴 버튼 */}
           <div className="menu-container">
             <button 
               className="menu-button"
@@ -482,14 +478,12 @@ function BoardDetail() {
               
               {/* 이미지 편집 영역 */}
               <div className="edit-image-section">
-                
                 {editImagePreview ? (
                   <div className="image-preview-container">
                     <img 
                       src={editImagePreview} 
                       alt="이미지 미리보기" 
                       className="board-image"
-                      
                     />
                     <button
                       type="button"
@@ -515,14 +509,26 @@ function BoardDetail() {
             <>
               <p className="board-content-text">{board.boardContent}</p>
               
-              {/* 이미지 표시 */}
-              {board.boardImage && (
+              {/* ✅ 수정: 이미지 표시 부분 */}
+              {board.boardImage && !imageError && (
                 <div className="board-image-container">
                   <img 
-                    src={board.boardImage} 
+                    src={
+                      board.boardImage.startsWith('http')
+                        ? board.boardImage
+                        : `${API_BASE_URL}${board.boardImage.startsWith('/') ? '' : '/'}${board.boardImage}`
+                    }
                     alt="게시글 이미지" 
                     className="board-image"
+                    onError={handleImageError}
                   />
+                </div>
+              )}
+              
+              {/* ✅ 추가: 이미지 로딩 실패 시 메시지 */}
+              {board.boardImage && imageError && (
+                <div className="image-error-message">
+                  <p>이미지를 불러올 수 없습니다.</p>
                 </div>
               )}
             </>

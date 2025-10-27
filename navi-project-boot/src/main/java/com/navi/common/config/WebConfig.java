@@ -1,45 +1,46 @@
-package com.navi.common.config;
+package com.navi.config;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.web.config.EnableSpringDataWebSupport;
-import org.springframework.format.FormatterRegistry;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.nio.file.Paths;
-
 @Configuration
-@EnableSpringDataWebSupport(pageSerializationMode = EnableSpringDataWebSupport.PageSerializationMode.VIA_DTO)
 public class WebConfig implements WebMvcConfigurer {
+
+    /**
+     * 이미지 정적 리소스 제공 설정
+     * /images/** 경로로 들어오는 요청을 실제 파일 시스템의 이미지 폴더로 매핑
+     */
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        // Windows 경로 (개발 환경)
+        registry.addResourceHandler("/images/**")
+                .addResourceLocations("file:///C:/navi-project/images/")
+                .setCachePeriod(3600); // 1시간 캐싱
+
+        // Linux 서버 경로 (배포 환경) - 필요시 주석 해제
+        /*
+        registry.addResourceHandler("/images/**")
+                .addResourceLocations("file:/var/www/navi-project/images/")
+                .setCachePeriod(3600);
+        */
+    }
+
+    /**
+     * CORS 설정 (프론트엔드와 통신 허용)
+     */
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                // ✅ 이 주소가 현재 React 개발 서버 주소와 일치해야 합니다.
-                .allowedOrigins("http://localhost:5173", "http://127.0.0.1:5173")
+                .allowedOrigins(
+                        "http://localhost:5173",      // Vite 개발 서버
+                        "http://localhost:3000",      // React 개발 서버
+                        "https://yourdomain.com"      // 실제 배포 도메인 (배포 시 수정)
+                )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true)
                 .maxAge(3600);
-    }
-
-    @Override
-    public void addFormatters(FormatterRegistry registry) {
-        registry.addFormatter(new DateFormatter());
-    }
-
-    @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // 현재 실행 위치를 기준으로 상대경로 ../images 보정
-        String imagePath = Paths.get(System.getProperty("user.dir"), "../images")
-                .normalize()
-                .toAbsolutePath()
-                .toString()
-                .replace("\\", "/");
-        String basePath = "C:/navi-project/images/";
-
-        registry.addResourceHandler("/images/**")
-                .addResourceLocations("file:" + imagePath + "/")
-                .addResourceLocations("file:" + basePath);
     }
 }
