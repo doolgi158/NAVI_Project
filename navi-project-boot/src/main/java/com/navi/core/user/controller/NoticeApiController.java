@@ -1,6 +1,7 @@
 package com.navi.core.user.controller;
 
 import com.navi.core.domain.Notice;
+import com.navi.core.dto.NoticeDTO;
 import com.navi.core.user.service.NoticeService;
 import com.navi.image.dto.ImageDTO;
 import com.navi.image.service.ImageService;
@@ -37,7 +38,7 @@ public class NoticeApiController {
 
         try {
             Pageable pageable = PageRequest.of(page, size, Sort.by("createDate").descending());
-            Page<Notice> noticePage = noticeService.getAllNotices(pageable);
+            Page<Notice> noticePage = noticeService.getActiveNotices(pageable);
 
             List<Map<String, Object>> notices = noticePage.getContent().stream()
                     .map(notice -> {
@@ -109,7 +110,7 @@ public class NoticeApiController {
 
         try {
             Pageable pageable = PageRequest.of(page, size, Sort.by("createDate").descending());
-            Page<Notice> noticePage = noticeService.searchNotices(keyword, pageable);
+            Page<NoticeDTO> noticePage = noticeService.searchNotices(keyword, pageable);
 
             Map<String, Object> response = new HashMap<>();
             response.put("notices", noticePage.getContent());

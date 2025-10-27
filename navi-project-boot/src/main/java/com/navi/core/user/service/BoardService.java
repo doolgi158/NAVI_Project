@@ -31,6 +31,34 @@ public class BoardService {
     @Autowired
     private final CommentRepository commentRepository;
 
+    // ==================== 추가 메서드 (BoardApiController용) ====================
+
+    /**
+     * 게시글 조회 (조회수 증가 없음, Long 타입 지원)
+     */
+    @Transactional(readOnly = true)
+    public Board findById(Long id) {
+        return boardRepository.findById(id.intValue())
+                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
+    }
+
+    /**
+     * 게시글 저장 (이미지 업로드용)
+     */
+    public Board save(Board board) {
+        return boardRepository.save(board);
+    }
+
+    /**
+     * 게시글 삭제 (Long 타입 지원)
+     */
+    public void delete(Long id) {
+        boardRepository.deleteById(id.intValue());
+        log.info("게시글 삭제 완료. ID: {}", id);
+    }
+
+    // ==================== 기존 메서드 ====================
+
     // 목록 조회 (조회수 증가 없음!)
     public Page<Board> getAllBoards(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createDate").descending());

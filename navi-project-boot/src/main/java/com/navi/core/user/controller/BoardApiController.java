@@ -227,7 +227,7 @@ public class BoardApiController {
     public ResponseEntity<?> reportBoard(@PathVariable Integer id) {
         try {
             boardService.reportBoard(id);
-            return ResponseEntity.ok("success").build();
+            return ResponseEntity.ok("success");
         } catch (Exception e) {
             log.error("신고 실패 - boardNo: {}", id, e);
             return ResponseEntity.badRequest().body("신고에 실패했습니다.");
@@ -314,7 +314,7 @@ public class BoardApiController {
     public ResponseEntity<?> reportComment(@PathVariable Integer commentNo) {
         try {
             commentService.reportComment(commentNo);
-            return ResponseEntity.ok("success").build();
+            return ResponseEntity.ok("success");
         } catch (Exception e) {
             log.error("댓글 신고 실패 - commentNo: {}", commentNo, e);
             return ResponseEntity.badRequest().body("댓글 신고에 실패했습니다.");

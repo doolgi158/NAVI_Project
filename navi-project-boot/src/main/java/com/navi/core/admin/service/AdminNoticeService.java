@@ -19,8 +19,10 @@ public class AdminNoticeService {
 
     private final NoticeRepository noticeRepository;
 
+    // ==================== 관리자 전용 메서드 ====================
+
     /**
-     * 전체 공지사항 조회
+     * 전체 공지사항 조회 (관리자용 - 게시 기간 무관)
      */
     @Transactional(readOnly = true)
     public List<NoticeDTO> getAllNotices() {
@@ -29,10 +31,11 @@ public class AdminNoticeService {
                 .collect(Collectors.toList());
     }
 
-    // 공지사항 전체 목록 조회 (관리자)
+    /**
+     * 공지사항 검색 (관리자용)
+     */
     @Transactional(readOnly = true)
     public List<NoticeDTO> searchNotices(String keyword) {
-        // TODO: 실제 검색 로직 구현
         return noticeRepository.findAll().stream()
                 .filter(notice ->
                         notice.getNoticeTitle().contains(keyword) ||
@@ -42,7 +45,9 @@ public class AdminNoticeService {
                 .collect(Collectors.toList());
     }
 
-    // 공지사항 조회 (관리자 - 조회수 증가 없음)
+    /**
+     * 공지사항 조회 (관리자용 - 조회수 증가 없음)
+     */
     @Transactional(readOnly = true)
     public NoticeDTO getNotice(Integer noticeNo) {
         Notice notice = noticeRepository.findById(noticeNo)
@@ -66,7 +71,9 @@ public class AdminNoticeService {
         return NoticeDTO.fromEntity(savedNotice);
     }
 
-    // 공지사항 수정 (관리자 전용)
+    /**
+     * 공지사항 수정 (관리자 전용)
+     */
     public NoticeDTO updateNotice(Integer noticeNo, NoticeDTO noticeDTO) {
         Notice notice = noticeRepository.findById(noticeNo)
                 .orElseThrow(() -> new RuntimeException("공지사항을 찾을 수 없습니다. ID: " + noticeNo));
@@ -74,24 +81,49 @@ public class AdminNoticeService {
         // 업데이트
         notice.setNoticeTitle(noticeDTO.getNoticeTitle());
         notice.setNoticeContent(noticeDTO.getNoticeContent());
-        notice.setNoticeFile(noticeDTO.getNoticeFile());
-        notice.setNoticeFile(noticeDTO.getNoticeFile());
         notice.setNoticeStartDate(noticeDTO.getNoticeStartDate());
         notice.setNoticeEndDate(noticeDTO.getNoticeEndDate());
         notice.setNoticeImage(noticeDTO.getNoticeImage());
-        notice.setNoticeFile(noticeDTO.getNoticeFile());
 
         Notice savedNotice = noticeRepository.save(notice);
         log.info("공지사항 수정 완료. ID: {}", noticeNo);
         return NoticeDTO.fromEntity(savedNotice);
     }
 
-    // 공지사항 삭제 (관리자 전용)
+    /**
+     * 공지사항 삭제 (관리자 전용)
+     */
     public void deleteNotice(Integer noticeNo) {
         Notice notice = noticeRepository.findById(noticeNo)
                 .orElseThrow(() -> new RuntimeException("공지사항을 찾을 수 없습니다. ID: " + noticeNo));
 
         noticeRepository.deleteById(noticeNo);
         log.info("공지사항 삭제 완료. ID: {}", noticeNo);
+    }
+
+    // ==================== 이미지 업로드를 위한 Entity 직접 조작 메서드 ====================
+
+    /**
+     * Notice Entity 저장 (이미지 업로드용)
+     */
+    public Notice save(Notice notice) {
+        return noticeRepository.save(notice);
+    }
+
+    /**
+     * Notice Entity 조회 (Long 타입 지원)
+     */
+    @Transactional(readOnly = true)
+    public Notice findById(Long id) {
+        return noticeRepository.findById(id.intValue())
+                .orElseThrow(() -> new RuntimeException("공지사항을 찾을 수 없습니다."));
+    }
+
+    /**
+     * 공지사항 삭제 (Long 타입 지원)
+     */
+    public void delete(Long id) {
+        noticeRepository.deleteById(id.intValue());
+        log.info("공지사항 삭제 완료. ID: {}", id);
     }
 }
