@@ -16,19 +16,25 @@ function ManagerBoardDetail() {
     }
   }, [boardId]);
 
-  const fetchBoard = async () => {
-    try {
-      setLoading(true);
-      const data = await getBoardById(boardId);
+const fetchBoard = async () => {
+  try {
+    setLoading(true);
+
+    const data = await getBoardById(boardId); // ✅ 먼저 선언
+    console.log("게시글 데이터:", data);       // ✅ 그 다음 사용
+
+    if (data) {
       setBoard(data);
-    } catch (error) {
-      console.error('게시글 조회 실패:', error);
-      alert('게시글을 불러올 수 없습니다.');
-      navigate('/manager/board');
-    } finally {
-      setLoading(false);
+    } else {
+      setBoard(null);
     }
-  };
+  } catch (error) {
+    console.error("게시글 조회 실패:", error);
+    alert("게시글 조회 중 오류가 발생했습니다.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   // 게시글 삭제 (관리자 - 이중 확인)
   const handleDelete = async () => {
@@ -43,7 +49,7 @@ function ManagerBoardDetail() {
     try {
       await deleteBoard(boardId);
       alert('삭제되었습니다.');
-      navigate('/manager/board');
+      navigate('/adm/board');
     } catch (error) {
       console.error('삭제 실패:', error);
       alert('삭제에 실패했습니다.');
@@ -105,17 +111,17 @@ function ManagerBoardDetail() {
         {/* 버튼 영역 */}
         <div className="board-actions manager-actions">
           <button 
-            onClick={() => navigate('/manager/board')}
+            onClick={() => navigate('/adm/board')}
             className="btn-list"
           >
-            ← 목록으로
+            목록으로
           </button>
 
           <button 
             onClick={handleDelete}
             className="btn-delete-manager"
           >
-            🗑️ 게시글 삭제
+            게시글 삭제
           </button>
         </div>
 

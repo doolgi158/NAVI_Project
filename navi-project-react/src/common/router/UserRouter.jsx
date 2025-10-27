@@ -10,9 +10,9 @@ const EditProfile = lazy(() => import("../../users/pages/user/UserProfileEditPag
 const LikedTravelsPage = lazy(() => import("../../users/pages/user/UserLikedTravelsPage"));
 const BookmarkedTravelsPage = lazy(() => import("../../users/pages/user/UserBookmarkedTravelsPage"));
 const UserMyFlight = lazy(() => import("../../users/pages/user/UserMyFlightsPage"));
-const UserMyDelivery = lazy(() => import("../../users/pages/user/UserMyDeliveriesPage"))
-const UserAccommodation = lazy(() => import("../../users/pages/user/UserMyAccommodationsPage"))
-const UserPayments = lazy(() => import("../../users/pages/user/UserMyPaymentsPage"))
+const UserMyDelivery = lazy(() => import("../../users/pages/user/UserMyDeliveriesPage"));
+const UserAccommodation = lazy(() => import("../../users/pages/user/UserMyAccommodationsPage"));
+const UserPayments = lazy(() => import("../../users/pages/user/UserMyPaymentsPage"));
 
 const UserRouter = () => {
     return [
@@ -96,14 +96,6 @@ const UserRouter = () => {
             path: "/users/my-payments",
             element: <UserPayments />,
         },
-        {
-            path: "client/*",
-            element: (
-                <Suspense fallback={Loading}>
-                    <ClientRouter />
-                </Suspense>
-            )
-        }
     ]
 }
 

@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -53,6 +54,7 @@ public class TravelPlanServiceImpl implements TravelPlanService {
                 .startTime(dto.getStartTime())
                 .endTime(dto.getEndTime())
                 .thumbnailPath(dto.getThumbnailPath())
+                // createdAt, updatedAt은 엔티티의 @CreationTimestamp, @UpdateTimestamp 또는 @PrePersist에서 자동 처리
                 .build();
 
         // 2️⃣ days + items 매핑
@@ -125,10 +127,21 @@ public class TravelPlanServiceImpl implements TravelPlanService {
             );
         }
 
+        // ✅ 생성 시간 명시 (엔티티의 @PrePersist에서 처리하므로 주석 처리하거나 제거 가능)
+        /*
+        if (plan.getCreatedAt() == null) {
+            plan.setCreatedAt(LocalDateTime.now());
+        }
+        plan.setUpdatedAt(LocalDateTime.now());
+        */
+
+
         TravelPlan saved = travelPlanRepository.save(plan);
-        em.flush(); // ✅ 즉시 DB 반영
+
+        em.flush();
         log.info("✅ 여행계획 저장 완료: planId={}", saved.getPlanId());
         return saved.getPlanId();
+
     }
 
     /** ✅ 내 여행계획 목록 */
@@ -154,6 +167,7 @@ public class TravelPlanServiceImpl implements TravelPlanService {
         if (!plan.getUser().getId().equals(userId))
             throw new IllegalArgumentException("본인의 여행계획만 수정할 수 있습니다.");
 
+        // ✅ createdAt, updatedAt 파라미터 제거
         plan.updatePlanInfo(
                 dto.getTitle(),
                 dto.getStartDate(),

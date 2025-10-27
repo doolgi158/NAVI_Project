@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Tabs, Space, Input, Select, Typography } from "antd";
-import { SearchOutlined } from "@ant-design/icons";
+import { Tabs, Space, Input, Select, Typography, Button } from "antd";
+import { SearchOutlined, ReloadOutlined } from "@ant-design/icons";
 
 const { Title } = Typography;
 
@@ -9,6 +9,8 @@ const { Title } = Typography;
    [AdminAccHeader]
    - 숙소 관리 페이지 상단 Header
    - 숙소/예약 탭 이동, 검색, 필터링 제어
+   - ✅ 초기화 버튼 추가
+   - ✅ 숙소예약 탭일 때 RsvStatus 필터 세트로 변경
 ========================================================== */
 const AdminAccHeader = ({ onTabChange, onSearch, onFilter }) => {
   const navigate = useNavigate();
@@ -18,12 +20,11 @@ const AdminAccHeader = ({ onTabChange, onSearch, onFilter }) => {
   const [searchValue, setSearchValue] = useState("");
   const [filterValue, setFilterValue] = useState("ALL");
 
-  // ✅ 현재 URL에 따라 초기 탭 상태 동기화
+  // ✅ URL 변화 시 탭 동기화
   useEffect(() => {
     if (location.pathname.includes("/accommodations/reservations")) {
       setActiveTab("RSV");
     } else if (location.pathname.includes("/accommodations")) {
-      // 기본은 숙소 목록 (type 상태로 구분됨)
       setActiveTab("API");
     }
   }, [location.pathname]);
@@ -42,16 +43,44 @@ const AdminAccHeader = ({ onTabChange, onSearch, onFilter }) => {
   // ✅ 탭 변경
   const handleTabChange = (key) => {
     setActiveTab(key);
+    setSearchValue("");
+    setFilterValue("ALL");
+    onSearch?.("");
+    onFilter?.("ALL");
 
     if (key === "RSV") {
-      // ✅ 숙소 예약 관리 탭 클릭 → 예약 페이지로 이동
       navigate("/adm/accommodations/reservations");
     } else {
-      // ✅ 숙소 탭 클릭 → 숙소 목록 페이지로 이동
       onTabChange?.(key);
       navigate("/adm/accommodations/list");
     }
   };
+
+  // ✅ 초기화 버튼
+  const handleReset = () => {
+    setSearchValue("");
+    setFilterValue("ALL");
+    onSearch?.("");
+    onFilter?.("ALL");
+  };
+
+  // ✅ 필터 옵션 (탭에 따라 다르게 표시)
+  const filterOptions =
+    activeTab === "RSV"
+      ? [
+          { label: "전체", value: "ALL" },
+          { label: "예약 중", value: "PENDING" },
+          { label: "결제 완료", value: "PAID" },
+          { label: "예약 취소", value: "CANCELLED" },
+          { label: "환불 완료", value: "REFUNDED" },
+          { label: "예약 실패", value: "FAILED" },
+          //{ label: "이용 완료 (COMPLETE)", value: "COMPLETE" },
+        ]
+      : [
+          { label: "전체", value: "ALL" },
+          { label: "운영중", value: "ACTIVE" },
+          { label: "비활성", value: "INACTIVE" },
+        ];
 
   return (
     <div className="bg-white shadow-md rounded-xl p-5 mb-4 border border-gray-100">
@@ -72,7 +101,7 @@ const AdminAccHeader = ({ onTabChange, onSearch, onFilter }) => {
         </Title>
       </div>
 
-      {/* 상단 탭 */}
+      {/* 탭 */}
       <Tabs
         activeKey={activeTab}
         onChange={handleTabChange}
@@ -123,7 +152,7 @@ const AdminAccHeader = ({ onTabChange, onSearch, onFilter }) => {
         ]}
       />
 
-      {/* 🔍 검색 & 필터 */}
+      {/* 검색 + 필터 + 초기화 */}
       <Space
         wrap
         style={{
@@ -132,9 +161,14 @@ const AdminAccHeader = ({ onTabChange, onSearch, onFilter }) => {
           width: "100%",
         }}
       >
+        {/* 검색창 */}
         <Input
           prefix={<SearchOutlined />}
-          placeholder="숙소명 / 주소 / 숙소 ID 검색"
+          placeholder={
+            activeTab === "RSV"
+              ? "예약자명 / 숙소명 / 예약 ID 검색"
+              : "숙소명 / 주소 / 숙소 ID 검색"
+          }
           allowClear
           value={searchValue}
           onChange={(e) => setSearchValue(e.target.value)}
@@ -145,17 +179,28 @@ const AdminAccHeader = ({ onTabChange, onSearch, onFilter }) => {
             borderRadius: 8,
           }}
         />
+
         <Space wrap>
+          {/* 필터 */}
           <Select
             value={filterValue}
-            style={{ width: 160, height: 40 }}
-            options={[
-              { label: "전체", value: "ALL" },
-              { label: "운영중", value: "ACTIVE" },
-              { label: "비활성", value: "INACTIVE" },
-            ]}
+            style={{ width: 200, height: 40 }}
+            options={filterOptions}
             onChange={handleFilterChange}
           />
+
+          {/* 초기화 버튼 */}
+          <Button
+            icon={<ReloadOutlined />}
+            onClick={handleReset}
+            style={{
+              height: 40,
+              borderRadius: 8,
+              fontWeight: 500,
+            }}
+          >
+            초기화
+          </Button>
         </Space>
       </Space>
     </div>

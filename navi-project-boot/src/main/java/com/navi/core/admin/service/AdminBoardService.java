@@ -29,13 +29,17 @@ public class AdminBoardService {
         return boardRepository.findAllByOrderByCreateDateDesc();
     }
 
-    // 게시글 상세 조회 (관리자)
+    /**
+     * 게시글 검색 (관리자)
+     */
     @Transactional(readOnly = true)
     public List<Board> searchBoards(String keyword) {
         return boardRepository.searchByKeyword(keyword);
     }
 
-    //게시글 상세 조회 (관리자 - 조회수 증가 없음)
+    /**
+     * 게시글 상세 조회 (관리자 - 조회수 증가 없음)
+     */
     @Transactional(readOnly = true)
     public Board getBoard(Integer id) {
         return boardRepository.findById(id)

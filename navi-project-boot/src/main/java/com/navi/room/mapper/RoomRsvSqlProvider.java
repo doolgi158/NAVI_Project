@@ -19,29 +19,34 @@ public class RoomRsvSqlProvider {
                     r.RESERVER_NAME   AS reserverName,
                     r.RESERVER_TEL    AS reserverTel,
                     r.RESERVER_EMAIL  AS reserverEmail,
+                    rm.ROOM_ID        AS roomId,
                     rm.ROOM_NAME      AS roomName,
-                    a.TITLE           AS accTitle,
+                    a.ACC_ID          AS accId,
+                    a.TITLE           AS title,
                     r.START_DATE      AS startDate,
                     r.END_DATE        AS endDate,
                     r.NIGHTS          AS nights,
                     r.GUEST_COUNT     AS guestCount,
                     r.QUANTITY        AS quantity,
                     r.PRICE           AS price,
-                    r.RSV_STATUS      AS rsvStatus
+                    r.RSV_STATUS      AS rsvStatus,
+                    r.CREATED_AT      AS createdAt,
+                    r.UPDATED_AT      AS updatedAt
                 """)
                 .FROM("NAVI_ROOM_RSV r")
                 .JOIN("NAVI_ROOM rm ON r.ROOM_NO = rm.ROOM_NO")
                 .JOIN("NAVI_ACCOMMODATION a ON rm.ACC_NO = a.ACC_NO")
                 .WHERE("1=1");
 
-        // ✅ 키워드 검색 (예약자명 / 숙소명 / 예약ID / 전화번호 등)
+        // 키워드 검색 (예약자명 / 숙소명 / 객실명 / 예약ID / 전화번호 등)
         if (keyword != null && !keyword.isBlank()) {
             sql.WHERE("""
                 (LOWER(r.RESERVER_NAME) LIKE LOWER(CONCAT('%', #{keyword}, '%'))
                  OR LOWER(r.RESERVER_TEL) LIKE LOWER(CONCAT('%', #{keyword}, '%'))
                  OR LOWER(r.RESERVER_EMAIL) LIKE LOWER(CONCAT('%', #{keyword}, '%'))
                  OR LOWER(r.RESERVE_ID) LIKE LOWER(CONCAT('%', #{keyword}, '%'))
-                 OR LOWER(a.TITLE) LIKE LOWER(CONCAT('%', #{keyword}, '%')))
+                 OR LOWER(a.TITLE) LIKE LOWER(CONCAT('%', #{keyword}, '%'))
+                 OR LOWER(rm.ROOM_NAME) LIKE LOWER(CONCAT('%', #{keyword}, '%')))
             """);
         }
 
@@ -58,6 +63,8 @@ public class RoomRsvSqlProvider {
             orderColumn = "r.RESERVER_NAME";
         } else if ("START_DATE".equalsIgnoreCase(sortField)) {
             orderColumn = "r.START_DATE";
+        } else if ("PRICE".equalsIgnoreCase(sortField)) {
+            orderColumn = "r.PRICE";
         }
 
         sql.ORDER_BY(orderColumn + " " + (sortOrder != null ? sortOrder : "DESC"));
@@ -86,7 +93,8 @@ public class RoomRsvSqlProvider {
                  OR LOWER(r.RESERVER_TEL) LIKE LOWER(CONCAT('%', #{keyword}, '%'))
                  OR LOWER(r.RESERVER_EMAIL) LIKE LOWER(CONCAT('%', #{keyword}, '%'))
                  OR LOWER(r.RESERVE_ID) LIKE LOWER(CONCAT('%', #{keyword}, '%'))
-                 OR LOWER(a.TITLE) LIKE LOWER(CONCAT('%', #{keyword}, '%')))
+                 OR LOWER(a.TITLE) LIKE LOWER(CONCAT('%', #{keyword}, '%'))
+                 OR LOWER(rm.ROOM_NAME) LIKE LOWER(CONCAT('%', #{keyword}, '%')))
             """);
         }
 

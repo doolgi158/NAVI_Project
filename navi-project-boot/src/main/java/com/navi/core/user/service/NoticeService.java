@@ -2,15 +2,16 @@ package com.navi.core.user.service;
 
 
 import com.navi.core.domain.Notice;
+import com.navi.core.dto.NoticeDTO;
 import com.navi.core.repository.NoticeRepository;
-import com.navi.core.user.dto.NoticeDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Slf4j
 @Service
@@ -24,24 +25,22 @@ public class NoticeService {
         return NoticeDTO.builder()
                 .noticeNo(notice.getNoticeNo())
                 .noticeTitle(notice.getNoticeTitle())
-                .noticeFile(notice.getNoticeFile())
                 .noticeContent(notice.getNoticeContent())
+                .noticeImage(notice.getNoticeImage())
+                .noticeFile(notice.getNoticeFile())
                 .createDate(notice.getCreateDate())
                 .updateDate(notice.getUpdateDate())
                 .noticeViewCount(notice.getNoticeViewCount())
                 .noticeStartDate(notice.getNoticeStartDate())
                 .noticeEndDate(notice.getNoticeEndDate())
-                .noticeAttachFile(notice.getNoticeFile())
                 .build();
     }
 
-    // 공지사항 전체 목록 조회
+    // 공지사항 전체 목록 조회 (페이징)
     @Transactional(readOnly = true)
-    public List<NoticeDTO> getAllNotices() {
-        return noticeRepository.findAllByOrderByCreateDateDesc()
-                .stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+    public Page<NoticeDTO> getAllNotices(Pageable pageable) {
+        return noticeRepository.findAll(pageable)
+                .map(this::convertToDTO);
     }
 
     // 공지사항 조회수 증가
@@ -68,12 +67,15 @@ public class NoticeService {
         return convertToDTO(notice);
     }
 
-    // 공지사항 검색
+    //공지사항 검색
     @Transactional(readOnly = true)
-    public List<NoticeDTO> searchNotices(String keyword) {
-        return null;
-    }
+    public Page<NoticeDTO> searchNotices(String keyword, Pageable pageable) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return getAllNotices(pageable);
+        }
 
-    public void createNotice(NoticeDTO noticeDTO) {
+        return noticeRepository.findByNoticeTitleContainingOrNoticeContentContaining(
+                keyword, keyword, pageable
+        ).map(this::convertToDTO);
     }
 }

@@ -2,7 +2,6 @@ package com.navi.planner.domain;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.navi.common.entity.BaseEntityNoAudit;
-import com.navi.common.listener.TravelEntityListener;
 import com.navi.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -23,7 +22,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@EntityListeners(TravelEntityListener.class)
+//@EntityListeners(TravelEntityListener.class)
 @DynamicUpdate
 @Table(name = "NAVI_TRAVEL_PLAN")
 @SequenceGenerator(
@@ -42,7 +41,9 @@ public class TravelPlan extends BaseEntityNoAudit {
     @JoinColumn(name = "user_no", nullable = false)
     private User user;
 
-    /** ✅ 하루 일정들 (Day) */
+    /**
+     * ✅ 하루 일정들 (Day)
+     */
     @OneToMany(mappedBy = "travelPlan", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     @Builder.Default
@@ -76,15 +77,32 @@ public class TravelPlan extends BaseEntityNoAudit {
 
 
     /* ===== 편의 메서드 ===== */
+    // @CreationTimestamp, @UpdateTimestamp를 사용하고 있으므로 @PrePersist/@PreUpdate는 제거하거나 내용 변경
+    @PrePersist
+    public void onCreate() {
+        if (this.createdAt == null) {
+            this.createdAt = LocalDateTime.now();
+        }
+        this.updatedAt = LocalDateTime.now(); // UpdatedAt은 항상 갱신
+    }
 
-    /** ✅ 하루 추가 */
+    @PreUpdate
+    public void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    /**
+     * ✅ 하루 추가
+     */
     public void addDay(TravelPlanDay day) {
         if (day == null) return;
         day.setTravelPlan(this);
         this.days.add(day);
     }
 
-    /** ✅ 전체 교체 */
+    /**
+     * ✅ 전체 교체
+     */
     public void replaceDays(Set<TravelPlanDay> newDays) {
         this.days.clear();
         if (newDays != null) {
@@ -93,7 +111,9 @@ public class TravelPlan extends BaseEntityNoAudit {
         }
     }
 
-    /** ✅ 계획 기본정보 수정 */
+    /**
+     * ✅ 계획 기본정보 수정 (createdAt, updatedAt 필드 제거)
+     */
     public void updatePlanInfo(String title, LocalDate startDate, LocalDate endDate,
                                LocalTime startTime, LocalTime endTime, String thumbnailPath) {
         if (title != null) this.title = title;
@@ -102,6 +122,7 @@ public class TravelPlan extends BaseEntityNoAudit {
         if (startTime != null) this.startTime = startTime;
         if (endTime != null) this.endTime = endTime;
         if (thumbnailPath != null) this.thumbnailPath = thumbnailPath;
+
     }
 
     /* ✅ 삭제 관련 메서드 불필요 → removeAllDays() 제거 (JPA cascade가 처리) */

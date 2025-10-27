@@ -6,7 +6,6 @@ import com.navi.accommodation.dto.api.AdminAccListDTO;
 import com.navi.accommodation.dto.request.AccRequestDTO;
 import com.navi.accommodation.dto.request.AccSearchRequestDTO;
 import com.navi.accommodation.dto.response.AccDetailResponseDTO;
-import com.navi.accommodation.dto.response.AccListResponseDTO;
 
 import java.util.List;
 import java.util.Map;
@@ -25,7 +24,7 @@ public interface AccService {
 
     /* === 사용자 전용 조회 (View) === */
     // 숙소 리스트 조회 (검색 조건 필터링)
-    List<AccListResponseDTO> searchAccommodations(AccSearchRequestDTO dto);
+    Map<String, Object> searchAccommodations(AccSearchRequestDTO dto);
 
     // 숙소 상세 조회
     AccDetailResponseDTO getAccDetail(String accId);
@@ -38,6 +37,5 @@ public interface AccService {
     // 조회수 증가
     void increaseViewCount(String accId);
 
-    // 조회수 기준 TOP 10
-    List<AccRankDTO> getTop10ByViews();
+    public List<AccRankDTO> getTop10ByViews();
 }

@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -28,5 +29,6 @@ public interface RoomRsvRepository extends JpaRepository<RoomRsv, Long> {
     @Query("SELECT r FROM RoomRsv r WHERE r.rsvStatus = :status AND r.createdAt < :threshold")
     List<RoomRsv> findExpiredReservations(@Param("status") RsvStatus status,
                                           @Param("threshold") LocalDateTime threshold);
-
+    /* 삭제 시점(오늘) 이후의 예약이 있는지 개수 체크 */
+    long countByRoom_Acc_AccNoAndEndDateGreaterThanEqual(Long accNo, LocalDate date);
 }

@@ -1,5 +1,6 @@
 package com.navi.core.admin.controller;
 
+import com.navi.core.admin.service.AdminBoardService;
 import com.navi.core.admin.service.AdminCommentService;
 import com.navi.core.domain.Board;
 import com.navi.core.admin.service.AdminBoardService;
@@ -39,7 +40,7 @@ public class AdminBoardController {
         return ResponseEntity.ok(boards);
     }
 
-    // 게시글 상세 조회 (관리자)
+    // 게시글 상세 조회 (관리자 - 조회수 증가 없음)
     @GetMapping("/{id}")
     public ResponseEntity<Board> getBoard(@PathVariable Integer id) {
         Board board = adminBoardService.getBoard(id);

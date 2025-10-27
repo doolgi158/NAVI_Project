@@ -1,22 +1,38 @@
-// 사용자용 게시판 API 서비스
-const API_URL = '/api/notice';
+import axios from 'axios';
 
-// 게시글 전체 목록 조회
-export const getAllBoards = async () => {
-  const response = await fetch(API_URL);
-  return response.json();
+// 사용자용 게시판 API 서비스
+const API_URL = 'http://localhost:8080/api/board';
+
+// 게시판 전체 목록 조회 (페이징)
+export const getAllBoards = async (page = 0, size = 10) => {
+  const response = await fetch(`${API_URL}?page=${page}&size=${size}`, {
+    credentials: 'include'  // ✅ credentials 추가
+  });
+  
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  
+  return await response.json();
 };
 
-// 게시글 검색
-export const searchBoards = async (keyword) => {
-  const response = await fetch(`${API_URL}/search?keyword=${encodeURIComponent(keyword)}`);
-  return response.json();
+// 게시판 검색 (페이징)
+export const searchBoards = async (keyword, page = 0, size = 10) => {
+  const response = await axios.get(`${API_URL}/search`, {
+    params: { keyword, page, size },
+  });
+  return response.data;
 };
 
 // 게시글 상세 조회
-export const getBoardById = async (boardNo) => {
-  const response = await fetch(`${API_URL}/${boardNo}`);
-  return response.json();
+export const getBoardById = async (id) => {
+  const response = await fetch(`${API_URL}/${id}`);
+  
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  
+  return await response.json();
 };
 
 // 게시글 작성

@@ -10,6 +10,7 @@ import DeliveryRouter from "./DeliveryRouter.jsx"
 import PaymentRouter from "./PaymentRouter.jsx";
 import ClientRouter from "./ClientRouter.jsx";
 import ProtectedRoute from "./ProtectedRoute.jsx";
+import ManagerRouter from "./ManagerRouter.jsx";
 
 const Loading = <div></div>
 const Main = lazy(() => import("../../users/pages/UserMainPage.jsx"))
@@ -39,7 +40,6 @@ const root = createBrowserRouter([
                 path: "/adm",
                 children: [...AdminRouter()]
             },
-            ...ManagerRouter(),
             {
                 path: "/accommodations",
                 children: [...AccRouter()]
@@ -61,10 +61,7 @@ const root = createBrowserRouter([
                 path: "/payment",
                 children: [...PaymentRouter()]
             },
-            {
-                path: "/client",
-                children: [...ClientRouter()],
-            },
+            ...ClientRouter(),
             {
                 path: "*",
                 element: <Suspense fallback={Loading}><Main /></Suspense>

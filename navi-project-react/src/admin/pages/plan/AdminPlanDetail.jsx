@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Layout, Button, Spin, message, Splitter } from "antd";
 import { LeftOutlined } from "@ant-design/icons";
@@ -6,15 +6,16 @@ import dayjs from "dayjs";
 import { API_SERVER_HOST } from "@/common/api/naviApi";
 import api from "@/common/api/naviApi";
 
-import HeaderLayout from "@/users/layout/HeaderLayout";
-import FooterLayout from "@/users/layout/FooterLayout";
+import AdminSiderLayout from "../../layout/AdminSiderLayout";
+import { Content, Header } from "antd/es/layout/layout";
 import PlanSidebar from "@/users/pages/plan/components/scheduler/PlanSidebar";
 import PlanDayList from "@/users/pages/plan/components/scheduler/PlanDayList";
 import TravelMap from "@/users/pages/plan/components/TravelMap";
+import AdminThemeProvider from "../../theme/AdminThemeProvider";
 
-const { Content } = Layout;
+const NAVI_BLUE = "#0A3D91";
 
-export default function AdminPlanDetailView() {
+export default function AdminPlanDetail() {
     const { planId } = useParams();
     const navigate = useNavigate();
     const [plan, setPlan] = useState(null);
@@ -34,9 +35,8 @@ export default function AdminPlanDetailView() {
             const data = res.data;
             setPlan(data);
 
-            // 날짜별 아이템 구성
             const mapped = (data.days || []).map((d, idx) => ({
-                dateISO: d.dayDate,
+                dateISO: d.date,
                 orderNo: idx + 1,
                 items: (d.items || []).map((it) => ({
                     ...it,
@@ -119,103 +119,137 @@ export default function AdminPlanDetailView() {
         );
 
     return (
-        <>
-            <HeaderLayout />
-            <div className="w-full h-screen bg-gray-50 overflow-hidden flex flex-col">
-                {/* 상단 제목 */}
-                <div className="flex justify-between items-center bg-white border-b px-8 py-4 shadow-sm">
-                    <div>
-                        <h2 className="text-2xl font-bold text-[#0A3D91]">
-                            여행계획 상세보기 (관리자)
-                        </h2>
-                        <p className="text-gray-600 text-sm mt-1">
-                            작성자: {plan.name} ({plan.id}) | 여행일정: {plan.startDate} ~ {plan.endDate}
-                        </p>
-                    </div>
-                </div>
-
-                {/* 본문 Splitter 레이아웃 */}
-                <Splitter
-                    style={{
-                        height: "100%",
-                        borderTop: "1px solid #eee",
-                        transition: "all 0.3s ease-in-out",
-                    }}
-                    min="25%"
-                    max="75%"
-                    size={splitSize}
-                    onChange={setSplitSize}
-                    primary="first"
-                >
-                    {/* ✅ 좌측: 일정 패널 */}
-                    <Splitter.Panel
+        <AdminThemeProvider>
+            <Layout className="min-h-screen" style={{ background: "#F7F8FB" }}>
+                <AdminSiderLayout />
+                <Layout>
+                    {/* ▶ 상단 관리자 공통 헤더 (톤 통일) */}
+                    <Header
+                        className="px-6 flex items-center"
                         style={{
-                            background: "#fff",
-                            display: "flex",
-                            flexDirection: "column",
-                            height: "100%",
+                            background: "#FFFFFF",
+                            boxShadow: "0 1px 0 rgba(0,0,0,0.04)",
+                            height: 64,
                         }}
                     >
-                        <div
-                            style={{
-                                display: "grid",
-                                gridTemplateColumns: "200px 1fr",
-                                height: "100%",
-                                overflow: "hidden",
-                            }}
-                        >
-                            {/* 좌측 사이드바 */}
-                            <PlanSidebar
-                                days={days}
-                                activeDayIdx={activeDayIdx}
-                                setActiveDayIdx={setActiveDayIdx}
-                                isViewMode={false}
-                                isEditMode={false}
-                                isAdminView={true}
+                        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                            <Button
+                                icon={<LeftOutlined />}
+                                onClick={() => navigate(-1)}
+                                style={{ borderRadius: 8 }}
                             />
-
-                            {/* 우측 일정 리스트 */}
-                            <div
-                                className="overflow-y-auto px-10 py-8 custom-scroll"
-                                style={{ height: "100%", background: "#fafafa" }}
-                            >
-                                <div className="border-b-2 mb-8">
-                                    <h3 className="text-xl font-semibold text-[#2F3E46] mb-1">
-                                        {plan.title || "제목 없음"}
-                                    </h3>
-                                    <p className="text-gray-500 text-sm mb-2">
-                                        등록일: {plan.createdAt?.replace("T", " ").substring(0, 16)} | 수정일:{" "}
-                                        {plan.updatedAt?.replace("T", " ").substring(0, 16)}
-                                    </p>
-                                </div>
-
-                                <PlanDayList
-                                    days={days}
-                                    activeDayIdx={activeDayIdx}
-                                    isViewMode={true}
-                                    onDragEnd={() => { }}
-                                    onEditTime={() => { }}
-                                    dayColors={DAY_COLORS}
-                                    fallbackImg={FALLBACK_IMG}
-                                    setDays={() => { }}
-                                />
-                            </div>
+                            <h2 style={{ margin: 0, color: NAVI_BLUE, fontWeight: 700 }}>
+                                NAVI 관리자 – 여행계획 상세
+                            </h2>
                         </div>
-                    </Splitter.Panel>
+                        <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
+                            {/* 필요 시 우측 액션 버튼 추가 가능 */}
+                        </div>
+                    </Header>
 
-                    {/* ✅ 우측: 지도 영역 */}
-                    <Splitter.Panel
-                        style={{
-                            background: "#fefefe",
-                            position: "relative",
-                            overflow: "hidden",
-                        }}
-                    >
-                        <TravelMap markers={markers} step={6} />
-                    </Splitter.Panel>
-                </Splitter>
-            </div>
-            <FooterLayout />
-        </>
+                    {/* ▶ 본문: Splitter 레이아웃을 그대로 사용. Admin 톤으로 배경/여백 정리 */}
+                    <Content style={{ padding: 0, height: "calc(100vh - 64px)" }}>
+                        <div className="w-full h-full overflow-hidden flex flex-col" style={{ background: "#F7F8FB" }}>
+                            {/* 상단 메타 정보 바 */}
+                            <div className="flex justify-between items-center bg-white border-b px-8 py-4 shadow-sm">
+                                <div>
+                                    <h3 className="text-xl font-bold text-[#0A3D91]" style={{ margin: 0 }}>
+                                        {plan?.title || "여행계획 상세보기 (관리자)"}
+                                    </h3>
+                                    <div className="mt-2 flex flex-col">
+                                        <p className="text-gray-500 text-sm mb-1">
+                                            등록일: {plan?.createdAt?.replace("T", " ").substring(0, 16) || "-"}
+                                        </p>
+                                        <p className="text-gray-500 text-sm mb-0">
+                                            수정일: {plan?.updatedAt ? plan.updatedAt.replace("T", " ").substring(0, 16) : "-"}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Splitter 영역 */}
+                            <Splitter
+                                style={{
+                                    height: "100%",
+                                    borderTop: "1px solid #eee",
+                                    transition: "all 0.3s ease-in-out",
+                                }}
+                                min="25%"
+                                max="75%"
+                                size={splitSize}
+                                onChange={setSplitSize}
+                                primary="first"
+                            >
+                                {/* 좌측: 일정 패널 */}
+                                <Splitter.Panel
+                                    style={{
+                                        background: "#fff",
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        height: "100%",
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            display: "grid",
+                                            gridTemplateColumns: "200px 1fr",
+                                            height: "100%",
+                                            overflow: "hidden",
+                                        }}
+                                    >
+                                        {/* 사이드바 */}
+                                        <PlanSidebar
+                                            days={days}
+                                            activeDayIdx={activeDayIdx}
+                                            setActiveDayIdx={setActiveDayIdx}
+                                            isViewMode={false}
+                                            isEditMode={false}
+                                            isAdminView={true}
+                                        />
+
+                                        {/* 일정 리스트 */}
+                                        <div
+                                            className="overflow-y-auto px-10 py-8 custom-scroll"
+                                            style={{ height: "100%", background: "#fafafa" }}
+                                        >
+                                            <div className="border-b-2 mb-8">
+                                                <h3 className="text-2xl font-semibold text-[#2F3E46] mb-1">
+                                                    {plan?.title || "제목 없음"}
+                                                </h3>
+                                                <p className="text-gray-600 text-sm mt-4 mb-2">
+                                                    작성자: {plan?.name} ({plan?.id}) | 여행일정: {plan?.startDate} ~ {plan?.endDate}
+                                                </p>
+                                            </div>
+
+                                            <PlanDayList
+                                                days={days}
+                                                activeDayIdx={activeDayIdx}
+                                                isViewMode={true}
+                                                onDragEnd={() => { }}
+                                                onEditTime={() => { }}
+                                                dayColors={DAY_COLORS}
+                                                fallbackImg={FALLBACK_IMG}
+                                                setDays={() => { }}
+                                            />
+                                        </div>
+                                    </div>
+                                </Splitter.Panel>
+
+                                {/* 우측: 지도 */}
+                                <Splitter.Panel
+                                    style={{
+                                        background: "#fefefe",
+                                        position: "relative",
+                                        overflow: "hidden",
+                                    }}
+                                >
+                                    <TravelMap markers={markers} step={6} />
+                                </Splitter.Panel>
+                            </Splitter>
+                        </div>
+                    </Content>
+                </Layout>
+            </Layout>
+        </AdminThemeProvider>
     );
 }

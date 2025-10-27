@@ -1,10 +1,9 @@
 package com.navi.accommodation.dto.api;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.*;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * ========================================================
@@ -20,14 +19,18 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AccApiDTO {
-    /** 공통 필드 */
+    /**
+     * 공통 필드
+     */
     @JsonProperty("contentid")
     private String contentId;           // 공공데이터 원본 ID
 
     @JsonProperty("cat3")
     private String category;            // 카테고리 코드
 
-    /** acc_list.json */
+    /**
+     * acc_list.json
+     */
     private String title;               // 숙소명
     private String addr1;               // 기본 주소
     private String addr2;               // 상세 주소
@@ -42,10 +45,14 @@ public class AccApiDTO {
     @JsonProperty("modifiedtime")
     private String modifiedTime;        // 수정일시
 
-    /** acc_basic.json */
+    /**
+     * acc_basic.json
+     */
     private String overview;            // 숙소 설명
 
-    /** acc_extra.json */
+    /**
+     * acc_extra.json
+     */
     @JsonProperty("checkintime")
     private String checkInTime;         // 체크인 시간
 

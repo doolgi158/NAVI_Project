@@ -65,7 +65,7 @@ export default function PlanDayList({
                 <div className="flex gap-12 overflow-x-auto px-4 custom-scroll">
                     {days.map((d, dayIdx) => (
                         <Droppable
-                            key={d.dateISO}
+                            key={d.dateISO || `day-${dayIdx}`}
                             droppableId={`day-${dayIdx}`}
                             isDropDisabled={isViewMode}
                         >
@@ -76,20 +76,20 @@ export default function PlanDayList({
                                     className="w-[300px] flex-shrink-0"
                                 >
                                     <h2
-                                        className="text-lg font-bold text-center sticky top-0 z-10 py-2 mb-4"
-                                        style={{ backgroundColor: "#fff" }}
+                                        className="text-lg font-bold text-center sticky top-0 z-10 py-2 mb-5 "
+                                        style={{ backgroundColor: `${dayColors[dayIdx % dayColors.length]}cc`, borderRadius: '20px' }}
                                     >
-                                        <span style={{ color: dayColors[dayIdx % dayColors.length] }}>
+                                        <span style={{ color: "white" }}>
                                             DAY {d.orderNo || dayIdx + 1}
                                         </span>{" "}
-                                        <span className="text-gray-500 text-sm">
+                                        <span className="text-white text-sm">
                                             ({dayjs(d.dateISO).format("YYYY.MM.DD")})
                                         </span>
                                     </h2>
                                     <div className="relative min-h-[550px]">
                                         {d.items.map((it, i) => (
                                             <PlanItemCard
-                                                key={`${dayIdx}-${i}-${it.title}-${i}`}
+                                                key={it.itemId || it.travelId || it.stayId || `${activeDayIdx}-${i}`}
                                                 item={it}
                                                 index={i}
                                                 dayIdx={dayIdx}
@@ -122,14 +122,14 @@ export default function PlanDayList({
                         >
                             <h2
                                 className="text-xl font-bold text-center sticky top-0 z-10 py-2 mb-4"
-                                style={{ backgroundColor: "#fff" }}
+                                style={{ backgroundColor: `${dayColors[activeDayIdx % dayColors.length]}cc`, borderRadius: '20px' }}
                             >
                                 <span
-                                    style={{ color: dayColors[activeDayIdx % dayColors.length] }}
+                                    style={{ color: 'white' }}
                                 >
                                     DAY {days[activeDayIdx]?.orderNo || activeDayIdx + 1}
                                 </span>{" "}
-                                <span className="text-gray-500 text-sm">
+                                <span className="text-white text-sm">
                                     (
                                     {days[activeDayIdx]?.dateISO
                                         ? dayjs(days[activeDayIdx].dateISO).format("YYYY.MM.DD")
@@ -141,7 +141,7 @@ export default function PlanDayList({
                             <div className="relative min-h-[550px]">
                                 {days[activeDayIdx]?.items.map((it, i) => (
                                     <PlanItemCard
-                                        key={`${activeDayIdx}-${i}-${it.title}-${i}`}
+                                        key={it.itemId || it.travelId || it.stayId || `${activeDayIdx}-${i}`}
                                         item={it}
                                         index={i}
                                         dayIdx={activeDayIdx}

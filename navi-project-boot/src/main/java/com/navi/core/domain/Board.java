@@ -29,37 +29,65 @@ public class Board {
     @Column(name = "board_no")
     private Integer boardNo;
 
-    @Column(name = "board_title")
+    //제목
+    @Column(name = "board_title", nullable = false)
     private String boardTitle;
 
+    //좋아요수
     @Column(name = "board_good")
     @Builder.Default
     private Integer boardGood = 0;
 
+    //신고수
     @Column(name = "report_count")
     @Builder.Default
     private Integer reportCount = 0;
 
-    @Column(name = "board_viewCount")
-    @ColumnDefault("0")
+    //조회수
+    @Column(name = "board_view_count")
     @Builder.Default
     private Integer boardViewCount = 0;
 
+    //게시글내용
     @Lob
-    @Column(name = "board_content")
+    @Column(name = "board_content", nullable = false)
     private String boardContent;
 
-    @Column(name = "user_no")
+    //작성자 번호
+    @Column(name = "user_no", nullable = false)
     private Integer userNo;
 
+    //등록일
     @CreationTimestamp
-    @Column(name = "create_date")
+    @Column(name = "create_date", updatable = false)
     private LocalDateTime createDate;
 
+    //수정일
     @UpdateTimestamp
     @Column(name = "update_date")
     private LocalDateTime updateDate;
 
+    //이미지 URL
     @Column(name = "board_image")
     private String boardImage;
+
+    // 댓글 수는 계산해서 가져와야 함
+    @Transient  // DB 컬럼이 아님
+    private Integer commentCount;
+
+    // Getters and Setters
+    public Integer getBoardViewCount() {
+        return boardViewCount != null ? boardViewCount : 0;
+    }
+
+    public Integer getCommentCount() {
+        return commentCount != null ? commentCount : 0;
+    }
+
+    //게시글 작성자 확인
+    public boolean isAuthor(Integer currentUserNo) {
+        return this.userNo.equals(currentUserNo);
+
+
+    }
 }

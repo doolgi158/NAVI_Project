@@ -612,48 +612,43 @@ export default function PlanScheduler() {
 
                 updated[idx].items = [...(updated[idx].items || []), ...newItems];
             });
-
             console.log("✅ updated days:", updated);
             return [...updated];
         });
     };
 
-
     /** ✅ 숙소 추가 처리 */
-    const handleAddStay = (selectedStays, targetDayIdx) => {
+    const handleAddStay = (grouped) => {
         setDays((prev) => {
             const updated = [...prev];
-            if (!updated[targetDayIdx]) return prev;
 
-            const newItems = selectedStays.map((s) => ({
-                type: "stay",
-                title: s.title,
-                stayId: s.accId,
-                lat: parseFloat(s.mapy ?? s.lat),
-                lng: parseFloat(s.mapx ?? s.lng),
-                img:
-                    s.accImage?.trim() ||
-                    s.img?.trim() ||
-                    "https://placehold.co/150x150?text=No+Image",
-                startTime: "--:--",
-                endTime: "--:--",
-                __manual__: false,
-            }));
+            Object.entries(grouped).forEach(([dayIdx, stays]) => {
+                const idx = parseInt(dayIdx, 10);
+                if (isNaN(idx) || !updated[idx]) return;
 
-            updated[targetDayIdx].items = [
-                ...updated[targetDayIdx].items,
-                ...newItems,
-            ];
+                const newItems = stays.map((s) => ({
+                    type: "stay",
+                    title: s.title,
+                    stayId: s.accId,
+                    lat: parseFloat(s.mapy ?? s.lat),
+                    lng: parseFloat(s.mapx ?? s.lng),
+                    img:
+                        s.accImage?.trim() ||
+                        s.img?.trim() ||
+                        s.imagePath?.trim() ||
+                        "https://placehold.co/150x150?text=No+Image",
+                    startTime: "--:--",
+                    endTime: "--:--",
+                    __manual__: false,
+                }));
 
+                updated[idx].items = [...(updated[idx].items || []), ...newItems];
+            });
+
+            console.log("✅ updated stays:", updated);
             return [...updated];
         });
-
-        message.success(`${selectedStays.length}개의 숙소가 ${targetDayIdx + 1}일차에 추가되었습니다.`);
     };
-
-
-
-
 
     /** 저장/수정 */
     const handleConfirm = async () => {

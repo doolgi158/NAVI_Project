@@ -15,15 +15,11 @@ import com.navi.user.dto.auth.UserSecurityDTO;
 import com.navi.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.awt.print.Pageable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -214,8 +210,6 @@ public class RoomRsvServiceImpl implements RoomRsvService {
     }
 
 
-
-
     @Override
     @Transactional(readOnly = true)
     public boolean verifyTotalAmount(String reserveId, BigDecimal paidAmount) {
@@ -251,7 +245,7 @@ public class RoomRsvServiceImpl implements RoomRsvService {
                             .price(r.getPrice())
                             .rsvStatus(r.getRsvStatus())
                             .quantity(r.getQuantity())
-                            .accTitle(acc != null ? acc.getTitle() : null)
+                            .title(acc != null ? acc.getTitle() : null)
                             .roomName(room != null ? room.getRoomName() : null)
                             .reserverName(user.getName())
                             .reserverEmail(user.getEmail())

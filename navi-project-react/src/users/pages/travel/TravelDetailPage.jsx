@@ -212,6 +212,20 @@ export default function TravelDetailPage() {
             </Text>
             <Title level={1}>{data.title}</Title>
 
+            <div style={{ position: 'absolute', top: 20, left: 0 }}>
+              <Button
+                type="primary"
+                style={{
+                  color: '#676767ff',
+                  borderRadius: '8px',
+                  fontWeight: 600,
+                }}
+                onClick={() => window.history.back()}
+              >
+                {'< 목록으로'}
+              </Button>
+            </div>
+
             {/* ❤️ 북마크 공유 */}
             <Row justify="end" style={{ marginBottom: 20 }}>
               <Space size={32}>
