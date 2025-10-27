@@ -96,6 +96,14 @@ const UserRouter = () => {
             path: "/users/my-payments",
             element: <UserPayments />,
         },
+        {
+            path: "client/*",
+            element: (
+                <Suspense fallback={Loading}>
+                    <ClientRouter />
+                </Suspense>
+            )
+        }
     ]
 }
 

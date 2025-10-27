@@ -39,6 +39,7 @@ const root = createBrowserRouter([
                 path: "/adm",
                 children: [...AdminRouter()]
             },
+            ...ManagerRouter(),
             {
                 path: "/accommodations",
                 children: [...AccRouter()]
