@@ -99,7 +99,7 @@ const FlightPage = () => {
 
   return (
     <MainLayout>
-      <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4 lg:p-10">
+      <div className="min-h-screen flex flex-col items-center justify-center p-4 lg:p-10">
         {/* 왕복 / 편도 선택 탭 */}
         <div className="w-full max-w-6xl flex justify-start -mb-px z-10">
           <button
