@@ -69,4 +69,5 @@ public class FlightReservation extends BaseEntity {
     @Column(name = "paid_at")
     @Comment("결제 완료 일자")
     private LocalDate paidAt;
+    
 }

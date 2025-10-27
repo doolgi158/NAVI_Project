@@ -71,9 +71,9 @@ const handleSearch = async () => {
       {/* 헤더 - 게시판/공지사항 선택 */}
       <div className="notice-header">
         <div className="board-nav">
-          <Link to="/board" className="nav-link">일반 게시판</Link>
+          <Link to="/client/board" className="nav-link">일반 게시판</Link>
           <span className="nav-divider">|</span>
-          <Link to="/notice" className="nav-link active">공지사항</Link>
+          <Link to="/client/notice" className="nav-link active">공지사항</Link>
         </div>
       </div>
 
@@ -111,7 +111,7 @@ const handleSearch = async () => {
                 <td>{notice.noticeNo}</td>
                 <td 
                   className="notice-title"
-                  onClick={() => navigate(`notice/detail?noticeNo=${notice.noticeNo}`)}
+                  onClick={() => navigate(`/client/notice/detail?noticeNo=${notice.noticeNo}`)}
                   style={{ cursor: 'pointer' }}
                 >
                   {notice.noticeTitle}

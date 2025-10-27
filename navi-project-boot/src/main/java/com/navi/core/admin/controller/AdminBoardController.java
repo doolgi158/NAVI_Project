@@ -1,5 +1,6 @@
 package com.navi.core.admin.controller;
 
+import com.navi.core.admin.service.AdminBoardService;
 import com.navi.core.admin.service.AdminCommentService;
 import com.navi.core.domain.Board;
 import com.navi.core.admin.service.AdminBoardService;

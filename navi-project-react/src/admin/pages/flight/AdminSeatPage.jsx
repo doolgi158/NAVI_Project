@@ -136,7 +136,7 @@ const AdminSeatPage = () => {
             message.success("항공편의 모든 좌석이 삭제되었습니다.");
             fetchSeats(flightInfo.flightId, flightInfo.depTime);
         } catch {
-            message.error("전체 삭제 실패");
+            message.error("예약된 좌석이 있는 경우 삭제할 수 없습니다.");
         }
     };
 
@@ -154,7 +154,7 @@ const AdminSeatPage = () => {
             message.success("좌석이 초기화되었습니다.");
             fetchSeats(flightInfo.flightId, flightInfo.depTime);
         } catch {
-            message.error("초기화 실패");
+            message.error("예약된 좌석이 있는 경우 초기화 할 수 없습니다");
         }
     };
 
@@ -172,6 +172,29 @@ const AdminSeatPage = () => {
             dataIndex: "flightId",
             align: "center",
             sorter: (a, b) => a.flightId.localeCompare(b.flightId),
+            render: (v) => <div style={cellStyle}>{v}</div>,
+        },
+        {
+            title: "출발시간",
+            dataIndex: "depTime",
+            align: "center",
+            sorter: (a, b) => dayjs(a.depTime).unix() - dayjs(b.depTime).unix(),
+            render: (v) => (
+                <div style={cellStyle}>{dayjs(v).format("YYYY-MM-DD HH:mm")}</div>
+            ),
+        },
+        {
+            title: "출발 공항",
+            dataIndex: "depAirportNm",
+            align: "center",
+            sorter: (a, b) => a.depAirportNm.localeCompare(b.depAirportNm),
+            render: (v) => <div style={cellStyle}>{v}</div>,
+        },
+        {
+            title: "도착 공항",
+            dataIndex: "arrAirportNm",
+            align: "center",
+            sorter: (a, b) => a.arrAirportNm.localeCompare(b.arrAirportNm),
             render: (v) => <div style={cellStyle}>{v}</div>,
         },
         {
@@ -206,15 +229,6 @@ const AdminSeatPage = () => {
             align: "center",
             sorter: (a, b) => a.extraPrice - b.extraPrice,
             render: (v) => <div style={cellStyle}>{v?.toLocaleString()}원</div>,
-        },
-        {
-            title: "출발시간",
-            dataIndex: "depTime",
-            align: "center",
-            sorter: (a, b) => dayjs(a.depTime).unix() - dayjs(b.depTime).unix(),
-            render: (v) => (
-                <div style={cellStyle}>{dayjs(v).format("YYYY-MM-DD HH:mm")}</div>
-            ),
         },
         {
             title: "관리",

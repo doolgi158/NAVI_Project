@@ -233,7 +233,7 @@ const UserDetailPage = () => {
           passwordForm.resetFields();
         }}
         footer={null}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form
           form={passwordForm}

@@ -2,14 +2,14 @@ package com.navi.core.user.service;
 
 import com.navi.core.domain.Board;
 import com.navi.core.repository.BoardRepository;
-import com.navi.image.service.ImageService;  // ✅ import 추가
+import com.navi.image.service.ImageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 @Slf4j
 @Service
@@ -20,14 +20,18 @@ public class BoardService {
     private final BoardRepository boardRepository;
     private final ImageService imageService;
 
+    //전체 게시글 조회 (페이징)
     @Transactional(readOnly = true)
-    public List<Board> getAllBoards() {
-        return boardRepository.findAllByOrderByCreateDateDesc();
+    public Page<Board> getAllBoards(Pageable pageable) {
+        return boardRepository.findAll(pageable);
     }
 
+    //게시글 검색
     @Transactional(readOnly = true)
-    public List<Board> searchBoards(String keyword) {
-        return boardRepository.searchByKeyword(keyword);
+    public Page<Board> searchBoards(String keyword, Pageable pageable) {
+        return boardRepository.findByBoardTitleContainingOrBoardContentContaining(
+                keyword, keyword, pageable
+        );
     }
 
     public Board createBoard(String title, String content, Integer userNo, MultipartFile imageFile) {
@@ -42,7 +46,7 @@ public class BoardService {
         Board savedBoard = boardRepository.save(board);
         log.info("게시글 작성 완료. ID: {}", savedBoard.getBoardNo());
 
-        // ✅ 이미지 업로드
+        // 이미지 업로드
         if (imageFile != null && !imageFile.isEmpty()) {
             try {
                 var imageDTO = imageService.uploadImage(
@@ -83,7 +87,7 @@ public class BoardService {
         board.setBoardTitle(title);
         board.setBoardContent(content);
 
-        // ✅ 이미지 업데이트
+        // 이미지 업데이트
         if (imageFile != null && !imageFile.isEmpty()) {
             try {
                 // 기존 이미지 삭제
@@ -111,7 +115,7 @@ public class BoardService {
             throw new RuntimeException("본인이 작성한 게시글만 삭제할 수 있습니다.");
         }
 
-        // ✅ 이미지 삭제
+        // 이미지 삭제
         try {
             imageService.deleteImage("BOARD", id.toString());
             log.info("이미지 삭제 완료");

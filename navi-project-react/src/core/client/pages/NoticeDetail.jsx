@@ -16,7 +16,7 @@ function NoticeDetail() {
       fetchNotice();
     } else {
       alert('잘못된 접근입니다.');
-      navigate('/notice');
+      navigate('/client/notice');
     }
   }, [noticeNo, navigate]);
 
@@ -28,7 +28,7 @@ function NoticeDetail() {
     } catch (error) {
       console.error('공지사항을 불러오는데 실패했습니다:', error);
       alert('공지사항을 불러오는데 실패했습니다.');
-      navigate('/notice');
+      navigate('/client/notice');
     } finally {
       setLoading(false);
     }
@@ -105,7 +105,7 @@ function NoticeDetail() {
       )}
 
       <div className="button-group">
-        <button onClick={() => navigate('/notice')}>목록</button>
+        <button onClick={() => navigate('/client/notice')}>목록</button>
       </div>
     </div>
     </MainLayout>

@@ -11,12 +11,15 @@ import {
   Input,
   Form,
   InputNumber,
+  Descriptions,
+  Divider,
 } from "antd";
 import {
   ReloadOutlined,
   DeleteOutlined,
   EditOutlined,
   SearchOutlined,
+  FileSearchOutlined,
 } from "@ant-design/icons";
 import axios from "axios";
 import dayjs from "dayjs";
@@ -37,6 +40,8 @@ const AdminFlightReservationPage = () => {
   const [selected, setSelected] = useState(null);
   const [form] = Form.useForm();
   const searchInput = useRef(null);
+  const [detailModal, setDetailModal] = useState(false);
+  const [detailData, setDetailData] = useState(null);
 
   /** ✅ 예약 목록 조회 */
   const fetchReservations = async () => {
@@ -106,6 +111,11 @@ const AdminFlightReservationPage = () => {
     setEditModal(true);
   };
 
+  /** ✅ 상세조회 모달 열기 */
+  const openDetailModal = (record) => {
+    setDetailData(record);
+    setDetailModal(true);
+  };
   /** ✅ 수정 저장 */
   const handleSave = async () => {
     try {
@@ -282,6 +292,15 @@ const AdminFlightReservationPage = () => {
       render: (_, record) => (
         <Space size={"small"}>
           <Button
+            type="default"
+            icon={<FileSearchOutlined />}
+            onClick={() => openDetailModal(record)}
+            size="small"
+            style={{ borderRadius: 8 }}
+          >
+            상세
+          </Button>
+          <Button
             icon={<EditOutlined />}
             onClick={() => openEditModal(record)}
             size="small"
@@ -388,6 +407,109 @@ const AdminFlightReservationPage = () => {
             />
           </Form.Item>
         </Form>
+      </Modal>
+      {/* ✅ 상세 조회 모달 */}
+      <Modal
+        title={`✈️ 예약 상세정보 - ${detailData?.rsvId || ""}`}
+        open={detailModal}
+        onCancel={() => setDetailModal(false)}
+        footer={[
+          <Button key="close" onClick={() => setDetailModal(false)}>
+            닫기
+          </Button>,
+        ]}
+        width={700}
+        centered
+      >
+        {detailData ? (
+          <>
+            <Divider orientation="left">📌 기본 정보</Divider>
+            <Descriptions
+              bordered
+              column={2}
+              labelStyle={{ fontWeight: "bold", width: 120 }}
+              contentStyle={{ background: "#fafafa" }}
+            >
+              <Descriptions.Item label="예약번호">{detailData.rsvId}</Descriptions.Item>
+              <Descriptions.Item label="사용자">{detailData.userName}</Descriptions.Item>
+              <Descriptions.Item label="결제금액">
+                <Tag color="purple">
+                  {detailData.totalPrice?.toLocaleString()} 원
+                </Tag>
+              </Descriptions.Item>
+              <Descriptions.Item label="예약상태">
+                <Tag
+                  color={
+                    detailData.status === "PAID"
+                      ? "purple"
+                      : detailData.status === "PENDING"
+                        ? "blue"
+                        : detailData.status === "CANCELLED"
+                          ? "volcano"
+                          : detailData.status === "FAILED"
+                            ? "red"
+                            : "default"
+                  }
+                >
+                  {detailData.status}
+                </Tag>
+              </Descriptions.Item>
+              <Descriptions.Item label="항공편">{detailData.flightId}</Descriptions.Item>
+              <Descriptions.Item label="좌석번호">
+                <Tag color="geekblue">{detailData.seatNo}</Tag>
+              </Descriptions.Item>
+              <Descriptions.Item label="좌석등급">
+                <Tag
+                  color={
+                    detailData.seatClass === "ECONOMY"
+                      ? "green"
+                      : detailData.seatClass === "PRESTIGE"
+                        ? "gold"
+                        : "default"
+                  }
+                >
+                  {detailData.seatClass}
+                </Tag>
+              </Descriptions.Item>
+              <Descriptions></Descriptions>
+            </Descriptions>
+
+            <Divider orientation="left">🛫 항공편 정보</Divider>
+            <Descriptions
+              bordered
+              column={2}
+              labelStyle={{ fontWeight: "bold", width: 120 }}
+              contentStyle={{ background: "#fafafa" }}
+            >
+
+              <Descriptions.Item label="출발지">{detailData.depAirport}</Descriptions.Item>
+              <Descriptions.Item label="도착지">{detailData.arrAirport}</Descriptions.Item>
+              <Descriptions.Item label="출발시간">
+                {dayjs(detailData.depTime).format("YYYY-MM-DD HH:mm")}
+              </Descriptions.Item>
+              <Descriptions.Item label="도착시간">
+                {dayjs(detailData.arrTime).format("YYYY-MM-DD HH:mm")}
+              </Descriptions.Item>
+            </Descriptions>
+
+            <Divider orientation="left">🕓 등록/수정 이력</Divider>
+            <Descriptions
+              bordered
+              column={1}
+              labelStyle={{ fontWeight: "bold", width: 150 }}
+              contentStyle={{ background: "#fafafa" }}
+            >
+              <Descriptions.Item label="등록일">
+                {dayjs(detailData.createdAt).format("YYYY-MM-DD HH:mm")}
+              </Descriptions.Item>
+              <Descriptions.Item label="수정일">
+                {dayjs(detailData.updatedAt).format("YYYY-MM-DD HH:mm")}
+              </Descriptions.Item>
+            </Descriptions>
+          </>
+        ) : (
+          <p>데이터를 불러오는 중입니다...</p>
+        )}
       </Modal>
     </div>
   );

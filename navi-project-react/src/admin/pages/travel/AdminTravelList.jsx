@@ -137,6 +137,9 @@ export default function AdminTravelList() {
       message.warning("먼저 항목을 선택하세요.");
       return;
     }
+
+    console.log(`📍 상태 변경 시도: IDs=[${selectedRowKeys.join(', ')}], State=${newState}`); // 디버깅 로그 1
+
     try {
       await updateAdminTravelState(selectedRowKeys, newState);
       message.success(
@@ -146,11 +149,12 @@ export default function AdminTravelList() {
       setSelectedRowKeys([]);
       loadTravels(page, searchKeyword);
     } catch (err) {
-      console.error("상태 변경 실패:", err);
-      message.error("상태 변경 중 오류가 발생했습니다.");
+      // 🚨 핵심 수정: 오류 상세 정보 출력
+      console.error("❌ 상태 변경 실패 (응답):", err.response);
+      console.error("❌ 상태 변경 실패 (전체):", err);
+      message.error("상태 변경 중 오류가 발생했습니다. (상세 오류는 콘솔 확인)");
     }
   };
-
   /** ✅ 테이블 정렬 핸들러 */
   const handleTableChange = (pagination, filters, sorter) => {
     if (sorter && sorter.field) {
@@ -162,6 +166,13 @@ export default function AdminTravelList() {
 
   /** ✅ 컬럼 정의 (정렬 추가됨) */
   const columns = [
+    {
+      title: "No",
+      key: "no",
+      align: "center",
+      width: 70,
+      render: (_, __, index) => page * pageSize + (index + 1),
+    },
     { title: "ID", dataIndex: "travelId", key: "travelId", align: "center", sorter: true },
     {
       title: "제목",

@@ -83,7 +83,7 @@ public class AdminNoticeService {
         notice.setNoticeStartDate(noticeDTO.getNoticeStartDate());
         notice.setNoticeEndDate(noticeDTO.getNoticeEndDate());
         notice.setNoticeImage(noticeDTO.getNoticeImage());
-        notice.setNoticeFile(noticeDTO.getNoticeAttachFile());
+        notice.setNoticeFile(noticeDTO.getNoticeFile());
 
         Notice savedNotice = noticeRepository.save(notice);
         log.info("공지사항 수정 완료. ID: {}", noticeNo);

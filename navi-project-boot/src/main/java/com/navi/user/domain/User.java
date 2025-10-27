@@ -7,7 +7,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.navi.user.enums.UserRole;
 import com.navi.user.enums.UserState;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -96,6 +99,7 @@ public class User {
     public void addRole(UserRole userRole) {
         userRoleList.add(userRole);
     }
+
     public void clearRole(UserRole userRole) {
         userRoleList.clear();
     }
@@ -110,5 +114,9 @@ public class User {
     // Spring Security나 DTO 변환 시 사용하기 위한 Getter
     public List<UserRole> getRoleList() {
         return this.userRoleList;
+    }
+
+    public Integer getUserNo() {
+        return 0;
     }
 }

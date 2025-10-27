@@ -2,7 +2,10 @@ package com.navi.accommodation.dto.response;
 
 import com.navi.accommodation.domain.Acc;
 import com.navi.room.dto.response.RoomResponseDTO;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -22,8 +25,8 @@ public class AccDetailResponseDTO {
     private String category;                // 숙소 유형
     private String tel;                     // 문의 전화번호
     private String address;                 // 전체 주소
-    private BigDecimal mapx;
-    private BigDecimal mapy;
+    private BigDecimal mapx;                // 경도
+    private BigDecimal mapy;                // 위도
     private String overview;                // 숙소 설명
     private String checkInTime;             // 체크인 시간
     private String checkOutTime;            // 체크아웃 시간
@@ -31,6 +34,7 @@ public class AccDetailResponseDTO {
     private Boolean hasParking;             // 주차 가능 여부
     private boolean active;                 // 운영 여부
     private List<String> accImages;         // 숙소 이미지
+    private Long viewCount;                 // 조회수
 
     /* 객실 정보 */
     private List<RoomResponseDTO> rooms;    // 객실 리스트 (Todo: 객실별 이미지 포함 - 추후 확장)
@@ -50,7 +54,8 @@ public class AccDetailResponseDTO {
                 .checkOutTime(acc.getCheckOutTime())
                 .hasCooking(acc.getHasCooking())
                 .hasParking(acc.getHasParking())
-                .active(acc.isActive())
+                .active(acc.getActive())
+                .viewCount(acc.getViewCount())
                 .build();
     }
 }

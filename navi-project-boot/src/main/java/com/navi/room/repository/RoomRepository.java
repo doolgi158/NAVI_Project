@@ -16,8 +16,7 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     List<Room> findByAcc(Acc acc);
     // 2. 숙소 ID(accId)로 객실 목록 조회
     List<Room> findByAcc_AccId(String accId);
-    // 3. 숙소별 + 예약 가능한 객실 조회 (isAvailable = true)
-    //List<Room> findByAccAndIsAvailable(Acc acc, boolean isAvailable);
+
 
     /* 관리자 기능 */
     // 1. contentId 기준으로 객실 목록 조회
@@ -30,4 +29,8 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     // 4. roomId 자동 생성
     @Query(value = "SELECT ROOM_SEQ.NEXTVAL FROM DUAL", nativeQuery = true)
     Long getNextSeqVal();
+    // 5. 숙소 기본키(accNo)로 객실 목록 조회 (숙소 삭제 시 사용)
+    List<Room> findByAcc_AccNo(Long accNo);
+    // 6. 특정 숙소의 객실 일괄 삭제
+    void deleteAllByAcc_AccNo(Long accNo);
 }

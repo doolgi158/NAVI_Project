@@ -57,9 +57,9 @@ function BoardList() {
         {/* 헤더 - 게시판/공지사항 선택 */}
         <div className="board-list-header">
           <div className="board-nav">
-            <Link to="/board" className="nav-link active">일반 게시판</Link>
+            <Link to="/client/board" className="nav-link active">일반 게시판</Link>
             <span className="nav-divider">|</span>
-            <Link to="/notice" className="nav-link">공지사항</Link>
+            <Link to="/client/notice" className="nav-link">공지사항</Link>
           </div>
         </div>
 
@@ -89,7 +89,7 @@ function BoardList() {
             boards.map(board => (
               <Link
                 key={board.boardNo}
-                to={`/board/detail?id=${board.boardNo}`}
+                to={`/client/board/detail?id=${board.boardNo}`}
                 className="board-item"
               >
                 <div className="board-item-title">
@@ -123,7 +123,7 @@ function BoardList() {
               다음 ▶
             </button>
           </div>
-          <Link to="/board/write" className="btn-write">
+          <Link to="/client/board/write" className="btn-write">
             글쓰기
           </Link>
         </div>

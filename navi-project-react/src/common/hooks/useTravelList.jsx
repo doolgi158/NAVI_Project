@@ -7,7 +7,6 @@ const categories = ['전체', '관광지', '음식점', '쇼핑'];
 
 // ✅ 여행지 목록 API 호출 함수
 const getTravelData = async (domain, pageParam, filterQuery, userId) => {
-  const apiUrl = `/${domain}`;
   const sortArray = pageParam.sort ? pageParam.sort.split(',') : [];
   const sortParams = [];
 
@@ -33,7 +32,12 @@ const getTravelData = async (domain, pageParam, filterQuery, userId) => {
     queryString += `&search=${encodedSearch}`;
   }
 
-  // ✅ 로그인 사용자가 있다면 쿼리 파라미터로 id 전달
+  // ✅ 좋아요순일 경우 별도 API 사용
+  let apiUrl = `/${domain}`;
+  if (pageParam.sort?.includes('likesCount,desc')) {
+    apiUrl = `/${domain}/popular`; // 💡 인기순 API로 분기
+  }
+
   try {
     const response = await api.get(apiUrl + queryString, {
       headers: {
@@ -48,7 +52,6 @@ const getTravelData = async (domain, pageParam, filterQuery, userId) => {
 };
 
 export const useTravelList = (userId) => {
-  // ⭐ 새로고침 시 세션 초기화
   const navType = performance?.getEntriesByType('navigation')?.[0]?.type;
   if (navType === 'reload') {
     sessionStorage.removeItem('travelListSort');
@@ -57,7 +60,6 @@ export const useTravelList = (userId) => {
     sessionStorage.removeItem('travelListPage');
   }
 
-  // ✅ 세션 저장된 상태 복원
   const getInitialParams = () => {
     const savedPage = sessionStorage.getItem('travelListPage');
     const savedSort = sessionStorage.getItem('travelListSort');
@@ -115,14 +117,14 @@ export const useTravelList = (userId) => {
       getTravelData('travel', param, query, userId)
         .then((data) => {
           const fetchedList = data.content || [];
-          const pageInfo = data.page || {}; // 추가
+          const pageInfo = data.page || {};
 
-          const currentPage = (pageInfo.number || 0) + 1; // 수정
-          const totalPages = pageInfo.totalPages || 1;  // 추가
-          const totalElements = pageInfo.totalElements || 0;  // 추가
+          const currentPage = (pageInfo.number || 0) + 1;
+          const totalPages = pageInfo.totalPages || 1;
+          const totalElements = pageInfo.totalElements || 0;
 
-          const startBlock = Math.floor((currentPage - 1) / 10) * 10 + 1; // 수정
-          const endBlock = Math.min(totalPages, startBlock + 9);  // 수정
+          const startBlock = Math.floor((currentPage - 1) / 10) * 10 + 1;
+          const endBlock = Math.min(totalPages, startBlock + 9);
           const pageList = Array.from({ length: endBlock - startBlock + 1 }, (_, i) => startBlock + i);
 
           setPageResult({
@@ -130,7 +132,7 @@ export const useTravelList = (userId) => {
             totalElements,
             totalPages,
             page: currentPage,
-            size: pageInfo.size || 10, // 수정
+            size: pageInfo.size || 10,
             startPage: startBlock,
             endPage: endBlock,
             pageList,
@@ -166,7 +168,7 @@ export const useTravelList = (userId) => {
       if (!showLoading && pageNumber > 0 && pageNumber <= pageResult.totalPages) {
         sessionStorage.setItem('travelListPage', pageNumber);
         setPageParam((prev) => ({ ...prev, page: pageNumber }));
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({ top: 0, behavior: 'auto' });
       }
     },
     [showLoading, pageResult.totalPages]

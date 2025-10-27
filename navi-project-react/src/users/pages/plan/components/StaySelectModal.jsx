@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button, message } from "antd";
+import { API_SERVER_HOST } from "@/common/api/planApi";
 
 export default function StaySelectModal({
   open,
@@ -14,6 +15,7 @@ export default function StaySelectModal({
   setSelectedStays,
 }) {
   const [selectedDates, setSelectedDates] = useState([]);
+  const FALLBACK_IMG = `${API_SERVER_HOST}/images/acc/default_hotel.jpg`;
 
   useEffect(() => setSelectedDates([]), [resetTrigger]);
 
@@ -23,6 +25,7 @@ export default function StaySelectModal({
     }
   }, [open, stay?.accId, stayPlans]);
 
+  /** ✅ 날짜 토글 (숙소 중복 방지 포함) */
   const toggleDate = (dateStr) => {
     const assigned = Object.entries(stayPlans).find(([id, dates]) =>
       dates.includes(dateStr)
@@ -41,7 +44,6 @@ export default function StaySelectModal({
           const updated = { ...stayPlans };
           updated[assignedId] = updated[assignedId].filter((d) => d !== dateStr);
           if (updated[assignedId].length === 0) delete updated[assignedId];
-
           const active = Object.keys(updated).filter((k) => updated[k].length);
           setStayPlans(updated);
           setSelectedStays(stays.filter((s) => active.includes(s.accId)));
@@ -95,44 +97,51 @@ export default function StaySelectModal({
             ? stays.find((s) => s.accId === bookedStayId)
             : null;
 
+          /** ✅ 통일된 이미지 경로 처리 */
+          const bookedImg =
+            bookedStay?.accImage?.trim()
+              ? bookedStay.accImage.startsWith("http")
+                ? bookedStay.accImage
+                : `${API_SERVER_HOST}${bookedStay.accImage.startsWith("/") ? bookedStay.accImage : `/images/acc/${bookedStay.accImage}`}`
+              : bookedStay?.imagePath
+                ? bookedStay.imagePath
+                : FALLBACK_IMG;
+
           return (
             <div
               key={dateStr}
               onClick={() => toggleDate(dateStr)}
               className={`relative flex flex-col items-center border-2 rounded-xl p-3 cursor-pointer transition ${booked
-                  ? bookedStayId === stay?.accId
-                    ? "border-[#6846FF] bg-[#6846FF]/10"
-                    : "border-red-300 bg-red-50"
-                  : selected
-                    ? "border-[#6846FF] bg-[#6846FF]/10"
-                    : "border-gray-300 hover:border-[#6846FF]"
+                ? bookedStayId === stay?.accId
+                  ? "border-[#6846FF] bg-[#6846FF]/10"
+                  : "border-red-300 bg-red-50"
+                : selected
+                  ? "border-[#6846FF] bg-[#6846FF]/10"
+                  : "border-gray-300 hover:border-[#6846FF]"
                 }`}
             >
+              {/* 날짜 뱃지 */}
               <div
                 className={`absolute -top-3 text-xs font-bold px-2 py-1 rounded-full ${booked
-                    ? bookedStayId === stay?.accId
-                      ? "bg-[#6846FF] text-white"
-                      : "bg-red-500 text-white"
-                    : selected
-                      ? "bg-[#6846FF] text-white"
-                      : "bg-gray-200 text-gray-600"
+                  ? bookedStayId === stay?.accId
+                    ? "bg-[#6846FF] text-white"
+                    : "bg-red-500 text-white"
+                  : selected
+                    ? "bg-[#6846FF] text-white"
+                    : "bg-gray-200 text-gray-600"
                   }`}
               >
                 {dateStr}
               </div>
 
+              {/* ✅ 숙소 썸네일 */}
               <div className="w-16 h-16 rounded-md overflow-hidden flex items-center justify-center mt-3">
                 {booked && bookedStayId !== stay?.accId ? (
                   <img
-                    src={
-                      bookedStay?.accImages?.[0]
-                        ? bookedStay.accImages[0].startsWith("http")
-                          ? bookedStay.accImages[0]
-                          : `http://localhost:8080${bookedStay.accImages[0]}`
-                        : "https://placehold.co/100x100?text=No+Image"
-                    }
+                    src={bookedImg}
                     alt={bookedStay?.title}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover rounded-xl shadow-sm ring-1 ring-gray-200"
+                    onError={(e) => (e.target.src = FALLBACK_IMG)}
                   />
                 ) : selected || bookedStayId === stay?.accId ? (
                   <i className="bi bi-check-circle text-[#6846FF] text-2xl"></i>
@@ -141,14 +150,15 @@ export default function StaySelectModal({
                 )}
               </div>
 
+              {/* 상태 표시 */}
               <p
                 className={`text-xs mt-2 font-medium ${booked
-                    ? bookedStayId === stay?.accId
-                      ? "text-[#6846FF]"
-                      : "text-red-600"
-                    : selected
-                      ? "text-[#6846FF]"
-                      : "text-gray-500"
+                  ? bookedStayId === stay?.accId
+                    ? "text-[#6846FF]"
+                    : "text-red-600"
+                  : selected
+                    ? "text-[#6846FF]"
+                    : "text-gray-500"
                   }`}
               >
                 {booked

@@ -1,14 +1,15 @@
 import React from "react";
-import { Card, Typography, Divider } from "antd";
+import { Card, Typography, Divider, Space } from "antd";
+import dayjs from "dayjs";
 
 const { Title, Text } = Typography;
 
 /**
- * 📦 짐배송 결제/요약 전용 카드
- * - 출발지, 도착지, 배송일, 가방 크기·개수, 예상 요금
+ * 📦 짐배송 요약 카드 (우측 결제 요약)
+ * - 출발지, 도착지, 배송일, 가방 크기·개수, 예상 요금 표시
  */
-const DlvRsvSumCard = ({ items, formData }) => {
-  if (!items || !formData) {
+const DlvRsvSumCard = ({ formData, totalAmount }) => {
+  if (!formData) {
     return (
       <Card
         style={{
@@ -24,6 +25,27 @@ const DlvRsvSumCard = ({ items, formData }) => {
     );
   }
 
+  const bags = formData.bags;
+
+  const fromAddress = formData.fromAddress || "출발지 미지정";
+  const toAddress = formData.toAddress || "도착지 미지정";
+
+  // ✅ 날짜 안전 포맷 처리
+  const deliveryDate = formData.deliveryDate
+    ? dayjs(formData.deliveryDate).isValid()
+      ? dayjs(formData.deliveryDate).format("YYYY-MM-DD")
+      : formData.deliveryDate.toString()
+    : "날짜 미지정";
+
+  // ✅ 가방 요약 표시
+  const bagSummary =
+    bags && Object.values(bags).some((v) => v > 0)
+      ? Object.entries(bags)
+        .filter(([_, count]) => count > 0)
+        .map(([size, count]) => `${size}(${count}개)`)
+        .join(", ")
+      : "없음";
+
   return (
     <Card
       style={{
@@ -35,38 +57,48 @@ const DlvRsvSumCard = ({ items, formData }) => {
       bodyStyle={{ padding: "22px" }}
     >
       <Title level={5} style={{ color: "#003366", marginBottom: 12 }}>
-        짐배송 예약 요약
+        🧾 짐배송 예약 요약
       </Title>
 
-      {/* 배송 정보 */}
-      <div style={{ marginBottom: 10 }}>
-        <Text strong>출발지</Text>
-        <br />
-        <Text type="secondary">{formData.startAddr}</Text>
+      <Space direction="vertical" size="small" style={{ width: "100%" }}>
+        <div>
+          <Text strong>출발지</Text>
+          <br />
+          <Text type="secondary">{fromAddress}</Text>
+        </div>
+
+        <div>
+          <Text strong>도착지</Text>
+          <br />
+          <Text type="secondary">{toAddress}</Text>
+        </div>
+
+        <div>
+          <Text strong>배송일자</Text>
+          <br />
+          <Text type="secondary">{deliveryDate}</Text>
+        </div>
+
+        <div>
+          <Text strong>가방 정보</Text>
+          <br />
+          <Text type="secondary">{bagSummary}</Text>
+        </div>
+
         <Divider style={{ margin: "10px 0" }} />
-        <Text strong>도착지</Text>
-        <br />
-        <Text type="secondary">{formData.endAddr}</Text>
-      </div>
 
-      <Text type="secondary" style={{ fontSize: 13 }}>
-        배송일자 : {formData.deliveryDate}
-      </Text>
-      <br />
-      <Text type="secondary" style={{ fontSize: 13 }}>
-        가방 {formData.bagCount}개 ({formData.bagSize}사이즈)
-      </Text>
-
-      <Divider />
-
-      {/* 요금 */}
-      <Text strong>예상 요금</Text>
-      <Title
-        level={4}
-        style={{ margin: 0, color: "#1677ff", fontWeight: 700 }}
-      >
-        ₩{formData.totalPrice?.toLocaleString()}
-      </Title>
+        <Text strong>총금액</Text>
+        <Title
+          level={4}
+          style={{
+            margin: 0,
+            color: "#1677ff",
+            fontWeight: 700,
+          }}
+        >
+          ₩{(totalAmount || 0).toLocaleString()}
+        </Title>
+      </Space>
     </Card>
   );
 };

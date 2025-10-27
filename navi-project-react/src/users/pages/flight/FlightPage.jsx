@@ -20,6 +20,7 @@ import {
   TeamOutlined,
   RocketOutlined,
   EnvironmentOutlined,
+  ArrowLeftOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import MainLayout from "../../layout/MainLayout";
@@ -114,7 +115,7 @@ const FlightPage = () => {
       <div
         style={{
           minHeight: "100vh",
-          background: "linear-gradient(180deg, #ffffff 0%, #f4f6fa 100%)",
+          background: "linear-gradient(180deg, #ffffff 0%, #ffffff 100%)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -128,8 +129,23 @@ const FlightPage = () => {
             borderRadius: 20,
             boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
             backgroundColor: "#fffefc",
+            position: "relative",
           }}
         >
+          <Button
+            type="text"
+            icon={<ArrowLeftOutlined />}
+            style={{
+              position: "absolute",
+              top: 20,
+              left: 20,
+              color: "#1677ff",
+              fontWeight: "500",
+            }}
+            onClick={() => navigate(-1)}
+          >
+
+          </Button>
           <div style={{ textAlign: "center", marginBottom: 20 }}>
             <RocketOutlined
               style={{ fontSize: 40, color: "#1677ff", marginBottom: 10 }}

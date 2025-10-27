@@ -26,6 +26,9 @@ public interface FlightReservationService {
     // 사용자별 예약 목록 조회
     List<FlightReservation> getReservationsByUser(Long userNo);
 
+    // 사용자별 예약 목록 조회(DTO)
+    List<FlightReservationDTO> getReservationsByUserDTO(Long userNo);
+
     // 예약 총액 조회
     BigDecimal getTotalAmountByReserveId(String frsvId);
 

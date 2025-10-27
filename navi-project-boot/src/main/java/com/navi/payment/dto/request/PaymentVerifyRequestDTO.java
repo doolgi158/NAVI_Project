@@ -20,7 +20,6 @@ public class PaymentVerifyRequestDTO {
     private PaymentMethod paymentMethod;
 
     /* === 결제 상세 정보 === */
-    @JsonAlias({"items", "paymentItems"})
     private List<PaymentConfirmRequestDTO.ReservePaymentItem> items; // 예약별 금액 리스트
 
     /* === 결제 확정 DTO 변환 === */

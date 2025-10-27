@@ -1,6 +1,9 @@
 package com.navi.accommodation.dto.request;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /* ======== [AccRequestDTO] ==========
    : 관리자 전용 숙소 등록 / 수정 요청 DTO
@@ -11,6 +14,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AccRequestDTO {
+    private Long accNo;             // 숙소 번호
     private String title;           // 숙소명
     private String category;        // 숙소 유형
     private String tel;             // 문의 전화번호

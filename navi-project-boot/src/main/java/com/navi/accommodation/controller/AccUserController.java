@@ -1,9 +1,11 @@
 package com.navi.accommodation.controller;
 
+import com.navi.accommodation.dto.api.AccRankDTO;
 import com.navi.accommodation.dto.request.AccSearchRequestDTO;
 import com.navi.accommodation.dto.response.AccDetailResponseDTO;
 import com.navi.accommodation.dto.response.AccListResponseDTO;
 import com.navi.accommodation.service.AccService;
+import com.navi.common.response.ApiResponse;
 import com.navi.room.service.RoomService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,9 +25,10 @@ public class AccUserController {
 
     /* === 숙소 리스트 조회 === */
     @GetMapping("/accommodations")
-    public List<AccListResponseDTO> getAccommodationList(@ModelAttribute AccSearchRequestDTO dto) {
+    public ResponseEntity<Map<String, Object>> getAccommodationList(@ModelAttribute AccSearchRequestDTO dto) {
         log.info("[USER] 숙소 리스트 조회 요청 - 조건: {}", dto);
-        return accService.searchAccommodations(dto);
+        Map<String, Object> result = accService.searchAccommodations(dto);
+        return ResponseEntity.ok(result);
     }
 
     /* 추가: /stay/list 도 동일한 응답을 반환하도록 (호환용) */
@@ -43,4 +47,8 @@ public class AccUserController {
         return accService.getAccDetail(accId);
     }
 
+    @GetMapping("/accommodation/rank")
+    public ApiResponse<List<AccRankDTO>> getAccRank() {
+        return ApiResponse.success(accService.getTop10ByViews());
+    }
 }

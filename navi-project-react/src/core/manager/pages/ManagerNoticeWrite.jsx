@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { createNotice, updateNotice, getNoticeById } from "./ManagerNoticeService";
-import "../css/ManagerNoticeWrite.css";
+import "../css/NoticeWrite.css";
 
 function NoticeWrite() {
   const [searchParams] = useSearchParams();
@@ -19,11 +19,29 @@ function NoticeWrite() {
 
   const [selectedFile, setSelectedFile] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [image, setImage] = useState(null);
-  const [imagePreview, setImagePreview] = useState('');
-  const [isDragging, setIsDragging] = useState(false);
 
-  // 날짜 포맷 함수
+const fetchNotice = useCallback(async () => {
+  try {
+    const data = await getNoticeById(noticeNo);
+    setWriteData({
+      noticeTitle: data.noticeTitle || '',
+      noticeContent: data.noticeContent || '',
+      noticeStartDate: data.noticeStartDate ? formatDateForInput(data.noticeStartDate) : '',
+      noticeEndDate: data.noticeEndDate ? formatDateForInput(data.noticeEndDate) : '',
+      noticeAttachFile: data.noticeAttachFile || ''
+    });
+  } catch (error) {
+    console.error('공지사항을 불러오는데 실패했습니다:', error);
+    alert('공지사항을 불러오는데 실패했습니다.');
+  }
+}, [noticeNo]);
+
+useEffect(() => {
+  if (isEditMode) {
+    fetchNotice();
+  }
+}, [isEditMode, fetchNotice]);  //fetchNotice 함수가 필요할 때만 새로 생성됌.
+
   const formatDateForInput = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);
@@ -35,35 +53,6 @@ function NoticeWrite() {
     return `${year}-${month}-${day}T${hours}:${minutes}`;
   };
 
-  // 공지사항 조회 (수정 모드)
-  const fetchNotice = useCallback(async () => {
-    try {
-      const data = await getNoticeById(noticeNo);
-      setWriteData({
-        noticeTitle: data.noticeTitle || '',
-        noticeContent: data.noticeContent || '',
-        noticeStartDate: data.noticeStartDate ? formatDateForInput(data.noticeStartDate) : '',
-        noticeEndDate: data.noticeEndDate ? formatDateForInput(data.noticeEndDate) : '',
-        noticeAttachFile: data.noticeAttachFile || ''
-      });
-      
-      // 기존 이미지 미리보기
-      if (data.noticeAttachFile) {
-        setImagePreview(data.noticeAttachFile);
-      }
-    } catch (error) {
-      console.error('공지사항을 불러오는데 실패했습니다:', error);
-      alert('공지사항을 불러오는데 실패했습니다.');
-    }
-  }, [noticeNo]);
-
-  useEffect(() => {
-    if (isEditMode) {
-      fetchNotice();
-    }
-  }, [isEditMode, fetchNotice]);
-
-  // 입력 변경 핸들러
   const handleChange = (e) => {
     const { name, value } = e.target;
     setWriteData(prev => ({
@@ -72,102 +61,26 @@ function NoticeWrite() {
     }));
   };
 
-  // 이미지 파일 처리
-  const handleFile = (file) => {
-    if (!file) return;
-
-    // 이미지 파일만 허용
-    if (!file.type.startsWith('image/')) {
-      alert('이미지 파일만 업로드 가능합니다.');
-      return;
-    }
-
-    setImage(file);
-
-    // 미리보기
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImagePreview(reader.result);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  // 이미지 파일 선택
-  const handleImageSelect = (e) => {
+  const handleFileChange = (e) => {
     const file = e.target.files[0];
-    handleFile(file);
-  };
-
-  // 드래그 이벤트
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    setIsDragging(false);
-    
-    const file = e.dataTransfer.files[0];
-    handleFile(file);
-  };
-
-  // 이미지 제거
-  const removeImage = () => {
-    setImage(null);
-    setImagePreview('');
-  };
-
-  // 이미지 업로드
-  const uploadImage = async (file) => {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('targetType', 'NOTICE');
-    formData.append('targetId', noticeNo || 'temp');
-
-    try {
-      const token = localStorage.getItem('accessToken');
-
-      const response = await fetch('/api/images/upload', {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Authorization': token ? `Bearer ${token}` : '',
-        },
-        body: formData
-      });
-
-      if (!response.ok) {
-        throw new Error('이미지 업로드 실패');
+    if (file) {
+      const maxSize = 10 * 1024 * 1024;
+      if (file.size > maxSize) {
+        alert('파일 크기는 10MB를 초과할 수 없습니다.');
+        e.target.value = '';
+        return;
       }
-
-      const data = await response.json();
-      return data.data.path;
-    } catch (error) {
-      console.error('이미지 업로드 오류:', error);
-      throw error;
+      setSelectedFile(file);
     }
   };
 
-  // 첨부파일 업로드
   const uploadFile = async (file) => {
     const formData = new FormData();
     formData.append('file', file);
 
     try {
-      const token = localStorage.getItem('accessToken');
-
-      const response = await fetch('/api/adm/notice/upload', {
+      const response = await fetch('/api/admin/notice/upload', {
         method: 'POST',
-        headers: {
-          'Authorization': token ? `Bearer ${token}` : '',  // ✅ 토큰 추가
-      },
-        credentials: 'include',
         body: formData
       });
 
@@ -183,20 +96,8 @@ function NoticeWrite() {
     }
   };
 
-  // 첨부파일 변경 (크기 제한 없음)
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setSelectedFile(file);
-    }
-  };
-
-  // 제출 핸들러
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-  const token = localStorage.getItem('accessToken');
-  console.log('현재 토큰:', token);
 
     if (!writeData.noticeTitle.trim()) {
       alert('제목을 입력해주세요.');
@@ -211,13 +112,6 @@ function NoticeWrite() {
     try {
       setLoading(true);
 
-      // 이미지 업로드
-      let imageUrl = imagePreview;
-      if (image) {
-        imageUrl = await uploadImage(image);
-      }
-
-      // 첨부파일 업로드
       let fileUrl = writeData.noticeAttachFile;
       if (selectedFile) {
         fileUrl = await uploadFile(selectedFile);
@@ -225,8 +119,7 @@ function NoticeWrite() {
 
       const submitData = {
         ...writeData,
-        noticeImage: imageUrl,  // 이미지 경로
-        noticeAttachFile: fileUrl  // 첨부파일 경로
+        noticeAttachFile: fileUrl
       };
 
       if (isEditMode) {
@@ -237,7 +130,7 @@ function NoticeWrite() {
         alert('작성되었습니다.');
       }
 
-      navigate('/adm/notice');
+      navigate('/manager/notice');
     } catch (error) {
       console.error('저장에 실패했습니다:', error);
       alert('저장에 실패했습니다.');
@@ -296,55 +189,12 @@ function NoticeWrite() {
           />
         </div>
 
-        {/* 이미지 업로드 영역 */}
-        <div className="write-group">
-          <label>이미지 (선택)</label>
-          
-          <div
-            className={`image-upload-area ${isDragging ? 'dragging' : ''}`}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            onClick={() => document.getElementById('imageInput').click()}
-          >
-            {imagePreview ? (
-              <div className="image-preview-container">
-                <img src={imagePreview} alt="미리보기" className="image-preview" />
-                <button
-                  type="button"
-                  className="remove-image-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removeImage();
-                  }}
-                >
-                  ✕
-                </button>
-              </div>
-            ) : (
-              <div className="upload-placeholder">
-                <p>이미지를 드래그하거나 클릭하여 업로드</p>
-                <p className="upload-hint">(JPG, PNG, GIF)</p>
-              </div>
-            )}
-          </div>
-
-          <input
-            id="imageInput"
-            type="file"
-            accept="image/*"
-            onChange={handleImageSelect}
-            style={{ display: 'none' }}
-          />
-        </div>
-
-        {/* 첨부파일 업로드 */}
         <div className="write-group">
           <label>첨부파일</label>
           <input
             type="file"
             onChange={handleFileChange}
-            accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip"
+            accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.zip"
           />
           {selectedFile && (
             <div className="file-info">
@@ -359,7 +209,7 @@ function NoticeWrite() {
         </div>
 
         <div className="button-group">
-          <button type="button" onClick={() => navigate('/adm/notice')}>
+          <button type="button" onClick={() => navigate('/manager/notice')}>
             취소
           </button>
           <button type="submit" disabled={loading}>

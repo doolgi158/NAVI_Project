@@ -3,19 +3,20 @@ package com.navi.common.response;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Data
 public class ApiResponse<T> {   //
     private int status;                 // HTTP 상태 코드
     private String message;             // 처리 결과 메시지
     private T data;                     // 데이터
-    private LocalDateTime timestamp;    // 응답 시간
+    private String timestamp;    // 응답 시간
 
     public ApiResponse(String message, int status, T data) {
         this.status = status;
         this.message = message;
         this.data = data;
-        this.timestamp = LocalDateTime.now();
+        this.timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
 
     // 성공 응답

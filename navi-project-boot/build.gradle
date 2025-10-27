@@ -97,6 +97,16 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:4.11.0'
     implementation 'com.squareup.okio:okio-jvm:3.4.0'
 
+    // MapStruct core
+    implementation 'org.mapstruct:mapstruct:1.5.5.Final'
+
+    // Annotation processor (for DTO ↔ Entity mapping code generation)
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+
+    // Lombok과 함께 쓴다면 추가로 필요
+    annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+    
+    implementation 'net.coobird:thumbnailator:0.4.20'
 }
 
 tasks.named('test') {

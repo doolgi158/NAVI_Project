@@ -23,4 +23,8 @@ public interface StockRepository extends JpaRepository<RoomStock, Long> {
     List<RoomStock> findByRoom_RoomIdAndStockDateBetween(String roomId, LocalDate startDate, LocalDate endDate);
     // 스케줄러용 - 기준일 이전의 재고 전체 삭제
     int deleteAllByStockDateBefore(LocalDate date);
+    // 객실 번호 기준으로 재고 찾기
+    List<RoomStock> findByRoom_RoomNo(Long roomNo);
+    // 특정 숙소의 재고 일괄 삭제
+    void deleteAllByRoom_Acc_AccNo(Long accNo);
 }

@@ -4,7 +4,7 @@ import com.navi.common.response.ApiResponse;
 import com.navi.delivery.domain.DeliveryReservation;
 import com.navi.delivery.dto.DeliveryReservationDTO;
 import com.navi.delivery.service.DeliveryReservationService;
-import com.navi.user.dto.users.UserSecurityDTO;
+import com.navi.user.dto.auth.UserSecurityDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -44,6 +44,19 @@ public class DeliveryReservationController {
     public ResponseEntity<ApiResponse<List<DeliveryReservation>>> getReservationsByUser(@PathVariable Long userNo) {
         List<DeliveryReservation> reservations = deliveryReservationService.getReservationsByUser(userNo);
         return ResponseEntity.ok(ApiResponse.success(reservations));
+    }
+
+    // 마이페이지용 예약 목록 조회
+    @GetMapping("/my")
+    public ResponseEntity<ApiResponse<List<DeliveryReservationDTO>>> getMyReservations(
+            @AuthenticationPrincipal UserSecurityDTO user
+    ) {
+        List<DeliveryReservationDTO> list = deliveryReservationService
+                .getReservationsByUser(user.getNo())
+                .stream()
+                .map(DeliveryReservationDTO::fromEntity)
+                .toList();
+        return ResponseEntity.ok(ApiResponse.success(list));
     }
 
     /*
