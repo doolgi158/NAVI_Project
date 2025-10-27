@@ -34,9 +34,10 @@
 
 /* 네비게이션 */
 .board-nav {
-  display: flex;
-  align-items: center;
-  gap: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
 }
 
 .nav-link {

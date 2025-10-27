@@ -4,7 +4,6 @@
 .board-list-container {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Malgun Gothic', sans-serif;
   padding: 40px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
 }
 
@@ -33,8 +32,10 @@
 }
 
 .board-nav {
-  display: flex;
-  align-items: center;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
 }
 
 .nav-title {
@@ -85,8 +86,6 @@
 }
 
 .btn-search:hover {
-  background-color: #667eea;
-  color: white;
   border-color: #667eea;
   transform: translateY(-1px);
 }
@@ -111,7 +110,6 @@
 
 .board-item:hover {
   background-color: #f8f9fa;
-  transform: translateX(8px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   border-left-color: #667eea;
 }

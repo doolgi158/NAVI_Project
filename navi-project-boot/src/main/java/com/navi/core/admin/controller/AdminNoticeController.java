@@ -6,12 +6,13 @@ import com.navi.image.dto.ImageDTO;
 import com.navi.image.service.ImageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 @RestController
@@ -33,7 +34,6 @@ public class AdminNoticeController {
             @RequestParam(value = "image", required = false) MultipartFile image) {
 
         try {
-            // 1. Notice Entity 생성
             Notice notice = new Notice();
             notice.setNoticeTitle(title);
             notice.setNoticeContent(content);
@@ -46,11 +46,9 @@ public class AdminNoticeController {
                 notice.setNoticeEndDate(LocalDateTime.parse(endDate));
             }
 
-            // 2. 공지사항 저장
             Notice savedNotice = adminNoticeService.save(notice);
             log.info("공지사항 작성 완료 - noticeNo: {}", savedNotice.getNoticeNo());
 
-            // 3. 이미지가 있으면 업로드
             if (image != null && !image.isEmpty()) {
                 ImageDTO imageDTO = imageService.uploadImage(
                         image,
@@ -94,14 +92,11 @@ public class AdminNoticeController {
                 notice.setNoticeEndDate(LocalDateTime.parse(endDate));
             }
 
-            // 이미지 삭제 요청
             if ("true".equals(removeImage)) {
                 imageService.deleteImage("NOTICE", String.valueOf(id));
                 notice.setNoticeImage(null);
                 log.info("이미지 삭제 완료 - noticeNo: {}", id);
-            }
-            // 새 이미지 업로드 (기존 이미지는 자동으로 교체됨)
-            else if (image != null && !image.isEmpty()) {
+            } else if (image != null && !image.isEmpty()) {
                 ImageDTO imageDTO = imageService.uploadImage(
                         image,
                         "NOTICE",
@@ -124,11 +119,7 @@ public class AdminNoticeController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteNotice(@PathVariable Long id) {
         try {
-            // 1. 이미지 먼저 삭제
             imageService.deleteImage("NOTICE", String.valueOf(id));
-            log.info("이미지 삭제 완료 - noticeNo: {}", id);
-
-            // 2. 공지사항 삭제
             adminNoticeService.delete(id);
             log.info("공지사항 삭제 완료 - noticeNo: {}", id);
 
@@ -140,17 +131,52 @@ public class AdminNoticeController {
         }
     }
 
-    // ==================== 공지사항 목록 조회 (관리자용) ====================
+    // ==================== 공지사항 목록 조회 (관리자용, 페이지네이션 적용) ====================
     @GetMapping
-    public ResponseEntity<?> getAllNotices() {
+    public ResponseEntity<?> getAllNotices(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
         try {
-            // 모든 공지사항 조회 (게시 기간 상관없이)
-            List<?> notices = adminNoticeService.getAllNotices();
-            return ResponseEntity.ok(notices);
+            Pageable pageable = PageRequest.of(page, size, Sort.by("createDate").descending());
+            Page<Notice> noticePage = adminNoticeService.getAllNotices(pageable);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("notices", noticePage.getContent());
+            response.put("currentPage", noticePage.getNumber());
+            response.put("totalPages", noticePage.getTotalPages());
+            response.put("totalItems", noticePage.getTotalElements());
+
+            return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             log.error("공지사항 목록 조회 실패", e);
             return ResponseEntity.badRequest().body("공지사항 목록 조회에 실패했습니다.");
+        }
+    }
+
+    // ==================== 공지사항 검색 (관리자용, 페이지네이션 적용) ====================
+    @GetMapping("/search")
+    public ResponseEntity<?> searchNotices(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        try {
+            Pageable pageable = PageRequest.of(page, size, Sort.by("createDate").descending());
+            Page<Notice> noticePage = adminNoticeService.searchNotices(keyword, pageable);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("notices", noticePage.getContent());
+            response.put("currentPage", noticePage.getNumber());
+            response.put("totalPages", noticePage.getTotalPages());
+            response.put("totalItems", noticePage.getTotalElements());
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            log.error("공지사항 검색 실패", e);
+            return ResponseEntity.badRequest().body("공지사항 검색에 실패했습니다.");
         }
     }
 
@@ -160,9 +186,7 @@ public class AdminNoticeController {
         try {
             Notice notice = adminNoticeService.findById(id);
 
-            // 이미지 정보 조회
             List<ImageDTO> images = imageService.getImagesByTarget("NOTICE", String.valueOf(id));
-
             if (!images.isEmpty()) {
                 notice.setNoticeImage(images.get(0).getPath());
             }

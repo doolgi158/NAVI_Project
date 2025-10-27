@@ -15,9 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -68,32 +66,29 @@ public class NoticeApiController {
         }
     }
 
-    // ==================== 공지사항 상세 조회 (조회수 증가) ====================
+    // ==================== 공지사항 상세 조회 (조회수 증가 포함) ====================
     @GetMapping("/{id}")
     public ResponseEntity<?> getNotice(@PathVariable Long id) {
         try {
-            Notice notice = noticeService.findById(id);
+            Integer noticeId = id.intValue(); // ✅ NoticeService는 Integer를 사용하므로 변환
+            NoticeDTO noticeDTO = noticeService.getNoticeById(noticeId);
 
             // 게시 기간 체크
             LocalDateTime now = LocalDateTime.now();
-            if (notice.getNoticeStartDate() != null && now.isBefore(notice.getNoticeStartDate())) {
+            if (noticeDTO.getNoticeStartDate() != null && now.isBefore(noticeDTO.getNoticeStartDate())) {
                 return ResponseEntity.badRequest().body("아직 공개되지 않은 공지사항입니다.");
             }
-            if (notice.getNoticeEndDate() != null && now.isAfter(notice.getNoticeEndDate())) {
+            if (noticeDTO.getNoticeEndDate() != null && now.isAfter(noticeDTO.getNoticeEndDate())) {
                 return ResponseEntity.badRequest().body("공개 기간이 종료된 공지사항입니다.");
             }
 
             // 이미지 정보 조회
             List<ImageDTO> images = imageService.getImagesByTarget("NOTICE", String.valueOf(id));
-
             if (!images.isEmpty()) {
-                notice.setNoticeImage(images.get(0).getPath());
+                noticeDTO.setNoticeImage(images.get(0).getPath());
             }
 
-            // 조회수 증가
-            noticeService.increaseViewCount(id);
-
-            return ResponseEntity.ok(notice);
+            return ResponseEntity.ok(noticeDTO);
 
         } catch (Exception e) {
             log.error("공지사항 조회 실패 - noticeNo: {}", id, e);
@@ -101,7 +96,7 @@ public class NoticeApiController {
         }
     }
 
-    // ==================== 공지사항 검색 ====================
+    // ==================== 공지사항 검색 (페이징 포함) ====================
     @GetMapping("/search")
     public ResponseEntity<?> searchNotices(
             @RequestParam String keyword,
