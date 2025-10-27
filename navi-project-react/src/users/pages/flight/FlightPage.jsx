@@ -99,7 +99,8 @@ const FlightPage = () => {
 
   return (
     <MainLayout>
-      <div className="min-h-screen flex flex-col items-center justify-center p-4 lg:p-10">
+      {/* ===== 수정된 컨테이너 영역 ===== */}
+      <div className="flex flex-col items-center p-4 lg:p-6 mt-4 mb-6">
         {/* 왕복 / 편도 선택 탭 */}
         <div className="w-full max-w-6xl flex justify-start -mb-px z-10">
           <button
@@ -131,7 +132,8 @@ const FlightPage = () => {
         </div>
 
         {/* 메인 검색 카드 */}
-        <div className="w-full max-w-6xl bg-white p-6 lg:p-10 rounded-b-xl rounded-tr-xl shadow-2xl z-0">
+        {/* ===== 내부 여백 살짝 줄임 ===== */}
+        <div className="w-full max-w-6xl bg-white p-5 lg:p-8 rounded-b-xl rounded-tr-xl shadow-2xl z-0">
           <h1 className="text-3xl font-extrabold text-gray-900 mb-6">
             <span className="text-blue-600 mr-2">국내선</span> 항공권 예매
           </h1>
