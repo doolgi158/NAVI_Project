@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -25,7 +27,6 @@ public class BoardService {
     public Page<Board> getAllBoards(Pageable pageable) {
         return boardRepository.findAll(pageable);
     }
-
     //게시글 검색
     @Transactional(readOnly = true)
     public Page<Board> searchBoards(String keyword, Pageable pageable) {

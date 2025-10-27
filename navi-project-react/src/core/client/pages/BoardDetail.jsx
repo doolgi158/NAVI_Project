@@ -194,6 +194,19 @@ function BoardDetail() {
       return;
     }
 
+    const formData = new FormData();
+    formData.append('title', editTitle);
+    formData.append('content', editContent);
+    
+    // ✅ 새 이미지가 있으면 추가
+    if (editImage) {
+      formData.append('image', editImage);
+    }
+    // 이미지 삭제 플래그
+    else if (removeImage) {
+      formData.append('removeImage', 'true');
+    }
+
     fetch(`/api/board/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -246,7 +259,12 @@ function BoardDetail() {
   };
 
   // 댓글을 계층 구조로 정렬
-  const organizeComments = (comments) => {
+  const organizeComments = (commentsList) => {
+    // ✅ 배열 체크
+    if (!Array.isArray(commentsList)) {
+      return [];
+    }
+
     const organized = [];
     const commentMap = {};
 
@@ -282,23 +300,16 @@ const renderComment = (comment, depth = 0) => (
     <div className="comment-content">
       {comment.commentContent}
     </div>
-    <div className="comment-actions">
-      {/* depth가 0일 때만 답글 버튼 표시 */}
-      {depth === 0 && (
-        <button
-          onClick={() => setReplyTo(comment.commentNo)}
-          className="btn-reply"
-        >
-          답글
-        </button>
-      )}
-      <button
-        onClick={() => handleReportComment(comment.commentNo)}
-        className="btn-comment-report"
+
+    <div className="comment-item-actions">
+      <button 
+        className="comment-action-btn"
+        onClick={() => setReplyTo(comment.commentNo)}
       >
-        신고
+        답글
       </button>
-      <button
+      <button 
+        className="comment-action-btn"
         onClick={() => {
           if (window.confirm('댓글을 삭제하시겠습니까?')) {
             fetch(`/api/board/comment/${comment.commentNo}`, {
@@ -314,8 +325,8 @@ const renderComment = (comment, depth = 0) => (
       </button>
     </div>
 
-    {/* 답글 입력창도 depth 0일 때만 */}
-    {replyTo === comment.commentNo && depth === 0 && (
+    {/* 답글 작성 폼 */}
+    {replyTo === comment.commentNo && (
       <div className="reply-form">
         <textarea
           value={replyContent}

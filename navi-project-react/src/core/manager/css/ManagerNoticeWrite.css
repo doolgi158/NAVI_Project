@@ -215,3 +215,19 @@
 .file-info a:hover {
   text-decoration: underline;
 }
+
+/* 파일 삭제 버튼 */
+.file-info button {
+  background: none;
+  border: none;
+  padding: 5px 10px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.file-info button:hover {
+  color: #dc3545 !important;
+  transform: scale(1.1);
+}
