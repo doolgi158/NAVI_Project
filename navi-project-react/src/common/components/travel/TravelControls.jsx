@@ -75,11 +75,10 @@ const TravelControls = ({
             {sortButtons.map((sort, idx) => (
               <React.Fragment key={sort.value}>
                 <button
-                  className={`pb-1 transition ${
-                    activeSort === sort.value
-                      ? 'text-blue-600 font-bold border-b-2 border-blue-600'
-                      : 'text-gray-500 hover:text-blue-600'
-                  }`}
+                  className={`pb-1 transition ${activeSort === sort.value
+                    ? 'text-blue-600 font-bold border-b-2 border-blue-600'
+                    : 'text-gray-500 hover:text-blue-600'
+                    }`}
                   onClick={() => handleSortChange(sort.value)}
                 >
                   {sort.label}

@@ -94,3 +94,19 @@
 .custom-scroll::-webkit-scrollbar-thumb:hover {
   background-color: rgba(10, 61, 145, 0.45);
 }
+
+.theme-user {
+  --color-primary: #58B6E8;
+  /* 산뜻한 하늘색 */
+  --color-primary-hover: #3CA5DB;
+  --color-accent: #FFC857;
+  /* 포인트용 노랑 */
+  --color-bg: #FAFCFF;
+  /* 전체 배경 (밝은 파스텔톤) */
+  --color-surface: #FFFFFF;
+  /* 카드 등 컨테이너 배경 */
+  --color-border: #D9E9F4;
+  --color-text: #24344D;
+  --color-text-sub: #6B7A8B;
+  --color-shadow: rgba(88, 182, 232, 0.15);
+}

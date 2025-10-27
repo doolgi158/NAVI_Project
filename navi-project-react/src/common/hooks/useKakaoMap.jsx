@@ -23,7 +23,6 @@ export const useKakaoMap = (containerId) => {
         retryCount++;
         console.warn(`⏳ Kakao SDK not ready (retry ${retryCount})`);
         setTimeout(ensureKakaoReady, 300);
-      } else {
       }
     };
 
@@ -43,8 +42,7 @@ export const useKakaoMap = (containerId) => {
       }
     }
 
-    return () => {
-    };
+    return () => { };
   }, [KAKAO_MAP_KEY]);
 
   /** ✅ 컨테이너 표시될 때까지 대기 */
@@ -152,14 +150,28 @@ export const useKakaoMap = (containerId) => {
         containerId === HIDE_OVERLAY_ID || showOverlay === false;
 
       if (!shouldHideOverlay) {
+        /** 🎨 오버레이 디자인 개선 (밝고 부드러운 카드 스타일) */
         const content = `
-          <div style="width: 220px; background: white; border-radius: 12px;
-                      box-shadow: 0 4px 12px rgba(0,0,0,0.15); overflow: hidden;">
-            <img src="${imageSrc}" style="width:100%; height:140px; object-fit:cover;"
+          <div style="
+            width: 230px;
+            background: #ffffff;
+            border-radius: 14px;
+            border: 1.5px solid #D6EAF5;
+            box-shadow: 0 4px 15px rgba(88,181,233,0.25);
+            overflow: hidden;
+            transition: all 0.3s ease;
+          ">
+            <img src="${imageSrc}" 
+              style="width:100%; height:140px; object-fit:cover; border-bottom:1px solid #E8F4FA;"
               onerror="this.src='https://placehold.co/220x140/cccccc/333333?text=No+Image'"/>
-            <div style="padding:8px 10px; font-weight:600; color:#222;">${title || ""}</div>
+            <div style="padding:10px 12px; text-align:center; background:#FAFDFF;">
+              <div style="font-size:15px; font-weight:600; color:#2A3A5E;">
+                ${title || ""}
+              </div>
+            </div>
           </div>
         `;
+
         const overlay = new kakao.maps.CustomOverlay({
           map,
           position: coords,

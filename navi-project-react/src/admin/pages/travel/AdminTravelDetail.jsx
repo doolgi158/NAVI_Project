@@ -7,13 +7,15 @@ import {
 } from "antd";
 import {
     EnvironmentFilled, PhoneFilled, ClockCircleFilled,
-    CarFilled, CreditCardFilled, HomeFilled, EditOutlined
+    CarFilled, CreditCardFilled, HomeFilled, EditOutlined, LeftOutlined
 } from "@ant-design/icons";
 import AdminSiderLayout from "../../layout/AdminSiderLayout";
 import { Content, Header } from "antd/es/layout/layout";
 import { useKakaoMap } from "@/common/hooks/useKakaoMap";
+import AdminThemeProvider from "../../theme/AdminThemeProvider";
 
 const { Title, Text, Paragraph } = Typography;
+const NAVI_BLUE = "#0A3D91";
 
 export default function AdminTravelDetail() {
     const { travelId } = useParams();
@@ -117,146 +119,154 @@ export default function AdminTravelDetail() {
     ];
 
     return (
-        <Layout className="min-h-screen">
-            <AdminSiderLayout />
-            <Layout>
-                <Header
-                    className="px-6 shadow flex items-center justify-between text-xl font-bold"
-                    style={{ background: "#fefce8" }}
-                >
-                    <span>NAVI 관리자 페이지</span>
+        <AdminThemeProvider>
+            <Layout className="min-h-screen" style={{ background: "#F7F8FB" }}>
+                <AdminSiderLayout />
+                <Layout>
+                    {/* ▶ AdminPlanDetail 과 동일한 구성: 좌측 뒤로가기 + 타이틀, 우측 액션 */}
+                    <Header
+                        className="px-6 flex items-center"
+                        style={{
+                            background: "#FFFFFF",
+                            boxShadow: "0 1px 0 rgba(0,0,0,0.04)",
+                            height: 64,
+                        }}
+                    >
+                        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                            <Button
+                                icon={<LeftOutlined />}
+                                onClick={() => navigate(-1)}
+                                style={{ borderRadius: 8 }}
+                            />
+                            <h2 style={{ margin: 0, color: NAVI_BLUE, fontWeight: 700 }}>
+                                NAVI 관리자 – 여행지 상세
+                            </h2>
+                        </div>
 
-                </Header>
+                        <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
 
-                <Content style={{ padding: "24px", background: "#fff", minHeight: "100vh" }}>
-                    <div className="flex flex-col gap-2  items-end">
-                        <Button
-                            type="primary"
-                            style={{
-                                backgroundColor: "#9db92dff",
-                                color: "#ffffffff",
-                            }}
-                            onClick={() => navigate(`/adm/travel`)}
-                        >
-                            목록으로
-                        </Button>
-                        <Button
-                            type="primary"
-                            icon={<EditOutlined />}
-                            style={{ background: "#0A3D91" }}
-                            onClick={() => navigate(`/adm/travel/edit/${travelId}`)}
-                        >
-                            수정하기
-                        </Button>
-                    </div>
-                    <Row justify="center" style={{ maxWidth: 1200, margin: "0 auto" }}>
-                        <Col span={24}>
-                            <div style={{ textAlign: "center", marginBottom: 20 }}>
-                                <Text type="secondary" style={{ fontSize: "1.1em" }}>
-                                    {data.categoryName || "여행지"}
-                                </Text>
-                                <Title level={1}>{data.title}</Title>
-
-                                <Divider />
-                                <Text type="secondary" style={{ fontSize: "0.9em" }}>
-                                    조회수 {data.views || 0} &nbsp;|&nbsp;
-                                    등록일 {formatDate(data.createdAt)} &nbsp;|&nbsp;
-                                    수정일 {formatDate(data.updatedAt)}
-                                </Text>
-                            </div>
-
-                            {/* 이미지 캐러셀 */}
-                            <div style={{ marginBottom: 40 }}>
-                                <Carousel autoplay effect="fade">
-                                    {images.map((src, i) => (
-                                        <div key={i}>
-                                            <img
-                                                src={src}
-                                                alt={`${data.title}-${i + 1}`}
-                                                style={{
-                                                    width: "100%",
-                                                    aspectRatio: "16/9",
-                                                    objectFit: "cover",
-                                                    borderRadius: 8,
-                                                    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                                                }}
-                                                onError={(e) =>
-                                                    (e.target.src = "https://placehold.co/800x450/EAEAEA/333333?text=No+Image")
-                                                }
-                                            />
-                                        </div>
-                                    ))}
-                                </Carousel>
-                            </div>
-
-                            {/* 소개 */}
-                            <Title level={4} style={{ borderLeft: "4px solid #1890ff", paddingLeft: 10 }}>
-                                소개
-                            </Title>
-                            <Paragraph style={{ lineHeight: 1.8, whiteSpace: "pre-line" }}>
-                                {data.introduction || "제공된 소개 내용이 없습니다."}
-                            </Paragraph>
-
-                            {tags.map((tag, i) => (
-                                <Tag key={i} color="blue" style={{ marginBottom: 8 }}>
-                                    #{tag}
-                                </Tag>
-                            ))}
-
-                            {/* 본문 */}
-                            {data.description && (
-                                <div
-                                    style={{ marginTop: 30, lineHeight: 1.8, fontSize: 18 }}
-                                    dangerouslySetInnerHTML={{ __html: data.description }}
-                                />
-                            )}
-
-                            {/* 지도 */}
-                            <Title level={4} style={{ borderLeft: "4px solid #1890ff", paddingLeft: 10, marginTop: 40 }}>
-                                위치
-                            </Title>
-                            <div
-                                style={{
-                                    margin: "10px 0 30px",
-                                    border: "1px solid #ccc",
-                                    borderRadius: 8,
-                                    overflow: "hidden",
-                                }}
+                            <Button
+                                type="primary"
+                                icon={<EditOutlined />}
+                                onClick={() => navigate(`/adm/travel/edit/${travelId}`)}
                             >
-                                <div id={MAP_CONTAINER_ID} style={{ height: 350, width: "100%" }}>
-                                    {!isMapLoaded && (
-                                        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 z-10">
-                                            <Spin size="large" tip="지도 로딩 중..." />
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
+                                수정하기
+                            </Button>
+                        </div>
+                    </Header>
 
-                            {/* 상세 정보 */}
-                            <Title level={4} style={{ borderLeft: "4px solid #1890ff", paddingLeft: 10 }}>
-                                여행지 정보
-                            </Title>
-                            <Descriptions column={2} bordered size="large" style={{ marginTop: 20, marginBottom: 50 }}>
-                                {infoData.map((item, i) => (
-                                    <Descriptions.Item
-                                        key={i}
-                                        label={
-                                            <Space>
-                                                {item.icon}
-                                                <Text strong>{item.label}</Text>
-                                            </Space>
-                                        }
-                                    >
-                                        <div style={{ whiteSpace: "pre-line", lineHeight: 1.6 }}>
-                                            {item.value || "-"}
-                                        </div>
-                                    </Descriptions.Item>
+                    <Content style={{ padding: "24px", background: "#F7F8FB", minHeight: "calc(100vh - 64px)" }}>
+                        <Row justify="center" style={{ maxWidth: 1200, margin: "0 auto" }}>
+                            <Col span={24}>
+                                {/* 상단 메타 섹션 */}
+                                <div style={{ textAlign: "center", marginBottom: 20 }}>
+                                    <Text type="secondary" style={{ fontSize: "1.1em" }}>
+                                        {data.categoryName || "여행지"}
+                                    </Text>
+                                    <Title level={1} style={{ marginTop: 6 }}>{data.title}</Title>
+
+                                    <Divider />
+                                    <Text type="secondary" style={{ fontSize: "0.9em" }}>
+                                        조회수 {data.views || 0} &nbsp;|&nbsp;
+                                        등록일 {formatDate(data.createdAt)} &nbsp;|&nbsp;
+                                        수정일 {formatDate(data.updatedAt)}
+                                    </Text>
+                                </div>
+
+                                {/* 이미지 캐러셀 */}
+                                <div style={{ marginBottom: 40 }}>
+                                    <Carousel autoplay effect="fade">
+                                        {images.map((src, i) => (
+                                            <div key={i}>
+                                                <img
+                                                    src={src}
+                                                    alt={`${data.title}-${i + 1}`}
+                                                    style={{
+                                                        width: "100%",
+                                                        aspectRatio: "16/9",
+                                                        objectFit: "cover",
+                                                        borderRadius: 8,
+                                                        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                                                    }}
+                                                    onError={(e) =>
+                                                        (e.target.src = "https://placehold.co/800x450/EAEAEA/333333?text=No+Image")
+                                                    }
+                                                />
+                                            </div>
+                                        ))}
+                                    </Carousel>
+                                </div>
+
+                                {/* 소개 */}
+                                <Title level={4} style={{ borderLeft: "4px solid #1890ff", paddingLeft: 10 }}>
+                                    소개
+                                </Title>
+                                <Paragraph style={{ lineHeight: 1.8, whiteSpace: "pre-line" }}>
+                                    {data.introduction || "제공된 소개 내용이 없습니다."}
+                                </Paragraph>
+
+                                {tags.map((tag, i) => (
+                                    <Tag key={i} color="blue" style={{ marginBottom: 8 }}>
+                                        #{tag}
+                                    </Tag>
                                 ))}
-                            </Descriptions>
-                        </Col>
-                    </Row>
-                </Content>
+
+                                {/* 본문 */}
+                                {data.description && (
+                                    <div
+                                        style={{ marginTop: 30, lineHeight: 1.8, fontSize: 18 }}
+                                        dangerouslySetInnerHTML={{ __html: data.description }}
+                                    />
+                                )}
+
+                                {/* 지도 */}
+                                <Title level={4} style={{ borderLeft: "4px solid #1890ff", paddingLeft: 10, marginTop: 40 }}>
+                                    위치
+                                </Title>
+                                <div
+                                    style={{
+                                        margin: "10px 0 30px",
+                                        border: "1px solid #ccc",
+                                        borderRadius: 8,
+                                        overflow: "hidden",
+                                        background: "#fff"
+                                    }}
+                                >
+                                    <div id={MAP_CONTAINER_ID} style={{ height: 350, width: "100%" }}>
+                                        {!isMapLoaded && (
+                                            <div className="absolute inset-0 flex items-center justify-center bg-gray-100 z-10">
+                                                <Spin size="large" tip="지도 로딩 중..." />
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* 상세 정보 */}
+                                <Title level={4} style={{ borderLeft: "4px solid #1890ff", paddingLeft: 10 }}>
+                                    여행지 정보
+                                </Title>
+                                <Descriptions column={2} bordered size="large" style={{ marginTop: 20, marginBottom: 50, background: "#fff" }}>
+                                    {infoData.map((item, i) => (
+                                        <Descriptions.Item
+                                            key={i}
+                                            label={
+                                                <Space>
+                                                    {item.icon}
+                                                    <Text strong>{item.label}</Text>
+                                                </Space>
+                                            }
+                                        >
+                                            <div style={{ whiteSpace: "pre-line", lineHeight: 1.6 }}>
+                                                {item.value || "-"}
+                                            </div>
+                                        </Descriptions.Item>
+                                    ))}
+                                </Descriptions>
+                            </Col>
+                        </Row>
+                    </Content>
+                </Layout>
             </Layout>
-        </Layout>
+        </AdminThemeProvider>
     );
 }

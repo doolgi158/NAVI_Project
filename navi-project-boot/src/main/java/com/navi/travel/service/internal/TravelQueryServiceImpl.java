@@ -71,24 +71,36 @@ public class TravelQueryServiceImpl implements TravelQueryService {
         boolean noCategoryFilter = !StringUtils.hasText(category) || "전체".equalsIgnoreCase(category.trim());
         boolean noSearchFilter = !StringUtils.hasText(search);
 
-        // ✅ 인기순 정렬 (native query)
+        // ✅ 인기순 정렬 (좋아요 많은 순, 동점 시 조회수 많은 순)
         if (sortByLikes && noRegionFilter && noCategoryFilter && noSearchFilter) {
-            log.info("🔥 [인기순 정렬] likes_count DESC 정렬 실행");
+            log.info("🔥 [인기순 정렬] likes_count DESC, views_count DESC 정렬 실행");
 
             Pageable plainPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
 
-            Page<Object[]> nativePage = travelRepository.findAllOrderByLikesCountNative(plainPageable);
-            Page<TravelListResponseDTO> resultPage = nativePage.map(row ->
-                    new TravelListResponseDTO(
-                            ((Number) row[0]).longValue(),  // travel_id
-                            (String) row[1],                // title
-                            (String) row[2],                // region1
-                            (String) row[3],                // region2
-                            (String) row[4],                // image_path
-                            (String) row[5],                // thumbnail_path
-                            ((Number) row[6]).longValue()   // likes_count
-                    )
-            );
+            Page<Object[]> nativePage = travelRepository.findAllOrderByPopularityNative(plainPageable);
+
+            // ✅ native query 결과 매핑
+            Page<TravelListResponseDTO> resultPage = nativePage.map(row -> {
+                TravelListResponseDTO dto = new TravelListResponseDTO();
+
+                dto.setTravelId(((Number) row[0]).longValue());   // travel_id
+                dto.setTitle((String) row[1]);                    // title
+                dto.setRegion1((String) row[2]);                  // region1_name
+                dto.setRegion2((String) row[3]);                  // region2_name
+                dto.setImagePath((String) row[4]);                // image_path
+                dto.setThumbnailPath((String) row[5]);            // thumbnail_path
+
+                try {
+                    dto.setViews(((Number) row[6]).longValue());  // ✅ 조회수
+                } catch (Exception e) {
+                    dto.setViews(0L);
+                }
+
+                dto.setLikesCount(((Number) row[7]).longValue());     // ✅ 좋아요
+                dto.setBookmarkCount(((Number) row[8]).longValue());  // 북마크 (참고용)
+
+                return dto;
+            });
 
             return attachLikesAndBookmarks(resultPage);
         }
