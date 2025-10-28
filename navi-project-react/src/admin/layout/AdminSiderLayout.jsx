@@ -45,7 +45,7 @@ const AdminSiderLayout = () => {
     "5": () => navigate("/adm/flight"),
     "6": () => navigate("/adm/deliveries"),
     "7": () => navigate("/adm/payments"),
-    "8": () => navigate("/adm/manager/board"),
+    "8": () => navigate("/adm/board"),
   };
 
   const handleMenuClick = (e) => {
@@ -69,7 +69,7 @@ const AdminSiderLayout = () => {
     else if (path.includes("/adm/flight")) setSelectedKeys(["5"]);
     else if (path.includes("/adm/deliveries")) setSelectedKeys(["6"]);
     else if (path.includes("/adm/payments")) setSelectedKeys(["7"]);
-    else if (path.includes("/adm/manager/board")) setSelectedKeys(["8"]);
+    else if (path.includes("/adm/board")) setSelectedKeys(["8"]);
     else setSelectedKeys([]);
   }, [location.pathname]);
 

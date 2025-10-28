@@ -9,20 +9,7 @@ function BoardWrite() {
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
   const [isDragging, setIsDragging] = useState(false);
-
-  // 이미지 업로드
-  const uploadImage = async (file) => {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    const response = await fetch('/api/board/upload', {
-      method: 'POST',
-      body: formData
-    });
-
-    const data = await response.json();
-    return data.imageUrl;
-  };
+  const [loading, setLoading] = useState(false);
 
   // 파일 선택
   const handleFileSelect = (e) => {
@@ -59,9 +46,11 @@ function BoardWrite() {
       return;
     }
 
-    // 5MB 제한
-    if (file.size > 5 * 1024 * 1024) {
-      alert('파일 크기는 5MB 이하여야 합니다.');
+    // 확장자 검사
+    const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+    const fileExtension = file.name.split('.').pop().toLowerCase();
+    if (!allowedExtensions.includes(fileExtension)) {
+      alert('허용되지 않은 이미지 형식입니다.');
       return;
     }
 
@@ -91,29 +80,54 @@ function BoardWrite() {
     }
 
     try {
-      let imageUrl = '';
+      setLoading(true);
+
+      // ✅ FormData에 직접 파일 추가
+      const formData = new FormData();
+      formData.append('title', title);
+      formData.append('content', content);
       
-      // 이미지가 있으면 업로드
+      // ✅ 이미지 파일 자체를 전송
       if (image) {
-        imageUrl = await uploadImage(image);
+        formData.append('image', image);
+        console.log('이미지 파일 추가:', image.name);
       }
 
-      // 게시글 저장
-      await fetch('/api/board', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: title,
-          content: content,
-          image: imageUrl
-        })
+      console.log('전송 데이터:', {
+        title,
+        content,
+        hasImage: !!image
       });
 
+      const token = localStorage.getItem('accessToken');
+
+      const response = await fetch('/api/board', {
+        method: 'POST',
+        headers: token ? {
+          'Authorization': `Bearer ${token}`
+        } : {},
+        credentials: 'include',
+        body: formData
+      });
+
+      console.log('응답 상태:', response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('에러 응답:', errorText);
+        throw new Error('게시글 작성 실패');
+      }
+
+      const result = await response.json();
+      console.log('작성 결과:', result);
+
       alert('작성되었습니다!');
-      navigate('/client/board');
+      navigate('/board');
     } catch (error) {
       console.error('작성 실패:', error);
       alert('작성에 실패했습니다.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -130,6 +144,7 @@ function BoardWrite() {
             onChange={(e) => setTitle(e.target.value)}
             placeholder="제목을 입력하세요"
             maxLength="30"
+            required
           />
         </div>
 
@@ -140,12 +155,13 @@ function BoardWrite() {
             onChange={(e) => setContent(e.target.value)}
             placeholder="내용을 입력하세요"
             rows="10"
+            required
           />
         </div>
 
         {/* 이미지 업로드 영역 */}
         <div className="form-group">
-          <label>이미지</label>
+          <label>이미지 (선택)</label>
           
           <div
             className={`image-upload-area ${isDragging ? 'dragging' : ''}`}
@@ -171,7 +187,7 @@ function BoardWrite() {
             ) : (
               <div className="upload-placeholder">
                 <p>이미지를 드래그하거나 클릭하여 업로드</p>
-                <p className="upload-hint">(JPG, PNG, GIF - 최대 5MB)</p>
+                <p className="upload-hint">(JPG, PNG, GIF, WEBP)</p>
               </div>
             )}
           </div>
@@ -179,17 +195,19 @@ function BoardWrite() {
           <input
             id="fileInput"
             type="file"
-            accept="image/*"
+            accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
             onChange={handleFileSelect}
             style={{ display: 'none' }}
           />
         </div>
 
         <div className="button-group">
-          <button type="button" onClick={() => navigate('/client/board')}>
+          <button type="button" onClick={() => navigate('/board')} disabled={loading}>
             취소
           </button>
-          <button type="submit">작성</button>
+          <button type="submit" disabled={loading}>
+            {loading ? '작성 중...' : '작성'}
+          </button>
         </div>
       </form>
     </div>
