@@ -61,12 +61,13 @@ export default function TravelDetailPage() {
         setLoading(true);
         await api.post(`/travel/views/${travelId}`);
         const res = await api.get(`/travel/detail/${travelId}`);
+        console.log("📦 travel detail:", res.data);
         const data = res.data;
         setTravelDetail(data);
         setLikeCount(data.likesCount || 0);
         setBookmarkCount(data.bookmarkCount || 0);
         setIsLiked(data.likedByUser || false);
-        setIsBookmarked(data.bookmarkedByUser || false);
+        setIsBookmarked(data.isBookmarkedByUser || false);
         setError(null);
       } catch (err) {
         console.error("❌ 상세 조회 실패:", err);
