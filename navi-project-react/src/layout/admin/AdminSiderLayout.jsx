@@ -42,8 +42,7 @@ const AdminSiderLayout = () => {
     "5": () => navigate("/adm/plans"),
     "6": () => navigate("/adm/deliveries"),
     "7": () => navigate("/adm/payments"),
-    "8": () => navigate("/adm/refunds"),
-    "9": () => navigate("/adm//board"),
+    "8": () => navigate("/adm//board"),
   };
 
   const handleMenuClick = (e) => {
@@ -77,8 +76,7 @@ const AdminSiderLayout = () => {
             { key: "5", icon: <CalendarOutlined />, label: "여행 계획 관리" },
             { key: "6", icon: <DropboxOutlined />, label: "짐 배송 관리" },
             { key: "7", icon: <DollarOutlined />, label: "결제 관리" },
-            { key: "8", icon: <UndoOutlined />, label: "환불 관리" },
-            { key: "9", icon: <FileTextOutlined />, label: "게시판 관리" },
+            { key: "8", icon: <FileTextOutlined />, label: "게시판 관리" },
           ]}
         />
       </div>
