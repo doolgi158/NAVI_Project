@@ -36,18 +36,20 @@ public class NoticeApiController {
 
         try {
             Pageable pageable = PageRequest.of(page, size, Sort.by("createDate").descending());
-            Page<Notice> noticePage = noticeService.getActiveNotices(pageable);
+
+            // ✅ 수정: Page<Notice> → Page<NoticeDTO>
+            Page<NoticeDTO> noticePage = noticeService.getAllNotices(pageable);
 
             List<Map<String, Object>> notices = noticePage.getContent().stream()
-                    .map(notice -> {
+                    .map(noticeDTO -> {  // ✅ notice → noticeDTO
                         Map<String, Object> map = new HashMap<>();
-                        map.put("noticeNo", notice.getNoticeNo());
-                        map.put("noticeTitle", notice.getNoticeTitle());
-                        map.put("noticeViewCount", notice.getNoticeViewCount() != null ? notice.getNoticeViewCount() : 0);
-                        map.put("createDate", notice.getCreateDate());
-                        map.put("noticeStartDate", notice.getNoticeStartDate());
-                        map.put("noticeEndDate", notice.getNoticeEndDate());
-                        map.put("noticeImage", notice.getNoticeImage());
+                        map.put("noticeNo", noticeDTO.getNoticeNo());
+                        map.put("noticeTitle", noticeDTO.getNoticeTitle());
+                        map.put("noticeViewCount", noticeDTO.getNoticeViewCount() != null ? noticeDTO.getNoticeViewCount() : 0);
+                        map.put("createDate", noticeDTO.getCreateDate());
+                        map.put("noticeStartDate", noticeDTO.getNoticeStartDate());
+                        map.put("noticeEndDate", noticeDTO.getNoticeEndDate());
+                        map.put("noticeImage", noticeDTO.getNoticeImage());
                         return map;
                     })
                     .collect(Collectors.toList());
@@ -72,15 +74,6 @@ public class NoticeApiController {
         try {
             Integer noticeId = id.intValue(); // ✅ NoticeService는 Integer를 사용하므로 변환
             NoticeDTO noticeDTO = noticeService.getNoticeById(noticeId);
-
-            // 게시 기간 체크
-            LocalDateTime now = LocalDateTime.now();
-            if (noticeDTO.getNoticeStartDate() != null && now.isBefore(noticeDTO.getNoticeStartDate())) {
-                return ResponseEntity.badRequest().body("아직 공개되지 않은 공지사항입니다.");
-            }
-            if (noticeDTO.getNoticeEndDate() != null && now.isAfter(noticeDTO.getNoticeEndDate())) {
-                return ResponseEntity.badRequest().body("공개 기간이 종료된 공지사항입니다.");
-            }
 
             // 이미지 정보 조회
             List<ImageDTO> images = imageService.getImagesByTarget("NOTICE", String.valueOf(id));

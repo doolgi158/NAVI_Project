@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+
 /**
  * 공지사항 Repository
  * - 기본 CRUD
@@ -26,8 +28,8 @@ public interface NoticeRepository extends JpaRepository<Notice, Integer> {
 
     /** 게시 기간 내 공지사항 조회 */
     Page<Notice> findByNoticeStartDateBeforeAndNoticeEndDateAfter(
-            java.time.LocalDateTime startDate,
-            java.time.LocalDateTime endDate,
+            LocalDateTime start,
+            LocalDateTime end,
             Pageable pageable
     );
 

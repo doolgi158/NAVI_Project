@@ -31,13 +31,20 @@ public class AdminNoticeController {
             @RequestParam("content") String content,
             @RequestParam(value = "startDate", required = false) String startDate,
             @RequestParam(value = "endDate", required = false) String endDate,
-            @RequestParam(value = "image", required = false) MultipartFile image) {
+            @RequestParam(value = "imageUrl", required = false) String imageUrl) {  // ✅ 추가 (중괄호 수정)
 
         try {
             Notice notice = new Notice();
             notice.setNoticeTitle(title);
             notice.setNoticeContent(content);
             notice.setNoticeViewCount(0);
+
+            // ✅ 이미지 URL 설정 (이미 업로드된 경우)
+            if (imageUrl != null && !imageUrl.isEmpty()) {
+                notice.setNoticeImage(imageUrl);
+                log.info("이미지 URL 설정 완료: {}", imageUrl);
+            }
+
 
             if (startDate != null && !startDate.isEmpty()) {
                 notice.setNoticeStartDate(LocalDateTime.parse(startDate));
@@ -48,18 +55,6 @@ public class AdminNoticeController {
 
             Notice savedNotice = adminNoticeService.save(notice);
             log.info("공지사항 작성 완료 - noticeNo: {}", savedNotice.getNoticeNo());
-
-            if (image != null && !image.isEmpty()) {
-                ImageDTO imageDTO = imageService.uploadImage(
-                        image,
-                        "NOTICE",
-                        String.valueOf(savedNotice.getNoticeNo())
-                );
-
-                savedNotice.setNoticeImage(imageDTO.getPath());
-                adminNoticeService.save(savedNotice);
-                log.info("이미지 업로드 완료 - path: {}", imageDTO.getPath());
-            }
 
             return ResponseEntity.ok(savedNotice);
 

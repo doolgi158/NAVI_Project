@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { getNotices, searchNotices } from "./NoticeService";
 import "../css/NoticeList.css";
-import "../../../css/common/Pagination.css"; // ✅ 공통 페이지네이션 CSS 유지
+import "../../../css/common/Pagination.css";
 import Pagination from "@/common/components/Pagination";
 
 function NoticeList() {
@@ -14,30 +14,40 @@ function NoticeList() {
   const pageSize = 10;
   const navigate = useNavigate();
 
+  console.log('🎯 NoticeList 컴포넌트 렌더링됨!');
+
   useEffect(() => {
+    console.log('✅ useEffect 실행! currentPage:', currentPage);
     fetchNotices();
   }, [currentPage]);
 
   const fetchNotices = async () => {
+    console.log('🔍 fetchNotices 호출됨! currentPage:', currentPage);
     try {
       setLoading(true);
+      console.log('📞 getNotices API 호출 시작...');
       const data = await getNotices(currentPage, pageSize);
+      console.log('📦 getNotices 응답 데이터:', data);
 
       if (data && Array.isArray(data.notices)) {
+        console.log('✅ notices 배열 확인:', data.notices.length, '개');
         setNotices(data.notices);
         setTotalPages(data.totalPages || 1);
       } else if (Array.isArray(data)) {
+        console.log('✅ data가 배열:', data.length, '개');
         setNotices(data);
         setTotalPages(1);
       } else {
+        console.warn('⚠️ 예상과 다른 데이터 구조:', data);
         setNotices([]);
         setTotalPages(0);
       }
     } catch (error) {
-      console.error("공지사항 목록 불러오기 실패:", error);
+      console.error("❌ 공지사항 목록 불러오기 실패:", error);
       setNotices([]);
     } finally {
       setLoading(false);
+      console.log('✅ fetchNotices 완료!');
     }
   };
 
@@ -64,9 +74,11 @@ function NoticeList() {
   };
 
   const handlePageChange = (page) => {
-    const safeTotal = totalPages > 0 ? totalPages : 1; // 최소 1 보장
+    const safeTotal = totalPages > 0 ? totalPages : 1;
     if (page >= 0 && page < safeTotal) setCurrentPage(page);
   };
+
+  console.log('📊 현재 상태 - loading:', loading, 'notices:', notices.length);
 
   if (loading) return <div className="loading">로딩 중...</div>;
 

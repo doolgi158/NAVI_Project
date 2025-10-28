@@ -66,11 +66,10 @@ public class NoticeService {
                 .map(this::convertToDTO);
     }
 
-    /** 활성 공지사항 조회 (게시 기간 내만) */
-    @Transactional(readOnly = true)
-    public Page<Notice> getActiveNotices(Pageable pageable) {
-        LocalDateTime now = LocalDateTime.now();
-        return noticeRepository.findByNoticeStartDateBeforeAndNoticeEndDateAfter(now, now, pageable);
+    // ✅ 새로운 메서드 (모든 공지사항)
+    public Page<Notice> getAllNotices(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("noticeNo").descending());
+        return noticeRepository.findAll(pageable);
     }
 
     /** 최신 공지사항 조회 (메인 페이지용) */
