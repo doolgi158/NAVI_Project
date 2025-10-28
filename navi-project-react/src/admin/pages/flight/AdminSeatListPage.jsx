@@ -101,7 +101,7 @@ const AdminSeatListPage = () => {
 
     return (
         <div style={{ padding: 24 }}>
-            <h2 className="text-lg font-semibold mb-4">전체 좌석 관리</h2>
+            <h2 className="text-lg font-semibold mb-4 whitespace-nowrap">전체 좌석 관리</h2>
 
             <Space style={{ marginBottom: 16 }}>
                 <Input

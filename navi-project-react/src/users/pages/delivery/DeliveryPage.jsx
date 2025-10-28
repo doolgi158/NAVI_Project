@@ -49,6 +49,16 @@ const DeliveryPage = () => {
   const markersRef = useRef({ fromAddress: null, toAddress: null });
   const lineRef = useRef(null);
 
+  /* ✅ 지도 */
+  useEffect(() => {
+    const handleResize = () => {
+      if (mapRef.current && window.kakao) {
+        window.kakao.maps.event.trigger(mapRef.current, "resize");
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
   const handleChange = (key, value) =>
     setForm((prev) => ({ ...prev, [key]: value }));
 
@@ -532,12 +542,23 @@ const DeliveryPage = () => {
           </Col>
 
           {/* ✅ 지도 */}
-          <Col xs={24} md={12}>
+          <Col
+            xs={24}
+            md={12}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
             <Card
               style={{
-                height: "100%",
+                width: "100%",
                 borderRadius: 12,
                 boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
               }}
               styles={{ body: { padding: 0 } }}
             >
@@ -545,8 +566,9 @@ const DeliveryPage = () => {
                 id={MAP_CONTAINER_ID}
                 style={{
                   width: "100%",
-                  height: "calc(100vh - 200px)",
-                  minHeight: 500,
+                  height: "70vh",      // 브라우저 높이의 70%
+                  minHeight: 700,       // 너무 작아지지 않게
+                  borderRadius: 12,
                 }}
               ></div>
             </Card>
