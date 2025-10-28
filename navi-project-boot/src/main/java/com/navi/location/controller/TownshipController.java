@@ -20,6 +20,7 @@ public class TownshipController {
     public List<TownshipResponseDTO> getTownships() {
         return townshipRepository.findAll()
                 .stream()
+                .filter(township -> township.getTownshipId() != 0)
                 .map(TownshipResponseDTO::fromEntity)
                 .toList();
     }
