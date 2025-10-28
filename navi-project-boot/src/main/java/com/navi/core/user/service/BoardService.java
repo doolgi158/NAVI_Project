@@ -114,7 +114,7 @@ public class BoardService {
                     .modDate(board.getUpdateDate() != null ? board.getUpdateDate().toString() : null)
                     .boardGood(board.getBoardGood())
                     .boardReport(board.getReportCount())
-                    .viewCount(board.getBoardViewCount().longValue())
+                    .boardViewCount(board.getBoardViewCount().longValue())
                     .commentNo(commentNo)       // 댓글번호 추가
                     .commentCount(commentCount) // 댓글개수 추가
                     .build();

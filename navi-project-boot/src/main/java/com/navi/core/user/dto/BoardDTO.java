@@ -18,7 +18,7 @@ public class BoardDTO {
     private String modDate;       // 수정일
     private int boardGood;        // 좋아요 수
     private int boardReport;      // 신고 수
-    private Long viewCount;       // 조회 수
+    private Long boardViewCount;       // 조회 수
     private Integer commentNo;    // 댓글 번호
     private Integer commentCount;
 
@@ -33,7 +33,7 @@ public class BoardDTO {
                 .modDate(entity.getUpdateDate() != null ? entity.getUpdateDate().toString() : null)
                 .boardGood(entity.getBoardGood())
                 .boardReport(entity.getReportCount())
-                .viewCount(entity.getBoardViewCount().longValue())
+                .boardViewCount(entity.getBoardViewCount().longValue())
                 .build();
     }
 
