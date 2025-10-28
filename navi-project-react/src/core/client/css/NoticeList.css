@@ -42,6 +42,16 @@
   border-left: 6px solid #007bff;
   padding-left: 12px;
 }
+/* 제목 */
+.notice-list-container h1 {
+  font-size: 26px;
+  font-weight: 700;
+  color: #333;
+  text-align: left;
+  margin-bottom: 30px;
+  border-left: 6px solid #007bff;
+  padding-left: 12px;
+}
 
 /* 상단 네비게이션 (일반게시판 | 공지사항) */
 /* 상단 네비게이션 (일반게시판 | 공지사항) */

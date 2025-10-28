@@ -121,10 +121,17 @@ function ManagerBoardList() {
   }
 
   return (
+    <>
+    <HeaderLayout />
     <div className="board-list-container">
       <div className="board-list-wrapper">
         {/* ✅ 헤더 - 탭 네비게이션 추가 */}
         <div className="board-list-header">
+          <div className="board-nav">
+            <Link to="/adm/board" className="nav-link active">일반 게시판</Link>
+            <span className="nav-divider">|</span>
+            <Link to="/adm/notice" className="nav-link">공지사항</Link>
+          </div>
           <div className="board-nav">
             <Link to="/adm/board" className="nav-link active">일반 게시판</Link>
             <span className="nav-divider">|</span>
@@ -262,6 +269,7 @@ function ManagerBoardList() {
         </div>
       </div>
     </div>
+    </>
   );
 }
 

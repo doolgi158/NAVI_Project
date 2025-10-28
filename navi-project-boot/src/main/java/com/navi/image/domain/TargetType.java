@@ -6,8 +6,8 @@ public enum TargetType {
     ACC,        // 숙박
     TRAVEL,     // 여행
     POST,       // 게시글
-    BOARD,      // 게시판 (추가)
-    NOTICE,     // 공지사항 (추가)
+    BOARD,      // 게시판
+    NOTICE,     // 공지사항
     ETC,        // 기타
     CORE        // 코어
 }
