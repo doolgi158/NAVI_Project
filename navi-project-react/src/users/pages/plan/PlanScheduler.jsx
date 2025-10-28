@@ -58,6 +58,8 @@ export default function PlanScheduler() {
     const [selectedPart, setSelectedPart] = useState(null);
     const [openKey, setOpenKey] = useState(null);
 
+    const [stayPlans, setStayPlans] = useState({});
+
     const FALLBACK_IMG = "https://placehold.co/150x150?text=No+Image";
     const DAY_COLORS = ["#E74C3C", "#3498DB", "#27AE60", "#F1C40F", "#9B59B6", "#FF8C00", "#8E44AD"];
 
@@ -1000,9 +1002,9 @@ export default function PlanScheduler() {
                                 endDate: dayjs(newEnd).format("YYYY-MM-DD"),
                             }));
 
-                            // ✅ 숙소 초기화
-                            setStayPlans({});
-                            setSelectedStays([]);
+                            // ✅ 숙소 초기화 (변경됨)
+                            setStageStayPlans({});
+                            setStageStays([]);
 
                             message.success("여행 날짜가 변경되었습니다. 숙소 정보가 초기화되었습니다.");
 
