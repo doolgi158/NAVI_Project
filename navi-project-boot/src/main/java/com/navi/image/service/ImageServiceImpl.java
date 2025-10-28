@@ -3,6 +3,7 @@ package com.navi.image.service;
 import com.navi.image.domain.Image;
 import com.navi.image.dto.ImageDTO;
 import com.navi.image.repository.ImageRepository;
+import com.navi.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 @Transactional
 public class ImageServiceImpl implements ImageService {
     private final ImageRepository imageRepository;
+    private final UserRepository userRepository;
 
     private static final String BASE_DIR = "C:/navi-project/images/";
 
@@ -70,6 +72,7 @@ public class ImageServiceImpl implements ImageService {
 
                 // DB에 저장
                 Image updated = imageRepository.save(existing);
+
                 return ImageDTO.fromEntity(updated);
             }
 

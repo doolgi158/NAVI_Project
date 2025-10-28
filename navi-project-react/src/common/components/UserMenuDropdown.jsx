@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Avatar } from "antd";
 import { DownOutlined, UpOutlined, UserOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
-import { setlogout } from "../slice/loginSlice";
+import { setlogout, setProfileUrl } from "../slice/loginSlice";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { API_SERVER_HOST } from "../api/naviApi";
@@ -18,38 +18,35 @@ const UserMenuDropdown = () => {
   const loginstate = useSelector((state) => state.login) || {};
   const user = loginstate?.user || {};
 
-  const [profileUrl, setProfileUrl] = useState(null);
+  const profileUrl = useSelector((state) => state.login.profileUrl);
 
-  // 메뉴 외부 클릭 시 닫기
+  // 프로필 이미지 초기 로드
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
-    if (token) {
-      axios
-        .get(`${API_SERVER_HOST}/api/users/me`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then((res) => {
-          const data = res.data.data;
-          if (data?.profile) {
-            setProfileUrl(`${API_SERVER_HOST}${data.profile}`);
-          }
-        })
-        .catch(() => {
-          console.warn("프로필 이미지 불러오기 실패");
-        });
-    }
+    const username = localStorage.getItem("username");
 
-    // 프로필 변경 이벤트 감지
-    const handleProfileUpdate = (e) => {
-      if (e.detail?.newProfile) {
-        setProfileUrl(`${API_SERVER_HOST}${e.detail.newProfile}?t=${Date.now()}`);
-      }
-    };
-    window.addEventListener("profile-updated", handleProfileUpdate);
+    if (!token || !username) return;
 
-    // 외부 클릭 닫기
+    // USER 타입 이미지 불러오기
+    axios
+      .get(`${API_SERVER_HOST}/api/images`, {
+        params: { targetType: "USER", targetId: username },
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
+        const imgData = res.data.data?.[0];
+        if (imgData?.path) {
+          const fullUrl = `${API_SERVER_HOST}${imgData.path}?t=${Date.now()}`;
+          dispatch(setProfileUrl(fullUrl));
+        } else {
+          dispatch(setProfileUrl(null));
+        }
+      })
+      .catch((err) => {
+        console.warn("❗ 프로필 이미지 불러오기 실패:", err.message);
+      });
+
+    // 외부 클릭 시 메뉴 닫기
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
         setMenuOpen(false);
@@ -57,18 +54,17 @@ const UserMenuDropdown = () => {
     };
     document.addEventListener("mousedown", handleClickOutside);
 
-    // cleanup
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
-      window.removeEventListener("profile-updated", handleProfileUpdate);
     };
-  }, []);
+  }, [dispatch]);
 
+  // 메뉴 클릭 핸들러
   const handleMenuClick = (path) => {
     setMenuOpen(false);
     if (path === "logout") {
       dispatch(setlogout());
-      setProfileUrl(null);
+      dispatch(setProfileUrl(null));
       navigate("/");
     } else {
       navigate(path);
@@ -125,7 +121,7 @@ const UserMenuDropdown = () => {
                   </li>
                   <li
                     className="pl-8 py-2 hover:bg-gray-100 cursor-pointer"
-                    onClick={() => handleMenuClick("/users/my-plans")}
+                    onClick={() => handleMenuClick("/plans")}
                   >
                     여행계획
                   </li>

@@ -28,6 +28,8 @@ public class AccSearchRequestDTO {
     private String sort;               // 정렬 기준
 
     /* 페이징 처리용 */
-    @Builder.Default private Integer page = 1;          // 현재 페이지 (기본값: 1)
-    @Builder.Default private Integer size = 6;          // 페이지당 숙소 개수 (기본값: 6)
+    @Builder.Default
+    private Integer page = 1;          // 현재 페이지 (기본값: 1)
+    @Builder.Default
+    private Integer size = 6;          // 페이지당 숙소 개수 (기본값: 6)
 }

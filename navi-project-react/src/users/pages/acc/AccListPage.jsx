@@ -104,8 +104,8 @@ const AccListPage = () => {
   const townshipOptions = useMemo(() => {
     return city
       ? townshipList
-          .filter((t) => t.sigunguName === city)
-          .map((t) => ({ value: t.townshipName, label: t.townshipName }))
+        .filter((t) => t.sigunguName === city)
+        .map((t) => ({ value: t.townshipName, label: t.townshipName }))
       : [];
   }, [city, townshipList]);
 
@@ -151,10 +151,10 @@ const AccListPage = () => {
           page,
           size,
         };
-
+        console.log(params);
         const res = await axios.get(`${API_SERVER_HOST}/api/accommodations`, { params });
         const { data = [], total = 0, page: current, size: pageSizeFromServer } = res.data;
-  console.log(data);
+        console.log(data);
 
         setAccommodations(data);
         setIsSearched(true);
@@ -397,7 +397,7 @@ const AccListPage = () => {
                           <img
                             alt={acc.title}
                             src={`${API_SERVER_HOST}${acc.mainImage}`}
-                            loading="lazy" 
+                            loading="lazy"
                             className="h-48 object-cover w-full rounded-t-2xl"
                             onError={(e) => {
                               e.target.style.display = "none";

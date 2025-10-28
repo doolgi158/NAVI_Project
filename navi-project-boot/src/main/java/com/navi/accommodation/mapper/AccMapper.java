@@ -20,11 +20,11 @@ public interface AccMapper {
             @Param("categoryList") List<String> categoryList,
             @Param("checkIn") String checkIn,
             @Param("checkOut") String checkOut,
-            @Param("guestCount") int guestCount,
+            @Param("guestCount") Integer guestCount,
             @Param("roomCount") Integer roomCount,
             @Param("sort") String sort,
-            @Param("offset") int offset,
-            @Param("pageSize") int pageSize
+            @Param("offset") Integer offset,
+            @Param("pageSize") Integer pageSize
     );
 
     @SelectProvider(type = AccSqlProvider.class, method = "buildSearchCountQuery")

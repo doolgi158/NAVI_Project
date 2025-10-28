@@ -25,26 +25,6 @@ const AdminAccommodationRouter = () => {
                 { path: "edit/:accNo", element: <AdminAccForm /> },
             ],
         },
-        // {
-        //     path: "accommodations/new",
-        //     element: (
-        //         <Suspense fallback={<div></div>}>
-        //             <ProtectedRoute requiredRole="ADMIN">
-        //                 <AdminAccForm />
-        //             </ProtectedRoute>
-        //         </Suspense>
-        //     )
-        // },
-        // {
-        //     path: "accommodations/edit/:accNo",
-        //     element: (
-        //         <Suspense fallback={<div></div>}>
-        //             <ProtectedRoute requiredRole="ADMIN">
-        //                 <AdminAccForm />
-        //             </ProtectedRoute>
-        //         </Suspense>
-        //     )
-        // },
     ];
 };
 

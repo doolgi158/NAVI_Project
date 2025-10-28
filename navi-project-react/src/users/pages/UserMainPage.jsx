@@ -228,8 +228,10 @@ function CarouselSection({ title, description, data, type, navigate }) {
                         navigate(`/travel/detail/${item.travelId}`);
                       if (type === "festival")
                         navigate(`/festival/detail/${item.id}`);
-                      if (type === "accommodation")
-                        navigate(`/acc/detail/${item.id}`);
+                      if (type === "accommodation") {
+                        localStorage.setItem("selectedAccId", item.id);
+                        navigate(`/accommodations/detail`);
+                      }
                     }}
                     className="cursor-pointer bg-white rounded-2xl shadow-md hover:shadow-xl transition overflow-hidden"
                   >

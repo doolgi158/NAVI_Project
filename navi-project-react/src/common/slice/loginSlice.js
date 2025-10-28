@@ -10,6 +10,7 @@ const initState = {
   role: "",
   ip: "",
   userNo: "",
+  profileUrl: "",
 };
 
 /** ✅ 쿠키에서 사용자 정보 로드 */
@@ -84,11 +85,15 @@ const loginSlice = createSlice({
       state.role = "";
       state.ip = "";
       state.userNo = "";
+      state.profileUrl = null;
 
       delete axios.defaults.headers.common["Authorization"];
+    },
+    setProfileUrl(state, action) {
+      state.profileUrl = action.payload;
     },
   },
 });
 
-export const { setlogin, setlogout } = loginSlice.actions;
+export const { setlogin, setlogout, setProfileUrl } = loginSlice.actions;
 export default loginSlice.reducer;

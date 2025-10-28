@@ -12,6 +12,8 @@ import {
   Modal,
   Row,
   Col,
+  Descriptions,
+  Spin,
 } from "antd";
 import {
   SearchOutlined,
@@ -37,6 +39,13 @@ const AdminPaymentListPage = () => {
     open: false,
     merchantId: null,
     details: [],
+  });
+
+  // ✅ 예약 내역 모달 상태
+  const [reservationModal, setReservationModal] = useState({
+    open: false,
+    loading: false,
+    data: null,
   });
 
   const [pagination, setPagination] = useState({
@@ -145,6 +154,31 @@ const AdminPaymentListPage = () => {
     }
   };
 
+  /* ✅ 예약 내역 보기 */
+  const handleViewReservation = async (type, reserveId) => {
+    setReservationModal({ open: true, loading: true, data: null });
+    console.log(type, reserveId);
+    try {
+      const token = localStorage.getItem("accessToken");
+
+      const endpoint = `/api/adm/payment/reservation/${type}/${reserveId}`;
+
+      const res = await axios.get(`${API_SERVER_HOST}${endpoint}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setReservationModal({
+        open: true,
+        loading: false,
+        data: res.data,
+      });
+    } catch (err) {
+      console.error(err);
+      message.error("예약 내역을 불러오지 못했습니다.");
+      setReservationModal({ open: false, loading: false, data: null });
+    }
+  }
+
   /* === 컬럼 === */
   const columns = [
     { title: "결제번호", dataIndex: "merchantId", align: "center", width: 200, fixed: "left" },
@@ -217,21 +251,25 @@ const AdminPaymentListPage = () => {
       title: "관리",
       key: "actions",
       align: "center",
-      width: 140,
+      width: 180,
       fixed: "right",
       render: (_, record) => (
-        <Tooltip title="상세 보기">
-          <Button
-            icon={<SearchOutlined />}
-            style={{ backgroundColor: "#FFF4C2", borderColor: "#F8E473" }}
-            onClick={() => handleExpand(record)}
-          >상세보기</Button>
-        </Tooltip>
+        <Space>
+          <Tooltip title="결제 상세 보기">
+            <Button
+              icon={<EyeOutlined />}
+              style={{ backgroundColor: "#1677ff", borderColor: "#F8E473", color: "white" }}
+              onClick={() => handleExpand(record)}
+            >
+              상세보기
+            </Button>
+          </Tooltip>
+        </Space>
       ),
     },
   ];
 
-  /* === 상세 테이블 컬럼 === */
+  /* === 상세 테이블 === */
   const detailColumns = [
     { title: "예약 ID", dataIndex: "reserveId", align: "center", width: 140 },
     {
@@ -254,20 +292,9 @@ const AdminPaymentListPage = () => {
       align: "center",
       width: 100,
       render: (s) => {
-        const labelMap = {
-          PAID: "결제완료",
-          REFUNDED: "환불완료",
-          FAILED: "실패",
-        };
+        const labelMap = { PAID: "결제완료", REFUNDED: "환불완료", FAILED: "실패" };
         return <Tag color={statusColorMap[s]}>{labelMap[s] || s}</Tag>;
       },
-    },
-    {
-      title: "사유",
-      dataIndex: "reason",
-      align: "center",
-      width: 200,
-      render: (v) => (v ? <Text type="secondary">{v}</Text> : "-"),
     },
     {
       title: "생성일",
@@ -277,18 +304,38 @@ const AdminPaymentListPage = () => {
       render: (v) => (v ? dayjs(v).format("YYYY.MM.DD HH:mm") : "-"),
     },
     {
-      title: "수정일",
-      dataIndex: "updatedAt",
+      title: "관리",
+      key: "actions",
       align: "center",
-      width: 160,
-      render: (v) => (v ? dayjs(v).format("YYYY.MM.DD HH:mm") : "-"),
+      width: 220,
+      render: (_, record) => (
+        <Space>
+          <Button
+            icon={<EyeOutlined />}
+            onClick={() =>
+              handleViewReservation(record.rsvType, detail.reserveId)
+            }
+          >
+            예약 내역
+          </Button>
+          <Button
+            danger
+            type="primary"
+            icon={<RollbackOutlined />}
+            onClick={() =>
+              handleFullRefund(record.merchantId, record.rsvType)
+            }
+          >
+            전체 환불
+          </Button>
+        </Space>
+      ),
     },
   ];
 
   return (
     <div style={{ paddingTop: 8 }}>
       <Card
-        bordered={false}
         style={{
           borderRadius: 16,
           boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
@@ -325,7 +372,7 @@ const AdminPaymentListPage = () => {
               return (
                 <div
                   style={{
-                    background: "white",         // 🔹 바깥 배경을 흰색으로
+                    background: "white",
                     borderRadius: 16,
                     padding: 16,
                     margin: "10px 12px 14px",
@@ -335,7 +382,6 @@ const AdminPaymentListPage = () => {
                 >
                   <div
                     style={{
-                      background: "#f9f9f9",     // 🔹 내부 영역은 연회색
                       borderRadius: 12,
                       padding: "16px 16px 8px",
                     }}
@@ -347,27 +393,8 @@ const AdminPaymentListPage = () => {
                       pagination={false}
                       size="small"
                       bordered={false}
-                      style={{
-                        background: "#f9f9f9",    // 테이블도 내부 색에 맞춤
-                      }}
+                      style={{ background: "#f9f9f9" }}
                     />
-
-                    {/* ✅ 버튼 영역 */}
-                    <Row justify="end" style={{ marginTop: 14, marginRight: 8 }}>
-                      <Space>
-                        <Button icon={<EyeOutlined />}>예약 내역</Button>
-                        <Button
-                          danger
-                          type="primary"
-                          icon={<RollbackOutlined />}
-                          onClick={() =>
-                            handleFullRefund(record.merchantId, record.rsvType)
-                          }
-                        >
-                          전체 환불
-                        </Button>
-                      </Space>
-                    </Row>
                   </div>
                 </div>
               );
@@ -389,6 +416,29 @@ const AdminPaymentListPage = () => {
           )
         }
       />
+
+      {/* ✅ 예약 내역 모달 */}
+      <Modal
+        title="예약 내역"
+        open={reservationModal.open}
+        onCancel={() => setReservationModal({ open: false, loading: false, data: null })}
+        footer={null}
+        width={700}
+      >
+        {reservationModal.loading ? (
+          <Spin tip="로딩 중..." />
+        ) : reservationModal.data ? (
+          <Descriptions bordered column={1} size="small">
+            {Object.entries(reservationModal.data).map(([key, value]) => (
+              <Descriptions.Item label={key} key={key}>
+                {String(value)}
+              </Descriptions.Item>
+            ))}
+          </Descriptions>
+        ) : (
+          <Text type="secondary">데이터가 없습니다.</Text>
+        )}
+      </Modal>
     </div>
   );
 };

@@ -200,9 +200,11 @@ public class ImageBatchService {
     }
 
     /* ===============================================================
-       [3] 숙소 mainImage 랜덤 배정
+       [3] 숙소 mainImage 랜덤 배정 (UUID 파일만 사용 & Image 테이블 저장)
        =============================================================== */
+    @Transactional
     public void assignAccMainImages() {
+        // CONTENTID가 NULL인 숙소만 필터링 (내부 등록 항목)
         List<Acc> accList = accRepository.findAll().stream()
                 .filter(acc -> acc.getContentId() == null)
                 .toList();
@@ -216,57 +218,55 @@ public class ImageBatchService {
                 File dir = new File(UPDATE_DIR + folder);
                 if (!dir.exists() || !dir.isDirectory()) continue;
 
-                File[] imgs = dir.listFiles((d, n) -> n.matches(".*\\.(jpg|jpeg|png|webp)$"));
-                if (imgs == null || imgs.length == 0) continue;
+                // RANDOM 하위 폴더의 모든 이미지 파일을 대상으로 함
+                File[] imgs = dir.listFiles((d, n) ->
+                        n.matches(".*\\.(jpg|jpeg|png|webp|JPG|JPEG|PNG|WEBP)$"));
 
-                File chosen = imgs[random.nextInt(imgs.length)];
-
-                if (!chosen.getName().matches("^[0-9a-fA-F\\-]{36}\\..+$")) {
-                    String ext = chosen.getName().substring(chosen.getName().lastIndexOf("."));
-                    String uuid = UUID.randomUUID().toString();
-                    String newFileName = uuid + ext;
-
-                    Path sourcePath = chosen.toPath();
-                    Path targetPath = Path.of(UPDATE_DIR + folder + "/" + newFileName);
-                    Files.move(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
-                    log.info("🔁 파일명 변경: {} → {}", chosen.getName(), newFileName);
-
-                    chosen = targetPath.toFile();
+                if (imgs == null || imgs.length == 0) {
+                    log.warn("⚠️ '{}' 폴더에 이미지 파일이 없습니다. 매칭 스킵.", folder);
+                    continue;
                 }
 
-                String relativePath = "/images/random/" + folder + "/" + chosen.getName();
+                // 이미지 파일 중 랜덤으로 하나 선택
+                File chosen = imgs[random.nextInt(imgs.length)];
 
+                String fileName = chosen.getName();
+                String uuidName = fileName.substring(0, fileName.lastIndexOf("."));
+                // 상대 경로 생성 (예: /images/random/hotel/uuid-file-name.jpg)
+                String relativePath = "/images/random/" + folder + "/" + fileName;
+
+                // 1. Acc 테이블 업데이트: 숙소의 mainImage에 경로 배정 (덮어씌우기)
                 acc.updateMainImage(relativePath);
                 accRepository.save(acc);
 
-                boolean exists = imageRepository.existsByPath(relativePath);
-                if (!exists) {
-                    Image image = Image.builder()
-                            .targetType("ACC")
-                            .targetId(acc.getAccId())
-                            .path(relativePath)
-                            .uuidName(chosen.getName().substring(0, chosen.getName().lastIndexOf(".")))
-                            .originalName(chosen.getName())
-                            .build();
-                    imageRepository.save(image);
-                }
+                // ⭐️ 2. Image 테이블에 등록: 경로 중복 체크를 제거하고 ACC ID별로 무조건 저장합니다.
+                //    (SQL 삭제 후 이 배치를 실행하면 모든 숙소에 대해 레코드가 생성됩니다.)
+                Image image = Image.builder()
+                        .targetType("ACC")
+                        .targetId(acc.getAccId()) // ACC ID별로 레코드 생성
+                        .path(relativePath)
+                        .uuidName(uuidName)
+                        .originalName(fileName) // UUID 파일명이 원본 역할
+                        .build();
+                imageRepository.save(image);
 
                 log.info("🏨 숙소 '{}' ({}) → {}", acc.getTitle(), folder, relativePath);
                 success++;
             } catch (Exception e) {
                 failed++;
-                log.error("❌ 숙소 이미지 처리 실패: {}", acc.getTitle(), e);
+                log.error("❌ 숙소 이미지 배정 실패: {}", acc.getTitle(), e);
             }
         }
 
-        log.info("🎯 숙소 이미지 배정 완료 → 성공: {}건 / 실패: {}건", success, failed);
+        log.info("🎯 숙소 이미지 배정 완료 (ACC ID별 이미지 등록) → 성공: {}건 / 실패: {}건", success, failed);
     }
+
 
     private String getFolderByCategory(String category) {
         if (category == null) return "normal";
         String c = category.toLowerCase();
-        if (c.contains("호텔") || c.contains("리조트") || c.contains("콘도") || c.contains("모텔")) return "hotel";
-        if (c.contains("펜션")) return "pension";
+        if (c.contains("호텔") || c.contains("콘도,리조트") || c.contains("모텔")) return "hotel";
+        if (c.contains("펜션") || c.contains("게스트하우스") || c.contains("민박")) return "pension";
         return "normal";
     }
 
@@ -338,72 +338,54 @@ public class ImageBatchService {
         File thumbDir = new File(THUMB_DIR);
         if (!thumbDir.exists()) thumbDir.mkdirs();
 
-        int total = accList.size();
-        int success = 0, failed = 0;
-        log.info("🚀 썸네일 강제 재생성 시작 - 총 {}개", total);
+        log.info("🚀 썸네일 강제 재생성 시작 - 총 {}개", accList.size());
 
-        // ✅ 병렬 대신 제한된 스레드풀 사용
-        ExecutorService executor = Executors.newFixedThreadPool(4); // CPU 4개 권장
-        List<Future<?>> futures = new ArrayList<>();
+        int success = 0, failed = 0, updated = 0;
 
+        // ✅ 순차 처리 (병렬 X) — DB 일관성 우선
         for (Acc acc : accList) {
-            futures.add(executor.submit(() -> {
-                try {
-                    String mainImagePath = acc.getMainImage();
-                    String fileName = Path.of(mainImagePath).getFileName().toString();
+            try {
+                String mainImagePath = acc.getMainImage();
+                String fileName = Path.of(mainImagePath).getFileName().toString();
 
-                    Path sourcePath;
-                    if (mainImagePath.contains("/random/")) {
-                        sourcePath = Path.of("../images/random", extractSubfolder(mainImagePath), fileName);
-                    } else if (mainImagePath.contains("/acc/")) {
-                        sourcePath = Path.of(BASE_DIR, fileName);
-                    } else {
-                        sourcePath = Path.of(BASE_DIR, fileName);
-                    }
-
-                    Path thumbPath = Path.of(THUMB_DIR, fileName);
-
-                    if (!Files.exists(sourcePath)) {
-                        log.warn("⚠️ 원본 없음 → {}", sourcePath);
-                        return;
-                    }
-
-                    // ✅ 단일 파일 I/O는 synchronized
-                    synchronized (ImageBatchService.class) {
-                        Thumbnails.of(sourcePath.toFile())
-                                .size(400, 300)
-                                .outputFormat("jpg")
-                                .allowOverwrite(true)
-                                .toFile(thumbPath.toFile());
-                    }
-
-                    acc.updateMainImage("/images/thumb/" + fileName);
-                    synchronized (accRepository) {
-                        accRepository.save(acc);
-                    }
-
-                    synchronized (System.out) {
-                        log.debug("🏨 [{} / {}] {} → 썸네일 생성 완료",
-                                acc.getTitle(), total, fileName);
-                    }
-
-                } catch (Exception e) {
-                    synchronized (System.out) {
-                        log.error("❌ 썸네일 생성 실패: {}", acc.getTitle(), e);
-                    }
+                Path sourcePath;
+                if (mainImagePath.contains("/random/")) {
+                    sourcePath = Path.of("../images/random", extractSubfolder(mainImagePath), fileName);
+                } else if (mainImagePath.contains("/acc/")) {
+                    sourcePath = Path.of(BASE_DIR, fileName);
+                } else {
+                    sourcePath = Path.of(BASE_DIR, fileName);
                 }
-            }));
+
+                Path thumbPath = Path.of(THUMB_DIR, fileName);
+
+                // ✅ 원본 이미지 존재 확인
+                if (!Files.exists(sourcePath)) {
+                    log.warn("⚠️ 원본 없음 → {}", sourcePath);
+                    continue;
+                }
+
+                // ✅ 썸네일이 없거나 덮어쓰기 허용
+                Thumbnails.of(sourcePath.toFile())
+                        .size(400, 300)
+                        .outputFormat("jpg")
+                        .allowOverwrite(true)
+                        .toFile(thumbPath.toFile());
+
+                // ✅ DB 반영 — 썸네일 경로로 강제 갱신
+                acc.updateMainImage("/images/thumb/" + fileName);
+                accRepository.save(acc);
+                updated++;
+                success++;
+
+                log.debug("🏨 {} → /images/thumb/{}", acc.getTitle(), fileName);
+
+            } catch (Exception e) {
+                failed++;
+                log.error("❌ 썸네일 생성 실패: {}", acc.getTitle(), e);
+            }
         }
 
-        // ✅ 스레드 종료 대기
-        executor.shutdown();
-        try {
-            executor.awaitTermination(20, TimeUnit.MINUTES);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-
-        log.info("✅ 썸네일 강제 재생성 완료");
+        log.info("🎯 썸네일 재생성 완료 → 생성: {} / DB갱신: {} / 실패: {}", success, updated, failed);
     }
-
 }

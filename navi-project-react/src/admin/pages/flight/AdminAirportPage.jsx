@@ -149,7 +149,6 @@ const AdminAirportPage = () => {
                             style={{
                                 borderRadius: 8,
                                 fontWeight: 600,
-                                background: "#2563eb",
                                 border: "none",
                             }}
                         >

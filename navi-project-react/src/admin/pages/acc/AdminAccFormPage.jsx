@@ -150,23 +150,35 @@ const AdminAccFormPage = () => {
                 <Form.Item
                   label="전화번호"
                   name="tel"
-                  rules={[{ required: true, message: "전화번호를 입력하세요" }]}
+                  rules={[
+                    { required: true, message: "전화번호를 입력하세요" },
+                    {
+                      pattern: /^01[0-9]-\d{3,4}-\d{4}$/,
+                      message: "전화번호 형식이 올바르지 않습니다. (예: 010-1234-5678)",
+                    },
+                  ]}
                 >
-                  <Input placeholder="예: 064-123-4567" size="large" />
+                  <Input placeholder="예: 010-1234-5678" size="large" maxLength={13} />
                 </Form.Item>
               </Col>
               <Col span={16}>
                 <Form.Item
                   label="주소"
-                  name="address"
-                  rules={[{ required: true, message: "주소를 입력하세요" }]}
+                  required
+                  tooltip="주소찾기를 통해 입력하세요"
                 >
                   <Input.Group compact>
-                    <Input
-                      style={{ width: "calc(100% - 110px)" }}
-                      placeholder="예: 제주특별자치도 제주시 애월읍 곽지리 123"
-                      size="large"
-                    />
+                    <Form.Item
+                      name="address"
+                      noStyle
+                      rules={[{ required: true, message: "주소를 입력하세요" }]}
+                    >
+                      <Input
+                        style={{ width: "calc(100% - 110px)" }}
+                        placeholder="예: 제주특별자치도 제주시 애월읍 곽지리 123"
+                        size="large"
+                      />
+                    </Form.Item>
                     <Button
                       type="primary"
                       icon={<EnvironmentOutlined />}
