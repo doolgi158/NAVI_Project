@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
-import { List, Button, Empty, Input, Tabs, message } from "antd";
+import { List, Button, Empty, Input, Tabs, message, Spin } from "antd";
 import TitleDateDisplay from "./TitleDateDisplay";
 import Pagination from "@/common/components/travel/Pagination";
 import { API_SERVER_HOST } from "@/common/api/naviApi";
@@ -19,8 +19,10 @@ export default function TravelSelectDrawer({
   const [searchText, setSearchText] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("전체");
   const [myBookmarks, setMyBookmarks] = useState([]);
-  const [pageSize] = useState(20);
+  const [bookmarkLoading, setBookmarkLoading] = useState(false); // ✅ 로딩 상태 추가
+  const [pageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
+  const [bookmarkPage, setBookmarkPage] = useState(1);
   const [pageResult, setPageResult] = useState({
     page: 1,
     totalPages: 1,
@@ -32,15 +34,16 @@ export default function TravelSelectDrawer({
 
   const listContainerRef = useRef(null);
 
-  // ✅ 카테고리 목록 (원하는 항목 추가 가능)
+  // ✅ 카테고리 목록
   const categories = ["전체", "관광지", "음식점", "쇼핑"];
 
-  /** ✅ 북마크 여행지 불러오기 */
+  /** ✅ 북마크 여행지 불러오기 (캐싱 적용 + 로딩 표시) */
   useEffect(() => {
-    if (activeTab !== "my") return;
+    if (activeTab !== "my" || myBookmarks.length > 0) return; // ✅ 이미 불러왔으면 재요청 X
 
     const fetchBookmarks = async () => {
       try {
+        setBookmarkLoading(true); // ✅ 로딩 시작
         const token = localStorage.getItem("accessToken");
         const userNo = localStorage.getItem("userNo");
 
@@ -61,6 +64,8 @@ export default function TravelSelectDrawer({
       } catch (err) {
         console.error("❌ 북마크 여행지 불러오기 실패:", err);
         message.error("나의 여행지를 불러오지 못했습니다.");
+      } finally {
+        setBookmarkLoading(false); // ✅ 로딩 종료
       }
     };
 
@@ -72,19 +77,16 @@ export default function TravelSelectDrawer({
     let list = [...travels];
     const keyword = searchText.trim().toLowerCase();
 
-    // 🔍 검색어 필터링
     if (keyword) {
       const normalizedKeyword = keyword.replace(/\s+/g, "").toLowerCase();
       list = list.filter((t) => {
-        const normalizedText = `${t.title || ""} ${t.region1Name || ""} ${t.region2Name || ""
-          }`
+        const normalizedText = `${t.title || ""} ${t.region1Name || ""} ${t.region2Name || ""}`
           .replace(/\s+/g, "")
           .toLowerCase();
         return normalizedText.includes(normalizedKeyword);
       });
     }
 
-    // 🎯 카테고리 필터링
     if (categoryFilter !== "전체") {
       list = list.filter(
         (t) =>
@@ -117,13 +119,46 @@ export default function TravelSelectDrawer({
     });
   }, [filteredTravels, currentPage, pageSize]);
 
+  /** ✅ 북마크 페이지네이션 */
+  const pagedBookmarks = useMemo(() => {
+    const startIdx = (bookmarkPage - 1) * pageSize;
+    return myBookmarks.slice(startIdx, startIdx + pageSize);
+  }, [myBookmarks, bookmarkPage, pageSize]);
+
+  const bookmarkPageResult = useMemo(() => {
+    const totalElements = myBookmarks.length;
+    const totalPages = Math.ceil(totalElements / pageSize);
+    const startBlock = Math.floor((bookmarkPage - 1) / 10) * 10 + 1;
+    const endBlock = Math.min(startBlock + 9, totalPages);
+    const pageList = Array.from(
+      { length: endBlock - startBlock + 1 },
+      (_, i) => startBlock + i
+    );
+    return {
+      page: bookmarkPage,
+      totalElements,
+      totalPages,
+      startPage: startBlock,
+      endPage: endBlock,
+      pageList,
+    };
+  }, [myBookmarks, bookmarkPage, pageSize]);
+
+  const handleBookmarkPageClick = (page) => {
+    if (page >= 1 && page <= bookmarkPageResult.totalPages) {
+      setBookmarkPage(page);
+      if (listContainerRef.current) {
+        listContainerRef.current.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }
+  };
+
   /** ✅ 현재 페이지 데이터 */
   const pagedTravels = useMemo(() => {
     const startIdx = (currentPage - 1) * pageSize;
     return filteredTravels.slice(startIdx, startIdx + pageSize);
   }, [filteredTravels, currentPage, pageSize]);
 
-  /** ✅ 리스트 클릭시 페이지 맨 위로 */
   const handlePageClick = (page) => {
     if (page >= 1 && page <= pageResult.totalPages) {
       setCurrentPage(page);
@@ -133,7 +168,6 @@ export default function TravelSelectDrawer({
     }
   };
 
-  /** ✅ 카테고리 변경 시 페이지 리셋 + 스크롤 맨 위로 이동 */
   const handleCategoryChange = (cat) => {
     setCategoryFilter(cat);
     setCurrentPage(1);
@@ -142,7 +176,6 @@ export default function TravelSelectDrawer({
     }
   };
 
-  /** ✅ 여행지 선택/해제 */
   const handleToggleSelect = (item) => {
     setSelectedTravels((prev) => {
       const exists = prev.some((v) => v.travelId === item.travelId);
@@ -225,9 +258,8 @@ export default function TravelSelectDrawer({
         <div className="flex-1 overflow-y-auto custom-scroll">
           {activeTab === "search" && (
             <div className="flex flex-col h-full">
-              {/* ✅ 고정 영역 (검색 + 카테고리 + 개수) */}
+              {/* ✅ 검색 영역 */}
               <div className="sticky top-0 z-10 px-4 pt-2 pb-3 border-b border-gray-200 shadow-sm ">
-                {/* 🔍 검색 입력 */}
                 <Search
                   placeholder="장소명을 입력하세요"
                   allowClear
@@ -244,11 +276,6 @@ export default function TravelSelectDrawer({
                   onChange={(e) => {
                     setSearchText(e.target.value);
                     setCurrentPage(1);
-                    if (listContainerRef.current)
-                      listContainerRef.current.scrollTo({
-                        top: 0,
-                        behavior: "auto",
-                      });
                   }}
                   value={searchText}
                 />
@@ -265,14 +292,14 @@ export default function TravelSelectDrawer({
                           ? "bg-[#0A3D91] border-none text-white"
                           : "text-gray-600"
                       }
-                      onClick={() => handleCategoryChange(cat)} // ✅ 수정된 부분
+                      onClick={() => handleCategoryChange(cat)}
                     >
                       {cat}
                     </Button>
                   ))}
                 </div>
 
-                {/* ✅ 총 개수 고정 */}
+                {/* ✅ 총 개수 */}
                 <div className="text-gray-600 text-sm">
                   총{" "}
                   <span className="font-semibold text-[#0A3D91]">
@@ -282,7 +309,7 @@ export default function TravelSelectDrawer({
                 </div>
               </div>
 
-              {/* ✅ 리스트만 스크롤 */}
+              {/* ✅ 리스트 */}
               <div
                 ref={listContainerRef}
                 className="flex-1 overflow-y-auto custom-scroll px-4 pb-4"
@@ -308,28 +335,47 @@ export default function TravelSelectDrawer({
           {/* ✅ 나의 여행지 탭 */}
           {activeTab === "my" && (
             <div className="flex flex-col gap-3 px-4 mt-1 mb-2">
-              <div className="text-gray-600 text-sm mb-2">
-                총{" "}
-                <span className="font-semibold text-[#0A3D91]">
-                  {myBookmarks.length.toLocaleString()}
-                </span>{" "}
-                개
-              </div>
-              <div className="flex-1 overflow-y-auto custom-scroll  pb-4">
-                <List
-                  dataSource={myBookmarks}
-                  locale={{
-                    emptyText: <Empty description="북마크한 여행지가 없습니다." />,
-                  }}
-                  renderItem={renderTravelItem}
-                />
-              </div>
+              {bookmarkLoading ? (
+                <div className="flex justify-center items-center py-10 text-gray-500">
+                  <Spin size="large" tip="북마크를 불러오는 중입니다..." />
+                </div>
+              ) : (
+                <>
+                  <div className="text-gray-600 text-sm mb-2">
+                    총{" "}
+                    <span className="font-semibold text-[#0A3D91]">
+                      {myBookmarks.length.toLocaleString()}
+                    </span>{" "}
+                    개
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto custom-scroll pb-4">
+                    <List
+                      dataSource={pagedBookmarks}
+                      locale={{
+                        emptyText: (
+                          <Empty description="북마크한 여행지가 없습니다." />
+                        ),
+                      }}
+                      renderItem={renderTravelItem}
+                    />
+
+                    {bookmarkPageResult.totalPages > 1 && (
+                      <Pagination
+                        pageResult={bookmarkPageResult}
+                        handlePageClick={handleBookmarkPageClick}
+                        loading={false}
+                      />
+                    )}
+                  </div>
+                </>
+              )}
             </div>
           )}
         </div>
       </div>
 
-      {/* ✅ 오른쪽: 선택된 여행지 요약 (독립 스크롤) */}
+      {/* ✅ 오른쪽: 선택된 여행지 요약 */}
       <div className="p-5 flex-shrink-0 border-b border-gray-200">
         <div className="flex justify-between items-center">
           <div>
