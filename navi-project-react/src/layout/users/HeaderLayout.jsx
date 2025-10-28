@@ -34,13 +34,14 @@ const HeaderLayout = () => {
         zIndex: 1000,
       }}
     >
-      <Link to="/">
+      <Link to="/" style={{ display: "flex", alignItems: "center", height: "100%" }}>
         <Image
           src={naviLogo}
           alt="naviLogo"
           preview={false}
           width={130}
-          style={{ display: "block" }}
+          style={{ display: "block", alignSelf: "center", objectFit: "contain", height: "auto", }}
+
         />
       </Link>
 
