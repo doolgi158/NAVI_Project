@@ -201,7 +201,7 @@ export default function AdminPlanList() {
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
                                     onPressEnter={handleSearch}
-                                    style={{ flex: 1, minWidth: 280 }}
+                                    style={{ flex: 1, minWidth: 280, maxWidth: 600 }}
                                 />
                                 <Button
                                     type="primary"
@@ -227,15 +227,7 @@ export default function AdminPlanList() {
                                     ]}
                                 />
 
-                                <div style={{ flex: 1 }} />
 
-                                <Button
-                                    type="primary"
-                                    icon={<PlusOutlined />}
-                                    onClick={() => navigate("/adm/plan/register")}
-                                >
-                                    새 계획 등록
-                                </Button>
                             </div>
 
                             <Divider style={{ margin: "16px 0" }} />

@@ -201,7 +201,7 @@ const PaymentPage = () => {
 								<Space direction="vertical">
 									<Radio value="KAKAOPAY">카카오페이</Radio>
 									<Radio value="TOSSPAY">토스페이</Radio>
-									<Radio value="KGINIPAY">KG이니시스</Radio>
+									{/* <Radio value="KGINIPAY">KG이니시스</Radio> */}
 								</Space>
 							</Radio.Group>
 						</div>

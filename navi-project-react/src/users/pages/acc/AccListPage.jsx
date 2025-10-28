@@ -1,17 +1,5 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
-import {
-  Radio,
-  Input,
-  DatePicker,
-  Select,
-  Typography,
-  Button,
-  Card,
-  message,
-  InputNumber,
-  Pagination,
-  Checkbox,
-} from "antd";
+import { Radio, Input, DatePicker, Select, Typography, Button, Card, message, InputNumber, Pagination, Checkbox, Spin } from "antd";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setSearchState, setSelectedAcc } from "../../../common/slice/accSlice";
@@ -24,6 +12,7 @@ import dayjs from "dayjs";
 const { Text } = Typography;
 const { Meta } = Card;
 const { RangePicker } = DatePicker;
+
 
 const AccListPage = () => {
   const dispatch = useDispatch();
@@ -79,8 +68,8 @@ const AccListPage = () => {
   const [township, setTownship] = useState(savedSearch.township);
   const [keyword, setKeyword] = useState(savedSearch.keyword);
   const [spot, setSpot] = useState(savedSearch.spot);
-  const [guestCount, setGuestCount] = useState(savedSearch.guestCount);
-  const [roomCount, setRoomCount] = useState(savedSearch.roomCount);
+  const [guestCount, setGuestCount] = useState(savedSearch.guestCount || 1);
+const [roomCount, setRoomCount] = useState(savedSearch.roomCount || 1);
   const [isSearched, setIsSearched] = useState(savedSearch.isSearched || false);
   const [accommodations, setAccommodations] = useState(savedSearch.accommodations || []);
   const [sortOption, setSortOption] = useState("title");
@@ -93,6 +82,7 @@ const AccListPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(8);
   const [totalCount, setTotalCount] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   const cityOptions = useMemo(() => {
     return [...new Set(townshipList.map((t) => t.sigunguName))].map((city) => ({
@@ -111,9 +101,7 @@ const AccListPage = () => {
 
   const handleSearch = useCallback(
     async (page = 1, size = pageSize) => {
-      if (isTownshipLoading) {
-        return;
-      }
+      if (isTownshipLoading) return;
       if (townshipError) {
         message.error("잠시 후에 다시 시도해주세요.");
         return;
@@ -137,6 +125,7 @@ const AccListPage = () => {
       }
 
       try {
+        setLoading(true);   // 로딩 시작
         const params = {
           city,
           townshipName: township,
@@ -179,6 +168,8 @@ const AccListPage = () => {
       } catch (err) {
         console.error("숙소 검색 실패:", err);
         message.error("숙소 목록을 불러오지 못했습니다.");
+      } finally {
+        setLoading(false);  // 로딩 종료
       }
     },
     [
@@ -230,6 +221,7 @@ const AccListPage = () => {
     handleSearch(page, size);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+  
   return (
     <MainLayout>
       <div className="min-h-screen flex flex-col items-center pt-6 pb-8 px-6">
@@ -266,17 +258,20 @@ const AccListPage = () => {
             <div className="flex flex-wrap gap-2 items-end justify-start mb-5">
               {searchType === "region" ? (
                 <>
-                  <Select
-                    placeholder="행정시 선택"
-                    className="w-[140px]"
-                    value={city || undefined}
-                    onChange={(c) => {
-                      setCity(c);
-                      setTownship("");
-                    }}
-                    options={cityOptions}
-                    size="middle"
-                  />
+                  <div className="flex flex-col">
+                    <Text>지역</Text>
+                    <Select
+                      placeholder="행정시 선택"
+                      className="w-[140px]"
+                      value={city || undefined}
+                      onChange={(c) => {
+                        setCity(c);
+                        setTownship("");
+                      }}
+                      options={cityOptions}
+                      size="middle"
+                    />
+                  </div>
                   <Select
                     placeholder="읍면 선택"
                     className="w-[140px]"
@@ -288,48 +283,56 @@ const AccListPage = () => {
                   />
                 </>
               ) : (
-                <Input
-                  placeholder="숙소명을 입력하세요"
-                  className="w-[320px]"
-                  size="middle"
-                  value={keyword}
-                  onChange={(e) => setKeyword(e.target.value)}
-                />
+                <div className="flex flex-col">
+                  <Text>숙소명</Text>
+                  <Input
+                    placeholder="숙소명을 입력하세요"
+                    className="w-[320px]"
+                    size="middle"
+                    value={keyword}
+                    onChange={(e) => setKeyword(e.target.value)}
+                  />
+                </div>
               )}
-
-              <RangePicker
-                format="YYYY-MM-DD"
-                placeholder={["체크인", "체크아웃"]}
-                value={dateRange}
-                size="middle"
-                onChange={(v) => setDateRange(v)}
-                disabledDate={(current) => {
-                  const today = dayjs().startOf("day");
-                  const twoWeeksLater = today.add(14, "day").endOf("day");
-                  return current < today || current > twoWeeksLater;
-                }}
-              />
-
-              <InputNumber
-                min={1}
-                max={30}
-                value={guestCount}
-                onChange={setGuestCount}
-                placeholder="인원"
-                size="middle"
-                className="w-[90px]"
-              />
-
-              <InputNumber
-                min={1}
-                max={10}
-                value={roomCount}
-                onChange={setRoomCount}
-                placeholder="객실"
-                size="middle"
-                className="w-[90px]"
-              />
-
+              <div className="flex flex-col">
+                <Text>숙박 일정</Text>
+                <RangePicker
+                  format="YYYY-MM-DD"
+                  placeholder={["체크인", "체크아웃"]}
+                  value={dateRange}
+                  size="middle"
+                  onChange={(v) => setDateRange(v)}
+                  disabledDate={(current) => {
+                    const today = dayjs().startOf("day");
+                    const twoWeeksLater = today.add(14, "day").endOf("day");
+                    return current < today || current > twoWeeksLater;
+                  }}
+                />
+              </div>
+              <div className="flex flex-col">
+                <Text>인원 수</Text>
+                <InputNumber
+                  min={1}
+                  max={30}
+                  value={guestCount}
+                  onChange={setGuestCount}
+                  placeholder="인원"
+                  size="middle"
+                  className="w-[90px]"
+                />
+              </div>
+              <div className="flex flex-col">
+                <Text>객실 수</Text>
+                <InputNumber
+                  min={1}
+                  max={10}
+                  value={roomCount}
+                  onChange={setRoomCount}
+                  placeholder="객실"
+                  size="middle"
+                  className="w-[90px]"
+                />
+              </div>
               <Button
                 type="primary"
                 className="!rounded-[6px] h-[32px] px-6 font-semibold border-0 bg-[#1677ff] text-white shadow-sm hover:shadow-md transition-all ml-auto"
@@ -374,73 +377,75 @@ const AccListPage = () => {
           {/* ✅ 검색 결과 */}
           <div className="bg-white/90 shadow-md rounded-2xl p-5 border border-gray-100 backdrop-blur-sm">
             <h2 className="text-xl font-bold mb-5">검색 결과</h2>
-
-            {!isSearched ? (
-              <div className="text-center text-gray-500 min-h-[250px] flex items-center justify-center border border-dashed border-gray-300 rounded-2xl p-4">
-                <p className="text-base">
-                  원하는 숙소를 찾아보세요! 🚀<br />검색 조건을 입력하고 ‘검색’을 눌러주세요.
-                </p>
-              </div>
-            ) : accommodations.length === 0 ? (
-              <div className="text-center text-gray-400 py-16">검색 결과가 없습니다 😢</div>
-            ) : (
-              <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {accommodations.map((acc, index) => (
-                    <Card
-                      key={acc.accId || `acc-${index}`}
-                      hoverable
-                      className="rounded-2xl shadow-sm cursor-pointer transition-transform transform hover:scale-[1.02] duration-200"
-                      onClick={() => handleCardClick(acc)}
-                      cover={
-                        acc.mainImage ? (
-                          <img
-                            alt={acc.title}
-                            src={`${API_SERVER_HOST}${acc.mainImage}`}
-                            loading="lazy"
-                            className="h-48 object-cover w-full rounded-t-2xl"
-                            onError={(e) => {
-                              e.target.style.display = "none";
-                              const fallback = document.createElement("div");
-                              fallback.className =
-                                "h-48 w-full flex items-center justify-center rounded-t-2xl bg-gray-200/60 text-gray-600 font-medium text-lg";
-                              fallback.textContent = "이미지 준비중";
-                              e.target.parentNode.appendChild(fallback);
-                            }}
-                          />
-                        ) : (
-                          <div className="h-48 w-full flex items-center justify-center rounded-t-2xl bg-gray-200/60 text-gray-600 font-medium text-lg">
-                            이미지 준비중
-                          </div>
-                        )
-                      }
-                    >
-                      <Meta
-                        title={<span className="text-base font-semibold">{acc.title}</span>}
-                        description={
-                          <div className="text-gray-600 mt-3">
-                            <p className="font-semibold text-sm mt-1 flex items-center gap-2 text-[#006D77]">
-                              {acc.minPrice ? `${acc.minPrice.toLocaleString()}원` : "가격 미정"} / 1박
-                            </p>
-                            <p className="text-sm mt-1 truncate">{acc.address}</p>
-                          </div>
-                        }
-                      />
-
-                    </Card>
-                  ))}
+            
+            <Spin spinning={loading} tip="숙소 정보를 불러오는 중입니다...">
+              {!isSearched ? (
+                <div className="text-center text-gray-500 min-h-[250px] flex items-center justify-center border border-dashed border-gray-300 rounded-2xl p-4">
+                  <p className="text-base">
+                    원하는 숙소를 찾아보세요! 🚀<br />검색 조건을 입력하고 ‘검색’을 눌러주세요.
+                  </p>
                 </div>
+              ) : accommodations.length === 0 ? (
+                <div className="text-center text-gray-400 py-16">검색 결과가 없습니다 😢</div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {accommodations.map((acc, index) => (
+                      <Card
+                        key={acc.accId || `acc-${index}`}
+                        hoverable
+                        className="rounded-2xl shadow-sm cursor-pointer transition-transform transform hover:scale-[1.02] duration-200"
+                        onClick={() => handleCardClick(acc)}
+                        cover={
+                          acc.mainImage ? (
+                            <img
+                              alt={acc.title}
+                              src={`${API_SERVER_HOST}${acc.mainImage}`}
+                              loading="lazy"
+                              className="h-48 object-cover w-full rounded-t-2xl"
+                              onError={(e) => {
+                                e.target.style.display = "none";
+                                const fallback = document.createElement("div");
+                                fallback.className =
+                                  "h-48 w-full flex items-center justify-center rounded-t-2xl bg-gray-200/60 text-gray-600 font-medium text-lg";
+                                fallback.textContent = "이미지 준비중";
+                                e.target.parentNode.appendChild(fallback);
+                              }}
+                            />
+                          ) : (
+                            <div className="h-48 w-full flex items-center justify-center rounded-t-2xl bg-gray-200/60 text-gray-600 font-medium text-lg">
+                              이미지 준비중
+                            </div>
+                          )
+                        }
+                      >
+                        <Meta
+                          title={<span className="text-base font-semibold">{acc.title}</span>}
+                          description={
+                            <div className="text-gray-600 mt-3">
+                              <p className="font-semibold text-sm mt-1 flex items-center gap-2 text-[#006D77]">
+                                {acc.minPrice ? `${acc.minPrice.toLocaleString()}원` : "가격 미정"} / 1박
+                              </p>
+                              <p className="text-sm mt-1 truncate">{acc.address}</p>
+                            </div>
+                          }
+                        />
 
-                <Pagination
-                  current={currentPage}
-                  pageSize={pageSize}
-                  total={totalCount}
-                  onChange={handlePageChange}
-                  showSizeChanger={false}
-                  className="mt-6 text-center"
-                />
-              </>
-            )}
+                      </Card>
+                    ))}
+                  </div>
+
+                  <Pagination
+                    current={currentPage}
+                    pageSize={pageSize}
+                    total={totalCount}
+                    onChange={handlePageChange}
+                    showSizeChanger={false}
+                    className="mt-6 text-center"
+                  />
+                </>
+              )}
+            </Spin>
           </div>
         </div>
       </div>

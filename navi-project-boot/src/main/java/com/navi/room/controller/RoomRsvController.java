@@ -59,7 +59,8 @@ public class RoomRsvController {
             @PathVariable String reserveId,
             @RequestBody ReserverUpdateRequestDTO dto) {
 
-        roomRsvService.updateReserverInfo(reserveId, dto.getReserverName(), dto.getReserverTel(), dto.getReserverEmail());
+        roomRsvService.updateReserverInfo(
+                reserveId, dto.getReserverName(), dto.getReserverTel(), dto.getReserverEmail(), dto.getReserverBirth());
         return ResponseEntity.ok("✅ 예약자 정보가 업데이트되었습니다.");
     }
 

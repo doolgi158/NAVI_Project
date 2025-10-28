@@ -140,16 +140,16 @@ public class RoomRsvServiceImpl implements RoomRsvService {
 
     @Override
     @Transactional
-    public void updateReserverInfo(String reserveId, String name, String tel, String email) {
+    public void updateReserverInfo(String reserveId, String name, String tel, String email, String birth) {
         List<RoomRsv> rsvList = roomRsvRepository.findAllByReserveId(reserveId);
         if (rsvList.isEmpty()) throw new IllegalArgumentException("❌ 예약 정보를 찾을 수 없습니다.");
 
         for (RoomRsv rsv : rsvList) {
-            rsv.updateReserverInfo(name, tel, email);
+            rsv.updateReserverInfo(name, tel, email, birth);
         }
 
-        log.info("🪪 예약자 정보 업데이트 완료 → reserveId={}, name={}, tel={}, email={}",
-                reserveId, name, tel, email);
+        log.info("🪪 예약자 정보 업데이트 완료 → reserveId={}, name={}, tel={}, email={}, birth={}",
+                reserveId, name, tel, email, birth);
     }
 
     /* 예약 상태 변경 + 재고 복구 */
@@ -207,6 +207,24 @@ public class RoomRsvServiceImpl implements RoomRsvService {
         result.put("total", total);
 
         return result;
+    }
+
+    /* 예약 상태 조회 */
+    @Override
+    public String getReservationStatus(String reserveId) {
+        return roomRsvRepository.findStatusByReserveId(reserveId)
+                .orElseThrow(() -> new IllegalArgumentException("예약을 찾을 수 없습니다."));
+    }
+
+    /* 예약 삭제 */
+    @Transactional
+    public void deleteReservationByReserveId(String reserveId) {
+        RoomRsv rsv = roomRsvRepository.findByReserveId(reserveId)
+                .orElseThrow(() -> new IllegalArgumentException("예약을 찾을 수 없습니다."));
+        if (rsv.getRsvStatus() != RsvStatus.CANCELLED) {
+            throw new IllegalStateException("예약 취소 상태일 때만 삭제할 수 있습니다.");
+        }
+        roomRsvRepository.deleteById(rsv.getNo());
     }
 
 
@@ -281,7 +299,7 @@ public class RoomRsvServiceImpl implements RoomRsvService {
     private String generateReserveId() {
         String today = LocalDate.now(ZoneId.of("Asia/Seoul"))
                 .format(DateTimeFormatter.BASIC_ISO_DATE);
-        long seq = roomRsvRepository.count() + 1;
+        Long seq = roomRsvRepository.getNextSeqVal();
         return String.format("%sACC%04d", today, seq);
     }
 }

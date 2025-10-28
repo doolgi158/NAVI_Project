@@ -28,6 +28,11 @@ public class StockController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
 
         log.info("재고 조회 요청 - roomId={}, 기간:{}~{}", roomId, startDate, endDate);
+
+        if (startDate == null || endDate == null) {
+            throw new IllegalArgumentException("재고를 조회하려면 시작일과 종료일을 모두 지정해야 합니다.");
+        }
+
         List<StockResponseDTO> result = stockService.getStockByRoomAndPeriod(roomId, startDate, endDate);
         return ResponseEntity.ok(result);
     }

@@ -1,5 +1,6 @@
 package com.navi.accommodation.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.navi.accommodation.dto.api.AccApiDTO;
 import com.navi.accommodation.dto.request.AccRequestDTO;
@@ -32,6 +33,7 @@ import java.util.List;
         sequenceName = "ACC_SEQ",
         initialValue = 1,
         allocationSize = 1)
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Acc {
     /* === COLUMN 정의 === */
     // 내부 식별번호 (예: 1)
@@ -102,11 +104,6 @@ public class Acc {
     @Column(name = "has_parking", nullable = false)
     private Boolean hasParking = false;
 
-    // 삭제 가능 여부
-    //@Builder.Default
-    //@Column(name = "is_deletable", nullable = false)
-    //private Boolean deletable = false;
-
     // 운영 여부
     @Builder.Default
     @Column(name = "is_active", nullable = false)
@@ -149,7 +146,6 @@ public class Acc {
         if (hasCooking == null) hasCooking = false;
         if (hasParking == null) hasParking = false;
         if (active == null) active = true;
-        //if (deletable == null) deletable = false;
         if (createdTime == null) createdTime = LocalDateTime.now();
         if (modifiedTime == null) modifiedTime = LocalDateTime.now();
     }

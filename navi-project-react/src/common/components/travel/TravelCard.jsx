@@ -80,7 +80,7 @@ const TravelCard = ({ item, onClick, isSelected, onMouseEnter, onMouseLeave }) =
 
   return (
     <div
-      className={`min-w-[400px] bg-white rounded-xl shadow-lg border-2 p-4 cursor-pointer transition duration-300 transform hover:shadow-xl hover:-translate-y-1 ${isSelected ? 'border-blue-500 shadow-blue-300/50 scale-[1.01]' : 'border-gray-200'
+      className={`min-w-[400px] bg-white rounded-xl shadow-lg border-2 p-4 cursor-pointer transition duration-300 transform hover:shadow-xl hover:-translate-y-1 hover:border-blue-300  ${isSelected ? ' scale-[1.01]' : 'border-gray-200'
         } flex space-x-4`}
       onClick={() => onClick(item)}
       onMouseEnter={onMouseEnter}

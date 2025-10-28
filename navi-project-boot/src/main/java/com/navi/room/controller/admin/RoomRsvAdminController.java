@@ -14,7 +14,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RequestMapping("/api/adm/room/reserve")
 public class RoomRsvAdminController {
-
     private final RoomRsvService roomRsvService;
 
     /* 관리자용 객실 예약 목록 조회 (페이징 + 필터 + 키워드 검색) */
@@ -30,7 +29,6 @@ public class RoomRsvAdminController {
         Map<String, Object> result = roomRsvService.getAdminReservationList(page, size, status, keyword);
         return ApiResponse.success(result);
     }
-
 
     /* 관리자용 단일 예약 상세 조회 */
     @GetMapping("/{reserveId}")
@@ -48,5 +46,19 @@ public class RoomRsvAdminController {
         log.info("⚙️ [ADMIN] 예약 상태 변경 - {} → {}", reserveId, status);
         roomRsvService.updateStatus(reserveId, status);
         return ApiResponse.success("예약 상태가 변경되었습니다.");
+    }
+
+    /* 관리자용 예약 삭제 (취소 상태일 때만 가능) */
+    @DeleteMapping("/{reserveId}")
+    public ApiResponse<String> deleteReservation(@PathVariable String reserveId) {
+        String currentStatus = roomRsvService.getReservationStatus(reserveId);
+
+        if (currentStatus != null && !"CANCELLED".equalsIgnoreCase(currentStatus)) {
+            // 상태가 CANCELLED가 아니면 실패 응답 반환
+            return ApiResponse.error("예약 취소 상태일 때만 삭제할 수 있습니다.", 400, null);
+        }
+
+        roomRsvService.deleteReservationByReserveId(reserveId);
+        return ApiResponse.success("예약이 삭제되었습니다.");
     }
 }

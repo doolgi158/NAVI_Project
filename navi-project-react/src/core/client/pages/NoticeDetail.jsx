@@ -27,6 +27,8 @@ function NoticeDetail() {
       const data = await getNoticeById(noticeNo);
       console.log('공지사항 데이터:', data);
       console.log('이미지 경로:', data.noticeImage);
+      console.log('공지사항 데이터:', data);
+      console.log('이미지 경로:', data.noticeImage);
       setNotice(data);
     } catch (error) {
       console.error('공지사항을 불러오는데 실패했습니다:', error);
@@ -61,8 +63,8 @@ function NoticeDetail() {
 
   return (
     <MainLayout>
-    <div className="notice-detail-container">
-      <h1>공지사항</h1>
+      <div className="notice-detail-container">
+        <h1>공지사항</h1>
 
       <div className="notice-info">
         <div className="info-row">

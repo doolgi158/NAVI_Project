@@ -82,7 +82,7 @@ export const useTravelList = (userId) => {
     totalElements: 0,
     totalPages: 0,
     page: 1,
-    size: 10,
+    size: 5,
     startPage: 1,
     endPage: 1,
     pageList: [],
@@ -91,7 +91,7 @@ export const useTravelList = (userId) => {
   const initialParams = getInitialParams();
   const [pageParam, setPageParam] = useState({
     page: initialParams.page,
-    size: 10,
+    size: 5,
     sort: initialParams.sort,
     categoryName: initialParams.categoryName,
     search: initialParams.search,

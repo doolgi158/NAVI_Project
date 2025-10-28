@@ -15,7 +15,7 @@ const RedirectPage = () => {
 
     // provider 추출 (Google, Kakao, Naver 중 어느 것인지)
     const url = new URL(window.location.href);
-    
+
     let provider = "kakao";
     if (url.href.includes("google")) provider = "google";
     else if (url.href.includes("navi")) provider = "naver";
@@ -27,8 +27,8 @@ const RedirectPage = () => {
       .get(`http://localhost:8080/api/auth/oauth/${provider}?code=${code}`)
       .then((res) => {
         const data = res.data.data;
-        
-        dispatch(setlogin({ 
+
+        dispatch(setlogin({
           username: data.id,
           token: data.accessToken,
           role: data.role,

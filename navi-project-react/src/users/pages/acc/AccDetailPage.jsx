@@ -62,7 +62,7 @@ const AccDetailPage = () => {
   const [dateRange, setDateRange] = useState(
     searchState?.dateRange?.length === 2
       ? [dayjs(searchState.dateRange[0]), dayjs(searchState.dateRange[1])]
-      : null
+      : [dayjs().startOf('day'), dayjs().add(1, 'day').startOf('day')]
   );
   const [guestCount, setGuestCount] = useState(searchState?.guestCount || 1);
   const [roomCount, setRoomCount] = useState(searchState?.roomCount || 1);
@@ -338,12 +338,15 @@ const AccDetailPage = () => {
                 <Text>숙박 일정</Text>
                 <RangePicker
                   format="YYYY-MM-DD"
+                  placeholder={["체크인", "체크아웃"]}
                   value={dateRange}
                   size="large"
-                  onChange={setDateRange}
-                  disabledDate={(current) =>
-                    current && current < dayjs().startOf("day")
-                  }
+                  onChange={(v) => setDateRange(v)}
+                  disabledDate={(current) => {
+                    const today = dayjs().startOf("day");
+                    const twoWeeksLater = today.add(14, "day").endOf("day");
+                    return current < today || current > twoWeeksLater;
+                  }}
                 />
               </div>
 
@@ -373,9 +376,9 @@ const AccDetailPage = () => {
                     key={room.roomId}
                     className="flex flex-col md:flex-row border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200"
                   >
-                    {room.thumbnailImage ? (
+                    {room.mainImage ? (
                       <img
-                        src={`${API_SERVER_HOST}${room.thumbnailImage}`}
+                        src={`${API_SERVER_HOST}${room.mainImage}`}
                         alt={room.roomName}
                         className="md:w-1/4 w-full h-40 object-cover"
                       />

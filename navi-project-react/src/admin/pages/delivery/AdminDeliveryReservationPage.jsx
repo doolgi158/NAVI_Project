@@ -198,7 +198,7 @@ const AdminDeliveryReservationPage = () => {
                     message.success("삭제 완료");
                     fetchReservations();
                 } catch {
-                    message.error("삭제 실패");
+                    message.error(`현재 ${record.status} 상태의 예약은 삭제할 수 없습니다.`);
                 }
             },
         });

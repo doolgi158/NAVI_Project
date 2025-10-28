@@ -25,7 +25,7 @@ export default function PlanSidebar({
     handleAddTravel = () => { },
     handleAddStay = () => { },
 }) {
-    const navigate = useNavigate(); // ✅ 이제 진짜 useNavigate로부터 가져옴
+    const navigate = useNavigate(); // ✅ useNavigate 사용
 
     const [showTravelModal, setShowTravelModal] = useState(false);
     const [showStayModal, setShowStayModal] = useState(false);
@@ -48,21 +48,23 @@ export default function PlanSidebar({
                 maxWidth: "240px",
             }}
         >
-            {/* ✅ 상단: 목록으로 버튼 */}
-            <div className="flex items-center justify-left ml-5 h-[60px] border-b border-gray-100">
-                <Button
-                    icon={<LeftOutlined />}
-                    onClick={handleBackClick}
-                    style={{
-                        background: "#1845adff",
-                        color: "white",
-                        fontWeight: 600,
-                        borderRadius: 8,
-                    }}
-                >
-                    목록으로
-                </Button>
-            </div>
+            {/* ✅ 상단: 목록으로 버튼 (관리자 모드일 때는 숨김) */}
+            {!isAdminView && (
+                <div className="flex items-center justify-left ml-5 h-[60px] border-b border-gray-100">
+                    <Button
+                        icon={<LeftOutlined />}
+                        onClick={handleBackClick}
+                        style={{
+                            background: "#1845adff",
+                            color: "white",
+                            fontWeight: 600,
+                            borderRadius: 8,
+                        }}
+                    >
+                        목록으로
+                    </Button>
+                </div>
+            )}
 
             {/* ✅ 중앙: 일차 목록 */}
             <div className="flex flex-col flex-1 overflow-y-auto px-5 py-4 custom-scroll">
@@ -72,8 +74,8 @@ export default function PlanSidebar({
                         type={activeDayIdx === -1 ? "primary" : "default"}
                         onClick={() => setActiveDayIdx(-1)}
                         className={`${activeDayIdx === -1
-                            ? "!bg-[#FFF5B7] !border-none !text-[#2F3E46] font-semibold"
-                            : "hover:!bg-[#FAF9F6]"
+                                ? "!bg-[#FFF5B7] !border-none !text-[#2F3E46] font-semibold"
+                                : "hover:!bg-[#FAF9F6]"
                             }`}
                     >
                         전체 일정
@@ -86,8 +88,8 @@ export default function PlanSidebar({
                             type={idx === activeDayIdx ? "primary" : "default"}
                             onClick={() => setActiveDayIdx(idx)}
                             className={`${idx === activeDayIdx
-                                ? "!bg-[#FFF5B7] !border-none !text-[#2F3E46] font-semibold"
-                                : "hover:!bg-[#FAF9F6]"
+                                    ? "!bg-[#FFF5B7] !border-none !text-[#2F3E46] font-semibold"
+                                    : "hover:!bg-[#FAF9F6]"
                                 }`}
                         >
                             {idx + 1}일차

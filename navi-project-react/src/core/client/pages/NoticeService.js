@@ -9,6 +9,7 @@ export const getNotices = async (page = 0, size = 10) => {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
 
+
   const text = await response.text();
   return text ? JSON.parse(text) : { notices: [], currentPage: 0, totalPages: 0, totalItems: 0 };
 };
@@ -17,9 +18,11 @@ export const getNotices = async (page = 0, size = 10) => {
 export const getNoticeById = async (noticeNo) => {
   const response = await fetch(`${API_URL}/${noticeNo}`);
 
+
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
+
 
   const text = await response.text();
   return text ? JSON.parse(text) : null;
@@ -33,6 +36,7 @@ export const searchNotices = async (keyword, page = 0, size = 10) => {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
 
+
   const text = await response.text();
   return text ? JSON.parse(text) : { notices: [], currentPage: 0, totalPages: 0, totalItems: 0 };
-};
+}
