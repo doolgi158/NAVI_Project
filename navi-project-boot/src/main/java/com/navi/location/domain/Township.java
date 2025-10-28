@@ -6,11 +6,13 @@ package com.navi.location.domain;
  * ============================================
  */
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Check;
 
 @Getter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -20,13 +22,14 @@ import org.hibernate.annotations.Check;
                 @UniqueConstraint(columnNames = {"sigungu_id", "township_name"})
         }
 )
-@Check(constraints = "sigungu_id IN (110, 130)")
+@Check(constraints = "sigungu_id IN (0, 110, 130)")
 @SequenceGenerator(
         name = "township_generator",
         sequenceName = "TOWNSHIP_SEQ",
         initialValue = 1,
         allocationSize = 1
 )
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Township {
     /* === COLUMN 정의 === */
     @Id @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "township_generator")

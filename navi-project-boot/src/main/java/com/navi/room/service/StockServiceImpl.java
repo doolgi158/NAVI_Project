@@ -18,12 +18,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional
 public class StockServiceImpl implements StockService {
-
     private final StockRepository stockRepository;
 
-    /* ============================================================
-       ✅ 1️⃣ 객실별 기간 내 재고 조회
-    ============================================================ */
+    /* 객실별 기간 내 재고 조회  */
     @Override
     @Transactional(readOnly = true)
     public List<StockResponseDTO> getStockByRoomAndPeriod(String roomId, LocalDate startDate, LocalDate endDate) {

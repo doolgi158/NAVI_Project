@@ -190,7 +190,7 @@ export default function StayAddModal({ open, onClose, onAdd, days = [], selected
                 stayId: stay.accId || stay.stayId,
                 img: stay.mainImage
                     ? `${API_SERVER_HOST}${stay.mainImage.startsWith("/") ? stay.mainImage : `/images/acc/${stay.mainImage}`}`
-                    : `${API_SERVER_HOST}/images/acc/default_hotel.jpg`,
+                    : `https://placehold.co/150x150?text=No+Image`,
                 lat: stay.lat,
                 lng: stay.lng,
             };
@@ -235,7 +235,7 @@ export default function StayAddModal({ open, onClose, onAdd, days = [], selected
                         item.accImage?.trim() ||
                         item.imagePath?.trim() ||
                         item.mainImage?.trim() || // ✨ 수정된 부분: mainImage 필드 추가
-                        `${API_SERVER_HOST}/images/acc/default_hotel.jpg`;
+                        `https://placehold.co/150x150?text=No+Image`;
 
                     return (
                         <Col key={key} xs={12} sm={8} md={4} lg={4}>

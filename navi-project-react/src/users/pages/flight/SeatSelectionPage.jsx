@@ -26,8 +26,8 @@ const { Title, Text } = Typography;
 
 const SeatSelectPage = () => {
   const { state } = useLocation();
-  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const {
     isRoundTrip = false,
@@ -259,7 +259,7 @@ const SeatSelectPage = () => {
             totalPrice: finalTotalPrice,
             selectedSeats: combinedSeats, // ✅ 두 편 좌석 모두 전달
             outboundSeats: outboundDto?.selectedSeats || selectedSeats, // ✅ 출발편 좌석
-            inboundSeats: step === "inbound" ? selectedSeats : [],      // ✅ 귀국편 좌석
+            inboundSeats: step === "inbound" ? selectedSeats : [],      // ✅ 귀국편 좌석
           },
           itemData: {
             selectedOutbound,

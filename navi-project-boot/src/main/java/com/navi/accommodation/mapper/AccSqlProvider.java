@@ -58,7 +58,7 @@ public class AccSqlProvider {
             sql.WHERE("LOWER(a.TITLE) LIKE '%' || LOWER(#{title}) || '%'");
         } else if ((city != null && !city.isBlank()) || (townshipName != null && !townshipName.isBlank())) {
             if (city != null && !city.isBlank() && townshipName != null && !townshipName.isBlank()) {
-                sql.WHERE("(t.SIGUNGU_NAME = #{city} OR t.TOWNSHIP_NAME = #{townshipName})");
+                sql.WHERE("(t.SIGUNGU_NAME = #{city} AND t.TOWNSHIP_NAME = #{townshipName})");
             } else if (city != null && !city.isBlank()) {
                 sql.WHERE("t.SIGUNGU_NAME = #{city}");
             } else if (townshipName != null && !townshipName.isBlank()) {

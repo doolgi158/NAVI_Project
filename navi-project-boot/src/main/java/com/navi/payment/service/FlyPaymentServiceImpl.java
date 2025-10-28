@@ -2,10 +2,14 @@ package com.navi.payment.service;
 
 import com.navi.common.enums.RsvStatus;
 import com.navi.flight.service.FlightReservationService;
+import com.navi.payment.domain.PaymentDetail;
+import com.navi.payment.domain.PaymentMaster;
 import com.navi.payment.dto.request.PaymentPrepareRequestDTO;
 import com.navi.payment.dto.request.PaymentVerifyRequestDTO;
 import com.navi.payment.dto.response.PaymentPrepareResponseDTO;
 import com.navi.payment.dto.response.PaymentResultResponseDTO;
+import com.navi.payment.repository.PaymentDetailRepository;
+import com.navi.payment.repository.PaymentRepository;
 import com.siot.IamportRestClient.exception.IamportResponseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +26,8 @@ import java.util.List;
 public class FlyPaymentServiceImpl {
     private final PaymentServiceImpl paymentService;
     private final FlightReservationService flyRsvService;
+    private final PaymentDetailRepository paymentDetailRepository;
+    private final PaymentRepository paymentRepository;
 
     /* 결제 준비 */
     public PaymentPrepareResponseDTO preparePayment(PaymentPrepareRequestDTO dto) {
@@ -135,16 +141,47 @@ public class FlyPaymentServiceImpl {
     }
 
     /* 환불 처리 */
-    public void handleRefund(List<String> reserveIds, String merchantId, String reason) {
-        log.info("💸 [FLY] 환불 처리 reserveIds={}, merchantId={}", reserveIds, merchantId);
-        try {
-            paymentService.refundPayment(merchantId, BigDecimal.ZERO, reason);
-            for (String id : reserveIds) {
-                flyRsvService.updateStatus(id, RsvStatus.REFUNDED.name());
+    // merchantId 단위 전체 환불
+    @Transactional(rollbackFor = Exception.class)
+    public void handleRefund(String merchantId, String reason)
+            throws IamportResponseException, IOException {
+
+        log.info("✈️ [FLY] 전체 환불 처리 시작 - merchantId={}", merchantId);
+
+        PaymentMaster master = paymentRepository.findByMerchantId(merchantId)
+                .orElseThrow(() -> new IllegalArgumentException("결제 정보를 찾을 수 없습니다. merchantId=" + merchantId));
+
+        // 결제 환불은 공통 결제 서비스에서 처리
+        paymentService.refundPayment(merchantId, master.getTotalAmount(), reason);
+
+        master.getPaymentDetails().forEach(detail -> {
+            try {
+                flyRsvService.updateStatus(detail.getReserveId(), RsvStatus.REFUNDED.name());
+            } catch (Exception e) {
+                log.error("⚠️ [FLY] 예약 상태 변경 실패 - reserveId={}, msg={}", detail.getReserveId(), e.getMessage());
             }
-        } catch (Exception e) {
-            log.error("❌ [FLY] 환불 처리 실패 reserveIds={}, msg={}", reserveIds, e.getMessage());
-            throw new IllegalStateException("환불 처리 실패", e);
-        }
+        });
+
+        log.info("✅ [FLY] 전체 환불 완료 (항공 예약 상태 갱신)");
+    }
+
+    // reserveId 단위 부분 환불
+    @Transactional(rollbackFor = Exception.class)
+    public void handlePartialRefund(String reserveId, String merchantId, String reason)
+            throws IamportResponseException, IOException {
+
+        log.info("✈️ [FLY] 부분 환불 처리 시작 - reserveId={}, merchantId={}", reserveId, merchantId);
+
+        PaymentDetail detail = paymentDetailRepository.findAdminDetailsByReserveId(reserveId)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("결제 상세 내역이 존재하지 않습니다."));
+
+        BigDecimal refundAmount = detail.getAmount();
+
+        paymentService.refundPayment(merchantId, refundAmount, reason);
+        flyRsvService.updateStatus(reserveId, RsvStatus.REFUNDED.name());
+
+        log.info("✅ [FLY] 부분 환불 완료 (예약 상태만 갱신)");
     }
 }

@@ -231,7 +231,6 @@ export default function AdminTravelList() {
       dataIndex: "likeCount",
       key: "likeCount",
       align: "right",
-      sorter: true,
       width: 110,
       render: (v) => formatNumber(v),
     },

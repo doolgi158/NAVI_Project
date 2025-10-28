@@ -18,11 +18,10 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class RoomUserController {
-
     private final RoomService roomService;
-    private final StockService stockService; // ✅ 재고 조회용 서비스 추가
+    private final StockService stockService;
 
-    /* ✅ 1️⃣ 숙소별 객실 리스트 조회 */
+    /* 숙소별 객실 리스트 조회 */
     @GetMapping("/{accId}")
     public ResponseEntity<List<RoomListResponseDTO>> getRoomsByAccId(
             @PathVariable String accId,
@@ -40,7 +39,7 @@ public class RoomUserController {
         return ResponseEntity.ok(result);
     }
 
-    /* ✅ 2️⃣ 특정 객실의 기간별 재고 조회 */
+    /* 특정 객실의 기간별 재고 조회 */
     // 예: GET /api/rooms/stock/ROM001?checkIn=2025-10-20&checkOut=2025-10-23
     @GetMapping("/stock/{roomId}")
     public ResponseEntity<List<StockResponseDTO>> getStockByRoomAndPeriod(

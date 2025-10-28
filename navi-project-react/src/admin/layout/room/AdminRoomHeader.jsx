@@ -62,12 +62,12 @@ const AdminRoomHeader = ({ onSearch }) => {
           allowClear
         />
 
-        <RangePicker
+        {/* <RangePicker
           value={dateRange}
           onChange={(dates) => setDateRange(dates || [])}
           placeholder={["시작일", "종료일"]}
           size="large"
-        />
+        /> */}
 
         <Button
           type="primary"

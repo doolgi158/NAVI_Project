@@ -99,7 +99,7 @@ const AdminAccListPage = () => {
             headers: { Authorization: `Bearer ${token}` },
           });
 
-          message.success("✅ 숙소가 삭제되었습니다.");
+          message.success("숙소가 삭제되었습니다.");
           fetchList(pagination.current, pagination.pageSize);
         } catch (err) {
           console.error("삭제 실패:", err);

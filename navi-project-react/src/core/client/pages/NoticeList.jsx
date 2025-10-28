@@ -1,96 +1,96 @@
-import React, { useState, useEffect } from 'react';
-import { getAllNotices, searchNotice } from './NoticeService';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { getNotices, searchNotices } from "./NoticeService";
 import "../css/NoticeList.css";
-import MainLayout from '@/users/layout/MainLayout';
+import "../../../css/common/Pagination.css"; // ✅ 공통 페이지네이션 CSS 유지
+import Pagination from "@/common/components/Pagination";
 
 function NoticeList() {
   const [notices, setNotices] = useState([]);
-  const [searchKeyword, setSearchKeyword] = useState('');
+  const [searchKeyword, setSearchKeyword] = useState("");
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const pageSize = 10;
   const navigate = useNavigate();
 
-  // 컴포넌트가 처음 로드될 때 공지사항 목록 가져오기
   useEffect(() => {
-    fetchNotice();
-  }, []);
+    fetchNotices();
+  }, [currentPage]);
 
-  // 공지사항 목록 가져오기
-  const fetchNotice = async () => {
+  const fetchNotices = async () => {
     try {
       setLoading(true);
-      const data = await getAllNotices();
-      setNotices(data);
+      const data = await getNotices(currentPage, pageSize);
+
+      if (data && Array.isArray(data.notices)) {
+        setNotices(data.notices);
+        setTotalPages(data.totalPages || 1);
+      } else if (Array.isArray(data)) {
+        setNotices(data);
+        setTotalPages(1);
+      } else {
+        setNotices([]);
+        setTotalPages(0);
+      }
     } catch (error) {
-      console.error('공지사항 목록을 불러오는데 실패했습니다:', error);
-      alert('공지사항 목록을 불러오는데 실패했습니다.');
+      console.error("공지사항 목록 불러오기 실패:", error);
+      setNotices([]);
     } finally {
       setLoading(false);
     }
   };
 
-// 검색
-const handleSearch = async () => {
-  if (!searchKeyword.trim()) {
-    fetchNotice();
-    return;
-  }
+  const handleSearch = async () => {
+    if (!searchKeyword.trim()) {
+      setCurrentPage(0);
+      fetchNotices();
+      return;
+    }
 
-  try {
-    const data = await searchNotice(searchKeyword);
-    console.log('검색 결과:', data); // ← 추가!
-    
-    if (Array.isArray(data)) {
-      setNotices(data);
-    } else if (data && Array.isArray(data.notices)) {
-      setNotices(data.notices);
-    } else {
+    try {
+      const data = await searchNotices(searchKeyword, currentPage, pageSize);
+      if (data && Array.isArray(data.notices)) {
+        setNotices(data.notices);
+        setTotalPages(data.totalPages || 1);
+      } else {
+        setNotices([]);
+        setTotalPages(0);
+      }
+    } catch (error) {
+      console.error("검색 실패:", error);
       setNotices([]);
     }
-  } catch (error) {
-    console.error('검색에 실패했습니다:', error);
-    alert('검색에 실패했습니다.');
-    setNotices([]);
-  }
-};
-
-  // 날짜 포맷 변환
-  const formatDate = (dateString) => {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ko-KR');
   };
 
-  if (loading) {
-    return <div className="loading">로딩 중...</div>;
-  }
+  const handlePageChange = (page) => {
+    const safeTotal = totalPages > 0 ? totalPages : 1; // 최소 1 보장
+    if (page >= 0 && page < safeTotal) setCurrentPage(page);
+  };
+
+  if (loading) return <div className="loading">로딩 중...</div>;
 
   return (
-    <MainLayout>
     <div className="notice-list-container">
-      {/* 헤더 - 게시판/공지사항 선택 */}
-      <div className="notice-header">
+      <div className="board-list-header">
         <div className="board-nav">
-          <Link to="/client/board" className="nav-link">일반 게시판</Link>
+          <Link to="/board" className="nav-link">일반 게시판</Link>
           <span className="nav-divider">|</span>
-          <Link to="/client/notice" className="nav-link active">공지사항</Link>
+          <Link to="/notice" className="nav-link active">공지사항</Link>
         </div>
       </div>
 
-      {/* 검색 영역 */}
       <div className="search-box">
         <input
           type="text"
-          placeholder="제목으로 검색"
+          placeholder="공지 제목으로 검색"
           value={searchKeyword}
           onChange={(e) => setSearchKeyword(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+          onKeyPress={(e) => e.key === "Enter" && handleSearch()}
         />
         <button onClick={handleSearch}>검색</button>
-        <button onClick={fetchNotice}>전체보기</button>
       </div>
 
-      {/* 공지사항 테이블 */}
       <table className="notice-table">
         <thead>
           <tr>
@@ -109,22 +109,31 @@ const handleSearch = async () => {
             notices.map((notice) => (
               <tr key={notice.noticeNo}>
                 <td>{notice.noticeNo}</td>
-                <td 
+                <td
                   className="notice-title"
-                  onClick={() => navigate(`/client/notice/detail?noticeNo=${notice.noticeNo}`)}
-                  style={{ cursor: 'pointer' }}
+                  onClick={() =>
+                    navigate(`/notice/detail?noticeNo=${notice.noticeNo}`)
+                  }
+                  style={{ cursor: "pointer" }}
                 >
                   {notice.noticeTitle}
                 </td>
-                <td>{formatDate(notice.createDate)}</td>
+                <td>
+                  {new Date(notice.createDate).toLocaleDateString("ko-KR")}
+                </td>
                 <td>{notice.noticeViewCount}</td>
               </tr>
             ))
           )}
         </tbody>
       </table>
+
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
     </div>
-    </MainLayout>
   );
 }
 

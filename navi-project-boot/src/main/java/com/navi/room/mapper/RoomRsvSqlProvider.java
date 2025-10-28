@@ -4,7 +4,7 @@ import org.apache.ibatis.jdbc.SQL;
 
 public class RoomRsvSqlProvider {
 
-    /* ✅ 관리자용 객실 예약 목록 조회 (페이징 + 필터 + 정렬) */
+    /* 관리자용 객실 예약 목록 조회 (페이징 + 필터 + 정렬) */
     public String buildAdminListQuery(final java.util.Map<String, Object> params) {
         String status = (String) params.get("status");
         String keyword = (String) params.get("keyword");
@@ -67,14 +67,14 @@ public class RoomRsvSqlProvider {
             orderColumn = "r.PRICE";
         }
 
-        sql.ORDER_BY(orderColumn + " " + (sortOrder != null ? sortOrder : "DESC"));
+        sql.ORDER_BY("r.CREATED_AT DESC");
 
-        // ✅ 페이징 (Oracle 12c 이상)
+        // 페이징 (Oracle 12c 이상)
         return sql.toString() +
                 " OFFSET " + offset + " ROWS FETCH NEXT " + size + " ROWS ONLY";
     }
 
-    /* ✅ 전체 개수 조회 */
+    /* 전체 개수 조회 */
     public String buildAdminListCountQuery(final java.util.Map<String, Object> params) {
         String status = (String) params.get("status");
         String keyword = (String) params.get("keyword");

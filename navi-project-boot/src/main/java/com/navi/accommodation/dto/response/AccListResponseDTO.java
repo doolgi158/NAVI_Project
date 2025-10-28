@@ -26,6 +26,9 @@ public class AccListResponseDTO {
     private BigDecimal maxPrice;        // 예약 가능 객실 중 최고가
     private Integer remainingRooms;     // Todo: 예약 가능 잔여 객실 수
 
+    private BigDecimal mapx;                // 경도
+    private BigDecimal mapy;                // 위도
+
     /* Entity → DTO 변환 */
     public static AccListResponseDTO fromEntity(Acc acc) {
         return AccListResponseDTO.builder()
@@ -33,6 +36,8 @@ public class AccListResponseDTO {
                 .title(acc.getTitle())           // 숙소명
                 .address(acc.getAddress())       // 주소
                 .mainImage(acc.getMainImage())   // 대표 이미지
+                .mapx(acc.getMapx())             //경도
+                .mapy(acc.getMapy())             //위도
                 .build();
     }
 }

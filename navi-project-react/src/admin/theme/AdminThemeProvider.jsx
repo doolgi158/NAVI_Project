@@ -19,7 +19,7 @@ export default function AdminThemeProvider({ children }) {
                     colorText: "#1F2937",
                     fontFamily: "Pretendard, -apple-system, BlinkMacSystemFont, sans-serif",
                     fontSize: 14,
-                    controlHeight: 38,
+                    controlHeight: 30,
                 },
                 components: {
                     Button: {

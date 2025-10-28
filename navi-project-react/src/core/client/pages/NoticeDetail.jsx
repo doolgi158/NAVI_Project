@@ -10,6 +10,7 @@ function NoticeDetail() {
   const navigate = useNavigate();
   const [notice, setNotice] = useState(null);
   const [loading, setLoading] = useState(true);
+  const API_BASE_URL = 'http://localhost:8080';
 
   useEffect(() => {
     if (noticeNo) {
@@ -24,6 +25,8 @@ function NoticeDetail() {
     try {
       setLoading(true);
       const data = await getNoticeById(noticeNo);
+      console.log('공지사항 데이터:', data);
+      console.log('이미지 경로:', data.noticeImage);
       setNotice(data);
     } catch (error) {
       console.error('공지사항을 불러오는데 실패했습니다:', error);
@@ -58,56 +61,75 @@ function NoticeDetail() {
 
   return (
     <MainLayout>
-    <div className="notice-detail-container">
-      <h1>공지사항</h1>
+      <div className="notice-detail-container">
+        <h1>공지사항</h1>
 
-      <div className="notice-info">
-        <div className="info-row">
-          <span className="label">제목:</span>
-          <span className="value">{notice.noticeTitle}</span>
-        </div>
-        <div className="info-row">
-          <span className="label">작성일:</span>
-          <span className="value">{formatDate(notice.createDate)}</span>
-        </div>
-        <div className="info-row">
-          <span className="label">조회수:</span>
-          <span className="value">{notice.noticeViewCount || 0}</span>
-        </div>
-        {notice.noticeStartDate && (
+        <div className="notice-info">
           <div className="info-row">
-            <span className="label">게시 시작일:</span>
-            <span className="value">{formatDate(notice.noticeStartDate)}</span>
+            <span className="label">제목:</span>
+            <span className="value">{notice.noticeTitle}</span>
+          </div>
+          <div className="info-row">
+            <span className="label">작성일:</span>
+            <span className="value">{formatDate(notice.createDate)}</span>
+          </div>
+          <div className="info-row">
+            <span className="label">조회수:</span>
+            <span className="value">{notice.noticeViewCount || 0}</span>
+          </div>
+          {notice.noticeStartDate && (
+            <div className="info-row">
+              <span className="label">게시 시작일:</span>
+              <span className="value">{formatDate(notice.noticeStartDate)}</span>
+            </div>
+          )}
+          {notice.noticeEndDate && (
+            <div className="info-row">
+              <span className="label">게시 종료일:</span>
+              <span className="value">{formatDate(notice.noticeEndDate)}</span>
+            </div>
+          )}
+        </div>
+
+        {/* 이미지 표시 영역 */}
+        {notice.noticeImage && (
+          <div className="notice-image">
+            <img
+              src={
+                notice.noticeImage?.startsWith('http')
+                  ? notice.noticeImage
+                  : `${API_BASE_URL}${notice.noticeImage.startsWith('/') ? '' : '/'}${notice.noticeImage}`
+              }
+              alt={notice.noticeTitle}
+              className="notice-image-tag"
+              onError={(e) => {
+                console.error('이미지 로딩 실패:', e.target.src);
+                e.target.style.display = 'none';
+              }}
+            />
           </div>
         )}
-        {notice.noticeEndDate && (
-          <div className="info-row">
-            <span className="label">게시 종료일:</span>
-            <span className="value">{formatDate(notice.noticeEndDate)}</span>
+
+        <div className="notice-content">
+          <h3></h3>
+          <div className="content-text">
+            {notice.noticeContent}
+          </div>
+        </div>
+
+        {notice.noticeFile && (
+          <div className="notice-attachment">
+            <span className="label">첨부파일:</span>
+            <a href={notice.noticeFile} download>
+              {notice.noticeFile.split('/').pop()}
+            </a>
           </div>
         )}
-      </div>
 
-      <div className="notice-content">
-        <h3>내용</h3>
-        <div className="content-text">
-          {notice.noticeContent}
+        <div className="button-group">
+          <button onClick={() => navigate('/notice')}>목록</button>
         </div>
       </div>
-
-      {notice.noticeAttachFile && (
-        <div className="notice-attachment">
-          <span className="label">첨부파일:</span>
-          <a href={notice.noticeAttachFile} download>
-            {notice.noticeAttachFile}
-          </a>
-        </div>
-      )}
-
-      <div className="button-group">
-        <button onClick={() => navigate('/client/notice')}>목록</button>
-      </div>
-    </div>
     </MainLayout>
   );
 }

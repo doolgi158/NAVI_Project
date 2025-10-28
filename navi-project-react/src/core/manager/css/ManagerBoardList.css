@@ -1,20 +1,19 @@
-/* BoardList.css - 개선된 버전 */
+/* ManagerBoardList.css - 관리자용 */
 
 /* 전체 컨테이너 */
 .board-list-container {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Malgun Gothic', sans-serif;
-  padding: 40px 100px;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 40px;
   min-height: 100vh;
 }
 
 .board-list-wrapper {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   background-color: white;
   padding: 40px;
   border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
 }
 
 /* 로딩 메시지 */
@@ -32,38 +31,20 @@
   border-bottom: 2px solid #f0f0f0;
 }
 
-/* 네비게이션 */
 .board-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.nav-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #667eea;
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.nav-link {
-  font-size: 20px;
-  font-weight: 600;
-  color: #666;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  padding: 5px 10px;
-  border-radius: 6px;
-}
-
-.nav-link:hover {
-  color: #007bff;
-  background-color: #f8f9fa;
-}
-
-.nav-link.active {
-  color: #007bff;
-  font-weight: 700;
-  background-color: #e7f3ff;
-}
-
-.nav-divider {
-  color: #ddd;
-  font-size: 18px;
+  gap: 8px;
 }
 
 /* 검색 박스 */
@@ -73,7 +54,7 @@
   align-items: center;
   margin-bottom: 25px;
   padding: 15px;
-  background-color: #f8f9fa;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   border-radius: 8px;
 }
 
@@ -88,8 +69,8 @@
 }
 
 .search-input:focus {
-  border-color: #007bff;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .btn-search {
@@ -105,9 +86,7 @@
 }
 
 .btn-search:hover {
-  background-color: #007bff;
-  color: white;
-  border-color: #007bff;
+  border-color: #667eea;
   transform: translateY(-1px);
 }
 
@@ -126,12 +105,13 @@
   transition: all 0.3s ease;
   border-radius: 8px;
   margin-bottom: 8px;
+  border-left: 4px solid transparent;
 }
 
 .board-item:hover {
   background-color: #f8f9fa;
-  transform: translateX(8px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-left-color: #667eea;
 }
 
 .board-item-header {
@@ -148,6 +128,21 @@
   color: #333;
   line-height: 1.5;
   flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.report-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  padding: 4px 10px;
+  background-color: #ff4444;
+  color: white;
+  border-radius: 12px;
+  font-weight: 600;
 }
 
 .board-item-stats {
@@ -236,19 +231,19 @@
 }
 
 .page-btn:hover:not(:disabled) {
-  background-color: #007bff;
+  background-color: #667eea;
   color: white;
-  border-color: #007bff;
+  border-color: #667eea;
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
 }
 
 .page-btn.active {
-  background-color: #007bff;
+  background-color: #667eea;
   color: white;
-  border-color: #007bff;
+  border-color: #667eea;
   font-weight: 700;
-  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
 
 .page-btn:disabled {
@@ -268,15 +263,15 @@
 /* 푸터 */
 .board-footer {
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-start;
   margin-top: 30px;
   padding-top: 20px;
 }
 
-/* 글쓰기 버튼 */
-.btn-write {
+/* 뒤로가기 버튼 */
+.btn-back {
   padding: 14px 30px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-color: #6c757d;
   color: white;
   border: none;
   border-radius: 8px;
@@ -285,18 +280,19 @@
   cursor: pointer;
   text-decoration: none;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
   display: inline-flex;
   align-items: center;
   gap: 6px;
 }
 
-.btn-write:hover {
+.btn-back:hover {
+  background-color: #5a6268;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
 }
 
-.btn-write:active {
+.btn-back:active {
   transform: translateY(0);
 }
 

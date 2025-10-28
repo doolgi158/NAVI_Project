@@ -1,57 +1,72 @@
+/* ===============================
+   📄 NoticeList.css (사용자 공지사항)
+   관리자 공지 스타일을 기본으로, 사용자 페이지에 맞게 조정
+   =============================== */
+
+/* 전체 레이아웃 */
 .notice-list-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 40px 20px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
-/* 헤더 */
-.notice-header {
-  margin-bottom: 20px;
-  padding-bottom: 15px;
-  border-bottom: 2px solid #e0e0e0;
+/* 제목 */
+.notice-list-container h1 {
+  font-size: 26px;
+  font-weight: 700;
+  color: #333;
+  text-align: left;
+  margin-bottom: 30px;
+  border-left: 6px solid #007bff;
+  padding-left: 12px;
 }
 
-/* 네비게이션 */
+/* 상단 네비게이션 (일반게시판 | 공지사항) */
 .board-nav {
   display: flex;
   align-items: center;
-  gap: 15px;
-}
-
-.nav-link {
-  font-size: 18px;
-  font-weight: 500;
-  color: #666;
-  text-decoration: none;
-  transition: color 0.2s;
-}
-
-.nav-link:hover {
-  color: #007bff;
-}
-
-.nav-link.active {
-  color: #007bff;
-  font-weight: bold;
-}
-
-.nav-divider {
-  color: #ddd;
-  font-size: 16px;
-}
-
-.search-box {
-  display: flex;
   gap: 10px;
   margin-bottom: 20px;
 }
 
+.board-nav .nav-link {
+  color: #777;
+  text-decoration: none;
+  font-size: 15px;
+}
+
+.board-nav .nav-link.active {
+  color: #007bff;
+  font-weight: 600;
+}
+
+.board-nav .nav-divider {
+  color: #bbb;
+}
+
+
+/* 검색 박스 */
+.search-box {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 25px;
+}
+
 .search-box input {
   flex: 1;
-  padding: 10px;
+  padding: 10px 12px;
   border: 1px solid #ddd;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 14px;
+  transition: border-color 0.3s ease;
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: #007bff;
 }
 
 .search-box button {
@@ -59,47 +74,82 @@
   background-color: #007bff;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
 }
 
 .search-box button:hover {
   background-color: #0056b3;
 }
 
+/* 테이블 */
 .notice-table {
   width: 100%;
   border-collapse: collapse;
   background-color: white;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  font-size: 15px;
 }
 
 .notice-table th,
 .notice-table td {
-  padding: 15px;
   text-align: center;
-  border-bottom: 1px solid #ddd;
+  padding: 14px 10px;
+  border-bottom: 1px solid #e6e6e6;
 }
 
 .notice-table th {
   background-color: #f8f9fa;
-  font-weight: bold;
-  color: #333;
+  color: #555;
+  font-weight: 600;
+}
+
+.notice-table tr:hover td {
+  background-color: #f4f8ff;
 }
 
 .notice-table .notice-title {
-  cursor: pointer;
-  color: #007bff;
   text-align: left;
+  color: #333;
+  cursor: pointer;
+  transition: color 0.2s ease;
 }
 
 .notice-table .notice-title:hover {
-  text-decoration: underline;
+  color: #007bff;
 }
 
+/* 공지 없음 */
+.no-notices {
+  text-align: center;
+  color: #888;
+  padding: 40px 0;
+  font-size: 15px;
+}
+
+/* 로딩 */
 .loading {
   text-align: center;
-  padding: 50px;
-  font-size: 18px;
-  color: #666;
+  color: #555;
+  font-size: 16px;
+  padding: 40px;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+  .notice-list-container {
+    padding: 20px 10px;
+  }
+
+  .notice-table th,
+  .notice-table td {
+    font-size: 13px;
+    padding: 10px;
+  }
+
+  .search-box button {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
 }

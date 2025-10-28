@@ -17,7 +17,7 @@ const AccRouter = () => {
       ),
     },
     {
-      path: "detail",
+      path: "detail/",
       element: (
         <Suspense fallback={Loading}>
           <AccDetail />

@@ -568,6 +568,7 @@ const DeliveryPage = () => {
                   width: "100%",
                   height: "70vh",      // 브라우저 높이의 70%
                   minHeight: 700,       // 너무 작아지지 않게
+                  maxHeight: 800,       // 너무 커지지 않게 
                   borderRadius: 12,
                 }}
               ></div>

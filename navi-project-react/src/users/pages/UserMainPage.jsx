@@ -38,7 +38,6 @@ export default function UserMainPage() {
 
   return (
     <>
-
       <HeaderLayout />
 
       <HeroBanner />
@@ -145,6 +144,7 @@ function CarouselSection({ title, description, data, type, navigate }) {
   const prevRef = useRef(null);
   const nextRef = useRef(null);
 
+
   // ✅ 이미지 URL 처리 함수
   const getImageUrl = (item) => {
     const candidates = [
@@ -226,10 +226,12 @@ function CarouselSection({ title, description, data, type, navigate }) {
                     onClick={() => {
                       if (type === "travel")
                         navigate(`/travel/detail/${item.travelId}`);
-                      if (type === "festival")
+                      else if (type === "festival")
                         navigate(`/festival/detail/${item.id}`);
-                      if (type === "accommodation")
-                        navigate(`/acc/detail/${item.id}`);
+                      else if (type === "accommodation") {
+                        localStorage.setItem("selectedAccId", item.id);
+                        navigate(`/accommodations/detail`);
+                      }
                     }}
                     className="cursor-pointer bg-white rounded-2xl shadow-md hover:shadow-xl transition overflow-hidden"
                   >
