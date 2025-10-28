@@ -29,10 +29,6 @@ public class Notice {
     @Column(name = "notice_title")
     private String noticeTitle;
 
-    //파일
-    @Column(name = "notice_file")
-    private String noticeFile;
-
     //공지내용
     @Lob
     @Column(name = "notice_content")

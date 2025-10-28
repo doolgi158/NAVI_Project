@@ -2,14 +2,21 @@ package com.navi.core.user.service;
 
 import com.navi.core.domain.Board;
 import com.navi.core.repository.BoardRepository;
+import com.navi.core.repository.CommentRepository;
+import com.navi.core.user.dto.BoardDTO;
 import com.navi.image.service.ImageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.time.LocalDateTime;
 
 @Slf4j
 @Service
@@ -17,13 +24,101 @@ import org.springframework.web.multipart.MultipartFile;
 @Transactional
 public class BoardService {
 
+    @Autowired
     private final BoardRepository boardRepository;
     private final ImageService imageService;
 
-    //전체 게시글 조회 (페이징)
+    @Autowired
+    private final CommentRepository commentRepository;
+
+    // ==================== 추가 메서드 (BoardApiController용) ====================
+
+    /**
+     * 게시글 조회 (조회수 증가 없음, Long 타입 지원)
+     */
     @Transactional(readOnly = true)
-    public Page<Board> getAllBoards(Pageable pageable) {
-        return boardRepository.findAll(pageable);
+    public Board findById(Long id) {
+        return boardRepository.findById(id.intValue())
+                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
+    }
+
+    /**
+     * 게시글 저장 (이미지 업로드용)
+     */
+    public Board save(Board board) {
+        return boardRepository.save(board);
+    }
+
+    /**
+     * 게시글 삭제 (Long 타입 지원)
+     */
+    public void delete(Long id) {
+        boardRepository.deleteById(id.intValue());
+        log.info("게시글 삭제 완료. ID: {}", id);
+    }
+
+    // ==================== 기존 메서드 ====================
+
+    // 목록 조회 (조회수 증가 없음!)
+    public Page<Board> getAllBoards(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createDate").descending());
+        Page<Board> boardPage = boardRepository.findAll(pageable);
+
+        // ✅ 각 게시글에 댓글 수 추가
+        boardPage.forEach(board -> {
+            int commentCount = commentRepository.countByBoardNo(board.getBoardNo());
+            board.setCommentCount(commentCount);
+        });
+
+        return boardPage;
+    }
+
+    // 상세 조회 (조회수 증가!)
+    public Board getBoardById(Integer boardNo) {
+        Board board = boardRepository.findById(boardNo)
+                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
+
+        // ✅ 조회수 증가
+        board.setBoardViewCount(board.getBoardViewCount() + 1);
+        boardRepository.save(board);
+
+        // ✅ 댓글 수 추가
+        int commentCount = commentRepository.countByBoardNo(boardNo);
+        board.setCommentCount(commentCount);
+
+        return board;
+    }
+
+    // 게시글 + 댓글 정보 포함 조회 (DTO 변환)
+    @Transactional(readOnly = true)
+    public Page<BoardDTO> getAllBoardsWithComments(Pageable pageable) {
+        Page<Board> boards = boardRepository.findAll(pageable);
+
+        // Board → BoardDTO 변환
+        return boards.map(board -> {
+            // 대표 댓글 번호 (가장 오래된 댓글 1개)
+            Integer commentNo = commentRepository.findTopByBoardNoOrderByCreateDateAsc(board.getBoardNo())
+                    .map(c -> c.getCommentNo())
+                    .orElse(null);
+
+            // 댓글 개수
+            int commentCount = commentRepository.countByBoardNo(board.getBoardNo());
+
+            return BoardDTO.builder()
+                    .userNo(board.getUserNo())
+                    .boardNo(board.getBoardNo())
+                    .boardTitle(board.getBoardTitle())
+                    .boardContent(board.getBoardContent())
+                    .boardImage(board.getBoardImage())
+                    .createDate(board.getCreateDate() != null ? LocalDateTime.parse(board.getCreateDate().toString()) : null)
+                    .modDate(board.getUpdateDate() != null ? board.getUpdateDate().toString() : null)
+                    .boardGood(board.getBoardGood())
+                    .boardReport(board.getReportCount())
+                    .viewCount(board.getBoardViewCount().longValue())
+                    .commentNo(commentNo)       // 댓글번호 추가
+                    .commentCount(commentCount) // 댓글개수 추가
+                    .build();
+        });
     }
 
     //게시글 검색
