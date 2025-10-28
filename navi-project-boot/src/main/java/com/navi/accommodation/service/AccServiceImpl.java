@@ -47,6 +47,7 @@ public class AccServiceImpl implements AccService {
     private final LogRepository logRepository;
     private final RoomRsvRepository roomRsvRepository;
     private final StockRepository stockRepository;
+    private final AccViewCountService accViewCountService;
 
     private final KakaoGeoService kakaoGeoService;
     private final AccSyncService accSyncService;
@@ -308,7 +309,7 @@ public class AccServiceImpl implements AccService {
         Acc acc = accRepository.findByAccId(accId)
                 .orElseThrow(() -> new IllegalArgumentException("숙소를 찾을 수 없습니다."));
 
-        increaseViewCount(accId);   // 조회수 증가
+        accViewCountService.increaseViewCount(accId);   // 조회수 증가
 
         // 숙소 이미지 리스트
         List<String> accImages = imageRepository

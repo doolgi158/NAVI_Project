@@ -46,7 +46,7 @@ const UserMyPaymentsPage = () => {
     };
 
     // 환불 요청
-    const handleRefundRequest = async (merchantId) => {
+    const handleRefundRequest = async (merchantId, totalAmount) => {
         Modal.confirm({
             title: "환불 요청",
             content: "정말 이 결제를 환불하시겠습니까?",
@@ -56,23 +56,18 @@ const UserMyPaymentsPage = () => {
             async onOk() {
                 try {
                     const res = await axios.post(
-                        `${API_SERVER_HOST}/api/payment/refund/${merchantId}`,
-                        {
-                            headers: { Authorization: `Bearer ${token}` },
-                            params: {
-                                merchantId,
-                                refundAmount: totalAmount, // 전체 금액 환불
-                                reason: "사용자 요청",      // 선택 사항
-                            },
-                        }
+                    `${API_SERVER_HOST}/api/payment/refund?merchantId=${merchantId}&refundAmount=${totalAmount}&reason=사용자요청`,
+                    {},
+                    { headers: { Authorization: `Bearer ${token}` } }
                     );
 
                     if (res.data.status === 200) {
                         message.success("환불 요청이 완료되었습니다.");
                         fetchPayments(); // 새로고침
-                    } else {
-                        message.error("환불 요청 처리에 실패했습니다.");
-                    }
+                    } 
+                    // else {
+                    //     message.error("환불 요청 처리에 실패했습니다.");
+                    // }
                 } catch (err) {
                     console.error("❌ [handleRefundRequest] 오류:", err);
                     message.error("서버 통신 중 오류가 발생했습니다.");

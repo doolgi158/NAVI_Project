@@ -1,100 +1,106 @@
 import React, { useState, useEffect } from 'react';
 import { getAllNotices, deleteNotice, searchNotice } from "./ManagerNoticeService";
-import { useNavigate } from 'react-router-dom';
-import "../css/NoticeList.css";
+import { useNavigate, Link } from 'react-router-dom';
+import '../css/ManagerNoticeList.css';
+import '../../../css/common/Pagination.css'; // ✅ 공통 페이지네이션 스타일
+import Pagination from "@/common/components/Pagination";
 
-function NoticeList() {
+function ManagerNoticeList() {
   const [notices, setNotices] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState('');
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const pageSize = 10;
   const navigate = useNavigate();
 
-  // 컴포넌트가 처음 로드될 때 공지사항 목록 가져오기
   useEffect(() => {
-    fetchNotice();
-  }, []);
+    fetchNotices();
+  }, [currentPage]);
 
-// 공지사항 목록 가져오기
-const fetchNotice = async () => {
-  try {
-    setLoading(true);
-    const data = await getAllNotices();
-    
-    // ✅ 배열인지 확인 후 설정
-    console.log('API 응답:', data); // 디버깅용
-    
-    if (Array.isArray(data)) {
-      setNotices(data);
-    } else if (data && Array.isArray(data.notices)) {
-      setNotices(data.notices); // 객체 안에 배열이 있는 경우
-    } else {
-      setNotices([]); // 배열이 아니면 빈 배열
+  const fetchNotices = async () => {
+    try {
+      setLoading(true);
+      const data = await getAllNotices(currentPage, pageSize);
+
+      if (data && Array.isArray(data.notices)) {
+        setNotices(data.notices);
+        setTotalPages(data.totalPages || 1);
+      } else if (Array.isArray(data)) {
+        setNotices(data);
+        setTotalPages(1);
+      } else {
+        setNotices([]);
+        setTotalPages(0);
+      }
+    } catch (error) {
+      console.error('공지사항 목록 조회 실패:', error);
+      alert('공지사항 목록을 불러오는데 실패했습니다.');
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error('공지사항 목록을 불러오는데 실패했습니다:', error);
-    alert('공지사항 목록을 불러오는데 실패했습니다.');
-    setNotices([]); // ← 에러 시에도 빈 배열
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
-// 검색도 동일하게
-const handleSearch = async () => {
-  if (!searchKeyword.trim()) {
-    fetchNotice();
-    return;
-  }
-
-  try {
-    const data = await searchNotice(searchKeyword);
-    
-    if (Array.isArray(data)) {
-      setNotices(data);
-    } else if (data && Array.isArray(data.notices)) {
-      setNotices(data.notices);
-    } else {
-      setNotices([]);
-    }
-  } catch (error) {
-    console.error('검색에 실패했습니다:', error);
-    alert('검색에 실패했습니다.');
-    setNotices([]); // ← 에러 시에도 빈 배열
-  }
-};
-
-  // 삭제
-  const handleDelete = async (noticeNo) => {
-    if (!window.confirm('정말 삭제하시겠습니까?')) {
+  const handleSearch = async () => {
+    if (!searchKeyword.trim()) {
+      setCurrentPage(0);
+      fetchNotices();
       return;
     }
 
     try {
+      const data = await searchNotice(searchKeyword, currentPage, pageSize);
+      if (data && Array.isArray(data.notices)) {
+        setNotices(data.notices);
+        setTotalPages(data.totalPages || 1);
+      } else if (Array.isArray(data)) {
+        setNotices(data);
+        setTotalPages(1);
+      } else {
+        setNotices([]);
+      }
+    } catch (error) {
+      console.error('검색 실패:', error);
+      alert('검색에 실패했습니다.');
+      setNotices([]);
+    }
+  };
+
+  const handleDelete = async (noticeNo) => {
+    if (!window.confirm('정말 삭제하시겠습니까?')) return;
+    try {
       await deleteNotice(noticeNo);
       alert('삭제되었습니다.');
-      fetchNotice(); // 목록 새로고침
+      fetchNotices();
     } catch (error) {
-      console.error('삭제에 실패했습니다:', error);
+      console.error('삭제 실패:', error);
       alert('삭제에 실패했습니다.');
     }
   };
 
-  // 날짜 포맷 변환
   const formatDate = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);
     return date.toLocaleDateString('ko-KR');
   };
 
-  if (loading) {
-    return <div className="loading">로딩 중...</div>;
-  }
+  const handlePageChange = (page) => {
+    const safeTotal = totalPages > 0 ? totalPages : 1; // 최소 1 보장
+    if (page >= 0 && page < safeTotal) setCurrentPage(page);
+  };
+
+  if (loading) return <div className="loading">로딩 중...</div>;
 
   return (
     <div className="notice-list-container">
-      <h1>공지사항</h1>
+      <div className="board-list-header">
+        <div className="board-nav">
+          <Link to="/adm/board" className="nav-link">일반 게시판</Link>
+          <span className="nav-divider">|</span>
+          <Link to="/adm/notice" className="nav-link active">공지사항</Link>
+        </div>
+      </div>
 
-      {/* 검색 영역 */}
       <div className="search-box">
         <input
           type="text"
@@ -104,20 +110,15 @@ const handleSearch = async () => {
           onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
         />
         <button onClick={handleSearch}>검색</button>
-        <button onClick={fetchNotice}>전체보기</button>
+        <button onClick={() => { setSearchKeyword(''); setCurrentPage(0); fetchNotices(); }}>전체보기</button>
       </div>
 
-      {/* 작성 버튼 */}
       <div className="button-area">
-        <button 
-          className="create-button"
-          onClick={() => navigate('/manager/notice/write')}
-        >
+        <button className="create-button" onClick={() => navigate('/adm/notice/write')}>
           공지사항 작성
         </button>
       </div>
 
-      {/* 공지사항 테이블 */}
       <table className="notice-table">
         <thead>
           <tr>
@@ -130,33 +131,24 @@ const handleSearch = async () => {
         </thead>
         <tbody>
           {notices.length === 0 ? (
-            <tr>
-              <td colSpan="5">공지사항이 없습니다.</td>
-            </tr>
+            <tr><td colSpan="5">공지사항이 없습니다.</td></tr>
           ) : (
             notices.map((notice) => (
               <tr key={notice.noticeNo}>
                 <td>{notice.noticeNo}</td>
-                <td 
+                <td
                   className="notice-title"
-                  onClick={() => navigate(`/manager/notice/detail?noticeNo=${notice.noticeNo}`)}
-                  style={{ cursor: 'pointer' }}
+                  onClick={() => navigate(`/adm/notice/detail?noticeNo=${notice.noticeNo}`)}
                 >
                   {notice.noticeTitle}
                 </td>
                 <td>{formatDate(notice.createDate)}</td>
                 <td>{notice.noticeViewCount}</td>
                 <td>
-                  <button 
-                    className="edit-button"
-                    onClick={() => navigate(`/manager/notice/write?noticeNo=${notice.noticeNo}`)}
-                  >
+                  <button className="edit-button" onClick={() => navigate(`/adm/notice/write?noticeNo=${notice.noticeNo}`)}>
                     수정
                   </button>
-                  <button 
-                    className="delete-button"
-                    onClick={() => handleDelete(notice.noticeNo)}
-                  >
+                  <button className="delete-button" onClick={() => handleDelete(notice.noticeNo)}>
                     삭제
                   </button>
                 </td>
@@ -165,8 +157,14 @@ const handleSearch = async () => {
           )}
         </tbody>
       </table>
+
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
     </div>
   );
 }
 
-export default NoticeList;
+export default ManagerNoticeList;
