@@ -39,7 +39,9 @@ public class WebConfig implements WebMvcConfigurer {
         String basePath = "C:/navi-project/images/";
 
         registry.addResourceHandler("/images/**")
-                .addResourceLocations("file:" + imagePath + "/")
-                .addResourceLocations("file:" + basePath);
+                .addResourceLocations(
+                        "file:///" + imagePath + "/",
+                        "file:///" + basePath
+                );
     }
 }

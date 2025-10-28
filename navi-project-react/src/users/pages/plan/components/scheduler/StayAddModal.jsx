@@ -180,11 +180,24 @@ export default function StayAddModal({ open, onClose, onAdd, days = [], selected
     const handleAdd = () => {
         const grouped = {};
         Object.entries(selectedMap).forEach(([accId, dayIdxList]) => {
-            const item = stays.find((s) => String(s.accId) === accId);
-            if (!item) return;
+            const stay = stays.find((s) => String(s.accId) === accId);
+            if (!stay) return;
+
+            // ✅ PlanItem 형식으로 통일
+            const stayItem = {
+                type: "stay",
+                title: stay.title,
+                stayId: stay.accId || stay.stayId,
+                img: stay.mainImage
+                    ? `${API_SERVER_HOST}${stay.mainImage.startsWith("/") ? stay.mainImage : `/images/acc/${stay.mainImage}`}`
+                    : `${API_SERVER_HOST}/images/acc/default_hotel.jpg`,
+                lat: stay.lat,
+                lng: stay.lng,
+            };
+
             dayIdxList.forEach((dayIdx) => {
                 if (!grouped[dayIdx]) grouped[dayIdx] = [];
-                grouped[dayIdx].push(item);
+                grouped[dayIdx].push(stayItem);
             });
         });
 
@@ -221,6 +234,7 @@ export default function StayAddModal({ open, onClose, onAdd, days = [], selected
                     const imgSrc =
                         item.accImage?.trim() ||
                         item.imagePath?.trim() ||
+                        item.mainImage?.trim() || // ✨ 수정된 부분: mainImage 필드 추가
                         `${API_SERVER_HOST}/images/acc/default_hotel.jpg`;
 
                     return (

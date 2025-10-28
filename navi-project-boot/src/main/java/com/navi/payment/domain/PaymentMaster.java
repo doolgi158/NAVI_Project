@@ -31,6 +31,7 @@ import java.util.List;
         allocationSize = 1
 )
 public class PaymentMaster extends BaseEntity {
+
     /* === COLUMN 정의 === */
     // 내부 식별번호 (예: 1)
     @Id @Column(name = "no")

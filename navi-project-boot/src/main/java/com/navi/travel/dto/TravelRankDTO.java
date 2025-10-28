@@ -17,7 +17,7 @@ public class TravelRankDTO {
     private String introduction;    // 요약 소개
     private String thumbnailPath;   // 썸네일 이미지
     private String imagePath;       // 메인 이미지
-    private Long viewsCount;        // 조회수
+    private Long views;        // 조회수
     private Long likesCount;        // 좋아요 수
     private Long bookmarkCount;     // 북마크 수
     private Long score;             // 종합 점수 (views + likes + bookmarks)
@@ -41,7 +41,7 @@ public class TravelRankDTO {
                 .introduction(travel.getIntroduction())
                 .thumbnailPath(travel.getThumbnailPath())
                 .imagePath(travel.getImagePath())
-                .viewsCount(views)
+                .views(views)
                 .likesCount(likes)
                 .bookmarkCount(bookmarks)
                 .score(views + likes + bookmarks)

@@ -154,31 +154,31 @@ export default function StaySelectDrawer({
   // pagedStays를 의존성에 넣으면 에러가 발생하므로, pagedStays의 '소스'가 되는 변수를 넣습니다.
 
 
-  /** ✅ 나의 숙소 북마크 불러오기 */
-  useEffect(() => {
-    if (activeTab !== "my") return;
-    const fetchBookmarks = async () => {
-      try {
-        const token = localStorage.getItem("accessToken");
-        if (!token) {
-          message.warning("로그인 후 이용 가능합니다.");
-          return;
-        }
-        const res = await api.get("/stay/bookmarks", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = Array.isArray(res.data)
-          ? res.data
-          : Array.isArray(res.data?.data)
-            ? res.data.data
-            : [];
-        setMyBookmarks(data);
-      } catch (err) {
-        console.error("❌ 북마크 숙소 불러오기 실패:", err);
-      }
-    };
-    fetchBookmarks();
-  }, [activeTab]);
+  // /** ✅ 나의 숙소 북마크 불러오기 */
+  // useEffect(() => {
+  //   if (activeTab !== "my") return;
+  //   const fetchBookmarks = async () => {
+  //     try {
+  //       const token = localStorage.getItem("accessToken");
+  //       if (!token) {
+  //         message.warning("로그인 후 이용 가능합니다.");
+  //         return;
+  //       }
+  //       const res = await api.get("/stay/bookmarks", {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       });
+  //       const data = Array.isArray(res.data)
+  //         ? res.data
+  //         : Array.isArray(res.data?.data)
+  //           ? res.data.data
+  //           : [];
+  //       setMyBookmarks(data);
+  //     } catch (err) {
+  //       console.error("❌ 북마크 숙소 불러오기 실패:", err);
+  //     }
+  //   };
+  //   fetchBookmarks();
+  // }, [activeTab]);
 
 
   /** ✅ 페이지 클릭 */
@@ -265,7 +265,7 @@ export default function StaySelectDrawer({
           className="px-4 pt-3 flex-shrink-0"
           items={[
             { key: "search", label: "숙소 검색" },
-            { key: "my", label: "나의 숙소" },
+            // { key: "my", label: "나의 숙소" },
           ]}
         />
 
@@ -315,7 +315,7 @@ export default function StaySelectDrawer({
               </div>
             </div>
           )}
-          {/* ✅ 나의 숙소 탭 */}
+          ✅ 나의 숙소 탭
           {activeTab === "my" && (
             <div className="px-4 pb-4 ">
               <List

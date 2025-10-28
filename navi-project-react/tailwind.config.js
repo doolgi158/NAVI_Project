@@ -9,6 +9,11 @@ export default {
   ],
   theme: {
     extend: {
+      navi: {
+        blue: "#0A3D91",
+        light: "#E7F0FA",
+        sand: "#FFF5B7",
+      },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',

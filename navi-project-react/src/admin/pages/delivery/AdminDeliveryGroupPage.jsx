@@ -64,7 +64,7 @@ const AdminDeliveryGroupPage = () => {
                     message.success(`상태가 '${nextStatus}'(으)로 변경되었습니다.`);
                     fetchGroups();
                 } catch {
-                    message.error("상태 변경 중 오류가 발생했습니다.");
+                    message.error(`${record.status} 상태에는 변경할 수 없습니다.`);
                 }
             },
         });

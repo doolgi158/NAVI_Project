@@ -4,6 +4,8 @@ import { API_SERVER_HOST } from "../api/naviApi";
 import dayjs from "dayjs";
 import { Input, message, Modal } from "antd";
 import { resizeImage } from "@/common/util/resizeImage";
+import { useDispatch } from "react-redux";
+import { setProfileUrl } from "../slice/loginSlice";
 
 const { confirm } = Modal;
 
@@ -16,20 +18,33 @@ export const useUserDetailFunctions = (form) => {
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const dispatch = useDispatch();
 
   // 사용자 정보 불러오기
   useEffect(() => {
-    axios
-      .get(`${API_SERVER_HOST}/api/users/me`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
-      })
-      .then((res) => {
+    const fetchUser = async () => {
+      try {
+        // 기본 유저 정보
+        const res = await axios.get(`${API_SERVER_HOST}/api/users/me`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
+        });
         const data = res.data.data;
-        setUser({
-          ...data,
-          profile: data.profile ? `${API_SERVER_HOST}${data.profile}` : null,
+
+        // 프로필 이미지 별도 조회
+        const imgRes = await axios.get(`${API_SERVER_HOST}/api/images`, {
+          params: {
+            targetType: "USER",
+            targetId: localStorage.getItem("username"),
+          },
+          headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
         });
 
+        const userImage = imgRes.data.data?.[0]?.path
+          ? `${API_SERVER_HOST}${imgRes.data.data[0].path}?t=${Date.now()}`
+          : null;
+
+        // 상태 세팅
+        setUser({ ...data, profile: userImage });
         form.setFieldsValue({
           name: data.name,
           phone: data.phone,
@@ -38,9 +53,15 @@ export const useUserDetailFunctions = (form) => {
           gender: data.gender,
           local: data.local,
         });
-      })
-      .catch(() => message.error("사용자 정보를 불러오지 못했습니다."))
-      .finally(() => setLoading(false));
+      } catch (err) {
+        console.error(err);
+        message.error("사용자 정보를 불러오지 못했습니다.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
   }, [form]);
 
   // 회원정보 수정 저장
@@ -87,11 +108,12 @@ export const useUserDetailFunctions = (form) => {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
       });
+
       const newPath = res.data.data.path;
       const newProfileUrl = `${API_SERVER_HOST}${newPath}?t=${Date.now()}`;
 
       setUser((prev) => ({ ...prev, profile: newProfileUrl }));
-      window.dispatchEvent(new CustomEvent("profile-updated", { detail: { newProfile: newPath } }));
+      dispatch(setProfileUrl(newProfileUrl));
 
       message.success("프로필이 변경되었습니다!");
     } catch (err) {
@@ -124,7 +146,7 @@ export const useUserDetailFunctions = (form) => {
 
           // 로컬 상태 업데이트
           setUser((prev) => ({ ...prev, profile: null }));
-          window.dispatchEvent(new CustomEvent("profile-updated", { detail: { newProfile: null } }));
+          dispatch(setProfileUrl(null));
 
           message.success("프로필 이미지가 삭제되었습니다.");
         } catch (err) {

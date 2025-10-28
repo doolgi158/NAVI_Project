@@ -1,12 +1,15 @@
 package com.navi.payment.controller;
 
-import com.navi.common.response.ApiResponse;
+import com.navi.accommodation.repository.AccRepository;
+import com.navi.common.enums.RsvType;
+import com.navi.delivery.service.DeliveryReservationService;
+import com.navi.flight.service.FlightReservationService;
+import com.navi.payment.domain.enums.PaymentStatus;
 import com.navi.payment.dto.response.PaymentAdminDetailResponseDTO;
 import com.navi.payment.dto.response.PaymentAdminListResponseDTO;
 import com.navi.payment.service.PaymentAdminService;
-import com.navi.payment.service.PaymentService;
-import com.navi.security.util.JWTUtil;
-import jakarta.servlet.http.HttpServletRequest;
+import com.navi.room.repository.RoomRsvRepository;
+import com.navi.room.service.RoomRsvService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -20,28 +23,41 @@ import java.util.List;
 @RequestMapping("/api/adm/payment")
 public class PaymentAdminController {
     private final PaymentAdminService paymentAdminService;
-    private final PaymentService paymentService;
-    private final JWTUtil jwtUtil;
+    private final RoomRsvService roomReservationService;
+    private final FlightReservationService flightReservationService;
+    private final DeliveryReservationService deliveryReservationService;
 
     @GetMapping("/list")
-    public ApiResponse<List<PaymentAdminListResponseDTO>> getMyPayments(HttpServletRequest request) {
-        // 1헤더에서 토큰 추출
-        String bearer = request.getHeader("Authorization");
-        if (bearer == null || !bearer.startsWith("Bearer ")) {
-            log.warn("🚫 Authorization 헤더가 비어 있음");
-            return ApiResponse.error("인증 토큰이 없습니다.", 401, null);
+    public ResponseEntity<List<PaymentAdminListResponseDTO>> getAdminPayments(
+            @RequestParam(required = false) RsvType rsvType,
+            @RequestParam(required = false) PaymentStatus paymentStatus,
+            @RequestParam(required = false) String keyword
+    ) {
+        List<PaymentAdminListResponseDTO> payments = paymentAdminService.getAllPaymentsForAdmin(rsvType, paymentStatus, keyword);
+
+        if (payments.isEmpty()) {
+            return ResponseEntity.noContent().build(); // 204 응답 (데이터 없음)
         }
 
-        String token = bearer.substring(7);
+        return ResponseEntity.ok(payments);
+    }
 
-        // JWT에서 userId 추출
-        String userId = jwtUtil.getUserIdFromToken(token);
-        log.info("💳 [PaymentController] 결제 내역 요청 - userId: {}", userId);
+    @GetMapping("/reservation/{rsvType}/{reserveId}")
+    public ResponseEntity<Object> getReservationDetail(
+            @PathVariable RsvType rsvType,
+            @PathVariable String reserveId
+    ) {
+        log.info("🔎 [ADMIN] 예약 상세 조회 요청 - type={}, reserveId={}", rsvType, reserveId);
 
-        // 서비스 호출
-        List<PaymentAdminListResponseDTO> payments = paymentService.getMyPayments(userId);
+        Object reservationDetail;
+        switch (rsvType) {
+            case ACC -> reservationDetail = roomReservationService.findByReserveId(reserveId);
+            case FLY -> reservationDetail = flightReservationService.getReservationById(reserveId);
+            case DLV -> reservationDetail = deliveryReservationService.getReservationById(reserveId);
+            default -> throw new IllegalArgumentException("Unsupported type: " + rsvType);
+        }
 
-        return ApiResponse.success(payments);
+        return ResponseEntity.ok(reservationDetail);
     }
 
     @GetMapping("/details/{merchantId}")

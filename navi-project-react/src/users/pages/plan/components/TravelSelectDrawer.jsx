@@ -133,6 +133,15 @@ export default function TravelSelectDrawer({
     }
   };
 
+  /** ✅ 카테고리 변경 시 페이지 리셋 + 스크롤 맨 위로 이동 */
+  const handleCategoryChange = (cat) => {
+    setCategoryFilter(cat);
+    setCurrentPage(1);
+    if (listContainerRef.current) {
+      listContainerRef.current.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   /** ✅ 여행지 선택/해제 */
   const handleToggleSelect = (item) => {
     setSelectedTravels((prev) => {
@@ -162,8 +171,8 @@ export default function TravelSelectDrawer({
       >
         <div
           className={`flex justify-between w-full items-center bg-white px-4 py-3 rounded-lg shadow-sm transition-all hover:shadow-md ${isSelected
-            ? "ring-2 ring-[#0A3D91] ring-offset-1"
-            : "border border-gray-200"
+              ? "ring-2 ring-[#0A3D91] ring-offset-1"
+              : "border border-gray-200"
             }`}
         >
           <div className="flex items-center gap-3">
@@ -223,8 +232,24 @@ export default function TravelSelectDrawer({
                   placeholder="장소명을 입력하세요"
                   allowClear
                   enterButton
-                  onSearch={(val) => setSearchText(val)}
-                  onChange={(e) => setSearchText(e.target.value)}
+                  onSearch={(val) => {
+                    setSearchText(val);
+                    setCurrentPage(1);
+                    if (listContainerRef.current)
+                      listContainerRef.current.scrollTo({
+                        top: 0,
+                        behavior: "smooth",
+                      });
+                  }}
+                  onChange={(e) => {
+                    setSearchText(e.target.value);
+                    setCurrentPage(1);
+                    if (listContainerRef.current)
+                      listContainerRef.current.scrollTo({
+                        top: 0,
+                        behavior: "auto",
+                      });
+                  }}
                   value={searchText}
                 />
 
@@ -240,7 +265,7 @@ export default function TravelSelectDrawer({
                           ? "bg-[#0A3D91] border-none text-white"
                           : "text-gray-600"
                       }
-                      onClick={() => setCategoryFilter(cat)}
+                      onClick={() => handleCategoryChange(cat)} // ✅ 수정된 부분
                     >
                       {cat}
                     </Button>
@@ -258,7 +283,10 @@ export default function TravelSelectDrawer({
               </div>
 
               {/* ✅ 리스트만 스크롤 */}
-              <div ref={listContainerRef} className="flex-1 overflow-y-auto custom-scroll px-4 pb-4">
+              <div
+                ref={listContainerRef}
+                className="flex-1 overflow-y-auto custom-scroll px-4 pb-4"
+              >
                 <List
                   dataSource={pagedTravels}
                   locale={{
@@ -305,8 +333,12 @@ export default function TravelSelectDrawer({
       <div className="p-5 flex-shrink-0 border-b border-gray-200">
         <div className="flex justify-between items-center">
           <div>
-            <h3 className="text-lg font-semibold text-[#2F3E46]">📍 선택한 여행지</h3>
-            <p className="text-sm text-gray-500">총 {selectedTravels.length}개</p>
+            <h3 className="text-lg font-semibold text-[#2F3E46]">
+              📍 선택한 여행지
+            </h3>
+            <p className="text-sm text-gray-500">
+              총 {selectedTravels.length}개
+            </p>
           </div>
           <Button
             type="text"
@@ -338,7 +370,9 @@ export default function TravelSelectDrawer({
                       className="w-20 h-16 rounded-xl object-cover"
                     />
                     <div>
-                      <p className="font-semibold text-sm text-[#2F3E46]">{item.title}</p>
+                      <p className="font-semibold text-sm text-[#2F3E46]">
+                        {item.title}
+                      </p>
                       <p className="text-xs text-gray-500">
                         {item.region1Name || "-"} &gt; {item.region2Name || "-"}
                       </p>

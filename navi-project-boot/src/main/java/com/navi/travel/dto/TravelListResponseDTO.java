@@ -30,7 +30,7 @@ public class TravelListResponseDTO {
     private Long photoId;
     private String imagePath;
     private String thumbnailPath;
-    private Long views;
+    private Long Views;
     private Long likesCount;
     private Long bookmarkCount;
     private int state;
@@ -59,7 +59,7 @@ public class TravelListResponseDTO {
                 .photoId(travel.getPhotoId())
                 .imagePath(travel.getImagePath())
                 .thumbnailPath(travel.getThumbnailPath())
-                .views(travel.getViews() != null ? travel.getViews() : 0L)
+                .Views(travel.getViews() != null ? travel.getViews() : 0L)
                 .likesCount(travel.getLikesCount() != null ? travel.getLikesCount() : 0L)
                 .bookmarkCount(travel.getBookmarkCount() != null ? travel.getBookmarkCount() : 0L)
                 .state(travel.getState())
@@ -81,7 +81,9 @@ public class TravelListResponseDTO {
             String region2,
             String imagePath,
             String thumbnailPath,
-            Long likesCount
+            Long Views,
+            Long likesCount,
+            Long bookmarkCount
     ) {
         this.travelId = travelId;
         this.title = title;
@@ -89,6 +91,8 @@ public class TravelListResponseDTO {
         this.region2 = region2;
         this.imagePath = imagePath;
         this.thumbnailPath = thumbnailPath;
+        this.Views = Views;
         this.likesCount = likesCount;
+        this.bookmarkCount = bookmarkCount;
     }
 }

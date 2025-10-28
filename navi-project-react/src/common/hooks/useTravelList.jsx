@@ -32,10 +32,13 @@ const getTravelData = async (domain, pageParam, filterQuery, userId) => {
     queryString += `&search=${encodedSearch}`;
   }
 
-  // ✅ 좋아요순일 경우 별도 API 사용
+  // ✅ 좋아요순일 경우 별도 API 사용 (수정된 부분)
   let apiUrl = `/${domain}`;
-  if (pageParam.sort?.includes('likesCount,desc')) {
-    apiUrl = `/${domain}/popular`; // 💡 인기순 API로 분기
+  const sortParam = pageParam.sort || '';
+
+  if (String(sortParam).toLowerCase().includes('likescount')) {
+    apiUrl = `/${domain}/popular`; // ✅ 인기순 API 호출
+    console.log('🔥 인기순 API로 분기됨:', apiUrl);
   }
 
   try {
@@ -176,7 +179,8 @@ export const useTravelList = (userId) => {
 
   const handleSortChange = useCallback((sortType) => {
     if (!sortType) return;
-    const newSort = `${sortType},contentsCd,asc`;
+    const newSort = sortType;
+
     sessionStorage.setItem('travelListSort', newSort);
     setPageParam((prev) => ({ ...prev, page: 1, sort: newSort }));
     sessionStorage.removeItem('travelListPage');

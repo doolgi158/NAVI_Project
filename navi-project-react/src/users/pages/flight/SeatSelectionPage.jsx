@@ -26,6 +26,7 @@ const { Title, Text } = Typography;
 
 const SeatSelectPage = () => {
   const { state } = useLocation();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const {
@@ -45,7 +46,6 @@ const SeatSelectPage = () => {
   const [seats, setSeats] = useState([]);
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [totalPrice, setTotalPrice] = useState(0);
-  const dispatch = useDispatch();
 
   const flightIdValue =
     flight?.flightId?.flightId || flight?.flightNo || flight?.flightId;

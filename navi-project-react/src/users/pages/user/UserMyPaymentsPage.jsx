@@ -57,8 +57,14 @@ const UserMyPaymentsPage = () => {
                 try {
                     const res = await axios.post(
                         `${API_SERVER_HOST}/api/payment/refund/${merchantId}`,
-                        {},
-                        { headers: { Authorization: `Bearer ${token}` } }
+                        {
+                            headers: { Authorization: `Bearer ${token}` },
+                            params: {
+                                merchantId,
+                                refundAmount: totalAmount, // 전체 금액 환불
+                                reason: "사용자 요청",      // 선택 사항
+                            },
+                        }
                     );
 
                     if (res.data.status === 200) {
@@ -147,7 +153,7 @@ const UserMyPaymentsPage = () => {
                                             type="primary"
                                             danger
                                             size="small"
-                                            onClick={() => handleRefundRequest(p.merchantId)}
+                                            onClick={() => handleRefundRequest(p.merchantId, p.totalAmount)}
                                         >
                                             환불 요청
                                         </Button>
