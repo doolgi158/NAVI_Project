@@ -129,7 +129,7 @@ export default function PlanScheduler() {
                             it.imagePath?.trim() ||
                             it.thumbnailPath?.trim() ||
                             it.mainImage?.trim() ||
-                            `${API_SERVER_HOST}/images/acc/default_hotel.jpg`,
+                            `https://placehold.co/150x150?text=No+Image`,
                     })),
                 }));
                 setDays(applyEdgeTimes(loaded));

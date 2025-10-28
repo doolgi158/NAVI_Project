@@ -15,7 +15,7 @@ export default function StaySelectModal({
   setSelectedStays,
 }) {
   const [selectedDates, setSelectedDates] = useState([]);
-  const FALLBACK_IMG = `${API_SERVER_HOST}/images/acc/default_hotel.jpg`;
+  const FALLBACK_IMG = `https://placehold.co/150x150?text=No+Image`;
 
   useEffect(() => setSelectedDates([]), [resetTrigger]);
 

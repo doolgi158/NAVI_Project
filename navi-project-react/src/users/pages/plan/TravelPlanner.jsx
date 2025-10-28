@@ -200,7 +200,7 @@ export default function TravelPlanner() {
         stay.img?.trim() ||
         stay.imagePath?.trim() ||
         stay.thumbnailPath?.trim() ||
-        `${API_SERVER_HOST}/images/acc/default_hotel.jpg`;
+        `https://placehold.co/150x150?text=No+Image`;
 
       dates.forEach((dateStr) => {
         const parsed = dayjs(dateStr.includes("-") ? dateStr : `${dateRange[0].year()}-${dateStr}`);

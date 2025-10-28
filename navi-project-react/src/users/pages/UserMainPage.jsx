@@ -145,6 +145,7 @@ function CarouselSection({ title, description, data, type, navigate }) {
   const prevRef = useRef(null);
   const nextRef = useRef(null);
 
+
   // ✅ 이미지 URL 처리 함수
   const getImageUrl = (item) => {
     const candidates = [
