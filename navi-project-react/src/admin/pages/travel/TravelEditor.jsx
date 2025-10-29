@@ -150,43 +150,59 @@ export default function TravelEditor({ value = "", onChange }) {
     const quill = quillRef.current?.getEditor?.();
     if (!quill) return;
 
+    // ✅ 딱 한 번만 실행하도록 flag 사용
+    if (quill.__imageGrouped) return;
+    quill.__imageGrouped = true;
+
     setTimeout(() => {
       const editor = quill.root;
       const imgs = editor.querySelectorAll("p > img");
+      if (imgs.length <= 1) return;
+
       let group = [];
+      const newHTML = [];
 
       imgs.forEach((img, idx) => {
         const parent = img.parentElement;
-        group.push(parent);
+        group.push(img.outerHTML);
 
         const next = parent.nextElementSibling;
         const isEnd = !next || !next.querySelector("img");
-        if (isEnd && group.length > 1) {
-          const wrapper = document.createElement("div");
-          wrapper.className = "image-row";
-          wrapper.style.display = "flex";
-          wrapper.style.flexWrap = "wrap";
-          wrapper.style.gap = "8px";
-          wrapper.style.justifyContent = "center";
 
-          group.forEach((p) => {
-            const image = p.querySelector("img");
-            if (image) {
-              image.style.width = "180px";
-              image.style.borderRadius = "6px";
-              image.style.border = "1px solid #ddd";
-              image.style.objectFit = "cover";
-              wrapper.appendChild(image);
-            }
-          });
-
-          group[group.length - 1].after(wrapper);
-          group.forEach((p) => p.remove());
+        if (isEnd) {
+          if (group.length > 1) {
+            // ✅ 묶어서 이미지 행으로 변환
+            const wrapperHTML = `
+            <div class="image-row" style="
+              display:flex;
+              flex-wrap:wrap;
+              gap:8px;
+              justify-content:center;">
+              ${group
+                .map(
+                  (html) =>
+                    html.replace(
+                      "<img",
+                      `<img style='width:180px;border-radius:6px;border:1px solid #ddd;object-fit:cover;'`
+                    )
+                )
+                .join("")}
+            </div>`;
+            newHTML.push(wrapperHTML);
+          } else {
+            newHTML.push(group[0]);
+          }
           group = [];
         }
       });
-    }, 400);
-  }, [value]); // ✅ value 변경될 때마다 검사
+
+      // ✅ 기존 내용 전체를 교체 (단 한 번)
+      if (newHTML.length > 0) {
+        quill.root.innerHTML = newHTML.join("<p><br/></p>");
+      }
+    }, 300);
+  }, []); // ✅ 의존성 제거: 처음 렌더 시 1회만 실행
+
 
   return (
     <div
