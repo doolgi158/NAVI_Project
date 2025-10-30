@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
-import AdminSiderLayout from "../../layout/AdminSiderLayout";
 import AdminPaymentHeader from "../../layout/payment/AdminPaymentHeader";
 import AdminThemeProvider from "@/admin/theme/AdminThemeProvider";
+import AdminSiderLayout from "@/layout/admin/AdminSiderLayout";
 
 const AdminPaymentRoot = () => {
   const [rsvType, setRsvType] = useState("ACC");

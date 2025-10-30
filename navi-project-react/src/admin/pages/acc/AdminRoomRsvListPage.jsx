@@ -58,7 +58,7 @@ const AdminRoomRsvListPage = () => {
         },
         headers: { Authorization: `Bearer ${token}` },
       });
-
+      console.log(res);
       const result = res?.data?.data || {};
       setRows(result.data || []);
       setPagination({
@@ -151,6 +151,13 @@ const AdminRoomRsvListPage = () => {
       ),
     },
     {
+      title: "총금액",
+      dataIndex: "totalPrice",
+      align: "center",
+      width: 120,
+      render: (v) => (v ? `${Number(v).toLocaleString()}원` : "-"),
+    },
+    {
       title: "체크인",
       dataIndex: "startDate",
       align: "center",
@@ -168,7 +175,7 @@ const AdminRoomRsvListPage = () => {
     { title: "인원", dataIndex: "guestCount", align: "center", width: 80 },
     { title: "객실 수", dataIndex: "quantity", align: "center", width: 100 },
     {
-      title: "금액",
+      title: "단가(1박)",
       dataIndex: "price",
       align: "center",
       width: 120,

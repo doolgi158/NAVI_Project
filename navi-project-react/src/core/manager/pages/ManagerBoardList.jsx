@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getAllBoards, searchBoards } from './ManagerBoardService';
 import '../css/ManagerBoardList.css';
+import HeaderLayout from '@/layout/users/HeaderLayout';
 
 function ManagerBoardList() {
   const [boards, setBoards] = useState([]);

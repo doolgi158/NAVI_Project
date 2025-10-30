@@ -141,6 +141,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .message("PG 결제 검증 완료")
                 .impUid(dto.getImpUid())
                 .merchantId(dto.getMerchantId())
+                .paidAmount(paymentInfo.getAmount())
                 .build();
     }
 

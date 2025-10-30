@@ -35,6 +35,7 @@ public class DeliveryReservation extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "group_id")
     @Comment("배송 그룹 (선택, FK: NAVI_DLV_GROUP.GROUP_ID)")
+    @JsonIgnore
     private DeliveryGroup group;
 
     @Column(name = "start_addr", nullable = false)

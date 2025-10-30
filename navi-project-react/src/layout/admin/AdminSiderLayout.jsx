@@ -37,7 +37,7 @@ const AdminSiderLayout = () => {
     "1": () => navigate("/adm/users"),
     "2": () => navigate("/adm/travel"),
     "3-1": () => navigate("/adm/accommodations"),
-    "3-2": () => navigate("/adm/rooms"),
+    //"3-2": () => navigate("/adm/rooms"),
     "4": () => navigate("/adm/flight"),
     "5": () => navigate("/adm/plans"),
     "6": () => navigate("/adm/deliveries"),
@@ -70,7 +70,7 @@ const AdminSiderLayout = () => {
               label: "숙박 관리",
               children: [
                 { key: "3-1", icon: <BankOutlined />, label: "숙소 관리" },
-                { key: "3-2", icon: <KeyOutlined />, label: "객실 관리" },
+                //{ key: "3-2", icon: <KeyOutlined />, label: "객실 관리" },
               ],
             },
             { key: "4", icon: <RocketOutlined />, label: "항공편 관리" },
