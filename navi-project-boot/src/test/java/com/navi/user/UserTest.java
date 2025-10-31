@@ -27,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
@@ -465,5 +466,13 @@ public class UserTest {
         int medium = random.nextInt(2);
         int large = random.nextInt(2);
         return String.format("{\"S\":%d,\"M\":%d,\"L\":%d}", small, medium, large);
+    }
+
+    @Test
+    public void changePassword() {
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        String rawPassword = "user1";
+        String encoded = encoder.encode(rawPassword);
+        System.out.println(encoded);
     }
 }
