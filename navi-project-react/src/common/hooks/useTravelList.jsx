@@ -32,17 +32,10 @@ const getTravelData = async (domain, pageParam, filterQuery, userId) => {
     queryString += `&search=${encodedSearch}`;
   }
 
-  // ✅ 좋아요순일 경우 별도 API 사용 (수정된 부분)
-  let apiUrl = `/${domain}`;
-  const sortParam = pageParam.sort || '';
-
-  if (String(sortParam).toLowerCase().includes('likescount')) {
-    apiUrl = `/${domain}/popular`; // ✅ 인기순 API 호출
-    console.log('🔥 인기순 API로 분기됨:', apiUrl);
-  }
+  const apiUrl = `/${domain}${queryString}`;
 
   try {
-    const response = await api.get(apiUrl + queryString, {
+    const response = await api.get(apiUrl, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('accessToken') || ''}`,
       },
