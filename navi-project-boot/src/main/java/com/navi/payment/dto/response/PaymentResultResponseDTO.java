@@ -3,6 +3,7 @@ package com.navi.payment.dto.response;
 import com.navi.common.enums.RsvStatus;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /* ================[PaymentResultResponseDTO]================
@@ -20,6 +21,7 @@ public class PaymentResultResponseDTO {
     private String message;         // 사용자 메시지
     private String impUid;          // PG 승인번호
     private String merchantId;      // 결제 고유번호
+    private BigDecimal paidAmount;
 
     /* === DB 반영 결과 === */
     private List<String> reserveIds; // 예약 ID 리스트

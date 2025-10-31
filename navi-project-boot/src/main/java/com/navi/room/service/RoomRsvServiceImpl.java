@@ -97,6 +97,7 @@ public class RoomRsvServiceImpl implements RoomRsvService {
                 .nights(serverNights)
                 .rsvStatus(RsvStatus.PENDING)
                 .guestCount(dto.getGuestCount())
+                .totalPrice(totalPrice)
                 .build();
 
         roomRsvRepository.save(rsv);

@@ -23,8 +23,8 @@ public interface RoomRsvRepository extends JpaRepository<RoomRsv, Long> {
     @Query("SELECT r FROM RoomRsv r WHERE r.user.no = :userNo")
     List<RoomRsv> findAllByUserNo(Long userNo);
     /* 총 결제 금액 계산 */
-    @Query("SELECT SUM(r.price * r.quantity) FROM RoomRsv r WHERE r.reserveId = :reserveId")
-    BigDecimal sumTotalAmountByReserveId(String reserveId);
+    @Query("SELECT SUM(r.price * r.nights * r.quantity) FROM RoomRsv r WHERE r.reserveId = :reserveId")
+    BigDecimal sumTotalAmountByReserveId(@Param("reserveId") String reserveId);
     /* 예약 만료된 숙소 예약 조회 */
     @Query("SELECT r FROM RoomRsv r WHERE r.rsvStatus = :status AND r.createdAt < :threshold")
     List<RoomRsv> findExpiredReservations(@Param("status") RsvStatus status,
