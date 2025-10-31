@@ -72,8 +72,8 @@ public class AccPaymentServiceImpl {
         // 예약 ID
         String reserveId = dto.getReserveId().get(0);
 
-        BigDecimal expectedTotal = roomRsvService.getTotalAmountByReserveId(reserveId);
-        BigDecimal paidTotal = dto.getTotalAmount() != null ? dto.getTotalAmount() : BigDecimal.ZERO;
+        BigDecimal expectedTotal =  roomRsvService.getTotalAmountByReserveId(reserveId);
+        BigDecimal paidTotal = verifyRes.getPaidAmount() != null ? verifyRes.getPaidAmount() : BigDecimal.ZERO;
 
         log.info("💰 [금액 검증] reserveId={} expected={} paid={}", reserveId, expectedTotal, paidTotal);
 

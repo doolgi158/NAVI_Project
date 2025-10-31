@@ -29,6 +29,7 @@ public class RoomRsvSqlProvider {
                     r.GUEST_COUNT     AS guestCount,
                     r.QUANTITY        AS quantity,
                     r.PRICE           AS price,
+                    r.TOTAL_PRICE     AS totalPrice,
                     r.RSV_STATUS      AS rsvStatus,
                     r.CREATED_AT      AS createdAt,
                     r.UPDATED_AT      AS updatedAt
