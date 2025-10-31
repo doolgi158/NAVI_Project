@@ -177,10 +177,10 @@ public class PaymentServiceImpl implements PaymentService {
         }
 
         // 총액 갱신 + 저장
-        master.updateTotalAmount(total);
+        // master.updateTotalAmount(total);
         paymentRepository.save(master);
 
-        log.info("✅ [결제 확정 완료] merchantId={}, totalAmount={}", master.getMerchantId(), total);
+        log.info("✅ [결제 확정 완료] merchantId={}", master.getMerchantId());
 
         return PaymentResultResponseDTO.builder()
                 .success(true)
