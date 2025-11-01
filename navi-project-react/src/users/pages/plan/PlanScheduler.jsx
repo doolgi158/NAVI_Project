@@ -63,6 +63,8 @@ export default function PlanScheduler() {
     const FALLBACK_IMG = "https://placehold.co/150x150?text=No+Image";
     const DAY_COLORS = ["#E74C3C", "#3498DB", "#27AE60", "#F1C40F", "#9B59B6", "#FF8C00", "#8E44AD"];
 
+
+
     /** ✅ 삭제 후 새로고침 함수 */
     const refreshPlans = async (deletedId) => {
         try {
@@ -916,7 +918,10 @@ export default function PlanScheduler() {
                     const diff = end.diff(start, "day") + 1;
 
                     // ✅ 기존 날짜 동일할 경우 → 아무 동작 안 함
-                    if (meta.startDate === start.format("YYYY-MM-DD") && meta.endDate === end.format("YYYY-MM-DD")) {
+                    if (
+                        meta.startDate === start.format("YYYY-MM-DD") &&
+                        meta.endDate === end.format("YYYY-MM-DD")
+                    ) {
                         setDateModalOpen(false);
                         return;
                     }
@@ -925,11 +930,16 @@ export default function PlanScheduler() {
                     const allItems = days.flatMap((d) => d.items);
 
                     // ✅ 제주공항 일정 추출
-                    const jejuArrivals = allItems.filter((it) => it.type === "poi" && it.title?.includes("제주공항 도착"));
-                    const jejuDepartures = allItems.filter((it) => it.type === "poi" && it.title?.includes("제주공항 출발"));
+                    const jejuArrivals = allItems.filter(
+                        (it) => it.type === "poi" && it.title?.includes("제주공항 도착")
+                    );
+                    const jejuDepartures = allItems.filter(
+                        (it) => it.type === "poi" && it.title?.includes("제주공항 출발")
+                    );
 
-                    const arrival =
-                        jejuArrivals[0] || {
+                    const arrival = jejuArrivals.length
+                        ? jejuArrivals[0]
+                        : {
                             type: "poi",
                             title: "제주공항 도착",
                             icon: "bi bi-airplane",
@@ -940,8 +950,9 @@ export default function PlanScheduler() {
                             endTime: "22:00",
                         };
 
-                    const departure =
-                        jejuDepartures[0] || {
+                    const departure = jejuDepartures.length
+                        ? jejuDepartures[0]
+                        : {
                             type: "poi",
                             title: "제주공항 출발",
                             icon: "bi bi-airplane",
@@ -952,8 +963,10 @@ export default function PlanScheduler() {
                             endTime: "22:00",
                         };
 
-                    // ✅ 일반 여행지만 필터링 (공항 제외)
-                    const generalTravels = allItems.filter((it) => it.type === "travel" || it.type === "stay");
+                    // ✅ 숙소(stay)는 완전히 제외 (중복 제거)
+                    const generalTravels = allItems.filter(
+                        (it) => it.type !== "stay" && !it.title?.includes("제주공항 도착") && !it.title?.includes("제주공항 출발")
+                    );
 
                     // ✅ n일 분배
                     const buckets = Array.from({ length: diff }, () => []);
@@ -961,9 +974,13 @@ export default function PlanScheduler() {
                         buckets[idx % diff].push(t);
                     });
 
-                    // ✅ 공항 재배치
-                    if (arrival) buckets[0].unshift(arrival);
-                    if (departure && diff > 1) buckets[diff - 1].push(departure);
+                    // ✅ 공항 재배치 (중복 방지)
+                    if (!buckets[0].some((it) => it.title?.includes("제주공항 도착"))) {
+                        buckets[0].unshift(arrival);
+                    }
+                    if (diff > 1 && !buckets[diff - 1].some((it) => it.title?.includes("제주공항 출발"))) {
+                        buckets[diff - 1].push(departure);
+                    }
 
                     // ✅ 새로운 일정 구성
                     const newDays = buckets.map((b, i) => ({
@@ -971,8 +988,14 @@ export default function PlanScheduler() {
                         orderNo: i + 1,
                         items: b.map((it) => ({
                             ...it,
-                            startTime: typeof it.startTime === "object" ? dayjs(it.startTime).format("HH:mm") : it.startTime,
-                            endTime: typeof it.endTime === "object" ? dayjs(it.endTime).format("HH:mm") : it.endTime,
+                            startTime:
+                                typeof it.startTime === "object"
+                                    ? dayjs(it.startTime).format("HH:mm")
+                                    : it.startTime,
+                            endTime:
+                                typeof it.endTime === "object"
+                                    ? dayjs(it.endTime).format("HH:mm")
+                                    : it.endTime,
                         })),
                     }));
 
@@ -983,7 +1006,8 @@ export default function PlanScheduler() {
                             <>
                                 여행 날짜를 <b>{meta.startDate}</b> ~ <b>{meta.endDate}</b>에서
                                 <br />
-                                <b>{start.format("YYYY-MM-DD")}</b> ~ <b>{end.format("YYYY-MM-DD")}</b>
+                                <b>{start.format("YYYY-MM-DD")}</b> ~{" "}
+                                <b>{end.format("YYYY-MM-DD")}</b>
                                 (으)로 변경하시겠습니까?
                                 <br />
                                 <br />
@@ -994,7 +1018,7 @@ export default function PlanScheduler() {
                         cancelText: "취소",
                         centered: true,
                         onOk: () => {
-                            // ✅ 상태 반영
+                            // ✅ 숙소 제거된 일정만 반영
                             setDays(newDays);
                             setMeta((prev) => ({
                                 ...prev,
@@ -1002,13 +1026,12 @@ export default function PlanScheduler() {
                                 endDate: dayjs(newEnd).format("YYYY-MM-DD"),
                             }));
 
-                            // ✅ 숙소 초기화 (변경됨)
+                            // ✅ 숙소 상태 초기화
                             setStageStayPlans({});
                             setStageStays([]);
 
                             message.success("여행 날짜가 변경되었습니다. 숙소 정보가 초기화되었습니다.");
 
-                            // ✅ 모달 닫기
                             setDateModalOpen(false);
                         },
                         onCancel: () => {
@@ -1017,6 +1040,7 @@ export default function PlanScheduler() {
                     });
                 }}
             />
+
 
             <FooterLayout />
         </>

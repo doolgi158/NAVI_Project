@@ -25,8 +25,7 @@ export default function PlanSidebar({
     handleAddTravel = () => { },
     handleAddStay = () => { },
 }) {
-    const navigate = useNavigate(); // ✅ useNavigate 사용
-
+    const navigate = useNavigate();
     const [showTravelModal, setShowTravelModal] = useState(false);
     const [showStayModal, setShowStayModal] = useState(false);
 
@@ -74,8 +73,8 @@ export default function PlanSidebar({
                         type={activeDayIdx === -1 ? "primary" : "default"}
                         onClick={() => setActiveDayIdx(-1)}
                         className={`${activeDayIdx === -1
-                                ? "!bg-[#FFF5B7] !border-none !text-[#2F3E46] font-semibold"
-                                : "hover:!bg-[#FAF9F6]"
+                            ? "!bg-[#FFF5B7] !border-none !text-[#2F3E46] font-semibold"
+                            : "hover:!bg-[#FAF9F6]"
                             }`}
                     >
                         전체 일정
@@ -88,8 +87,8 @@ export default function PlanSidebar({
                             type={idx === activeDayIdx ? "primary" : "default"}
                             onClick={() => setActiveDayIdx(idx)}
                             className={`${idx === activeDayIdx
-                                    ? "!bg-[#FFF5B7] !border-none !text-[#2F3E46] font-semibold"
-                                    : "hover:!bg-[#FAF9F6]"
+                                ? "!bg-[#FFF5B7] !border-none !text-[#2F3E46] font-semibold"
+                                : "hover:!bg-[#FAF9F6]"
                                 }`}
                         >
                             {idx + 1}일차
@@ -98,89 +97,77 @@ export default function PlanSidebar({
                 </div>
 
                 {/* ✅ 하단: 액션 버튼 */}
-                <div className="mt-6 pt-4 border-t border-gray-200 flex flex-col gap-2">
-                    {isAdminView ? null : (
-                        <>
-                            {isViewMode ? (
+                {!isViewMode && ( // ✅ view 모드일 때 전체 버튼 영역 숨김
+                    <div className="mt-6 pt-4 border-t border-gray-200 flex flex-col gap-2">
+                        {isAdminView ? null : (
+                            <>
+                                {!isEditMode && (
+                                    <Button
+                                        block
+                                        className="bg-gray-200 hover:bg-gray-300 text-gray-700 border-none"
+                                        onClick={() => {
+                                            navigate("/plans/planner", {
+                                                state: {
+                                                    from: "scheduler",
+                                                    step: 3,
+                                                    restoreData: {
+                                                        meta,
+                                                        days,
+                                                        dayTimes: state?.dayTimes || {},
+                                                        title: meta.title,
+                                                        dateRange: [
+                                                            dayjs(meta.startDate),
+                                                            dayjs(meta.endDate),
+                                                        ],
+                                                        times: state?.dayTimes || {},
+                                                        selectedTravels: stageTravels,
+                                                        selectedStays: stageStays,
+                                                        stayPlans: stageStayPlans,
+                                                    },
+                                                    deletedTravelIds,
+                                                    deletedStayIds,
+                                                    refreshSource: "scheduler",
+                                                },
+                                            });
+                                        }}
+                                    >
+                                        이전
+                                    </Button>
+                                )}
+
+                                {isEditMode && (
+                                    <>
+                                        <Button
+                                            block
+                                            icon={<PlusOutlined />}
+                                            className="bg-[#FFF5B7] hover:bg-[#FFE98A] text-[#2F3E46] border-none"
+                                            onClick={() => setShowTravelModal(true)}
+                                        >
+                                            여행지 추가
+                                        </Button>
+                                        <Button
+                                            block
+                                            icon={<HomeOutlined />}
+                                            className="bg-[#DCEFFF] hover:bg-[#B8E0FF] text-[#2F3E46] border-none"
+                                            onClick={() => setShowStayModal(true)}
+                                        >
+                                            숙소 추가
+                                        </Button>
+                                    </>
+                                )}
+
                                 <Button
                                     block
                                     type="primary"
-                                    icon={<EditOutlined />}
-                                    onClick={() => setMode("edit")}
-                                    className="bg-[#2F3E46] hover:bg-[#1E2E32] border-none text-white"
+                                    className="bg-[#2F3E46] hover:bg-[#1E2E32] border-none"
+                                    onClick={handleConfirm}
                                 >
-                                    수정하기
+                                    {isEditMode ? "수정 완료" : "저장"}
                                 </Button>
-                            ) : (
-                                <>
-                                    {!isEditMode && (
-                                        <Button
-                                            block
-                                            className="bg-gray-200 hover:bg-gray-300 text-gray-700 border-none"
-                                            onClick={() => {
-                                                navigate("/plans/planner", {
-                                                    state: {
-                                                        from: "scheduler",
-                                                        step: 3,
-                                                        restoreData: {
-                                                            meta,
-                                                            days,
-                                                            dayTimes: state?.dayTimes || {},
-                                                            title: meta.title,
-                                                            dateRange: [
-                                                                dayjs(meta.startDate),
-                                                                dayjs(meta.endDate),
-                                                            ],
-                                                            times: state?.dayTimes || {},
-                                                            selectedTravels: stageTravels,
-                                                            selectedStays: stageStays,
-                                                            stayPlans: stageStayPlans,
-                                                        },
-                                                        deletedTravelIds,
-                                                        deletedStayIds,
-                                                        refreshSource: "scheduler",
-                                                    },
-                                                });
-                                            }}
-                                        >
-                                            이전
-                                        </Button>
-                                    )}
-
-                                    {isEditMode && (
-                                        <>
-                                            <Button
-                                                block
-                                                icon={<PlusOutlined />}
-                                                className="bg-[#FFF5B7] hover:bg-[#FFE98A] text-[#2F3E46] border-none"
-                                                onClick={() => setShowTravelModal(true)}
-                                            >
-                                                여행지 추가
-                                            </Button>
-                                            <Button
-                                                block
-                                                icon={<HomeOutlined />}
-                                                className="bg-[#DCEFFF] hover:bg-[#B8E0FF] text-[#2F3E46] border-none"
-                                                onClick={() => setShowStayModal(true)}
-                                            >
-                                                숙소 추가
-                                            </Button>
-                                        </>
-                                    )}
-
-                                    <Button
-                                        block
-                                        type="primary"
-                                        className="bg-[#2F3E46] hover:bg-[#1E2E32] border-none"
-                                        onClick={handleConfirm}
-                                    >
-                                        {isEditMode ? "수정 완료" : "저장"}
-                                    </Button>
-                                </>
-                            )}
-                        </>
-                    )}
-                </div>
+                            </>
+                        )}
+                    </div>
+                )}
 
                 {/* ✅ 모달 */}
                 <TravelAddModal
