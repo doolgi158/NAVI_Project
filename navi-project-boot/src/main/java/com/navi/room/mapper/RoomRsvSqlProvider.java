@@ -19,6 +19,7 @@ public class RoomRsvSqlProvider {
                     r.RESERVER_NAME   AS reserverName,
                     r.RESERVER_TEL    AS reserverTel,
                     r.RESERVER_EMAIL  AS reserverEmail,
+                    r.RESERVER_BIRTH  AS reserverBirth,
                     rm.ROOM_ID        AS roomId,
                     rm.ROOM_NAME      AS roomName,
                     a.ACC_ID          AS accId,

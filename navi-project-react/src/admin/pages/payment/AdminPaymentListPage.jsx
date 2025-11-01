@@ -207,7 +207,7 @@ const AdminPaymentListPage = () => {
           FAILED: "결제실패",
           CANCELLED: "결제취소",
           REFUNDED: "환불완료",
-          PARTIAL_REFUNDED: "부분환불",
+          //PARTIAL_REFUNDED: "부분환불",
         };
         return <Tag color={statusColorMap[s]}>{labelMap[s] || s}</Tag>;
       },
@@ -285,7 +285,7 @@ const AdminPaymentListPage = () => {
   const detailColumns = [
     { title: "예약 ID", dataIndex: "reserveId", align: "center", width: 140 },
     {
-      title: "결제 금액",
+      title: "결제금액",
       dataIndex: "amount",
       align: "center",
       width: 120,
@@ -431,6 +431,7 @@ const AdminPaymentListPage = () => {
           <Spin tip="로딩 중..." />
         ) : reservationModal.data ? (
           <Descriptions bordered column={1} size="small">
+            {console.log(reservationModal.data)}
             {Object.entries(reservationModal.data).map(([key, value]) => (
               <Descriptions.Item label={key} key={key}>
                 {String(value)}

@@ -2,7 +2,11 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getAllBoards, searchBoards } from './ManagerBoardService';
 import '../css/ManagerBoardList.css';
+<<<<<<< HEAD
+import HeaderLayout from '@/layout/users/HeaderLayout';
+=======
 import HeaderLayout from '@/users/layout/HeaderLayout';
+>>>>>>> 177196f4174822f3557264d3acda272d4870d53f
 
 function ManagerBoardList() {
   const [boards, setBoards] = useState([]);
@@ -128,11 +132,6 @@ function ManagerBoardList() {
         <div className="board-list-wrapper">
           {/* ✅ 헤더 - 탭 네비게이션 추가 */}
           <div className="board-list-header">
-            <div className="board-nav">
-              <Link to="/adm/board" className="nav-link active">일반 게시판</Link>
-              <span className="nav-divider">|</span>
-              <Link to="/adm/notice" className="nav-link">공지사항</Link>
-            </div>
             <div className="board-nav">
               <Link to="/adm/board" className="nav-link active">일반 게시판</Link>
               <span className="nav-divider">|</span>

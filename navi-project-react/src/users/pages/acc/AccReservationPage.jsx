@@ -60,7 +60,6 @@ const AccReservationPage = () => {
             const updatedFormData = {
                 ...formData,
                 name: values.name,
-                birthday: values.birthday,
                 phone: cleanedPhone,
                 email: values.email,
                 birth: values.birth ? values.birth.format("YYYY-MM-DD") : null
@@ -75,7 +74,6 @@ const AccReservationPage = () => {
                 },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-
             message.success("예약자 정보가 저장되었습니다.");
 
             dispatch(

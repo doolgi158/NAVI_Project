@@ -43,6 +43,7 @@ const AccListPage = () => {
         setSpot(parsed.spot || "");
         setGuestCount(parsed.guestCount || null);
         setRoomCount(parsed.roomCount || null);
+        setSelectedCategories(parsed.selectedCategories || []);
 
         if (parsed.dateRange?.length === 2) {
           setDateRange([
@@ -69,7 +70,7 @@ const AccListPage = () => {
   const [keyword, setKeyword] = useState(savedSearch.keyword);
   const [spot, setSpot] = useState(savedSearch.spot);
   const [guestCount, setGuestCount] = useState(savedSearch.guestCount || 1);
-const [roomCount, setRoomCount] = useState(savedSearch.roomCount || 1);
+  const [roomCount, setRoomCount] = useState(savedSearch.roomCount || 1);
   const [isSearched, setIsSearched] = useState(savedSearch.isSearched || false);
   const [accommodations, setAccommodations] = useState(savedSearch.accommodations || []);
   const [sortOption, setSortOption] = useState("title");
@@ -356,7 +357,7 @@ const [roomCount, setRoomCount] = useState(savedSearch.roomCount || 1);
                     { value: "title", label: "이름순" },
                     { value: "view", label: "조회순" },
                     { value: "minPrice", label: "낮은가격순" },
-                    { value: "maxPrice", label: "높은가격순" },
+                    //{ value: "maxPrice", label: "높은가격순" },
                     { value: "recent", label: "최신등록순" },
                   ]}
                   size="middle"
@@ -390,7 +391,9 @@ const [roomCount, setRoomCount] = useState(savedSearch.roomCount || 1);
               ) : (
                 <>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {accommodations.map((acc, index) => (
+                    {accommodations
+                      .filter((acc) => acc.minPrice > 0)
+                    .map((acc, index) => (
                       <Card
                         key={acc.accId || `acc-${index}`}
                         hoverable

@@ -41,7 +41,7 @@ const AdminSiderLayout = () => {
     "2": () => navigate("/adm/travel"),
     "3": () => navigate("/adm/plan"),
     "4-1": () => navigate("/adm/accommodations"),
-    "4-2": () => navigate("/adm/rooms"),
+    //"4-2": () => navigate("/adm/rooms"),
     "5": () => navigate("/adm/flight"),
     "6": () => navigate("/adm/deliveries"),
     "7": () => navigate("/adm/payments"),
@@ -65,7 +65,7 @@ const AdminSiderLayout = () => {
     else if (path.includes("/adm/travel")) setSelectedKeys(["2"]);
     else if (path.includes("/adm/plan")) setSelectedKeys(["3"]);
     else if (path.includes("/adm/accommodations")) setSelectedKeys(["4-1"]);
-    else if (path.includes("/adm/rooms")) setSelectedKeys(["4-2"]);
+    //else if (path.includes("/adm/rooms")) setSelectedKeys(["4-2"]);
     else if (path.includes("/adm/flight")) setSelectedKeys(["5"]);
     else if (path.includes("/adm/deliveries")) setSelectedKeys(["6"]);
     else if (path.includes("/adm/payments")) setSelectedKeys(["7"]);
@@ -95,7 +95,7 @@ const AdminSiderLayout = () => {
               label: "숙박 관리",
               children: [
                 { key: "4-1", icon: <BankOutlined />, label: "숙소 관리" },
-                { key: "4-2", icon: <KeyOutlined />, label: "객실 관리" },
+                //{ key: "4-2", icon: <KeyOutlined />, label: "객실 관리" },
               ],
             },
             { key: "5", icon: <RocketOutlined />, label: "항공편 관리" },
