@@ -19,7 +19,8 @@ import {
   ClockCircleOutlined,
   CarOutlined,
   FireOutlined,
-  EnvironmentOutlined,
+  CheckCircleOutlined,
+  RollbackOutlined,
 } from "@ant-design/icons";
 import { useKakaoMap } from "../../../common/hooks/useKakaoMap";
 import { setSelectedAcc } from "../../../common/slice/accSlice";
@@ -203,7 +204,7 @@ const AccDetailPage = () => {
       const items = [
         {
           reserveId: generatedReserveId,
-          amount: room.weekdayFee,
+          amount: room.weekdayFee * nights * roomCount,
         },
       ];
 
@@ -252,16 +253,35 @@ const AccDetailPage = () => {
     );
   }
 
+  const handleGoBack = () => {
+    navigate("/accommodations", { state: { prevSearchState: searchState } });
+  };
+
   return (
     <MainLayout>
       <div className="min-h-screen flex justify-center pt-8 pb-10 px-6">
         <div className="w-full max-w-6xl">
           <div className="bg-white shadow-md rounded-2xl p-6">
             {/* 숙소 정보 */}
-            <div className="mb-5">
+            <div className="mb-5 flex justify-between items-start"> 
+              <div>
+                <Title level={3} style={{ marginBottom: 4 }}>{accData.title}</Title>
+                <Text className="text-sm text-gray-600">{accData.address}</Text>
+              </div>
+
+              {/* <Button
+                onClick={handleGoBack}
+                icon={<RollbackOutlined />}
+                size="large"
+                type="default" // 버튼 타입은 기본값으로 설정
+              >
+                목록으로
+              </Button> */}
+            </div>
+            {/* <div className="mb-5">
               <Title level={3}>{accData.title}</Title>
               <Text className="text-sm text-gray-600">{accData.address}</Text>
-            </div>
+            </div> */}
 
             {/* 이미지 + 지도 */}
             <Row gutter={[16, 16]} className="mb-6">
@@ -309,22 +329,52 @@ const AccDetailPage = () => {
               column={{ xs: 1, sm: 2, md: 3 }}
               className="rounded-xl overflow-hidden shadow-sm mb-8"
             >
-              <Descriptions.Item label="문의전화">
+              <Descriptions.Item label={
+                <>
+                  <PhoneOutlined/>
+                  <span> 문의전화</span>
+                </>
+              }>
                 {accData.tel || "정보 없음"}
               </Descriptions.Item>
-              <Descriptions.Item label="체크인 시간">
+              <Descriptions.Item label={
+                <>
+                  <ClockCircleOutlined/>
+                  <span> 체크인 시간</span>
+                </>
+              }>
                 {accData.checkInTime || "-"}
               </Descriptions.Item>
-              <Descriptions.Item label="체크아웃 시간">
+              <Descriptions.Item label={
+                <>
+                  <ClockCircleOutlined/>
+                  <span> 체크아웃 시간</span>
+                </>
+              }>
                 {accData.checkOutTime || "-"}
               </Descriptions.Item>
-              <Descriptions.Item label="주차 가능 여부">
+              <Descriptions.Item label={
+                <>
+                  <CarOutlined />
+                  <span> 주차 가능 여부</span>
+                </>
+              }>
                 {accData.hasParking ? "가능" : "불가"}
               </Descriptions.Item>
-              <Descriptions.Item label="취사 가능 여부">
+              <Descriptions.Item label={
+                <>
+                  <FireOutlined />
+                  <span> 취사 가능 여부</span>
+                </>
+              }>
                 {accData.hasCooking ? "가능" : "불가"}
               </Descriptions.Item>
-              <Descriptions.Item label="운영 상태">
+              <Descriptions.Item label={
+                <>
+                  <CheckCircleOutlined />
+                  <span> 운영 상태</span>
+                </>
+              }>
                 {accData.active ? "운영 중" : "운영 중단"}
               </Descriptions.Item>
             </Descriptions>

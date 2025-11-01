@@ -22,10 +22,10 @@ const AdminAccHeader = ({ onTabChange, onSearch, onFilter }) => {
 
   // ✅ URL 변화 시 탭 동기화
   useEffect(() => {
-    if (location.pathname.includes("/accommodations/reservations")) {
+    if(location.pathname.includes("/accommodations/new") || location.pathname.includes("/accommodations/edit")){
+      setActiveTab("SELF");
+    } else if (location.pathname.includes("/accommodations/reservations")) {
       setActiveTab("RSV");
-    } else if (location.pathname.includes("/accommodations")) {
-      setActiveTab("API");
     }
   }, [location.pathname]);
 
@@ -167,7 +167,7 @@ const AdminAccHeader = ({ onTabChange, onSearch, onFilter }) => {
           placeholder={
             activeTab === "RSV"
               ? "예약자명 / 숙소명 / 예약 ID 검색"
-              : "숙소명 / 주소 / 숙소 ID 검색"
+              : "숙소명 / 주소 검색"
           }
           allowClear
           value={searchValue}
