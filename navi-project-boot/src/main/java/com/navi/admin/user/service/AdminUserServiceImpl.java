@@ -32,7 +32,14 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Override
     public Page<AdminUserDTO> getPagedUsers(int page, int size, String keyword, String field) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "no"));
-        Page<User> userPage = getFilteredUsers(keyword, field, pageable);
+
+        // 검색어가 있는 경우만 필터링
+        Page<User> userPage;
+        if (keyword != null && !keyword.trim().isEmpty() && !"all".equalsIgnoreCase(field)) {
+            userPage = getFilteredUsers(keyword.trim(), field, pageable);
+        } else {
+            userPage = AdminUserRepository.findAllWithRoles(pageable);
+        }
 
         // 로그인 이력 batch 조회로 N+1 방지
         List<Long> userNos = userPage.getContent().stream().map(User::getNo).toList();

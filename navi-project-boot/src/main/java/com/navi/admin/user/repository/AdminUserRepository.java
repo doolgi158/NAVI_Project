@@ -1,6 +1,9 @@
 package com.navi.admin.user.repository;
 
 import com.navi.user.domain.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -23,4 +26,8 @@ public interface AdminUserRepository extends JpaRepository<User, Long> {
     // 활성 유저 수 (NORMAL 상태)
     @Query("SELECT COUNT(u) FROM User u WHERE u.userState = 'NORMAL'")
     long countActiveUsers();
+
+    @EntityGraph(attributePaths = {"userRoleList"})
+    @Query("SELECT u FROM User u")
+    Page<User> findAllWithRoles(Pageable pageable);
 }

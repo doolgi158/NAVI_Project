@@ -20,8 +20,8 @@ const AdminUsersPage = () => {
   const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
-    fetchAllUsers(search, filterField);
-  }, [search, filterField]);
+    fetchAllUsers("", "all");
+  }, []);
 
   // ✅ 전체 리스트 불러오기 (백엔드에서 한 번만)
   const fetchAllUsers = async (keyword = "", field = "all") => {
@@ -42,15 +42,47 @@ const AdminUsersPage = () => {
     }
   };
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
+    if (!search.trim()) {
+      message.info("검색어를 입력해주세요.");
+      return;
+    }
+
+    setLoading(true);
     setPage(1);
-    fetchAllUsers(search, filterField);
+
+    try {
+      const token = localStorage.getItem("accessToken");
+      const res = await axios.get(`${API_SERVER_HOST}/api/adm/users`, {
+        params: { page: 0, size: 10000, keyword: search, field: filterField },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const apiData = res.data?.data;
+      const list = Array.isArray(apiData)
+        ? apiData
+        : Array.isArray(apiData?.content)
+          ? apiData.content
+          : [];
+
+      setUsers(list);
+
+      if (list.length === 0) message.info("검색 결과가 없습니다.");
+    } catch (err) {
+      console.error(err);
+      message.error("검색 중 오류가 발생했습니다.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDelete = async (userNo) => {
     if (!window.confirm("정말 삭제하시겠습니까?")) return;
     try {
-      await axios.delete(`${API_SERVER_HOST}/api/adm/${userNo}`);
+      const token = localStorage.getItem("accessToken");
+      await axios.delete(`${API_SERVER_HOST}/api/adm/${userNo}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       message.success("삭제되었습니다.");
       fetchAllUsers(search, filterField);
     } catch (err) {
