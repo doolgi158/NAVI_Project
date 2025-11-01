@@ -67,7 +67,7 @@ export default function TravelDetailPage() {
         setLikeCount(data.likesCount || 0);
         setBookmarkCount(data.bookmarkCount || 0);
         setIsLiked(data.likedByUser || false);
-        setIsBookmarked(data.isBookmarkedByUser || false);
+        setIsBookmarked(data.bookmarkedByUser || false);
         setError(null);
       } catch (err) {
         console.error("❌ 상세 조회 실패:", err);
