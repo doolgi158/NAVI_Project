@@ -1,12 +1,15 @@
 package com.navi.flight.dto;
 
+import lombok.Builder;
 import lombok.Data;
-
-
-//API → JSON 매핑 DTO
+import lombok.Getter;
+import lombok.Setter;
 
 @Data
-public class ApiAirportDTO {
+@Getter
+@Setter
+@Builder
+public class AirportDTO {
     private String airportId;
     private String airportNm;
 }

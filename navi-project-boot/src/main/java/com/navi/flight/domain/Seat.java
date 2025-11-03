@@ -9,7 +9,7 @@ import lombok.*;
  */
 @Entity
 @Table(
-        name = "navi_seat",
+        name = "navi_fly_seat",
         uniqueConstraints = {
                 @UniqueConstraint(columnNames = {"flight_id", "dep_time", "seat_no"})
         }

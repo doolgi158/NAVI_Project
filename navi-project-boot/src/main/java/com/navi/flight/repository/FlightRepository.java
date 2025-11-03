@@ -16,11 +16,11 @@ public interface FlightRepository extends JpaRepository<Flight, FlightId> {
      * ✅ 기존 ±시간 범위 검색 (남겨둠)
      */
     @Query("""
-        SELECT f 
-          FROM Flight f
-         WHERE f.flightId.flightId = :flightId
-           AND f.flightId.depTime BETWEEN :start AND :end
-        """)
+            SELECT f 
+              FROM Flight f
+             WHERE f.flightId.flightId = :flightId
+               AND f.flightId.depTime BETWEEN :start AND :end
+            """)
     Optional<Flight> findByFlightIdAndDepTimeRange(
             @Param("flightId") String flightId,
             @Param("start") LocalDateTime start,
@@ -33,11 +33,11 @@ public interface FlightRepository extends JpaRepository<Flight, FlightId> {
      * - 자동 좌석 생성 로직에서 사용
      */
     @Query("""
-        SELECT f
-          FROM Flight f
-         WHERE f.flightId.flightId = :flightId
-           AND CAST(f.flightId.depTime AS date) = CAST(:depDate AS date)
-        """)
+            SELECT f
+              FROM Flight f
+             WHERE f.flightId.flightId = :flightId
+               AND CAST(f.flightId.depTime AS date) = CAST(:depDate AS date)
+            """)
     Optional<Flight> findByFlightIdAndDepDate(
             @Param("flightId") String flightId,
             @Param("depDate") LocalDateTime depDate
@@ -48,10 +48,12 @@ public interface FlightRepository extends JpaRepository<Flight, FlightId> {
      * 항공편 코드별 전체 조회 (예: LJ123)
      */
     @Query("""
-        SELECT f 
-          FROM Flight f
-         WHERE f.flightId.flightId = :flightId
-         ORDER BY f.flightId.depTime ASC
-        """)
+            SELECT f 
+              FROM Flight f
+             WHERE f.flightId.flightId = :flightId
+             ORDER BY f.flightId.depTime ASC
+            """)
     List<Flight> findAllByFlightId(@Param("flightId") String flightId);
+
+    boolean existsByFlightId_FlightIdAndFlightId_DepTime(String flightId, LocalDateTime depTime);
 }
