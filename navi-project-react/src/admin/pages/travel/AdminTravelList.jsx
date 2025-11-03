@@ -104,6 +104,26 @@ export default function AdminTravelList() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // ✅ 검색어 자동 반응 (디바운스 포함)
+  useEffect(() => {
+    const trimmed = (inputKeyword || "").replace(/\s+/g, "");
+
+    const delayDebounce = setTimeout(() => {
+      // 검색어가 있으면 필터 검색
+      if (trimmed.length > 0) {
+        loadTravels(0, trimmed, pageSize, sortField, sortOrder);
+      }
+      // 검색어가 없으면 전체 목록 다시 로드
+      else {
+        loadTravels(0, "", pageSize, sortField, sortOrder);
+      }
+    }, 400); // 0.4초 디바운스
+
+    return () => clearTimeout(delayDebounce);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inputKeyword]);
+
+
   const handleSearch = (value) => {
     const trimmed = (value || "").replace(/\s+/g, ""); // 모든 공백 제거
     loadTravels(0, trimmed);
@@ -395,7 +415,10 @@ export default function AdminTravelList() {
                 {/* 페이지 크기 */}
                 <Select
                   value={pageSize}
-                  onChange={(value) => setPageSize(value)}
+                  onChange={(value) => {
+                    setPageSize(value);
+                    loadTravels(0, searchKeyword, value, sortField, sortOrder); // ✅ 페이지 크기 변경 시 즉시 재조회
+                  }}
                   style={{ width: 140 }}
                   options={sizeOptions.map((n) => ({
                     label: `${n}개씩 보기`,
