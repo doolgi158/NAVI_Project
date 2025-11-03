@@ -14,7 +14,6 @@ import {
 import {
     DeleteOutlined,
     SearchOutlined,
-    PlusOutlined,
 } from "@ant-design/icons";
 import api from "@/common/api/naviApi";
 import AdminSiderLayout from "../../layout/AdminSiderLayout";
@@ -34,7 +33,7 @@ export default function AdminPlanList() {
     const navigate = useNavigate();
 
     /** ✅ 여행계획 목록 조회 */
-    const fetchPlans = async (page = 1, size = pageSize, keyword = search) => {
+    const fetchPlans = async (page = 1, size = pageSize, keyword = "") => {
         setLoading(true);
         try {
             const res = await api.get(
@@ -53,15 +52,50 @@ export default function AdminPlanList() {
         }
     };
 
+    /** ✅ 최초 및 페이지 변경 시 */
     useEffect(() => {
         fetchPlans(currentPage, pageSize, search);
     }, [pageSize, currentPage]);
 
-    /** ✅ 검색 */
+    /** ✅ 검색 버튼 클릭 */
     const handleSearch = async () => {
         setCurrentPage(1);
         fetchPlans(1, pageSize, search);
     };
+
+    /** ✅ 검색 자동 반응 (디바운스) */
+    useEffect(() => {
+        const trimmed = search.trim();
+
+        const delay = setTimeout(() => {
+            // 검색어가 없으면 전체 목록 다시 로드
+            if (trimmed === "") {
+                fetchPlans(1, pageSize, "");
+                return;
+            }
+
+            // ✅ userId 검색 (정확 일치)
+            if (/^navi\d+$/i.test(trimmed)) {
+                api.get(`/adm/plan?page=0&size=${pageSize}&sort=planId&direction=desc`)
+                    .then((res) => {
+                        const filtered = (res.data.content || []).filter(
+                            (plan) => plan.userId?.toLowerCase() === trimmed.toLowerCase()
+                        );
+                        setPlans(filtered);
+                        setTotalElements(filtered.length);
+                        setCurrentPage(1);
+                    })
+                    .catch(() => message.error("데이터를 불러올 수 없습니다."));
+                return;
+            }
+
+            // ✅ 일반 검색
+            fetchPlans(1, pageSize, trimmed);
+        }, 400); // 0.4초 지연
+
+        return () => clearTimeout(delay);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [search]);
 
     /** ✅ 삭제 */
     const handleDelete = async (planId) => {
@@ -195,7 +229,7 @@ export default function AdminPlanList() {
                                 }}
                             >
                                 <Input
-                                    placeholder="제목 또는 작성자 검색"
+                                    placeholder="제목, 작성자 또는 ID 검색"
                                     prefix={<SearchOutlined />}
                                     allowClear
                                     value={search}
@@ -226,8 +260,6 @@ export default function AdminPlanList() {
                                         { label: "50개씩 보기", value: 50 },
                                     ]}
                                 />
-
-
                             </div>
 
                             <Divider style={{ margin: "16px 0" }} />
