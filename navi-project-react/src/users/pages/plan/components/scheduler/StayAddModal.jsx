@@ -13,12 +13,10 @@ export default function StayAddModal({ open, onClose, onAdd, days = [], selected
     useEffect(() => {
         if (!open) return;
 
-        // ✅ 1. 숙소 데이터 불러오기
+        // ✅ 숙소 데이터 불러오기
         getAllStays()
             .then((data) => {
                 setStays(data || []);
-
-                // ✅ 2. 현재 days 기반 preselected 계산
                 const preselected = {};
                 days.forEach((day, idx) => {
                     (day.items || []).forEach((it) => {
@@ -27,20 +25,16 @@ export default function StayAddModal({ open, onClose, onAdd, days = [], selected
                         }
                     });
                 });
-
-                // ✅ 3. 선택맵 초기화 (저장 안 된 선택은 모두 제거)
                 setSelectedMap(preselected);
             })
             .catch(() => message.error("숙소 데이터를 불러올 수 없습니다."));
     }, [open, days]);
+
     const handleClose = () => {
-        // ✅ 모달 닫을 때 선택 초기화 (플래너 반영 X)
         setSelectedMap({});
         onClose();
     };
 
-
-    // ✅ 기존 플래너 데이터 반영
     useEffect(() => {
         if (!open) return;
         const preselected = {};
@@ -91,60 +85,64 @@ export default function StayAddModal({ open, onClose, onAdd, days = [], selected
         setSelectedMap((prev) => {
             const copy = { ...prev };
 
-            // ✅ 이미 선택된 숙소 → 해제 허용
+            // ✅ 이미 선택된 숙소 → 해제
             if (copy[key] !== undefined) {
                 delete copy[key];
                 return copy;
             }
 
-            // ✅ 현재 일정에서 숙소가 배정된 day 인덱스 수집
+            // ✅ 현재 이미 숙소가 배정된 DAY 목록 수집
             const occupiedDayIdx = new Set();
+
+            // 기존 플래너에서 숙소가 있는 DAY
             days.forEach((d, idx) => {
                 if ((d.items || []).some((it) => it.type === "stay")) {
                     occupiedDayIdx.add(idx);
                 }
             });
-            Object.values(copy).flat().forEach((idx) => occupiedDayIdx.add(idx));
 
-            const maxStayCount = Math.max(days.length - 1, 1);
-
-            // ✅ 현재까지 선택된 숙소가 점유한 DAY 수
-            const totalSelectedDays = Object.values(copy)
+            // 새로 선택된 숙소들도 반영
+            Object.values(copy)
                 .flat()
-                .reduce((acc, cur) => acc.add(cur), new Set()).size;
+                .forEach((idx) => occupiedDayIdx.add(idx));
 
-            if (totalSelectedDays >= maxStayCount) {
+            const maxStayCount = days.length - 1 > 0 ? days.length - 1 : 1;
+
+            // ✅ 현재 숙소가 배정된 DAY 개수 계산
+            const totalOccupiedDays = occupiedDayIdx.size;
+
+            // ✅ 이미 모든 DAY가 숙소로 채워졌다면 선택 차단
+            if (totalOccupiedDays >= maxStayCount) {
                 Modal.warning({
                     title: "숙소 선택 제한",
-                    content: `이 여행은 ${maxStayCount}박 일정입니다. 숙소는 최대 ${maxStayCount}박까지만 선택할 수 있습니다.`,
+                    content: `이미 ${maxStayCount}개의 DAY에 숙소가 배정되어 있습니다.`,
                     centered: true,
                 });
                 return prev;
             }
 
-            // ✅ 아직 숙소 없는 첫 번째 day 탐색
+            // ✅ 아직 숙소 없는 첫 번째 DAY 탐색
             const availableDayIdx = days.findIndex(
                 (_, i) => !occupiedDayIdx.has(i)
             );
             if (availableDayIdx === -1) {
                 Modal.warning({
                     title: "숙소 선택 제한",
-                    content: "모든 일정에 숙소가 배정되어 있습니다.",
+                    content: "모든 일정에 이미 숙소가 배정되어 있습니다.",
                     centered: true,
                 });
                 return prev;
             }
 
-            copy[key] = [availableDayIdx]; // ✅ 여러 DAY를 가질 수 있도록 배열로 관리
+            copy[key] = [availableDayIdx];
             return copy;
         });
     };
 
+
     /** ✅ DAY 변경 / 추가 */
     const handleDayChange = (accId, newIdxArr) => {
-        const maxStayCount = Math.max(days.length - 1, 1);
-
-        // ✅ 선택된 DAY 전체 중복 방지
+        // ✅ 이미 다른 숙소가 있는 DAY 중복 방지
         const allSelectedDays = Object.entries(selectedMap)
             .filter(([id]) => id !== accId)
             .flatMap(([, dayArr]) => dayArr);
@@ -153,27 +151,22 @@ export default function StayAddModal({ open, onClose, onAdd, days = [], selected
         if (overlap) {
             Modal.warning({
                 title: "숙소 중복 선택",
-                content: `이미 다른 숙소가 선택된 DAY가 포함되어 있습니다.`,
+                content: "이미 다른 숙소가 선택된 DAY가 포함되어 있습니다.",
                 centered: true,
             });
             return;
         }
 
-        // ✅ 전체 DAY 점유 수 제한
-        const totalSelectedDays = new Set([
-            ...allSelectedDays,
-            ...newIdxArr,
-        ]).size;
-        if (totalSelectedDays > maxStayCount) {
-            Modal.warning({
-                title: "숙소 선택 제한",
-                content: `이 여행은 ${maxStayCount}박 일정입니다. 숙소는 총 ${maxStayCount}박까지만 선택할 수 있습니다.`,
-                centered: true,
-            });
-            return;
-        }
-
-        setSelectedMap((prev) => ({ ...prev, [accId]: newIdxArr }));
+        setSelectedMap((prev) => {
+            const copy = { ...prev };
+            if (newIdxArr.length === 0) {
+                // ✅ DAY 모두 해제 시 선택 해제
+                delete copy[accId];
+            } else {
+                copy[accId] = newIdxArr;
+            }
+            return copy;
+        });
     };
 
     /** ✅ 추가 버튼 */
@@ -183,7 +176,6 @@ export default function StayAddModal({ open, onClose, onAdd, days = [], selected
             const stay = stays.find((s) => String(s.accId) === accId);
             if (!stay) return;
 
-            // ✅ PlanItem 형식으로 통일
             const stayItem = {
                 type: "stay",
                 title: stay.title,
@@ -234,7 +226,7 @@ export default function StayAddModal({ open, onClose, onAdd, days = [], selected
                     const imgSrc =
                         item.accImage?.trim() ||
                         item.imagePath?.trim() ||
-                        item.mainImage?.trim() || // ✨ 수정된 부분: mainImage 필드 추가
+                        item.mainImage?.trim() ||
                         `https://placehold.co/150x150?text=No+Image`;
 
                     return (
@@ -285,10 +277,7 @@ export default function StayAddModal({ open, onClose, onAdd, days = [], selected
                                                     mode="multiple"
                                                     value={selectedDays}
                                                     onChange={(vals) =>
-                                                        setSelectedMap((prev) => ({
-                                                            ...prev,
-                                                            [key]: vals.sort((a, b) => a - b),
-                                                        }))
+                                                        handleDayChange(key, vals.sort((a, b) => a - b))
                                                     }
                                                     options={days
                                                         .slice(0, Math.max(days.length - 1, 1))

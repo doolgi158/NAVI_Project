@@ -2,12 +2,12 @@ import { useState, useCallback, useMemo } from 'react';
 
 // ⭐️ 지역 분류 정의 (유지)
 const ALL_REGIONS = {
-    '제주시': ['전체', '제주시내', '애월', '한림','한경','조천', '구좌', '우도', '추자'],
-    '서귀포시': ['전체', '성산','서귀포시내', '대정', '안덕', '중문',  '남원','표선']
+    '제주시': ['전체', '제주시내', '애월', '한림', '한경', '조천', '구좌', '우도'],
+    '서귀포시': ['전체', '성산', '서귀포시내', '대정', '안덕', '중문', '남원', '표선']
 };
 
 // 모든 지역 태그를 플랫 리스트로 만듭니다. (유지)
-const REGION_TAGS = Object.entries(ALL_REGIONS).flatMap(([region1Cd, region2s]) => 
+const REGION_TAGS = Object.entries(ALL_REGIONS).flatMap(([region1Cd, region2s]) =>
     region2s.map(region2Cd => ({
         region1Cd: region1Cd,
         region2Cd: region2Cd
@@ -51,11 +51,11 @@ export const useTravelListFilter = (onFilterChange) => {
 
             // 중복 제거 및 상태 업데이트
             const uniqueRegions = Array.from(new Set(newRegions.map(JSON.stringify))).map(JSON.parse);
-            
+
             // 필터 변경 콜백 호출
             if (onFilterChange) {
                 // 변경된 필터 배열을 직접 전달
-                onFilterChange(uniqueRegions); 
+                onFilterChange(uniqueRegions);
             }
             return uniqueRegions;
         });
@@ -68,7 +68,7 @@ export const useTravelListFilter = (onFilterChange) => {
     //모든 지역 선택 핸들러
     const handleSelectAllRegions = useCallback(() => {
         if (onFilterChange) {
-            onFilterChange(REGION_TAGS); 
+            onFilterChange(REGION_TAGS);
         }
         setSelectedRegions(REGION_TAGS);
     }, [onFilterChange]);
@@ -93,19 +93,19 @@ export const useTravelListFilter = (onFilterChange) => {
     }, []);
 
     //API 호출에 필요한 쿼리 파라미터 문자열 생성 
-     const filterQuery = useMemo(() => {
-        if (selectedRegions.length === 0 || selectedRegions.length === REGION_TAGS.length) {
-            // 필터가 적용되지 않은 경우 
-            return { region2Name: [] }; 
-        }
+    const filterQuery = useMemo(() => {
+        if (selectedRegions.length === 0 || selectedRegions.length === REGION_TAGS.length) {
+            // 필터가 적용되지 않은 경우 
+            return { region2Name: [] };
+        }
 
-        // region2Cd 목록만 추출
-        const region2List = Array.from(new Set(selectedRegions.map(r => r.region2Cd)));
-        
-        return {
-            region2Name: region2List  // 예: ['애월', '한림', '성산']
-        };
-    }, [selectedRegions]);
+        // region2Cd 목록만 추출
+        const region2List = Array.from(new Set(selectedRegions.map(r => r.region2Cd)));
+
+        return {
+            region2Name: region2List  // 예: ['애월', '한림', '성산']
+        };
+    }, [selectedRegions]);
 
 
     return {
@@ -116,6 +116,6 @@ export const useTravelListFilter = (onFilterChange) => {
         handleRegionSelect,
         handleSelectAllRegions,
         handleDeselectAllRegions,
-        filterQuery 
+        filterQuery
     };
 };

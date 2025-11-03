@@ -351,6 +351,7 @@ export default function TravelPlanner() {
                       stays={stays}
                       onSaveSchedule={handleConfirm}
                       days={days}
+                      isViewMode={state?.isViewMode === true}
                     />
                   </div>
                   <div className="flex-1 border-r border-[#eee] overflow-y-auto">

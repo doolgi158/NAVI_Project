@@ -91,6 +91,10 @@ public class RoomRsv extends BaseEntity{
     @Column(name="nights", nullable = false)
     private int nights;
 
+    // 객실별 총 금액
+    @Column(name="total_price", nullable = false)
+    private BigDecimal totalPrice;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "rsv_status", length = 20, nullable = false)
     private RsvStatus rsvStatus;

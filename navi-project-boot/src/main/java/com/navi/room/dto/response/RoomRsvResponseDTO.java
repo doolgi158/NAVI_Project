@@ -30,8 +30,10 @@ public class RoomRsvResponseDTO {
     private String reserverName;    // 대표 예약자 이름
     private String reserverTel;     // 대표 예약자 연락처
     private String reserverEmail;   // 대표 예약자 이메일
+    private LocalDate reserverBirth;
     private String createdAt;
     private String updatedAt;
+    private BigDecimal totalPrice;
 
     public static RoomRsvResponseDTO fromEntity(RoomRsv entity) {
         return RoomRsvResponseDTO.builder()
@@ -42,6 +44,7 @@ public class RoomRsvResponseDTO {
                 .reserverName(entity.getReserverName())
                 .reserverTel(entity.getReserverTel())
                 .reserverEmail(entity.getReserverEmail())
+                .reserverBirth(entity.getReserverBirth())
                 .guestCount(entity.getGuestCount())
                 .quantity(entity.getQuantity())
                 .price(entity.getPrice())
@@ -51,6 +54,7 @@ public class RoomRsvResponseDTO {
                 .rsvStatus(entity.getRsvStatus())
                 .createdAt(String.valueOf(entity.getCreatedAt()))
                 .updatedAt(String.valueOf(entity.getUpdatedAt()))
+                .totalPrice(entity.getTotalPrice())
                 .build();
     }
 }

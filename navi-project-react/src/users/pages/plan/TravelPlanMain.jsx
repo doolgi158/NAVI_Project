@@ -53,7 +53,37 @@ export default function TravelPlanMain() {
       onOk: async () => {
         try {
           await deletePlan(id);
-          setPlans((prev) => prev.filter((p) => p.planId !== id));
+
+          // ✅ 1. 삭제된 후 목록 반영
+          setPlans((prev) => {
+            const updated = prev.filter((p) => p.planId !== id);
+
+            // ✅ 2. 페이지 보정 로직 (현재 탭)
+            const isCompletedTab = activeTab === "completed";
+
+            // 삭제 후 남은 목록 계산
+            const totalAfterDelete = isCompletedTab
+              ? updated.filter((p) => {
+                const end = startOfDay(new Date(p.endDate));
+                return isBefore(end, today);
+              }).length
+              : updated.filter((p) => {
+                const end = startOfDay(new Date(p.endDate));
+                return isAfter(end, today) || isSameDay(end, today);
+              }).length;
+
+            // ✅ 3. 현재 페이지 기준
+            const totalPages = Math.ceil(totalAfterDelete / pageSize);
+            const currentPage = page[activeTab];
+
+            // ✅ 4. 현재 페이지가 범위를 초과하면 이전 페이지로 이동
+            if (currentPage > totalPages && currentPage > 1) {
+              setPage((prev) => ({ ...prev, [activeTab]: currentPage - 1 }));
+            }
+
+            return updated;
+          });
+
           message.success("여행이 삭제되었습니다.");
         } catch {
           Modal.error({

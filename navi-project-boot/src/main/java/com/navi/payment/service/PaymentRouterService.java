@@ -30,7 +30,6 @@ public class PaymentRouterService {
     public PaymentPrepareResponseDTO preparePayment(PaymentPrepareRequestDTO dto) {
         for (String rsvId : dto.getReserveId()) {
             log.info("✅ 결제 준비 - 예약 ID: {}", rsvId);
-            // 각 예약 ID별 로직 수행 (예: DlvPaymentService.preparePayment(rsvId))
         }
         return switch (dto.getRsvType()) {
             case ACC -> accPaymentServiceImpl.preparePayment(dto);
