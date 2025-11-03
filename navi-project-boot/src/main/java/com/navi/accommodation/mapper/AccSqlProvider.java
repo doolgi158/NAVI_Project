@@ -78,17 +78,17 @@ public class AccSqlProvider {
         }
 
         // 객실 조건
-        if (checkIn != null && checkOut != null) {
-            sql.WHERE("""
-                        EXISTS (
-                          SELECT 1 FROM NAVI_ROOM r 
-                          JOIN NAVI_ROOM_STOCK s ON r.ROOM_NO = s.ROOM_NO
-                          WHERE r.ACC_NO = a.ACC_NO
-                            AND s.STOCK_DATE BETWEEN #{checkIn} AND #{checkOut}
-                            AND s.REMAIN_COUNT > 0
-                        )
-                    """);
-        }
+//        if (checkIn != null && checkOut != null) {
+//            sql.WHERE("""
+//                        EXISTS (
+//                          SELECT 1 FROM NAVI_ROOM r
+//                          JOIN NAVI_ROOM_STOCK s ON r.ROOM_NO = s.ROOM_NO
+//                          WHERE r.ACC_NO = a.ACC_NO
+//                            AND s.STOCK_DATE BETWEEN #{checkIn} AND #{checkOut}
+//                            AND s.REMAIN_COUNT > 0
+//                        )
+//                    """);
+//        }
         if (guestCount != null) {
             sql.WHERE("EXISTS (SELECT 1 FROM NAVI_ROOM r WHERE r.ACC_NO = a.ACC_NO AND r.MAX_CNT >= #{guestCount})");
         }

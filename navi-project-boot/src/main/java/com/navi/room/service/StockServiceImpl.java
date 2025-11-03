@@ -41,9 +41,7 @@ public class StockServiceImpl implements StockService {
                 .collect(Collectors.toList());
     }
 
-    /* ============================================================
-       ✅ 2️⃣ 특정 기간 내 최소 잔여 객실 수 조회
-    ============================================================ */
+    /* 특정 기간 내 최소 잔여 객실 수 조회 */
     @Override
     @Transactional(readOnly = true)
     public int getRemainCount(String roomId, LocalDate checkIn, LocalDate checkOut) {
@@ -52,7 +50,7 @@ public class StockServiceImpl implements StockService {
         );
 
         if (stocks.isEmpty()) {
-            log.warn("⚠️ 재고 없음 - roomId={}, 기간: {}~{}", roomId, checkIn, checkOut);
+            //log.warn("⚠️ 재고 없음 - roomId={}, 기간: {}~{}", roomId, checkIn, checkOut);
             return 0;
         }
 
@@ -65,9 +63,7 @@ public class StockServiceImpl implements StockService {
         return minRemain;
     }
 
-    /* ============================================================
-       ✅ 3️⃣ 예약 가능 여부 확인 (모든 일자 재고 충분 여부)
-    ============================================================ */
+    /* 예약 가능 여부 확인  */
     @Override
     @Transactional(readOnly = true)
     public boolean hasAvailableStock(String roomId, LocalDate checkIn, LocalDate checkOut, Integer roomCount) {
@@ -76,7 +72,7 @@ public class StockServiceImpl implements StockService {
         );
 
         if (stocks.isEmpty()) {
-            log.warn("❌ 재고 데이터 없음 - roomId={}", roomId);
+            //log.warn("❌ 재고 데이터 없음 - roomId={}", roomId);
             return false;
         }
 
@@ -87,43 +83,30 @@ public class StockServiceImpl implements StockService {
         return available;
     }
 
-    /* ============================================================
-       ✅ 4️⃣ 예약 발생 시 재고 차감 (기간 단위)
-    ============================================================ */
+    /* 예약 발생 시 재고 차감 (기간 단위) */
     @Override
     public void decreaseStock(Room room, LocalDate startDate, LocalDate endDate, int qty) {
         log.info("📉 [재고 차감 요청] room={}, 기간:{}~{}, 수량={}", room.getRoomId(), startDate, endDate, qty);
 
         if (qty <= 0) throw new IllegalArgumentException("❌ 예약 수량은 1개 이상이어야 합니다.");
+        if (!endDate.isAfter(startDate)) throw new IllegalArgumentException("체크아웃 날짜가 체크인보다 이전입니다.");
 
-        LocalDate date = startDate;
-        while (date.isBefore(endDate)) {
-            RoomStock stock = stockRepository.findByRoomAndStockDate(room, date)
-                    .orElse(null);
-
-            if (stock == null) {
-                stock = createIfMissing(room, date);
-            }
-
+        for (LocalDate date = startDate; date.isBefore(endDate); date = date.plusDays(1)) {
+            RoomStock stock = createIfMissing(room, date);
             if (stock.getRemainCount() < qty) {
                 throw new IllegalStateException(String.format(
-                        "❌ 재고 부족: room=%s, date=%s (남은 %d개, 요청 %d개)",
+                        "재고 부족: room=%s, date=%s (남은 %d개, 요청 %d개)",
                         room.getRoomId(), date, stock.getRemainCount(), qty
                 ));
             }
 
             stock.decreaseStock(qty);
             stockRepository.save(stock);
-
-            log.debug("✅ [{}] 재고 차감 완료 → 남은 수량: {}", date, stock.getRemainCount());
-            date = date.plusDays(1);
+            log.debug("재고 차감 완료 → room={}, date={}, 남은수량={}", room.getRoomId(), date, stock.getRemainCount()); // 🟣 로그 포맷 개선
         }
     }
 
-
-    /* ============================================================
-       ✅ 5️⃣ 예약 취소 / 실패 시 재고 복구 (기간 단위)
-    ============================================================ */
+    /* 예약 취소 / 실패 시 재고 복구 (기간 단위) */
     @Override
     public void increaseStock(Room room, LocalDate startDate, LocalDate endDate, int qty) {
         log.info("📈 [재고 복구 요청] room={}, 기간:{}~{}, 수량={}", room.getRoomId(), startDate, endDate, qty);
@@ -131,28 +114,16 @@ public class StockServiceImpl implements StockService {
         if (qty <= 0) throw new IllegalArgumentException("❌ 복구 수량은 1개 이상이어야 합니다.");
         if (!endDate.isAfter(startDate)) throw new IllegalArgumentException("❌ 체크아웃 날짜가 체크인보다 이전입니다.");
 
-        LocalDate date = startDate;
-        while (date.isBefore(endDate)) {
-            RoomStock stock = stockRepository.findByRoomAndStockDate(room, date)
-                    .orElse(null);
-
-            if (stock == null) {
-                // ✅ 재고가 없을 경우 새로 생성
-                stock = createIfMissing(room, date);
-            }
-
+        for (LocalDate date = startDate; date.isBefore(endDate); date = date.plusDays(1)) {
+            RoomStock stock = createIfMissing(room, date);
             stock.increaseStock(qty);
             stockRepository.save(stock);
-
-            log.debug("♻️ [{}] 재고 복구 완료 → 남은 수량: {}", date, stock.getRemainCount());
-            date = date.plusDays(1);
+            log.debug("재고 복구 완료 → room={}, date={}, 남은수량={}", room.getRoomId(), date, stock.getRemainCount());
         }
     }
 
 
-    /* ============================================================
-       ✅ 6️⃣ 재고 자동 생성 (하이브리드)
-    ============================================================ */
+    /* 재고 자동 생성 */
     @Override
     public RoomStock createIfMissing(Room room, LocalDate stockDate) {
         return stockRepository.findByRoomAndStockDate(room, stockDate)

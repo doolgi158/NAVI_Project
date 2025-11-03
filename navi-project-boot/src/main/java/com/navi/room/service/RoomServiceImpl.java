@@ -162,7 +162,7 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public List<RoomListResponseDTO> getAvailableRooms(
             String accId,
             LocalDate checkIn,
@@ -186,22 +186,29 @@ public class RoomServiceImpl implements RoomService {
             return List.of();
         }
 
-        // 3️날짜 없으면 전체 반환
-        if (checkIn == null || checkOut == null) {
-            log.info("[USER] 날짜 미선택 → 전체 객실 반환");
-            return allRooms.stream()
-                    .map(room -> RoomListResponseDTO.fromEntity(room, null))
-                    .toList();
-        }
+        // 날짜 없으면 전체 반환
+//        if (checkIn == null || checkOut == null) {
+//            log.info("[USER] 날짜 미선택 → 전체 객실 반환");
+//            return allRooms.stream()
+//                    .map(room -> RoomListResponseDTO.fromEntity(room, null))
+//                    .toList();
+//        }
 
-        // 4️재고 확인
+        // 날짜가 선택된 경우, 재고 확인 및 없으면 생성
         List<RoomListResponseDTO> availableRooms = allRooms.stream()
-                .filter(room -> stockService.hasAvailableStock(room.getRoomId(), checkIn, checkOut, roomCount))
-                .filter(room -> guestCount == null || room.getMaxCnt() >= guestCount)
                 .map(room -> {
+                    // 기간 내 재고가 없으면 자동 생성
+                    for (LocalDate date = checkIn; date.isBefore(checkOut); date = date.plusDays(1)) {
+                        stockService.createIfMissing(room, date);
+                    }
+
                     int remain = stockService.getRemainCount(room.getRoomId(), checkIn, checkOut);
                     return RoomListResponseDTO.fromEntity(room, remain);
                 })
+                // 요청 인원 수보다 큰 객실만 필터
+                .filter(dto -> guestCount == null || dto.getMaxCnt() >= guestCount)
+                // 잔여 수량이 0 이상인 객실만 반환
+                .filter(dto -> dto.getRemainCount() > 0)
                 .toList();
 
         log.info("[USER] 숙소({})의 예약 가능 객실: {}개", accId, availableRooms.size());
@@ -209,9 +216,7 @@ public class RoomServiceImpl implements RoomService {
     }
 
 
-    /* ============================================================
-       ✅ 비즈니스 로직 - 요금 계산
-       ============================================================ */
+    /* 비즈니스 로직 - 요금 계산 */
     @Override
     @Transactional(readOnly = true)
     public Integer findMinPriceByAcc(Acc acc, LocalDate checkIn, LocalDate checkOut) {

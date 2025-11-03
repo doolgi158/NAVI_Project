@@ -253,9 +253,9 @@ const AccDetailPage = () => {
     );
   }
 
-  const handleGoBack = () => {
-    navigate("/accommodations", { state: { prevSearchState: searchState } });
-  };
+  // const handleGoBack = () => {
+  //   navigate("/accommodations", { state: { prevSearchState: searchState } });
+  // };
 
   return (
     <MainLayout>

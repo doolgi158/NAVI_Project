@@ -22,6 +22,7 @@ public class TownshipService {
 
         // 불변 리스트 생성 메서드 (추가, 삭제 등의 수정 작업 불가)
         List<Township> data = List.of(
+                new Township(0L, 0, "미지정", "미지정"),
                 new Township(null, 110, "제주시", "제주시내"),
                 new Township(null, 110, "제주시", "애월읍"),
                 new Township(null, 110, "제주시", "한림읍"),

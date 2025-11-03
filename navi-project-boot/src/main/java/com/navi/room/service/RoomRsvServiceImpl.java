@@ -49,12 +49,6 @@ public class RoomRsvServiceImpl implements RoomRsvService {
         // 로그인 사용자 가져오기 (SecurityContextHolder 사용)
         User user = getLoginUser();
 
-        // 이미 reserveId가 있다면 그대로 사용 (다중 예약 시)
-        String reserveId = dto.getReserveId();
-        if (reserveId == null || reserveId.isBlank()) {
-            reserveId = generateReserveId();
-        }
-
         // 객실 조회
         Room room = roomRepository.findByRoomId(dto.getRoomId())
                 .orElseThrow(() -> new IllegalArgumentException("❌ 객실 정보를 찾을 수 없습니다."));
@@ -82,8 +76,14 @@ public class RoomRsvServiceImpl implements RoomRsvService {
                 .multiply(BigDecimal.valueOf(serverNights))
                 .multiply(BigDecimal.valueOf(dto.getQuantity()));
 
-        // 재고 차감 (start ~ end-1)
+        // 재고 생성/차감 (체크인 ~ 체크아웃)
         stockService.decreaseStock(room, start, end, dto.getQuantity());
+
+        // 예약 ID 생성 (다중 예약 시 있으면 그대로 사용)
+        String reserveId = dto.getReserveId();
+        if (reserveId == null || reserveId.isBlank()) {
+            reserveId = generateReserveId();
+        }
 
         // 예약 엔티티 생성
         RoomRsv rsv = RoomRsv.builder()
