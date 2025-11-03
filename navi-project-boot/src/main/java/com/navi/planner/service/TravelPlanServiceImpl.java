@@ -51,8 +51,6 @@ public class TravelPlanServiceImpl implements TravelPlanService {
                 .title(dto.getTitle())
                 .startDate(dto.getStartDate())
                 .endDate(dto.getEndDate())
-                .startTime(dto.getStartTime())
-                .endTime(dto.getEndTime())
                 .thumbnailPath(dto.getThumbnailPath())
                 // createdAt, updatedAt은 엔티티의 @CreationTimestamp, @UpdateTimestamp 또는 @PrePersist에서 자동 처리
                 .build();

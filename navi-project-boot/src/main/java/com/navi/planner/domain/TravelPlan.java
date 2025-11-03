@@ -58,12 +58,6 @@ public class TravelPlan extends BaseEntityNoAudit {
     @Column(name = "end_date")
     private LocalDate endDate;
 
-    @Column(name = "start_time")
-    private LocalTime startTime;
-
-    @Column(name = "end_time")
-    private LocalTime endTime;
-
     @Column(name = "thumbnail_path", length = 1000)
     private String thumbnailPath;
 
@@ -119,8 +113,6 @@ public class TravelPlan extends BaseEntityNoAudit {
         if (title != null) this.title = title;
         if (startDate != null) this.startDate = startDate;
         if (endDate != null) this.endDate = endDate;
-        if (startTime != null) this.startTime = startTime;
-        if (endTime != null) this.endTime = endTime;
         if (thumbnailPath != null) this.thumbnailPath = thumbnailPath;
 
     }
