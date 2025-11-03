@@ -184,6 +184,18 @@ export default function TravelSelectDrawer({
     }
   };
 
+  /** ✅ 필터 변경 시 1페이지 + 최상단으로 스크롤 */
+  useEffect(() => {
+    // 카테고리나 지역 필터가 바뀌면 1페이지로 이동
+    setCurrentPage(1);
+
+    // 스크롤을 최상단으로 이동
+    if (listContainerRef.current) {
+      listContainerRef.current.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [categoryFilter, regionFilterQuery]);
+
+
   const handleToggleSelect = (item) => {
     setSelectedTravels((prev) => {
       const exists = prev.some((v) => v.travelId === item.travelId);

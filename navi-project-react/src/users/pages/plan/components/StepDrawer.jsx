@@ -3,8 +3,14 @@ import { Button, Modal } from "antd";
 import { useNavigate } from "react-router-dom";
 import { LeftOutlined } from "@ant-design/icons";
 
-
-export default function StepDrawer({ step, setStep, selectedTravels, onSaveSchedule, days, }) {
+export default function StepDrawer({
+  step,
+  setStep,
+  selectedTravels,
+  onSaveSchedule,
+  days,
+  isViewMode = false, // ✅ view모드 여부 prop 추가
+}) {
   const navigate = useNavigate();
   const steps = ["날짜 선택", "여행 제목", "시간 설정", "여행지 선택", "숙소 선택"];
 
@@ -37,11 +43,11 @@ export default function StepDrawer({ step, setStep, selectedTravels, onSaveSched
           {steps.map((label, i) => (
             <li
               key={i}
-              onClick={() => setStep(i + 1)}
+              onClick={() => !isViewMode && setStep(i + 1)} // ✅ view모드에서는 클릭 비활성화
               className={`cursor-pointer px-3 py-2 rounded-md transition ${step === i + 1
-                ? "bg-[#FFF5B7] text-[#2F3E46] font-semibold text-sm"
-                : "hover:bg-[#FAF9F6] text-gray-700"
-                }`}
+                  ? "bg-[#FFF5B7] text-[#2F3E46] font-semibold text-sm"
+                  : "hover:bg-[#FAF9F6] text-gray-700"
+                } ${isViewMode ? "cursor-default opacity-70" : ""}`}
             >
               Step {i + 1}
               <br />
@@ -51,47 +57,49 @@ export default function StepDrawer({ step, setStep, selectedTravels, onSaveSched
         </ul>
       </div>
 
-      {/* ✅ 하단 버튼 영역 */}
-      <div className="space-y-2 mt-6">
-        {step > 1 && (
-          <Button className="w-full" onClick={() => setStep(step - 1)}>
-            이전
-          </Button>
-        )}
+      {/* ✅ 하단 버튼 영역 - view모드에서는 숨김 */}
+      {!isViewMode && (
+        <div className="space-y-2 mt-6">
+          {step > 1 && (
+            <Button className="w-full" onClick={() => setStep(step - 1)}>
+              이전
+            </Button>
+          )}
 
-        {step === 5 ? (
-          <Button
-            type="primary"
-            className="w-full"
-            style={{ background: "#2F3E46", border: "none" }}
-            onClick={onSaveSchedule}
-          >
-            저장
-          </Button>
-        ) : (
-          step < 5 && (
+          {step === 5 ? (
             <Button
               type="primary"
               className="w-full"
               style={{ background: "#2F3E46", border: "none" }}
-              onClick={() => {
-                // ✅ 여행지 선택 부족 검사 (4단계에서만)
-                if (step === 4 && days.length > 0 && selectedTravels.length < days.length) {
-                  Modal.warning({
-                    title: "여행지 선택 부족",
-                    content: `여행일수(${days.length}일)에 비해 선택된 여행지가 부족합니다.\n\n최소 ${days.length}개 이상의 여행지를 선택해주세요.`,
-                    centered: true,
-                  });
-                  return;
-                }
-                setStep(step + 1);
-              }}
+              onClick={onSaveSchedule}
             >
-              다음
+              저장
             </Button>
-          )
-        )}
-      </div>
+          ) : (
+            step < 5 && (
+              <Button
+                type="primary"
+                className="w-full"
+                style={{ background: "#2F3E46", border: "none" }}
+                onClick={() => {
+                  // ✅ 여행지 선택 부족 검사 (4단계에서만)
+                  if (step === 4 && days.length > 0 && selectedTravels.length < days.length) {
+                    Modal.warning({
+                      title: "여행지 선택 부족",
+                      content: `여행일수(${days.length}일)에 비해 선택된 여행지가 부족합니다.\n\n최소 ${days.length}개 이상의 여행지를 선택해주세요.`,
+                      centered: true,
+                    });
+                    return;
+                  }
+                  setStep(step + 1);
+                }}
+              >
+                다음
+              </Button>
+            )
+          )}
+        </div>
+      )}
     </div>
   );
 }
