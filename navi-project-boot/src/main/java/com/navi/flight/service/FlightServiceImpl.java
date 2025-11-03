@@ -42,15 +42,18 @@ public class FlightServiceImpl implements FlightService {
                 .orElseThrow(() -> new RuntimeException("공항 정보 없음: " + apiName));
     }
 
+
     /*
      * 항공편 저장 (좌석은 생성하지 않음)
      */
     @Override
     public void saveFlight(ApiFlightDTO dto) {
-        Airport depAirport = resolveAirportByApiName(dto.getDepAirportNm());
-        Airport arrAirport = resolveAirportByApiName(dto.getArrAirportNm());
+        // dep/arr 공항 코드 기준 조회 (PK 사용)
+        Airport depAirport = airportRepository.findById(dto.getDepAirportCode())
+                .orElseThrow(() -> new RuntimeException("출발 공항 코드 정보 없음: " + dto.getDepAirportCode()));
+        Airport arrAirport = airportRepository.findById(dto.getArrAirportCode())
+                .orElseThrow(() -> new RuntimeException("도착 공항 코드 정보 없음: " + dto.getArrAirportCode()));
 
-        // 2025.10 구조 기준: @EmbeddedId 필드명이 flightId
         Flight flight = Flight.builder()
                 .flightId(new FlightId(
                         dto.getVihicleId(),
@@ -70,6 +73,7 @@ public class FlightServiceImpl implements FlightService {
         flightRepository.save(flight);
     }
 
+
     /*
      * 항공편 조회
      */
@@ -88,6 +92,12 @@ public class FlightServiceImpl implements FlightService {
                 // 출발 날짜 일치 (LocalDate 비교)
                 .filter(f -> f.getFlightId().getDepTime().toLocalDate()
                         .equals(LocalDate.parse(requestDTO.getDepDate())))
+                
+                // ✅ 비즈니스석 필터링 추가: BUSINESS 클래스 검색 시,
+                //    prestigeCharge가 null이거나 0원 이하인 항공편은 제외
+                .filter(f -> !requestDTO.getSeatClass().equalsIgnoreCase("BUSINESS") ||
+                        (f.getPrestigeCharge() != null && f.getPrestigeCharge() > 0))
+
                 // DTO 변환
                 .map(f -> {
                     int price = requestDTO.getSeatClass().equalsIgnoreCase("ECONOMY")

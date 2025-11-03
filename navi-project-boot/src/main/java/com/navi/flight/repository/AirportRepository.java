@@ -23,4 +23,11 @@ public interface AirportRepository extends JpaRepository<Airport, String> {
      * 예: "부산" → Airport(PUS, 김해(부산))
      */
     Optional<Airport> findByAirportNameContaining(String keyword);
+
+    /*
+     * 공항 코드로 조회
+     * 예: "CJU" → Airport(CJU, 제주)
+     */
+    Optional<Airport> findByAirportCode(String airportCode);
+
 }

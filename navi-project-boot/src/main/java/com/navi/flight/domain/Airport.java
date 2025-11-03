@@ -7,7 +7,7 @@ import jakarta.persistence.Table;
 import lombok.*;
 
 @Entity
-@Table(name = "navi_airport")
+@Table(name = "navi_fly_airport")
 @Getter
 @Setter
 @NoArgsConstructor
